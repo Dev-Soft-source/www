@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "663185542429",
+    "project_id": "proxima-ride-app",
+    "storage_bucket": "proxima-ride-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663185542429:android:7d68dc300704ea2e3565f4",
+        "android_client_info": {
+          "package_name": "com.example.proxima_ride"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "663185542429-qnvpf55h1j7tdjdt1opjkcfel8np3ifj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTdmkzuEzD9BU1iIksWaI_2ixnJ5fF3RY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "663185542429-qnvpf55h1j7tdjdt1opjkcfel8np3ifj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "663185542429-ea2iokiup9b0r8ss89pvt2pgvspidsf1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.proximaRide"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

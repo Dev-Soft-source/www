@@ -1,0 +1,142 @@
+.link-underline {
+    border-bottom-width: 0;
+    background-image: linear-gradient(transparent, transparent),
+        linear-gradient(#fff, #fff);
+    background-size: 0 3px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.5s ease-in-out;
+}
+
+.link-underline-black {
+    background-image: linear-gradient(transparent, transparent),
+        linear-gradient(#c3002f, #c3002f);
+}
+
+.link-underline:hover {
+    background-size: 100% 4px;
+    background-position: 0 100%;
+}
+
+.link-underline.active {
+    background-size: 100% 4px;
+    background-position: 0 100%;
+}
+
+.shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.shine::before {
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 100%
+    );
+    content: "";
+    display: block;
+    height: 100%;
+    left: -75%;
+    position: absolute;
+    top: 0;
+    transform: skewX(-25deg);
+    width: 50%;
+    z-index: 2;
+}
+
+.shine:hover::before,
+.shine:focus::before {
+    -webkit-animation: shine 0.55s;
+    animation: shine 0.55s;
+}
+
+@-webkit-keyframes shine {
+    100% {
+        left: 125%;
+    }
+}
+
+@keyframes shine {
+    100% {
+        left: 125%;
+    }
+}
+
+/* --- Slider --- */
+.swiper {
+    padding: 25px 25px 0px 25px !important;
+}
+
+.exporters-slider {
+    padding: 28px !important;
+}
+
+.exporters-slider .swiper-pagination-bullets {
+    bottom: 0 !important;
+}
+
+.exporters-slider .swiper-pagination-bullet {
+    background: #d3dfeb;
+}
+
+.swiper-pagination-bullet-active {
+    background-color: #fff !important;
+}
+
+.swiper-button-prev:after,
+.swiper-button-next:after {
+    display: none;
+}
+
+.swiper-button-prev {
+    left: -30px !important;
+    width: 50px;
+}
+
+.swiper-button-next {
+    right: -30px !important;
+    width: 50px;
+}
+
+.ce-hero-bg {
+    background-image: url("./../assets/image/hero-bg.png");
+}
+
+.ce-export-bg {
+    background-image: url("./../assets/image/export-bg.jpg");
+}
+
+.link-underline {
+    border-bottom-width: 0;
+    background-image: linear-gradient(transparent, transparent),
+        linear-gradient(#fff, #fff);
+    background-size: 0 3px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.5s ease-in-out;
+}
+
+.link-underline-black {
+    background-image: linear-gradient(transparent, transparent),
+        linear-gradient(#52b5e0, #52b5e0);
+}
+
+.link-underline:hover {
+    background-size: 100% 4px;
+    background-position: 0 100%;
+}
+.link-underline.active {
+    background-size: 100% 4px;
+    background-position: 0 100%;
+}
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #52b5e0 transparent;
+}

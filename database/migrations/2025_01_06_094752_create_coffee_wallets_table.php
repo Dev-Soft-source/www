@@ -1,0 +1,59 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('coffee_wallets', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->integer('package_id')->nullable();
+            $table->string('frequency')->nullable();
+            $table->foreignId('ride_id')->nullable()
+                ->constrained()
+                ->on('rides')
+                ->references('id')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->foreignId('booking_id')->nullable()
+                ->constrained()
+                ->on('bookings')
+                ->references('id')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->foreignId('user_id')->nullable()
+                ->constrained()
+                ->on('users')
+                ->references('id')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->decimal('dr_amount', 18,2)->default('0.00');
+            $table->decimal('cr_amount', 18,2)->default('0.00');
+            $table->string('paypal_id')->nullable();
+            $table->string('stripe_id')->nullable();
+            $table->string('status')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('coffee_wallets');
+    }
+};

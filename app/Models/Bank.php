@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Bank extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name','bank_to_bank_fee','other_bank_fee'];
+}

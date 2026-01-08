@@ -1,0 +1,507 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+/* FONTS */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@300;400;600;700&display=swap");
+/* general */
+
+/*********************************/
+/*             General            */
+/*===============================*/
+body {
+    /* font-family: 'Nunito', sans-serif; */
+    font-family: "Roboto", sans-serif;
+}
+
+@layer base {
+    @font-face {
+        font-family: "Futura";
+        src: local("Futura Light BT"), local("FuturaBT-Light"),
+            url("/assets/fonts/FuturaBT-Light.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-Light.woff") format("woff");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaItalic";
+        src: local("Futura Light Italic BT"), local("FuturaBT-LightItalic"),
+            url("/assets/fonts/FuturaBT-LightItalic.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-LightItalic.woff") format("woff");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaMedium";
+        src: local("Futura Medium BT"), local("FuturaBT-Medium"),
+            url("/assets/fonts/FuturaBT-Medium.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-Medium.woff") format("woff");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaBold";
+        src: local("Futura-Bold"),
+            url("/assets/fonts/Futura-Bold.woff2") format("woff2"),
+            url("/assets/fonts/Futura-Bold.woff") format("woff");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaHeavy";
+        src: local("Futura Heavy Italic BT"), local("FuturaBT-HeavyItalic"),
+            url("/assets/fonts/FuturaBT-HeavyItalic.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-HeavyItalic.woff") format("woff");
+        font-weight: 900;
+        font-style: italic;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaBdCnBT";
+        src: local("Futura Bold Condensed BT"), local("FuturaBT-BoldCondensed"),
+            url("/assets/fonts/FuturaBT-BoldCondensed.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-BoldCondensed.woff") format("woff");
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "FuturaMdCnBT";
+        src: local("Futura Medium Condensed BT"),
+            local("FuturaBT-MediumCondensed"),
+            url("/assets/fonts/FuturaBT-MediumCondensed.woff2") format("woff2"),
+            url("/assets/fonts/FuturaBT-MediumCondensed.woff") format("woff");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+    }
+}
+
+@layer components {
+    .can-exp-h1 {
+        font-size: 30px;
+        line-height: normal;
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.primary");
+        margin-bottom: theme("margin.4");
+        font-weight: theme("fontWeight.medium");
+    }
+
+    .can-exp-h2 {
+        font-size: 24px;
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.secondary");
+    }
+
+    .can-exp-h3 {
+        font-family: "FuturaMdCnBT";
+        font-weight: 500;
+        font-size: 28px;
+        line-height: 36px;
+    }
+
+    .can-exp-h4 {
+        font-family: "FuturaMdCnBT";
+        font-size: 24px;
+        line-height: 120%;
+    }
+
+    .can-exp-p {
+        font-size: theme("fontSize.base");
+        color: theme("colors.secondary");
+        text-align: justify;
+    }
+
+    .can-exp-a {
+        @apply text-base text-primary hover:text-secondary;
+    }
+
+    h1 {
+        font-size: 30px;
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.primary");
+        margin-bottom: theme("margin.4");
+        font-weight: theme("fontWeight.medium");
+    }
+
+    h2 {
+        font-size: 24px;
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.secondary");
+    }
+
+    h3 {
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        font-size: theme("fontSize.xl");
+    }
+
+    h4 {
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        font-size: theme("fontSize.lg");
+    }
+
+    h5 {
+        font-size: theme("fontSize.lg");
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.primary");
+        text-align: justify;
+    }
+
+    h6 {
+        @apply text-primary text-[28px] font-FuturaMdCnBT;
+    }
+
+    p {
+        font-size: theme("fontSize.base");
+        color: theme("colors.secondary");
+        text-align: justify;
+    }
+
+    a {
+        @apply text-base text-primary hover:text-secondary;
+    }
+
+    /* Form Elements */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+        font-family: "Roboto", sans-serif !important;
+        font-size: 16px;
+    }
+
+    label {
+        font-family: theme("fontFamily.FuturaMdCnBT");
+    }
+
+    /* Buttons */
+
+    .button-exp-fill {
+        @apply bg-primary hover:bg-blue-500 text-white text-base rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+    }
+
+    .button-exp-no-fill {
+        @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+    }
+
+    .button-exp {
+        @apply bg-transparent text-white border border-white text-base rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+    }
+
+    /* Footer */
+
+    .footer-exp-heading {
+        @apply text-primary text-[28px] font-FuturaMdCnBT;
+    }
+
+    .footer-exp ul {
+        @apply font-FuturaMdCnBT text-primary;
+    }
+
+    .footer-exp ul li a {
+        @apply text-base text-white;
+    }
+
+    /* Cards & input */
+
+    .card-heading {
+        @apply text-xl font-FuturaMdCnBT text-secondary;
+    }
+
+    .responsive-heading {
+        font-size: theme("fontSize.2xl");
+        font-family: theme("fontFamily.FuturaMdCnBT");
+        color: theme("colors.secondary");
+    }
+
+    .card {
+        @apply rounded-md text-lg font-semibold text-secondary;
+    }
+
+    .card-footer {
+        @apply text-lg text-white;
+    }
+
+    .can-exp-input {
+        @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
+    }
+    label {
+        font-size: 16px;
+    }
+
+    /* Tablet Media Screen */
+
+    @media screen and (min-width: 767px) {
+        h1 {
+            font-size: 36px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.primary");
+            margin-bottom: theme("margin.4");
+            font-weight: theme("fontWeight.medium");
+        }
+
+        h2 {
+            font-size: 30px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.secondary");
+        }
+
+        h3 {
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            font-size: theme("fontSize.2xl");
+        }
+
+        h4 {
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            font-size: theme("fontSize.xl");
+        }
+
+        .can-exp-h1 {
+            font-size: 36px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.primary");
+            margin-bottom: theme("margin.4");
+            font-weight: theme("fontWeight.medium");
+        }
+
+        .can-exp-h2 {
+            font-size: 30px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.secondary");
+        }
+
+        .can-exp-p {
+            font-size: theme("fontSize.base");
+            color: theme("colors.secondary");
+            text-align: justify;
+        }
+
+        p {
+            font-size: theme("fontSize.base");
+            color: theme("colors.secondary");
+            text-align: justify;
+        }
+
+        .card-heading {
+            @apply text-2xl font-FuturaMdCnBT text-secondary;
+        }
+
+        .button-exp-fill {
+            @apply bg-primary hover:bg-blue-500 text-white text-base rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+        }
+
+        .button-exp-no-fill {
+            @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+        }
+
+        .button-exp {
+            @apply bg-transparent text-white border border-white text-base rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+        }
+
+        a {
+            @apply text-base text-primary hover:text-secondary;
+        }
+
+        .can-exp-a {
+            @apply text-base text-primary hover:text-secondary;
+        }
+
+        .footer-exp ul li a {
+            @apply text-base text-white;
+        }
+
+        .can-exp-input {
+            @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
+        }
+        label {
+            font-size: 16px;
+        }
+    }
+
+    /* Desktop Media Screen */
+
+    @media screen and (min-width: 1200px) {
+        h1 {
+            font-size: 40px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.primary");
+            margin-bottom: theme("margin.4");
+            font-weight: theme("fontWeight.medium");
+        }
+
+        h2 {
+            font-size: 36px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.secondary");
+        }
+
+        h3 {
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            font-size: theme("fontSize.3xl");
+        }
+
+        h4 {
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            font-size: theme("fontSize.2xl");
+        }
+
+        .can-exp-h1 {
+            font-size: 40px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.primary");
+            margin-bottom: theme("margin.4");
+            font-weight: theme("fontWeight.medium");
+        }
+
+        .can-exp-h2 {
+            font-size: 36px;
+            font-family: theme("fontFamily.FuturaMdCnBT");
+            color: theme("colors.secondary");
+        }
+
+        .can-exp-p {
+            font-size: theme("fontSize.lg");
+            color: theme("colors.secondary");
+            text-align: justify;
+        }
+
+        p {
+            font-size: theme("fontSize.lg");
+            color: theme("colors.secondary");
+            text-align: justify;
+        }
+
+        .card-heading {
+            @apply text-3xl font-FuturaMdCnBT text-secondary;
+        }
+
+        .button-exp-fill {
+            @apply bg-primary hover:bg-blue-500 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+        }
+
+        .button-exp-no-fill {
+            @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-lg hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+        }
+
+        .button-exp {
+            @apply bg-transparent text-white border border-white text-lg rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+        }
+
+        a {
+            @apply text-lg text-primary hover:text-secondary;
+        }
+
+        .can-exp-a {
+            @apply text-lg text-primary hover:text-secondary;
+        }
+
+        .footer-exp ul li a {
+            @apply text-lg text-white;
+        }
+
+        .can-exp-input {
+            @apply border border-gray-300 text-lg block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
+        }
+        label {
+            font-size: 18px;
+        }
+    }
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #2058d3;
+}
+
+.ridesharing_movement_section p {
+    color: #fff !important;
+}
+/* .ridesharing_reliability_section p{
+    font-size: 18px;
+
+} */
+#navbar {
+    padding: 8px 0;
+    transition: all 500ms ease-in-out;
+}
+.ridesharing_reliability_section ul {
+    list-style: disc;
+    padding-left: 16px;
+    margin-top: 16px;
+}
+.ridesharing_reliability_section ul li {
+    margin-bottom: 10px;
+}
+.ridesharing_reliability_section ul li::marker {
+    color: #2563eb;
+}
+.ridesharing_driver_description_section p {
+    margin-top: 8px;
+    font-size: 16px;
+    color: rgb(107 114 128);
+}
+
+.search_features .flex_col {
+    flex-direction: column;
+    align-items: start;
+}
+
+.text_center p {
+    text-align: center;
+}
+.text_sm p {
+    font-size: 14px;
+}
+.text_base p {
+    font-size: 16px;
+}
+.Signup-bottom p {
+    font-family: theme("fontFamily.FuturaMdCnBT") !important;
+}
+
+.content ul, .content ol{
+    list-style: disc !important;
+    padding-left: 40px !important;
+    margin: unset !important;
+}
+
+.page-post_a_ride label {
+    font-size: 24px;
+}

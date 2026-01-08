@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Imports;
+
+use App\Models\HomePageSetting;
+use App\Models\HomePageSettingDetail;
+use App\Models\Language;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+
+class HomePageSettingImport implements ToCollection, WithHeadingRow, WithValidation
+{
+    protected $languageId;
+
+    public function __construct($languageId)
+    {
+        $this->languageId = $languageId;
+    }
+
+    protected function fieldsList(): array
+    {
+        return [
+            'name','meta_keywords','meta_description','slider_heading','slider_from_placeholder','slider_to_placeholder','slider_date_placeholder','slider_required_error','slider_image','from_field_icon','swap_field_icon','to_field_icon','date_field_icon','search_field_icon','section1_main_heading','section1_pink_rides_label','section1_pink_rides_image','section1_pink_rides_description','section1_folks_rides_label','section1_folks_rides_image','section1_folks_rides_description','section1_customize_label','section1_customize_image','section1_customize_description','section2_main_heading','section2_profile_verification_label','section2_profile_verification_image','section2_profile_verification_description','section2_policies_label','section2_policies_image','section2_policies_description','section2_car_insurance_label','section2_car_insurance_image','section2_car_insurance_description','section2_help_label','section2_help_image','section2_help_description','section3_main_heading','section3_safe_label','section3_safe_image','section3_safe_description','section3_affordable_label','section3_affordable_image','section3_affordable_description','section3_reliable_label','section3_reliable_image','section3_reliable_description','section4_main_heading','work_section_main_heading','work_section_main_text','work_section_passenger_label','work_section_passenger_description','work_section_passenger_point1_label','work_section_passenger_point1_image','work_section_passenger_point1_description','work_section_passenger_point2_label','work_section_passenger_point2_image','work_section_passenger_point2_description','work_section_passenger_point3_label','work_section_passenger_point3_image','work_section_passenger_point3_description','work_section_passenger_point4_label','work_section_passenger_point4_image','work_section_passenger_point4_description','work_section_passenger_point5_label','work_section_passenger_point5_image','work_section_passenger_point5_description','work_section_driver_label','work_section_driver_description','work_section_driver_point1_label','work_section_driver_point1_image','work_section_driver_point1_description','work_section_driver_point2_label','work_section_driver_point2_image','work_section_driver_point2_description','work_section_driver_point3_label','work_section_driver_point3_image','work_section_driver_point3_description','work_section_driver_point4_label','work_section_driver_point4_image','work_section_driver_point4_description','work_section_driver_point5_label','work_section_driver_point5_image','work_section_driver_point5_description','doing_section_main_heading','doing_section_main_text','doing_section_slider_image','doing_section_label1','doing_section_label2','reasons_section_main_heading','reasons_section_main_text','reasons_section_members_label','reasons_section_members_image','reasons_section_members_description','reasons_section_driver_label','reasons_section_driver_image','reasons_section_driver_description','reasons_section_quality_label','reasons_section_quality_image','reasons_section_quality_description','reasons_section_policy_label','reasons_section_policy_image','reasons_section_policy_description','reasons_section_students_label','reasons_section_students_image','reasons_section_students_description','reasons_section_safety_label','reasons_section_safety_image','reasons_section_safety_description','reasons_section_price_label','reasons_section_price_image','reasons_section_price_description','reasons_section_use_label','reasons_section_use_image','reasons_section_use_description','reasons_section_reliable_label','reasons_section_reliable_image','reasons_section_reliable_description','reasons_section_responsible_label','reasons_section_responsible_image','reasons_section_responsible_description','movement_section_heading','movement_section_icon','movement_section_text','members_section_heading','members_section_text','news_section_heading','news_section_icon1','news_section_icon2','news_section_icon3','news_section_icon4','use_section_heading','use_section_text','use_section_point1_label','use_section_point1_image','use_section_point1_description','use_section_point2_label','use_section_point2_image','use_section_point2_description','use_section_point3_label','use_section_point3_image','use_section_point3_description','use_section_point4_label','use_section_point4_image','use_section_point4_description','reliability_section_heading','reliability_section_text','reliability_section_passengers_label','reliability_section_passengers_description','reliability_section_drivers_label','reliability_section_drivers_description','reliability_section_button_label1','reliability_section_button_label2','payment_section_heading','payment_section_text','payment_section_icon1','payment_section_icon2','payment_section_icon3','payment_section_icon4'
+        ];
+    }
+
+    public function collection(Collection $rows)
+    {
+        $setting = HomePageSetting::first();
+        if (!$setting) $setting = HomePageSetting::create([]);
+        if ($rows->isEmpty()) return;
+
+        $firstRow = $rows->first();
+        $keys = array_keys($firstRow->toArray());
+        $isSingleColumn = isset($keys[0]) && (in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys)));
+
+        if ($isSingleColumn) {
+            foreach ($rows as $row) $this->processSingleColumnFormat($setting, $row);
+        } else {
+            $this->processMultiColumnFormat($setting, $firstRow);
+        }
+    }
+
+    protected function processSingleColumnFormat($setting, $row)
+    {
+        $fieldName = $row['field_name'] ?? null;
+        $value = $row['translation_value'] ?? $row['value'] ?? null;
+        if (empty($fieldName) || $value === null || $value === '') return;
+        $fieldName = strtolower(trim($fieldName));
+        if (!in_array($fieldName, $this->fieldsList())) return;
+
+        $detail = HomePageSettingDetail::where('home_page_setting_id', $setting->id)
+            ->where('language_id', $this->languageId)
+            ->first();
+
+        if ($detail) {
+            $detail->$fieldName = $value;
+            $detail->save();
+        } else {
+            HomePageSettingDetail::create([
+                'home_page_setting_id' => $setting->id,
+                'language_id' => $this->languageId,
+                $fieldName => $value,
+            ]);
+        }
+    }
+
+    protected function processMultiColumnFormat($setting, $row)
+    {
+        $fields = [
+            'home_page_setting_id' => $setting->id,
+            'language_id' => $this->languageId,
+        ];
+        foreach ($this->fieldsList() as $f) {
+            $fields[$f] = $row[$f] ?? null;
+        }
+
+        HomePageSettingDetail::updateOrCreate(
+            [
+                'home_page_setting_id' => $setting->id,
+                'language_id' => $this->languageId,
+            ],
+            $fields
+        );
+    }
+
+    public function rules(): array
+    {
+        $language = Language::find($this->languageId);
+        if (!$language || $language->is_default != '1') return [];
+        return [
+            'name' => 'required|string',
+            'meta_keywords' => 'required|string',
+            'meta_description' => 'required|string',
+            'slider_heading' => 'required|string',
+            'slider_required_error' => 'required|string',
+            'slider_image' => 'required|string',
+            'from_field_icon' => 'required|string',
+            'swap_field_icon' => 'required|string',
+            'to_field_icon' => 'required|string',
+            'date_field_icon' => 'required|string',
+            'search_field_icon' => 'required|string',
+            'section1_main_heading' => 'required|string',
+        ];
+    }
+}
+
+
