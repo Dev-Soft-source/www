@@ -4,7 +4,7 @@
 
 <div class="container mx-auto my-6 md:my-10 xl:my-14 px-4 xl:px-0 pt-safe">
         <div class="pb-4 pt-4 md:pt-2 hideheader1">
-            <h1 class="mb-0 text-left">
+            <h1 class="mb-0 text-left font-FuturaMdCnBT">
                 @isset($privacyPolicyPage->main_heading)
                     {{ $privacyPolicyPage->main_heading }}
                 @endisset

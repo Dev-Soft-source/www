@@ -6,7 +6,7 @@
 <div class="container mx-auto my-14">
     <div class="bg-white border rounded p-4 border-gray-200 shadow w-full md:w-[70%] mx-auto">
         <div class="flex flex-col md:flex-row items-center justify-between">
-            <h1 class="mb-0">
+            <h1 class="mb-0 font-FuturaMdCnBT">
                 @isset($contactUsPage->main_heading)
                     {{ $contactUsPage->main_heading }}
                 @endisset
@@ -77,7 +77,7 @@
                     @isset($contactUsPage->name_email_placeholder)
                         <div>
                             <label for="">{{ $contactProximaPage->your_email_address_label }} <span class="text-red-500">*</span></label>
-                            <input placeholder="{{ $contactUsPage->placeholder_email }}" type="email" name="email" value="{{ old('email') }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                            <input placeholder="{{ $contactUsPage->placeholder_email }}" type="email" name="email" value="{{ old('email') }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 italic focus:ring-none focus:outline-none focus:border-blue-600">
                             @error('email')
                               <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -90,7 +90,7 @@
                     @isset($contactUsPage->telephone_label)
                         <div>
                             <label for="">{{ $contactProximaPage->your_phone_label }}</label>
-                            <input placeholder="{{ $contactUsPage->placeholder_phone }}" type="tel" name="phone" value="{{ old('phone') }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                            <input placeholder="{{ $contactUsPage->placeholder_phone }}" type="tel" name="phone" value="{{ old('phone') }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg italic rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                             @error('phone')
                               <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -103,7 +103,7 @@
                     @isset($contactUsPage->message_placeholder)
                         <div class="md:col-span-2">
                             <label for="">{{ $contactProximaPage->your_message_label }} <span class="text-red-500">*</span></label>
-                            <textarea placeholder="{{ $contactUsPage->placeholder_message }}" id="message" rows="5" name="message" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('message') }}</textarea>
+                            <textarea placeholder="{{ $contactUsPage->placeholder_message }}" id="message" rows="5" name="message" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg italic rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('message') }}</textarea>
                             @error('message')
                               <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -116,7 +116,7 @@
 
                     @isset($contactProximaPage->submit_button_text)
                         <div class="md:col-span-2 flex justify-center">
-                            <button type="submit" class="button-exp-fill">{{ $contactProximaPage->submit_button_text }}</button>
+                            <button type="submit" class="w-28 button-exp-fill">{{ $contactProximaPage->submit_button_text }}</button>
                         </div>
                     @endisset
                 </div>

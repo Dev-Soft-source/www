@@ -4,7 +4,7 @@
 
 <div class="container mx-auto  my-6 md:my-10 xl:my-14 px-4 xl:px-0">
     <div class="container mx-auto">
-        <h1 class="text-blue-600 text-center mb-0">
+        <h1 class="text-blue-600 text-center mb-0 font-FuturaMdCnBT">
             Media
         </h1>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4 xl:gap-6 mt-4 md:mt-6 xl:mt-10">

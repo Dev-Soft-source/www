@@ -94,7 +94,7 @@
 
               <div class="flex items-center justify-center flex-col sm:flex-col md:flex-row lg:flex-row">
                 <div>
-                    <button class="button-exp-fill flex w-full justify-center text-lg font-semibold px-8" type="submit">
+                    <button class="button-exp-fill flex w-full justify-center text-lg font-semibold px-4" type="submit">
                         @isset($resetPasswordPage->button_label)
                             {{ $resetPasswordPage->button_label }}
                         @else

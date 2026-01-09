@@ -9,7 +9,7 @@
                 <img class="w-7 h-7 object-contain" src="{{ asset('home_page_icons/' . $studentPage->page_image)}}" alt="">
             @endisset
         </div>
-        <h1 class="mb-0">
+        <h1 class="mb-0 font-FuturaMdCnBT">
             @isset($studentPage->main_heading)
                 {{ $studentPage->main_heading }}
             @endisset

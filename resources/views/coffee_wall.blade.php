@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mx-auto my-10 md:my-14 px-4">
         <div class="pb-2">
-            <h1 class="mb-0">
+            <h1 class="mb-0 font-FuturaMdCnBT">
                 @isset($coffeeWallPage->main_heading)
                     {{ $coffeeWallPage->main_heading }}
                 @endisset

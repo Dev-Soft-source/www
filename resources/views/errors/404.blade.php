@@ -97,16 +97,16 @@
                         src="{{ asset('assets/404/404-01.png') }}" alt="">
                 </div>
                 <div class="text-center my-20 w-full mx-auto px-6 lg:my-12">
-                    <h1 class="can-exp-h1 text-white">OPPS! PAGE NOT FOUNDED</h1>
-                    <p class="text-white text-center">The page you are looking for was moved, removed,
+                    <h1 class="can-exp-h1 text-white">Ho-ho-hold on! This page doesn't exist.</h1>
+                    <p class="text-white text-center">The page you’re looking for may have been moved, removed, renamed — or maybe it never existed in the first place.
                         <br class="hidden md:block">
-                        rename or might never be existed
+                        Kind of like this skinny Santa, cruising in a Tesla and eating a fat-free donut… in the middle of summer.
                     </p>
                     <div class="flex items-center justify-center space-x-4">
                         <a
                         href="/"
                             class="mt-4 button-exp-fill">
-                            Go home</a>
+                            Back to Homepage</a>
                         <a
                         href="/"
                             class="mt-4 button-exp-fill">

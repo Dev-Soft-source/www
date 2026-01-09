@@ -6,7 +6,7 @@
     <div class="flex min-h-full flex-col justify-center my-14 px-4 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-100 p-4 shadow rounded-md sm:px-10">
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <h1 class="text-center can-exp-h1 text-primary">
+                <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary">
                     @isset($loginPage->main_heading)
                         {{ $loginPage->main_heading }}
                     @endisset
@@ -187,7 +187,7 @@
                     </div>
                     <div class="flex w-full justify-center">
                         @isset($loginPage->submit_button_label)
-                            <button class="button-exp-fill w-32 " type="submit">
+                            <button class="button-exp-fill w-28 " type="submit">
                                 {{ $loginPage->submit_button_label }}
                             </button>
                         @endisset

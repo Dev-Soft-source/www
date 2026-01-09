@@ -4,7 +4,7 @@
 
 <div class="w-full col-span-12 md:col-span-9 container mx-auto px-4 md:px-8 xl:px-0 my-14">
     <div class="flex items-center space-x-2">
-        <h1 class="mb-0">
+        <h1 class="mb-0 font-FuturaMdCnBT">
             @isset($driverPage->main_heading)
                 {{ $driverPage->main_heading }}
             @endisset

@@ -615,12 +615,12 @@
         // Your web app's Firebase configuration
         // TODO: Replace with your new Firebase project (proxima-ride-app-devop) web app config
         const firebaseConfig = {
-  apiKey: "AIzaSyBt3Y5R24dI1V-qArWRVVXwSvrwrvreyf0",
-  authDomain: "proxima-ride-app-devop.firebaseapp.com",
-  projectId: "proxima-ride-app-devop",
-  storageBucket: "proxima-ride-app-devop.firebasestorage.app",
-  messagingSenderId: "785619130237",
-  appId: "1:785619130237:web:20f9ee0f705e60e4b5de14"
+            apiKey: "AIzaSyBt3Y5R24dI1V-qArWRVVXwSvrwrvreyf0",
+            authDomain: "proxima-ride-app-devop.firebaseapp.com",
+            projectId: "proxima-ride-app-devop",
+            storageBucket: "proxima-ride-app-devop.firebasestorage.app",
+            messagingSenderId: "785619130237",
+            appId: "1:785619130237:web:20f9ee0f705e60e4b5de14"
         };
 
         // Initialize Firebase

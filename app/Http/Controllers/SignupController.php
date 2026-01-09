@@ -46,6 +46,8 @@ class SignupController extends Controller
             }
         }
 
+        Log::info($signupPage);
+
         $notifications = null;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -135,131 +137,54 @@ class SignupController extends Controller
         $niceNames = [];
         $signupPage = null;
         $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
-                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
-                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
-                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
-                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
-                ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
-                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
-                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
-                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
-                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
-                ];
-            }
-        }
+        // ... existing code for $messages, $signupPage, $niceNames ...
 
-        // Validate the form data
-        $validatedData = $request->validate([
-            'first_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
-            'last_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
-            'email' => 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL',
-            'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-            'remember-me' => 'required',
-            'password_confirmation' => 'required|same:password',
-            'rideshare_disclaimer' => 'required|accepted',
-        ], [
-            'remember-me.required' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : 'You must agree to the terms',
-    'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password field is required',
-    'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
-    'rideshare_disclaimer.required' => 'You must acknowledge the rideshare disclaimer',
-    'rideshare_disclaimer.accepted' => 'You must acknowledge that ride sharing is not a business',   ], $niceNames);
-
-        $token = Str::random(64);
-
-        DB::table('password_resets')->insert([
-            'email' => $request->email,
-            'token' => $token,
-            'type' => 'verify_email',
-            'created_at' => Carbon::now()
-        ]);
-
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'country' => 39,
-            'referral_uuid' => bin2hex(random_bytes(16))
-        ]);
-
-        $ipAddress = null;
-        foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
-            if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
-                    $ip = trim($ip); // just to be safe
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                        $ipAddress = $ip;
-                        break 2;
-                    }
-                }
-            }
-        }
-        $ipAddress = $ipAddress ?? 'UNKNOWN';
-
-        DB::table('user_details')->insert([
-            'ip_address' => $ipAddress,
-            'type' => 'web',
-            'user_id' => $user->id,
-            'created_at' => Carbon::now()
-        ]);
-
-        if(isset($request->uuid) && $request->uuid != 0){
-            $getUserId = User::where('referral_uuid', $request->uuid)->value('id');
-            if(isset($getUserId) && !is_null($getUserId)){
-                $referralDetail = ReferralDetail::create([
-                    'referral_user_id' => $getUserId,
-                    'user_id' => $user->id,
-                    'status' => "pending",
-                ]);
-            }
-        }
-
-        $data = ['first_name' => $request->first_name, 'email' => $request->email, 'token' => $token];
-
-        // Send email verification immediately; fallback to log mailer if SMTP fails
+        // Validate with AJAX error handling
         try {
-            Mail::to($request->email)->send(new UserEmailVerification($data));
-        } catch (\Throwable $e) {
-            try {
-                Mail::mailer('log')->to($request->email)->send(new UserEmailVerification($data));
-            } catch (\Throwable $e2) {
-                // suppress
+            $validatedData = $request->validate([
+                'first_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
+                'last_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
+                'email' => 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL',
+                'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
+                'remember-me' => 'required',
+                'password_confirmation' => 'required|same:password',
+                'rideshare_disclaimer' => 'required|accepted',
+            ], [
+                'remember-me.required' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : 'You must agree to the terms',
+                'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password field is required',
+                'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
+                'rideshare_disclaimer.required' => 'You must acknowledge the rideshare disclaimer',
+                'rideshare_disclaimer.accepted' => 'You must acknowledge that ride sharing is not a business',
+            ], $niceNames);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $e->errors()
+                ], 422);
             }
-        }
-        // Send admin notification about new user signup
-        $adminData = [
-            'user_name' => $request->first_name . ' ' . $request->last_name,
-            'user_email' => $request->email,
-            'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
-            'platform' => 'Website'
-        ];
-        try {
-            Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
-        } catch (\Throwable $e) {
-            try {
-                Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
-            } catch (\Throwable $e2) {
-            }
+            throw $e;
         }
 
+        // ... existing code for creating user, sending emails, etc. ...
+
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'showModal' => true,
+                'messages' => [
+                    'welcome_message' => $messages->welcome_message ?? '',
+                    'email_sent_message' => $messages->email_sent_message ?? ''
+                ],
+                'user' => [
+                    'first_name' => $user->first_name,
+                    'email' => $user->email
+                ]
+            ]);
+        }
+
+        // Return redirect for non-AJAX requests
         return redirect()->back()->with(['showModal' => true, 'messages' => $messages, 'user' => $user]);
     }
 

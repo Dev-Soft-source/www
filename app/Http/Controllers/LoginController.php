@@ -65,63 +65,97 @@ class LoginController extends Controller
         return view('login',['loginPage' => $loginPage,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $niceNames = [];
         $message = null;
         $selectedLanguage = session('selectedLanguage');
+
         if ($selectedLanguage) {
-            // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
+                    ->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')
+                    ->first();
 
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')->first();
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email' => isset($loginPage->email_error) ? $loginPage->email_error : '',
+                    'email'    => isset($loginPage->email_error) ? $loginPage->email_error : '',
                     'password' => isset($loginPage->password_error) ? $loginPage->password_error : '',
                 ];
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
+                    ->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')
+                    ->first();
+
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email' => isset($loginPage->email_error) ? $loginPage->email_error : '',
+                    'email'    => isset($loginPage->email_error) ? $loginPage->email_error : '',
                     'password' => isset($loginPage->password_error) ? $loginPage->password_error : '',
                 ];
             }
         }
 
-        // Validate the form data
-        $validatedData = $request->validate([
-            'email' => 'required|string|max:255|email',
-            'password' => 'required',
-        ], [], $niceNames);
+        // Validate the form data with AJAX support
+        try {
+            $validatedData = $request->validate([
+                'email'    => 'required|string|max:255|email',
+                'password' => 'required',
+            ], [], $niceNames);
+        } catch (ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        }
 
-        // Your authentication logic can go here, for example:
+        // Auth logic
         $credentials = $request->only('email', 'password');
-
-        // Find the user by email
-        $user = User::where('email', $credentials['email'])->first();
+        $user        = User::where('email', $credentials['email'])->first();
 
         if ($user) {
             if ($user->closed === '1') {
                 $closeModalErrorMessage = $loginPage ? $loginPage->close_modal_error_message : 'Account has been closed';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error'   => $closeModalErrorMessage,
+                    ], 422);
+                }
+
                 return back()->with(['error' => $closeModalErrorMessage])->withInput();
             }
 
             if ($user->admin_deactive_account === '1') {
-                return back()->with(['error' => $message->admin_block_account_message ?? 'Your account is suspended. Please contact us if you feel it should be reinstated'])->withInput();
+                $adminMsg = $message->admin_block_account_message
+                    ?? 'Your account is suspended. Please contact us if you feel it should be reinstated';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error'   => $adminMsg,
+                    ], 422);
+                }
+
+                return back()->with(['error' => $adminMsg])->withInput();
             }
         }
 
         if ($user && !$user->trashed() && $user->email_verified != 0 && auth()->attempt($credentials, $request->has('remember'))) {
+            // IP & user_details tracking (unchanged)
             $ipAddress = null;
-            foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
+            foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP',
+                    'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'] as $key) {
                 if (array_key_exists($key, $_SERVER) === true) {
                     foreach (explode(',', $_SERVER[$key]) as $ip) {
-                        $ip = trim($ip); // just to be safe
+                        $ip = trim($ip);
                         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
                             $ipAddress = $ip;
                             break 2;
@@ -135,35 +169,78 @@ class LoginController extends Controller
             if (!$record) {
                 DB::table('user_details')->insert([
                     'ip_address' => $ipAddress,
-                    'type' => 'web',
-                    'user_id' => $user->id,
-                    'created_at' => now()
+                    'type'       => 'web',
+                    'user_id'    => $user->id,
+                    'created_at' => now(),
                 ]);
             }
 
-
-            // Authentication passed
+            // Redirect logic (unchanged)
             $user = auth()->user();
             if ($user->step === '1') {
-                // Additional profile fields are empty, redirect to login page with modal
-                return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation])->with(['showModal' => true, 'user' => $user]);
+                $redirectUrl = route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
             } elseif ($user->step === '2') {
-                return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
+                $redirectUrl = route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
             } elseif ($user->step === '3') {
-                return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
+                $redirectUrl = route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
             } elseif ($user->step === '4') {
-                return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
+                $redirectUrl = route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
+            } else {
+                $redirectUrl = '/'.$selectedLanguage->abbreviation.'/home';
             }
-            return redirect()->intended('/'.$selectedLanguage->abbreviation.''.'/home');
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'      => true,
+                    'redirect_url' => $redirectUrl,
+                ]);
+            }
+
+            return redirect()->intended($redirectUrl);
         } else {
+            // Error branches
             if ($user && $user->trashed()) {
-                // User account is soft deleted
-                return back()->with(['message' => 'Account is not available anymore'])->withInput();
+                $errorMsg = 'Account is not available anymore';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error'   => $errorMsg,
+                    ], 422);
+                }
+
+                return back()->with(['message' => $errorMsg])->withInput();
             } elseif ($user && $user->email_verified == 0) {
-                return back()->with(['error' => $message->verified_email_message ?? null.'<a href="'.route('sendEmailVerify', ['email' => $user->email]).'">Request a new verification email</a>', 'verify_email' => true, 'email' => $user->email])->withInput();
+                $errorMsg = ($message->verified_email_message ?? null)
+                    . '<a href="' . route('sendEmailVerify', ['email' => $user->email]) . '">Request a new verification email</a>';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success'     => false,
+                        'error'       => $errorMsg,
+                        'verify_email'=> true,
+                        'email'       => $user->email,
+                    ], 422);
+                }
+
+                return back()->with([
+                    'error'        => $errorMsg,
+                    'verify_email' => true,
+                    'email'        => $user->email,
+                ])->withInput();
             }
+
             // Authentication failed
-            return back()->with(['error' => $message->no_user_match_message])->withInput();
+            $errorMsg = $message->no_user_match_message ?? 'These credentials do not match our records.';
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => $errorMsg,
+                ], 422);
+            }
+
+            return back()->with(['error' => $errorMsg])->withInput();
         }
     }
 
