@@ -99,12 +99,13 @@ class LoginController extends Controller
                 ];
             }
         }
+        Log::info($message);
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
                 'email'    => 'required|string|max:255|email',
                 'password' => 'required',
-            ], [], $niceNames);
+            ], [],$niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -115,7 +116,6 @@ class LoginController extends Controller
             throw $e;
         }
         
-
         // Auth logic
         $credentials = $request->only('email', 'password');
         $user        = User::where('email', $credentials['email'])->first();
@@ -238,7 +238,7 @@ class LoginController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'error'   => $errorMsg,
+                    'errors'   => ['password' => [$errorMsg]],
                 ], 422);
             }
 
