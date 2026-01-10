@@ -168,5 +168,4 @@ class ForgotPasswordController extends Controller
         return redirect()->route('forgot.password', ['lang' => $selectedLanguage->abbreviation])
                         ->with(['message' => $messages->reset_password_message ?? null]);
     }
-
 }
