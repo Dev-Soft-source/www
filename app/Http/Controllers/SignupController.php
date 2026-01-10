@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
 class SignupController extends Controller
@@ -45,8 +46,6 @@ class SignupController extends Controller
                 $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
         }
-
-        Log::info($signupPage);
 
         $notifications = null;
         if (auth()->user()) {
@@ -136,10 +135,40 @@ class SignupController extends Controller
     {
         $niceNames = [];
         $signupPage = null;
+        $messages = null;
         $selectedLanguage = session('selectedLanguage');
-        // ... existing code for $messages, $signupPage, $niceNames ...
+        if ($selectedLanguage) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+            if ($selectedLanguage) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
+                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                $niceNames = [
+                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
+                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
+                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
+                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
+                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
+                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
+                ];
+            }
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
+                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                $niceNames = [
+                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
+                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
+                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
+                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
+                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
+                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
+                ];
+            }
+        }
 
-        // Validate with AJAX error handling
+        // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
                 'first_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
@@ -156,35 +185,148 @@ class SignupController extends Controller
                 'rideshare_disclaimer.required' => 'You must acknowledge the rideshare disclaimer',
                 'rideshare_disclaimer.accepted' => 'You must acknowledge that ride sharing is not a business',
             ], $niceNames);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'errors' => $e->errors()
+                    'errors' => $e->errors(),
                 ], 422);
             }
             throw $e;
         }
 
-        // ... existing code for creating user, sending emails, etc. ...
+        $token = Str::random(64);
 
-        // Return JSON for AJAX requests
+        DB::table('password_resets')->insert([
+            'email' => $request->email,
+            'token' => $token,
+            'type' => 'verify_email',
+            'created_at' => Carbon::now()
+        ]);
+
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'country' => 39,
+            'referral_uuid' => bin2hex(random_bytes(16))
+        ]);
+
+        $ipAddress = null;
+        foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    $ip = trim($ip); // just to be safe
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                        $ipAddress = $ip;
+                        break 2;
+                    }
+                }
+            }
+        }
+        $ipAddress = $ipAddress ?? 'UNKNOWN';
+
+        DB::table('user_details')->insert([
+            'ip_address' => $ipAddress,
+            'type' => 'web',
+            'user_id' => $user->id,
+            'created_at' => Carbon::now()
+        ]);
+
+        if(isset($request->uuid) && $request->uuid != 0){
+            $getUserId = User::where('referral_uuid', $request->uuid)->value('id');
+            if(isset($getUserId) && !is_null($getUserId)){
+                $referralDetail = ReferralDetail::create([
+                    'referral_user_id' => $getUserId,
+                    'user_id' => $user->id,
+                    'status' => "pending",
+                ]);
+            }
+        }
+
+        $data = ['first_name' => $request->first_name, 'email' => $request->email, 'token' => $token];
+
+        // Log mail configuration for debugging
+        $mailDriver = config('mail.default');
+        $mailHost = config('mail.mailers.smtp.host');
+        Log::info('Attempting to send email verification', [
+            'email' => $request->email,
+            'mail_driver' => $mailDriver,
+            'mail_host' => $mailHost,
+            'token' => substr($token, 0, 10) . '...'
+        ]);
+
+        // Send email verification immediately; fallback to log mailer if SMTP fails
+        $emailSent = false;
+        try {
+            Mail::to($request->email)->send(new UserEmailVerification($data));
+            $emailSent = true;
+            Log::info('Email verification sent successfully via ' . $mailDriver, [
+                'email' => $request->email,
+                'mail_driver' => $mailDriver
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to send email verification on signup', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Try fallback to log mailer
+            try {
+                Mail::mailer('log')->to($request->email)->send(new UserEmailVerification($data));
+                $emailSent = true;
+                Log::info('Email verification sent via log mailer (fallback)', ['email' => $request->email]);
+            } catch (\Throwable $e2) {
+                Log::error('Failed to send email verification via log mailer', [
+                    'email' => $request->email,
+                    'error' => $e2->getMessage(),
+                    'error_class' => get_class($e2)
+                ]);
+            }
+        }
+        
+        // Log final status
+        if (!$emailSent) {
+            Log::critical('Email verification NOT sent - all methods failed', [
+                'email' => $request->email,
+                'user_id' => $user->id
+            ]);
+        }
+        // Send admin notification about new user signup
+        $adminData = [
+            'user_name' => $request->first_name . ' ' . $request->last_name,
+            'user_email' => $request->email,
+            'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
+            'platform' => 'Website'
+        ];
+        try {
+            Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+        } catch (\Throwable $e) {
+            try {
+                Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+            } catch (\Throwable $e2) {
+            }
+        }
+
+        // Handle AJAX requests
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'showModal' => true,
                 'messages' => [
-                    'welcome_message' => $messages->welcome_message ?? '',
-                    'email_sent_message' => $messages->email_sent_message ?? ''
+                    'welcome_message' => $messages->welcome_message ?? 'Welcome',
+                    'email_sent_message' => $messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.',
                 ],
                 'user' => [
                     'first_name' => $user->first_name,
-                    'email' => $user->email
+                    'email' => $user->email,
                 ]
             ]);
         }
 
-        // Return redirect for non-AJAX requests
         return redirect()->back()->with(['showModal' => true, 'messages' => $messages, 'user' => $user]);
     }
 
@@ -218,11 +360,21 @@ class SignupController extends Controller
         // Send email verification immediately; fallback to log mailer
         try {
             Mail::to($user->email)->send(new UserEmailVerification($data));
+            Log::info('Email verification sent successfully (resend)', ['email' => $user->email]);
         } catch (\Throwable $e) {
-            Log::error('Failed to send email verification', ['error' => $e->getMessage()]);
+            Log::error('Failed to send email verification', [
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             try {
                 Mail::mailer('log')->to($user->email)->send(new UserEmailVerification($data));
+                Log::info('Email verification sent via log mailer (resend)', ['email' => $user->email]);
             } catch (\Throwable $e2) {
+                Log::error('Failed to send email verification via log mailer', [
+                    'email' => $user->email,
+                    'error' => $e2->getMessage()
+                ]);
             }
         }
 

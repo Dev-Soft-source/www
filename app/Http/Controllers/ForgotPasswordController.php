@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -104,10 +105,12 @@ class ForgotPasswordController extends Controller
             }
         }
 
-        // Validate the form data
         $validatedData = $request->validate([
             'email' => 'required|email',
-        ], [], $niceNames);
+        ], [
+            'email.required' => $forgotPasswordPage->field_require,
+            'email.email' => $forgotPasswordPage->email_error,
+        ]);
 
         $user = User::where('email', $request->email)->first();
 
@@ -159,7 +162,7 @@ class ForgotPasswordController extends Controller
             Mail::to($request->email)->send(new UserForgotPassword($data));
         } catch (\Exception $e) {
             \Log::error('Forgot password email failed: ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Failed to send reset password email. Please try again.']);
+            return back()->withErrors(['email' => $forgotPasswordPage->fail_send]);
         }
 
         return redirect()->route('forgot.password', ['lang' => $selectedLanguage->abbreviation])

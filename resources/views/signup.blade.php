@@ -233,7 +233,7 @@
                         @isset($signupPage->confirm_password_placeholder)
                             placeholder="{{ $signupPage->confirm_password_placeholder }}"
                         @endisset
-                        class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 placeholder:text-[12px]" id="password" type="password" name="password"
+                        class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600" id="password" type="password" name="password"
                         value="{{ old('password') }}"
                          autocomplete="current-password" />
                         <span id="togglePassword" class="absolute right-3 top-2.5">
@@ -380,9 +380,8 @@
     </div>
 </div>
 
-@if(session('showModal'))
-
-<div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+{{-- Always render modal but hide it initially - show via JavaScript for AJAX or session for regular requests --}}
+<div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: {{ session('showModal') ? 'block' : 'none' }};">
   <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
       <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -409,7 +408,16 @@
                             $user = session('user');
                             $messages = session('messages');
                         @endphp
-                        <p class="can-exp-p text-center">{{ $messages->welcome_message }} {{ $user->first_name }},</p> <div>{!! $messages->email_sent_message !!}</div>
+                        <p class="can-exp-p text-center" id="modal-welcome-message">
+                            @if($messages && $user)
+                                {{ $messages->welcome_message }} {{ $user->first_name }},
+                            @endif
+                        </p>
+                        <div id="modal-email-message">
+                            @if($messages)
+                                {!! $messages->email_sent_message !!}
+                            @endif
+                        </div>
                     </div>
                 </div>
               </div>
@@ -422,8 +430,6 @@
       </div>
   </div>
 </div>
-
-@endif
 
 @endsection
 
@@ -579,11 +585,11 @@
         if (modal) {
             // Update modal content if data is provided
             if (data && data.user) {
-                var modalContent = modal.querySelector('.can-exp-p');
-                var emailMessage = modal.querySelector('.can-exp-p')?.nextElementSibling;
+                var welcomeMessage = document.getElementById('modal-welcome-message');
+                var emailMessage = document.getElementById('modal-email-message');
                 
-                if (data.messages && data.messages.welcome_message && modalContent) {
-                    modalContent.textContent = data.messages.welcome_message + ' ' + data.user.first_name + ',';
+                if (data.messages && data.messages.welcome_message && welcomeMessage) {
+                    welcomeMessage.textContent = data.messages.welcome_message + ' ' + data.user.first_name + ',';
                 }
                 if (data.messages && data.messages.email_sent_message && emailMessage) {
                     emailMessage.innerHTML = data.messages.email_sent_message || '';
@@ -595,6 +601,8 @@
             
             // Scroll to top to show modal
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            console.error('Modal element not found');
         }
     }
 
@@ -652,16 +660,20 @@
                 }
             })
             .then(function(data) {
+                console.log('Signup response:', data);
                 // Handle successful submission
                 if (data.success && data.showModal) {
                     // Reset form
                     form.reset();
                     
                     // Show success modal
+                    console.log('Showing success modal');
                     showSuccessModal(data);
                 } else if (data.errors) {
                     // Display validation errors
                     displayValidationErrors(data.errors);
+                } else {
+                    console.warn('Unexpected response format:', data);
                 }
             })
             .catch(function(error) {

@@ -1,4 +1,4 @@
-<footer class="py-10 md:py-14 w-full bg-blue-600 px-4 sm:px-8 flex-initial hidefooter">
+<footer class="py-10 md:py-14 w-full bg-indigo-800 px-4 sm:px-8 flex-initial hidefooter">
     <div class="container mx-auto">
 
       <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-8 pb-7 md:pb-14">

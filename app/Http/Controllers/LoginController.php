@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -98,7 +99,6 @@ class LoginController extends Controller
                 ];
             }
         }
-
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
@@ -114,11 +114,12 @@ class LoginController extends Controller
             }
             throw $e;
         }
+        
 
         // Auth logic
         $credentials = $request->only('email', 'password');
         $user        = User::where('email', $credentials['email'])->first();
-
+        
         if ($user) {
             if ($user->closed === '1') {
                 $closeModalErrorMessage = $loginPage ? $loginPage->close_modal_error_message : 'Account has been closed';
@@ -175,7 +176,7 @@ class LoginController extends Controller
                 ]);
             }
 
-            // Redirect logic (unchanged)
+            // Redirect logic
             $user = auth()->user();
             if ($user->step === '1') {
                 $redirectUrl = route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
@@ -186,7 +187,8 @@ class LoginController extends Controller
             } elseif ($user->step === '4') {
                 $redirectUrl = route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
             } else {
-                $redirectUrl = '/'.$selectedLanguage->abbreviation.'/home';
+                // Use route helper instead of manual URL construction
+                $redirectUrl = route('home', ['lang' => $selectedLanguage->abbreviation]);
             }
 
             if ($request->ajax() || $request->wantsJson()) {

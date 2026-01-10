@@ -18,7 +18,7 @@
                         {{ $loginPage->continue_label }}
                     @endisset
                 </h2>
-                <form class="space-y-6" method="POST" action="">
+                <form id="login-form" class="space-y-6" method="POST" action="">
                     @csrf
                     @if(session('error'))
                         <div id="error-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick="closeModal('error-modal')">
@@ -144,8 +144,8 @@
                                 class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600"
                                 type="text" name="email" value="{{ old('email') }}" autofocus />
                             @error('email')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                              <div class="relative tooltip tooltip-error -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                     <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                 </div>
                               </div>
@@ -173,8 +173,8 @@
                                 </svg>
                             </span>
                             @error('password')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                              <div class="relative tooltip tooltip-error -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                     <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                 </div>
                               </div>
@@ -299,61 +299,226 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
+    // Get the current language from the URL or use default
+    function getCurrentLang() {
+        const path = window.location.pathname;
+        const match = path.match(/\/([a-z]{2})\//);
+        return match ? match[1] : '';
+    }
+
+    // AJAX Form Submission
+    $(document).ready(function() {
+        $('#login-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const submitButton = form.find('button[type="submit"]');
+            const originalButtonText = submitButton.html();
+            
+            // Disable submit button and show loading state
+            submitButton.prop('disabled', true);
+            submitButton.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
+            
+            // Clear previous errors
+            $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
+            setTimeout(() => {
+                $('.tooltip-error').remove();
+            }, 200);
+            
+            // Get form data
+            const formData = form.serialize();
+            const lang = getCurrentLang();
+            const url = lang ? `/${lang}/login` : '/login';
+            
+            // Make AJAX request
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Redirect on success
+                        if (response.redirect_url) {
+                            window.location.href = response.redirect_url;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        // Handle errors
+                        handleLoginError(response);
+                        submitButton.prop('disabled', false);
+                        submitButton.html(originalButtonText);
+                    }
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    
+                    if (xhr.status === 422) {
+                        // Validation errors
+                        handleValidationErrors(response.errors || {});
+                    } else if (response && response.error) {
+                        // General error
+                        showErrorModal(response.error, response.verify_email, response.email);
+                    } else {
+                        // Network or server error
+                        showErrorModal('An error occurred. Please try again.');
+                    }
+                    
+                    submitButton.prop('disabled', false);
+                    submitButton.html(originalButtonText);
+                }
+            });
+        });
+    });
+
+    // Handle validation errors
+    function handleValidationErrors(errors) {
+        // Remove existing error tooltips
+        $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
+        setTimeout(() => {
+            $('.tooltip-error').remove();
+        }, 200);
+        
+        // Add new error tooltips with animation
+        setTimeout(() => {
+            Object.keys(errors).forEach(function(field) {
+                const input = $(`#${field}`);
+                const errorMessage = errors[field][0];
+                
+                if (input.length) {
+                    const tooltip = $(`
+                        <div class="relative tooltip tooltip-error tooltip-init -bottom-4">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <p class="text-white leading-none text-sm lg:text-base">${errorMessage}</p>
+                            </div>
+                        </div>
+                    `);
+                    
+                    input.parent().append(tooltip);
+                    // Trigger animation - remove init class and add show class
+                    setTimeout(() => {
+                        tooltip.removeClass('tooltip-init').addClass('tooltip-show');
+                    }, 10);
+                }
+            });
+        }, 200);
+    }
+
+    // Handle login errors
+    function handleLoginError(response) {
+        if (response.error) {
+            showErrorModal(response.error, response.verify_email, response.email);
+        } else if (response.errors) {
+            handleValidationErrors(response.errors);
+        }
+    }
+
+    // Show error modal
+    function showErrorModal(message, verifyEmail, email) {
+        // Create or update error modal
+        let modal = $('#error-modal');
+        if (modal.length === 0) {
+            // Create modal if it doesn't exist
+            modal = $(`
+                <div id="error-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick="closeModal('error-modal')">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
+                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl" onclick="event.stopPropagation()">
+                                <a onclick="closeModal('error-modal')" class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 z-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </a>
+                                <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                                    <div class="text-center">
+                                        <div class="w-full">
+                                            <p class="can-exp-p text-center text-black error-message"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                    <div class="verify-email-button"></div>
+                                    <a onclick="closeModal('error-modal')" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">Close</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            $('body').append(modal);
+        }
+        
+        modal.find('.error-message').html(message);
+        
+        if (verifyEmail && email) {
+            const lang = getCurrentLang();
+            const verifyUrl = `/send-email-verify/${encodeURIComponent(email)}`;
+            modal.find('.verify-email-button').html(`
+                <a href="${verifyUrl}" class="inline-flex justify-center rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3 w-auto">Request a new verification email</a>
+            `);
+        } else {
+            modal.find('.verify-email-button').empty();
+        }
+        
+        modal.show();
+    }
 
     function hideTooltip(parms) {
-        if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-            $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
+        const tooltip = $(this).closest('.mt-2, .relative').find('.tooltip-error');
+        if (tooltip.length > 0 && parms != 'label') {
+            tooltip.removeClass('tooltip-show').addClass('tooltip-hide');
+            setTimeout(() => {
+                tooltip.remove();
+            }, 200);
         }
     }
 
     const inputs = document.querySelectorAll('input, textarea');
     inputs.forEach(input => {
-        input.addEventListener('input', hideTooltip); // no parameter on input typing
+        input.addEventListener('input', hideTooltip);
     });
 
     const labels = document.querySelectorAll('label');
-    labels.forEach(input => {
-        input.addEventListener('click', function (e) {
-            hideTooltip.call(this, 'label'); // pass 'testing' on label click
+    labels.forEach(label => {
+        label.addEventListener('click', function (e) {
+            hideTooltip.call(this, 'label');
         });
     });
 
-     function closeModal(modalId) {
-         const modal = document.getElementById(modalId);
-         if (modal) {
-             modal.style.display = 'none';
-         }
-     }
-
-
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
 
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
 
-    togglePassword.addEventListener('click', function () {
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
+    if (togglePassword && password) {
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
 
-        // Change eye icon based on password visibility
-        if (type === 'password') {
-            togglePassword.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 cursor-pointer text-gray-600">
-                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                    <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
-                </svg> `;
-        } else {
-            togglePassword.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" class="w-5 h-5 text-gray-600 cursor-pointer">
-                <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/>
-            </svg>`;
-        }
-    });
+            // Change eye icon based on password visibility
+            if (type === 'password') {
+                togglePassword.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 cursor-pointer text-gray-600">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                        <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
+                    </svg> `;
+            } else {
+                togglePassword.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" class="w-5 h-5 text-gray-600 cursor-pointer">
+                    <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/>
+                </svg>`;
+            }
+        });
+    }
 </script>
 
 @endsection
@@ -367,6 +532,58 @@
     .modal-visible {
         transform: translateX(0); /* Slide to the center */
         transition: transform 0.3s ease-in-out; /* Smooth transition */
+    }
+
+    /* Tooltip Animation Styles */
+    .tooltip-error {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: auto;
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        display: block;
+    }
+
+    /* Initial hidden state for dynamically created tooltips */
+    .tooltip-error.tooltip-init {
+        opacity: 0;
+        transform: scale(0.95) translateY(-5px);
+        pointer-events: none;
+    }
+
+    .tooltip-error.tooltip-show {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: auto;
+    }
+
+    .tooltip-error.tooltip-hide {
+        opacity: 0;
+        transform: scale(0.95) translateY(-5px);
+        pointer-events: none;
+    }
+
+    /* Ensure tooltips are visible when they have the show class */
+    .tooltip-error.tooltip-show .tooltiptext {
+        display: flex !important;
+    }
+
+    /* Loading spinner styles */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        display: inline-block;
+        vertical-align: text-bottom;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    @keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
     }
 
 </style>

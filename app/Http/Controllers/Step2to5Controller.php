@@ -89,8 +89,20 @@ class Step2to5Controller extends Controller
             'max' => $message->image_size_error_message,
         ];
 
+        // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
+            
+            if (!in_array($extension, $allowedExtensions)) {
+                return redirect()->back()->withErrors(['image' => 'The image must be a file of type: jpeg, png, jpg, gif.'])->withInput();
+            }
+        }
+
+        // Use extensions instead of mimes to avoid requiring php_fileinfo extension
         $validator = Validator::make($request->all(), [
-            'image' => in_array(basename($user->profile_image), ['male.png', 'female.png', 'neutral.png']) ? 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240' : 'nullable',
+            'image' => in_array(basename($user->profile_image), ['male.png', 'female.png', 'neutral.png']) ? 'nullable|file|max:10240' : 'nullable',
         ], $customMessages, $niceNames);
 
         // Check if validation fails

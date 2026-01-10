@@ -136,6 +136,17 @@ class Step3to5Controller extends Controller
             return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
         }
 
+        // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
+            
+            if (!in_array($extension, $allowedExtensions)) {
+                return redirect()->back()->withErrors(['image' => 'The image must be a file of type: jpeg, png, jpg, gif.'])->withInput();
+            }
+        }
+
         // Otherwise, user is adding vehicle -> validate only vehicle fields
         $validated = $request->validate([
             'make' => 'required',
@@ -145,8 +156,9 @@ class Step3to5Controller extends Controller
             'color' => 'required',
             'year' => 'required',
             'car_type' => 'required',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240',
+            'image' => 'nullable|file|max:10240',
         ], [], $niceNames);
+        
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();

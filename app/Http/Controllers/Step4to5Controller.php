@@ -95,8 +95,19 @@ class Step4to5Controller extends Controller
         }
 
         if ($request->input('action') != 'skip_license') {
+            // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
+            if ($request->hasFile('driver_liscense')) {
+                $file = $request->file('driver_liscense');
+                $extension = strtolower($file->getClientOriginalExtension());
+                $allowedExtensions = ['pdf', 'jpeg', 'jpg', 'png', 'gif'];
+                
+                if (!in_array($extension, $allowedExtensions)) {
+                    return redirect()->back()->withErrors(['driver_liscense' => 'The driver license must be a file of type: pdf, jpeg, png, jpg, gif.'])->withInput();
+                }
+            }
+
             $validated = $request->validate([
-                'driver_liscense' => 'required|file|mimes:pdf,jpeg,png,jpg,gif|max:10240',
+                'driver_liscense' => 'required|file|max:10240',
             ], [], $niceNames);
 
             if ($request->hasFile('driver_liscense')) {

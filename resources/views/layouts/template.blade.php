@@ -77,6 +77,28 @@
                 padding-top: max(3.5rem, env(safe-area-inset-top));
             }
         }
+
+        /* Global Placeholder Styling - All placeholders must be identical */
+        input::placeholder,
+        textarea::placeholder {
+            font-style: italic !important;
+            font-size: 0.9375rem !important; /* 15px - smaller than text-lg (18px) but not too small */
+            color: rgb(107 114 128) !important; /* gray-500 */
+        }
+
+        /* Ensure consistency across all input types */
+        input[type="text"]::placeholder,
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder,
+        input[type="tel"]::placeholder,
+        input[type="number"]::placeholder,
+        input[type="date"]::placeholder,
+        input[type="time"]::placeholder,
+        textarea::placeholder {
+            font-style: italic !important;
+            font-size: 0.9375rem !important;
+            color: rgb(107 114 128) !important;
+        }
     </style>
     <script type="application/ld+json">
     {

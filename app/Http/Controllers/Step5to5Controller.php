@@ -209,8 +209,11 @@ public function update($id, Request $request){
         $sid = env('TWILIO_ACCOUNT_SID');
         $token = env('TWILIO_AUTH_TOKEN');
         $from = env('TWILIO_PHONE_NUMBER');
+        $appEnv = env('APP_ENV');
+        $smsSent = false;
+        $smsError = null;
 
-        if($sid != null){
+        if($sid != null && $token != null && $from != null){
             $twilio = new Client($sid, $token);
             $to = $phone->phone;
             $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
@@ -218,11 +221,11 @@ public function update($id, Request $request){
                 'to' => $to,
                 'from' => $from,
                 'has_sid' => $sid ? true : false,
-                'env' => env('APP_ENV'),
+                'env' => $appEnv,
             ]);
 
             try {
-                if(env('APP_ENV') != 'local'){
+                if($appEnv != 'local'){
                     $res = $twilio->messages->create(
                         $to,
                         [
@@ -230,24 +233,37 @@ public function update($id, Request $request){
                             'body' => $message,
                         ]
                     );
+                    $smsSent = true;
                     Log::info('Twilio SMS sent', [
                         'to' => $to,
                         'sid' => method_exists($res, 'getSid') ? $res->getSid() : null,
                         'status' => method_exists($res, 'getStatus') ? $res->getStatus() : null,
                     ]);
                 } else {
-                    Log::info('Skip sending SMS in local env; simulated send complete', [
+                    Log::info('Skip sending SMS in local env; verification code generated', [
                         'to' => $to,
+                        'code' => $verificationCode,
                     ]);
+                    // In local environment, store code in session for testing
+                    session(['verification_code_' . $phone->id => $verificationCode]);
                 }
             } catch (\Exception $e) {
+                $smsError = $e->getMessage();
                 Log::error('Twilio SMS send failed', [
                     'to' => $to,
-                    'error' => $e->getMessage(),
+                    'error' => $smsError,
                 ]);
-
-                // $phone->delete();
-                // return redirect()->back()->with(['error' => 'Can not send text to ' . $phone->phone . ' because unable to create record: Authenticate']);
+            }
+        } else {
+            $smsError = 'Twilio credentials not configured';
+            Log::warning('Twilio credentials missing', [
+                'has_sid' => $sid ? true : false,
+                'has_token' => $token ? true : false,
+                'has_from' => $from ? true : false,
+            ]);
+            // In development, store code in session even if Twilio not configured
+            if($appEnv == 'local' || $appEnv == 'development'){
+                session(['verification_code_' . $phone->id => $verificationCode]);
             }
         }
 
@@ -380,31 +396,59 @@ public function sendVerificationCode(Request $request, $lang = null)
     $sid = env('TWILIO_ACCOUNT_SID');
     $token = env('TWILIO_AUTH_TOKEN');
     $from = env('TWILIO_PHONE_NUMBER');
+    $appEnv = env('APP_ENV');
+    $smsSent = false;
+    $smsError = null;
 
-    if($sid != null){
+    if($sid != null && $token != null && $from != null){
         $twilio = new Client($sid, $token);
         $to = $phone->phone;
         $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
         try {
-            if(env('APP_ENV') != 'local'){
+            if($appEnv != 'local'){
                 $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
+                $smsSent = true;
                 Log::info('Twilio SMS sent (AJAX)', ['to' => $to]);
             } else {
-                Log::info('Skip sending SMS in local env (AJAX)', ['to' => $to]);
+                Log::info('Skip sending SMS in local env (AJAX); verification code generated', [
+                    'to' => $to,
+                    'code' => $verificationCode,
+                ]);
+                // In local environment, include code in response for testing
+                session(['verification_code_' . $phone->id => $verificationCode]);
             }
         } catch (\Exception $e) {
+            $smsError = $e->getMessage();
             Log::error('Twilio SMS send failed (AJAX)', [
                 'to' => $to,
-                'error' => $e->getMessage(),
+                'error' => $smsError,
             ]);
-            // Continue anyway - don't block the user from entering code manually
+        }
+    } else {
+        $smsError = 'Twilio credentials not configured';
+        Log::warning('Twilio credentials missing (AJAX)', [
+            'has_sid' => $sid ? true : false,
+            'has_token' => $token ? true : false,
+            'has_from' => $from ? true : false,
+        ]);
+        // In development, store code in session even if Twilio not configured
+        if($appEnv == 'local' || $appEnv == 'development'){
+            session(['verification_code_' . $phone->id => $verificationCode]);
         }
     }
 
-    return response()->json([
+    $response = [
         'success' => true,
         'message' => 'Verification code sent successfully'
-    ]);
+    ];
+
+    // In local/development, include the code in response for testing
+    if(($appEnv == 'local' || $appEnv == 'development') && !$smsSent){
+        $response['verification_code'] = $verificationCode;
+        $response['message'] = 'Verification code generated (SMS not sent in ' . $appEnv . ' environment)';
+    }
+
+    return response()->json($response);
 }
 }

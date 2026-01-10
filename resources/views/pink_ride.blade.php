@@ -181,8 +181,12 @@
                                                     {{ $findRidePage->search_section_keyword_label }}
                                                 @endisset
                                             </h3>
+
                                             <textarea id="keyword"
-                                                class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 line-clamp-2"@isset($findRidePage->search_section_keyword_placeholder)placeholder="{{$findRidePage->search_section_keyword_placeholder}}"@endisset></textarea>
+                                            class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
+                                                @isset($findRidePage->search_section_keyword_placeholder)
+                                                    placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
+                                                @endisset></textarea>
                                         </div>
                                         <div class="space-y-4 mb-4">
                                             <h3 class="text-primary">
@@ -257,7 +261,7 @@
                                                 @endisset
                                             </label>
                                             <input type="text" id="driverName" value="{{ $request->driver_name }}"
-                                                class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                class="bg-gray-100 border-0 text-gray-500 text-lg italic rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                 @isset($findRidePage->driver_know_placeholder)
                                                 placeholder={{ $findRidePage->driver_know_placeholder }}
                                             @endisset>
@@ -716,8 +720,8 @@
                                                 @endisset
                                             </div>
                                         </div>
-                                        <button class="text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
-                                        <button class="text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
+                                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
+                                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                                     </div>
                                 </div>
                             </div>
@@ -737,7 +741,7 @@
                                         alt="">
                                 </div>
                                 <input type="text" id="fromInput" value="{{ $request->from }}"
-                                    class="bg-white rounded-md md:rounded-none pl-7 border-0 text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                    class="bg-white rounded-md md:rounded-none pl-7 border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                     @isset($findRidePage->search_section_from_placeholder)
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
                                     @endisset>
@@ -755,7 +759,7 @@
                                     <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
                                 </div>
                                 <input type="text" id="toInput" value="{{ $request->to }}"
-                                    class="bg-white pl-7 rounded-md md:rounded-none md:border-0 text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
+                                    class="bg-white pl-7 rounded-md md:rounded-none md:border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
                                     @isset($findRidePage->search_section_to_placeholder)
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
                                     @endisset>
@@ -772,7 +776,7 @@
                                     </svg>
                                 </div>
                                 <input type="text" id="dateInput" value="{{ $request->date }}"
-                                    class="bg-white rounded-md md:rounded-none px-7 sm:border-l border-gray-300 border-0 text-gray-900 text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                    class="bg-white rounded-md md:rounded-none px-7 sm:border-l italic border-gray-300 border-0 text-gray-900 text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                     @isset($findRidePage->search_section_date_placeholder)
                                         placeholder="{{ $findRidePage->search_section_date_placeholder }}"
                                     @endisset>
@@ -2243,6 +2247,35 @@
 }
     </script>
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const autoGrow = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            };
+
+            document.querySelectorAll('textarea').forEach(textarea => {
+                // Base styles (safe, non-breaking)
+                textarea.style.resize = 'none';
+                textarea.style.overflowY = 'hidden';
+
+                // Grow on typing
+                textarea.addEventListener('input', () => autoGrow(textarea));
+
+                // Grow to fit placeholder on load
+                if (!textarea.value && textarea.placeholder) {
+                    textarea.value = textarea.placeholder;
+                    autoGrow(textarea);
+                    textarea.value = '';
+                } else {
+                    autoGrow(textarea);
+                }
+            });
+
+        });
+
+
         document.addEventListener('DOMContentLoaded', () => {
             const toggle = document.getElementById('search-filter-toggle');
             const close = document.getElementById('search-filter-close');

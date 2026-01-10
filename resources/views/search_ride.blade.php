@@ -247,7 +247,7 @@
                                 @endisset
                             </h3>
                             <textarea id="keyword"
-                            class="bg-gray-100 border-0 text-black text-base md:text-lg rounded focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
+                            class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
                                 @isset($findRidePage->search_section_keyword_placeholder)
                                     placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
                                 @endisset>{{ old('keyword', $request->keyword) }}</textarea>
