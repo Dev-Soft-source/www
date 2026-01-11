@@ -99,6 +99,11 @@
             font-size: 0.9375rem !important;
             color: rgb(107 114 128) !important;
         }
+
+        /* Modal border styling - Professional colored frame */
+        .modal-border {
+            border: 3px solid #00A99D;
+        }
     </style>
     <script type="application/ld+json">
     {
@@ -272,7 +277,7 @@
         <div class="relative h-screen my-6 mx-auto flex items-center justify-center w-full w-full">
             <!--content-->
             <div
-                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                 <button type="button" onclick="toggleModal('logout-modal')"
                     class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

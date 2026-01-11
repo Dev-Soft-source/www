@@ -223,7 +223,7 @@
                             @endif
                             <p class="text-left flex text-sm lg:text-base text-gray-900">
                                 <span> {{ $editProfilePage->image_placeholder ?? 'Drag and drop or' }}</span>
-                                <span class="text-primary"> {{ $editProfilePage->choose_file_placeholder ?? 'choose a file' }}</span>
+                                <!-- <span class="text-primary"> {{ $editProfilePage->choose_file_placeholder ?? 'choose a file' }}</span> -->
                             </p>
                             <p class="text-sm lg:text-base text-gray-900 font-normal">
                                 {{ $editProfilePage->image_option_placeholder ?? '(Allowed formats: JPG, JPEG, PNG. 10MB max.)' }}

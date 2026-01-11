@@ -76,7 +76,7 @@ class LoginController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
-                    ->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')
+                    ->select('no_user_match_message', 'no_password_match_message', 'verified_email_message', 'admin_block_account_message')
                     ->first();
 
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -89,7 +89,7 @@ class LoginController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
-                    ->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')
+                    ->select('no_user_match_message', 'no_password_match_message', 'verified_email_message', 'admin_block_account_message')
                     ->first();
 
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -99,7 +99,6 @@ class LoginController extends Controller
                 ];
             }
         }
-        Log::info($message);
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
@@ -230,19 +229,31 @@ class LoginController extends Controller
                     'verify_email' => true,
                     'email'        => $user->email,
                 ])->withInput();
+            } elseif ($user) {
+                // User exists but password is incorrect
+                $errorMsg = $message->no_password_match_message ?? 'The password you entered is incorrect.';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors'  => ['password' => [$errorMsg]],
+                    ], 422);
+                }
+
+                return back()->withErrors(['password' => $errorMsg])->withInput();
+            } else {
+                // User doesn't exist - email is incorrect
+                $errorEmailMsg = $message->no_user_match_message ?? 'The email you entered is incorrect.';
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'errors'  => ['email' => [$errorEmailMsg]],
+                    ], 422);
+                }
+
+                return back()->withErrors(['email' => $errorEmailMsg])->withInput();
             }
-
-            // Authentication failed
-            $errorMsg = $message->no_user_match_message ?? 'These credentials do not match our records.';
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'errors'   => ['password' => [$errorMsg]],
-                ], 422);
-            }
-
-            return back()->with(['error' => $errorMsg])->withInput();
         }
     }
 

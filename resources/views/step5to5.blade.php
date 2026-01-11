@@ -30,7 +30,7 @@
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-10 my-4">
             <div class="pb-2 flex items-center justify-center">
-                <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4">@isset($step4Page->main_heading){{ $step4Page->main_heading }}@endisset</h1>
+                <h1 class="font-FuturaMdCnBT mt-10 text-primary text-3xl md:text-4xl lg:text-5xl mb-4">@isset($step4Page->main_heading){{ $step4Page->main_heading }}@endisset</h1>
             </div>
             <p class="text-black">@isset($step4Page->main_label){!! $step4Page->main_label !!}@endisset</p>
             <form method="POST" action="{{ route('step5to5.update', $user->id) }}">

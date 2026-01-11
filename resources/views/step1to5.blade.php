@@ -9,14 +9,14 @@
 <div class="mx-auto max-w-2xl lg:max-w-4xl my-14">
     <div class="bg-white rounded px-4 w-full col-span-12 md:col-span-9 mx-auto">
     <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-10 my-4">
-        <div class="pb-2 flex items-center justify-center">
-            <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4">
+        <div class="pb-3 flex items-center justify-center">
+            <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4 mt-10">
                 @isset($step1Page->main_heading)
                     {{ $step1Page->main_heading }}
                 @endisset
             </h1>
         </div>
-        <div class="pb-2 flex items-center justify-start">
+        <div class=" flex items-center justify-start">
             <p class="text-red-500">*
                 @isset($step1Page->required_label)
                     {{ $step1Page->required_label }}
@@ -27,7 +27,7 @@
         <form method="POST" action="{{ route('step1to5.update',$user->id) }}">
             @csrf
             @method('PUT')
-            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-3">
                 <div>
                     <label for="">
                         @isset($step1Page->first_name_label)
@@ -231,7 +231,7 @@
                 @endif --}}
 
                 <div class="md:col-span-2 flex justify-center mt-4">
-                    <button type="submit" id="nextButton" class="button-exp-fill w-32 opacity-50 cursor-not-allowed" disabled>
+                    <button type="submit" id="nextButton" class="button-exp-fill w-28 opacity-50 cursor-not-allowed" disabled>
                         @isset($step1Page->button_label)
                             {{ $step1Page->button_label }}
                         @endisset
@@ -249,7 +249,7 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
-                          <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                          <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                             <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

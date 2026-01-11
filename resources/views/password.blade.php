@@ -48,8 +48,8 @@
     @include('layouts.inc.profile_sidebar')
 
     <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
-        <div class=" pb-2">
-            <h1 class="mb-0">{{ $passwordSettingPage->main_heading ?? "Password"}}</h1>
+        <div class="mt-4 pb-2">
+            <h1 class="mb-4">{{ $passwordSettingPage->main_heading ?? "Password"}}</h1>
             <p>
                 @if (isset($passwordSettingPage->password_description_text))
                     {!! $passwordSettingPage->password_description_text !!}
@@ -125,7 +125,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    <button class="button-exp-fill">{{ $passwordSettingPage->update_button_text ?? "Update"}}</button>
+                    <button class="button-exp-fill w-28">{{ $passwordSettingPage->update_button_text ?? "Update"}}</button>
                 </div>
             </div>
         </form>

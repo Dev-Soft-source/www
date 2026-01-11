@@ -6,7 +6,7 @@
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-4 px-4 shadow rounded-md sm:px-10 my-4">
         <div class="pb-2 flex items-center justify-center">
-            <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4">
+            <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4 mt-10">
                 @isset($step2Page->main_heading)
                     {{ $step2Page->main_heading }}
                 @endisset
@@ -86,12 +86,12 @@
                 @endif
 
                 <div class="mt-6 flex justify-center space-x-2 md:col-span-2">
-                    <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-32">
+                    <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill ">
                         @isset($step2Page->skip_button_label)
                             {{ $step2Page->skip_button_label }}
                         @endisset
                     </button>
-                    <button type="submit" id="nextButton" class="button-exp-fill w-32">
+                    <button type="submit" id="nextButton" class="button-exp-fill w-28">
                         @isset($step2Page->next_button_label)
                             {{ $step2Page->next_button_label }}
                         @endisset

@@ -26,7 +26,7 @@
                             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                 <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
                                     <div
-                                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl" onclick="event.stopPropagation()">
+                                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border" onclick="event.stopPropagation()">
                                         <a onclick="closeModal('error-modal')" class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 z-50">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -69,7 +69,7 @@
                             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                 <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
                                     <div
-                                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border">
                                         <button onclick="closeModal('message-modal')" class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 z-50">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -106,7 +106,7 @@
                         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                             <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-backdrop"></div>
-                                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                         <div class="flex justify-end">
                                             <button onclick="closeModal('my-modal')" class="p-1 rounded-full hover:bg-gray-100">
@@ -427,7 +427,7 @@
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
-                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl" onclick="event.stopPropagation()">
+                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border" onclick="event.stopPropagation()">
                                 <a onclick="closeModal('error-modal')" class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 z-50">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

@@ -15,7 +15,7 @@
                 <div class="fixed inset-0 flex items-center justify-center p-4 z-20 opacity-0 scale-95 transition-all duration-300 ease-in-out" id="modal-container">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <!-- Modal content with transition -->
-                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                             <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -86,7 +86,7 @@
             </script>
         @endif
 
-        <div class="pb-2">
+        <div class="mt-4">
             <h1 class="mb-0">
                 @isset($profilePhotoPage->main_heading)
                     {{ $profilePhotoPage->main_heading }}
@@ -97,7 +97,7 @@
         <form method="POST" action="{{ route('profile.photo.update',$user->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <div class="mt-4">
+            <div class="">
                 <div class="flex flex-col items-center justify-center w-full md:w-1/2">
                     <div class="mt-6 mb-2 text-left w-full">
                         <span>{!! $step2Page->sub_heading_text ?? "If you are signing up as a driver, then please note that to be eligible to post ProximaRide and Extra-Care Rides, you must upload your profile photo" !!}</span>
@@ -114,11 +114,11 @@
                                 @isset($profilePhotoPage->upload_profile_photo_placeholder)
                                     {{ $profilePhotoPage->upload_profile_photo_placeholder }}
                                 @endisset
-                                <span class="text-primary">
+                                <!-- <span class="text-primary">
                                     @isset($profilePhotoPage->choose_file_placeholder)
                                         {{ $profilePhotoPage->choose_file_placeholder }}
                                     @endisset
-                                </span>
+                                </span> -->
                             </p>
                             <p class="text-sm lg:text-base text-gray-900 font-normal">
                                 @isset($profilePhotoPage->images_option_placeholder)
@@ -142,7 +142,7 @@
 
 
                     <div class="mt-4 flex justify-center md:justify-start">
-                        <button type="submit" class="submitBtn button-exp-fill {{ isset($user->profile_image) && $user->profile_image != "" ? "disabled:bg-primary/20 cursor-not-allowed disabled:border-none" : "" }} w-32" {{ isset($user->profile_image) && $user->profile_image != "" ? "disabled" : "" }}>
+                        <button type="submit" class="submitBtn button-exp-fill {{ isset($user->profile_image) && $user->profile_image != "" ? "disabled:bg-primary/20 cursor-not-allowed disabled:border-none" : "" }} w-28" {{ isset($user->profile_image) && $user->profile_image != "" ? "disabled" : "" }}>
                             @isset($profilePhotoPage->save_button_text)
                                 {{ $profilePhotoPage->save_button_text }}
                             @endisset

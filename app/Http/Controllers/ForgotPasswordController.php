@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ForgotPasswordController extends Controller
 {
@@ -74,6 +75,8 @@ class ForgotPasswordController extends Controller
     public function store(Request $request) {
         $niceNames = [];
         $messages = null;
+        $forgotPasswordPage = null;
+        $loginPage = null;
         $selectedLanguage = session('selectedLanguage');
         
         // Fetch language and messages
@@ -85,9 +88,9 @@ class ForgotPasswordController extends Controller
                     ->first();
 
                 $forgotPasswordPage = ForgotPasswordPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first(); // Get the correct model for login page
+                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email' => isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
+                    'email' => isset($forgotPasswordPage) && isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
                 ];
             }
         } else {
@@ -98,24 +101,47 @@ class ForgotPasswordController extends Controller
                     ->first();
 
                 $forgotPasswordPage = ForgotPasswordPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first(); // Get the correct model for login page
+                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email' => isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
+                    'email' => isset($forgotPasswordPage) && isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
                 ];
             }
         }
 
-        $validatedData = $request->validate([
-            'email' => 'required|email',
-        ], [
-            'email.required' => $forgotPasswordPage->field_require,
-            'email.email' => $forgotPasswordPage->email_error,
-        ]);
+        // Custom validation messages
+        $customMessages = [
+            'email.required' => isset($forgotPasswordPage) && isset($forgotPasswordPage->field_require) ? $forgotPasswordPage->field_require : 'The email field is required.',
+            'email.email' => 'Please enter a valid email address, such as name@example.com',
+        ];
+        
+        // Validate the form data with AJAX support
+        try {
+            $validatedData = $request->validate([
+                'email' => 'required|email',
+            ], $customMessages);
+        } catch (ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        }
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => $messages->no_user_found_message]);
+            $errorMsg = isset($messages) && isset($messages->no_user_found_message) ? $messages->no_user_found_message : 'No user found with this email address.';
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => ['email' => [$errorMsg]],
+                ], 422);
+            }
+            
+            return back()->withErrors(['email' => $errorMsg]);
         }
 
         // Check if the user's account is closed
@@ -124,12 +150,29 @@ class ForgotPasswordController extends Controller
             session(['user' => $user]);
 
             // Get the close_modal_error_message from LoginPageSettingDetail
-            $closeModalErrorMessage = isset($loginPage->close_modal_error_message) ? $loginPage->close_modal_error_message : 'Account has been closed';
+            $closeModalErrorMessage = isset($loginPage) && isset($loginPage->close_modal_error_message) ? $loginPage->close_modal_error_message : 'Account has been closed';
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => $closeModalErrorMessage,
+                ], 422);
+            }
+            
             return back()->with(['error' => $closeModalErrorMessage])->withInput();
         }
 
         // If the account is not closed and email is verified
         if ($user->email_verified == 0) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'   => false,
+                    'showModal' => true,
+                    'user'      => ['email' => $user->email],
+                    'message'   => 'This email isn\'t verified yet.',
+                ], 422);
+            }
+            
             return back()->with(['showModal' => true, 'user' => $user]);
         }
 
@@ -162,10 +205,28 @@ class ForgotPasswordController extends Controller
             Mail::to($request->email)->send(new UserForgotPassword($data));
         } catch (\Exception $e) {
             \Log::error('Forgot password email failed: ' . $e->getMessage());
-            return back()->withErrors(['email' => $forgotPasswordPage->fail_send]);
+            $errorMsg = isset($forgotPasswordPage) && isset($forgotPasswordPage->fail_send) ? $forgotPasswordPage->fail_send : 'Failed to send reset password email.';
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors'  => ['email' => [$errorMsg]],
+                ], 422);
+            }
+            
+            return back()->withErrors(['email' => $errorMsg]);
+        }
+
+        $successMessage = isset($messages) && isset($messages->reset_password_message) ? $messages->reset_password_message : 'Password reset email has been sent successfully.';
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+            ]);
         }
 
         return redirect()->route('forgot.password', ['lang' => $selectedLanguage->abbreviation])
-                        ->with(['message' => $messages->reset_password_message ?? null]);
+                        ->with(['message' => $successMessage]);
     }
 }

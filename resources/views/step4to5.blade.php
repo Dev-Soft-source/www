@@ -6,7 +6,7 @@
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-6 my-4">
             <div class="py-2 flex items-center justify-center">
-                <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4">
+                <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4 mt-10">
                     @isset($step4Page->main_heading)
                         {{ $step4Page->main_heading }}
                     @endisset
@@ -41,11 +41,11 @@
                             <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                 <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png') }}">
                                 <p class="text-sm lg:text-lg text-gray-900">Driver's license photo
-                                    <span class="text-primary">
+                                    <!-- <span class="text-primary">
                                         @isset($step4Page->mobile_photo_choose_file_label)
                                             {{ $step4Page->mobile_photo_choose_file_label }}
                                         @endisset
-                                    </span>
+                                    </span> -->
                                 </p>
                             </div>
                             <input id="dropzone-file1" name="driver_liscense" type="file" onchange="previewImage1(this)" class="hidden" />
@@ -58,12 +58,12 @@
                         </div>
                         @enderror
                         <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-32">
+                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill">
                                 @isset($step4Page->skip_license)
                                     {{ $step4Page->skip_license }}
                                 @endisset
                             </button>
-                            <button type="submit" id="nextButton" class="button-exp-fill w-32 opacity-50 cursor-not-allowed" disabled>
+                            <button type="submit" id="nextButton" class="button-exp-fill w-28 opacity-50 cursor-not-allowed" disabled>
                                 @isset($step4Page->next_button_label)
                                     {{ $step4Page->next_button_label }}
                                 @endisset

@@ -6,7 +6,7 @@
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-6 my-4">
             <div class="py-2 flex items-center justify-center">
-                <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4">
+                <h1 class="font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl mb-4 mt-10">
                     @isset($step3Page->main_heading)
                         {{ $step3Page->main_heading }}
                     @endisset
@@ -16,7 +16,7 @@
                 {{ $step3Page->sub_heading ?? "Don’t forget your driver’s license below" }}
             </h4> --}}
             <p for="" class=" text-black mt-2">
-                {!! $step3Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra-Care Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license " !!}
+                {!! $step3Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra-Care Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license. " !!}
             </p>
             <p for="" class=" text-black mt-8">
                 {!! $step3Page->sub_main_label ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it" !!}
@@ -221,11 +221,11 @@
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                     <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
                                     <p class="text-sm lg:text-lg text-gray-900">Vehicle photo
-                                        <span class="text-primary"> 
+                                        <!-- <span class="text-primary"> 
                                             @isset($step3Page->mobile_photo_choose_file_label)
-                                            {{ $step3Page->mobile_photo_choose_file_label }}
-                                        @endisset    
-                                        </span>
+                                                {{ $step3Page->mobile_photo_choose_file_label }}
+                                            @endisset    
+                                        </span> -->
                                     </p>
                                     <p class="text-sm lg:text-base text-gray-900 ">
                                         @isset($step3Page->photo_detail_label)
