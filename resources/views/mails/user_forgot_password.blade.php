@@ -41,8 +41,7 @@
                     <td align="center" style="display: flex;background:#fff;border-bottom: 3px solid black;">
                         <div style="display: flex; margin: 20px auto;">
                             <a href="">
-                                <img src="{{ config('app.url') }}/assets/PROXIMARIDE.png" alt="ProximaRide"
-                                    style="height: 100px; vertical-align: middle">
+                                <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" style="height: 100px; vertical-align: middle; max-height: 100px">
                             </a>
                         </div>
                     </td>

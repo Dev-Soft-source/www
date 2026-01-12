@@ -220,7 +220,7 @@ class PhoneController extends Controller
 
                 $twilio = new Client($sid, $token);
                 $to = $phoneNumber->phone;
-                $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+                $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
                 try {
                     if(env('APP_ENV') != 'local'){
@@ -303,7 +303,7 @@ class PhoneController extends Controller
 
         $twilio = new Client($sid, $token);
         $to = $phone_number->phone;
-        $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+        $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
         try {
             if(env('APP_ENV') != 'local'){

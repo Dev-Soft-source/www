@@ -28,8 +28,8 @@ class ContactUsController extends Controller
         $message = ContactMessage::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
-            'message' => $request->message,
+            'phone' => $request->message, // App sends phone in message field
+            'message' => $request->phone, // App sends message in phone field
         ]);
 
         $admin = Admin::first();

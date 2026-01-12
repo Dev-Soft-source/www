@@ -28,6 +28,84 @@ use Illuminate\Support\Str;
 
 class PhoneController extends Controller
 {
+    /**
+     * Check verification code using Twilio Verify API
+     * 
+     * @param string $phoneNumber Normalized phone number in E.164 format
+     * @param string $code Verification code to check
+     * @param string $verifySid Twilio Verify SID
+     * @return array ['success' => bool, 'status' => string|null, 'error' => string|null]
+     */
+    private function checkVerificationViaTwilioVerify($phoneNumber, $code, $verifySid)
+    {
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $verifyServiceSid = env('TWILIO_VERIFY_SERVICE_SID');
+        $appEnv = env('APP_ENV');
+
+        // Check if Twilio credentials are configured
+        if (!$sid || !$token || !$verifyServiceSid) {
+            Log::warning('Twilio Verify credentials missing for verification check', [
+                'has_sid' => $sid ? true : false,
+                'has_token' => $token ? true : false,
+                'has_verify_service_sid' => $verifyServiceSid ? true : false,
+            ]);
+            return [
+                'success' => false,
+                'status' => null,
+                'error' => 'Twilio Verify Service not configured'
+            ];
+        }
+
+        // In local/development environment, skip actual check (accept any code for testing)
+        if ($appEnv == 'local' || $appEnv == 'development') {
+            Log::info('Skip Twilio Verify check in ' . $appEnv . ' environment (accepting code)', [
+                'phone' => $phoneNumber,
+                'code' => $code,
+            ]);
+            return [
+                'success' => true,
+                'status' => 'approved',
+                'error' => null
+            ];
+        }
+
+        try {
+            $twilio = new Client($sid, $token);
+            
+            // Check verification using Twilio Verify API
+            $verificationCheck = $twilio->verify->v2->services($verifyServiceSid)
+                ->verificationChecks
+                ->create($phoneNumber, ['code' => $code]);
+
+            $status = $verificationCheck->status;
+
+            Log::info('Twilio Verify API verification check', [
+                'phone' => $phoneNumber,
+                'status' => $status,
+                'verify_sid' => $verifySid,
+            ]);
+
+            return [
+                'success' => $status === 'approved',
+                'status' => $status,
+                'error' => $status === 'approved' ? null : 'Verification code is invalid or expired'
+            ];
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            Log::error('Twilio Verify API check failed', [
+                'phone' => $phoneNumber,
+                'code' => $code,
+                'error' => $errorMessage,
+            ]);
+
+            return [
+                'success' => false,
+                'status' => null,
+                'error' => $errorMessage
+            ];
+        }
+    }
     public function index($lang = null)
     {
         $languages = Language::all();
@@ -216,7 +294,7 @@ class PhoneController extends Controller
 
             $twilio = new Client($sid, $token);
             $to = $phone->phone;
-            $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes." ;
+            $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes." ;
 
             try {
                 if (env('APP_ENV') != 'local') {
@@ -233,6 +311,16 @@ class PhoneController extends Controller
 
                 $phone->delete();
                 return redirect()->back()->with(['error' => 'Can not send text to ' . $phone->phone . ' because unable to create record: Authenticate']);
+            }
+
+            // Preserve return URL if it exists in session (from booking/ride detail pages)
+            $returnUrl = session('return_url_after_action');
+            if (!$returnUrl) {
+                // Only set return URL if we have a referrer that's not the phone page itself
+                $referrer = request()->headers->get('referer');
+                if ($referrer && !str_contains($referrer, 'phone') && !str_contains($referrer, 'step5')) {
+                    session(['return_url_after_action' => $referrer]);
+                }
             }
 
             return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
@@ -392,7 +480,7 @@ class PhoneController extends Controller
 
         $twilio = new Client($sid, $token);
         $to = $phoneNumber->phone;
-        $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+        $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
         try {
             if (env('APP_ENV') != 'local') {
@@ -539,12 +627,73 @@ class PhoneController extends Controller
             return redirect()->back()->with(['error' => $message->phone_code_error_message ?? 'The code must be exactly 4 digits'])->withInput();
         }
 
-        $existingRecord = DB::table('phone_verifications')->where('verification_code', $code)->first();
+        // Find verification record - handle both North American (code in DB) and International (Twilio Verify)
+        $existingRecord = DB::table('phone_verifications')
+            ->where('verification_code', $code)
+            ->first();
 
-        if ($existingRecord) {
+        $isValid = false;
+        $phone_number = null;
+
+        if ($existingRecord && empty($existingRecord->twilio_verify_sid)) {
+            // North American number: Check against database code (existing logic)
             $phone_number = PhoneNumber::whereId($existingRecord->phone_number_id)->first();
+            if ($phone_number) {
+                // Check if code hasn't expired
+                if (Carbon::parse($existingRecord->expires_at)->isFuture()) {
+                    $isValid = true;
+                    // Delete the verification record
+                    DB::table('phone_verifications')->where('id', $existingRecord->id)->delete();
+                }
+            }
+        } elseif ($existingRecord && !empty($existingRecord->twilio_verify_sid)) {
+            // International number: Use Twilio Verify API Check
+            $phone_number = PhoneNumber::whereId($existingRecord->phone_number_id)->first();
+            if ($phone_number) {
+                $verifyResult = $this->checkVerificationViaTwilioVerify(
+                    $phone_number->phone,
+                    $code,
+                    $existingRecord->twilio_verify_sid
+                );
+                
+                if ($verifyResult['success']) {
+                    $isValid = true;
+                    // Delete the verification record
+                    DB::table('phone_verifications')->where('id', $existingRecord->id)->delete();
+                }
+            }
+        } else {
+            // No matching record by code - try to find by phone number for Twilio Verify (where code is empty in DB)
+            $user_id = auth()->user()->id;
+            $phone_numbers = PhoneNumber::where('user_id', $user_id)->get();
+            
+            foreach ($phone_numbers as $phone) {
+                $phoneRecord = DB::table('phone_verifications')
+                    ->where('phone_number_id', $phone->id)
+                    ->whereNotNull('twilio_verify_sid')
+                    ->where('expires_at', '>', Carbon::now())
+                    ->first();
+                
+                if ($phoneRecord) {
+                    $verifyResult = $this->checkVerificationViaTwilioVerify(
+                        $phone->phone,
+                        $code,
+                        $phoneRecord->twilio_verify_sid
+                    );
+                    
+                    if ($verifyResult['success']) {
+                        $isValid = true;
+                        $phone_number = $phone;
+                        // Delete the verification record
+                        DB::table('phone_verifications')->where('id', $phoneRecord->id)->delete();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($isValid && $phone_number) {
             $phone_number->update(['verified' => '1']);
-            DB::table('phone_verifications')->where('verification_code', $code)->delete();
 
             // Auto-mark as default if this is the first/only verified phone number
             $verifiedPhoneCount = PhoneNumber::where('user_id', auth()->user()->id)
@@ -560,16 +709,31 @@ class PhoneController extends Controller
                 $phone_number->update(['default' => '1']);
             }
 
+            // Check for return URL in session (to redirect back to original page)
+            $returnUrl = session('return_url_after_action');
+            
             if ($request->step) {
-            return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");
-        }
+                session()->forget('return_url_after_action');
+                return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");
+            }
+            
+            // If return URL exists, redirect there
+            if ($returnUrl) {
+                session()->forget('return_url_after_action');
+                return redirect($returnUrl)->with('message', $message->phone_verified_message ?? 'Phone number verified successfully');
+            }
+            
+            // Legacy support for page parameter
             if ($request->page && $request->page == "booking") {
+                session()->forget('return_url_after_action');
                 return redirect()->back();
             }
+            
+            session()->forget('return_url_after_action');
             return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_verified_message);
         }
 
-        return redirect()->back()->with(['error' => $message->incorrect_code_message]);
+        return redirect()->back()->with(['error' => $message->incorrect_code_message ?? 'The verification code is incorrect or has expired']);
     }
 
     public function resendCode(Request $request)
@@ -687,7 +851,7 @@ class PhoneController extends Controller
         if ($sid) {
             $twilio = new Client($sid, $token);
             $to = $phone->phone;
-            $smsMessage = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+            $smsMessage = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
             try {
                 if (env('APP_ENV') != 'local') {

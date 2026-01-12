@@ -174,3 +174,20 @@ if (!function_exists('validatePhoneNumber')) {
     }
 }
 
+if (!function_exists('isNorthAmericanNumber')) {
+    /**
+     * Check if a phone number is North American (+1)
+     * 
+     * @param string $phoneNumber E.164 format phone number
+     * @return bool True if North American (+1), false otherwise
+     */
+    function isNorthAmericanNumber($phoneNumber)
+    {
+        if (!$phoneNumber) {
+            return false;
+        }
+        
+        // Check if phone number starts with +1
+        return str_starts_with($phoneNumber, '+1');
+    }
+}

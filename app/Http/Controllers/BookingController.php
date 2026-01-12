@@ -863,13 +863,18 @@ class BookingController extends Controller
         $user = User::where('id', auth()->user()->id)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {
-            return redirect()->back()->with(['failure' => $messages->add_your_phone ?? "add phone number"]);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone number"]);
         }
 
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
         if (!$phoneVerification && $type->slug == 'secured') {
-
-            return redirect()->back()->with(['failure' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
         }
 
 
@@ -1610,7 +1615,7 @@ class BookingController extends Controller
 
         $twilio = new Client($sid, $token);
         $to = $phoneNumber->phone;
-        $message = "Message from ProximaRide. Your verification code is: $verificationCode. This code will expire in 30 minutes.";
+        $message = "ProximaRide: Your verification code is: $verificationCode. This code will expire in 30 minutes.";
 
         try {
             if (env('APP_ENV') != 'local') {
@@ -2215,12 +2220,17 @@ class BookingController extends Controller
         $user = User::where('id', auth()->user()->id)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {
-            return redirect()->back()->with(['failure' => $messages->add_your_phone ?? "add phone "]);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone "]);
         }
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
         if (!$phoneVerification && $type->slug == 'secured') {
-            // dd($messages->verified_number_message);
-            return redirect()->back()->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
         }
 
 
@@ -3704,12 +3714,17 @@ class BookingController extends Controller
         $user = User::where('id', auth()->user()->id)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {
-            return redirect()->back()->with(['failure' => $messages->add_your_phone ?? 'Add your phone number']);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? 'Add your phone number']);
         }
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
         if (!$phoneVerification && $type->slug == 'secured') {
-            // dd($messages->verified_number_message);
-            return redirect()->back()->with(['failure' => $messages->verified_number_message ?? 'Verify your phone number', 'phone' => $phoneNumber]);
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? 'Verify your phone number', 'phone' => $phoneNumber]);
         }
 
 

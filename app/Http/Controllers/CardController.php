@@ -105,6 +105,16 @@ class CardController extends Controller
 
     public function create($lang = null, Request $request)
     {
+        // Preserve return URL if it exists in session (from booking/ride detail pages)
+        // If not set and we have a referrer, store it
+        $returnUrl = session('return_url_after_action');
+        if (!$returnUrl) {
+            $referrer = request()->headers->get('referer');
+            if ($referrer && !str_contains($referrer, 'card') && !str_contains($referrer, 'create-card')) {
+                session(['return_url_after_action' => $referrer]);
+            }
+        }
+
         $paymentSettingDetail = null;
         $languages = Language::all();
         // Store the selected language in the session
@@ -265,6 +275,15 @@ class CardController extends Controller
             $type = session('type');
             session()->forget(['rideDetailId', 'rideId', 'type']);
 
+            // Check for return URL in session (to redirect back to original page)
+            $returnUrl = session('return_url_after_action');
+            
+            if ($returnUrl) {
+                session()->forget('return_url_after_action');
+                return redirect($returnUrl)->with('message', $message->card_add_message ?? 'Card added successfully');
+            }
+
+            // Legacy support for booking type
             if ($type == 'booking') {
                 return redirect()->route('booking', ['lang' => $selectedLanguage, 'id' => $rideId, 'rideDetailId' => $rideDetailId]);
             }
@@ -272,6 +291,7 @@ class CardController extends Controller
             if ($type == 'edit-booking') {
                 return redirect()->route('booking.edit', ['lang' => $selectedLanguage, 'id' => $bookingId]);
             }
+            
             return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_add_message);
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'An error occurred while processing your card. Please try again.']);
