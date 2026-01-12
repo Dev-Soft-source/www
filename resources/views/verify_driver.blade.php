@@ -7,38 +7,38 @@
         <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
             @if (session('message'))
                 <div id="myModal" class="relative z-50" id="delete_message_confirmation" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                                <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                                                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                                                            <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                                                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                                </svg>
-                                                            </button>
-                                                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                                                <div class="sm:flex sm:items-start justify-center">
-                                                                    <!-- <div
-                                                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                                        </svg>
-                                                                    </div> -->
-                                                                </div>
-                                                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                                                    <div class="mt-2 w-full">
-                                                                        <p class="can-exp-p text-center">  {{ session('message') }}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                                            <input type="hidden" id="notificationId" value="3094">
-                                                                <a href="#" onclick="closeModal()"  class="button-exp-fill">Close </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                    <div class="sm:flex sm:items-start justify-center">
+                                        <!-- <div
+                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                            </svg>
+                                        </div> -->
+                                    </div>
+                                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                        <div class="mt-2 w-full">
+                                            <p class="can-exp-p text-center">  {{ session('message') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                <input type="hidden" id="notificationId" value="3094">
+                                    <a href="#" onclick="closeModal()"  class="button-exp-fill">Close </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <div class="pb-2">
@@ -118,16 +118,18 @@
                             @enderror
                         </div>
                         <div id="hide-buttons" class="hidden justify-center gap-2 mt-3">
-                            <label for="edit-file" class="text-white bg-primary p-1.5 rounded cursor-pointer flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                    stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                </svg>
-                                <span class="text-sm">Edit</span>
-                                <input id="edit-file" name="existing_image" type="file" onchange="previewImage(this)" class="hidden" />
+                            <label for="edit-file" class="text-white bg-primary p-2 w-20 rounded cursor-pointer flex items-center justify-center gap-1">
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                        stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                    </svg>
+                                    <span class="text-sm">Edit</span>
+                                    <input id="edit-file" name="existing_image" type="file" onchange="previewImage(this)" class="hidden" />
+                                </div>                                
                             </label>
-                            <button id="remove-photo" type="button" class="text-white bg-primary p-1.5 rounded flex items-center gap-1">
+                            <button id="remove-photo" type="button" class="text-white bg-primary p-2 w-20 rounded flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                     stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -137,7 +139,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="mt-4 flex justify-center">
                         <button type="submit" class="submitBtn button-exp-fill {{ isset($user->driver_liscense) && $user->driver_liscense != "" ? "disabled:bg-primary/20 cursor-not-allowed disabled:border-none" : "" }}"  {{ isset($user->driver_liscense) && $user->driver_liscense != "" ? "disabled" : "" }}>
                             @isset($driverSettingPage->upload_new_image_btn_label)

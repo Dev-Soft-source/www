@@ -17,135 +17,6 @@ use Twilio\Rest\Client;
 
 class Step5to5Controller extends Controller
 {
-    /**
-     * Check rate limiting for phone verification (max 3 attempts in last 24 hours)
-     * 
-     * @param string $phoneNumber Normalized phone number in E.164 format
-     * @return array ['allowed' => bool, 'attempts' => int, 'message' => string|null]
-     */
-    private function checkRateLimit($phoneNumber)
-    {
-        $phoneNumberRecord = PhoneNumber::where('phone', $phoneNumber)->first();
-        
-        if (!$phoneNumberRecord) {
-            return ['allowed' => true, 'attempts' => 0, 'message' => null];
-        }
-
-        // Count verification attempts in the last 24 hours
-        $attemptsCount = DB::table('phone_verifications')
-            ->where('phone_number_id', $phoneNumberRecord->id)
-            ->where('created_at', '>=', Carbon::now()->subHours(24))
-            ->count();
-
-        if ($attemptsCount >= 3) {
-            return [
-                'allowed' => false,
-                'attempts' => $attemptsCount,
-                'message' => 'Maximum verification attempts (3) reached. Please try again after 24 hours.'
-            ];
-        }
-
-        return [
-            'allowed' => true,
-            'attempts' => $attemptsCount,
-            'message' => null
-        ];
-    }
-
-    /**
-     * Send verification code using Twilio Verify API
-     * 
-     * @param string $phoneNumber Normalized phone number in E.164 format
-     * @param int $phoneNumberId Phone number database ID
-     * @return array ['success' => bool, 'verify_sid' => string|null, 'channel' => string, 'error' => string|null]
-     */
-    private function sendVerificationViaTwilioVerify($phoneNumber, $phoneNumberId)
-    {
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $verifyServiceSid = env('TWILIO_VERIFY_SERVICE_SID');
-        $appEnv = env('APP_ENV');
-
-        // Check if Twilio credentials are configured
-        if (!$sid || !$token || !$verifyServiceSid) {
-            Log::warning('Twilio Verify credentials missing', [
-                'has_sid' => $sid ? true : false,
-                'has_token' => $token ? true : false,
-                'has_verify_service_sid' => $verifyServiceSid ? true : false,
-            ]);
-            return [
-                'success' => false,
-                'verify_sid' => null,
-                'channel' => 'sms',
-                'error' => 'Twilio Verify Service not configured'
-            ];
-        }
-
-        // Determine channel based on phone number
-        $isNorthAmerican = isNorthAmericanNumber($phoneNumber);
-        $channel = $isNorthAmerican ? 'sms' : 'whatsapp';
-
-        Log::info('Sending verification via Twilio Verify API', [
-            'phone' => $phoneNumber,
-            'channel' => $channel,
-            'is_north_american' => $isNorthAmerican,
-            'env' => $appEnv,
-        ]);
-
-        // In local/development environment, skip actual sending
-        if ($appEnv == 'local' || $appEnv == 'development') {
-            Log::info('Skip sending verification in ' . $appEnv . ' environment', [
-                'phone' => $phoneNumber,
-                'channel' => $channel,
-            ]);
-            return [
-                'success' => true,
-                'verify_sid' => 'test_verify_sid_' . time(),
-                'channel' => $channel,
-                'error' => null
-            ];
-        }
-
-        try {
-            $twilio = new Client($sid, $token);
-            
-            // Create verification using Twilio Verify API
-            $verification = $twilio->verify->v2->services($verifyServiceSid)
-                ->verifications
-                ->create($phoneNumber, ['channel' => $channel]);
-
-            $verifySid = $verification->sid;
-            $status = $verification->status;
-
-            Log::info('Twilio Verify API verification sent', [
-                'phone' => $phoneNumber,
-                'channel' => $channel,
-                'verify_sid' => $verifySid,
-                'status' => $status,
-            ]);
-
-            return [
-                'success' => true,
-                'verify_sid' => $verifySid,
-                'channel' => $channel,
-                'error' => null
-            ];
-        } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
-            Log::error('Twilio Verify API send failed', [
-                'phone' => $phoneNumber,
-                'channel' => $channel,
-                'error' => $errorMessage,
-            ]);
-
-            return [
-                'success' => false,
-                'verify_sid' => null,
-                'channel' => $channel,
-                'error' => $errorMessage
-            ];
-        }
-    }
     public function create($lang = null){
         $user = auth()->user();
         $countries = Country::where('status', '1')->orderBy('name', 'asc')->get();
@@ -315,129 +186,77 @@ public function update($id, Request $request){
     ]);
 
     if ($request->action === 'send') {
-        // Check rate limiting (max 3 attempts in last 24 hours)
-        $rateLimitCheck = $this->checkRateLimit($normalizedPhone);
-        if (!$rateLimitCheck['allowed']) {
-            return back()->withErrors(['phone' => $rateLimitCheck['message']])->withInput();
-        }
+        $verificationCode = rand(1000, 9999);
+        Log::info('Generated verification code', [
+            'user_id' => $user_id,
+            'phone_id' => $phone->id,
+            'code' => $verificationCode,
+        ]);
 
-        // Determine if we should use Twilio Verify API (for international) or Messages API (for +1)
-        $isNorthAmerican = isNorthAmericanNumber($normalizedPhone);
-        $appEnv = env('APP_ENV');
-        $verificationSent = false;
-        $error = null;
+        // Save verification code and its expiration time (30 minutes) to the database
+        DB::table('phone_verifications')->insert([
+            'phone_number_id' => $phone->id,
+            'verification_code' => $verificationCode,
+            'expires_at' => Carbon::now()->addMinutes(30),
+        ]);
+        Log::info('Saved verification code', [
+            'user_id' => $user_id,
+            'phone_id' => $phone->id,
+            'expires_at' => Carbon::now()->addMinutes(30)->toDateTimeString(),
+        ]);
 
-        if ($isNorthAmerican) {
-            // For North American numbers (+1), use traditional SMS via Messages API
-            $verificationCode = rand(1000, 9999);
-            Log::info('Generated verification code for North American number', [
-                'user_id' => $user_id,
-                'phone_id' => $phone->id,
-                'code' => $verificationCode,
+        // Send the verification code via Twilio
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+
+        if($sid != null){
+            $twilio = new Client($sid, $token);
+            $to = $phone->phone;
+            $message = "Message from ProximaRide. Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+            Log::info('Trying to send SMS via Twilio', [
+                'to' => $to,
+                'from' => $from,
+                'has_sid' => $sid ? true : false,
+                'env' => env('APP_ENV'),
             ]);
 
-            // Save verification code and its expiration time (30 minutes) to the database
-            DB::table('phone_verifications')->insert([
-                'phone_number_id' => $phone->id,
-                'verification_code' => $verificationCode,
-                'channel' => 'sms',
-                'expires_at' => Carbon::now()->addMinutes(30),
-            ]);
-
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
-            $from = env('TWILIO_PHONE_NUMBER');
-
-            if($sid != null && $token != null && $from != null){
-                $twilio = new Client($sid, $token);
-                $to = $phone->phone;
-                $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
-                
-                try {
-                    if($appEnv != 'local'){
-                        $res = $twilio->messages->create(
-                            $to,
-                            [
-                                'from' => $from,
-                                'body' => $message,
-                            ]
-                        );
-                        $verificationSent = true;
-                        Log::info('Twilio SMS sent (North American)', [
-                            'to' => $to,
-                            'sid' => method_exists($res, 'getSid') ? $res->getSid() : null,
-                        ]);
-                    } else {
-                        Log::info('Skip sending SMS in local env; verification code generated', [
-                            'to' => $to,
-                            'code' => $verificationCode,
-                        ]);
-                        session(['verification_code_' . $phone->id => $verificationCode]);
-                        $verificationSent = true;
-                    }
-                } catch (\Exception $e) {
-                    $error = $e->getMessage();
-                    Log::error('Twilio SMS send failed', [
+            try {
+                if(env('APP_ENV') != 'local'){
+                    $res = $twilio->messages->create(
+                        $to,
+                        [
+                            'from' => $from,
+                            'body' => $message,
+                        ]
+                    );
+                    Log::info('Twilio SMS sent', [
                         'to' => $to,
-                        'error' => $error,
+                        'sid' => method_exists($res, 'getSid') ? $res->getSid() : null,
+                        'status' => method_exists($res, 'getStatus') ? $res->getStatus() : null,
+                    ]);
+                } else {
+                    Log::info('Skip sending SMS in local env; simulated send complete', [
+                        'to' => $to,
                     ]);
                 }
-            } else {
-                $error = 'Twilio credentials not configured';
-                if($appEnv == 'local' || $appEnv == 'development'){
-                    session(['verification_code_' . $phone->id => $verificationCode]);
-                    $verificationSent = true;
-                }
-            }
-        } else {
-            // For international numbers, use Twilio Verify API with WhatsApp channel
-            $verifyResult = $this->sendVerificationViaTwilioVerify($normalizedPhone, $phone->id);
-            
-            if ($verifyResult['success']) {
-                // Store verification record with Twilio Verify SID
-                DB::table('phone_verifications')->insert([
-                    'phone_number_id' => $phone->id,
-                    'verification_code' => '', // Twilio manages the code
-                    'channel' => $verifyResult['channel'],
-                    'twilio_verify_sid' => $verifyResult['verify_sid'],
-                    'expires_at' => Carbon::now()->addMinutes(30),
+            } catch (\Exception $e) {
+                Log::error('Twilio SMS send failed', [
+                    'to' => $to,
+                    'error' => $e->getMessage(),
                 ]);
-                $verificationSent = true;
-                Log::info('Verification sent via Twilio Verify API (International)', [
-                    'phone' => $normalizedPhone,
-                    'channel' => $verifyResult['channel'],
-                    'verify_sid' => $verifyResult['verify_sid'],
-                ]);
-            } else {
-                $error = $verifyResult['error'];
-                Log::error('Twilio Verify API send failed', [
-                    'phone' => $normalizedPhone,
-                    'error' => $error,
-                ]);
-            }
-        }
 
-        if (!$verificationSent && $error) {
-            return back()->withErrors(['phone' => 'Failed to send verification code: ' . $error])->withInput();
+                // $phone->delete();
+                // return redirect()->back()->with(['error' => 'Can not send text to ' . $phone->phone . ' because unable to create record: Authenticate']);
+            }
         }
 
         // Store phone details in session
+        // session(['phone' => $phone->phone, 'country_code' => $request->country_code, 'country_id' => $request->country]);
         Log::info('Stored phone verification context in session', [
             'user_id' => $user_id,
             'phone' => $phone->phone,
-            'is_north_american' => $isNorthAmerican,
         ]);
-
-        // Preserve return URL if it exists in session (from booking/ride detail pages)
-        // If not set, it means user came directly to phone verification, so don't set one
-        $returnUrl = session('return_url_after_action');
-        if (!$returnUrl) {
-            // Only set return URL if we have a referrer that's not the phone verification page itself
-            $referrer = request()->headers->get('referer');
-            if ($referrer && !str_contains($referrer, 'phone') && !str_contains($referrer, 'step5')) {
-                session(['return_url_after_action' => $referrer]);
-            }
-        }
 
         return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation]);
     }
@@ -544,127 +363,77 @@ public function sendVerificationCode(Request $request, $lang = null)
         'phone' => $phone->phone,
     ]);
 
-    // Check rate limiting (max 3 attempts in last 24 hours)
-    $rateLimitCheck = $this->checkRateLimit($normalizedPhone);
-    if (!$rateLimitCheck['allowed']) {
-        return response()->json([
-            'success' => false,
-            'message' => $rateLimitCheck['message']
-        ], 429); // 429 Too Many Requests
-    }
+    $verificationCode = rand(1000, 9999);
 
-    // Determine if we should use Twilio Verify API (for international) or Messages API (for +1)
-    $isNorthAmerican = isNorthAmericanNumber($normalizedPhone);
+    Log::info('Generated verification code (AJAX)', [
+        'user_id' => $user_id,
+        'phone_id' => $phone->id,
+        'code' => $verificationCode,
+    ]);
+
+    DB::table('phone_verifications')->insert([
+        'phone_number_id' => $phone->id,
+        'verification_code' => $verificationCode,
+        'expires_at' => Carbon::now()->addMinutes(30),
+    ]);
+
+    $sid = env('TWILIO_ACCOUNT_SID');
+    $token = env('TWILIO_AUTH_TOKEN');
+    $from = env('TWILIO_PHONE_NUMBER');
     $appEnv = env('APP_ENV');
-    $verificationSent = false;
-    $error = null;
-    $channel = 'sms';
-    $verificationCode = null;
 
-    if ($isNorthAmerican) {
-        // For North American numbers (+1), use traditional SMS via Messages API
-        $verificationCode = rand(1000, 9999);
-        $channel = 'sms';
-        
-        Log::info('Generated verification code for North American number (AJAX)', [
-            'user_id' => $user_id,
-            'phone_id' => $phone->id,
-            'code' => $verificationCode,
-        ]);
-
-        // Save verification code and its expiration time (30 minutes) to the database
-        DB::table('phone_verifications')->insert([
-            'phone_number_id' => $phone->id,
-            'verification_code' => $verificationCode,
-            'channel' => 'sms',
-            'expires_at' => Carbon::now()->addMinutes(30),
-        ]);
-
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $from = env('TWILIO_PHONE_NUMBER');
-
-        if($sid != null && $token != null && $from != null){
+    // Attempt to send SMS if credentials are available
+    if($sid != null && $token != null && $from != null){
+        try {
             $twilio = new Client($sid, $token);
             $to = $phone->phone;
             $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
-            try {
-                if($appEnv != 'local'){
-                    $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
-                    $verificationSent = true;
-                    Log::info('Twilio SMS sent (AJAX - North American)', ['to' => $to]);
-                } else {
-                    Log::info('Skip sending SMS in local env (AJAX); verification code generated', [
-                        'to' => $to,
-                        'code' => $verificationCode,
-                    ]);
-                    session(['verification_code_' . $phone->id => $verificationCode]);
-                    $verificationSent = true;
-                }
-            } catch (\Exception $e) {
-                $error = $e->getMessage();
-                Log::error('Twilio SMS send failed (AJAX)', [
+            if($appEnv != 'local'){
+                $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
+                Log::info('Twilio SMS sent (AJAX)', ['to' => $to]);
+            } else {
+                Log::info('Skip sending SMS in local env (AJAX); verification code generated', [
                     'to' => $to,
-                    'error' => $error,
+                    'code' => $verificationCode,
+                ]);
+                // Store code in session for local testing
+                session(['verification_code_' . $phone->id => $verificationCode]);
+            }
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $isCurlError = strpos($errorMessage, 'CURLOPT') !== false || 
+                          strpos($errorMessage, 'curl') !== false ||
+                          strpos($errorMessage, 'Undefined constant') !== false;
+            
+            Log::error('Twilio SMS send failed (AJAX)', [
+                'to' => $phone->phone,
+                'error' => $errorMessage,
+                'is_curl_error' => $isCurlError,
+            ]);
+            
+            // If it's a cURL/SDK configuration error, log it but continue
+            // Verification code is saved in DB, user can enter it manually
+            if ($isCurlError) {
+                Log::warning('Twilio SDK cURL configuration issue - SMS not sent, but verification code is available in database', [
+                    'phone_id' => $phone->id,
                 ]);
             }
-        } else {
-            $error = 'Twilio credentials not configured';
-            if($appEnv == 'local' || $appEnv == 'development'){
-                session(['verification_code_' . $phone->id => $verificationCode]);
-                $verificationSent = true;
-            }
+            // Continue anyway - don't block the user from entering code manually
         }
     } else {
-        // For international numbers, use Twilio Verify API with WhatsApp channel
-        $verifyResult = $this->sendVerificationViaTwilioVerify($normalizedPhone, $phone->id);
-        $channel = $verifyResult['channel'];
-        
-        if ($verifyResult['success']) {
-            // Store verification record with Twilio Verify SID
-            DB::table('phone_verifications')->insert([
-                'phone_number_id' => $phone->id,
-                'verification_code' => '', // Twilio manages the code
-                'channel' => $verifyResult['channel'],
-                'twilio_verify_sid' => $verifyResult['verify_sid'],
-                'expires_at' => Carbon::now()->addMinutes(30),
-            ]);
-            $verificationSent = true;
-            Log::info('Verification sent via Twilio Verify API (AJAX - International)', [
-                'phone' => $normalizedPhone,
-                'channel' => $verifyResult['channel'],
-                'verify_sid' => $verifyResult['verify_sid'],
-            ]);
-        } else {
-            $error = $verifyResult['error'];
-            Log::error('Twilio Verify API send failed (AJAX)', [
-                'phone' => $normalizedPhone,
-                'error' => $error,
-            ]);
+        Log::warning('Twilio credentials not configured - SMS not sent, but verification code is available in database', [
+            'phone_id' => $phone->id,
+        ]);
+        // In local/dev, store code in session for testing
+        if($appEnv == 'local' || $appEnv == 'development'){
+            session(['verification_code_' . $phone->id => $verificationCode]);
         }
     }
 
-    if (!$verificationSent) {
-        return response()->json([
-            'success' => false,
-            'message' => $error ?: 'Failed to send verification code. Please try again.'
-        ], 500);
-    }
-
-    $response = [
+    return response()->json([
         'success' => true,
-        'message' => 'Verification code sent successfully',
-        'channel' => $channel,
-        'is_north_american' => $isNorthAmerican,
-    ];
-
-    // In local/development, include the code in response for testing (only for SMS)
-    if(($appEnv == 'local' || $appEnv == 'development') && $isNorthAmerican && $verificationCode){
-        $response['verification_code'] = $verificationCode;
-        $response['message'] = 'Verification code generated (SMS not sent in ' . $appEnv . ' environment)';
-    }
-
-    return response()->json($response);
+        'message' => 'Verification code sent successfully'
+    ]);
 }
 }

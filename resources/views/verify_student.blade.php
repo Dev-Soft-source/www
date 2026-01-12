@@ -58,38 +58,38 @@
           
 
             <div id="myModal" class="relative z-50" id="delete_message_confirmation" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                                <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                                                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                                                            <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                                                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                                </svg>
-                                                            </button>
-                                                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                                                <div class="sm:flex sm:items-start justify-center">
-                                                                    <!-- <div
-                                                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                                        </svg>
-                                                                    </div> -->
-                                                                </div>
-                                                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                                                    <div class="mt-2 w-full">
-                                                                        <p class="can-exp-p text-center">{{ session('message') }}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                                            <input type="hidden" id="notificationId" value="3094">
-                                                                <a href="#" onclick="closeModal()"  class="button-exp-fill">Close </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                            <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <!-- <div
+                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                        </svg>
+                                    </div> -->
+                                </div>
+                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <div class="mt-2 w-full">
+                                        <p class="can-exp-p text-center">{{ session('message') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <input type="hidden" id="notificationId" value="3094">
+                                <a href="#" onclick="closeModal()"  class="button-exp-fill">Close </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif --}}
 
         <div class="pb-2">
@@ -145,11 +145,11 @@
                                     @else
                                         <label for="">Use a different copy</label>
                                     @endif
-                                    <span class="font-semibold text-primary">
+                                    <!-- <span class="font-semibold text-primary">
                                         @isset($studentCardPage->choose_file_image_placeholder)
                                             {{ $studentCardPage->choose_file_image_placeholder }}
                                         @endisset
-                                    </span>
+                                    </span> -->
                                 </p>
                                 <p class="text-sm lg:text-base text-gray-900 font-normal">
                                     @isset($studentCardPage->mobile_image_type_placeholder)
@@ -209,7 +209,7 @@
                 </div>
 
                 <div class="mt-4 flex justify-center">
-                    <button {{ isset($user->student_card) && $user->student_card != "" ? "disabled" : "" }}  id="submit_btn" type="submit" class="submitBtn button-exp-fill">
+                    <button {{ isset($user->student_card) && $user->student_card != "" ? "disabled" : "" }}  id="submit_btn" type="submit" class="submitBtn w-28 button-exp-fill">
                         @isset($studentCardPage->upload_button_text)
                             {{ $studentCardPage->upload_button_text }}
                         @endisset

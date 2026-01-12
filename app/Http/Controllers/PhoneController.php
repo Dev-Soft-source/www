@@ -712,6 +712,29 @@ class PhoneController extends Controller
             // Check for return URL in session (to redirect back to original page)
             $returnUrl = session('return_url_after_action');
             
+            // Handle AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                $response = [
+                    'success' => true,
+                    'message' => $message->phone_verified_message ?? 'Phone number verified successfully'
+                ];
+                
+                if ($request->step) {
+                    $response['redirect'] = route('profile', ['lang' => $selectedLanguage->abbreviation]);
+                    $response['message'] = "Your profile is all set. Welcome to ProximaRide!";
+                } elseif ($returnUrl) {
+                    $response['redirect'] = $returnUrl;
+                } elseif ($request->page && $request->page == "booking") {
+                    $response['redirect'] = url()->previous();
+                } else {
+                    $response['redirect'] = route('phone', ['lang' => $selectedLanguage->abbreviation]);
+                }
+                
+                session()->forget('return_url_after_action');
+                return response()->json($response);
+            }
+            
+            // Handle regular form submissions (non-AJAX)
             if ($request->step) {
                 session()->forget('return_url_after_action');
                 return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");
@@ -731,6 +754,14 @@ class PhoneController extends Controller
             
             session()->forget('return_url_after_action');
             return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_verified_message);
+        }
+
+        // Handle AJAX error response
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'error' => $message->incorrect_code_message ?? 'The verification code is incorrect or has expired'
+            ], 422);
         }
 
         return redirect()->back()->with(['error' => $message->incorrect_code_message ?? 'The verification code is incorrect or has expired']);
