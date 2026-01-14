@@ -54,8 +54,9 @@ class MyRideController extends Controller
 {
     public function CurrentRides($lang = null)
     {
-
-
+        $user_id = auth()->user()->id;
+        
+        // Setup language first (needed for redirect)
         $languages = Language::all();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -64,6 +65,21 @@ class MyRideController extends Controller
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        }
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        
+        // Check if user has posted any rides (as a driver)
+        $hasPostedRides = Ride::where('added_by', $user_id)->exists();
+        
+        // If user hasn't posted rides, redirect to "As a Passenger" (my_trips)
+        if (!$hasPostedRides) {
+            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+        }
+        
+        // Continue with driver rides if user has posted rides
+        if ($selectedLanguage) {
             if ($selectedLanguage) {
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();

@@ -1,7 +1,50 @@
 @extends('layouts.template')
 
 @section('style')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
+    <style>
+        /* jQuery UI Datepicker styling */
+        .ui-datepicker {
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .ui-datepicker .ui-datepicker-header {
+            background: #3b82f6;
+            color: blue;
+            border: none;
+        }
+        
+        .ui-datepicker .ui-datepicker-title {
+            font-weight: bold;
+            color: blue;
+        }
+        
+        .ui-datepicker .ui-datepicker-year {
+            min-width: 80px;
+            padding: 2px 4px;
+        }
+        
+        .ui-datepicker .ui-datepicker-month {
+            min-width: 70px;
+            padding: 2px 4px;
+        }
+        
+        .ui-datepicker .ui-state-default {
+            border: 1px solid #c5c5c5;
+        }
+        
+        .ui-datepicker .ui-state-active,
+        .ui-datepicker .ui-state-hover {
+            background: #3b82f6;
+            color: blue;
+        }
+        
+        .ui-datepicker .ui-datepicker-prev,
+        .ui-datepicker .ui-datepicker-next {
+            cursor: pointer;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -17,7 +60,7 @@
             </h1>
         </div>
         <div class=" flex items-center justify-start">
-            <p class="text-red-500">*
+            <p class="text-red-500">
                 @isset($step1Page->required_label)
                     {{ $step1Page->required_label }}
                 @endisset
@@ -110,8 +153,10 @@
                         @endisset
                         <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="dateInput" name="dob" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('F d, Y') : '' }}"
-                        class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('dob') ? 'border-red-500' : '' }}">
+                    <input type="text" id="dateInput" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('F d, Y') : '' }}"
+                        class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('dob') ? 'border-red-500' : '' }}"
+                        readonly>
+                    <input type="hidden" id="dob" name="dob" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('Y-m-d') : '' }}">
                     @error('dob')
                       <div class="relative tooltip -bottom-4 group-hover:flex">
                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -131,7 +176,10 @@
                     <select name="country" id="country-dropdown" class="font-FuturaMdCnBT bg-white block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                         <option value="">Select your country</option>
                         @foreach ($countries as $country)
-                            <option value="{{$country->id}}" {{ old('country', $user->country) == $country->id ? 'selected' : '' }}>
+                            @php
+                                $selectedCountry = 38;  // Default to Canada (ID: 38) if no country is set
+                            @endphp
+                            <option value="{{$country->id}}" {{ $selectedCountry == $country->id ? 'selected' : '' }}>
                                 {{$country->name}}
                             </option>
                         @endforeach
@@ -294,7 +342,7 @@
 @section('script')
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
 <script>
      function closeModal() {
@@ -307,20 +355,55 @@
         }
     });
 
-    const oldDate = '{{ old('dob') }}';
-    const dateInput = document.getElementById('dateInput');
-    // Initialize the date picker
-    flatpickr(dateInput, {
-            dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
-            altInput: true,
-            altFormat: 'F d, Y',
-            maxDate: 'today', // Restrict to past dates only (for date of birth)
-            defaultDate: oldDate || '', // Set default date if available
-            disableMobile: true, // Disable mobile-friendly mode for consistent experience
-            allowInput: true, // Allow manual input
-            clickOpens: true, // Open calendar on click
-            theme: 'default' // Use default theme
+    $(document).ready(function() {
+        const oldDate = '{{ old('dob', $user->dob) ? \Carbon\Carbon::parse(old('dob', $user->dob))->format('Y-m-d') : '' }}';
+        const dateInput = $('#dateInput');
+        const dobHidden = $('#dob');
+        
+        // Initialize jQuery UI Datepicker
+        dateInput.datepicker({
+            dateFormat: 'MM dd, yy', // Display format: "January 15, 2024"
+            changeMonth: true,
+            changeYear: true,
+            yearRange: '1900:{{ date('Y') }}',
+            maxDate: 0, // Restrict to past dates only (for date of birth)
+            defaultDate: oldDate || null,
+            showButtonPanel: false,
+            onSelect: function(dateText, inst) {
+                // Get the selected date
+                var date = $(this).datepicker('getDate');
+                if (date) {
+                    // Format for display: "January 15, 2024"
+                    var monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+                    var formattedDate = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                    $(this).val(formattedDate);
+                    
+                    // Store the actual date value in Y-m-d format for form submission
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    dobHidden.val(year + '-' + month + '-' + day);
+                }
+            }
         });
+        
+        // Set initial date if available
+        if (oldDate) {
+            dateInput.datepicker('setDate', oldDate);
+            // Trigger onSelect to set the hidden field
+            var date = dateInput.datepicker('getDate');
+            if (date) {
+                var monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+                var formattedDate = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                dateInput.val(formattedDate);
+            }
+        }
+        
+        // Make input readonly to prevent manual entry
+        dateInput.prop('readonly', true);
+    });
 
     function loadStatesByCountry(countryId, selectedState) {
         $.ajax({
@@ -379,6 +462,11 @@
 
     $(document).ready(function() {
         var countryId = $('#country-dropdown').val();
+        // If no country is selected and user has no country, default to Canada (ID: 39)
+        if (!countryId && !{{ $user->country ?? 'null' }}) {
+            $('#country-dropdown').val(39);
+            countryId = 39;
+        }
         if (countryId) {
             var selectedState = "{{ old('state', $user->state) }}";
             loadStatesByCountry(countryId, selectedState);

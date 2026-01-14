@@ -6,7 +6,7 @@
     <div class="flex min-h-full flex-col justify-center my-14 px-4 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-100 p-4 shadow rounded-md sm:px-10">
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary">
+                <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary mt-10">
                     @isset($loginPage->main_heading)
                         {{ $loginPage->main_heading }}
                     @endisset

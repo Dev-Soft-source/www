@@ -70,34 +70,34 @@
                         $selectedType = $errors->count() > 0 ? old('type') : optional($vehicle)->type;
                     @endphp
                     <select id="type" name="type" class="block mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                        <option value="" {{ $selectedType === '' || $selectedType === null ? 'selected' : '' }}>
+                        <option value="" {{ ($selectedType === '' || $selectedType === null) ? 'selected' : '' }}>
                             {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                         </option>
-                        <option value="Convertable" {{ $selectedType === 'Convertable' ? 'selected' : '' }}>
+                        <option value="Convertable" {{ ($selectedType == 'Convertable' || $selectedType === 'Convertable') ? 'selected' : '' }}>
                             Convertable
                         </option>
-                        <option value="Coupe" {{ $selectedType === 'Coupe' ? 'selected' : '' }}>
+                        <option value="Coupe" {{ ($selectedType == 'Coupe' || $selectedType === 'Coupe') ? 'selected' : '' }}>
                             Coupe
                         </option>
-                        <option value="Hatchback" {{ $selectedType === 'Hatchback' ? 'selected' : '' }}>
+                        <option value="Hatchback" {{ ($selectedType == 'Hatchback' || $selectedType === 'Hatchback') ? 'selected' : '' }}>
                             Hatchback
                         </option>
-                        <option value="Minivan" {{ $selectedType === 'Minivan' ? 'selected' : '' }}>
+                        <option value="Minivan" {{ ($selectedType == 'Minivan' || $selectedType === 'Minivan') ? 'selected' : '' }}>
                             Minivan
                         </option>
-                        <option value="Sedan" {{ $selectedType === 'Sedan' ? 'selected' : '' }}>
+                        <option value="Sedan" {{ ($selectedType == 'Sedan' || $selectedType === 'Sedan') ? 'selected' : '' }}>
                             Sedan
                         </option>
-                        <option value="Station wagon" {{ $selectedType === 'Station wagon' ? 'selected' : '' }}>
+                        <option value="Station wagon" {{ ($selectedType == 'Station wagon' || $selectedType === 'Station wagon') ? 'selected' : '' }}>
                             Station wagon
                         </option>
-                        <option value="SUV" {{ $selectedType === 'SUV' ? 'selected' : '' }}>
+                        <option value="SUV" {{ ($selectedType == 'SUV' || $selectedType === 'SUV') ? 'selected' : '' }}>
                             SUV
                         </option>
-                        <option value="Truck" {{ $selectedType === 'Truck' ? 'selected' : '' }}>
+                        <option value="Truck" {{ ($selectedType == 'Truck' || $selectedType === 'Truck') ? 'selected' : '' }}>
                             Truck
                         </option>
-                        <option value="Van" {{ $selectedType === 'Van' ? 'selected' : '' }}>
+                        <option value="Van" {{ ($selectedType == 'Van' || $selectedType === 'Van') ? 'selected' : '' }}>
                             Van
                         </option>
                     </select>
@@ -183,7 +183,7 @@
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="car_type_electric" name="car_type" type="radio" value="Electric"
                                 {{ old('car_type', optional($vehicle)->car_type) === 'Electric' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_electric" class="block text-gray-900">
                                 {{ $myVehiclePage->electric_checkbox_label ?? "Electric"}}
                             </label>
@@ -191,7 +191,7 @@
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="car_type_hybrid" name="car_type" type="radio" value="Hybrid"
                                 {{ old('car_type', optional($vehicle)->car_type) === 'Hybrid' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_hybrid" class="block text-gray-900">
                                 {{ $myVehiclePage->hybrid_checkbox_label ?? "Hybrid"}}
                             </label>
@@ -199,7 +199,7 @@
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="car_type_gas" name="car_type" type="radio" value="Gas"
                                 {{ old('car_type', optional($vehicle)->car_type) === 'Gas' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_gas" class="block text-gray-900">
                                 {{ $myVehiclePage->gas_checkbox_label ?? "Gas"}}
                             </label>
@@ -218,8 +218,8 @@
                     <div class="mt-2 flex items-center gap-2">
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="primary_vehicle_yes" name="primary_vehicle" type="radio" value="1"
-                                {{ old('primary_vehicle', optional($vehicle)->primary_vehicle) == '1' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                {{ old('primary_vehicle', optional($vehicle)->primary_vehicle ?? '1') == '1' ? 'checked' : '' }}
+                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="primary_vehicle_yes" class="block text-gray-900">
                                 {{ $myVehiclePage->yes_checkbox_label ?? "Yes"}}
                             </label>
@@ -227,7 +227,7 @@
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="primary_vehicle_no" name="primary_vehicle" type="radio" value="0"
                                 {{ old('primary_vehicle', optional($vehicle)->primary_vehicle) == '0' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="primary_vehicle_no" class="block text-gray-900">
                                 {{ $myVehiclePage->no_checkbox_label ?? "No"}}
                             </label>
@@ -242,22 +242,7 @@
                     @enderror
                 </div>
 
-                <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center mt-4 gap-2 md:col-span-2">
-                    <div id="hide-text2" class="text-gray-500"><p>
-                    @isset($myVehiclePage->car_photo_label)
-                        {{ $myVehiclePage->car_photo_label }}
-                    @endisset
-                </p></div>
-                    <div id="show-text1" class="text-gray-500 hidden"><p>
-                        @isset($myVehiclePage->image_description_label)
-                        {{ $myVehiclePage->image_description_label }}
-                    @endisset
-                    </p></div>
-                    <div id="show-text2" class="text-gray-500 hidden"><p>
-                        @isset($myVehiclePage->edit_photo_label)
-                        {{ $myVehiclePage->edit_photo_label }}
-                    @endisset
-                    </p></div>
+                <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-end md:items-center mt-4 gap-2 md:col-span-2">
                     <div id="hide-buttons" class="hidden flex items-center gap-2">
                         <label for="edit-file"
                             class="flex items-center justify-center rounded bg-primary p-1 cursor-pointer">
@@ -266,7 +251,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
-                            <input id="edit-file" name="existing_image" type="file" onchange="previewImage(this)" class="hidden" />
+                            <input id="edit-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
                         </label>
                         <button class="bg-primary p-1 rounded cursor-pointer" type="button" onclick="toggleModalCard('card-modal-1')">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -288,18 +273,9 @@
                             @else
                                 <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
                             @endif
-                            <div id="hide-text1" class="justify-center text-center">
-                                <p class="text-sm lg:text-lg text-gray-900">
-                                    @isset($myVehiclePage->upload_profile_photo_image_placeholder)
-                                    {{ $myVehiclePage->upload_profile_photo_image_placeholder }}
-                                @endisset
-                                    <span class="font-semibold text-primary"> @isset($myVehiclePage->choose_file_image_placeholder)
-                                        {{ $myVehiclePage->choose_file_image_placeholder }}
-                                    @endisset
-                                </span>
-                                </p>
-                                <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                    {{--  (Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max.)  --}}
+                            <div id="hide-text1" class="text-center w-full">
+                                <p class="text-sm lg:text-lg text-gray-900 text-center">Vehicle photo</p>
+                                <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
                                     @isset($myVehiclePage->images_option_placeholder)
                                     {{ $myVehiclePage->images_option_placeholder }}
                                 @endisset
@@ -311,7 +287,8 @@
                             <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
                         @elseif ($vehicle->image)
                             @php
-                                $imageName = basename($vehicle->image);
+                                // Get the raw attribute value (filename only) instead of the accessor (full URL)
+                                $imageName = $vehicle->getAttributes()['image'] ?? basename(parse_url($vehicle->image, PHP_URL_PATH));
                             @endphp
                             <input id="existing_image" type="hidden" name="existing_image" value="{{ $imageName }}">
                         @endif
@@ -322,26 +299,12 @@
                         @enderror
                     </label>
                 </div>
-               <div id="show-button" class="hidden">
-                    <div class=" flex items-center">
-                        <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="remove_image" name="remove_image" type="checkbox" value="1"
-                                {{ old('remove_image', optional($vehicle)->remove_image) == '1' ? 'checked' : '' }}
-                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                            <label for="remove_image" class="block text-gray-900">
-                                @isset($myVehiclePage->remove_car_photo_label)
-                                    {{ $myVehiclePage->remove_car_photo_label }}
-                                @endisset
-                            </label>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="button-exp-fill"> @isset($myVehiclePage->update_vehicle_button_text)
+                <div class="mt-4 flex justify-center md:col-span-2">
+                    <button type="submit" id="update-vehicle-btn" class="button-exp-fill w-32 opacity-50 cursor-not-allowed" disabled> @isset($myVehiclePage->update_vehicle_button_text)
                         {{ $myVehiclePage->update_vehicle_button_text }}
-                    @endisset
-                </button>
+                        @endisset
+                    </button>
                 </div>
             </div>
         </form>
@@ -350,7 +313,7 @@
 
 <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center" id="card-modal-1">
     <div class="relative h-screen my-6 mx-auto flex items-center justify-center w-full" id="card-modal-1-backdrop-1">
-        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
             <button onclick="toggleModalCard('card-modal-1')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -379,7 +342,7 @@
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full" id="card-modal-backdrop">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <button onclick="toggleModalCard('modal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -446,29 +409,138 @@
     var hasUploadedImage = uploadedImage && uploadedImage !== "null";
     var vehicleImage = "{{ $vehicle->image ?? '' }}";
     var hasVehicleImage = vehicleImage && vehicleImage !== "null";
+    
+    // Store original form values and image source
+    var originalFormData = {};
+    var originalImageSrc = '';
+    var formChanged = false;
 
     $(document).ready(function() {
+        // Store original form values
+        $('form input, form select, form textarea').each(function() {
+            var name = $(this).attr('name');
+            if (name) {
+                if ($(this).is(':checkbox') || $(this).is(':radio')) {
+                    originalFormData[name] = $(this).is(':checked') ? $(this).val() : '';
+                } else {
+                    originalFormData[name] = $(this).val();
+                }
+            }
+        });
+        
+        // Store original image source and ensure it's preserved
+        var profileImageEl = $('#profile-image');
+        originalImageSrc = profileImageEl.attr('src');
+        
+        // Store original image state
+        var hasImageOnLoad = (hasUploadedImage || hasVehicleImage || (originalImageSrc && !originalImageSrc.includes('image-placeholder.png')));
+        
         if (hasErrors) {
             scrollToFirstError();
         }
 
-        if (hasUploadedImage || hasVehicleImage) {
-            $('#profile-image').removeClass('w-12');
-            $('#profile-image').removeClass('h-12');
-            $('#profile-image').removeClass('object-contain');
-            $('#profile-image').removeClass('mb-3');
-            $('#profile-image').addClass('w-full');
-            $('#profile-image').addClass('h-full');
-            $('#profile-image').addClass('object-cover');
+        if (hasImageOnLoad) {
+            // Ensure image maintains its source and proper display
+            if (originalImageSrc && !originalImageSrc.includes('image-placeholder.png')) {
+                profileImageEl.attr('src', originalImageSrc); // Ensure source is set
+            }
+            profileImageEl.removeClass('w-12');
+            profileImageEl.removeClass('h-12');
+            profileImageEl.removeClass('object-contain');
+            profileImageEl.removeClass('mb-3');
+            profileImageEl.addClass('w-full');
+            profileImageEl.addClass('h-full');
+            profileImageEl.addClass('object-cover');
             $('#hide-text1').addClass('hidden');
-            $('#hide-text2').addClass('hidden');
             $('#show-button').removeClass('hidden');
             $('#hide-buttons').removeClass('hidden');
             $('#hide-buttons').addClass('flex');
-            $('#show-text1').removeClass('hidden');
             $('#dropzone-file-label').removeClass('cursor-pointer');
             $('#dropzone-file').prop('readonly', true);
         }
+        
+        // Function to preserve image state
+        function preserveImageState() {
+            var profileImage = $('#profile-image');
+            var currentSrc = profileImage.attr('src');
+            
+            // If image source was lost, restore it from original
+            if (!currentSrc || currentSrc.includes('image-placeholder.png')) {
+                if (originalImageSrc && !originalImageSrc.includes('image-placeholder.png')) {
+                    profileImage.attr('src', originalImageSrc);
+                    currentSrc = originalImageSrc;
+                }
+            }
+            
+            // Only preserve if image exists and is not placeholder
+            if (currentSrc && !currentSrc.includes('image-placeholder.png')) {
+                // Ensure image is visible with correct classes
+                profileImage.removeClass('w-12 h-12 mb-3');
+                if (!profileImage.hasClass('w-full') && !profileImage.hasClass('w-40')) {
+                    profileImage.addClass('w-full h-full object-cover');
+                }
+                if (profileImage.hasClass('object-contain') && !profileImage.hasClass('object-cover')) {
+                    profileImage.removeClass('object-contain');
+                    profileImage.addClass('object-cover');
+                }
+                $('#hide-text1').addClass('hidden');
+                $('#show-button').removeClass('hidden');
+                $('#hide-buttons').removeClass('hidden');
+                $('#hide-buttons').addClass('flex');
+                $('#dropzone-file-label').removeClass('cursor-pointer');
+                $('#dropzone-file').prop('readonly', true);
+            }
+        }
+        
+        // Track form changes
+        function checkFormChanges() {
+            formChanged = false;
+            
+            // Preserve image state before checking changes
+            preserveImageState();
+            
+            // Check all form inputs
+            $('form input, form select, form textarea').each(function() {
+                var name = $(this).attr('name');
+                if (name && name !== '_token' && name !== '_method' && name !== 'image' && name !== 'existing_image') {
+                    var currentValue = '';
+                    if ($(this).is(':checkbox') || $(this).is(':radio')) {
+                        currentValue = $(this).is(':checked') ? $(this).val() : '';
+                    } else {
+                        currentValue = $(this).val();
+                    }
+                    
+                    var originalValue = originalFormData[name] || '';
+                    if (currentValue !== originalValue) {
+                        formChanged = true;
+                        return false; // break loop
+                    }
+                }
+            });
+            
+            // Check if image has changed (but don't reset it)
+            var currentImageSrc = $('#profile-image').attr('src');
+            if (currentImageSrc !== originalImageSrc && !currentImageSrc.includes('image-placeholder.png')) {
+                formChanged = true;
+            }
+            
+            // Enable/disable update button
+            var updateBtn = $('#update-vehicle-btn');
+            if (formChanged) {
+                updateBtn.removeClass('opacity-50 cursor-not-allowed');
+                updateBtn.prop('disabled', false);
+            } else {
+                updateBtn.addClass('opacity-50 cursor-not-allowed');
+                updateBtn.prop('disabled', true);
+            }
+        }
+        
+        // Listen for form changes
+        $('form input, form select, form textarea').on('input change', function() {
+            // Preserve image state immediately when any form field changes
+            preserveImageState();
+            checkFormChanges();
+        });
 
         $('form').on('submit', function(e) {
             if ($('.error').length > 0) {
@@ -484,6 +556,9 @@
                 toggleModalCard('modal');
             }
         });
+        
+        // Initial check
+        checkFormChanges();
     });
 
     document.querySelector('input[name="year"]').addEventListener('input', function (e) {
@@ -535,13 +610,17 @@
             $('#profile-image').removeClass('h-full');
             $('#profile-image').removeClass('object-cover');
             $('#hide-text1').removeClass('hidden');
-            $('#hide-text2').removeClass('hidden');
             $('#show-button').addClass('hidden');
             $('#hide-buttons').addClass('hidden');
             $('#hide-buttons').addClass('flex');
-            $('#show-text1').addClass('hidden');
             $('#dropzone-file-label').addClass('cursor-pointer');
             $('#dropzone-file').prop('readonly', false);
+            
+            // Update original image source
+            originalImageSrc = profileImage.src;
+            if (typeof checkFormChanges === 'function') {
+                checkFormChanges();
+            }
         }
     });
 
@@ -560,13 +639,23 @@
                 $('#profile-image').addClass('h-full');
                 $('#profile-image').addClass('object-cover');
                 $('#hide-text1').addClass('hidden');
-                $('#hide-text2').addClass('hidden');
                 $('#show-button').removeClass('hidden');
                 $('#hide-buttons').removeClass('hidden');
                 $('#hide-buttons').addClass('flex');
-                $('#show-text1').removeClass('hidden');
                 $('#dropzone-file-label').removeClass('cursor-pointer');
                 $('#dropzone-file').prop('readonly', true);
+                
+                // Clear existing_image hidden field when new file is selected
+                var existingImageInput = document.getElementById('existing_image');
+                if (existingImageInput) {
+                    existingImageInput.remove();
+                }
+                
+                // Update original image source
+                originalImageSrc = profileImage.src;
+                if (typeof checkFormChanges === 'function') {
+                    checkFormChanges();
+                }
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -589,13 +678,17 @@
             $('#profile-image').removeClass('h-full');
             $('#profile-image').removeClass('object-cover');
             $('#hide-text1').removeClass('hidden');
-            $('#hide-text2').removeClass('hidden');
             $('#show-button').addClass('hidden');
             $('#hide-buttons').addClass('hidden');
             $('#hide-buttons').addClass('flex');
-            $('#show-text1').addClass('hidden');
             $('#dropzone-file-label').addClass('cursor-pointer');
             $('#dropzone-file').prop('readonly', false);
+            
+            // Update original image source
+            originalImageSrc = profileImage.src;
+            if (typeof checkFormChanges === 'function') {
+                checkFormChanges();
+            }
         }
         toggleModalCard('card-modal-1');
     });

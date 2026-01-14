@@ -22,7 +22,31 @@ use App\Models\SuccessMessagesSettingDetail;
 class MyTripController extends Controller
 {
     public function CurrentTrips($lang = null){
-        $bookings = Booking::where('user_id', auth()->user()->id)
+        $user_id = auth()->user()->id;
+        
+        // Setup language first (needed for redirect)
+        $languages = Language::all();
+        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
+            session(['selectedLanguage' => $lang]);
+        }
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        }
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        
+        // Check if user has posted any rides (as a driver)
+        $hasPostedRides = Ride::where('added_by', $user_id)->exists();
+        
+        // If user has posted rides, redirect to "Driver Rides" (my_rides)
+        if ($hasPostedRides) {
+            return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+        }
+        
+        // Continue with passenger trips if user hasn't posted rides
+        $bookings = Booking::where('user_id', $user_id)
             ->where('bookings.status', '!=', '3')
             ->where('bookings.status', '!=', '4')
             ->join('rides', 'bookings.ride_id', '=', 'rides.id')

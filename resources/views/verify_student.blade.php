@@ -12,7 +12,7 @@
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                         <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -42,7 +42,7 @@
                                     class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost ride</a>
                             @endif
                             <a href=""
-                                class="button-exp-fill">Close</a>
+                                class="button-exp-fill w-28">Close</a>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                 <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                             <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -134,7 +134,7 @@
                         <label for="dropzone-file"
                             class="flex flex-col items-center justify-center w-full h-auto p-4 border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                             <div class="flex flex-col items-center justify-center pb-6">
-                                <img id="profile-image" class="w-12 h-12 object-contain mb-4" src="{{ asset('assets/image-placeholder.png')}}">
+                                <img id="profile-image" class="w-14 h-14 object-contain mt-4" src="{{ asset('assets/image-placeholder.png')}}">
                                 <p class="text-sm lg:text-lg text-gray-900">
                                     @if ($user->student == 0)
                                         <label for="">
@@ -145,11 +145,6 @@
                                     @else
                                         <label for="">Use a different copy</label>
                                     @endif
-                                    <!-- <span class="font-semibold text-primary">
-                                        @isset($studentCardPage->choose_file_image_placeholder)
-                                            {{ $studentCardPage->choose_file_image_placeholder }}
-                                        @endisset
-                                    </span> -->
                                 </p>
                                 <p class="text-sm lg:text-base text-gray-900 font-normal">
                                     @isset($studentCardPage->mobile_image_type_placeholder)
@@ -183,13 +178,13 @@
                       </div>
                     @enderror
                 </div>
-                <div class="mt-12">
-                    <label for="dateInput" class="text-xl md:text-2xl flex items-center gap-2 text-black font-FuturaMdCnBT">
+                <div class="mt-10 flex flex-col items-center justify-center">
+                    <label for="dateInput" class="text-xl md:text-2xl flex items-center gap-2 text-primary font-FuturaMdCnBT justify-center">
                         @isset($studentCardPage->expiry_date_label)
                             {{ $studentCardPage->expiry_date_label }}
                         @endisset
                     </label>
-                    <div class="flex gap-4 items-center mt-2">
+                    <div class="flex gap-4 items-center mt-2 justify-center">
                         <div class="relative w-40">
                             <input type="text" id="monthInput" name="month" placeholder="Month" readonly onchange="changefield();"
                                 class="border p-2 w-full bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 cursor-pointer">
@@ -209,9 +204,11 @@
                 </div>
 
                 <div class="mt-4 flex justify-center">
-                    <button {{ isset($user->student_card) && $user->student_card != "" ? "disabled" : "" }}  id="submit_btn" type="submit" class="submitBtn w-28 button-exp-fill">
-                        @isset($studentCardPage->upload_button_text)
-                            {{ $studentCardPage->upload_button_text }}
+                    <button id="submit_btn" type="submit" class="submitBtn w-auto px-6 button-exp-fill opacity-50 cursor-not-allowed" disabled>
+                        @isset($studentCardPage->submit_for_verification_button_text)
+                            {{ $studentCardPage->submit_for_verification_button_text }}
+                        @else
+                            Submit for Verification
                         @endisset
                     </button>
                 </div>
@@ -277,16 +274,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function previewImage(input) {
         if (input.files && input.files[0]) {
-            submitBtn.removeAttribute('disabled');
-
             const reader = new FileReader();
 
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
                 profileImage.className = 'w-68 h-58 object-contain mb-3 cursor-pointer rounded-lg';
+                
+                // Enable button and make it full color when image is uploaded
+                submitBtn.removeAttribute('disabled');
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.classList.add('opacity-100');
             };
 
             reader.readAsDataURL(input.files[0]);
+        } else {
+            // Disable button if no file selected
+            submitBtn.setAttribute('disabled', 'disabled');
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.classList.remove('opacity-100');
         }
     }
 
@@ -317,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Date(2000, i, 1).toLocaleString('default', { month: 'long' });
     });
 
-    const years = Array.from({ length: 5 }, (_, i) => currentYear + i); // Current year + 4 years
+    const years = Array.from({ length: 5 }, (_, i) => currentYear + i + 1); // Start from next year, add 5 years (currentYear+1 to currentYear+5)
 
     // Update the month dropdown dynamically
     function updateMonthsDropdown() {
@@ -364,9 +369,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize the input fields
     monthInput.value = months[currentMonth];
-    yearInput.value = currentYear;
+    yearInput.value = currentYear + 1; // Start with next year since current year is removed
     updateExpiryDate();
     updateMonthsDropdown(); // Initialize months dropdown
+
+    // Check if user already has a student card uploaded, enable button if so
+    @if ($user->student_card)
+        submitBtn.removeAttribute('disabled');
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        submitBtn.classList.add('opacity-100');
+    @endif
 
     // Event listeners for showing/hiding dropdowns
     monthInput.addEventListener('focus', () => {

@@ -67,6 +67,20 @@
         z-index: 1000;
     }
 
+    /* Password tooltip down arrow (points to icon below) */
+    .password-tooltip::after {
+        content: "";
+        position: absolute;
+        margin-left: -10px;
+        border-left: 10px solid transparent !important;
+        border-right: 10px solid transparent !important;
+        border-top: 10px solid #3b82f6 !important;
+        border-bottom: 0 !important;
+        display: block !important;
+        z-index: 1001;
+        margin-top: 95px;
+    }
+
     /* Prevent input field from jumping when error appears */
     .mt-2 {
         min-height: auto;
@@ -84,64 +98,14 @@
     <div class="flex min-h-full flex-col justify-center py-14 px-4 sm:px-6 lg:px-0">
         <div class="bg-white border border-gray-100 p-4 shadow rounded-md sm:px-10">
           <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <h1 class="text-center font-FuturaMdCnBT text-primary text-3xl md:text-4xl lg:text-5xl">
+            <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary mt-10">
               @isset($signupPage->main_heading)
                   {{ $signupPage->main_heading }}
               @endisset
             </h1>
-
-            <div class="flex items-center justify-center space-x-1.5 md:space-x-4 my-4">
-              <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'facebook']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
-                      viewBox="0,0,256,256">
-                      <g fill="#1877f2" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
-                          stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
-                          font-family="none" font-weight="none" font-size="none" text-anchor="none"
-                          style="mix-blend-mode: normal">
-                          <g transform="scale(5.33333,5.33333)">
-                              <path
-                                  d="M29,3c-5.523,0 -10,4.477 -10,10v5h-6v8h6v19h8v-19h7l1,-8h-8v-4c0,-2.209 1.791,-4 4,-4h4v-6.678c-1.909,-0.197 -4.079,-0.326 -6,-0.322z">
-                              </path>
-                          </g>
-                      </g>
-                  </svg>
-              </a>
-              <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin-openid']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
-                      viewBox="0 0 48 48">
-                      <path fill="#0288d1"
-                          d="M8.421 14h.052 0C11.263 14 13 12 13 9.5 12.948 6.945 11.263 5 8.526 5 5.789 5 4 6.945 4 9.5 4 12 5.736 14 8.421 14zM4 17H13V43H4zM44 26.5c0-5.247-4.253-9.5-9.5-9.5-3.053 0-5.762 1.446-7.5 3.684V17h-9v26h9V28h0c0-2.209 1.791-4 4-4s4 1.791 4 4v15h9C44 43 44 27.955 44 26.5z">
-                      </path>
-                  </svg>
-              </a>
-              <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'google']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
-                      viewBox="0 0 48 48">
-                      <path fill="#FFC107"
-                          d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
-                      </path>
-                      <path fill="#FF3D00"
-                          d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z">
-                      </path>
-                      <path fill="#4CAF50"
-                          d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z">
-                      </path>
-                      <path fill="#1976D2"
-                          d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z">
-                      </path>
-                  </svg>
-              </a>
-            </div>
-
-            <p class="mt-3 text-center font-FuturaMdCnBT">
-              @isset($signupPage->or_label)
-                  {{ $signupPage->or_label }}
-              @endisset
-            </p>
           </div>
-        </div>
 
-        <div class="mx-auto w-full lg:px-8 ">
+          <div class="sm:mx-auto sm:w-full sm:max-w-xl md:min-w-[26rem]">
             <div class="pt-6 flex justify-start">
                 @isset($signupPage->required_label)
                     <p class="text-red-500">* {{ $signupPage->required_label }}</p>
@@ -221,18 +185,25 @@
               </div>
 
               <div class="mt-2">
-                <label for="password" class="flex space-x-1 font-FuturaMdCnBT">
+                <label for="password" class="flex items-center space-x-1 font-FuturaMdCnBT">
                     @isset($signupPage->password_label)
                       {{ $signupPage->password_label }}
                     @endisset
                     <span class="text-red-500">*</span>
-
+                    <div class="relative sups inline-flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-500 cursor-help hover:text-blue-700">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                        <div class="tooltip hidden absolute bottom-full mb-2 z-50 whitespace-normal" style="left: 10%; transform: translateX(-50%);">
+                            <div role="tooltip" class="tooltiptext password-tooltip bg-blue-500 text-white text-sm rounded-lg shadow-lg p-3 w-72 text-left relative">
+                                <p class="text-white leading-relaxed">{{ $signupPage->password_placeholder }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </label>
                 <div class="mt-2 relative">
                     <input
-                        @isset($signupPage->confirm_password_placeholder)
-                            placeholder="{{ $signupPage->confirm_password_placeholder }}"
-                        @endisset
+
                         class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600" id="password" type="password" name="password"
                         value="{{ old('password') }}"
                          autocomplete="current-password" />
@@ -281,13 +252,25 @@
                     @enderror
                 </div>
               </div>
+              
+              <!-- Cost-sharing information paragraphs -->
+              <div class="mt-6 space-y-3">
+                <p class="text-sm text-gray-800">
+                    {{$signupPage->ride_description1}}
+                    <br>
+                    {{$signupPage->ride_description2}}
+                    <br>
+                    {{$signupPage->ride_description3}}
+                </p>
+              </div>
+
               <div class="">
                 <div class="mt-2 relative">
                   <label for="remember-me"
                     class="relative flex text-sm text-gray-900 font-FuturaMdCnBT">
 
                     <input id="remember-me" name="remember-me" type="checkbox"
-                      class="mt-1.5 mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                      class="mt-2 mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
 
                     <div class="text_base relative">
                       @isset($signupPage->agree_terms_label)
@@ -326,7 +309,7 @@
                 <div class="mt-2 relative">
                   @isset($signupPage->rideshare_label)
                     <label for="rideshare-disclaimer" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
-                      <input id="rideshare-disclaimer" name="rideshare_disclaimer" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                      <input id="rideshare-disclaimer" name="rideshare_disclaimer" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
                       <div class="text_base">
                         <p>{{ $signupPage->rideshare_label }}</p>
                       </div>
@@ -359,23 +342,82 @@
 
               </div>
             </form>
-
-          <div class="mt-5 text_center font-FutuMdCnBT Signup-bottom">
-            @isset($signupPage->signin_label)
-              <?php
-                  // Define the desired URL
-                  $desiredUrl = route('login', ['lang' => $selectedLanguage->abbreviation]);
-
-                  // Define the pattern to match the href attribute
-                  $pattern = '/href=["\']([^"\']+)["\']/';
-
-                  // Replace all occurrences of the href attribute with the desired URL
-                  $signupPageContent = preg_replace($pattern, 'href="' . $desiredUrl . '"', $signupPage->signin_label);
-              ?>
-              {!! $signupPageContent !!}
-            @endisset
           </div>
-          </div>
+
+            <div class="sm:mx-auto sm:w-full sm:max-w-md flex justify-center border-b border-black mb-8">
+                <p class="mt-6 text-center bg-white w-fit px-2 text-2xl md:text-3xl font-FuturaMdCnBT -mb-4">
+                    @isset($signupPage->or_label)
+                        {{ $signupPage->or_label }}
+                    @endisset
+                </p>
+            </div>
+            <div class="flex items-center justify-center space-x-1.5 md:space-x-4 my-4">
+                <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'facebook']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
+                        viewBox="0,0,256,256">
+                        <g fill="#1877f2" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
+                            stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
+                            font-family="none" font-weight="none" font-size="none" text-anchor="none"
+                            style="mix-blend-mode: normal">
+                            <g transform="scale(5.33333,5.33333)">
+                                <path
+                                    d="M29,3c-5.523,0 -10,4.477 -10,10v5h-6v8h6v19h8v-19h7l1,-8h-8v-4c0,-2.209 1.791,-4 4,-4h4v-6.678c-1.909,-0.197 -4.079,-0.326 -6,-0.322z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </a>
+                <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin-openid']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
+                        viewBox="0 0 48 48">
+                        <path fill="#0288d1"
+                            d="M8.421 14h.052 0C11.263 14 13 12 13 9.5 12.948 6.945 11.263 5 8.526 5 5.789 5 4 6.945 4 9.5 4 12 5.736 14 8.421 14zM4 17H13V43H4zM44 26.5c0-5.247-4.253-9.5-9.5-9.5-3.053 0-5.762 1.446-7.5 3.684V17h-9v26h9V28h0c0-2.209 1.791-4 4-4s4 1.791 4 4v15h9C44 43 44 27.955 44 26.5z">
+                        </path>
+                    </svg>
+                </a>
+                <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'google']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
+                        viewBox="0 0 48 48">
+                        <path fill="#FFC107"
+                            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
+                        </path>
+                        <path fill="#FF3D00"
+                            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z">
+                        </path>
+                        <path fill="#4CAF50"
+                            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z">
+                        </path>
+                        <path fill="#1976D2"
+                            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z">
+                        </path>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="sm:mx-auto sm:w-full sm:max-w-md">
+                <p class="mt-3 text-center">
+
+                </p>
+            </div>
+
+            <div class="sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="mt-6 text_center Signup-bottom">
+                    @isset($signupPage->signin_label)
+                      <?php
+                          // Define the desired URL
+                          $desiredUrl = route('login', ['lang' => $selectedLanguage->abbreviation]);
+
+                          // Define the pattern to match the href attribute
+                          $pattern = '/href=["\']([^"\']+)["\']/';
+
+                          // Replace all occurrences of the href attribute with the desired URL
+                          $signupPageContent = preg_replace($pattern, 'href="' . $desiredUrl . '"', $signupPage->signin_label);
+                      ?>
+                      {!! $signupPageContent !!}
+                    @endisset
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 </div>
@@ -402,17 +444,23 @@
                     </div> -->
                 </div>
                 <div class="text-center sm:ml-4 sm:mt-0">
-                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">Registration Successful</h3>
+                    @php
+                        $user = session('user');
+                        $messages = session('messages');
+                    @endphp
+                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">
+                        @if($messages && $messages->registration_successful_title)
+                            {{ $messages->registration_successful_title }}!
+                        @else
+                            Registration Successful!
+                        @endif
+                    </h3>
                     <div class="mt-2 w-full">
-                        @php
-                            $user = session('user');
-                            $messages = session('messages');
-                        @endphp
                         <p class="can-exp-p text-center" id="modal-welcome-message">
                             @if($messages && $user)
                                 {{ $messages->welcome_message }} {{ $user->first_name }},
                             @endif
-                        </p>
+                        </p> 
                         <div id="modal-email-message">
                             @if($messages)
                                 {!! $messages->email_sent_message !!}

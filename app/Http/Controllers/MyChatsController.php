@@ -69,16 +69,37 @@ class MyChatsController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $chats = Message::where('status', 'new')->where(function ($query) use($user_id){
+        $chats = Message::where(function ($query) use($user_id){
             $query->where('sender', $user_id)->orWhere('receiver', $user_id);
-        })->orderByDesc('created_at')
+        })
+        ->where(function ($query) {
+            $query->where('status', 'new')->orWhereNull('status');
+        })
+        ->orderByDesc('created_at')
             ->get()
             ->groupBy(function ($message) use ($user_id) {
-                return $message->sender == $user_id ? $message->receiver : $message->sender;
+                // Group by both user ID and ride ID to separate conversations properly
+                $otherUserId = $message->sender == $user_id ? $message->receiver : $message->sender;
+                return $otherUserId . '_' . ($message->ride_id ?? '0');
             });
 
             $chats = $chats->map(function ($groupedMessages) use ($user_id) {
-                $latestMessage = $groupedMessages->first()
+                // Filter out messages that are deleted by this user
+                $visibleMessages = $groupedMessages->filter(function ($message) use ($user_id) {
+                    $deletedBy = $message->deleted_by ? explode(',', $message->deleted_by) : [];
+                    return !in_array((string)$user_id, $deletedBy);
+                });
+                
+                // If all messages are deleted, skip this group
+                if ($visibleMessages->isEmpty()) {
+                    return null;
+                }
+                
+                // Sort by created_at descending to get the latest message first
+                $visibleMessages = $visibleMessages->sortByDesc('created_at');
+                
+                // Get the latest visible message
+                $latestMessage = $visibleMessages->first()
                     ->load(['user' => function ($query) {
                         $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
                         $query->withTrashed(); // Include soft-deleted users
@@ -86,13 +107,9 @@ class MyChatsController extends Controller
                         $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
                         $query->withTrashed(); // Include soft-deleted users
                     }]);
-                    $deletedBy = $latestMessage->deleted_by ? explode(',', $latestMessage->deleted_by) : [];
-                    if (in_array((string)$user_id, $deletedBy)) {
-                        return null; // Skip this message group
-                    }
     
-                // Count unread messages (is_read = 0)
-                $unreadCount = $groupedMessages->where('receiver', $user_id)
+                // Count unread messages (is_read = 0) from visible messages only
+                $unreadCount = $visibleMessages->where('receiver', $user_id)
                     ->where('is_read', 0)
                     ->count();
     
@@ -106,9 +123,14 @@ class MyChatsController extends Controller
                     return $messageArray;
             })
             ->filter()
+            ->values()
+            ->sortByDesc(function ($chat) {
+                return $chat['created_at'] ?? '';
+            })
             ->values();
         return view('my_chats', ['successMessage' => $successMessage,'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
     }
+
 
     public function oldChats($lang = null)
     {

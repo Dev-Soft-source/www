@@ -82,6 +82,14 @@ class EmailController extends Controller
 
     public function update($userId, Request $request)
     {
+        // Get language for redirects
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+
         // dd($request->all());
         $customMessages = [
             // 'email_confirmation.required' => 'Confirm email is required',
@@ -92,19 +100,25 @@ class EmailController extends Controller
             // 'email.required' => 'Email address is required',
         ];
 
-        $validated = $request->validate([
-            'old_email' => 'required|email',
-            'email_confirmation' => 'required|email',
-            'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
-            // 'password' => [
-            //     'required',
-            //     function ($attribute, $value, $fail) {
-            //         if (!Hash::check($value, auth()->user()->password)) {
-            //             $fail(__('validation.password'));
-            //         }
-            //     },
-            // ],
-        ], $customMessages);
+        try {
+            $validated = $request->validate([
+                'old_email' => 'required|email',
+                'email_confirmation' => 'required|email',
+                'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
+                // 'password' => [
+                //     'required',
+                //     function ($attribute, $value, $fail) {
+                //         if (!Hash::check($value, auth()->user()->password)) {
+                //             $fail(__('validation.password'));
+                //         }
+                //     },
+                // ],
+            ], $customMessages);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+                ->withErrors($e->errors())
+                ->withInput();
+        }
 
         // Find the user
         $user = User::findOrFail($userId);
@@ -134,7 +148,9 @@ class EmailController extends Controller
         }
         // Check if the old email matches
         if ($request->old_email !== $user->email) {
-            return redirect()->back()->withErrors(['old_email' => 'The current email does not match.'])->withInput();
+            return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+                ->withErrors(['old_email' => 'The current email does not match.'])
+                ->withInput();
         }
 
         // Store old email for notification
@@ -179,14 +195,7 @@ class EmailController extends Controller
         Mail::to($user->email)->queue(new EmailAddressUpdatedEmail($verificationData));
         // Mail::to($user->email)->queue(new UserEmailVerification($verificationData));
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation]);
+        return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+            ->with('success', 'Email updated successfully. Please verify your new email address.');
     }
 }

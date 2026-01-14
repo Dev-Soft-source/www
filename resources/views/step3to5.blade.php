@@ -22,13 +22,13 @@
                 {!! $step3Page->sub_main_label ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it" !!}
             </p>
             <div class="pb-2 flex items-center justify-start mt-3">
-                <p class="text-red-500">*
+                <p class="text-red-500">
                     @isset($step3Page->required_label)
                         {{ $step3Page->required_label }}
                     @endisset
                 </p>
             </div>
-            <form class="rounded-lg" method="POST" action="{{ route('step3to5.store',$user->id) }}" enctype="multipart/form-data">
+            <form class="rounded-lg" method="POST" action="{{ route('step3to5.store',$user->id) }}" enctype="multipart/form-data" id="step3Form">
                 @csrf
 
                 <div class="bg-primary text-white rounded-t-lg font-medium text-xl flex items-center justify-center space-x-2 p-4 font-FuturaMdCnBT">
@@ -84,7 +84,7 @@
                             <span class="text-red-500">*</span>
                         </label>
                         <select id="type" name="type"
-                            class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                            class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full italic rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
 
                             <option value=""
                                 {{ old('type') === '' ? 'selected' : '' }}>
@@ -255,7 +255,7 @@
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
                                 <input id="" name="car_type" type="radio" value="Electric"
                                     {{ old('car_type') == 'Electric' ? 'checked' : '' }}
-                                    class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                    class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                                 <label for="" class="block text-gray-900">
                                     @isset($step3Page->electric_option_label)
                                         {{ $step3Page->electric_option_label }}
@@ -265,7 +265,7 @@
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
                                 <input id="" name="car_type" type="radio" value="Hybrid"
                                     {{ old('car_type') == 'Hybrid' ? 'checked' : '' }}
-                                    class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                    class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                                 <label for="" class="block text-gray-900">
                                     @isset($step3Page->hybrid_option_label)
                                         {{ $step3Page->hybrid_option_label }}
@@ -275,7 +275,7 @@
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
                                 <input id="" name="car_type" type="radio" value="Gas" checked
                                     {{ old('car_type') == 'Gas' ? 'checked' : '' }}
-                                    class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                    class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                                 <label for="" class="block text-gray-900">
                                     @isset($step3Page->gas_option_label)
                                         {{ $step3Page->gas_option_label }}
@@ -305,18 +305,18 @@
                     </div>
                 </div>
 
-                    <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-32">
-                                @isset($step3Page->skip_button_label)
-                                    {{ $step3Page->skip_button_label }}
-                                @endisset
-                            </button>
-                            <button type="submit" id="nextButton" class="button-exp-fill w-32 opacity-50 cursor-not-allowed" disabled>
-                                @isset($step3Page->next_button_label)
-                                    {{ $step3Page->next_button_label }}
-                                @endisset
-                            </button>
-                        </div>
+                <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
+                    <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-36">
+                        @isset($step3Page->skip_button_label)
+                            {{ $step3Page->skip_button_label }}
+                        @endisset
+                    </button>
+                    <button type="submit" id="nextButton" class="button-exp-fill w-36 opacity-50 cursor-not-allowed" disabled>
+                        @isset($step3Page->next_button_label)
+                            {{ $step3Page->next_button_label }}
+                        @endisset
+                    </button>
+                </div>
             </form>
 
         </div>
@@ -327,16 +327,59 @@
 <div id="skipModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="text-center w-full">
-                        <p class="text-lg font-medium text-gray-900 mb-4">Are you sure you want to skip this step for now?</p>
-                        <p class="text-gray-600">If you do, you can still add this later from your Profile Dashboard.</p>
+                        <h6 class="text-lg font-FuturaMdCnBT font-medium text-gray-900 mb-4">
+                            @isset($step3Page->skip_confirmation_heading)
+                                {{ $step3Page->skip_confirmation_heading }}
+                            @endisset
+                        </h6>
+                        <p class="text-gray-600">
+                            @isset($step3Page->skip_confirmation_message)
+                                {{ $step3Page->skip_confirmation_message }}
+                            @endisset
+                        </p>
                     </div>
                 </div>
                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                     <a href="{{ route('step4to5', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes, skip it!</a>
                     <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No, take me back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhance Profile Modal (No Photo) -->
+<div id="enhanceProfileModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div class="text-center w-full">
+                        <h6 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
+                            @isset($step3Page->enhance_profile_heading)
+                                {{ $step3Page->enhance_profile_heading }}
+                            @endisset
+                        </h6>
+                        <div class="text-left space-y-3">
+                            <p class="text-gray-700">
+                                @isset($step3Page->enhance_profile_message)
+                                    {{ $step3Page->enhance_profile_message }}
+                                @endisset
+                            </p>
+                            <p class="text-gray-700">
+                                @isset($step3Page->enhance_profile_message_2)
+                                    {{ $step3Page->enhance_profile_message_2 }}
+                                @endisset
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                    <button type="button" onclick="hideEnhanceProfileModal()" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">+ Add Photo</button>
+                    <button type="button" onclick="proceedWithoutPhoto()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">Maybe Later</button>
                 </div>
             </div>
         </div>
@@ -372,6 +415,8 @@
         }
     }
 
+    let hasVehiclePhoto = false;
+
     function previewImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -379,9 +424,14 @@
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
                 profileImage.className = 'w-68 h-58 object-contain mb-3 cursor-pointer rounded-lg';
+                hasVehiclePhoto = true;
+                validateStep3Form();
             };
 
             reader.readAsDataURL(input.files[0]);
+        } else {
+            hasVehiclePhoto = false;
+            validateStep3Form();
         }
     }
 
@@ -405,7 +455,7 @@
         
         const nextButton = document.getElementById('nextButton');
         
-        // Check if all required fields are filled
+        // Check if all required fields are filled (vehicle photo is optional for button enablement)
         const isValid = make && model && type && color && licenseNo && year && carType;
         
         if (isValid) {
@@ -417,6 +467,26 @@
             nextButton.classList.add('opacity-50', 'cursor-not-allowed');
             nextButton.classList.remove('opacity-100');
         }
+    }
+    
+    function showEnhanceProfileModal() {
+        document.getElementById('enhanceProfileModal').classList.remove('hidden');
+    }
+    
+    function hideEnhanceProfileModal() {
+        document.getElementById('enhanceProfileModal').classList.add('hidden');
+        // Scroll to the photo upload section
+        document.getElementById('dropzone-file').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus on the file input
+        setTimeout(() => {
+            document.getElementById('dropzone-file').click();
+        }, 500);
+    }
+    
+    function proceedWithoutPhoto() {
+        // Submit the form without photo
+        document.getElementById('enhanceProfileModal').classList.add('hidden');
+        document.getElementById('step3Form').submit();
     }
 
     // Add event listeners to all form inputs for real-time validation
@@ -437,6 +507,44 @@
                 element.addEventListener('input', validateStep3Form);
                 element.addEventListener('change', validateStep3Form);
             });
+        });
+        
+        // Check if user already has a vehicle photo
+        const fileInput = document.getElementById('dropzone-file');
+        const profileImage = document.getElementById('profile-image');
+        
+        // Check if image is not the placeholder (user has uploaded an image)
+        if (profileImage && profileImage.src && !profileImage.src.includes('image-placeholder.png')) {
+            // Check if it's a data URL (newly uploaded) or an existing image
+            if (profileImage.src.startsWith('data:') || profileImage.src.includes('car_images/')) {
+                hasVehiclePhoto = true;
+            }
+        }
+        
+        // Also check if file input has a file
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            hasVehiclePhoto = true;
+        }
+        
+        // Prevent form submission if no photo
+        document.getElementById('step3Form').addEventListener('submit', function(e) {
+            const make = document.querySelector('input[name="make"]').value.trim();
+            const model = document.querySelector('input[name="model"]').value.trim();
+            const type = document.querySelector('select[name="type"]').value;
+            const color = document.querySelector('input[name="color"]').value.trim();
+            const licenseNo = document.querySelector('input[name="liscense_no"]').value.trim();
+            const year = document.querySelector('input[name="year"]').value.trim();
+            const carType = document.querySelector('input[name="car_type"]:checked');
+            const fileInput = document.getElementById('dropzone-file');
+            
+            // Check if all fields are filled but no photo
+            const allFieldsFilled = make && model && type && color && licenseNo && year && carType;
+            
+            if (allFieldsFilled && !hasVehiclePhoto && !fileInput.files.length) {
+                e.preventDefault();
+                showEnhanceProfileModal();
+                return false;
+            }
         });
         
         // Initial validation check

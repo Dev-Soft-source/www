@@ -91,7 +91,7 @@
                             {{ $step2Page->skip_button_label }}
                         @endisset
                     </button>
-                    <button type="submit" id="nextButton" class="button-exp-fill w-28">
+                    <button type="submit" id="nextButton" class="button-exp-fill w-40 opacity-50 cursor-not-allowed" disabled>
                         @isset($step2Page->next_button_label)
                             {{ $step2Page->next_button_label }}
                         @endisset
@@ -107,11 +107,19 @@
 <div id="skipModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="text-center w-full">
-                        <p class="text-lg font-medium text-gray-900 mb-4">Are you sure you want to skip this step for now?</p>
-                        <p class="text-gray-600">If you do, you can still add this later from your Profile Dashboard.</p>
+                        <h6 class="text-lg font-medium text-gray-900 mb-4">
+                            @isset($step2Page->skip_confirmation_heading)
+                                {{ $step2Page->skip_confirmation_heading }}
+                            @endisset
+                        </h6>
+                        <p class="text-gray-600">
+                            @isset($step2Page->skip_confirmation_message)
+                                {{ $step2Page->skip_confirmation_message }}
+                            @endisset
+                        </p>
                     </div>
                 </div>
                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
@@ -145,16 +153,56 @@
 
     function previewImage(input) {
         const profileImage = document.getElementById('profile-image');
+        const nextButton = document.getElementById('nextButton');
+        
         if (input.files && input.files[0]) {
             const reader = new FileReader();
 
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
+                // Enable the button when image is uploaded
+                nextButton.disabled = false;
+                nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextButton.classList.add('opacity-100');
             };
 
             reader.readAsDataURL(input.files[0]);
+        } else {
+            // Disable button if no file selected
+            nextButton.disabled = true;
+            nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+            nextButton.classList.remove('opacity-100');
         }
     }
+    
+    // Check on page load if user already has a custom profile image
+    $(document).ready(function() {
+        const nextButton = document.getElementById('nextButton');
+        const profileImage = document.getElementById('profile-image');
+        const fileInput = document.getElementById('dropzone-file');
+        
+        // Check if user has a custom profile image (not the default ones)
+        @php
+            $hasCustomImage = false;
+            if ($user->profile_image) {
+                $imageBasename = basename($user->profile_image);
+                $defaultImages = ['male.png', 'female.png', 'neutral.png'];
+                $hasCustomImage = !in_array($imageBasename, $defaultImages);
+            }
+        @endphp
+        
+        @if ($hasCustomImage)
+            // User already has a custom profile image
+            nextButton.disabled = false;
+            nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            nextButton.classList.add('opacity-100');
+        @else
+            // User has default image or no image, button stays disabled
+            nextButton.disabled = true;
+            nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+            nextButton.classList.remove('opacity-100');
+        @endif
+    });
 
     function showSkipConfirmation() {
         document.getElementById('skipModal').classList.remove('hidden');

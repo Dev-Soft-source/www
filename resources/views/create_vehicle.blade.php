@@ -137,19 +137,19 @@
                     <label for="car_type" class="text-gray-900 mb-2">{{ $myVehiclePage->fuel_label ?? "Fuel"}} <span class="text-red-500">*</span></label>
                     <div class="mt-2 flex items-center gap-2">
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="car_type_electric" name="car_type" type="radio" value="Electric" {{ old('car_type') == 'Electric' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="car_type_electric" name="car_type" type="radio" value="Electric" {{ old('car_type') == 'Electric' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_electric" class="block text-gray-900">
                                 {{ $myVehiclePage->electric_checkbox_label ?? "Electric"}}
                             </label>
                         </div>
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="car_type_hybrid" name="car_type" type="radio" value="Hybrid" {{ old('car_type') == 'Hybrid' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="car_type_hybrid" name="car_type" type="radio" value="Hybrid" {{ old('car_type') == 'Hybrid' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_hybrid" class="block text-gray-900">
                                 {{ $myVehiclePage->hybrid_checkbox_label ?? "Hybrid"}}
                             </label>
                         </div>
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="car_type_gas" name="car_type" type="radio" value="Gas" {{ old('car_type') || empty(old('car_type')) == 'Gas' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="car_type_gas" name="car_type" type="radio" value="Gas" {{ old('car_type') || empty(old('car_type')) == 'Gas' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="car_type_gas" class="block text-gray-900">
                                 {{ $myVehiclePage->gas_checkbox_label ?? "Gas"}}
                             </label>
@@ -167,13 +167,13 @@
                     <label for="primary_vehicle" class="text-gray-900">{{ $myVehiclePage->set_primary_vehicle_label ?? "Set as primary vehicle"}} <span class="text-red-500">*</span></label>
                     <div class="mt-2 flex items-center gap-2">
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="primary_vehicle_yes" name="primary_vehicle" type="radio" value="1" {{ (old('primary_vehicle') == '1' || ($userVehicleCount == 0 && !old('primary_vehicle'))) ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="primary_vehicle_yes" name="primary_vehicle" type="radio" value="1" {{ (old('primary_vehicle') == '1' || (!old('primary_vehicle') && isset($userVehicleCount) && $userVehicleCount == 0)) ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="primary_vehicle_yes" class="block text-gray-900">
                                 {{ $myVehiclePage->yes_checkbox_label ?? "Yes"}}
                             </label>
                         </div>
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="primary_vehicle_no" name="primary_vehicle" type="radio" value="0" {{ (old('primary_vehicle') == '0' && $userVehicleCount > 0) ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="primary_vehicle_no" name="primary_vehicle" type="radio" value="0" {{ (old('primary_vehicle') == '0' || (!old('primary_vehicle') && isset($userVehicleCount) && $userVehicleCount > 0)) ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="primary_vehicle_no" class="block text-gray-900">
                                 {{ $myVehiclePage->no_checkbox_label ?? "No"}}
                             </label>
@@ -187,7 +187,7 @@
                       </div>
                     @enderror
                 </div>
-                <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center mt-4 gap-2 md:col-span-2">
+                <!-- <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center mt-4 gap-2 md:col-span-2">
                     <div id="hide-text2" class="text-gray-500"><p>{{ $myVehiclePage->car_photo_label ?? "Car Photo"}}</p></div>
                     <div id="show-text1" class="text-gray-500 hidden"><p> This is your car. Click on the photo if you want to change it</p></div>
                     <div id="hide-buttons" class="hidden justify-end gap-2">
@@ -203,21 +203,21 @@
                             </svg>
                         </button>
                     </div>
-                </div>
+                </div> -->
                 <div class="md:col-span-2">
                     <label for="dropzone-file" id="dropzone-file-label" class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                             @if (session('uploaded_image'))
-                                <img id="profile-image" class="w-40 h-40 object-contain mb-4 cursor-pointer" src="{{ asset('car_images/' . session('uploaded_image')) }}" alt="Uploaded Image">
+                                <img id="profile-image" class="w-40 h-40 object-contain mb-2 cursor-pointer" src="{{ asset('car_images/' . session('uploaded_image')) }}" alt="Uploaded Image">
                             @else
-                                <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
+                                <img id="profile-image" class="w-14 h-14 object-contain mb-1 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
                             @endif
-                            <div id="hide-text1" class="justify-center text-center">
-                                <p class="text-sm lg:text-lg text-gray-900">{{ $myVehiclePage->image_description_label ?? " Upload vehicle image."}}
-                                    <span class="text-primary">{{ $myVehiclePage->choose_file_image_placeholder ?? " Choose file"}}</span>
+                            <div id="hide-text1" class="text-center w-full">
+                                <p class="text-sm lg:text-lg text-gray-900 text-center">{{ $myVehiclePage->image_description_label ?? " Upload vehicle image."}}
+                                    <!-- <span class="text-primary">{{ $myVehiclePage->choose_file_image_placeholder ?? " Choose file"}}</span> -->
                                 </p>
-                                <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                    ({{ $myVehiclePage->images_option_placeholder ?? "Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max."}})
+                                <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
+                                    {{ $myVehiclePage->images_option_placeholder ?? "JPG, PNG, JPEG, or GIF — up to 10 MB"}}
                                 </p>
                             </div>
                         </div>
@@ -240,7 +240,7 @@
                 <div id="show-button" class="hidden">
                     <div class="flex items-center">
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                            <input id="remove_image" name="remove_image" type="checkbox" value="1" {{ old('remove_image') == '1' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                            <input id="remove_image" name="remove_image" type="checkbox" value="1" {{ old('remove_image') == '1' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
                             <label for="remove_image" class="block text-gray-900">
                                 {{ $myVehiclePage->remove_car_photo_label ?? "Remove car photo"}}
                             </label>
@@ -288,7 +288,7 @@
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full" id="card-modal-backdrop">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <button onclick="toggleModalCard('modal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

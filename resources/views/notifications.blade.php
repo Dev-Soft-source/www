@@ -66,23 +66,28 @@
             @if ($notifications && $notifications->count() > 0)
                 <ul class="divide-y divide-gray-100">
                     @foreach ($notifications as $notification)
-                        @if ($notification->from)
+                        @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
                             <li class="relative {{ $notification->is_read == 0 ? 'bg-blue-50 border-l-4 border-l-primary' : 'bg-white' }} hover:bg-gray-50 transition-colors">
                                 <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-1 px-3">
                                     Delete
                                 </button>
                                 @php
-                                    $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
-                                    $targetUrl = $hasChatTarget
-                                        ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
-                                        : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                    // Check if it's a welcome/system notification
+                                    if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
+                                        $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                    } else {
+                                        $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
+                                        $targetUrl = $hasChatTarget
+                                            ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
+                                            : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                    }
                                 @endphp
                                 <a href="javascript:void(0);" onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, '{{ $targetUrl }}')" class="block">
                                     <div class="flex gap-3 items-start px-4 py-4 pr-24">
                                         <div class="flex-shrink-0 relative">
                                             <img class="w-12 h-12 rounded-full object-cover"
-                                                src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : $notification->from->profile_image }}"
-                                                alt="{{ $notification->category == 'system' ? 'System' : $notification->from->first_name }}">
+                                                src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : ($notification->from ? $notification->from->profile_image : asset('assets/favicon.png')) }}"
+                                                alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}">
                                             @if ($notification->is_read == 0)
                                                 <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
                                             @endif
@@ -92,7 +97,7 @@
                                                 @if ($notification->category == 'system')
                                                     {{ config('app.name') }}
                                                 @else
-                                                    {{ $notification->from->first_name }}
+                                                    {{ $notification->from ? $notification->from->first_name : 'System' }}
                                                 @endif
                                             </p>
                                             <p class="text-gray-600 mt-1 {{ $notification->is_read == 0 ? 'text-gray-800' : '' }}">{{ $notification->message }}</p>

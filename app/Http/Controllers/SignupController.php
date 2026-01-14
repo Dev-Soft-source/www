@@ -141,29 +141,29 @@ class SignupController extends Controller
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
                 $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
-                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
-                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
-                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
-                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
+                    'first_name' => ($signupPage && isset($signupPage->first_name_error)) ? $signupPage->first_name_error : '',
+                    'last_name' => ($signupPage && isset($signupPage->last_name_error)) ? $signupPage->last_name_error : '',
+                    'email' => ($signupPage && isset($signupPage->email_error)) ? $signupPage->email_error : '',
+                    'password' => ($signupPage && isset($signupPage->password_error)) ? $signupPage->password_error : '',
+                    'password_confirmation' => ($signupPage && isset($signupPage->confirm_password_error)) ? $signupPage->confirm_password_error : '',
+                    'remember-me' => ($signupPage && isset($signupPage->agree_terms_error)) ? $signupPage->agree_terms_error : '',
                 ];
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
                 $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'first_name' => isset($signupPage->first_name_error) ? $signupPage->first_name_error : '',
-                    'last_name' => isset($signupPage->last_name_error) ? $signupPage->last_name_error : '',
-                    'email' => isset($signupPage->email_error) ? $signupPage->email_error : '',
-                    'password' => isset($signupPage->password_error) ? $signupPage->password_error : '',
-                    'password_confirmation' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : '',
+                    'first_name' => ($signupPage && isset($signupPage->first_name_error)) ? $signupPage->first_name_error : '',
+                    'last_name' => ($signupPage && isset($signupPage->last_name_error)) ? $signupPage->last_name_error : '',
+                    'email' => ($signupPage && isset($signupPage->email_error)) ? $signupPage->email_error : '',
+                    'password' => ($signupPage && isset($signupPage->password_error)) ? $signupPage->password_error : '',
+                    'password_confirmation' => ($signupPage && isset($signupPage->confirm_password_error)) ? $signupPage->confirm_password_error : '',
+                    'remember-me' => ($signupPage && isset($signupPage->agree_terms_error)) ? $signupPage->agree_terms_error : '',
                 ];
             }
         }
@@ -182,8 +182,8 @@ class SignupController extends Controller
                 'remember-me.required' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : 'You must agree to the terms',
                 'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password field is required',
                 'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
-                'rideshare_disclaimer.required' => 'You must acknowledge the rideshare disclaimer',
-                'rideshare_disclaimer.accepted' => 'You must acknowledge that ride sharing is not a business',
+                'rideshare_disclaimer.required' => $signupPage->rideshare_require,
+                'rideshare_disclaimer.accepted' => $signupPage->rideshare_require,
             ], $niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -319,6 +319,7 @@ class SignupController extends Controller
                 'messages' => [
                     'welcome_message' => $messages->welcome_message ?? 'Welcome',
                     'email_sent_message' => $messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.',
+                    'registration_successful_title' => $messages->registration_successful_title ?? 'Registration Successful!',
                 ],
                 'user' => [
                     'first_name' => $user->first_name,
@@ -326,7 +327,7 @@ class SignupController extends Controller
                 ]
             ]);
         }
-
+        
         return redirect()->back()->with(['showModal' => true, 'messages' => $messages, 'user' => $user]);
     }
 
@@ -390,6 +391,36 @@ class SignupController extends Controller
     public function handleProviderCallback($lang, $provider)
     {
         try {
+            // Check for Facebook error parameters in the request
+            if ($provider === 'facebook' && request()->has('error')) {
+                $error = request()->get('error');
+                $errorDescription = request()->get('error_description', '');
+                $errorReason = request()->get('error_reason', '');
+                
+                $selectedLanguage = session('selectedLanguage');
+                if ($selectedLanguage) {
+                    // Find the language by abbreviation
+                    $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+                } else {
+                    $selectedLanguage = Language::where('abbreviation', $lang)->first();
+                    if (!$selectedLanguage) {
+                        $selectedLanguage = Language::where('is_default', 1)->first();
+                    }
+                }
+                
+                // Handle specific Facebook errors
+                if ($error === 'access_denied' || $errorReason === 'user_denied') {
+                    Session::flash('error', 'Facebook login was cancelled. Please try again or use another login method.');
+                } elseif (str_contains(strtolower($errorDescription), 'app not active') || 
+                          str_contains(strtolower($errorDescription), 'app is not accessible')) {
+                    Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
+                } else {
+                    Session::flash('error', 'Unable to login using Facebook. ' . ($errorDescription ?: 'Please try again or use another login method.'));
+                }
+                
+                return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
+            }
+            
             $user = Socialite::driver($provider)->user();
 
             // Check if the user is already registered
@@ -437,10 +468,20 @@ class SignupController extends Controller
                 // Find the language by abbreviation
                 $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
+                $selectedLanguage = Language::where('abbreviation', $lang)->first();
+                if (!$selectedLanguage) {
+                    $selectedLanguage = Language::where('is_default', 1)->first();
+                }
             }
 
-            Session::flash('message', "Unable to login using " . $provider . ". Please try again");
+            // Check if it's a Facebook-specific error
+            $errorMessage = $e->getMessage();
+            if ($provider === 'facebook' && (str_contains(strtolower($errorMessage), 'app not active') || 
+                                              str_contains(strtolower($errorMessage), 'app is not accessible'))) {
+                Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
+            } else {
+                Session::flash('error', "Unable to login using " . $provider . ". Please try again or use another login method.");
+            }
 
             return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
         }

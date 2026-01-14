@@ -99,9 +99,48 @@ class ProfilePhotoController extends Controller
             ];
         }
 
+        // Validate file exists and size
         $request->validate([
-            'image' => 'required|file|mimes:jpeg,png|max:10240',
+            'image' => 'required|file|max:10240',
         ], [], $niceNames);
+        
+        // Manual validation for file extension (works without fileinfo extension)
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $allowedExtensions = ['jpeg', 'jpg', 'png'];
+            
+            if (!in_array($extension, $allowedExtensions)) {
+                $errorMessage = isset($niceNames['image']) && !empty($niceNames['image']) 
+                    ? $niceNames['image'] 
+                    : 'The image must be a file of type: jpeg, jpg, png.';
+                    
+                return redirect()->back()
+                    ->withErrors(['image' => $errorMessage])
+                    ->withInput();
+            }
+            
+            // Additional check: verify it's actually an image by checking file signature
+            $filePath = $file->getRealPath();
+            $fileSignature = file_exists($filePath) ? bin2hex(file_get_contents($filePath, false, null, 0, 4)) : '';
+            
+            // JPEG: FF D8 FF E0 or FF D8 FF E1 or FF D8 FF DB
+            // PNG: 89 50 4E 47
+            $isValidImage = (
+                strpos($fileSignature, 'ffd8ff') === 0 || // JPEG
+                strpos($fileSignature, '89504e47') === 0 // PNG
+            );
+            
+            if (!$isValidImage) {
+                $errorMessage = isset($niceNames['image']) && !empty($niceNames['image']) 
+                    ? $niceNames['image'] 
+                    : 'The uploaded file is not a valid image. Please upload a JPEG or PNG image.';
+                    
+                return redirect()->back()
+                    ->withErrors(['image' => $errorMessage])
+                    ->withInput();
+            }
+        }
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');

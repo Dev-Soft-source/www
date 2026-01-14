@@ -1,5 +1,24 @@
 @extends('layouts.template')
 
+@section('style')
+<style>
+    .verify-button-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-size: 18px;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .verify-button-modern:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    .verify-button-modern:active {
+        transform: translateY(0);
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="mx-auto max-w-2xl lg:max-w-4xl my-6">
     @if(session('error'))
@@ -85,9 +104,9 @@
                         @enderror
                     </div>
                     <div class="font-FuturaMdCnBT mt-4 flex flex-col  md:flex-row lg:flex-row items-center gap-2 justify-center md:col-span-2">
-                        <button type="button" onclick="sendVerificationCode()" class="button-exp-fill w-full md:w-32">@isset($step4Page->verify_button_label){{ $step4Page->verify_button_label }}@endisset</button>
+                        <button type="button" onclick="sendVerificationCode()" class="verify-button-modern w-full md:w-36 text-white text-base rounded font-FuturaMdCnBT px-5 py-2.5 text-center shadow-md">@isset($step4Page->verify_button_label){{ $step4Page->verify_button_label }}@endisset</button>
                         <div class="font-FuturaMdCnBT flex flex-col md:flex-row lg:flex-row items-center justify-center gap-2 w-full md:w-auto">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-full md:w-32">@isset($step4Page->skip_button_label){{ $step4Page->skip_button_label }}@endisset</button>
+                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-full md:w-36">@isset($step4Page->skip_button_label){{ $step4Page->skip_button_label }}@endisset</button>
                             <button type="button" onclick="showSaveUnverifiedConfirmation()" id="saveButton" class="font-FuturaMdCnBT button-exp-fill w-full md:w-36 opacity-50 cursor-not-allowed" disabled>@isset($step4Page->save_button_label){{ $step4Page->save_button_label }}@endisset</button>
                         </div>
                     </div>
@@ -103,13 +122,21 @@
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <p class="text-lg font-medium text-gray-900 mb-4">Are you sure you want to skip this step for now?</p>
-                            <p class="text-gray-600">If you do, you can still add this later from your Profile Dashboard.</p>
+                            <h6 class="text-lg font-medium text-gray-900 mb-4">
+                                @isset($step4Page->confirm_title){{ $step4Page->confirm_title }}@endisset
+                            </h6>
+                            <p class="text-gray-600">
+                                @isset($step4Page->confirm_text){{ $step4Page->confirm_text }}@endisset
+                            </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
-                        <a href="{{ route('profile', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes, skip it!</a>
-                        <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No, take me back</button>
+                        <a href="{{ route('profile', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            @isset($step4Page->confirm_skip){{ $step4Page->confirm_skip }}@endisset
+                        </a>
+                        <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
+                            @isset($step4Page->confirm_back){{ $step4Page->confirm_back }}@endisset
+                        </button>
                     </div>
                 </div>
             </div>
@@ -123,13 +150,21 @@
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <p class="text-lg font-medium text-gray-900 mb-4">Wait! Skipping verification means you won't be able to use Pink Rides or Extra-Care Rides.</p>
-                            <p class="text-gray-600">You can still verify your phone number anytime from your Profile Dashboard.</p>
+                            <h6 class="text-lg font-medium text-gray-900 mb-4">
+                                @isset($step4Page->skip_confirmation_heading){{ $step4Page->skip_confirmation_heading }}@endisset
+                            </h6>
+                            <p class="text-gray-600">
+                                @isset($step4Page->skip_confirmation_message){{ $step4Page->skip_confirmation_message }}@endisset
+                            </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
-                        <button type="button" onclick="confirmSaveUnverified()" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes, skip it!</button>
-                        <button type="button" onclick="hideSaveUnverifiedConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No, take me back</button>
+                        <button type="button" onclick="confirmSaveUnverified()" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            @isset($step4Page->save_button_label_1){{ $step4Page->save_button_label_1 }}@endisset
+                        </button>
+                        <button type="button" onclick="hideSaveUnverifiedConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
+                            @isset($step4Page->skip_button_label_1){{ $step4Page->skip_button_label_1 }}@endisset
+                        </button>
                     </div>
                 </div>
             </div>
@@ -152,8 +187,12 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="mt-2">
-                              <p class="text-left">Please enter the four digit code you received on your phone number</p>
-                              <p class="text-center mt-4">Enter code</p>
+                              <h6 class="text-left">
+                                @isset($step4Page->verify_code_heading){{ $step4Page->verify_code_heading }}@endisset
+                              </h6>
+                              <p class="text-center mt-4">
+                                @isset($step4Page->verify_code_label_1){{ $step4Page->verify_code_label_1 }}@endisset
+                              </p>
                               <div class="flex justify-center mt-4 space-x-2">
                                 <input type="text" name="code[]" maxlength="1" class="font-FuturaMdCnBT w-10 h-10 text-center block mt-1 border p-1.5 text-base rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 <input type="text" name="code[]" maxlength="1" class="font-FuturaMdCnBT w-10 h-10 text-center block mt-1 border p-1.5 text-base rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
@@ -166,7 +205,9 @@
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-36">Verify phone number</button>
+                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-36">
+                                @isset($step4Page->verify_button_label_1){{ $step4Page->verify_button_label_1 }}@endisset
+                            </button>
                         </div>
                     </div>
                 </div>

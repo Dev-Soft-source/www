@@ -107,8 +107,41 @@
           <img class="h-5" src="/assets/icons/google.png" alt="google icon">
         </a> --}}
       </div>
-      <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row  gap-2 justify-center items-center py-2 text-white">
+      <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 justify-center items-center py-2 text-white">
         <p class="text-white">© ProximaRide 2024. All rights reserved</p>
+        <div class="relative">
+            <button id="dropdownDesktopButton" data-dropdown-toggle="dropdown_desktop" class="min-w-fit px-3 py-1.5 border border-white rounded flex gap-2 items-center bg-white/10 hover:bg-white/20 transition-colors" type="button">
+                <img class="h-4" src="{{ $selectedLanguage->flag_icon ?? 'assets/flag.png' }}" alt="">
+                <span class="truncate text-white">{{ $selectedLanguage->name ?? 'Eng' }}</span>
+            </button>
+            <!-- Dropdown menu -->
+            <div id="dropdown_desktop" class="animate__animated animate__fadeIn absolute bottom-full right-0 mb-2 z-30 hidden bg-white divide-y divide-gray-100 rounded shadow w-32">
+                <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDesktopButton">
+                    @foreach ($languages as $language)
+                        @php
+                            $languageParameter = 'lang';
+                            $currentRoute = app('router')->getCurrentRoute();
+                            $routeParams = $currentRoute->parameters();
+                            $routeParams['lang'] = $language->abbreviation;
+                            $queryParameters = request()->query();
+                            $routeParams = array_merge($routeParams, $queryParameters);
+                            if ($currentRoute->getName() === 'news_detail') {
+                                $languageUrl = route('news', ['lang' => $language->abbreviation]);
+                            } else {
+                                $languageUrl = route($currentRoute->getName(), $routeParams);
+                            }
+                        @endphp
+                        <li>
+                            <a href="{{ $languageUrl }}"
+                                class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100 @isset($selectedLanguage){{ $selectedLanguage->name === $language->name ? 'text-primary font-medium' : 'text-gray-700 font-normal' }}@endisset">
+                                <img class="h-4" src="{{ $language->flag_icon }}" alt="">
+                                {{ $language->name }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
       </div>
 
     </div>

@@ -15,21 +15,21 @@
             <p for="" class=" text-black mt-2">
                 {!! $step4Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra-Care Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license " !!}
             </p>
-            <p for="" class=" text-black mt-8">
+            <p for="" class=" text-black mt-4">
                 {!! $step4Page->sub_main_label ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it" !!}
             </p>
             
-            <div class="pb-2 flex items-center justify-start mt-3">
+            <!-- <div class="pb-2 flex items-center justify-start mt-3">
                 <p class="text-red-500">*
                     @isset($step4Page->required_label)
                         {{ $step4Page->required_label }}
                     @endisset
                 </p>
-            </div>
+            </div> -->
             <form class="rounded-lg" method="POST" action="{{ route('step4to5.store', ['id' => $user->id, 'lang' => $selectedLanguage->abbreviation]) }}" enctype="multipart/form-data">
                 @csrf
 
-                <div class="bg-primary text-white rounded-t-lg text-xl flex items-center justify-center space-x-2 p-4 font-FuturaMdCnBT">
+                <div class="bg-primary text-white rounded-t-lg text-xl mt-4 flex items-center justify-center space-x-2 p-4 font-FuturaMdCnBT">
                     {{ $step4Page->liecense_section_heading ?? "Step 4 - Your driver’s license" }}
                 </div>
 
@@ -40,12 +40,10 @@
                             class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                             <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                 <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png') }}">
-                                <p class="text-sm lg:text-lg text-gray-900">Driver's license photo
-                                    <!-- <span class="text-primary">
-                                        @isset($step4Page->mobile_photo_choose_file_label)
-                                            {{ $step4Page->mobile_photo_choose_file_label }}
-                                        @endisset
-                                    </span> -->
+                                <p class="text-sm lg:text-lg text-gray-900">
+                                    @isset($step4Page->driver_liscense_photo_label)
+                                        {{ $step4Page->driver_liscense_photo_label }}
+                                    @endisset
                                 </p>
                             </div>
                             <input id="dropzone-file1" name="driver_liscense" type="file" onchange="previewImage1(this)" class="hidden" />
@@ -58,12 +56,12 @@
                         </div>
                         @enderror
                         <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill">
+                            <button type="button" onclick="showSkipConfirmation()" class="w-40 button-exp-fill">
                                 @isset($step4Page->skip_license)
                                     {{ $step4Page->skip_license }}
                                 @endisset
                             </button>
-                            <button type="submit" id="nextButton" class="button-exp-fill w-28 opacity-50 cursor-not-allowed" disabled>
+                            <button type="submit" id="nextButton" class="button-exp-fill w-40 opacity-50 cursor-not-allowed" disabled>
                                 @isset($step4Page->next_button_label)
                                     {{ $step4Page->next_button_label }}
                                 @endisset
@@ -80,11 +78,19 @@
 <div id="skipModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="text-center w-full">
-                        <p class="text-lg font-medium text-gray-900 mb-4">Are you sure you want to skip this step for now?</p>
-                        <p class="text-gray-600">If you do, you can still add this later from your Profile Dashboard.</p>
+                        <h6 class="text-lg font-medium text-gray-900 mb-4">
+                            @isset($step4Page->skip_confirmation_heading)
+                                {{ $step4Page->skip_confirmation_heading }}
+                            @endisset
+                        </h6>
+                        <p class="text-gray-600">
+                            @isset($step4Page->skip_confirmation_message)
+                                {{ $step4Page->skip_confirmation_message }}
+                            @endisset
+                        </p>
                     </div>
                 </div>
                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">

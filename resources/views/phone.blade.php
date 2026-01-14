@@ -84,9 +84,15 @@
                     @endisset
                 </h1>
                 <p class="text-gray-900">
-                    @isset($phoneSetting->phone_no_description_text)
-                        {!! $phoneSetting->phone_no_description_text !!}
-                    @endisset
+                    @if(isset($phone_numbers) && count($phone_numbers) > 0)
+                        @isset($phoneSetting->phone_no_description_text)
+                            {!! $phoneSetting->phone_no_description_text !!}
+                        @endisset
+                    @else
+                        @isset($phoneSetting->phone_no_description_text2)
+                            {!! $phoneSetting->phone_no_description_text2 !!}
+                        @endisset
+                    @endif
                 </p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 w-full gap-4 mt-4">
@@ -181,14 +187,34 @@
 
                 <div class="flex justify-center mt-2">
                     <button id="showForm" type="button"
-                        @if ($errors->any()) class="button-exp-fill hidden" @else class="button-exp-fill w-fit" @endif>Add a New Phone Number</button>
+                        @if ($errors->any()) class="button-exp-fill hidden" @else class="button-exp-fill w-fit" @endif>
+                        @if(isset($phone_numbers) && count($phone_numbers) > 0)
+                            @isset($phoneSetting->add_another_phone_number_button_text)
+                                {{ $phoneSetting->add_another_phone_number_button_text }}
+                            @endisset
+                        @else
+                            @isset($phoneSetting->add_phone_number_button_text)
+                                {{ $phoneSetting->add_phone_number_button_text }}
+                            @endisset
+                        @endif
+                    </button>
                 </div>
 
                 <form id="addForm" method="POST" action="{{ route('phone.store') }}"
                     @if ($errors->any()) class="" @else class="hidden" @endif>
                     @csrf
                     <div class="mt-6">
-                        <p class="text-primary text-lg md:text-xl lg:text-2xl font-FuturaMdCnBT font-medium mb-2">{{ $phoneSetting->add_another_phone_number_title ?? 'Add another phone number' }}</p>
+                        <p class="text-primary text-lg md:text-xl lg:text-2xl font-FuturaMdCnBT font-medium mb-2">
+                            @if(isset($phone_numbers) && count($phone_numbers) > 0)
+                                @isset($phoneSetting->add_another_phone_number_button_text)
+                                    {{ $phoneSetting->add_another_phone_number_button_text }}
+                                @endisset
+                            @else
+                                @isset($phoneSetting->add_phone_number_button_text)
+                                    {{ $phoneSetting->add_phone_number_button_text }}
+                                @endisset
+                            @endif
+                        </p>
                     </div>
                     <div class="mt-2">
                         <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-start gap-4 mt-1">
@@ -356,8 +382,16 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="mt-2">
-                              <p class="text-left">Please enter the four digit code you received on your phone number</p>
-                              <p class="text-center mt-4">Enter Code</p>
+                              <h6 class="text-left">
+                                @isset($phoneSetting->verify_code_heading)
+                                    {{ $phoneSetting->verify_code_heading }}
+                                @endisset
+                              </h6>
+                              <p class="text-center mt-4">
+                                @isset($phoneSetting->verify_code_label_1)
+                                    {{ $phoneSetting->verify_code_label_1 }}
+                                @endisset
+                              </p>
                               <div class="flex justify-center mt-4 space-x-2">
                                 <input type="text" name="code[]" maxlength="1" class="w-10 h-10 text-center block mt-1 border p-1.5 text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 <input type="text" name="code[]" maxlength="1" class="w-10 h-10 text-center block mt-1 border p-1.5 text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
@@ -374,7 +408,11 @@
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-36">Verify Phone Number</button>
+                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-36">
+                                @isset($phoneSetting->verify_button_label_1)
+                                    {{ $phoneSetting->verify_button_label_1 }}
+                                @endisset
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -36,10 +36,51 @@ class CountryStateCityController extends Controller
             $cities = $cities->where('name', 'like', $request->search.'%');
         }
 
-        $cities = $cities->orderBy('name', 'asc')->get();
+        // Group by city name, state_id to remove database-level duplicates before processing
+        $cities = $cities->orderBy('name', 'asc')
+            ->get()
+            ->unique(function ($city) {
+                // Use name and state_id as unique key at database level
+                return strtolower(trim($city->name)) . '|' . ($city->state_id ?? 'null');
+            });
 
+        // Deduplicate cities to ensure only one entry per unique city name + state + country combination
+        // This prevents showing "Ottawa, ON, Canada" and multiple "Ottawa, null, United States" entries
+        // Special handling: If state abbreviation is null, group by base_name + country_id only
+        // Otherwise, group by base_name + state_id + country_id
+        $uniqueCities = $cities->map(function ($city) {
+            // Extract the base city name by removing any state/country suffixes
+            // Pattern: "City Name, State, Country" or "City Name, State" -> "City Name"
+            $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
+            $countryId = $city->state && $city->state->country ? $city->state->country->id : null;
+            $stateAbrv = $city->state ? $city->state->abrv : null;
+            return [
+                'city' => $city,
+                'base_name' => strtolower(trim($baseName)),
+                'state_id' => $city->state_id,
+                'state_abrv' => $stateAbrv,
+                'country_id' => $countryId
+            ];
+        })->unique(function ($item) {
+            // If state abbreviation is null, group only by base_name + country_id
+            // This ensures multiple "Ottawa, null, United States" entries show as one
+            // If state abbreviation exists, group by base_name + state_id + country_id
+            if (empty($item['state_abrv'])) {
+                return $item['base_name'] . '|' . ($item['country_id'] ?? 'null');
+            } else {
+                return $item['base_name'] . '|' . ($item['state_id'] ?? 'null') . '|' . ($item['country_id'] ?? 'null');
+            }
+        })->map(function ($item) {
+            // Return only the city object, but ensure the name is clean (base name only)
+            $city = $item['city'];
+            // Update the city name to be just the base name (without state/country suffixes)
+            $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
+            $city->name = $baseName;
+            return $city;
+        });
 
-        $data['cities'] = $cities;
+        // Reset array keys after unique() to ensure proper JSON encoding
+        $data['cities'] = $uniqueCities->values();
         return response()->json($data);
     }
 

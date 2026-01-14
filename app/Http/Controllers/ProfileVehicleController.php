@@ -403,15 +403,46 @@ class ProfileVehicleController extends Controller
         ];
 
         $vehicle = Vehicle::findOrFail($id);
-        $filename = $vehicle->image;
+        // Get the raw attribute value (filename only) instead of the accessor (full URL)
+        $attributes = $vehicle->getAttributes();
+        $filename = isset($attributes['image']) && !empty($attributes['image']) ? $attributes['image'] : null;
 
+        // Store old filename for potential deletion
+        $oldFilename = isset($attributes['image']) && !empty($attributes['image']) ? $attributes['image'] : null;
+        
+        // Handle new image upload - check this FIRST before anything else
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $originalName = $file->getClientOriginalName();
+            
+            // Generate new filename with timestamp to ensure uniqueness
+            $filename = time() . '_' . $originalName;
             $destination_path = public_path('/car_images');
+            
+            // Delete old file if it exists and is different from new filename
+            if ($oldFilename && $oldFilename !== $filename && file_exists($destination_path . '/' . $oldFilename)) {
+                @unlink($destination_path . '/' . $oldFilename);
+                \Log::info('Old image deleted: ' . $oldFilename);
+            }
+            
+            // Move new file
             $file->move($destination_path, $filename);
+            \Log::info('New image uploaded: ' . $filename);
         } elseif ($request->filled('remove_image') && $request->remove_image == 1) {
+            // Handle image removal - delete the file
+            if ($oldFilename && file_exists(public_path('/car_images/' . $oldFilename))) {
+                @unlink(public_path('/car_images/' . $oldFilename));
+                \Log::info('Image file deleted: ' . $oldFilename);
+            }
             $filename = null;
+            \Log::info('Image removed');
+        } elseif ($request->filled('existing_image')) {
+            // Only use existing_image if no new file was uploaded
+            // existing_image should be just the filename (not full URL)
+            $existingImage = $request->input('existing_image');
+            // Make sure it's just a filename, not a full path
+            $filename = basename($existingImage);
+            \Log::info('Using existing image: ' . $filename);
         }
 
         $validator = Validator::make($request->all(),[
@@ -444,7 +475,9 @@ class ProfileVehicleController extends Controller
             Vehicle::where('user_id', auth()->user()->id)->update(['primary_vehicle' => 0]);
         }
 
-       $getVehicle =  Vehicle::whereId($id)->update([
+       // Always update the vehicle, including image fields
+       // This ensures the update happens even if the filename appears the same
+       $updateData = [
             'make' => $request->make,
             'model' => $request->model,
             'type' => $request->type,
@@ -453,10 +486,13 @@ class ProfileVehicleController extends Controller
             'year' => $request->year,
             'car_type' => $request->car_type,
             'primary_vehicle' => $request->primary_vehicle,
-            'image' => $filename,
-            'original_image' => $filename,
+            'image' => $filename, // Always include image, even if it's the same
+            'original_image' => $filename, // Always include original_image
             'remove_image' => $remove_image,
-        ]);
+        ];
+        
+        $getVehicle = Vehicle::whereId($id)->update($updateData);
+        \Log::info('Vehicle updated with image: ' . ($filename ?? 'null'));
 
         if(isset($getVehicle->remove_image) && $getVehicle->remove_image != "0"){
             $getRides = Ride::where('vehicle_id', $getVehicle->id)->get();
@@ -525,9 +561,11 @@ class ProfileVehicleController extends Controller
         
         $result = Vehicle::whereId($id)->delete();
         if ($result) {
-            // If we deleted the primary vehicle, set the first remaining vehicle as primary
+            // If we deleted the primary vehicle, set the first remaining vehicle (chronologically by id) as primary
             if ($wasPrimary) {
-                $firstRemainingVehicle = Vehicle::where('user_id', auth()->user()->id)->first();
+                $firstRemainingVehicle = Vehicle::where('user_id', auth()->user()->id)
+                    ->orderBy('id', 'asc')
+                    ->first();
                 if ($firstRemainingVehicle) {
                     $firstRemainingVehicle->update(['primary_vehicle' => '1']);
                 }

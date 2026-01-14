@@ -83,39 +83,6 @@
         </div>
 
         <div class="flex items-center justify-end space-x-2 w-1/2">
-            <div class="relative">
-                <button id="dropdownDesktopButton" data-dropdown-toggle="dropdown_desktop" class="min-w-fit md:px-1 lg:px-2 py-1.5 border border-gray-300 rounded flex gap-2 items-center" type="button">
-                    <img class="h-4" src="{{ $selectedLanguage->flag_icon ?? 'assets/flag.png' }}" alt="">
-                    <span class="truncate">{{ $selectedLanguage->name ?? 'Eng' }}</span>
-                </button>
-                <!-- Dropdown menu -->
-                <div id="dropdown_desktop" class="animate__animated animate__fadeIn absolute right-0 z-30 hidden bg-white divide-y divide-gray-100 rounded shadow w-32">
-                    <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownDesktopButton">
-                        @foreach ($languages as $language)
-                            @php
-                                $languageParameter = 'lang';
-                                $currentRoute = app('router')->getCurrentRoute();
-                                $routeParams = $currentRoute->parameters();
-                                $routeParams['lang'] = $language->abbreviation;
-                                $queryParameters = request()->query();
-                                $routeParams = array_merge($routeParams, $queryParameters);
-                                if ($currentRoute->getName() === 'news_detail') {
-                                    $languageUrl = route('news', ['lang' => $language->abbreviation]);
-                                } else {
-                                    $languageUrl = route($currentRoute->getName(), $routeParams);
-                                }
-                            @endphp
-                            <li>
-                                <a href="{{ $languageUrl }}"
-                                    class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100 @isset($selectedLanguage){{ $selectedLanguage->name === $language->name ? 'text-primary font-medium' : 'text-gray-700 font-normal' }}@endisset">
-                                    <img class="h-4" src="{{ $language->flag_icon }}" alt="">
-                                    {{ $language->name }}
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
             @if(auth()->check())
                 <div class="relative">
                     <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center">
@@ -151,7 +118,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
-                                             @if ($notification->from)
+                                             @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
                                              <a @if ($notification->type == '1')
                                                  @if($notification->departure && $notification->destination)
                                                  href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $notification->departure , 'destination' => $notification->destination , 'id' => $notification->ride_id]) }}"
@@ -165,10 +132,15 @@
                                                      ]) }}"
                                                 @elseif ($notification->type == null)
                                                     @php
-                                                        $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
-                                                        $targetUrl = $hasChatTarget
-                                                            ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
-                                                            : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                        // Check if it's a welcome/system notification
+                                                        if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
+                                                            $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                        } else {
+                                                            $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
+                                                            $targetUrl = $hasChatTarget
+                                                                ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
+                                                                : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                        }
                                                     @endphp
                                                     href="javascript:void(0);"
                                                     onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, '{{ $targetUrl }}')"
@@ -177,8 +149,8 @@
                                                     <div class="flex gap-3 p-4 relative">
                                                         <div class="flex-shrink-0 relative">
                                                             <img class="w-10 h-10 rounded-full object-cover"
-                                                                src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : $notification->from->profile_image }}"
-                                                                alt="{{ $notification->category == 'system' ? 'System' : $notification->from->first_name }}'s profile">
+                                                                src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : ($notification->from ? $notification->from->profile_image : asset('assets/favicon.png')) }}"
+                                                                alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}'s profile">
                                                             @if ($notification->is_read == 0)
                                                                 <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
                                                             @endif

@@ -31,6 +31,7 @@ use App\Models\VideoDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Stripe\Customer;
 use Stripe\PaymentMethod;

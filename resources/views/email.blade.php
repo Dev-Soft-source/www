@@ -5,6 +5,16 @@
         @include('layouts.inc.profile_sidebar')
 
         <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
+            @if (session('success'))
+                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ session('error') }}
+                </div>
+            @endif
             <div class="pb-2">
                 <h1 class="mb-0">
                     @isset($emailSettingPage->main_heading)
@@ -32,7 +42,7 @@
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     </div>
                     <div class="mt-3 flex justify-center">
-                        <button id="showUpdateForm" type="button"
+                        <button id="showUpdateForm" type="button" class="button-exp-fill w-28"
                             @if ($errors->any()) class="button-exp-fill hidden" @else class="button-exp-fill block" @endif>
                             @isset($emailSettingPage->update_button_text)
                                 {{ $emailSettingPage->update_button_text }}
@@ -89,7 +99,7 @@
                             @enderror
                         </div> --}}
                         <div class="mt-3 flex justify-center w-full">
-                            <button type="submit" class="button-exp-fill">
+                            <button type="submit" class="button-exp-fill w-28">
                                 @isset($emailSettingPage->save_btn_label)
                                     {{ $emailSettingPage->save_btn_label }}
                                 @endisset
@@ -113,38 +123,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!showUpdateFormBtn || !updateForm || !selectedLang) return;
 
-    const originalUrl = window.location.href;
-    let isFormOpened = false;
+    // Check if form should be visible due to errors or URL
+    const hasErrors = {{ $errors->any() ? 'true' : 'false' }};
+    const isEditEmailUrl = window.location.pathname.includes('/edit-email');
+    let isFormOpened = hasErrors || isEditEmailUrl;
 
-    // Sirf button click pe URL change karo
-    showUpdateFormBtn.addEventListener('click', function() {
-        if (isFormOpened) return;
-        isFormOpened = true;
-
+    // Initialize form state based on errors or URL
+    if (isFormOpened) {
         updateForm.style.display = 'block';
-        this.style.display = 'none';
+        updateForm.classList.remove('hidden');
+        updateForm.classList.add('block');
+        if (showUpdateFormBtn) {
+            showUpdateFormBtn.style.display = 'none';
+            showUpdateFormBtn.classList.add('hidden');
+        }
+        if (isEditEmailUrl && !hasErrors) {
+            const lang = selectedLang.value;
+            history.replaceState({ formVisible: true }, '', `/${lang}/edit-email`);
+        }
+    }
 
-        const lang = selectedLang.value;
-        const newUrl = `/${lang}/edit-email`;
-        history.pushState({ formVisible: true }, '', newUrl);
-    });
+    // Button click handler
+    if (showUpdateFormBtn) {
+        showUpdateFormBtn.addEventListener('click', function() {
+            if (isFormOpened) return;
+            isFormOpened = true;
 
-    // Sirf tab form dikhao jab history state mein formVisible ho
+            updateForm.style.display = 'block';
+            updateForm.classList.remove('hidden');
+            updateForm.classList.add('block');
+            this.style.display = 'none';
+            this.classList.add('hidden');
+
+            const lang = selectedLang.value;
+            const newUrl = `/${lang}/edit-email`;
+            history.pushState({ formVisible: true }, '', newUrl);
+        });
+    }
+
+    // Handle browser back/forward
     window.addEventListener('popstate', function(event) {
         if (event.state && event.state.formVisible && !isFormOpened) {
             updateForm.style.display = 'block';
-            showUpdateFormBtn.style.display = 'none';
+            updateForm.classList.remove('hidden');
+            updateForm.classList.add('block');
+            if (showUpdateFormBtn) {
+                showUpdateFormBtn.style.display = 'none';
+                showUpdateFormBtn.classList.add('hidden');
+            }
             isFormOpened = true;
+        } else if (!event.state || !event.state.formVisible) {
+            if (!hasErrors) {
+                updateForm.style.display = 'none';
+                updateForm.classList.remove('block');
+                updateForm.classList.add('hidden');
+                if (showUpdateFormBtn) {
+                    showUpdateFormBtn.style.display = 'block';
+                    showUpdateFormBtn.classList.remove('hidden');
+                }
+                isFormOpened = false;
+            }
         }
-        // Agar formVisible nahi hai, to kuch mat karo → logout ko allow karo!
     });
-
-    // Page load pe check karo agar URL mein /edit-email hai to form dikhao
-    if (window.location.pathname.includes('/edit-email')) {
-        updateForm.style.display = 'block';
-        showUpdateFormBtn.style.display = 'none';
-        isFormOpened = true;
-    }
 });
 </script>
 @endsection
