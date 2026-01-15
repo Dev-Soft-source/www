@@ -115,7 +115,7 @@
         @endphp
        <div class="relative mt-2">
 
-           <input type="number" step="any" id="price_{{$index}}" value="{{ $price }}" name="price_spot[]" id="priceData{{$index}}" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
+           <input type="number" step="any" id="priceData{{$index}}" value="{{ $price }}" name="price_spot[]" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
            <div class="price_{{$index}} {{ !empty($fromSpotError['price']) && $fromSpotError['price']!='' ? "" : "hidden"  }}  relative tooltip -bottom-4 group-hover:flex">
             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-primary text-gray-600 w-full md:w-1/2 rounded" >
                 <p class="price_message text-white leading-none text-sm lg:text-base">{{ $fromSpotError['price'] ?? "" }}</p>

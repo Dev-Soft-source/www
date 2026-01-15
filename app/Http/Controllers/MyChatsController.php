@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\ChatsPageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MyChatsController extends Controller
 {
@@ -69,11 +70,10 @@ class MyChatsController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
+        Log::info($notifications);
+
         $chats = Message::where(function ($query) use($user_id){
             $query->where('sender', $user_id)->orWhere('receiver', $user_id);
-        })
-        ->where(function ($query) {
-            $query->where('status', 'new')->orWhereNull('status');
         })
         ->orderByDesc('created_at')
             ->get()
@@ -128,6 +128,8 @@ class MyChatsController extends Controller
                 return $chat['created_at'] ?? '';
             })
             ->values();
+
+        Log::info($chats);
         return view('my_chats', ['successMessage' => $successMessage,'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
     }
 

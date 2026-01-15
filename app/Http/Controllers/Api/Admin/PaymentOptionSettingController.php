@@ -26,6 +26,7 @@ class PaymentOptionSettingController extends Controller
             $paymentSetting = PaymentSetting::create([]);
             $paymentSetting = PaymentSetting::with(['paymentSettingDetail', 'paymentSettingDetail.language:id,name'])->find($paymentSetting->id);
         }
+        
         return $this->successResponse(new PaymentOptionSettingResource($paymentSetting), 'Data Get Successfully!');
     }
 

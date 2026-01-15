@@ -316,9 +316,12 @@ class SignupController extends Controller
             return response()->json([
                 'success' => true,
                 'showModal' => true,
+                'emailSent' => $emailSent,
                 'messages' => [
                     'welcome_message' => $messages->welcome_message ?? 'Welcome',
-                    'email_sent_message' => $messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.',
+                    'email_sent_message' => $emailSent 
+                        ? ($messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.')
+                        : ($messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.') . ' <strong>Note: There was an issue sending the email. Please use the "Request a new verification email" option if you don\'t receive it.</strong>',
                     'registration_successful_title' => $messages->registration_successful_title ?? 'Registration Successful!',
                 ],
                 'user' => [
@@ -328,12 +331,28 @@ class SignupController extends Controller
             ]);
         }
         
-        return redirect()->back()->with(['showModal' => true, 'messages' => $messages, 'user' => $user]);
+        return redirect()->back()->with([
+            'showModal' => true, 
+            'messages' => $messages, 
+            'user' => $user,
+            'emailSent' => $emailSent
+        ]);
     }
 
-    public function sendEmailVerify($email)
+    public function sendEmailVerify($email, Request $request)
     {
         $user = User::where('email', $email)->first();
+        
+        if (!$user) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            return redirect()->back()->with(['error' => 'User not found']);
+        }
+        
         $token = Str::random(64);
 
         $existingRecord = DB::table('password_resets')
@@ -359,8 +378,10 @@ class SignupController extends Controller
         $data = ['first_name' => $user->first_name, 'email' => $user->email, 'token' => $token];
 
         // Send email verification immediately; fallback to log mailer
+        $emailSent = false;
         try {
             Mail::to($user->email)->send(new UserEmailVerification($data));
+            $emailSent = true;
             Log::info('Email verification sent successfully (resend)', ['email' => $user->email]);
         } catch (\Throwable $e) {
             Log::error('Failed to send email verification', [
@@ -370,6 +391,7 @@ class SignupController extends Controller
             ]);
             try {
                 Mail::mailer('log')->to($user->email)->send(new UserEmailVerification($data));
+                $emailSent = true;
                 Log::info('Email verification sent via log mailer (resend)', ['email' => $user->email]);
             } catch (\Throwable $e2) {
                 Log::error('Failed to send email verification via log mailer', [
@@ -378,8 +400,21 @@ class SignupController extends Controller
                 ]);
             }
         }
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => $emailSent,
+                'message' => $emailSent 
+                    ? 'Verification email has been sent! Please check your inbox.' 
+                    : 'There was an issue sending the email. Please try again later.'
+            ]);
+        }
 
-        return redirect()->back()->with(['success' => 'We will send you a verification email. Check your inbox']);
+        return redirect()->back()->with([
+            'success' => $emailSent 
+                ? 'We\'ve sent you a verification email. Check your inbox' 
+                : 'There was an issue sending the email. Please try again later.'
+        ]);
     }
 
     public function redirectToProvider($lang, $provider)

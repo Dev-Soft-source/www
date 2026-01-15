@@ -466,6 +466,12 @@
                                 {!! $messages->email_sent_message !!}
                             @endif
                         </div>
+                        <div id="modal-resend-section" class="mt-4 hidden">
+                            <p class="text-sm text-red-600 text-center mb-2" id="email-error-message"></p>
+                            <button type="button" id="resend-email-btn" class="inline-flex w-auto justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 mx-auto">
+                                Request a new verification email
+                            </button>
+                        </div>
                     </div>
                 </div>
               </div>
@@ -635,12 +641,29 @@
             if (data && data.user) {
                 var welcomeMessage = document.getElementById('modal-welcome-message');
                 var emailMessage = document.getElementById('modal-email-message');
+                var resendSection = document.getElementById('modal-resend-section');
+                var emailErrorMessage = document.getElementById('email-error-message');
+                var resendBtn = document.getElementById('resend-email-btn');
                 
                 if (data.messages && data.messages.welcome_message && welcomeMessage) {
                     welcomeMessage.textContent = data.messages.welcome_message + ' ' + data.user.first_name + ',';
                 }
                 if (data.messages && data.messages.email_sent_message && emailMessage) {
                     emailMessage.innerHTML = data.messages.email_sent_message || '';
+                }
+                
+                // Show resend section if email wasn't sent
+                if (data.emailSent === false && resendSection) {
+                    resendSection.classList.remove('hidden');
+                    if (emailErrorMessage) {
+                        emailErrorMessage.textContent = 'We encountered an issue sending the verification email. Please use the button below to request a new one.';
+                    }
+                    // Store user email for resend functionality
+                    if (resendBtn) {
+                        resendBtn.setAttribute('data-email', data.user.email);
+                    }
+                } else if (resendSection) {
+                    resendSection.classList.add('hidden');
                 }
             }
             
@@ -652,6 +675,68 @@
         } else {
             console.error('Modal element not found');
         }
+    }
+    
+    // Handle resend email button click
+    var resendEmailBtn = document.getElementById('resend-email-btn');
+    if (resendEmailBtn) {
+        resendEmailBtn.addEventListener('click', function() {
+            var email = this.getAttribute('data-email');
+            if (!email) {
+                alert('Email address not found. Please try signing up again.');
+                return;
+            }
+            
+            // Disable button and show loading
+            this.disabled = true;
+            var originalText = this.innerHTML;
+            this.innerHTML = 'Sending...';
+            
+            // Get current language
+            var currentLang = window.location.pathname.split('/')[1] || 'en';
+            
+            // Make AJAX request to resend email
+            fetch('/' + currentLang + '/send-email-verify/' + encodeURIComponent(email), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json().catch(function() {
+                    return { success: true, message: 'Email sent successfully' };
+                });
+            })
+            .then(function(data) {
+                var errorMessage = document.getElementById('email-error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = 'Verification email has been sent! Please check your inbox.';
+                    errorMessage.classList.remove('text-red-600');
+                    errorMessage.classList.add('text-green-600');
+                }
+                // Hide resend button after successful send
+                setTimeout(function() {
+                    var resendSection = document.getElementById('modal-resend-section');
+                    if (resendSection) {
+                        resendSection.classList.add('hidden');
+                    }
+                }, 3000);
+            })
+            .catch(function(error) {
+                console.error('Error resending email:', error);
+                var errorMessage = document.getElementById('email-error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = 'Failed to send email. Please try again later.';
+                    errorMessage.classList.remove('text-green-600');
+                    errorMessage.classList.add('text-red-600');
+                }
+            })
+            .finally(function() {
+                resendEmailBtn.disabled = false;
+                resendEmailBtn.innerHTML = originalText;
+            });
+        });
     }
 
     // AJAX Form Submission - PREVENTS PAGE REFRESH

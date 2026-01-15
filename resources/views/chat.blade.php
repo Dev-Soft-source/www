@@ -58,12 +58,15 @@
     window.authUserId = {{ Auth::id() ?? 'null' }};
       window.ride = @json($ride->id); // Pass $ride to JavaScript
       window.passenger = @json($passenger->id); // Pass $ride to JavaScript
-      window.rideDetails = @json([
-          'departure' => $ride->rideDetail[0]->departure ?? '',
-          'destination' => $ride->rideDetail[0]->destination ?? '',
-          'date' => $ride->date ?? '',
-          'time' => $ride->time ?? ''
-      ]);
+      @php
+          $rideDetailsArray = [
+              'departure' => $ride->rideDetail[0]->departure ?? '',
+              'destination' => $ride->rideDetail[0]->destination ?? '',
+              'date' => $ride->date ?? '',
+              'time' => $ride->time ?? ''
+          ];
+      @endphp
+      window.rideDetails = @json($rideDetailsArray);
     </script>
     <script>window.isOnChatDetailPage = true;</script>
   <script src="{{ asset('js/web.js') }}" defer></script>

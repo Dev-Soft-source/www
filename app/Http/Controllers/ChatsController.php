@@ -356,6 +356,17 @@ class ChatsController extends Controller
                     'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
                 ]);
                 $message1 = Message::whereId($message1->id)->with('user', 'rideDetail')->first();
+                // Use the redirect message as the main message for first message to avoid duplicate
+                $message = $message1;
+            } else {
+                // Only create regular message if it's not the first message
+                $message = Message::create([
+                    'ride_id' => $ride->id,
+                    'receiver' => $request->input('userId'),
+                    'sender' => $user->id,
+                    'message' => $request->input('message'),
+                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
+                ]);
             }
 
             $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
@@ -391,16 +402,18 @@ class ChatsController extends Controller
                 $message_count->contact_user_id = $request->input('userId');
                 $message_count->save();
             }
-            
 
-
-            $message = Message::create([
-                'ride_id' => $ride->id,
-                'receiver' => $request->input('userId'),
-                'sender' => $user->id,
-                'message' => $request->input('message'),
-                'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
-            ]);
+            // Message is already created above (either redirect message for first message, or regular message for subsequent messages)
+            // Only create the message here if it wasn't created above
+            if (!isset($message)) {
+                $message = Message::create([
+                    'ride_id' => $ride->id,
+                    'receiver' => $request->input('userId'),
+                    'sender' => $user->id,
+                    'message' => $request->input('message'),
+                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
+                ]);
+            }
 
             // Assuming $user and $fcmToken are defined
             
@@ -435,8 +448,23 @@ class ChatsController extends Controller
                 }
             }
 
+            // Make sure message has user relationship loaded before broadcasting
+            if (!$message->relationLoaded('user')) {
+                $message->load('user');
+            }
 
-            broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
+            // Broadcast the event synchronously (not queued) for immediate real-time updates
+            try {
+                broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
+                Log::info('Message broadcasted', [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to broadcast message: ' . $e->getMessage());
+            }
 
             $message = Message::whereId($message->id)->with('user')->first();
 

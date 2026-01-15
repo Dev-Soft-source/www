@@ -1238,10 +1238,10 @@
                                                             <img id="profile-image" class="w-12 h-12 object-contain mb-4 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
                                                         @endif
                                                         <p class="text-sm lg:text-lg text-gray-900">Upload car photo.
-                                                            <span class="font-semibold text-primary">Choose file</span>
+                                                            <!-- <span class="font-semibold text-primary">Choose file</span> -->
                                                         </p>
                                                         <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                            Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max.
+                                                        JPEG, JPG, PNG, GIF - 10MB max.
                                                         </p>
                                                     </div>
                                                     <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
