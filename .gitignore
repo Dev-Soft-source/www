@@ -26,9 +26,9 @@ Homestead.json
 
 
 
-public/mix-manifest.json
-public/css
-public/js
+# public/mix-manifest.json
+# public/css
+# public/js
 
 package-lock.json
 CLAUDE.local.md
