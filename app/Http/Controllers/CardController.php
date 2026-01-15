@@ -51,7 +51,7 @@ class CardController extends Controller
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
         }
-
+        Log::info($paymentSettingDetail);
         $notifications = null;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -84,10 +84,14 @@ class CardController extends Controller
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        // Fetch card details from Stripe
+        // Fetch card details from Stripe for card payment methods
         foreach ($cards as $card) {
-            if ($card->stripe_payment_method_id) {
-                $card->paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+            if ($card->stripe_payment_method_id && $card->payment_method_type === 'card') {
+                try {
+                    $card->paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                } catch (\Exception $e) {
+                    Log::error('Error retrieving payment method: ' . $e->getMessage());
+                }
             }
         }
         return view('my_cards', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'cards' => $cards, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail]);
@@ -95,12 +99,44 @@ class CardController extends Controller
 
     public function sessionData(Request $request)
     {
-
-
         session(['bookingId' => $request->bookingId]);
         session(['rideDetailId' => $request->rideDetailId]);
         session(['rideId' => $request->rideId]);
         session(['type' => $request->type]);
+    }
+    
+    public function createSetupIntent(Request $request)
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+        
+        if (!$user->stripe_customer_id) {
+            $customer = Customer::create([
+                'email' => $user->email,
+                'name' => $user->first_name,
+            ]);
+            User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+            $user = User::whereId($user->id)->first();
+        }
+        
+        try {
+            $setupIntent = \Stripe\SetupIntent::create([
+                'customer' => $user->stripe_customer_id,
+                'payment_method_types' => ['card'],
+            ]);
+            
+            return response()->json([
+                'clientSecret' => $setupIntent->client_secret
+            ]);
+        } catch (\Exception $e) {
+            Log::error('SetupIntent creation error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to create setup intent'], 500);
+        }
     }
 
     public function create($lang = null, Request $request)
@@ -173,11 +209,44 @@ class CardController extends Controller
     {
         $user = auth()->user();
         $user_id = $user->id;
+        $paymentMethodType = $request->input('payment_method_type', 'card');
+        
+        $selectedLanguage = session('selectedLanguage', Language::where('is_default', 1)->first()->abbreviation);
+        $message = null;
+        if ($selectedLanguage) {
+            $language = Language::where('abbreviation', $selectedLanguage)->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $language->id)->select('card_add_message', 'already_added_card_message')->first();
+        }
 
-        // Validate the form data
+        try {
+            // Handle different payment method types
+            if ($paymentMethodType === 'card') {
+                return $this->storeCard($request, $user, $user_id, $message, $selectedLanguage);
+            } elseif ($paymentMethodType === 'paypal') {
+                return $this->storePayPal($request, $user, $user_id, $message, $selectedLanguage);
+            } elseif ($paymentMethodType === 'apple_pay') {
+                return $this->storeApplePay($request, $user, $user_id, $message, $selectedLanguage);
+            } elseif ($paymentMethodType === 'google_pay') {
+                return $this->storeGooglePay($request, $user, $user_id, $message, $selectedLanguage);
+            } else {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Invalid payment method type'], 400);
+                }
+                return back()->withErrors(['error' => 'Invalid payment method type']);
+            }
+        } catch (\Exception $e) {
+            Log::error('Payment method store error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'An error occurred while processing your payment method. Please try again.'], 500);
+            }
+            return back()->withErrors(['error' => 'An error occurred while processing your payment method. Please try again.']);
+        }
+    }
+    
+    private function storeCard(Request $request, $user, $user_id, $message, $selectedLanguage)
+    {
         $validatedData = $request->validate([
             'name_on_card' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\-]+$/'],
-            // 'card_type' => 'required',
             'street_address' => 'required',
             'house_apartment_number' => 'nullable',
             'city' => 'required',
@@ -189,113 +258,216 @@ class CardController extends Controller
             'name_on_card.regex' => 'Cardholder name can only contain letters, spaces, and hyphens',
         ]);
 
-        // Set Stripe API key
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        try {
-            if (!$user->stripe_customer_id) {
-                // Create a new Stripe customer
-                $customer = Customer::create([
-                    'email' => $user->email,
-                    'name' => $user->first_name,
-                ]);
-
-                User::whereId($user_id)->update([
-                    'stripe_customer_id' => $customer->id,
-                ]);
-
-                $user = User::whereId($user_id)->first();
-            }
-
-            // Create a PaymentMethod with Stripe using the token
-            $paymentMethod = PaymentMethod::create([
-                'type' => 'card',
-                'card' => ['token' => $request->stripeToken],
-                'billing_details' => [
-                    'name' => $request->name_on_card,
-                    'address' => [
-                        'line1' => $request->street_address . $request->house_apartment_number . $request->city . $request->province . $request->country . $request->postal_code,
-                    ],
-                ],
+        if (!$user->stripe_customer_id) {
+            $customer = Customer::create([
+                'email' => $user->email,
+                'name' => $user->first_name,
             ]);
+            User::whereId($user_id)->update(['stripe_customer_id' => $customer->id]);
+            $user = User::whereId($user_id)->first();
+        }
 
-            $message = null;
-            $selectedLanguage = session('selectedLanguage', Language::where('is_default', 1)->first()->abbreviation);
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $language = Language::where('abbreviation', $selectedLanguage)->first();
-                $message = SuccessMessagesSettingDetail::where('language_id', $language->id)->select('card_add_message', 'already_added_card_message')->first();
-            }
+        // Attach payment method to customer
+        $paymentMethod = PaymentMethod::retrieve($request->stripeToken);
+        $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
-            // Check if the card fingerprint already exists
-            $existingCard = Card::where('user_id', $user_id)->where('fingerprint', $paymentMethod->card->fingerprint)->first();
+        // Check if the card fingerprint already exists
+        if (isset($paymentMethod->card->fingerprint)) {
+            $existingCard = Card::where('user_id', $user_id)
+                ->where('fingerprint', $paymentMethod->card->fingerprint)
+                ->where('payment_method_type', 'card')
+                ->first();
             if ($existingCard) {
-                // If the fingerprint exists, return back with an error message
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $message->already_added_card_message ?? 'This card is already added'], 400);
+                }
                 return back()->withErrors(['error' => $message->already_added_card_message])->withInput();
             }
-
-            // Handle primary card setting
-            // Check if this is user's first card - auto-set as primary
-            $userCardCount = Card::where('user_id', $user_id)->count();
-            if ($userCardCount == 0) {
-                $primary_card = 1;
-            } else {
-                $primary_card = $request->filled('primary_card') ? $request->primary_card : 0;
-                if ($primary_card == 1) {
-                    Card::where('user_id', $user_id)->update(['primary_card' => 0]);
-                }
-            }
-
-            // Store card details in the database
-            $card = Card::create([
-                'user_id' => $user_id,
-                'name_on_card' => $request->name_on_card,
-                'card_number' => $paymentMethod->card->last4,
-                'card_type' => $paymentMethod->card->brand,
-                'exp_month' => $paymentMethod->card->exp_month,
-                'exp_year' => $paymentMethod->card->exp_year,
-                'address' => $request->street_address . "," . $request->house_apartment_number . "," . $request->city . "," . $request->province . "," . $request->country . "," . $request->postal_code,
-                'primary_card' => $primary_card,
-                'fingerprint' => $paymentMethod->card->fingerprint,
-                'stripe_payment_method_id' => $paymentMethod->id,
-            ]);
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-            $emailData = [
-                'first_name' => $user->first_name,
-            ];
-            Mail::to($user->email)->send(new CardAddedEmail($emailData));
-            }
-            // if(isset($request->param) && $request->param=='booking'){
-
-            //     return redirect()->back();
-            // }
-            $bookingId = session('bookingId');
-            $rideDetailId = session('rideDetailId');
-            $rideId = session('rideId');
-            $type = session('type');
-            session()->forget(['rideDetailId', 'rideId', 'type']);
-
-            // Check for return URL in session (to redirect back to original page)
-            $returnUrl = session('return_url_after_action');
-            
-            if ($returnUrl) {
-                session()->forget('return_url_after_action');
-                return redirect($returnUrl)->with('message', $message->card_add_message ?? 'Card added successfully');
-            }
-
-            // Legacy support for booking type
-            if ($type == 'booking') {
-                return redirect()->route('booking', ['lang' => $selectedLanguage, 'id' => $rideId, 'rideDetailId' => $rideDetailId]);
-            }
-            
-            if ($type == 'edit-booking') {
-                return redirect()->route('booking.edit', ['lang' => $selectedLanguage, 'id' => $bookingId]);
-            }
-            
-            return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_add_message);
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'An error occurred while processing your card. Please try again.']);
         }
+
+        // Handle primary card setting
+        $userCardCount = Card::where('user_id', $user_id)->count();
+        $primary_card = ($userCardCount == 0) ? 1 : ($request->filled('primary_card') ? $request->primary_card : 0);
+        if ($primary_card == 1) {
+            Card::where('user_id', $user_id)->update(['primary_card' => 0]);
+        }
+
+        $card = Card::create([
+            'user_id' => $user_id,
+            'name_on_card' => $request->name_on_card,
+            'card_number' => $paymentMethod->card->last4 ?? '',
+            'card_type' => $paymentMethod->card->brand ?? '',
+            'exp_month' => $paymentMethod->card->exp_month ?? '',
+            'exp_year' => $paymentMethod->card->exp_year ?? '',
+            'address' => $request->street_address . "," . ($request->house_apartment_number ?? '') . "," . $request->city . "," . $request->province . "," . $request->country . "," . $request->postal_code,
+            'primary_card' => $primary_card,
+            'fingerprint' => $paymentMethod->card->fingerprint ?? null,
+            'stripe_payment_method_id' => $paymentMethod->id,
+            'payment_method_type' => 'card',
+        ]);
+
+        if (isset($user->email_notification) && $user->email_notification == 1) {
+            $emailData = ['first_name' => $user->first_name];
+            Mail::to($user->email)->send(new CardAddedEmail($emailData));
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $message->card_add_message ?? 'Card added successfully']);
+        }
+
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_add_message ?? 'Card added successfully');
+    }
+    
+    private function storePayPal(Request $request, $user, $user_id, $message, $selectedLanguage)
+    {
+        $request->validate([
+            'paypal_email' => 'required|email',
+            'paypal_payer_id' => 'required|string',
+        ]);
+
+        // Check if PayPal account already exists
+        $existingPayPal = Card::where('user_id', $user_id)
+            ->where('payment_method_type', 'paypal')
+            ->where('paypal_payer_id', $request->paypal_payer_id)
+            ->first();
+            
+        if ($existingPayPal) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'This PayPal account is already added'], 400);
+            }
+            return back()->withErrors(['error' => 'This PayPal account is already added']);
+        }
+
+        $userCardCount = Card::where('user_id', $user_id)->count();
+        $primary_card = ($userCardCount == 0) ? 1 : 0;
+        if ($primary_card == 1) {
+            Card::where('user_id', $user_id)->update(['primary_card' => 0]);
+        }
+
+        $card = Card::create([
+            'user_id' => $user_id,
+            'payment_method_type' => 'paypal',
+            'paypal_email' => $request->paypal_email,
+            'paypal_payer_id' => $request->paypal_payer_id,
+            'primary_card' => $primary_card,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'PayPal account added successfully']);
+        }
+
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'PayPal account added successfully');
+    }
+    
+    private function storeApplePay(Request $request, $user, $user_id, $message, $selectedLanguage)
+    {
+        $request->validate([
+            'payment_method_details' => 'required|array',
+            'apple_pay_token' => 'required',
+        ]);
+
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        if (!$user->stripe_customer_id) {
+            $customer = Customer::create([
+                'email' => $user->email,
+                'name' => $user->first_name,
+            ]);
+            User::whereId($user_id)->update(['stripe_customer_id' => $customer->id]);
+        }
+
+        // Create payment method from Apple Pay token
+        try {
+            $paymentMethod = PaymentMethod::create([
+                'type' => 'card',
+                'card' => ['token' => $request->apple_pay_token],
+            ]);
+            
+            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+        } catch (\Exception $e) {
+            Log::error('Apple Pay tokenization error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to process Apple Pay'], 400);
+            }
+            return back()->withErrors(['error' => 'Failed to process Apple Pay']);
+        }
+
+        $userCardCount = Card::where('user_id', $user_id)->count();
+        $primary_card = ($userCardCount == 0) ? 1 : 0;
+        if ($primary_card == 1) {
+            Card::where('user_id', $user_id)->update(['primary_card' => 0]);
+        }
+
+        $card = Card::create([
+            'user_id' => $user_id,
+            'payment_method_type' => 'apple_pay',
+            'payment_method_details' => $request->payment_method_details,
+            'stripe_payment_method_id' => $paymentMethod->id,
+            'primary_card' => $primary_card,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Apple Pay added successfully']);
+        }
+
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'Apple Pay added successfully');
+    }
+    
+    private function storeGooglePay(Request $request, $user, $user_id, $message, $selectedLanguage)
+    {
+        $request->validate([
+            'payment_method_details' => 'required|array',
+            'google_pay_token' => 'required',
+        ]);
+
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        if (!$user->stripe_customer_id) {
+            $customer = Customer::create([
+                'email' => $user->email,
+                'name' => $user->first_name,
+            ]);
+            User::whereId($user_id)->update(['stripe_customer_id' => $customer->id]);
+        }
+
+        // Create payment method from Google Pay token
+        try {
+            $tokenData = json_decode($request->google_pay_token, true);
+            $paymentMethod = PaymentMethod::create([
+                'type' => 'card',
+                'card' => ['token' => $tokenData['id'] ?? $request->google_pay_token],
+            ]);
+            
+            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+        } catch (\Exception $e) {
+            Log::error('Google Pay tokenization error: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to process Google Pay'], 400);
+            }
+            return back()->withErrors(['error' => 'Failed to process Google Pay']);
+        }
+
+        $userCardCount = Card::where('user_id', $user_id)->count();
+        $primary_card = ($userCardCount == 0) ? 1 : 0;
+        if ($primary_card == 1) {
+            Card::where('user_id', $user_id)->update(['primary_card' => 0]);
+        }
+
+        $card = Card::create([
+            'user_id' => $user_id,
+            'payment_method_type' => 'google_pay',
+            'payment_method_details' => $request->payment_method_details,
+            'stripe_payment_method_id' => $paymentMethod->id,
+            'primary_card' => $primary_card,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Google Pay added successfully']);
+        }
+
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'Google Pay added successfully');
     }
 
     public function primary($id)
@@ -399,7 +571,8 @@ class CardController extends Controller
             $message = null;
             $selectedLanguage = session('selectedLanguage', Language::where('is_default', 1)->first()->abbreviation);
             if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('card_delete_message')->first();
+                $language = Language::where('abbreviation', $selectedLanguage)->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $language->id)->select('card_delete_message')->first();
             }
             return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_delete_message);
         } catch (\Exception $e) {
