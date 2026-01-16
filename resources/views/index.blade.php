@@ -485,10 +485,14 @@
                     @foreach ($rides->take(2) as $ride)
 
                         @php
-                            $from = $ride->defaultRideDetail[0]->departure;
-                            $to = $ride->defaultRideDetail[0]->destination;
+                            // Check if defaultRideDetail has elements before accessing
+                            $defaultRideDetail = $ride->defaultRideDetail->first();
+                            $from = $defaultRideDetail ? $defaultRideDetail->departure : '';
+                            $to = $defaultRideDetail ? $defaultRideDetail->destination : '';
 
                         @endphp
+                        
+                        @if($defaultRideDetail)
                             <div class="relative">
                                 @if (auth()->user())
                                     @php
@@ -502,7 +506,7 @@
                                         $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
                                     @endphp
                                 @endif
-                                <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->defaultRideDetail[0]->departure, 'destination' => $ride->defaultRideDetail[0]->destination, 'id' => $ride->id]) }}">
+                                <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">
                                     <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid border-gray-100"
                                         id="ride-{{ $ride->id }}">
                                         <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
@@ -518,7 +522,7 @@
                                                     <p class="font-medium">
                                                         Total {{ $ride->seats }} seats</p>
                                                 </div>
-                                                <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->defaultRideDetail[0]->price), 2) }}
+                                                <p class="text-xl font-semibold text-primary">${{ number_format(floatval($defaultRideDetail ? $defaultRideDetail->price : 0), 2) }}
                                                     <small>
                                                         @isset($findRidePage->card_section_per_seat)
                                                             {{ $findRidePage->card_section_per_seat }}
@@ -777,6 +781,7 @@
                                     </div>
                                 </a>
                             </div>
+                        @endif
 
                         {{-- <div class="bg-white rounded shadow p-0 md:p-6">
                             <a >

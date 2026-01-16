@@ -418,6 +418,8 @@ class RideController extends Controller
             }])->where('status', '!=', 2)
                 ->where('suspand', '!=', 1)
                 ->where('vehicle_id', '!=', null);
+
+            
             // ->where(function ($query) {
             //     $query->where(function ($query) {
             //         $query->whereDate('date', '>', now()->toDateString())
@@ -582,6 +584,8 @@ class RideController extends Controller
             }
         }
 
+        
+
         $ratings = Rating::all();
         $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(2)->get();
 
@@ -609,7 +613,7 @@ class RideController extends Controller
 
             $recentSearches = RecentSearch::where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(2)->get();
         }
-
+        Log::info($findRidePage);
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
