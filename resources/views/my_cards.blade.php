@@ -38,7 +38,7 @@
             <button type="button" onclick="openAddPaymentMethodModal()" class="button-exp-fill">{{$paymentSettingDetail->add_new_card_button_text ?? "Add Payment Method"}}</button>
         </div>
 
-        <div class="max-h-[52rem] overflow-y-auto pr-2">
+        <div class="max-h-[52rem] overflow-y-auto pr-2 custom-scrollbar">
             @if (!empty($cards) && count($cards) > 0)
                 @foreach ($cards as $card)
                     <div class="even:bg-gray-100 odd:bg-white rounded border border-gray-100 shadow-md p-3 md:p-6 mt-3 mb-4">
@@ -101,10 +101,36 @@
     </div>
 </div>
 
+<style>
+/* Custom scrollbar styling - Reduced width for all scrollbars */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #6366f1 #f3f4f6;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+}
+</style>
+
 <!-- Add Payment Method Modal -->
 <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center" id="add-payment-method-modal">
     <div class="relative h-screen my-6 mx-auto flex items-center justify-center w-full">
-        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border max-h-[90vh] overflow-y-auto">
+        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button type="button" onclick="closeAddPaymentMethodModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 z-10">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -224,7 +250,6 @@
 @section('script')
 
 <script src="https://js.stripe.com/v3/"></script>
-<script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID') }}&currency=USD&intent=capture&vault=true"></script>
 <script src="https://pay.google.com/gp/p/js/pay.js"></script>
 
 <script>
@@ -232,13 +257,102 @@
     let elements;
     let paymentElement;
     let isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    let paypalSDKLoaded = false;
+    const paypalClientId = '{{ env('PAYPAL_CLIENT_ID') }}';
     
     function openAddPaymentMethodModal() {
         const modal = document.getElementById('add-payment-method-modal');
         const backdrop = document.getElementById('add-payment-method-modal-backdrop');
         modal.classList.remove('hidden');
         backdrop.classList.remove('hidden');
-        initializePaymentMethods();
+        
+        // Initialize other payment methods first (don't wait for PayPal)
+        initializeApplePay();
+        initializeGooglePay();
+        
+        // Load PayPal SDK if not already loaded
+        if (!paypalSDKLoaded && paypalClientId && paypalClientId !== '') {
+            loadPayPalSDK();
+        } else if (typeof paypal !== 'undefined' && paypal.Buttons) {
+            // PayPal is already loaded, initialize it
+            initializePayPal();
+        } else {
+            // PayPal is not configured or not available
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (paypalContainer && (!paypalClientId || paypalClientId === '')) {
+                paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">PayPal is not available</p>';
+            }
+        }
+    }
+    
+    function loadPayPalSDK() {
+        if (paypalSDKLoaded || typeof paypal !== 'undefined') {
+            paypalSDKLoaded = true;
+            initializePaymentMethods();
+            return;
+        }
+        
+        if (!paypalClientId || paypalClientId === '') {
+            console.error('PayPal Client ID is not configured');
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (paypalContainer) {
+                paypalContainer.innerHTML = '<p class="text-red-500 text-sm">PayPal is not configured. Please contact support.</p>';
+            }
+            // Continue with other payment methods
+            initializePaymentMethods();
+            return;
+        }
+        
+        // Check if script already exists
+        const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
+        if (existingScript) {
+            // Script already exists, wait for it to be ready
+            waitForPayPalSDK();
+            return;
+        }
+        
+        // Dynamically load PayPal SDK - disable credit and card funding sources
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture&vault=true&disable-funding=credit,card`;
+        script.setAttribute('data-sdk-integration-source', 'button-factory');
+        script.onload = function() {
+            console.log('PayPal SDK script loaded, waiting for PayPal object...');
+            // Wait a bit for PayPal object to be available
+            waitForPayPalSDK();
+        };
+        script.onerror = function() {
+            console.error('Failed to load PayPal SDK script');
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (paypalContainer) {
+                paypalContainer.innerHTML = '<p class="text-red-500 text-sm">Failed to load PayPal. Please refresh the page.</p>';
+            }
+            // Continue with other payment methods
+            initializePaymentMethods();
+        };
+        document.head.appendChild(script);
+    }
+    
+    function waitForPayPalSDK() {
+        let attempts = 0;
+        const maxAttempts = 20; // 10 seconds max wait
+        
+        const checkInterval = setInterval(function() {
+            attempts++;
+            if (typeof paypal !== 'undefined' && paypal.Buttons) {
+                clearInterval(checkInterval);
+                console.log('PayPal SDK is ready');
+                paypalSDKLoaded = true;
+                // Only initialize PayPal, not all payment methods (to avoid duplicates)
+                initializePayPal();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.error('PayPal SDK object not available after loading script');
+                const paypalContainer = document.getElementById('paypal-button-container');
+                if (paypalContainer) {
+                    paypalContainer.innerHTML = '<p class="text-red-500 text-sm">PayPal is taking too long to load. Please refresh the page.</p>';
+                }
+            }
+        }, 500);
     }
     
     function closeAddPaymentMethodModal() {
@@ -438,7 +552,9 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
                 payment_method_type: 'apple_pay',
@@ -449,11 +565,26 @@
                 apple_pay_token: payment.token
             })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text.substring(0, 200));
+                throw new Error('Server returned an invalid response. Please try again.');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 window.location.reload();
+            } else {
+                console.error('Apple Pay error:', data.message || 'Unknown error');
+                alert(data.message || 'Failed to add Apple Pay. Please try again.');
             }
+        })
+        .catch(error => {
+            console.error('Apple Pay processing error:', error);
+            alert('An error occurred while processing Apple Pay. Please try again.');
         });
     }
     
@@ -519,59 +650,158 @@
     }
     
     function processGooglePayPayment(paymentData) {
-        const token = paymentData.paymentMethodData.tokenizationData.token;
+        // Google Pay token can be a string or object - ensure it's stringified correctly
+        let token = paymentData.paymentMethodData.tokenizationData.token;
+        if (typeof token === 'object') {
+            token = JSON.stringify(token);
+        }
+        
+        // Extract card details safely
+        const cardDetails = paymentData.paymentMethodData.info?.cardDetails || '';
+        const cardDescription = paymentData.paymentMethodData.description || '';
+        
+        console.log('Processing Google Pay payment:', {
+            tokenType: typeof token,
+            cardDetails: cardDetails,
+            description: cardDescription
+        });
         
         fetch('{{ route("my_cards.store") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
                 payment_method_type: 'google_pay',
                 payment_method_details: {
-                    card_brand: paymentData.paymentMethodData.description,
-                    last4: paymentData.paymentMethodData.info.cardDetails
+                    card_brand: cardDescription,
+                    last4: cardDetails
                 },
                 google_pay_token: token
             })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text.substring(0, 200));
+                throw new Error('Server returned an invalid response. Please try again.');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 window.location.reload();
+            } else {
+                console.error('Google Pay error:', data.message || 'Unknown error');
+                alert(data.message || 'Failed to add Google Pay. Please try again.');
             }
+        })
+        .catch(error => {
+            console.error('Google Pay processing error:', error);
+            alert('An error occurred while processing Google Pay. Please try again.');
         });
     }
     
     function initializePayPal() {
         // Clear any existing PayPal buttons first
         const paypalContainer = document.getElementById('paypal-button-container');
+        if (!paypalContainer) {
+            console.error('PayPal container not found');
+            return;
+        }
+        
+        // Check if PayPal SDK is loaded and ready
+        if (typeof paypal === 'undefined' || !paypal.Buttons) {
+            console.warn('PayPal SDK not ready yet, waiting...');
+            if (!paypalSDKLoaded && paypalClientId && paypalClientId !== '') {
+                // SDK is being loaded, wait a bit more
+                setTimeout(function() {
+                    initializePayPal();
+                }, 500);
+            } else if (!paypalClientId || paypalClientId === '') {
+                paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">PayPal is not available</p>';
+            } else {
+                paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">Loading PayPal...</p>';
+                // Wait a bit and try again
+                setTimeout(function() {
+                    initializePayPal();
+                }, 500);
+            }
+            return;
+        }
+        
+        // PayPal SDK is ready, initialize buttons
+        initializePayPalButtons();
+    }
+    
+    function initializePayPalButtons() {
+        const paypalContainer = document.getElementById('paypal-button-container');
+        if (!paypalContainer) return;
+        
         paypalContainer.innerHTML = '';
         
-        paypal.Buttons({
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: '0.00'
+        try {
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'paypal'
+                },
+                // Only show PayPal button (credit and card are disabled in SDK URL)
+                createOrder: function(data, actions) {
+                    // PayPal requires minimum amount of 0.01 for vaulting
+                    // Using 0.01 as the minimum amount to satisfy PayPal's validation
+                    const amountValue = '0.01';
+                    
+                    const orderData = {
+                        purchase_units: [{
+                            amount: {
+                                value: amountValue,
+                                currency_code: 'USD'
+                            },
+                            description: 'ProximaRide - Save PayPal account for future payments'
+                        }],
+                        application_context: {
+                            brand_name: 'ProximaRide',
+                            landing_page: 'NO_PREFERENCE',
+                            user_action: 'PAY_NOW',
+                            return_url: window.location.origin + '/paypal/return',
+                            cancel_url: window.location.origin + '/paypal/cancel'
                         }
-                    }],
-                    application_context: {
-                        brand_name: 'ProximaRide',
-                        landing_page: 'NO_PREFERENCE',
-                        user_action: 'PAY_NOW',
-                        return_url: window.location.origin + '/paypal/return',
-                        cancel_url: window.location.origin + '/paypal/cancel'
-                    }
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    savePayPalPaymentMethod(details);
-                });
-            }
-        }).render('#paypal-button-container');
+                    };
+                    
+                    console.log('Creating PayPal order with amount:', amountValue);
+                    console.log('Full order data:', JSON.stringify(orderData, null, 2));
+                    
+                    return actions.order.create(orderData).catch(function(error) {
+                        console.error('PayPal order creation error:', error);
+                        throw error;
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        savePayPalPaymentMethod(details);
+                    });
+                },
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    paypalContainer.innerHTML = '<p class="text-red-500 text-sm">An error occurred with PayPal. Please try again.</p>';
+                },
+                onCancel: function(data) {
+                    console.log('PayPal payment cancelled');
+                }
+            }).render('#paypal-button-container');
+            
+            console.log('PayPal buttons initialized successfully');
+        } catch (error) {
+            console.error('Error initializing PayPal buttons:', error);
+            paypalContainer.innerHTML = '<p class="text-red-500 text-sm">Failed to initialize PayPal buttons. Please refresh the page.</p>';
+        }
     }
     
     function savePayPalPaymentMethod(details) {
@@ -579,7 +809,9 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
                 payment_method_type: 'paypal',
@@ -587,11 +819,26 @@
                 paypal_payer_id: details.payer.payer_id
             })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text.substring(0, 200));
+                throw new Error('Server returned an invalid response. Please try again.');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 window.location.reload();
+            } else {
+                console.error('PayPal error:', data.message || 'Unknown error');
+                alert(data.message || 'Failed to add PayPal. Please try again.');
             }
+        })
+        .catch(error => {
+            console.error('PayPal processing error:', error);
+            alert('An error occurred while processing PayPal. Please try again.');
         });
     }
     

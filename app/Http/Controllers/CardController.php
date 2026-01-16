@@ -322,10 +322,21 @@ class CardController extends Controller
     
     private function storePayPal(Request $request, $user, $user_id, $message, $selectedLanguage)
     {
-        $request->validate([
-            'paypal_email' => 'required|email',
-            'paypal_payer_id' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'paypal_email' => 'required|email',
+                'paypal_payer_id' => 'required|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
 
         // Check if PayPal account already exists
         $existingPayPal = Card::where('user_id', $user_id)
@@ -363,10 +374,21 @@ class CardController extends Controller
     
     private function storeApplePay(Request $request, $user, $user_id, $message, $selectedLanguage)
     {
-        $request->validate([
-            'payment_method_details' => 'required|array',
-            'apple_pay_token' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'payment_method_details' => 'required|array',
+                'apple_pay_token' => 'required',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -386,6 +408,9 @@ class CardController extends Controller
             ]);
             
             $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+            
+            // Refresh payment method to get full card details including exp_month and exp_year
+            $paymentMethod = PaymentMethod::retrieve($paymentMethod->id);
         } catch (\Exception $e) {
             Log::error('Apple Pay tokenization error: ' . $e->getMessage());
             if ($request->ajax() || $request->wantsJson()) {
@@ -405,6 +430,8 @@ class CardController extends Controller
             'payment_method_type' => 'apple_pay',
             'payment_method_details' => $request->payment_method_details,
             'stripe_payment_method_id' => $paymentMethod->id,
+            'exp_month' => $paymentMethod->card->exp_month ?? '',
+            'exp_year' => $paymentMethod->card->exp_year ?? '',
             'primary_card' => $primary_card,
         ]);
 
@@ -417,10 +444,21 @@ class CardController extends Controller
     
     private function storeGooglePay(Request $request, $user, $user_id, $message, $selectedLanguage)
     {
-        $request->validate([
-            'payment_method_details' => 'required|array',
-            'google_pay_token' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'payment_method_details' => 'required|array',
+                'google_pay_token' => 'required',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -434,17 +472,33 @@ class CardController extends Controller
 
         // Create payment method from Google Pay token
         try {
-            $tokenData = json_decode($request->google_pay_token, true);
+            $token = $request->google_pay_token;
+            
+            // Try to decode if it's a JSON string, otherwise use as-is
+            $tokenData = json_decode($token, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($tokenData['id'])) {
+                $tokenToUse = $tokenData['id'];
+            } else {
+                // If it's already a string token or can't be decoded, use it directly
+                $tokenToUse = is_string($token) ? $token : $token;
+            }
+            
             $paymentMethod = PaymentMethod::create([
                 'type' => 'card',
-                'card' => ['token' => $tokenData['id'] ?? $request->google_pay_token],
+                'card' => ['token' => $tokenToUse],
             ]);
             
             $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+            
+            // Refresh payment method to get full card details including exp_month and exp_year
+            $paymentMethod = PaymentMethod::retrieve($paymentMethod->id);
         } catch (\Exception $e) {
-            Log::error('Google Pay tokenization error: ' . $e->getMessage());
+            Log::error('Google Pay tokenization error: ' . $e->getMessage(), [
+                'token_preview' => is_string($request->google_pay_token) ? substr($request->google_pay_token, 0, 50) : 'non-string',
+                'user_id' => $user_id
+            ]);
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Failed to process Google Pay'], 400);
+                return response()->json(['success' => false, 'message' => 'Failed to process Google Pay: ' . $e->getMessage()], 400);
             }
             return back()->withErrors(['error' => 'Failed to process Google Pay']);
         }
@@ -460,6 +514,8 @@ class CardController extends Controller
             'payment_method_type' => 'google_pay',
             'payment_method_details' => $request->payment_method_details,
             'stripe_payment_method_id' => $paymentMethod->id,
+            'exp_month' => $paymentMethod->card->exp_month ?? '',
+            'exp_year' => $paymentMethod->card->exp_year ?? '',
             'primary_card' => $primary_card,
         ]);
 

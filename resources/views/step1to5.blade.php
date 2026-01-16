@@ -341,8 +341,17 @@
 
 @section('script')
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<!-- Load jQuery UI only if jQuery is available and jQuery UI is not already loaded -->
+<script>
+    if (typeof jQuery === 'undefined') {
+        document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><\/script>');
+    }
+</script>
+<script>
+    if (typeof jQuery !== 'undefined' && typeof jQuery.ui === 'undefined') {
+        document.write('<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"><\/script>');
+    }
+</script>
 
 <script>
      function closeModal() {
@@ -355,20 +364,43 @@
         }
     });
 
-    $(document).ready(function() {
+    // Wait for both jQuery and jQuery UI to be loaded
+    function initializeDatepicker() {
+        if (typeof jQuery === 'undefined' || typeof jQuery.ui === 'undefined' || !jQuery.fn.datepicker) {
+            console.log('Waiting for jQuery UI...');
+            setTimeout(initializeDatepicker, 100);
+            return;
+        }
+        
         const oldDate = '{{ old('dob', $user->dob) ? \Carbon\Carbon::parse(old('dob', $user->dob))->format('Y-m-d') : '' }}';
         const dateInput = $('#dateInput');
         const dobHidden = $('#dob');
         
+        if (dateInput.length === 0) {
+            console.error('Date input element not found');
+            return;
+        }
+        
+        console.log('Initializing datepicker...');
+        
         // Initialize jQuery UI Datepicker
         dateInput.datepicker({
-            dateFormat: 'MM dd, yy', // Display format: "January 15, 2024"
+            dateFormat: 'yy-mm-dd', // Internal format for datepicker (will be overridden in display)
             changeMonth: true,
             changeYear: true,
             yearRange: '1900:{{ date('Y') }}',
             maxDate: 0, // Restrict to past dates only (for date of birth)
             defaultDate: oldDate || null,
             showButtonPanel: false,
+            showOn: 'both', // Show on both button click and focus
+            buttonImage: '', // No button image
+            buttonImageOnly: false,
+            buttonText: 'Select date',
+            beforeShow: function(input, inst) {
+                console.log('Calendar opening...');
+                // Ensure calendar opens properly
+                return true;
+            },
             onSelect: function(dateText, inst) {
                 // Get the selected date
                 var date = $(this).datepicker('getDate');
@@ -385,25 +417,84 @@
                     var day = String(date.getDate()).padStart(2, '0');
                     dobHidden.val(year + '-' + month + '-' + day);
                 }
+            },
+            onChangeMonthYear: function(year, month, inst) {
+                // Ensure calendar updates properly when month/year changes
+                setTimeout(function() {
+                    inst.input.datepicker('setDate', inst.selectedDay ? 
+                        new Date(year, month - 1, inst.selectedDay) : 
+                        new Date(year, month - 1, 1));
+                }, 0);
             }
         });
         
         // Set initial date if available
         if (oldDate) {
-            dateInput.datepicker('setDate', oldDate);
-            // Trigger onSelect to set the hidden field
-            var date = dateInput.datepicker('getDate');
-            if (date) {
-                var monthNames = ["January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"];
-                var formattedDate = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
-                dateInput.val(formattedDate);
+            try {
+                dateInput.datepicker('setDate', oldDate);
+                // Format the initial date for display
+                var date = dateInput.datepicker('getDate');
+                if (date) {
+                    var monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+                    var formattedDate = monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                    dateInput.val(formattedDate);
+                    // Ensure hidden field is set
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    dobHidden.val(year + '-' + month + '-' + day);
+                }
+            } catch (e) {
+                console.error('Error setting initial date:', e);
             }
         }
         
-        // Make input readonly to prevent manual entry
+        // Make input readonly to prevent manual entry (but allow calendar to open)
         dateInput.prop('readonly', true);
+        
+        // Force calendar to open on click - remove readonly temporarily if needed
+        dateInput.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $this = $(this);
+            // Temporarily remove readonly to allow datepicker to work
+            $this.prop('readonly', false);
+            $this.datepicker('show');
+            // Re-add readonly after a short delay
+            setTimeout(function() {
+                $this.prop('readonly', true);
+            }, 100);
+        });
+        
+        // Also allow focus event
+        dateInput.on('focus', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            $this.prop('readonly', false);
+            $this.datepicker('show');
+            setTimeout(function() {
+                $this.prop('readonly', true);
+            }, 100);
+        });
+        
+        // Also add a visual indicator that it's clickable
+        dateInput.css('cursor', 'pointer');
+        
+        console.log('Datepicker initialized successfully');
+    }
+    
+    // Initialize when document is ready
+    $(document).ready(function() {
+        initializeDatepicker();
     });
+    
+    // Also try after a short delay in case scripts load asynchronously
+    setTimeout(function() {
+        if ($('#dateInput').length > 0 && !$('#dateInput').data('hasDatepicker')) {
+            initializeDatepicker();
+        }
+    }, 500);
 
     function loadStatesByCountry(countryId, selectedState) {
         $.ajax({
