@@ -458,6 +458,21 @@ class SignupController extends Controller
             
             $user = Socialite::driver($provider)->user();
 
+            Log::info("social login attempt", [
+                'provider' => $provider,
+                'email' => $user->email ?? 'not provided',
+                'has_token' => !empty($user->token ?? null)
+            ]);
+
+            // Validate that required fields are present
+            if (empty($user->email)) {
+                throw new \Exception("Email address is required from {$provider} provider");
+            }
+
+            if (empty($user->name)) {
+                throw new \Exception("Name is required from {$provider} provider");
+            }
+
             // Check if the user is already registered
             $existingUser = User::where('email', $user->email)->first();
 
@@ -482,6 +497,8 @@ class SignupController extends Controller
                 'profile_image' => $user->avatar,
                 'provider' => $provider,
                 'provider_id' => $user->id,
+                'country' => 39,
+                'referral_uuid' => bin2hex(random_bytes(16))
             ]);
 
             // Send admin notification about new social signup
@@ -491,7 +508,36 @@ class SignupController extends Controller
                 'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
                 'platform' => 'Web - ' . ucfirst($provider) . ' Login'
             ];
-            Mail::to('ccaned@gmail.com')->queue(new AdminNewUserSignupMail($adminData));
+            
+            // Send email with error handling similar to regular signup
+            try {
+                Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+                Log::info('Admin notification sent successfully for social signup', [
+                    'email' => $user->email,
+                    'provider' => $provider
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Failed to send admin notification for social signup', [
+                    'email' => $user->email,
+                    'provider' => $provider,
+                    'error' => $e->getMessage(),
+                    'error_class' => get_class($e)
+                ]);
+                // Try fallback to log mailer
+                try {
+                    Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+                    Log::info('Admin notification sent via log mailer (fallback) for social signup', [
+                        'email' => $user->email,
+                        'provider' => $provider
+                    ]);
+                } catch (\Throwable $e2) {
+                    Log::error('Failed to send admin notification via log mailer for social signup', [
+                        'email' => $user->email,
+                        'provider' => $provider,
+                        'error' => $e2->getMessage()
+                    ]);
+                }
+            }
 
             auth()->login($newUser);
 
@@ -511,6 +557,7 @@ class SignupController extends Controller
 
             // Check if it's a Facebook-specific error
             $errorMessage = $e->getMessage();
+            Log::info("social login error:". $errorMessage);
             if ($provider === 'facebook' && (str_contains(strtolower($errorMessage), 'app not active') || 
                                               str_contains(strtolower($errorMessage), 'app is not accessible'))) {
                 Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');

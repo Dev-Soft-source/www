@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
@@ -263,6 +264,10 @@ class LoginController extends Controller
             session()->forget('uploaded_profile_image');
             Auth::guard('web')->logout();
         }
+
+        // Http::asForm()->post('https://oauth2.googleapis.com/revoke', [
+        //     'token' => "ya29.a0AUMWg_LqmpPRrUVyRFIip8K1dRoEeZNzNSNcrGd54vWh6BwSiXhacQ0SfMBhQO39eUw3O54QxLtt6TIzvQEeIH7-VcmzzkXaNo8B3pcDxQOPL4uxKf5Z7-syzmHK6_cvmG32VNZZH8Lx6qBDgtTiMYVY8zOgCZ7oqbrewl-srlB3cpygqK4G6DbwKN3K2GgBVxSxiskaCgYKAesSARcSFQHGX2Mi-2SVUa7Kk4o2tcqIAR3XZA0206",
+        // ]);
 
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
