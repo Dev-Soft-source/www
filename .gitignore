@@ -18,7 +18,6 @@ app/storage/
 # public/hot
 
 storage/*.key
-.env
 Homestead.yaml
 Homestead.json
 /.vagrant

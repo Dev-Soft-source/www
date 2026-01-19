@@ -12,7 +12,7 @@
                     <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                                 <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -20,12 +20,12 @@
                                 </button>
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="sm:flex sm:items-start justify-center">
-                                        <!-- <div
+                                        <div
                                             class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
                                                 <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
                                             </svg>
-                                        </div> -->
+                                        </div>
                                     </div>
                                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                         <div class="mt-2 w-full">
@@ -43,7 +43,7 @@
                 </div>
         @endif
 
-        <div class="">
+        <div class="mb-2 mt-8">
             <h1 class="mb-0">{{ $closeAccountPage->main_heading ?? "Close my account"}}</h1>
         </div>
 
@@ -53,12 +53,12 @@
             </svg>
             <p class="text-red-600 font-medium">{{ $closeAccountPage->warning_text ?? $closeAccountPage->closing_account_label ?? "Closing your account will delete all of your data from our platform and this action is permanent"}}</p>
         </div>
-        <p class="text-red-500 font-medium mb-4">{{ $closeAccountPage->mobile_indicate_required_field_label ?? "* Indicates required field"}}</p>
+        <p class="text-red-500 font-medium mt-4">{{ $closeAccountPage->mobile_indicate_required_field_label ?? "* Indicates required field"}}</p>
         <div class="max-h-[48rem] overflow-y-auto pr-4">
         <div class="rounded-lg py-3">
             <p>
                 <span class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->apply_reason_label ?? "You are closing your account"}}</span>
-                <span class="text-gray-900 text-xl md:text-2xl font-FuturaMdCnBT"> ({{ $closeAccountPage->reason_label ?? "select all the reasons that apply"}})</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
+                <span class="text-gray-900 text-xl md:text-1xl font-FuturaMdCnBT"> {{ $closeAccountPage->reason_label ?? "select all the reasons that apply"}}</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
             </p>
         </div>
         <form method="POST" action="{{ route('close_account.update',$user->id) }}">
@@ -159,18 +159,24 @@
                     </ul>
                 </div>
 
-                <div class="md:col-span-2">
-                    <label for="" class="text-gray-900 text-base md:text-lg">{{ $closeAccountPage->why_closing_account_label ?? "Tell us, in your own words, why you are closing your account"}}</label>
+                <div class="md:col-span-2 mt-5">
+                    <p>
+                        <span class="text-primary text-base md:text-lg">{{ $closeAccountPage->why_closing_account_label ?? "In your own words, please tell us why you’d like to close your account."}}</span>
+                        <span class="text-gray-900 text-base md:text-lg"> {{ $closeAccountPage->why_closing_account_placeholder ?? "This is optional, but your feedback would be greatly appreciated."}}</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
+                    </p>
                     <textarea rows="5" name="close_account_reason" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('close_account_reason') }}</textarea>
                 </div>
 
-                <div class="md:col-span-2">
-                    <label for="" class="text-gray-900 text-base md:text-lg">{{ $closeAccountPage->improve_label ?? "Please tell us, how we can improve"}}</label>
+                <div class="md:col-span-2 mt-5">
+                    <p>
+                        <span class="text-primary text-base md:text-lg">{{ $closeAccountPage->improve_label ?? "We’d love to hear how we can improve."}}</span>
+                        <span class="text-gray-900 text-base md:text-lg"> {{ $closeAccountPage->why_closing_account_placeholder ?? "Sharing is optional, but your input would mean a lot."}}</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
+                    </p>
                     <textarea rows="5" name="improve_message" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('improve_message') }}</textarea>
                 </div>
 
                 <div class="md:col-span-2">
-                    <input type="checkbox" value="1" name="close_account" id="close_account_checkbox" {{ old('close_account') === '1' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                    <input type="checkbox" value="1" name="close_account" id="close_account_checkbox" {{ old('close_account') === '1' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 ml-2 focus:ring-none">
                     <label for="close_account_checkbox" class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->close_my_account_checkbox ?? "Close my account"}}</label><span class="text-red-500 font-bold">*</span>
                     @error('close_account')
                         <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -187,7 +193,7 @@
                 </div>
 
                 <div class="md:col-span-2 flex justify-center">
-                    <button type="button" id="show-modal" class="button-exp-fill bg-red-500 border-red-500 hover:bg-red-600 hover:border-red-600">{{ $closeAccountPage->close_account_button_text ?? "Close my account"}}</button>
+                    <button type="button" id="show-modal" class="inline-flex justify-center rounded bg-red-500 border border-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-600 hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">{{ $closeAccountPage->close_account_button_text ?? "Close my account"}}</button>
                 </div>
             </div>
 
@@ -196,7 +202,7 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-lg bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-lg bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md modal-border">
                             <button id="hide-modal-btn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none">
                                 <span class="sr-only">Close</span>
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

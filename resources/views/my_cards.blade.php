@@ -33,12 +33,12 @@
             </div>
         @endif
 
-        <div class="mb-4 pb-2 flex justify-between items-center">
+        <div class="my-4 pb-2 flex justify-between items-center">
             <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Payment options"}}</h1>
             <button type="button" onclick="openAddPaymentMethodModal()" class="button-exp-fill">{{$paymentSettingDetail->add_new_card_button_text ?? "Add Payment Method"}}</button>
         </div>
 
-        <div class="max-h-[52rem] overflow-y-auto pr-2 custom-scrollbar">
+        <div class="max-h-[52rem] overflow-y-auto pr-2 custom-scrollbar ">
             @if (!empty($cards) && count($cards) > 0)
                 @foreach ($cards as $card)
                     <div class="even:bg-gray-100 odd:bg-white rounded border border-gray-100 shadow-md p-3 md:p-6 mt-3 mb-4">
@@ -83,9 +83,9 @@
                             </div>
                             <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                                 @if ($card->primary_card === '0' || $card->primary_card == 0)
-                                    <a href="{{ route('my_cards.set_primary', $card->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-FuturaMdCnBT whitespace-nowrap text-center">{{$paymentSettingDetail->set_primary_card_label ?? "Make Primary"}}</a>
+                                    <a href="{{ route('my_cards.set_primary', $card->id) }}" class="button-exp-fill whitespace-nowrap text-center">{{$paymentSettingDetail->set_primary_card_label ?? "Make Primary"}}</a>
                                 @else
-                                    <span class="bg-green-600 text-white px-4 py-2 rounded font-FuturaMdCnBT whitespace-nowrap text-center cursor-default">{{$paymentSettingDetail->mobile_default_card_tab ?? "Primary"}}</span>
+                                    <span class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded font-FuturaMdCnBT whitespace-nowrap text-center cursor-default">{{$paymentSettingDetail->mobile_default_card_tab ?? "Primary"}}</span>
                                 @endif
                                 <button type="button" onclick="toggleModalCard('card-modal', {{ $card->id }})" class="button-exp-fill whitespace-nowrap">
                                     {{$paymentSettingDetail->delete_card_button_text ?? "Delete"}}
@@ -95,7 +95,11 @@
                     </div>
                 @endforeach
             @else
-                <p class="text-gray-600 text-center py-8">No payment methods added yet.</p>
+                <p class="text-gray-600 text-center py-8">
+                    @if(isset($paymentSettingDetail->no_payment_methods_text_label))
+                        {{ $paymentSettingDetail->no_payment_methods_text_label }}
+                    @endif
+                </p>
             @endif
         </div>
     </div>
@@ -368,6 +372,8 @@
         document.getElementById('payment-method-selection').classList.add('hidden');
         document.getElementById('card-form-container').classList.remove('hidden');
         initializeStripePaymentElement();
+        // Close the modal when card form is shown
+        closeAddPaymentMethodModal();
     }
     
     function initializePaymentMethods() {
@@ -515,6 +521,9 @@
                 }
             };
             
+            // Close the modal when Apple Pay is clicked
+            closeAddPaymentMethodModal();
+            
             const session = new ApplePaySession(3, request);
             
             session.onvalidatemerchant = function(event) {
@@ -608,6 +617,9 @@
     }
     
     function onGooglePayButtonClicked() {
+        // Close the modal when Google Pay is clicked
+        closeAddPaymentMethodModal();
+        
         const paymentDataRequest = {
             apiVersion: 2,
             apiVersionMinor: 0,
@@ -784,6 +796,8 @@
                     });
                 },
                 onApprove: function(data, actions) {
+                    // Close the modal when PayPal payment is approved
+                    closeAddPaymentMethodModal();
                     return actions.order.capture().then(function(details) {
                         savePayPalPaymentMethod(details);
                     });

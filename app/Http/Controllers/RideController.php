@@ -613,7 +613,6 @@ class RideController extends Controller
 
             $recentSearches = RecentSearch::where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(2)->get();
         }
-        Log::info($findRidePage);
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;

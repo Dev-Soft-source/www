@@ -1,78 +1,5 @@
 @extends('layouts.template')
-@section('style')
-<style>
-    /* Tooltip animation styles */
-    .tooltip {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-5px);
-        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, transform 0.5s ease-in-out;
-        pointer-events: none;
-        position: relative;
-    }
 
-    /* Visible tooltip state */
-    .tooltip.show,
-    .tooltip.show.hidden {
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: translateY(0) !important;
-        pointer-events: auto;
-    }
-
-    /* Tooltips that should be visible (error messages on load) */
-    .tooltip:not(.hidden):not([style*="display: none"]) {
-        display: flex;
-    }
-
-    /* Hide tooltips properly */
-    .tooltip.hidden {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-5px);
-        pointer-events: none;
-    }
-
-    /* Hover tooltips - smooth animation */
-    .group:hover .tooltip:not(.hidden),
-    .peer:hover ~ .tooltip:not(.hidden) {
-        display: flex !important;
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        pointer-events: auto;
-        transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
-    }
-
-    /* Ensure tooltip container doesn't cause layout shifts */
-    .tooltip {
-        min-height: 0;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Fix tooltip text positioning */
-    .tooltip .tooltiptext {
-        position: relative;
-        z-index: 1000;
-    }
-
-    /* Prevent input field from jumping when error appears */
-    .mt-2 {
-        min-height: auto;
-    }
-
-    /* Smooth error border transition */
-    input.ring-red-500 {
-        transition: ring-color 0.2s ease-in-out;
-    }
-
-    /* Modal border styling */
-    .modal-border {
-        border: 3px solid #00A99D;
-    }
-</style>
-@endsection
 @section('content')
     <div class="mx-auto max-w-2xl lg:max-w-xl">
         <div class="flex min-h-full flex-col justify-center py-12 p-4 sm:px-6 lg:px-8">
@@ -90,96 +17,76 @@
                         @endisset
                     </p>
 
-                    <form class="space-y-6" method="POST" action="{{ route('forgot.password', ['lang' => $selectedLanguage->abbreviation]) }}" id="forgot-password-form">
+                    <form class="space-y-6" method="POST" action="" id="forgot-password-form">
                         @csrf
 
-                        @if (session('error'))
-                            <div id="error-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog"
-                                aria-modal="true" onclick="closeModal('error-modal', event)">
-                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                    <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
-                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border"
-                                            onclick="event.stopPropagation()">
-                                            <button onclick="closeModal('error-modal', event)"
-                                                class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                                <div class="sm:flex sm:items-start justify-center">
-                                                    <!-- <div
-                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                    </svg>
-                                                </div> -->
-                                                </div>
-                                                <div class="text-center">
-                                                    <div class="w-full">
-                                                        <p class="can-exp-p text-center text-black">{!! session('error') !!}
-                                                        </p>
-                                                    </div>
+                        <!-- Always render modals for AJAX use (hidden by default if no session, but don't create if session modal exists) -->
+                        @if (!session('error'))
+                        <div id="error-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick="closeModal('error-modal', event)">
+                            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
+                                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border" 
+                                    onclick="event.stopPropagation()">
+                                        <button onclick="closeModal('error-modal', event)" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                            <div class="sm:flex sm:items-start justify-center">
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="w-full">
+                                                    <p class="can-exp-p text-center text-black"></p>
                                                 </div>
                                             </div>
-                                            <div
-                                                class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                                <a href=""
-                                                    class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 {{ session('verify_email') != null && session('verify_email') == true ? '' : 'sm:w-24' }}">Close</a>
-                                            </div>
+                                        </div>
+                                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center verify-email-container">
+                                            <a onclick="closeModal('error-modal', event)" class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         @endif
 
-                        @if (session('message'))
-                            <div id="success-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog"
-                                aria-modal="true" style="display: block;">
-                                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                    <div
-                                        class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                                            onclick="closeModal('success-modal', event)"></div>
-                                        <div
-                                            class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                                            <button onclick="closeModal('success-modal', event)"
-                                                class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                                <div class="sm:flex sm:items-start justify-center">
-                                                    <!-- <div
-                                                class="mx-auto h-16 w-16">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                              </svg>
-                                          </div> -->
-                                                </div>
-                                                <div class="text-center sm:ml-4 sm:mt-0">
-                                                    <div class="w-full">
-                                                        <p class="can-exp-p text-center text-black mt-5" id="success-modal-message">
-                                                            {{ session('message') }}</p>
-                                                    </div>
+                        @if (!session('message'))
+                        <div id="my-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal('my-modal', event)"></div>
+                                    <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                                        <button onclick="closeModal('my-modal', event)" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                            <div class="sm:flex sm:items-start justify-center">
+                                                <div
+                                                    class="mx-auto h-16 w-16">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                    </svg>
                                                 </div>
                                             </div>
-                                            <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                                <button onclick="closeModal('success-modal', event)"
-                                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</button>
+                                            <div class="text-center sm:ml-4 sm:mt-0">
+                                                <div class="w-full">
+                                                    <p class="can-exp-p text-center text-black mt-5"></p>
+                                                </div>
                                             </div>
+                                        </div>
+                                        <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                                            <a onclick="closeModal('my-modal', event)" class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         @endif
+
                         <div>
                             <div class="">
                                 <label for="email"></label>
@@ -187,9 +94,9 @@
                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                                     type="text" name="email" value="{{ old('email') }}" autofocus />
                                 @error('email')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div class="relative tooltip tooltip-error -bottom-4 group-hover:flex">
                                         <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                         </div>
                                     </div>
@@ -200,7 +107,7 @@
                         <div class="flex items-center justify-center flex-col sm:flex-col md:flex-row lg:flex-row">
                             <div>
                                 @isset($forgotPasswordPage->button_label)
-                                    <button id="forgot-password-button" class="button-exp-fill flex w-full justify-center" type="submit">
+                                    <button class="button-exp-fill flex w-full justify-center" type="submit">
                                         {{ $forgotPasswordPage->button_label }}
                                     </button>
                                 @endisset
@@ -220,7 +127,7 @@
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                         onclick="closeModal('my-modal', event)"></div>
                     <div
-                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                         <button onclick="closeModal('my-modal', event)"
                             class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
@@ -232,12 +139,12 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto h-16 w-16">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </div> -->
+                                              class="mx-auto h-16 w-16">
+                                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                  stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                              </svg>
+                                          </div> -->
                             </div>
                             <div class="mt-2 w-full">
                                 <p class="text-center can-exp-p">This email isn't verified yet.</p>
@@ -260,8 +167,223 @@
 @endsection
 
 @section('script')
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 <script>
-    // Function to close modal
+    // Get the current language from the URL or use default
+    function getCurrentLang() {
+        const path = window.location.pathname;
+        const match = path.match(/\/([a-z]{2})\//);
+        return match ? match[1] : '';
+    }
+
+    // AJAX Form Submission
+    $(document).ready(function() {
+        $('#forgot-password-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const submitButton = form.find('button[type="submit"]');
+            const originalButtonText = submitButton.html();
+            
+            // Disable submit button and show loading state
+            submitButton.prop('disabled', true);
+            submitButton.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
+            
+            // Clear previous errors
+            $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
+            setTimeout(() => {
+                $('.tooltip-error').remove();
+            }, 200);
+            
+            // Get form data
+            const formData = form.serialize();
+            const lang = getCurrentLang();
+            const url = lang ? `/${lang}/forgot-password` : '/forgot-password';
+            
+            // Make AJAX request
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Show success modal using existing my-modal
+                        const successMessage = response.message || 'Password reset link has been sent to your email.';
+                        showSuccessModal(successMessage);
+                        // Reset form
+                        form[0].reset();
+                        submitButton.prop('disabled', false);
+                        submitButton.html(originalButtonText);
+                    } else {
+                        // Handle errors
+                        handleForgotPasswordError(response);
+                        submitButton.prop('disabled', false);
+                        submitButton.html(originalButtonText);
+                    }
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    
+                    if (xhr.status === 422) {
+                        // Validation errors
+                        handleValidationErrors(response.errors || {});
+                    } else if (response && response.error) {
+                        // General error - use existing error-modal
+                        showErrorModal(response.error, response.verify_email, response.email);
+                    } else {
+                        // Network or server error
+                        showErrorModal('An error occurred. Please try again.');
+                    }
+                    
+                    submitButton.prop('disabled', false);
+                    submitButton.html(originalButtonText);
+                }
+            });
+        });
+    });
+
+    // Handle validation errors
+    function handleValidationErrors(errors) {
+        // Remove existing error tooltips
+        $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
+        setTimeout(() => {
+            $('.tooltip-error').remove();
+        }, 200);
+        
+        // Add new error tooltips with animation
+        setTimeout(() => {
+            Object.keys(errors).forEach(function(field) {
+                const input = $(`#${field}`);
+                const errorMessage = errors[field][0];
+                
+                if (input.length) {
+                    const tooltip = $(`
+                        <div class="relative tooltip tooltip-error tooltip-init -bottom-4">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <p class="text-white leading-none text-sm lg:text-base">${errorMessage}</p>
+                            </div>
+                        </div>
+                    `);
+                    
+                    input.parent().append(tooltip);
+                    // Trigger animation - remove init class and add show class
+                    setTimeout(() => {
+                        tooltip.removeClass('tooltip-init').addClass('tooltip-show');
+                    }, 10);
+                }
+            });
+        }, 200);
+    }
+
+    // Handle forgot password errors
+    function handleForgotPasswordError(response) {
+        if (response.error) {
+            showErrorModal(response.error, response.verify_email, response.email);
+        } else if (response.errors) {
+            handleValidationErrors(response.errors);
+        }
+    }
+
+    // Show success modal using existing my-modal structure
+    function showSuccessModal(message) {
+        // Use existing my-modal from template
+        let modal = $('#my-modal');
+        if (modal.length === 0) {
+            console.error('Success modal not found');
+            alert(message);
+            return;
+        }
+        
+        // Update message in existing modal
+        const messageElement = modal.find('.can-exp-p.text-center.text-black.mt-5');
+        if (messageElement.length) {
+            messageElement.html(message);
+        } else {
+            // Fallback: find any .can-exp-p in the modal
+            const fallbackElement = modal.find('.can-exp-p');
+            if (fallbackElement.length) {
+                fallbackElement.html(message);
+            }
+        }
+        
+        // Remove hidden class and show modal
+        modal.removeClass('hidden');
+        modal.css('display', 'block');
+        modal.show(); // Use jQuery show() as well to ensure it's visible
+    }
+
+    // Show error modal using existing error-modal structure
+    function showErrorModal(message, verifyEmail, email) {
+        // Use existing error-modal from template
+        let modal = $('#error-modal');
+        if (modal.length === 0) {
+            console.error('Error modal not found');
+            alert(message);
+            return;
+        }
+        
+        // Update message in existing modal
+        const messageElement = modal.find('.can-exp-p.text-center.text-black');
+        if (messageElement.length) {
+            messageElement.html(message);
+        } else {
+            // Fallback: find any .can-exp-p in the modal
+            const fallbackElement = modal.find('.can-exp-p');
+            if (fallbackElement.length) {
+                fallbackElement.html(message);
+            }
+        }
+        
+        // Handle verify email button if needed
+        const buttonContainer = modal.find('.verify-email-container');
+        
+        if (verifyEmail && email && buttonContainer.length) {
+            const lang = getCurrentLang();
+            const verifyUrl = `/send-email-verify/${encodeURIComponent(email)}`;
+            // Check if verify button already exists, if not add it
+            if (buttonContainer.find('a[href*="send-email-verify"]').length === 0) {
+                const closeButton = buttonContainer.find('a').last();
+                closeButton.before(`
+                    <a href="${verifyUrl}" class="inline-flex justify-center rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3 w-auto">Request a new verification email</a>
+                `);
+            }
+        } else if (buttonContainer.length) {
+            // Remove verify button if it exists but shouldn't
+            buttonContainer.find('a[href*="send-email-verify"]').remove();
+        }
+        
+        // Remove hidden class and show modal
+        modal.removeClass('hidden');
+        modal.css('display', 'block');
+        modal.show(); // Use jQuery show() as well to ensure it's visible
+    }
+
+    function hideTooltip(parms) {
+        const tooltip = $(this).closest('.mt-2, .relative, div').find('.tooltip-error');
+        if (tooltip.length > 0 && parms != 'label') {
+            tooltip.removeClass('tooltip-show').addClass('tooltip-hide');
+            setTimeout(() => {
+                tooltip.remove();
+            }, 200);
+        }
+    }
+
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', hideTooltip);
+    });
+
+    const labels = document.querySelectorAll('label');
+    labels.forEach(label => {
+        label.addEventListener('click', function (e) {
+            hideTooltip.call(this, 'label');
+        });
+    });
+
     function closeModal(modalId, event) {
         if (event) {
             event.preventDefault();
@@ -270,306 +392,68 @@
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-    }
-
-    // Function to show tooltip with animation
-    function showTooltip(tooltip) {
-        if (!tooltip) return;
-        
-        tooltip.classList.remove('hidden');
-        tooltip.style.display = 'flex';
-        tooltip.style.opacity = '';
-        tooltip.style.visibility = '';
-        tooltip.style.transform = '';
-        
-        void tooltip.offsetHeight;
-        
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                tooltip.classList.add('show');
-            });
-        });
-    }
-
-    // Function to hide tooltip with animation
-    function hideTooltip(tooltip) {
-        if (!tooltip) return;
-        
-        tooltip.classList.remove('show');
-        
-        setTimeout(function() {
-            tooltip.classList.add('hidden');
-            tooltip.style.display = 'none';
-            tooltip.style.opacity = '';
-            tooltip.style.visibility = '';
-            tooltip.style.transform = '';
-        }, 200);
-    }
-
-    // Function to clear all error messages
-    function clearAllErrors() {
-        document.querySelectorAll('.tooltip').forEach(function(tooltip) {
-            tooltip.classList.remove('show');
-            tooltip.classList.add('hidden');
-            tooltip.style.display = 'none';
-            tooltip.style.opacity = '';
-            tooltip.style.visibility = '';
-            tooltip.style.transform = '';
-        });
-        document.querySelectorAll('#forgot-password-form input').forEach(function(input) {
-            input.classList.remove('ring-red-500', 'ring-2');
-        });
-    }
-
-    // Function to display validation errors
-    function displayValidationErrors(errors) {
-        clearAllErrors();
-        
-        setTimeout(function() {
-            if (errors && typeof errors === 'object') {
-                Object.keys(errors).forEach(function(fieldName) {
-                    var field = document.querySelector('[name="' + fieldName + '"]');
-                    if (field) {
-                        field.classList.add('ring-red-500', 'ring-2');
-
-                        var fieldContainer = field.closest('.mt-2') || field.parentElement;
-                        var errorContainer = null;
-                        
-                        if (fieldContainer) {
-                            errorContainer = fieldContainer.querySelector('.tooltip');
-                        }
-                        
-                        if (!errorContainer && fieldContainer && fieldContainer.parentElement) {
-                            errorContainer = fieldContainer.parentElement.querySelector('.tooltip');
-                        }
-
-                        if (errorContainer) {
-                            var errorText = errorContainer.querySelector('p');
-                            if (errorText) {
-                                errorText.textContent = errors[fieldName][0];
-                            }
-                            errorContainer.classList.remove('hidden');
-                            errorContainer.style.display = 'flex';
-                            errorContainer.style.opacity = '';
-                            errorContainer.style.visibility = '';
-                            errorContainer.style.transform = '';
-                            showTooltip(errorContainer);
-                        } else {
-                            var errorDiv = document.createElement('div');
-                            errorDiv.className = 'relative tooltip -bottom-4 hidden';
-                            errorDiv.innerHTML = '<div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded"><p class="text-white leading-none text-sm lg:text-base">' + errors[fieldName][0] + '</p></div>';
-                            
-                            if (fieldContainer) {
-                                fieldContainer.appendChild(errorDiv);
-                                setTimeout(function() {
-                                    showTooltip(errorDiv);
-                                }, 50);
-                            } else if (field.parentElement) {
-                                field.parentElement.appendChild(errorDiv);
-                                setTimeout(function() {
-                                    showTooltip(errorDiv);
-                                }, 50);
-                            }
-                        }
-                    }
-                });
-                
-                setTimeout(function() {
-                    var firstErrorField = document.querySelector('#forgot-password-form input.ring-red-500');
-                    if (firstErrorField) {
-                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 500);
+            // Clear validation errors and reset form
+            const form = document.getElementById('forgot-password-form');
+            if (form) {
+                form.reset(); // Reset form fields
+                const errorElements = form.querySelectorAll('.tooltip-error');
+                errorElements.forEach(element => element.remove()); // Remove error messages
             }
-        }, 10);
-    }
-
-    // Function to show error modal
-    function showErrorModal(message) {
-        var errorModal = document.getElementById('error-modal');
-        if (errorModal) {
-            var messageElement = errorModal.querySelector('.can-exp-p');
-            if (messageElement) {
-                messageElement.innerHTML = message;
-            }
-            errorModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            alert(message);
         }
     }
-
-    // Function to show success modal
-    function showSuccessModal(message) {
-        var successModal = document.getElementById('success-modal');
-        if (!successModal) {
-            // Create modal if it doesn't exist
-            var modalHtml = '<div id="success-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: block;">' +
-                '<div class="fixed inset-0 z-10 w-screen overflow-y-auto">' +
-                '<div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">' +
-                '<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal(\'success-modal\', event)"></div>' +
-                '<div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">' +
-                '<button onclick="closeModal(\'success-modal\', event)" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />' +
-                '</svg></button>' +
-                '<div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">' +
-                '<div class="sm:flex sm:items-start justify-center"></div>' +
-                '<div class="text-center sm:ml-4 sm:mt-0">' +
-                '<div class="w-full">' +
-                '<p class="can-exp-p text-center text-black mt-5" id="success-modal-message">' + message + '</p>' +
-                '</div></div></div>' +
-                '<div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">' +
-                '<button onclick="closeModal(\'success-modal\', event)" class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</button>' +
-                '</div></div></div></div></div>';
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            successModal = document.getElementById('success-modal');
-        }
-        if (successModal) {
-            var messageElement = successModal.querySelector('#success-modal-message') || successModal.querySelector('.can-exp-p');
-            if (messageElement) {
-                messageElement.textContent = message;
-            }
-            successModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            alert(message);
-        }
-    }
-
-    // Function to show email verification modal
-    function showEmailVerificationModal(userEmail) {
-        var verificationModal = document.getElementById('email-verification-modal');
-        if (verificationModal) {
-            var linkElement = verificationModal.querySelector('a[href*="sendEmailVerify"]');
-            if (linkElement && userEmail) {
-                linkElement.setAttribute('href', linkElement.getAttribute('href').replace(/email=[^&]+/, 'email=' + userEmail));
-            }
-            verificationModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }
-
-    // AJAX Form Submission
-    var forgotPasswordForm = document.getElementById('forgot-password-form');
-    if (forgotPasswordForm) {
-        forgotPasswordForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            var form = this;
-            var submitButton = document.getElementById('forgot-password-button');
-            var formData = new FormData(form);
-            var originalButtonText = submitButton ? submitButton.innerHTML : '';
-
-            clearAllErrors();
-
-            if (submitButton) {
-                submitButton.setAttribute('disabled', 'true');
-                submitButton.innerHTML = '<span>Processing...</span>';
-            }
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(function(response) {
-                var contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json().then(function(data) {
-                        if (!response.ok) {
-                            throw data;
-                        }
-                        return data;
-                    });
-                } else {
-                    return response.text().then(function(html) {
-                        if (response.status === 422) {
-                            throw { errors: 'Validation error occurred' };
-                        }
-                        return { html: html };
-                    });
-                }
-            })
-            .then(function(data) {
-                console.log('Forgot password response:', data);
-                
-                if (data.success) {
-                    form.reset();
-                    
-                    if (data.message) {
-                        showSuccessModal(data.message);
-                    } else {
-                        showSuccessModal('Password reset email has been sent successfully.');
-                    }
-                } else if (data.showModal) {
-                    showEmailVerificationModal(data.user ? data.user.email : null);
-                } else if (data.errors) {
-                    displayValidationErrors(data.errors);
-                } else if (data.error) {
-                    showErrorModal(data.error);
-                } else {
-                    console.warn('Unexpected response format:', data);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-                
-                if (error.errors) {
-                    displayValidationErrors(error.errors);
-                } else if (error.error) {
-                    showErrorModal(error.error);
-                } else {
-                    alert('An error occurred. Please check your input and try again.');
-                }
-            })
-            .finally(function() {
-                if (submitButton) {
-                    submitButton.removeAttribute('disabled');
-                    if (originalButtonText) {
-                        submitButton.innerHTML = originalButtonText;
-                    }
-                }
-            });
-        });
-    }
-
-    // Hide error messages on input
-    document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(function() {
-            document.querySelectorAll('.tooltip:not(.hidden)').forEach(function(tooltip) {
-                var hasText = tooltip.querySelector('p') && tooltip.querySelector('p').textContent.trim() !== '';
-                if (hasText && tooltip.style.display !== 'none') {
-                    tooltip.style.opacity = '';
-                    tooltip.style.visibility = '';
-                    tooltip.style.transform = '';
-                    showTooltip(tooltip);
-                }
-            });
-        }, 100);
-
-        var emailInput = document.getElementById('email');
-        if (emailInput) {
-            emailInput.addEventListener('input', function() {
-                var parentDiv = this.closest('div');
-                if (parentDiv) {
-                    var errorMessage = parentDiv.querySelector('.tooltip');
-                    if (errorMessage) {
-                        hideTooltip(errorMessage);
-                        this.classList.remove('ring-red-500', 'ring-2');
-                    }
-                }
-            });
-        }
-    });
 </script>
+
+<style>
+    /* Tooltip Animation Styles */
+    .tooltip-error {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: auto;
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        display: block;
+    }
+
+    /* Initial hidden state for dynamically created tooltips */
+    .tooltip-error.tooltip-init {
+        opacity: 0;
+        transform: scale(0.95) translateY(-5px);
+        pointer-events: none;
+    }
+
+    .tooltip-error.tooltip-show {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        pointer-events: auto;
+    }
+
+    .tooltip-error.tooltip-hide {
+        opacity: 0;
+        transform: scale(0.95) translateY(-5px);
+        pointer-events: none;
+    }
+
+    /* Ensure tooltips are visible when they have the show class */
+    .tooltip-error.tooltip-show .tooltiptext {
+        display: flex !important;
+    }
+
+    /* Loading spinner styles */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        display: inline-block;
+        vertical-align: text-bottom;
+        border: 0.15em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    @keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 @endsection

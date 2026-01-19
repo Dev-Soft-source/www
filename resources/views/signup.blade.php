@@ -11,6 +11,13 @@
         /* left: 4rem; */
     }
 
+    /* Ensure arrow is visible on mobile */
+    @media (max-width: 768px) {
+        .password-tooltip::after {
+            left: 30px; /* Adjust position for mobile if needed */
+        }
+    }
+
     /* Tooltip animation styles - Fixed UI Issues */
     .tooltip {
         opacity: 0;
@@ -19,15 +26,6 @@
         transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out, transform 0.5s ease-in-out;
         pointer-events: none; /* Prevent interaction when hidden */
         position: relative; /* Ensure proper positioning */
-    }
-
-    /* Visible tooltip state */
-    .tooltip.show,
-    .tooltip.show.hidden {
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: translateY(0) !important;
-        pointer-events: auto;
     }
 
     /* Tooltips that should be visible (error messages on load) */
@@ -54,31 +52,49 @@
         transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
     }
 
-    /* Ensure tooltip container doesn't cause layout shifts */
-    .tooltip {
-        min-height: 0;
-        margin: 0;
-        padding: 0;
-    }
-
     /* Fix tooltip text positioning */
     .tooltip .tooltiptext {
         position: relative;
         z-index: 1000;
     }
 
-    /* Password tooltip down arrow (points to icon below) */
+    /* Show tooltip */
+    .tooltip.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .password-tooltip {
+        position: relative;
+        background-color: #c75b5b; /* blue */
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        width: 28rem;
+    }
+
+    /* LEFT arrow pointing to Password label */
     .password-tooltip::after {
         content: "";
         position: absolute;
-        margin-left: -10px;
-        border-left: 10px solid transparent !important;
-        border-right: 10px solid transparent !important;
-        border-top: 10px solid #3b82f6 !important;
-        border-bottom: 0 !important;
-        display: block !important;
-        z-index: 1001;
-        margin-top: 95px;
+
+        /* Arrow on left side */
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+
+        width: 0;
+        height: 0;
+
+        /* Triangle pointing RIGHT */
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-right: 10px solid #c75b5b;
+    }
+
+    .tooltip.shift-left {
+        margin-left: -220px;
     }
 
     /* Prevent input field from jumping when error appears */
@@ -194,16 +210,18 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-500 cursor-help hover:text-blue-700">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>
-                        <div class="tooltip hidden absolute bottom-full mb-2 z-50 whitespace-normal" style="left: 10%; transform: translateX(-50%);">
-                            <div role="tooltip" class="tooltiptext password-tooltip bg-blue-500 text-white text-sm rounded-lg shadow-lg p-3 w-72 text-left relative">
-                                <p class="text-white leading-relaxed">{{ $signupPage->password_placeholder }}</p>
+                        <!-- Tooltip -->
+                        <div class="tooltip hidden left-full bottom-full mb-2 z-50 shift-left">
+                            <div class="password-tooltip">
+                                <p class="text-white">{{ $signupPage->password_placeholder }}</p>
                             </div>
                         </div>
                     </div>
                 </label>
+            </div>
+            <div class="mt-2">
                 <div class="mt-2 relative">
                     <input
-
                         class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600" id="password" type="password" name="password"
                         value="{{ old('password') }}"
                          autocomplete="current-password" />
@@ -221,7 +239,7 @@
                       </div>
                     @enderror
                 </div>
-              </div>
+            </div>
               <div class="mt-2">
                 <label for="password_confirmation" class="font-FuturaMdCnBT">
                     @isset($signupPage->confirm_password_label)
@@ -435,13 +453,13 @@
                     </svg>
                 </button>
                 <div class="sm:flex sm:items-start justify-center">
-                      <!-- <div
+                      <div
                           class="mx-auto h-16 w-16">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                               stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
-                    </div> -->
+                    </div>
                 </div>
                 <div class="text-center sm:ml-4 sm:mt-0">
                     @php
