@@ -410,6 +410,12 @@
                         </path>
                     </svg>
                 </a>
+                <a id="apple-login-btn" href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'apple']) }}" class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100" height="100"
+                        viewBox="0 0 48 48">
+                        <path fill="#000000" d="M 39.928 17.352 C 39.686 17.54 35.406 19.952 35.406 25.315 C 35.406 31.519 40.852 33.712 41.015 33.767 C 40.99 33.901 40.15 36.773 38.144 39.699 C 36.354 42.274 34.486 44.844 31.644 44.844 C 28.801 44.844 28.07 43.193 24.788 43.193 C 21.59 43.193 20.454 44.898 17.854 44.898 C 15.253 44.898 13.439 42.516 11.353 39.589 C 8.936 36.154 6.985 30.815 6.985 25.75 C 6.985 17.623 12.268 13.314 17.469 13.314 C 20.232 13.314 22.535 15.128 24.27 15.128 C 25.92 15.128 28.496 13.206 31.639 13.206 C 32.83 13.206 37.111 13.314 39.928 17.352 Z M 30.147 9.765 C 31.447 8.222 32.367 6.082 32.367 3.942 C 32.367 3.645 32.341 3.344 32.286 3.102 C 30.174 3.181 27.655 4.51 26.138 6.271 C 24.947 7.625 23.835 9.765 23.835 11.935 C 23.835 12.26 23.89 12.587 23.914 12.691 C 24.048 12.716 24.266 12.745 24.482 12.745 C 26.381 12.745 28.768 11.475 30.147 9.765 Z" style="stroke-width: 1;"></path>
+                    </svg>
+                </a>
             </div>
 
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
@@ -454,11 +460,16 @@
                 </button>
                 <div class="sm:flex sm:items-start justify-center">
                       <div
+<<<<<<< HEAD
                           class="mx-auto h-16 w-16">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                               stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
+=======
+                          class="mx-auto h-full mb-8">
+                          <svg width="95px" height="95px" viewBox="-7.2 -7.2 38.40 38.40" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#00b859" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(0,0), scale(1)"><rect x="-7.2" y="-7.2" width="38.40" height="38.40" rx="19.2" fill="#eee" strokewidth="0"></rect></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.192"></g><g id="SVGRepo_iconCarrier"> <path d="M17.8086 9.70558C18.1983 9.31421 18.1969 8.68105 17.8056 8.29137C17.4142 7.90169 16.781 7.90305 16.3913 8.29442L10.6215 14.0892L7.30211 10.816C6.90886 10.4283 6.27571 10.4327 5.88793 10.8259C5.50015 11.2192 5.50459 11.8524 5.89784 12.2401L9.92581 16.212C10.3177 16.5985 10.9482 16.5956 11.3366 16.2056L17.8086 9.70558Z" fill="#00ff7b"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z" fill="#00ff7b"></path> </g></svg>
+>>>>>>> e695e794c3bd9126bfc1938ac5f47a30292a25c6
                     </div>
                 </div>
                 <div class="text-center sm:ml-4 sm:mt-0">
@@ -972,5 +983,35 @@
             });
         }
     });
+
+    // Detect Apple devices and show Apple login button
+    (function() {
+        function isAppleDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Check for iOS devices (iPhone, iPad, iPod)
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return true;
+            }
+            
+            // Check for macOS (Safari on Mac)
+            if (/Macintosh|Mac OS X/.test(userAgent)) {
+                // Also check if it's Safari browser
+                if (/Safari/.test(userAgent) && !/Chrome|Chromium|Edge/.test(userAgent)) {
+                    return true;
+                }
+                // Or if it's any browser on macOS (since Apple Sign In works on macOS in any browser)
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Show Apple login button if on Apple device
+        const appleLoginBtn = document.getElementById('apple-login-btn');
+        if (appleLoginBtn && isAppleDevice()) {
+            appleLoginBtn.style.display = 'flex';
+        }
+    })();
 </script>
 @endsection
