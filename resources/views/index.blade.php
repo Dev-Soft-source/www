@@ -49,7 +49,7 @@
     @if(session('success'))
     <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="relative flex min-h-full items-center justify-center p-4 sm:items-center sm:p-0 w-full">
+                    <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
                           <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                             <button onclick="closeModal('success-modal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
