@@ -28,7 +28,7 @@
                                         </div>
                                     </div>
                                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                        <div class="mt-2 w-full">
+                                        <div class="mt-5 w-full">
                                             <p class="can-exp-p text-center">{{ session('message') }}</p>
                                         </div>
                                     </div>

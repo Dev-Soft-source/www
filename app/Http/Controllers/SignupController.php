@@ -168,12 +168,25 @@ class SignupController extends Controller
             }
         }
 
+        // Check if email exists and account is closed - allow re-registration
+        $existingUser = User::where('email', $request->email)->whereNull('deleted_at')->first();
+        if ($existingUser && $existingUser->closed === '1') {
+            // Allow closed accounts to re-register - bypass unique validation
+            $emailRule = 'required|string|email|max:255';
+        } else if ($existingUser && $existingUser->closed !== '1') {
+            // Email exists and account is not closed - use standard unique validation
+            $emailRule = 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL';
+        } else {
+            // Email doesn't exist - allow registration
+            $emailRule = 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL';
+        }
+
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
                 'first_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
                 'last_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
-                'email' => 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL',
+                'email' => $emailRule,
                 'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
                 'remember-me' => 'required',
                 'password_confirmation' => 'required|same:password',
@@ -204,14 +217,30 @@ class SignupController extends Controller
             'created_at' => Carbon::now()
         ]);
 
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'country' => 39,
-            'referral_uuid' => bin2hex(random_bytes(16))
-        ]);
+        // Check if user exists with closed account - update instead of create
+        $existingClosedUser = User::where('email', $request->email)->where('closed', '1')->whereNull('deleted_at')->first();
+        
+        if ($existingClosedUser) {
+            // Update the closed account to reactivate it
+            $existingClosedUser->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'password' => Hash::make($request->password),
+                'closed' => '0', // Reactivate the account
+                'email_verified' => '0', // Require email verification again
+            ]);
+            $user = $existingClosedUser;
+        } else {
+            // Create new user
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'country' => 39,
+                'referral_uuid' => bin2hex(random_bytes(16))
+            ]);
+        }
 
         $ipAddress = null;
         foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {

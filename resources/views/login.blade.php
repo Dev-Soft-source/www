@@ -21,7 +21,7 @@
                 <form id="login-form" class="space-y-6" method="POST" action="">
                     @csrf
                     @if(session('error'))
-                        <div id="error-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick="closeModal('error-modal')">
+                        <div id="error-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true" onclick="closeModal('error-modal')" style="display: block;">
                             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                 <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
@@ -51,11 +51,11 @@
 
                                             @if (session('verify_email') != null && session('verify_email') == true)
                                             <a href="{{route('sendEmailVerify', ['email' => session('email')])}}"
-                                            class="inline-flex justify-center rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3 w-auto">{{ $loginPage->new_verification_email_btn_label ?? "Request a new verification email" }}</a>
+                                            class="inline-flex justify-center w-28 rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">{{ $loginPage->new_verification_email_btn_label ?? " resend email" }}</a>
                                             @endif
 
                                             <a onclick="closeModal('error-modal')"
-                                                class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">Close</a>
+                                                class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">Close</a>
                                         </div>
                                     </div>
                                 </div>
@@ -93,8 +93,7 @@
                                         </div>
                                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
 
-                                            <a href=""
-                                                class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">Close</a>
+                                            <a href="" class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">Close</a>
                                         </div>
                                     </div>
                                 </div>
@@ -373,8 +372,19 @@
                     const response = xhr.responseJSON;
                     
                     if (xhr.status === 422) {
-                        // Validation errors
-                        handleValidationErrors(response.errors || {});
+                        // Check if it's a closed account error (has error message but no errors object)
+                        if (response && response.error && !response.errors) {
+                            // This is a closed account or similar error - show modal
+                            showErrorModal(response.error, response.verify_email, response.email);
+                        } else if (response && response.errors) {
+                            // Validation errors
+                            handleValidationErrors(response.errors);
+                        } else if (response && response.error) {
+                            // General error
+                            showErrorModal(response.error, response.verify_email, response.email);
+                        } else {
+                            showErrorModal('An error occurred. Please try again.');
+                        }
                     } else if (response && response.error) {
                         // General error
                         showErrorModal(response.error, response.verify_email, response.email);
@@ -458,7 +468,7 @@
                                 </div>
                                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                                     <div class="verify-email-button"></div>
-                                    <a onclick="closeModal('error-modal')" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">Close</a>
+                                    <a onclick="closeModal('error-modal')" class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">Close</a>
                                 </div>
                             </div>
                         </div>
@@ -474,13 +484,15 @@
             const lang = getCurrentLang();
             const verifyUrl = `/send-email-verify/${encodeURIComponent(email)}`;
             modal.find('.verify-email-button').html(`
-                <a href="${verifyUrl}" class="inline-flex justify-center rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3 w-auto">Request a new verification email</a>
+                <a href="${verifyUrl}" class="inline-flex justify-center w-28 rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">Resend email</a>
             `);
         } else {
             modal.find('.verify-email-button').empty();
         }
         
-        modal.show();
+        // Show modal with proper display
+        modal.css('display', 'block');
+        modal.removeClass('hidden');
     }
 
     function hideTooltip(parms) {
@@ -509,6 +521,7 @@
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'none';
+            modal.classList.add('hidden');
         }
     }
 

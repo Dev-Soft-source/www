@@ -5,6 +5,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@300;400;600;700&display=swap");
+/* Carlito font from Fontsource CDN (closest to MS Calibri) */
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/index.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400-italic.css");
+@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700-italic.css");
 /* general */
 
 /*********************************/
@@ -12,7 +18,7 @@
 /*===============================*/
 body {
     /* font-family: 'Nunito', sans-serif; */
-    font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+    font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     font-size: 20px;
 }
 
@@ -197,15 +203,42 @@ body {
     /* Buttons */
 
     .button-exp-fill {
-        @apply bg-primary hover:bg-blue-500 text-white text-base rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+        @apply bg-primary hover:bg-blue-500 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+        font-size: 22px;
     }
 
     .button-exp-no-fill {
-        @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+        @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+        font-size: 22px;
     }
 
     .button-exp {
-        @apply bg-transparent text-white border border-white text-base rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+        @apply bg-transparent text-white border border-white rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+        font-size: 22px;
+    }
+
+    /* Force all buttons (red, green, blue/primary) to use 22px font size */
+    button.bg-red-500,
+    button.bg-greenXS,
+    button.bg-primary,
+    button.bg-blue-600,
+    a.bg-red-500,
+    a.bg-greenXS,
+    a.bg-primary,
+    a.bg-blue-600,
+    button[class*="bg-red"],
+    button[class*="bg-green"],
+    button[class*="bg-blue"],
+    button[class*="bg-primary"],
+    a[class*="bg-red"],
+    a[class*="bg-green"],
+    a[class*="bg-blue"],
+    a[class*="bg-primary"],
+    .bg-red-500.font-FuturaMdCnBT,
+    .bg-greenXS.font-FuturaMdCnBT,
+    .bg-primary.font-FuturaMdCnBT,
+    .bg-blue-600.font-FuturaMdCnBT {
+        font-size: 22px !important;
     }
 
     /* Footer */
@@ -307,15 +340,42 @@ body {
         }
 
         .button-exp-fill {
-            @apply bg-primary hover:bg-blue-500 text-white text-base rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+            @apply bg-primary hover:bg-blue-500 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
+            font-size: 22px;
         }
 
         .button-exp-no-fill {
-            @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+            @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
+            font-size: 22px;
         }
 
         .button-exp {
-            @apply bg-transparent text-white border border-white text-base rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+            @apply bg-transparent text-white border border-white rounded font-FuturaMdCnBT px-5 py-2 hover:text-white;
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        button.bg-red-500,
+        button.bg-greenXS,
+        button.bg-primary,
+        button.bg-blue-600,
+        a.bg-red-500,
+        a.bg-greenXS,
+        a.bg-primary,
+        a.bg-blue-600,
+        button[class*="bg-red"],
+        button[class*="bg-green"],
+        button[class*="bg-blue"],
+        button[class*="bg-primary"],
+        a[class*="bg-red"],
+        a[class*="bg-green"],
+        a[class*="bg-blue"],
+        a[class*="bg-primary"],
+        .bg-red-500.font-FuturaMdCnBT,
+        .bg-greenXS.font-FuturaMdCnBT,
+        .bg-primary.font-FuturaMdCnBT,
+        .bg-blue-600.font-FuturaMdCnBT {
+            font-size: 22px !important;
         }
 
         a {

@@ -122,12 +122,13 @@ class LoginController extends Controller
         
         if ($user) {
             if ($user->closed === '1') {
-                $closeModalErrorMessage = $loginPage ? $loginPage->close_modal_error_message : 'Account has been closed';
+                $closeModalErrorMessage = "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.";
 
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json([
                         'success' => false,
                         'error'   => $closeModalErrorMessage,
+                        'redirect_to_signup' => true,
                     ], 422);
                 }
 

@@ -1,6 +1,11 @@
 @import url(https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@300;400;600;700&display=swap);
+@import url(https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/index.css);
+@import url(https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400.css);
+@import url(https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700.css);
+@import url(https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400-italic.css);
+@import url(https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700-italic.css);
 
 *, ::before, ::after{
   --tw-border-spacing-x: 0;
@@ -754,6 +759,51 @@ h5 {
         color: #2563eb;
         text-align: justify;
     }
+h6
+    .bg-red-500,h6
+    .bg-greenXS,h6
+    .bg-primary,h6
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        h6
+        .bg-red-500,h6
+        .bg-greenXS,h6
+        .bg-primary,h6
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        h6
+        .bg-red-500,h6
+        .bg-greenXS,h6
+        .bg-primary,h6
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        h6
+        .bg-red-500,h6
+        .bg-greenXS,h6
+        .bg-primary,h6
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        h6
+        .bg-red-500,h6
+        .bg-greenXS,h6
+        .bg-primary,h6
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
 h6{
   font-family: FuturaMdCnBT, cursive;
   font-size: 28px;
@@ -795,6 +845,89 @@ label {
         font-family: FuturaMdCnBT, cursive;
     }
 /* Buttons */
+
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+    }
 .button-exp-fill{
   border-radius: 0.25rem;
   border-width: 1px;
@@ -808,11 +941,110 @@ label {
   padding-bottom: 0.5rem;
   text-align: center;
   font-family: FuturaMdCnBT, cursive;
-  font-size: 1rem;
-  line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
+.button-exp-fill:hover
+    .bg-red-500,.button-exp-fill:hover
+    .bg-greenXS,.button-exp-fill:hover
+    .bg-primary,.button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+.button-exp-fill:focus
+    button,.button-exp-fill:focus
+    a,.button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+.button-exp-fill:active
+    button,.button-exp-fill:active
+    a,.button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
 .button-exp-fill:hover{
   --tw-border-opacity: 1;
   border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
@@ -834,6 +1066,54 @@ label {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
+.button-exp-fill {
+        font-size: 22px;
+    }
+
+    .bg-red-500.button-exp-no-fill,
+    .bg-greenXS.button-exp-no-fill,
+    .bg-primary.button-exp-no-fill,
+    .bg-blue-600.button-exp-no-fill {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+    }
 .button-exp-no-fill{
   border-radius: 0.25rem;
   border-width: 1px;
@@ -845,8 +1125,6 @@ label {
   padding-bottom: 0.5rem;
   text-align: center;
   font-family: FuturaMdCnBT, cursive;
-  font-size: 1rem;
-  line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity, 1));
 }
@@ -870,8 +1148,79 @@ label {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
 }
+.button-exp-no-fill {
+        font-size: 22px;
+    }
+/* Force all buttons (red, green, blue/primary) to use 22px font size */
+button.bg-red-500,
+    button.bg-greenXS,
+    button.bg-primary,
+    button.bg-blue-600,
+    a.bg-red-500,
+    a.bg-greenXS,
+    a.bg-primary,
+    a.bg-blue-600,
+    button[class*="bg-red"],
+    button[class*="bg-green"],
+    button[class*="bg-blue"],
+    button[class*="bg-primary"],
+    a[class*="bg-red"],
+    a[class*="bg-green"],
+    a[class*="bg-blue"],
+    a[class*="bg-primary"],
+    .bg-red-500.font-FuturaMdCnBT,
+    .bg-greenXS.font-FuturaMdCnBT,
+    .bg-primary.font-FuturaMdCnBT,
+    .bg-blue-600.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
 /* Footer */
 /* Cards & input */
+
+    .bg-red-500.card-heading,
+    .bg-greenXS.card-heading,
+    .bg-primary.card-heading,
+    .bg-blue-600.card-heading {
+        font-size: 22px;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+    }
 .card-heading{
   font-family: FuturaMdCnBT, cursive;
   font-size: 1.25rem;
@@ -962,6 +1311,52 @@ label {
             color: #111827;
             text-align: justify;
         }
+    
+    .bg-red-500.card-heading,
+    .bg-greenXS.card-heading,
+    .bg-primary.card-heading,
+    .bg-blue-600.card-heading {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+    }
 
         .card-heading{
     font-family: FuturaMdCnBT, cursive;
@@ -970,6 +1365,90 @@ label {
     --tw-text-opacity: 1;
     color: rgb(17 24 39 / var(--tw-text-opacity, 1));
   }
+    
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+    }
 
         .button-exp-fill{
     border-radius: 0.25rem;
@@ -984,11 +1463,113 @@ label {
     padding-bottom: 0.5rem;
     text-align: center;
     font-family: FuturaMdCnBT, cursive;
-    font-size: 1rem;
-    line-height: 1.5rem;
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
+    .button-exp-fill:hover
+    .bg-red-500,.button-exp-fill:hover
+    .bg-greenXS,.button-exp-fill:hover
+    .bg-primary,.button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .button-exp-fill:focus
+    button,.button-exp-fill:focus
+    a,.button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .button-exp-fill:active
+    button,.button-exp-fill:active
+    a,.button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
 
         .button-exp-fill:hover{
     --tw-border-opacity: 1;
@@ -1014,6 +1595,56 @@ label {
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
 
+        .button-exp-fill {
+            font-size: 22px;
+        }
+    
+    .bg-red-500.button-exp-no-fill,
+    .bg-greenXS.button-exp-no-fill,
+    .bg-primary.button-exp-no-fill,
+    .bg-blue-600.button-exp-no-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+    }
+
         .button-exp-no-fill{
     border-radius: 0.25rem;
     border-width: 1px;
@@ -1025,8 +1656,6 @@ label {
     padding-bottom: 0.5rem;
     text-align: center;
     font-family: FuturaMdCnBT, cursive;
-    font-size: 1rem;
-    line-height: 1.5rem;
     --tw-text-opacity: 1;
     color: rgb(37 99 235 / var(--tw-text-opacity, 1));
   }
@@ -1054,6 +1683,56 @@ label {
     color: rgb(59 130 246 / var(--tw-text-opacity, 1));
   }
 
+        .button-exp-no-fill {
+            font-size: 22px;
+        }
+    
+    .bg-red-500.button-exp,
+    .bg-greenXS.button-exp,
+    .bg-primary.button-exp,
+    .bg-blue-600.button-exp {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+    }
+
         .button-exp{
     border-radius: 0.25rem;
     border-width: 1px;
@@ -1065,8 +1744,6 @@ label {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     font-family: FuturaMdCnBT, cursive;
-    font-size: 1rem;
-    line-height: 1.5rem;
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
@@ -1075,6 +1752,34 @@ label {
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
+
+        .button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        button.bg-red-500,
+        button.bg-greenXS,
+        button.bg-primary,
+        button.bg-blue-600,
+        a.bg-red-500,
+        a.bg-greenXS,
+        a.bg-primary,
+        a.bg-blue-600,
+        button[class*="bg-red"],
+        button[class*="bg-green"],
+        button[class*="bg-blue"],
+        button[class*="bg-primary"],
+        a[class*="bg-red"],
+        a[class*="bg-green"],
+        a[class*="bg-blue"],
+        a[class*="bg-primary"],
+        .bg-red-500.font-FuturaMdCnBT,
+        .bg-greenXS.font-FuturaMdCnBT,
+        .bg-primary.font-FuturaMdCnBT,
+        .bg-blue-600.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
 
         a{
     font-size: 1rem;
@@ -1184,6 +1889,52 @@ label {
             color: #111827;
             text-align: justify;
         }
+    
+    .bg-red-500.card-heading,
+    .bg-greenXS.card-heading,
+    .bg-primary.card-heading,
+    .bg-blue-600.card-heading {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.card-heading,
+        .bg-greenXS.card-heading,
+        .bg-primary.card-heading,
+        .bg-blue-600.card-heading {
+            font-size: 22px;
+        }
+    }
 
         .card-heading{
     font-family: FuturaMdCnBT, cursive;
@@ -1192,6 +1943,90 @@ label {
     --tw-text-opacity: 1;
     color: rgb(17 24 39 / var(--tw-text-opacity, 1));
   }
+    
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.button-exp-fill,
+    a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.button-exp-fill,
+    .bg-greenXS.button-exp-fill,
+    .bg-primary.button-exp-fill,
+    .bg-blue-600.button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.button-exp-fill,
+        a.button-exp-fill,.button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-fill,
+        .bg-greenXS.button-exp-fill,
+        .bg-primary.button-exp-fill,
+        .bg-blue-600.button-exp-fill {
+            font-size: 22px;
+        }
+    }
 
         .button-exp-fill{
     border-radius: 0.25rem;
@@ -1211,6 +2046,110 @@ label {
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
+    .button-exp-fill:hover
+    .bg-red-500,.button-exp-fill:hover
+    .bg-greenXS,.button-exp-fill:hover
+    .bg-primary,.button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:hover
+        .bg-red-500,.button-exp-fill:hover
+        .bg-greenXS,.button-exp-fill:hover
+        .bg-primary,.button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .button-exp-fill:focus
+    button,.button-exp-fill:focus
+    a,.button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:focus
+        button,.button-exp-fill:focus
+        a,.button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .button-exp-fill:active
+    button,.button-exp-fill:active
+    a,.button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .button-exp-fill:active
+        button,.button-exp-fill:active
+        a,.button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
 
         .button-exp-fill:hover{
     --tw-border-opacity: 1;
@@ -1235,6 +2174,52 @@ label {
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
+    
+    .bg-red-500.button-exp-no-fill,
+    .bg-greenXS.button-exp-no-fill,
+    .bg-primary.button-exp-no-fill,
+    .bg-blue-600.button-exp-no-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp-no-fill,
+        .bg-greenXS.button-exp-no-fill,
+        .bg-primary.button-exp-no-fill,
+        .bg-blue-600.button-exp-no-fill {
+            font-size: 22px;
+        }
+    }
 
         .button-exp-no-fill{
     border-radius: 0.25rem;
@@ -1275,6 +2260,52 @@ label {
     --tw-text-opacity: 1;
     color: rgb(59 130 246 / var(--tw-text-opacity, 1));
   }
+    
+    .bg-red-500.button-exp,
+    .bg-greenXS.button-exp,
+    .bg-primary.button-exp,
+    .bg-blue-600.button-exp {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.button-exp,
+        .bg-greenXS.button-exp,
+        .bg-primary.button-exp,
+        .bg-blue-600.button-exp {
+            font-size: 22px;
+        }
+    }
 
         .button-exp{
     border-radius: 0.25rem;
@@ -3630,13 +4661,14 @@ label {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 /* FONTS */
+/* Carlito font from Fontsource CDN (closest to MS Calibri) */
 /* general */
 /*********************************/
 /*             General            */
 /*===============================*/
 body {
     /* font-family: 'Nunito', sans-serif; */
-    font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+    font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     font-size: 20px;
 }
 /* width */
@@ -3709,6 +4741,376 @@ body {
 .page-post_a_ride label {
     font-size: 24px;
 }
+.hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+    a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-greenXS:hover
+    button,.hover\:bg-greenXS:hover
+    a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-primary:hover
+    button,.hover\:bg-primary:hover
+    a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-blue-600:hover
+    button,.hover\:bg-blue-600:hover
+    a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+    a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-greenXS:hover
+    button,.hover\:bg-greenXS:hover
+    a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-primary:hover
+    button,.hover\:bg-primary:hover
+    a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-blue-600:hover
+    button,.hover\:bg-blue-600:hover
+    a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+    a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:font-FuturaMdCnBT:hover
+    .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+    .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+    .bg-primary,.hover\:font-FuturaMdCnBT:hover
+    .bg-blue-600 {
+        font-size: 22px !important;
+    }
+.hover\:bg-greenXS:hover
+    button,.hover\:bg-greenXS:hover
+    a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:font-FuturaMdCnBT:hover
+    .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+    .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+    .bg-primary,.hover\:font-FuturaMdCnBT:hover
+    .bg-blue-600 {
+        font-size: 22px !important;
+    }
+.hover\:bg-primary:hover
+    button,.hover\:bg-primary:hover
+    a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:font-FuturaMdCnBT:hover
+    .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+    .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+    .bg-primary,.hover\:font-FuturaMdCnBT:hover
+    .bg-blue-600 {
+        font-size: 22px !important;
+    }
+.hover\:bg-blue-600:hover
+    button,.hover\:bg-blue-600:hover
+    a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.hover\:font-FuturaMdCnBT:hover
+    .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+    .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+    .bg-primary,.hover\:font-FuturaMdCnBT:hover
+    .bg-blue-600 {
+        font-size: 22px !important;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+        a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-greenXS:hover
+        button,.hover\:bg-greenXS:hover
+        a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-primary:hover
+        button,.hover\:bg-primary:hover
+        a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-blue-600:hover
+        button,.hover\:bg-blue-600:hover
+        a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+        a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-greenXS:hover
+        button,.hover\:bg-greenXS:hover
+        a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-primary:hover
+        button,.hover\:bg-primary:hover
+        a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-blue-600:hover
+        button,.hover\:bg-blue-600:hover
+        a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-red-500:hoverbutton,.hover\:bg-red-500:hover
+        a,.hover\:bg-red-500:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:font-FuturaMdCnBT:hover
+        .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+        .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+        .bg-primary,.hover\:font-FuturaMdCnBT:hover
+        .bg-blue-600 {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-greenXS:hover
+        button,.hover\:bg-greenXS:hover
+        a,.hover\:bg-greenXS:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:font-FuturaMdCnBT:hover
+        .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+        .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+        .bg-primary,.hover\:font-FuturaMdCnBT:hover
+        .bg-blue-600 {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-primary:hover
+        button,.hover\:bg-primary:hover
+        a,.hover\:bg-primary:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:font-FuturaMdCnBT:hover
+        .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+        .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+        .bg-primary,.hover\:font-FuturaMdCnBT:hover
+        .bg-blue-600 {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:bg-blue-600:hover
+        button,.hover\:bg-blue-600:hover
+        a,.hover\:bg-blue-600:hover.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .hover\:font-FuturaMdCnBT:hover
+        .bg-red-500,.hover\:font-FuturaMdCnBT:hover
+        .bg-greenXS,.hover\:font-FuturaMdCnBT:hover
+        .bg-primary,.hover\:font-FuturaMdCnBT:hover
+        .bg-blue-600 {
+            font-size: 22px !important;
+        }
+    }
+.focus\:bg-greenXS:focus
+    button,.focus\:bg-greenXS:focus
+    a,.focus\:bg-greenXS:focus.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .focus\:bg-greenXS:focus
+        button,.focus\:bg-greenXS:focus
+        a,.focus\:bg-greenXS:focus.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .focus\:bg-greenXS:focus
+        button,.focus\:bg-greenXS:focus
+        a,.focus\:bg-greenXS:focus.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .focus\:bg-greenXS:focus
+        button,.focus\:bg-greenXS:focus
+        a,.focus\:bg-greenXS:focus.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+    }
+.active\:bg-greenXS:active
+    button,.active\:bg-greenXS:active
+    a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-primary:active
+    button,.active\:bg-primary:active
+    a,.active\:bg-primary:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-blue-600:active
+    button,.active\:bg-blue-600:active
+    a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-greenXS:active
+    button,.active\:bg-greenXS:active
+    a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-primary:active
+    button,.active\:bg-primary:active
+    a,.active\:bg-primary:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-blue-600:active
+    button,.active\:bg-blue-600:active
+    a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-greenXS:active
+    button,.active\:bg-greenXS:active
+    a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-primary:active
+    button,.active\:bg-primary:active
+    a,.active\:bg-primary:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+.active\:bg-blue-600:active
+    button,.active\:bg-blue-600:active
+    a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-greenXS:active
+        button,.active\:bg-greenXS:active
+        a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-primary:active
+        button,.active\:bg-primary:active
+        a,.active\:bg-primary:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-blue-600:active
+        button,.active\:bg-blue-600:active
+        a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-greenXS:active
+        button,.active\:bg-greenXS:active
+        a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-primary:active
+        button,.active\:bg-primary:active
+        a,.active\:bg-primary:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-blue-600:active
+        button,.active\:bg-blue-600:active
+        a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-greenXS:active
+        button,.active\:bg-greenXS:active
+        a,.active\:bg-greenXS:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-primary:active
+        button,.active\:bg-primary:active
+        a,.active\:bg-primary:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .active\:bg-blue-600:active
+        button,.active\:bg-blue-600:active
+        a,.active\:bg-blue-600:active.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+    }
+.peer:checked ~ .peer-checked\:bg-primary
+    button,.peer:checked ~ .peer-checked\:bg-primary
+    a,.peer:checked ~ .peer-checked\:bg-primary.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+@media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .peer:checked ~ .peer-checked\:bg-primary
+        button,.peer:checked ~ .peer-checked\:bg-primary
+        a,.peer:checked ~ .peer-checked\:bg-primary.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .peer:checked ~ .peer-checked\:bg-primary
+        button,.peer:checked ~ .peer-checked\:bg-primary
+        a,.peer:checked ~ .peer-checked\:bg-primary.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .peer:checked ~ .peer-checked\:bg-primary
+        button,.peer:checked ~ .peer-checked\:bg-primary
+        a,.peer:checked ~ .peer-checked\:bg-primary.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+    }
 @media (min-width: 768px){
   .md\:container{
     width: 100%;
@@ -3743,6 +5145,90 @@ body {
       max-width: 1536px;
     }
   }
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+    }
 
     .md\:button-exp-fill{
     border-radius: 0.25rem;
@@ -3757,11 +5243,113 @@ body {
     padding-bottom: 0.5rem;
     text-align: center;
     font-family: FuturaMdCnBT, cursive;
-    font-size: 1rem;
-    line-height: 1.5rem;
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
+    .md\:button-exp-fill:hover
+    .bg-red-500,.md\:button-exp-fill:hover
+    .bg-greenXS,.md\:button-exp-fill:hover
+    .bg-primary,.md\:button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:focus
+    button,.md\:button-exp-fill:focus
+    a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:active
+    button,.md\:button-exp-fill:active
+    a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
 
     .md\:button-exp-fill:hover{
     --tw-border-opacity: 1;
@@ -3787,7 +5375,99 @@ body {
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
   }
 
+    .md\:button-exp-fill {
+        font-size: 22px;
+    }
+    button.md\:bg-red-500,
+    a.md\:bg-red-500,.md\:bg-red-500.font-FuturaMdCnBT {
+        font-size: 22px !important;
+    }
+
     @media screen and (min-width: 767px) {
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+    }
 
         .md\:button-exp-fill{
       border-radius: 0.25rem;
@@ -3802,10 +5482,112 @@ body {
       padding-bottom: 0.5rem;
       text-align: center;
       font-family: FuturaMdCnBT, cursive;
-      font-size: 1rem;
-      line-height: 1.5rem;
       --tw-text-opacity: 1;
       color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+    .md\:button-exp-fill:hover
+    .bg-red-500,.md\:button-exp-fill:hover
+    .bg-greenXS,.md\:button-exp-fill:hover
+    .bg-primary,.md\:button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:focus
+    button,.md\:button-exp-fill:focus
+    a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:active
+    button,.md\:button-exp-fill:active
+    a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
     }
 
         .md\:button-exp-fill:hover{
@@ -3831,9 +5613,352 @@ body {
       --tw-text-opacity: 1;
       color: rgb(255 255 255 / var(--tw-text-opacity, 1));
     }
+
+        .md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+    }
+
+        .md\:button-exp-fill{
+      border-radius: 0.25rem;
+      border-width: 1px;
+      --tw-border-opacity: 1;
+      border-color: rgb(37 99 235 / var(--tw-border-opacity, 1));
+      --tw-bg-opacity: 1;
+      background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      text-align: center;
+      font-family: FuturaMdCnBT, cursive;
+      --tw-text-opacity: 1;
+      color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+    .md\:button-exp-fill:hover
+    .bg-red-500,.md\:button-exp-fill:hover
+    .bg-greenXS,.md\:button-exp-fill:hover
+    .bg-primary,.md\:button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:focus
+    button,.md\:button-exp-fill:focus
+    a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:active
+    button,.md\:button-exp-fill:active
+    a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+
+        .md\:button-exp-fill:hover{
+      --tw-border-opacity: 1;
+      border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
+      --tw-bg-opacity: 1;
+      background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
+      font-family: FuturaMdCnBT, cursive;
+      --tw-text-opacity: 1;
+      color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+
+        .md\:button-exp-fill:focus{
+      --tw-bg-opacity: 1;
+      background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+      --tw-text-opacity: 1;
+      color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+
+        .md\:button-exp-fill:active{
+      --tw-bg-opacity: 1;
+      background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+      --tw-text-opacity: 1;
+      color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+
+        .md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        button.md\:bg-red-500,
+        a.md\:bg-red-500,.md\:bg-red-500.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        button.md\:bg-red-500,
+        a.md\:bg-red-500,.md\:bg-red-500.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        button.md\:bg-red-500,
+        a.md\:bg-red-500,.md\:bg-red-500.font-FuturaMdCnBT {
+            font-size: 22px !important;
+        }
     }
 
     @media screen and (min-width: 1200px) {
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+    
+    button.md\:button-exp-fill,
+    a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+    
+    .bg-red-500.md\:button-exp-fill,
+    .bg-greenXS.md\:button-exp-fill,
+    .bg-primary.md\:button-exp-fill,
+    .bg-blue-600.md\:button-exp-fill {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        button.md\:button-exp-fill,
+        a.md\:button-exp-fill,.md\:button-exp-fill.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        
+        .bg-red-500.md\:button-exp-fill,
+        .bg-greenXS.md\:button-exp-fill,
+        .bg-primary.md\:button-exp-fill,
+        .bg-blue-600.md\:button-exp-fill {
+            font-size: 22px;
+        }
+    }
 
         .md\:button-exp-fill{
       border-radius: 0.25rem;
@@ -3852,6 +5977,110 @@ body {
       line-height: 1.75rem;
       --tw-text-opacity: 1;
       color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+    }
+    .md\:button-exp-fill:hover
+    .bg-red-500,.md\:button-exp-fill:hover
+    .bg-greenXS,.md\:button-exp-fill:hover
+    .bg-primary,.md\:button-exp-fill:hover
+    .bg-blue-600 {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:hover
+        .bg-red-500,.md\:button-exp-fill:hover
+        .bg-greenXS,.md\:button-exp-fill:hover
+        .bg-primary,.md\:button-exp-fill:hover
+        .bg-blue-600 {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:focus
+    button,.md\:button-exp-fill:focus
+    a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:focus
+        button,.md\:button-exp-fill:focus
+        a,.md\:button-exp-fill:focus.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+    }
+    .md\:button-exp-fill:active
+    button,.md\:button-exp-fill:active
+    a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+        font-size: 22px;
+    }
+
+    @media screen and (min-width: 767px) {
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
+
+        /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
+        .md\:button-exp-fill:active
+        button,.md\:button-exp-fill:active
+        a,.md\:button-exp-fill:active.font-FuturaMdCnBT {
+            font-size: 22px;
+        }
     }
 
         .md\:button-exp-fill:hover{
