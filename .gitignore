@@ -36,3 +36,4 @@ public/js/web.js
 
 package-lock.json
 CLAUDE.local.md
+".env" 
