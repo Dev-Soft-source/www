@@ -1,11 +1,5 @@
 @import url(https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap);
 @import url(https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Nunito:wght@300;400;600;700&display=swap);
-/* Carlito font from Fontsource CDN (closest to MS Calibri) */
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/index.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/400-italic.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/carlito@5.0.8/700-italic.css");
 
  *, ::before, ::after{
   --tw-border-spacing-x: 0;
@@ -842,35 +836,11 @@ video {
   padding-bottom: 0.5rem;
   text-align: center;
   font-family: FuturaMdCnBT, cursive;
-  font-size: 22px;
+  font-size: 1rem;
   line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity, 1));
 }
- /* Force all buttons (red, green, blue/primary) to use 22px font size */
- button.bg-red-500,
- button.bg-greenXS,
- button.bg-primary,
- button.bg-blue-600,
- a.bg-red-500,
- a.bg-greenXS,
- a.bg-primary,
- a.bg-blue-600,
- button[class*="bg-red"],
- button[class*="bg-green"],
- button[class*="bg-blue"],
- button[class*="bg-primary"],
- a[class*="bg-red"],
- a[class*="bg-green"],
- a[class*="bg-blue"],
- a[class*="bg-primary"],
- .bg-red-500.font-FuturaMdCnBT,
- .bg-greenXS.font-FuturaMdCnBT,
- .bg-primary.font-FuturaMdCnBT,
- .bg-blue-600.font-FuturaMdCnBT {
-     font-size: 22px !important;
- }
-
  .button-exp-no-fill:hover{
   --tw-border-opacity: 1;
   border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
@@ -890,30 +860,6 @@ video {
   background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
-}
-
-/* Force all buttons (red, green, blue/primary) to use 22px font size - overrides text-lg */
-button.bg-red-500,
-button.bg-greenXS,
-button.bg-primary,
-button.bg-blue-600,
-a.bg-red-500,
-a.bg-greenXS,
-a.bg-primary,
-a.bg-blue-600,
-button[class*="bg-red"],
-button[class*="bg-green"],
-button[class*="bg-blue"],
-button[class*="bg-primary"],
-a[class*="bg-red"],
-a[class*="bg-green"],
-a[class*="bg-blue"],
-a[class*="bg-primary"],
-.bg-red-500.font-FuturaMdCnBT,
-.bg-greenXS.font-FuturaMdCnBT,
-.bg-primary.font-FuturaMdCnBT,
-.bg-blue-600.font-FuturaMdCnBT {
-    font-size: 22px !important;
 }
  /* Footer */
  /* Cards & input */
@@ -1062,7 +1008,7 @@ a[class*="bg-primary"],
     padding-bottom: 0.5rem;
     text-align: center;
     font-family: FuturaMdCnBT, cursive;
-    font-size: 22px;
+    font-size: 1rem;
     line-height: 1.5rem;
     --tw-text-opacity: 1;
     color: rgb(37 99 235 / var(--tw-text-opacity, 1));
@@ -3650,7 +3596,7 @@ a[class*="bg-primary"],
  /*===============================*/
  body {
   /* font-family: 'Nunito', sans-serif; */
-  font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
   font-size: 20px;
 }
  p{
