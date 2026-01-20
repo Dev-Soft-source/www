@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="mx-auto max-w-2xl lg:max-w-4xl my-6">
+<div class="mx-auto max-w-2xl lg:max-w-4xl ">
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-6 my-4">
             <div class="py-2 flex items-center justify-center">
