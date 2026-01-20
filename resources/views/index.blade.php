@@ -45,7 +45,7 @@
         </div>
     </div>
     @endif
-
+    <!-- <div class="pr-2"> -->
     @if(session('success'))
     <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
