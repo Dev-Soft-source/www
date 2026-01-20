@@ -128,6 +128,10 @@ class ChatsController extends Controller
 
     public function fetchMessages($id, $userId)
     {
+        if (!auth()->user()) {
+            return collect([]); // Return empty collection if user is not authenticated
+        }
+        
         $user_id = auth()->user()->id;
         return Message::with('user', 'rideDetail')
             ->where('ride_id', $id)
@@ -145,6 +149,10 @@ class ChatsController extends Controller
 
     public function fetchChats($userId)
     {
+        if (!auth()->user()) {
+            return collect([]); // Return empty collection if user is not authenticated
+        }
+        
         $user_id = auth()->user()->id;
         return Message::with('user', 'rideDetail')
             ->where(function ($query) use ($user_id, $userId) {
