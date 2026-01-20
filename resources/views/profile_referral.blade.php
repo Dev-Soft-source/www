@@ -6,11 +6,11 @@
     @include('layouts.inc.profile_sidebar')
 
     <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
-        <div class="border-b pb-2">
+        <div class="border-b pb-2 mt-5">
             <h1 class="mb-0">{{ $referralSettingPage->main_heading ?? "Refer a friend"}} </h1>
         </div>
 
-        <p class="text-gray-500 text-sm mt-1">{{ $referralSettingPage->referral_description ?? "Refer a friend using your referral URL and get two rides booking for free"}}</p>
+        <p class="text-gray-500 text-sm mt-1">{!! $referralSettingPage->referral_description ?? "At ProximaRide, we value great experiences. That's why we've introduced a referral rewards system to thank you for bringing trustworthy users to our community. <br><br>Refer a passenger who maintains a good reputation (no negative reviews), and you'll earn 1 point. Refer a driver with a positive attitude (no negative reviews), and you'll earn 5 points." !!}</p>
 
         <div class="mt-4 border border-gray-300 bg-white rounded flex justify-center items-center md:py-10 w-full">
             <div class="md:w-4/5 w-full text-center p-4">

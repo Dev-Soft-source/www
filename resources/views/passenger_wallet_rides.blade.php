@@ -19,14 +19,14 @@
                         </a>
                     </li>
                     <li class="flex-auto text-center">
-                        <a href="{{ route('driver_wallet_pending', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
+                        <a href="{{ route('driver_wallet_available', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
                             {{ $walletSettingPage->driver_heading ?? "As a driver"}}
                         </a>
                     </li>
                 </ul>
                 <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row gap-2">
                     <li class="flex-auto text-center">
-                        <a href="{{ route('passenger_wallet_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
+                        <a href="{{ route('passenger_wallet_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-greenXS border leading-normal text-white bg-greenXS cursor-pointer">
                             {{ $walletSettingPage->passenger_my_ride_heading ?? "My trip"}}
                         </a>
                     </li>

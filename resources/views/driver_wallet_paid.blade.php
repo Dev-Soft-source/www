@@ -15,27 +15,27 @@
                 <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row gap-2">
                     <li class="flex-auto text-center">
                         <a href="{{ route('passenger_wallet_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
-                            {{ $walletSettingPage->passenger_heading ?? "As a passenger"}}
+                            {{ $walletSettingPage->passenger_heading ?? "I'm a Passenger"}}
                         </a>
                     </li>
                     <li class="flex-auto text-center">
                         <a href="{{ route('driver_wallet_pending', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
-                            {{ $walletSettingPage->driver_heading ?? "As a driver"}}
+                            {{ $walletSettingPage->driver_heading ?? "I'm a Driver"}}
                         </a>
                     </li>
                 
                 </ul>
                 <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row gap-2">
                     <li class="flex-auto text-center">
-                        <a href="{{ route('driver_wallet_paid', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
-                            {{ $walletSettingPage->driver_paid_out_heading ?? "Paid out"}}
-                        </a>
-                    </li>
-                    <li class="flex-auto text-center">
                         <a href="{{ route('driver_wallet_available', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
                             {{ $walletSettingPage->driver_availabe_heading ?? "Available"}}
                         </a>
                     </li>
+                    <li class="flex-auto text-center">
+                        <a href="{{ route('driver_wallet_paid', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-greenXS border leading-normal text-white bg-greenXS cursor-pointer">
+                            {{ $walletSettingPage->driver_paid_out_heading ?? "Paid out"}}
+                        </a>
+                    </li>                    
                     <li class="flex-auto text-center">
                         <a href="{{ route('driver_wallet_pending', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
                             {{ $walletSettingPage->driver_pending_heading ?? "Pending"}}

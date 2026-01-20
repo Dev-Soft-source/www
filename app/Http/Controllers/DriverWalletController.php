@@ -30,11 +30,13 @@ class DriverWalletController extends Controller
         if ($selectedLanguage) {
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+            $walletSettingPage = MyWalletSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
+            $walletSettingPage = MyWalletSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -77,7 +79,7 @@ class DriverWalletController extends Controller
             ->groupBy('ride_id')
             ->get();
 
-        return view('driver_wallet_pending',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'getAvailableBalance' => $getAvailableBalance,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('driver_wallet_pending',['reviewSetting' => $reviewSetting, 'walletSettingPage' => $walletSettingPage, 'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'getAvailableBalance' => $getAvailableBalance,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }
 
     public function reward($lang = null){
@@ -234,6 +236,7 @@ class DriverWalletController extends Controller
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
+                $walletSettingPage = MyWalletSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -241,6 +244,7 @@ class DriverWalletController extends Controller
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
+                $walletSettingPage = MyWalletSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -282,7 +286,7 @@ class DriverWalletController extends Controller
             ->groupBy('ride_id', 'paid_out_date', 'user_id')
             ->get();
 
-        return view('driver_wallet_paid',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'getAvailableBalance' => $getPaidout,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('driver_wallet_paid',['reviewSetting' => $reviewSetting,'walletSettingPage' => $walletSettingPage,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'getAvailableBalance' => $getPaidout,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }
 
     public function detail($lang = null, $id){

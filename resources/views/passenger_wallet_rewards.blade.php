@@ -15,11 +15,11 @@
                 <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row gap-2">
                     <li class="flex-auto text-center">
                         <a href="{{ route('passenger_wallet_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
-                            {{ $walletSettingPage->passenger_heading ?? "As a passenger"}}
+                            {{ $walletSettingPage->passenger_heading ?? "As a pasenger"}}
                         </a>
                     </li>
                     <li class="flex-auto text-center">
-                        <a href="{{ route('driver_wallet_pending', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
+                        <a href="{{ route('driver_wallet_available', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
                             {{ $walletSettingPage->driver_heading ?? "As a driver"}}
                         </a>
                     </li>
@@ -36,7 +36,7 @@
                         </a>
                     </li>
                     <li class="flex-auto text-center">
-                        <a href="{{ route('passenger_wallet_rewards', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
+                        <a href="{{ route('passenger_wallet_rewards', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-greenXS border leading-normal text-white bg-greenXS cursor-pointer">
                             {{ $walletSettingPage->passenger_my_reward_heading ?? "My reward"}}
                         </a>
                     </li>
@@ -51,14 +51,14 @@
                                     <div class="relative">
                                         <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                             <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                <p>Rewards</p>
-                                                <p>My rewards</p>
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">Rewards</p>
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">Points</p>                                                
                                             </div>
                                             @if (!empty($rewardPointSettings) && count($rewardPointSettings) > 0)
                                                 @foreach ($rewardPointSettings as $rewardPointSetting)
                                                     <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                        <p>{{ $rewardPointSetting->rewardPointSetting->point }}</p>
                                                         <p>{{ $rewardPointSetting->reward_name }}</p>
+                                                        <p>{{ $rewardPointSetting->rewardPointSetting->point }}</p>                                                        
                                                     </div>
                                                 @endforeach
                                             @endif

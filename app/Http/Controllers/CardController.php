@@ -269,8 +269,26 @@ class CardController extends Controller
             $user = User::whereId($user_id)->first();
         }
 
+        // Handle both Token (tok_...) and PaymentMethod (pm_...) IDs
+        $stripeToken = $request->stripeToken;
+        $paymentMethod = null;
+        
+        if (str_starts_with($stripeToken, 'tok_')) {
+            // It's a token - create a PaymentMethod from the token
+            $paymentMethod = PaymentMethod::create([
+                'type' => 'card',
+                'card' => [
+                    'token' => $stripeToken,
+                ],
+            ]);
+        } elseif (str_starts_with($stripeToken, 'pm_')) {
+            // It's already a PaymentMethod ID
+            $paymentMethod = PaymentMethod::retrieve($stripeToken);
+        } else {
+            throw new \Exception('Invalid payment method identifier. Expected token (tok_...) or PaymentMethod ID (pm_...).');
+        }
+        
         // Attach payment method to customer
-        $paymentMethod = PaymentMethod::retrieve($request->stripeToken);
         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
         // Check if the card fingerprint already exists

@@ -26,15 +26,15 @@
                 </ul>
                 <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row gap-2">
                     <li class="flex-auto text-center">
-                        <a href="{{ route('driver_wallet_paid', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
-                            {{ $walletSettingPage->driver_paid_out_heading ?? "Paid out"}}
-                        </a>
-                    </li>
-                    <li class="flex-auto text-center">
-                        <a href="{{ route('driver_wallet_available', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
+                        <a href="{{ route('driver_wallet_available', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-greenXS border leading-normal text-white bg-greenXS cursor-pointer">
                             {{ $walletSettingPage->driver_availabe_heading ?? "Available"}}
                         </a>
                     </li>
+                    <li class="flex-auto text-center">
+                        <a href="{{ route('driver_wallet_paid', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
+                            {{ $walletSettingPage->driver_paid_out_heading ?? "Paid out"}}
+                        </a>
+                    </li>                    
                     <li class="flex-auto text-center">
                         <a href="{{ route('driver_wallet_pending', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
                             {{ $walletSettingPage->driver_pending_heading ?? "Pending"}}
@@ -58,7 +58,7 @@
                                                 <div onclick="closeModal()"  class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                                                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                                                             <button type="button" onclick="closeModal()"  class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

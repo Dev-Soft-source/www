@@ -37,6 +37,58 @@ if (!function_exists("updateLangByAbber")) {
     }
 }
 
+if (!function_exists('convertNumberToWordsFallback')) {
+    /**
+     * Fallback function to convert numbers to words without NumberFormatter
+     * Supports numbers 0-999
+     */
+    function convertNumberToWordsFallback($number)
+    {
+        $number = (int)$number;
+        
+        $ones = [
+            '', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+            'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+            'seventeen', 'eighteen', 'nineteen'
+        ];
+        
+        $tens = [
+            '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'
+        ];
+        
+        if ($number == 0) {
+            return 'Zero';
+        }
+        
+        if ($number < 20) {
+            return ucfirst($ones[$number]);
+        }
+        
+        if ($number < 100) {
+            $ten = floor($number / 10);
+            $one = $number % 10;
+            $result = $tens[$ten];
+            if ($one > 0) {
+                $result .= '-' . $ones[$one];
+            }
+            return ucfirst($result);
+        }
+        
+        if ($number < 1000) {
+            $hundred = floor($number / 100);
+            $remainder = $number % 100;
+            $result = $ones[$hundred] . ' hundred';
+            if ($remainder > 0) {
+                $result .= ' ' . convertNumberToWordsFallback($remainder);
+            }
+            return ucfirst($result);
+        }
+        
+        // For numbers 1000+, just return the number as a string
+        return (string)$number;
+    }
+}
+
 if (!function_exists('numberToWords')) {
     function numberToWords($number)
     {
@@ -44,9 +96,19 @@ if (!function_exists('numberToWords')) {
             return $number;
         }
 
-        $f = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
-        $words = $f->format($number);
-        return ucfirst($words);
+        // Check if NumberFormatter class is available (requires intl extension)
+        if (class_exists('NumberFormatter')) {
+            try {
+                $f = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
+                $words = $f->format($number);
+                return ucfirst($words);
+            } catch (\Exception $e) {
+                // Fall through to fallback implementation
+            }
+        }
+        
+        // Fallback implementation if NumberFormatter is not available
+        return convertNumberToWordsFallback($number);
     }
 }
 
