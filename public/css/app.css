@@ -4673,7 +4673,7 @@ body {
 }
 /* width */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 15px;
 }
 /* Track */
 ::-webkit-scrollbar-track {
@@ -4683,12 +4683,12 @@ body {
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #0369A1;
+    background: #2563eb;
     border-radius: 4px;
 }
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #0369A1;
+    background: #2058d3;
 }
 .ridesharing_movement_section p {
     color: #fff !important;
