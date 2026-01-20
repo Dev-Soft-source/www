@@ -2230,7 +2230,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 @layer components{
 
     .can-exp-h1{
-        font-size: 30px;
+        font-size: 45px;
         line-height: normal;
         font-family: theme('fontFamily.FuturaMdCnBT');
         color: theme('colors.primary');
@@ -2384,7 +2384,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
           font-size: theme('fontSize.xl');
         }
         .can-exp-h1{
-            font-size: 36px;
+            font-size: 54px;
             font-family: theme('fontFamily.FuturaMdCnBT');
             color: theme('colors.primary');
             margin-bottom: theme('margin.4');
@@ -2468,7 +2468,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
           font-size: theme('fontSize.2xl');
         }
         .can-exp-h1{
-            font-size: 40px;
+            font-size: 60px;
             font-family: theme('fontFamily.FuturaMdCnBT');
             color: theme('colors.primary');
             margin-bottom: theme('margin.4');

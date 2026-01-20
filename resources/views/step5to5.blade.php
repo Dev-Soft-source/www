@@ -205,7 +205,7 @@
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-36">
+                            <button type="submit" class="inline-flex w-42 justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3">
                                 @isset($step4Page->verify_button_label_1){{ $step4Page->verify_button_label_1 }}@endisset
                             </button>
                         </div>

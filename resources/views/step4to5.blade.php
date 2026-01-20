@@ -56,12 +56,12 @@
                         </div>
                         @enderror
                         <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                            <button type="button" onclick="showSkipConfirmation()" class="w-40 button-exp-fill">
+                            <button type="button" onclick="showSkipConfirmation()" class="w-42 button-exp-fill">
                                 @isset($step4Page->skip_license)
                                     {{ $step4Page->skip_license }}
                                 @endisset
                             </button>
-                            <button type="submit" id="nextButton" class="button-exp-fill w-40 opacity-50 cursor-not-allowed" disabled>
+                            <button type="submit" id="nextButton" class="button-exp-fill w-42 opacity-50 cursor-not-allowed" disabled>
                                 @isset($step4Page->next_button_label)
                                     {{ $step4Page->next_button_label }}
                                 @endisset

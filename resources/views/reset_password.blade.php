@@ -6,22 +6,22 @@
   <div class="flex min-h-full flex-col justify-center my-14 px-4 sm:px-6 lg:px-8">
       <div class="bg-white border border-gray-100 p-4 shadow rounded-md sm:px-10">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-          <h1 class="text-center can-exp-h1 text-primary">
+          <h1 class="text-center can-exp-h1 mt-6 text-primary">
             @isset($resetPasswordPage->main_heading)
                 {{ $resetPasswordPage->main_heading }}
             @else
                 Reset Your Password
             @endisset
           </h1>
-          <p class="text-center">
+          <!-- <p class="text-center">
             @isset($resetPasswordPage->main_label)
                 {{ $resetPasswordPage->main_label }}
             @endisset
-          </p>
+          </p> -->
         </div>
 
         <div class="sm:mx-auto sm:w-full sm:max-w-xl md:min-w-[26rem]">
-          <div class="bg-white pt-1 pb-4 px-4 rounded-md sm:px-10">
+          <div class="bg-white pb-4 px-4 rounded-md sm:px-10">
             <form class="space-y-4" method="POST" action="{{ route('update.password') }}">
               @csrf
               @if(session('message'))
@@ -40,11 +40,7 @@
                   @endisset
                 </label>
                 <div class="mt-2 relative">
-                  <input
-                    @isset($resetPasswordPage->password_placeholder)
-                      placeholder="{{ $resetPasswordPage->password_placeholder }}"
-                    @endisset
-                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" id="password" type="password" name="password" autocomplete="current-password" />
+                  <input class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" id="password" type="password" name="password" autocomplete="current-password" />
                   <span id="togglePassword" class="absolute right-3 top-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 cursor-pointer text-gray-600">
                       <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
@@ -52,7 +48,6 @@
                     </svg>
                   </span>
                 </div>
-                <p class="mt-1 text-sm text-gray-600">Your password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one special character.</p>
                 @error('password')
                   <div class="relative tooltip -bottom-4 group-hover:flex">
                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -71,11 +66,7 @@
                   @endisset
                 </label>
                 <div class="mt-2 relative">
-                  <input
-                    @isset($resetPasswordPage->confirm_password_placeholder)
-                      placeholder="{{ $resetPasswordPage->confirm_password_placeholder }}"
-                    @endisset
-                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" id="password_confirmation" type="password" name="password_confirmation" autocomplete="current-password" />
+                  <input class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" id="password_confirmation" type="password" name="password_confirmation" autocomplete="current-password" />
                   <span id="togglePassword2" class="absolute right-3 top-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 cursor-pointer text-gray-600">
                       <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />

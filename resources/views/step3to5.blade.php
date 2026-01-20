@@ -306,12 +306,12 @@
                 </div>
 
                 <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                    <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-36">
+                    <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-42">
                         @isset($step3Page->skip_button_label)
                             {{ $step3Page->skip_button_label }}
                         @endisset
                     </button>
-                    <button type="submit" id="nextButton" class="button-exp-fill w-36 opacity-50 cursor-not-allowed" disabled>
+                    <button type="submit" id="nextButton" class="button-exp-fill w-42 opacity-50 cursor-not-allowed" disabled>
                         @isset($step3Page->next_button_label)
                             {{ $step3Page->next_button_label }}
                         @endisset
