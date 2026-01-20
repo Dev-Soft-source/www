@@ -38,7 +38,7 @@
             <button type="button" onclick="openAddPaymentMethodModal()" class="button-exp-fill">{{$paymentSettingDetail->add_new_card_button_text ?? "Add Payment Method"}}</button>
         </div>
 
-        <div class="max-h-[52rem] overflow-y-auto pr-2 custom-scrollbar ">
+        <div class="max-h-[52rem] overflow-y-auto custom-scrollbar ">
             @if (!empty($cards) && count($cards) > 0)
                 @foreach ($cards as $card)
                     <div class="even:bg-gray-100 odd:bg-white rounded border border-gray-100 shadow-md p-3 md:p-6 mt-3 mb-4">
