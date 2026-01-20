@@ -423,8 +423,23 @@ class MyChatsController extends Controller
             $messageArray['sender'] = $messageArray['user'];
             unset($messageArray['user']);
             
-            // Broadcast the message to Pusher WebSocket
-            broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
+            // Broadcast the message to Pusher WebSocket with error handling
+            try {
+                broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
+            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+                // Log Pusher errors (like timestamp expired) but don't crash the application
+                Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'ride_id' => $ride->id ?? null,
+                    'user_id' => $user->id ?? null
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'ride_id' => $ride->id ?? null,
+                    'user_id' => $user->id ?? null
+                ]);
+            }
         }
 
         return $this->successResponse($messageArray, 'Message Sent!');

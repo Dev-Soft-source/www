@@ -165,13 +165,20 @@ class VerifyStudentController extends Controller
         
         $user = User::whereId($id)->first();
         if (basename($user->student_card) != $filename || $user->student_card_exp_date != $request->expiry_date) {
-            User::whereId($id)->update([
+            $updateData = [
                 'student_card' => $filename,
-                'student_card_upload' => Carbon::now(),
                 'student_card_exp_date' => $request->expiry_date,
                 'student' => 2,
                 'charge_booking' => 2,
-            ]);
+            ];
+            
+            // Set student_card_upload only on first upload (for annual renewal tracking)
+            // Don't update it on subsequent uploads so the anniversary date remains the same
+            if (empty($user->student_card_upload)) {
+                $updateData['student_card_upload'] = Carbon::now();
+            }
+            
+            User::whereId($id)->update($updateData);
         }
 
         $userEmailData = [

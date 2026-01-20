@@ -6815,7 +6815,23 @@ class BookingController extends Controller
 
         $getUser = User::where('id', $booking->user_id)->first();
 
-        broadcast(new MessageSentEvent($booking->ride, $getUser, $chatMessage))->toOthers();
+        // Broadcast the event with error handling for Pusher timestamp issues
+        try {
+            broadcast(new MessageSentEvent($booking->ride, $getUser, $chatMessage))->toOthers();
+        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+            // Log Pusher errors (like timestamp expired) but don't crash the application
+            Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'ride_id' => $booking->ride_id,
+                'user_id' => $getUser->id ?? null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'ride_id' => $booking->ride_id,
+                'user_id' => $getUser->id ?? null
+            ]);
+        }
 
         $phoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)->where('verified', '1')->where('default', '1')->first();
 

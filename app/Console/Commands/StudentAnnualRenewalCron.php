@@ -37,11 +37,15 @@ class StudentAnnualRenewalCron extends Command
     public function handle()
     {
         $today = Carbon::today();
+        
+        Log::info("Student Annual Renewal Cron - Running for date: " . $today->toDateString());
 
         // Find students whose student card upload anniversary is today
         // Check if today matches the month and day of when they first uploaded their student card
         // This sends emails every year starting from the first upload date, regardless of expiry
-        User::where(function ($query) {
+        // student_card_upload is only set on first upload and never updated, so it always contains the original upload date
+        
+        $matchingUsers = User::where(function ($query) {
                 $query->where('student', 1)
                       ->orWhere('student', 2); // Include both verified (2) and pending (1) students
             })
@@ -50,16 +54,25 @@ class StudentAnnualRenewalCron extends Command
             ->whereRaw('MONTH(student_card_upload) = ?', [$today->month])
             ->whereRaw('DAY(student_card_upload) = ?', [$today->day])
             ->whereRaw('YEAR(student_card_upload) < ?', [$today->year]) // Only users who uploaded at least a year ago
-            ->each(function ($user) use ($today) {
+            ->get();
+        
+        Log::info("Student Annual Renewal Cron - Found " . $matchingUsers->count() . " users matching anniversary date");
+        
+        $matchingUsers->each(function ($user) use ($today) {
+                Log::info("Student Annual Renewal Cron - Processing user: {$user->email}, Upload Date: {$user->student_card_upload}");
+                
                 // Check if we already sent an annual renewal email this year
                 $lastRenewalNotification = Notification::where('receiver_id', $user->id)
                     ->where('notification_type', 'student_renewal')
-                    ->whereYear('created_at', $today->year)
+                    ->whereYear('added_on', $today->year)
                     ->first();
 
                 // Only send if we haven't sent one this year
                 if (!$lastRenewalNotification) {
+                    Log::info("Student Annual Renewal Cron - Sending email to: {$user->email}");
                     $this->sendAnnualRenewalEmail($user, false);
+                } else {
+                    Log::info("Student Annual Renewal Cron - Email already sent this year to: {$user->email}");
                 }
             });
 
@@ -135,7 +148,7 @@ class StudentAnnualRenewalCron extends Command
             
             // Find students who received annual renewal email on the reminder date
             $notifications = Notification::where('notification_type', 'student_renewal')
-                ->whereDate('created_at', $reminderDate->toDateString())
+                ->whereDate('added_on', $reminderDate->toDateString())
                 ->where('message', 'NOT LIKE', '%Reminder%') // Only original emails, not reminders
                 ->get();
 
@@ -145,10 +158,11 @@ class StudentAnnualRenewalCron extends Command
                 if (!$user) continue;
 
                 // Check if user has updated their student card since the notification was sent
+                // Use student_card_upload (most recent upload) to check if they've responded
                 $cardUpdatedAfterNotification = false;
                 if ($user->student_card_upload) {
                     $cardUploadDate = Carbon::parse($user->student_card_upload);
-                    $notificationDate = Carbon::parse($notification->created_at);
+                    $notificationDate = Carbon::parse($notification->added_on);
                     // If card was updated after the notification, they've responded
                     $cardUpdatedAfterNotification = $cardUploadDate->greaterThan($notificationDate);
                 }
@@ -157,7 +171,7 @@ class StudentAnnualRenewalCron extends Command
                 $reminderSent = Notification::where('receiver_id', $user->id)
                     ->where('notification_type', 'student_renewal')
                     ->where('message', 'LIKE', '%Reminder%')
-                    ->whereDate('created_at', $today->toDateString())
+                    ->whereDate('added_on', $today->toDateString())
                     ->exists();
 
                 // Send reminder if:

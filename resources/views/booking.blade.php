@@ -1,5 +1,50 @@
 @extends('layouts.template')
 
+@section('style')
+<style>
+    /* Tooltip styles for student verification pending notice */
+    @media (max-width: 768px) {
+        .student-verification-tooltip::after {
+            left: 30px;
+        }
+    }
+
+    .student-verification-tooltip {
+        position: relative;
+        background-color: #c75b5b;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        width: 28rem;
+        max-width: 90vw;
+    }
+
+    .student-verification-tooltip::after {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-right: 10px solid #c75b5b;
+    }
+
+    .tooltip.shift-left {
+        margin-left: -220px;
+    }
+
+    @media (max-width: 768px) {
+        .tooltip.shift-left {
+            margin-left: 0;
+            left: 0;
+            right: 0;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 
 @php
@@ -451,11 +496,26 @@
                             @endif
 
                             <div class="flex items-center justify-between gap-2 mt-1">
-                                <p class="text-black">
-                                    @isset($bookingPage->booking_fee_label)
-                                        {{ $bookingPage->booking_fee_label }}
-                                    @endisset
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-black">
+                                        @isset($bookingPage->booking_fee_label)
+                                            {{ $bookingPage->booking_fee_label }}
+                                        @endisset
+                                    </p>
+                                    @if (auth()->user() && auth()->user()->student == 2)
+                                        <div class="relative sups inline-flex items-center group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-yellow-500 cursor-help hover:text-yellow-600 peer">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            <!-- Tooltip -->
+                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
+                                                <div class="student-verification-tooltip">
+                                                    <p class="text-white text-sm">Your student verification is pending. Pay the Booking Fee now to secure your seat, and we will refund it automatically once your status is approved (usually within 72 hours).</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                                 <p class="totalAmount text-black"></p>
                                 <input type="hidden" name="booking_credit" class="totalAmountInput form-control" readonly>
                             </div>

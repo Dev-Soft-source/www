@@ -23,7 +23,12 @@ class AuthController extends Controller
         ];
         $this->validate($request, $rules);
         
-        $user = new AdminResource($request->user('admin'));
+        $admin = $request->user('admin');
+        if (!$admin) {
+            return $this->errorResponse('Admin not authenticated', 401);
+        }
+        
+        $user = new AdminResource($admin);
         
         if ($request->email != $user->email || $request->admin_email != $user->admin_email) {
             $user = Admin::whereId($user->id)->update([

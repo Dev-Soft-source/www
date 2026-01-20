@@ -91,7 +91,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/user', function (Request $request) {
-        $user = new AdminResource($request->user('admin'));
+        $admin = $request->user('admin');
+        if (!$admin) {
+            return response()->json(['data' => null, 'status' => 'Error', 'message' => 'Admin not authenticated'], 401);
+        }
+        $user = new AdminResource($admin);
         return response()->json(['data' => $user, 'status' => 'Success']);
     });
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);

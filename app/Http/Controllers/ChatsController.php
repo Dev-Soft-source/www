@@ -470,8 +470,21 @@ class ChatsController extends Controller
                     'receiver' => $message->receiver,
                     'ride_id' => $message->ride_id
                 ]);
+            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+                // Log Pusher errors (like timestamp expired) but don't crash the application
+                Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
             } catch (\Exception $e) {
-                Log::error('Failed to broadcast message: ' . $e->getMessage());
+                Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
             }
 
             $message = Message::whereId($message->id)->with('user')->first();

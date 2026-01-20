@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\UserResource;
 use App\Mail\ExtraCareEligibilityMail;
 use App\Mail\StudentCardVerificationMail;
+use App\Models\Booking;
 use App\Models\FCMToken;
 use App\Models\Notification;
+use App\Models\TopUpBalance;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\FCMService;
 use App\Traits\StatusResponser;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -40,10 +44,19 @@ class StudentVerificationController extends Controller
     {
         $user = User::whereId($id)->first();
         if ($student === '1') {
+            // Store the previous student status to check if transitioning from pending (2) to approved (1)
+            $wasPending = $user->student == 2;
+            
             $result = User::whereId($id)->update([
                 'student' => $student,
                 'charge_booking' => 2,
             ]);
+            
+            // If student was pending and is now approved, make booking fees available for withdrawal
+            if ($wasPending) {
+                $this->makeBookingFeesAvailable($user->id);
+            }
+            
             $data = ['username' => $user->first_name];
             Mail::to($user->email)->queue(new StudentCardVerificationMail($data));
 
@@ -86,6 +99,64 @@ class StudentVerificationController extends Controller
             return $this->apiSuccessResponse(new UserResource($user), 'User status has been updated successfully.');
         }
         return $this->errorResponse();
+    }
+
+    /**
+     * Make booking fees available for withdrawal when student card is approved
+     * This credits booking fees paid before verification back to the student's wallet
+     * Only credits fees from bookings made while student was pending (before approval)
+     */
+    protected function makeBookingFeesAvailable($userId)
+    {
+        try {
+            $approvalTime = Carbon::now();
+            
+            // Get all bookings made by this student before approval
+            // These are bookings made while student was pending verification
+            $bookings = Booking::where('user_id', $userId)
+                ->where('booked_on', '<', $approvalTime)
+                ->get();
+            
+            foreach ($bookings as $booking) {
+                // Get all transactions with booking fees for this booking
+                $transactions = Transaction::where('booking_id', $booking->id)
+                    ->where('booking_fee', '>', 0)
+                    ->get();
+                
+                foreach ($transactions as $transaction) {
+                    // Check if this specific booking fee has already been credited back
+                    // Check for TopUpBalance entries with matching booking_id and dr_amount
+                    // We check for entries created after the booking was made to avoid duplicates
+                    $existingCredit = TopUpBalance::where('booking_id', $booking->id)
+                        ->where('user_id', $userId)
+                        ->where('dr_amount', $transaction->booking_fee)
+                        ->where('added_date', '>=', $booking->booked_on)
+                        ->first();
+                    
+                    // Only credit if not already credited
+                    if (!$existingCredit) {
+                        TopUpBalance::create([
+                            'booking_id' => $booking->id,
+                            'user_id' => $userId,
+                            'dr_amount' => $transaction->booking_fee,
+                            'added_date' => $approvalTime->toDateString(),
+                        ]);
+                        
+                        Log::info("Booking fee refunded to student wallet after card approval", [
+                            'user_id' => $userId,
+                            'booking_id' => $booking->id,
+                            'transaction_id' => $transaction->id,
+                            'booking_fee' => $transaction->booking_fee
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error making booking fees available for student: " . $e->getMessage(), [
+                'user_id' => $userId,
+                'error' => $e->getTraceAsString()
+            ]);
+        }
     }
 
     public function updateChargeBooking($id, $charge_booking)

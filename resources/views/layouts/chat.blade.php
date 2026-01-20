@@ -39,12 +39,12 @@
 
         ::-webkit-scrollbar-track {
             -webkit-box-shadow: #3b82f6;
-            background-color: #F5F5F5;
+            background-color: #0369A1;
         }
 
         ::-webkit-scrollbar {
             width: 10px;
-            background-color: #F5F5F5;
+            background-color: #0369A1;
         }
 
         ::-webkit-scrollbar-thumb {
