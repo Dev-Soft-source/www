@@ -127,7 +127,7 @@
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                         onclick="closeModal('my-modal', event)"></div>
                     <div
-                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                         <button onclick="closeModal('my-modal', event)"
                             class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"

@@ -93,6 +93,7 @@ class CountryStateCityController extends Controller
             $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
         }
         
+        $distanceInMeters = $distance;
         if($distance != 0){
             $distance = round(($distance / 1000), 2);
         }
@@ -105,7 +106,8 @@ class CountryStateCityController extends Controller
 
         $pricePerKm = $pricePerKm * $distance; 
 
-        $data['pricePerKm'] = round($pricePerKm, 2); // $pricePerKm;
+        $data['pricePerKm'] = round($pricePerKm, 2);
+        $data['distance'] = $distance; // Return distance in kilometers for frontend validation
         return response()->json($data);
     }
 

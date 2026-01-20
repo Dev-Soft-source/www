@@ -141,7 +141,7 @@
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">
+                            <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">
                                 Close
                             </button>
                             {{-- <a href=""
@@ -1887,7 +1887,7 @@
                                                 : (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="wi-fi"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span>
@@ -1910,7 +1910,7 @@
                                                 : (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="rating-passengers"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span>
@@ -1933,7 +1933,7 @@
                                                 : (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="provide-babyseats"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -1956,7 +1956,7 @@
                                                 : (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="passenger-provide"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -1979,7 +1979,7 @@
                                                 : (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="take-children"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2002,7 +2002,7 @@
                                                 : (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="passenger-provide1"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2025,7 +2025,7 @@
                                                 : (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="bike-rack"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2048,7 +2048,7 @@
                                                 : (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="ski-rack"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2071,7 +2071,7 @@
                                                 : (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="winter-tires"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2094,7 +2094,7 @@
                                                 : (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="air-conditioning"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2117,7 +2117,7 @@
                                                 : (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2140,7 +2140,7 @@
                                                 : (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2163,7 +2163,7 @@
                                                 : (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2186,7 +2186,7 @@
                                                 : (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features))
                                                     ? 'checked'
                                                     : '')) }}
-                                            class="mt-2.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
@@ -2305,7 +2305,7 @@
                 <div class="flex items-start my-4">
                     <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
                         {{ old('agree_terms') == '1' ? 'checked' : '' }}
-                        class="w-4 h-4 mt-2.5 text-blue-600 cursor-pointer bg-white mt-1 border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                        class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                         <label for="agree_terms" class="ml-2 font-normal text-gray-900 flex items-center space-x-0.5">
                             @isset($postRidePage->agree_terms_label)
                                 {!! $postRidePage->agree_terms_label !!}
@@ -2736,6 +2736,10 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(result) {
                 debugger;
                 $("#priceData"+index+"").val(result.pricePerKm);
+                // Store distance for price validation
+                if (result.distance) {
+                    $("#priceData"+index+"").data('distance', result.distance);
+                }
             }
         });
     }

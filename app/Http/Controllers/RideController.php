@@ -1306,6 +1306,27 @@ class RideController extends Controller
         $user_id = $user->id;
         $rides = Ride::where('added_by', $user_id)->whereNotIn('id', [$ride_id])->get();
         $adminSetting = SiteSetting::first();
+        
+        // Check if ride has any bookings - if so, price cannot be changed
+        $hasBookings = Booking::where('ride_id', $ride_id)
+            ->where('status', '<>', 3)
+            ->where('status', '<>', 4)
+            ->whereHas('passenger', function($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->exists();
+        
+        // If bookings exist, check if price is being changed
+        if ($hasBookings && $ride->defaultRideDetail && isset($ride->defaultRideDetail[0])) {
+            $currentPrice = $ride->defaultRideDetail[0]->price;
+            $newPrice = $request->price;
+            
+            if ($currentPrice != $newPrice) {
+                return back()->with('error', 'You cannot change the price once passengers have booked this ride.')
+                    ->with('heading', 'Price Change Not Allowed')
+                    ->withInput();
+            }
+        }
 
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
@@ -1587,13 +1608,22 @@ class RideController extends Controller
             $seatDetail->save();
         }
 
-        //Second
+        //Second - Get distance and duration from Google Maps API
         $duration = 0;
         $distance = 0;
-        $from = str_replace(" ", "", $request->from);
-        $to = str_replace(" ", "", $request->to);
+        // Use original from/to values - getDataFromGoogleApi will properly encode them
+        $from = $request->from;
+        $to = $request->to;
         $fromArray = explode(',', $request->from);
         $toArray = explode(',', $request->to);
+        
+        Log::info('Calculating distance for ride update', [
+            'ride_id' => $ride->id,
+            'from' => $from,
+            'to' => $to,
+            'user_id' => $user_id
+        ]);
+        
         $googleApiData = $this->getDataFromGoogleApi($from, $to);
         if (isset($googleApiData) && !empty($googleApiData)) {
             $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
@@ -1603,6 +1633,57 @@ class RideController extends Controller
 
         if ($distance != 0) {
             $distance = round(($distance / 1000), 2);
+        }
+        
+        Log::info('Distance calculation completed for ride update', [
+            'ride_id' => $ride->id,
+            'from' => $from,
+            'to' => $to,
+            'distance_km' => $distance,
+            'duration_seconds' => $duration,
+            'distance_meters' => $distance * 1000
+        ]);
+        
+        // Validate price per kilometer against cost-sharing caps
+        if ($distance > 0 && isset($request->price) && $request->price > 0) {
+            $pricePerKm = $request->price / $distance;
+            
+            Log::info('Price per kilometer calculation', [
+                'ride_id' => $ride->id ?? 'new',
+                'price' => $request->price,
+                'distance_km' => $distance,
+                'price_per_km' => round($pricePerKm, 4),
+                'error_cap' => 0.72,
+                'warning_cap' => 0.66
+            ]);
+            
+            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+            if ($pricePerKm > 0.72) {
+                Log::warning('Price exceeds error-triggering cap', [
+                    'ride_id' => $ride->id ?? 'new',
+                    'price_per_km' => round($pricePerKm, 4),
+                    'cap' => 0.72
+                ]);
+                
+                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
+                    ->with('heading', 'Price Too High')
+                    ->withInput();
+            }
+            
+            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+            if ($pricePerKm > 0.66) {
+                Log::info('Price exceeds soft warning cap but within error cap', [
+                    'ride_id' => $ride->id ?? 'new',
+                    'price_per_km' => round($pricePerKm, 4),
+                    'warning_cap' => 0.66
+                ]);
+                
+                // Store warning in session - will be shown to user via modal/popup
+                session()->flash('price_warning', [
+                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
+                    'price_per_km' => round($pricePerKm, 2)
+                ]);
+            }
         }
 
         if (isset($request->default_ride_detail_id)) {
@@ -1617,6 +1698,15 @@ class RideController extends Controller
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
+        
+        Log::info('Saving ride detail with distance', [
+            'ride_id' => $ride->id,
+            'ride_detail_id' => $rideDetail->id ?? 'new',
+            'departure' => $request->from,
+            'destination' => $request->to,
+            'total_distance_km' => $distance,
+            'total_duration_seconds' => $duration
+        ]);
         $rideDetail->price = $request->price;
         $rideDetail->time = $request->time;
         $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
@@ -3187,11 +3277,12 @@ class RideController extends Controller
         $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
         $formattedTime = Carbon::createFromFormat('H:i', $request->time)->format('H:i:s');
 
-        //Second
+        //Second - Get distance and duration from Google Maps API
         $duration = 0;
         $distance = 0;
-        $from = str_replace(" ", "", $request->from);
-        $to = str_replace(" ", "", $request->to);
+        // Use original from/to values - getDataFromGoogleApi will properly encode them
+        $from = $request->from;
+        $to = $request->to;
         $googleApiData = $this->getDataFromGoogleApi($from, $to);
         if (isset($googleApiData) && !empty($googleApiData)) {
             $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
@@ -3201,6 +3292,53 @@ class RideController extends Controller
 
         if ($distance != 0) {
             $distance = round(($distance / 1000), 2);
+        }
+        
+        Log::info('Distance calculation completed for post ride', [
+            'from' => $from,
+            'to' => $to,
+            'distance_km' => $distance,
+            'duration_seconds' => $duration,
+            'distance_meters' => $distance * 1000
+        ]);
+        
+        // Validate price per kilometer against cost-sharing caps
+        if ($distance > 0 && isset($request->price) && $request->price > 0) {
+            $pricePerKm = $request->price / $distance;
+            
+            Log::info('Price per kilometer calculation (PostRideStore)', [
+                'price' => $request->price,
+                'distance_km' => $distance,
+                'price_per_km' => round($pricePerKm, 4),
+                'error_cap' => 0.72,
+                'warning_cap' => 0.66
+            ]);
+            
+            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+            if ($pricePerKm > 0.72) {
+                Log::warning('Price exceeds error-triggering cap (PostRideStore)', [
+                    'price_per_km' => round($pricePerKm, 4),
+                    'cap' => 0.72
+                ]);
+                
+                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
+                    ->with('heading', 'Price Too High')
+                    ->withInput();
+            }
+            
+            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+            if ($pricePerKm > 0.66) {
+                Log::info('Price exceeds soft warning cap but within error cap (PostRideStore)', [
+                    'price_per_km' => round($pricePerKm, 4),
+                    'warning_cap' => 0.66
+                ]);
+                
+                // Store warning in session - will be shown to user via modal/popup
+                session()->flash('price_warning', [
+                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
+                    'price_per_km' => round($pricePerKm, 2)
+                ]);
+            }
         }
 
         if (isset($adminSetting)) {
@@ -3906,25 +4044,69 @@ class RideController extends Controller
 
     public function getDataFromGoogleApi($from, $to)
     {
-
         $apiKey = env('GOOGLE_API_KEY');
         $ch = curl_init();
 
-        $from = str_replace(" ", "", $from);
-        $to = str_replace(" ", "", $to);
+        // URL encode the addresses to properly handle spaces and special characters
+        // This ensures city names like "Montreal, QC" and "Ottawa, ON" work correctly
+        $fromEncoded = urlencode($from);
+        $toEncoded = urlencode($to);
 
-        curl_setopt($ch, CURLOPT_URL, "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $from . "&destinations=" . $to . "&units=imperial&key=" . $apiKey . "");
+        $apiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $fromEncoded . "&destinations=" . $toEncoded . "&units=imperial&key=" . $apiKey . "";
+        
+        Log::info('Google Maps API Request', [
+            'from' => $from,
+            'to' => $to,
+            'from_encoded' => $fromEncoded,
+            'to_encoded' => $toEncoded,
+            'url' => str_replace($apiKey, 'HIDDEN_KEY', $apiUrl)
+        ]);
+
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            echo 'cURL Error: ' . curl_error($ch);
+            Log::error('Google Maps API cURL Error: ' . curl_error($ch), [
+                'from' => $from,
+                'to' => $to,
+                'curl_error' => curl_error($ch),
+                'curl_errno' => curl_errno($ch)
+            ]);
         }
 
         curl_close($ch);
 
         $data = json_decode($response, true);
+
+        // Log API response
+        if (isset($data['status']) && $data['status'] === 'OK') {
+            $distance = isset($data['rows'][0]['elements'][0]['distance']['value']) ? $data['rows'][0]['elements'][0]['distance']['value'] : 0;
+            $distanceText = isset($data['rows'][0]['elements'][0]['distance']['text']) ? $data['rows'][0]['elements'][0]['distance']['text'] : 'N/A';
+            $duration = isset($data['rows'][0]['elements'][0]['duration']['value']) ? $data['rows'][0]['elements'][0]['duration']['value'] : 0;
+            $durationText = isset($data['rows'][0]['elements'][0]['duration']['text']) ? $data['rows'][0]['elements'][0]['duration']['text'] : 'N/A';
+            
+            Log::info('Google Maps API Success', [
+                'from' => $from,
+                'to' => $to,
+                'distance_meters' => $distance,
+                'distance_km' => round($distance / 1000, 2),
+                'distance_text' => $distanceText,
+                'duration_seconds' => $duration,
+                'duration_text' => $durationText,
+                'status' => $data['status']
+            ]);
+        } else {
+            // Log if API returns an error status
+            Log::warning('Google Maps API returned non-OK status', [
+                'status' => $data['status'] ?? 'unknown',
+                'error_message' => $data['error_message'] ?? 'No error message',
+                'from' => $from,
+                'to' => $to,
+                'response' => $data
+            ]);
+        }
 
         return $data;
     }

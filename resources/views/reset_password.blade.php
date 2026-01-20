@@ -13,11 +13,11 @@
                 Reset Your Password
             @endisset
           </h1>
-          <!-- <p class="text-center">
+          <p class="text-center">
             @isset($resetPasswordPage->main_label)
                 {{ $resetPasswordPage->main_label }}
             @endisset
-          </p> -->
+          </p>
         </div>
 
         <div class="sm:mx-auto sm:w-full sm:max-w-xl md:min-w-[26rem]">
