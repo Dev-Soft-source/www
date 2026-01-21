@@ -1643,48 +1643,6 @@ class RideController extends Controller
             'duration_seconds' => $duration,
             'distance_meters' => $distance * 1000
         ]);
-        
-        // Validate price per kilometer against cost-sharing caps
-        if ($distance > 0 && isset($request->price) && $request->price > 0) {
-            $pricePerKm = $request->price / $distance;
-            
-            Log::info('Price per kilometer calculation', [
-                'ride_id' => $ride->id ?? 'new',
-                'price' => $request->price,
-                'distance_km' => $distance,
-                'price_per_km' => round($pricePerKm, 4),
-                'error_cap' => 0.72,
-                'warning_cap' => 0.66
-            ]);
-            
-            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-            if ($pricePerKm > 0.72) {
-                Log::warning('Price exceeds error-triggering cap', [
-                    'ride_id' => $ride->id ?? 'new',
-                    'price_per_km' => round($pricePerKm, 4),
-                    'cap' => 0.72
-                ]);
-                
-                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
-                    ->with('heading', 'Price Too High')
-                    ->withInput();
-            }
-            
-            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-            if ($pricePerKm > 0.66) {
-                Log::info('Price exceeds soft warning cap but within error cap', [
-                    'ride_id' => $ride->id ?? 'new',
-                    'price_per_km' => round($pricePerKm, 4),
-                    'warning_cap' => 0.66
-                ]);
-                
-                // Store warning in session - will be shown to user via modal/popup
-                session()->flash('price_warning', [
-                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
-                    'price_per_km' => round($pricePerKm, 2)
-                ]);
-            }
-        }
 
         if (isset($request->default_ride_detail_id)) {
             $rideDetail = RideDetail::where('id', $request->default_ride_detail_id)->first();
@@ -1707,6 +1665,49 @@ class RideController extends Controller
             'total_distance_km' => $distance,
             'total_duration_seconds' => $duration
         ]);
+        
+        // Cost-sharing cap validation: Error-Triggering Cap $0.72/km
+        if ($distance > 0 && isset($request->price) && $request->price > 0) {
+            $pricePerKm = $request->price / $distance;
+            
+            Log::info('Price per kilometer calculation (UpdateRide)', [
+                'ride_id' => $ride->id,
+                'price' => $request->price,
+                'distance_km' => $distance,
+                'price_per_km' => round($pricePerKm, 4),
+                'error_cap' => 0.72,
+                'warning_cap' => 0.66
+            ]);
+            
+            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+            if ($pricePerKm > 0.72) {
+                Log::warning('Price exceeds error-triggering cap (UpdateRide)', [
+                    'ride_id' => $ride->id,
+                    'price_per_km' => round($pricePerKm, 4),
+                    'cap' => 0.72
+                ]);
+                
+                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
+                    ->with('heading', 'Price Too High')
+                    ->withInput();
+            }
+            
+            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+            if ($pricePerKm > 0.66) {
+                Log::info('Price exceeds soft warning cap but within error cap (UpdateRide)', [
+                    'ride_id' => $ride->id,
+                    'price_per_km' => round($pricePerKm, 4),
+                    'warning_cap' => 0.66
+                ]);
+                
+                // Store warning in session - will be shown to user via modal/popup
+                session()->flash('price_warning', [
+                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
+                    'price_per_km' => round($pricePerKm, 2)
+                ]);
+            }
+        }
+        
         $rideDetail->price = $request->price;
         $rideDetail->time = $request->time;
         $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
@@ -2329,14 +2330,20 @@ class RideController extends Controller
         $noshows = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
 
         if ($ride) {
-            // Swap departure and destination
+            // Swap departure and destination (From and To)
             $temp = $ride->defaultRideDetail[0]->departure;
             $ride->defaultRideDetail[0]->departure = $ride->defaultRideDetail[0]->destination;
             $ride->defaultRideDetail[0]->destination = $temp;
 
+            // Swap pickup and dropoff locations
             $temp1 = $ride->pickup;
             $ride->pickup = $ride->dropoff;
             $ride->dropoff = $temp1;
+
+            // Clear the date (user must select a new date for return ride)
+            $ride->date = null;
+            
+            // Keep the time the same (already preserved from $ride->time)
         }
 
         if ($rides->isNotEmpty()) {
@@ -3302,7 +3309,7 @@ class RideController extends Controller
             'distance_meters' => $distance * 1000
         ]);
         
-        // Validate price per kilometer against cost-sharing caps
+        // Cost-sharing cap validation: Error-Triggering Cap $0.72/km
         if ($distance > 0 && isset($request->price) && $request->price > 0) {
             $pricePerKm = $request->price / $distance;
             

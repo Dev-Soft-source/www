@@ -1947,47 +1947,6 @@ class RideController extends Controller
             if($distance != 0){
                 $distance = round(($distance / 1000), 2);
             }
-            
-            Log::info('Distance calculation completed for post ride (API)', [
-                'from' => $from,
-                'to' => $to,
-                'distance_km' => $distance,
-                'duration_seconds' => $duration,
-                'distance_meters' => $distance * 1000
-            ]);
-            
-            // Validate price per kilometer against cost-sharing caps
-            if ($distance > 0 && isset($request->price) && $request->price > 0) {
-                $pricePerKm = $request->price / $distance;
-                
-                Log::info('Price per kilometer calculation (API PostRide)', [
-                    'price' => $request->price,
-                    'distance_km' => $distance,
-                    'price_per_km' => round($pricePerKm, 4),
-                    'error_cap' => 0.72,
-                    'warning_cap' => 0.66
-                ]);
-                
-                // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-                if ($pricePerKm > 0.72) {
-                    Log::warning('Price exceeds error-triggering cap (API PostRide)', [
-                        'price_per_km' => round($pricePerKm, 4),
-                        'cap' => 0.72
-                    ]);
-                    
-                    return $this->apiErrorResponse('The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.', 200);
-                }
-                
-                // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-                // Just log the warning - don't block the request
-                if ($pricePerKm > 0.66) {
-                    Log::info('Price exceeds soft warning cap but within error cap (API PostRide) - Allowing with warning', [
-                        'price_per_km' => round($pricePerKm, 4),
-                        'warning_cap' => 0.66
-                    ]);
-                    // Note: Warning will be handled by frontend JavaScript validation
-                }
-            }
 
             if(isset($adminSetting)){
 
@@ -3376,42 +3335,6 @@ class RideController extends Controller
                 'duration_seconds' => $duration,
                 'distance_meters' => $distance * 1000
             ]);
-            
-            // Validate price per kilometer against cost-sharing caps
-            if ($distance > 0 && isset($request->price) && $request->price > 0) {
-                $pricePerKm = $request->price / $distance;
-                
-                Log::info('Price per kilometer calculation (API UpdateRide)', [
-                    'ride_id' => $request->ride_id,
-                    'price' => $request->price,
-                    'distance_km' => $distance,
-                    'price_per_km' => round($pricePerKm, 4),
-                    'error_cap' => 0.72,
-                    'warning_cap' => 0.66
-                ]);
-                
-                // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-                if ($pricePerKm > 0.72) {
-                    Log::warning('Price exceeds error-triggering cap (API UpdateRide)', [
-                        'ride_id' => $request->ride_id,
-                        'price_per_km' => round($pricePerKm, 4),
-                        'cap' => 0.72
-                    ]);
-                    
-                    return $this->apiErrorResponse('The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.', 200);
-                }
-                
-                // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-                // Just log the warning - don't block the request
-                if ($pricePerKm > 0.66) {
-                    Log::info('Price exceeds soft warning cap but within error cap (API UpdateRide) - Allowing with warning', [
-                        'ride_id' => $request->ride_id,
-                        'price_per_km' => round($pricePerKm, 4),
-                        'warning_cap' => 0.66
-                    ]);
-                    // Note: Warning will be handled by frontend JavaScript validation
-                }
-            }
 
             if(isset($adminSetting)){
 

@@ -152,6 +152,18 @@
             </div>
         </div>
     @endif
+    @if(session('price_warning'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const warning = @json(session('price_warning'));
+                if (warning && warning.message) {
+                    showPriceWarningModal(warning.message, function() {
+                        // User acknowledged the warning - modal closes
+                    });
+                }
+            });
+        </script>
+    @endif
     @if(session('message'))
         <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -238,6 +250,96 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal for 5+ seats warning -->
+    <div id="seatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="seats-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closeSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closeSeatsWarningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="seats-modal-title">Heads up for 5+ seats</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">Got it</button>
+                        <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-no-fill">Learn more about limits</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Price Error (Exceeds $0.72/km) -->
+    <div id="priceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-error-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePriceErrorModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="priceErrorHeading">Price Too High</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center" id="priceErrorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" onclick="closePriceErrorModal()" class="button-exp-fill">Got it</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Price Warning (Exceeds $0.66/km but <= $0.72/km) -->
+    <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePriceWarningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Price Warning</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center" id="priceWarningMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" onclick="closePriceWarningModal()" class="button-exp-no-fill">Cancel</button>
+                        <button type="button" id="priceWarningContinue" class="button-exp-fill">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
         <h1>
             @isset($postRidePage->main_heading)
@@ -282,20 +384,9 @@
                                         </div>
 
                                         @php
-                                        $departure = $destination = "";
-                                        if($routeType == "repost"){
-
-                                            $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
-
-                                            $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
-                                        }else{
-
-
-                                            $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
-
-                                            $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
-                                        }
-
+                                        // Controller already swaps departure/destination for repost, so just use the ride properties as-is
+                                        $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
+                                        $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
                                         @endphp
 
                                         <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
@@ -2479,6 +2570,90 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 
+    // Cost-sharing cap validation constants
+    const ERROR_TRIGGERING_CAP = 0.72; // $0.72 per km - BLOCK if exceeded
+    const SOFT_WARNING_CAP = 0.66; // $0.66 per km - WARN but ALLOW
+    
+    // Store distance globally when fetched
+    window.rideDistance = null;
+    
+    // Function to validate price per kilometer
+    function validatePricePerKm(price, distance) {
+        if (!price || !distance || distance <= 0 || price <= 0) {
+            return { valid: true, type: null };
+        }
+        
+        const pricePerKm = parseFloat(price) / parseFloat(distance);
+        
+        if (pricePerKm > ERROR_TRIGGERING_CAP) {
+            return {
+                valid: false,
+                type: 'error',
+                message: 'The price per kilometer ($' + pricePerKm.toFixed(2) + '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.',
+                heading: 'Price Too High',
+                pricePerKm: pricePerKm.toFixed(2)
+            };
+        }
+        
+        if (pricePerKm > SOFT_WARNING_CAP) {
+            return {
+                valid: true,
+                type: 'warning',
+                message: 'Your price per kilometer ($' + pricePerKm.toFixed(2) + '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
+                pricePerKm: pricePerKm.toFixed(2)
+            };
+        }
+        
+        return { valid: true, type: null };
+    }
+    
+    // Function to show error modal
+    function showPriceErrorModal(heading, message) {
+        const modal = document.getElementById('priceErrorModal');
+        if (modal) {
+            document.getElementById('priceErrorHeading').textContent = heading;
+            document.getElementById('priceErrorMessage').textContent = message;
+            modal.classList.remove('hidden');
+            modal.style.display = 'block';
+        }
+    }
+    
+    // Function to show warning modal (with continue button)
+    function showPriceWarningModal(message, callback) {
+        const modal = document.getElementById('priceWarningModal');
+        if (modal) {
+            document.getElementById('priceWarningMessage').textContent = message;
+            modal.classList.remove('hidden');
+            modal.style.display = 'block';
+            
+            // Store callback for continue button
+            const continueBtn = document.getElementById('priceWarningContinue');
+            if (continueBtn) {
+                continueBtn.onclick = function() {
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                    if (callback) callback();
+                };
+            }
+        }
+    }
+    
+    function closePriceErrorModal() {
+        const modal = document.getElementById('priceErrorModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+    }
+    
+    function closePriceWarningModal() {
+        const modal = document.getElementById('priceWarningModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+    }
+
     // Handle form submission errors
     document.querySelector('form').addEventListener('submit', function(e) {
         // First check HTML5 validation
@@ -2491,6 +2666,36 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             firstInvalid.focus();
             return;
+        }
+        
+        // Validate price per kilometer before submission
+        const priceInput = document.getElementById('priceData0');
+        const price = priceInput ? priceInput.value : null;
+        
+        // Get distance - try from data attribute first, then global variable
+        let distance = null;
+        if (priceInput) {
+            distance = $(priceInput).data('distance') || window.rideDistance;
+        }
+        
+        // If we have both price and distance, validate
+        if (price && distance) {
+            const validation = validatePricePerKm(price, distance);
+            
+            if (!validation.valid) {
+                e.preventDefault();
+                showPriceErrorModal(validation.heading, validation.message);
+                return;
+            }
+            
+            if (validation.type === 'warning') {
+                e.preventDefault();
+                showPriceWarningModal(validation.message, function() {
+                    // User confirmed - submit the form
+                    document.querySelector('form').submit();
+                });
+                return;
+            }
         }
 
     });
@@ -2593,7 +2798,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function seat_selected(th) {
-        var seat = $(th).val();
+        var seat = parseInt($(th).val());
 
         for (i = 1; i <= seat; i++) {
             // Change the image source for selected seats
@@ -2608,6 +2813,23 @@ document.addEventListener('DOMContentLoaded', function() {
             $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset("assets/seat.png") }}');
             $(".seat-number.seat-number-" + i).removeClass('text-green-300');
             $("#number-of-seat-cross-" + i).show();
+        }
+
+        // Show warning popup for 5+ seats
+        if (seat == 5 || seat == 6 || seat == 7) {
+            const modal = document.getElementById('seatsWarningModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'block';
+            }
+        }
+    }
+
+    function closeSeatsWarningModal() {
+        const modal = document.getElementById('seatsWarningModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
     }
 
@@ -2754,9 +2976,10 @@ document.addEventListener('DOMContentLoaded', function() {
             success: function(result) {
                 debugger;
                 $("#priceData"+index+"").val(result.pricePerKm);
-                // Store distance for price validation
+                // Store distance for price validation (globally and on input)
                 if (result.distance) {
                     $("#priceData"+index+"").data('distance', result.distance);
+                    window.rideDistance = result.distance; // Store globally for validation
                 }
             }
         });

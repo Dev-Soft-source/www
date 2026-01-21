@@ -93,7 +93,6 @@ class CountryStateCityController extends Controller
             $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
         }
         
-        $distanceInMeters = $distance;
         if($distance != 0){
             $distance = round(($distance / 1000), 2);
         }
