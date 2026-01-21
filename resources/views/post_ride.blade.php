@@ -167,9 +167,10 @@
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                    class="mx-auto h-16 w-16 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </div> -->
                             </div>
@@ -267,55 +268,55 @@
                     <div class="bg-white p-4 space-y-3">
                         <div class="flex flex-col md:flex-row justify-between items-start">
                             <div class="w-full md:w-[45%] mb-4">
-                            <div>
-                                <label for="from"
-                                    class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->from_label)
-                                        {{ $postRidePage->from_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative mt-2">
-                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                <div>
+                                    <label for="from"
+                                        class="block mb-2 text-gray-900">
+                                        @isset($postRidePage->from_label)
+                                            {{ $postRidePage->from_label }}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                        </div>
+
+                                        @php
+                                        $departure = $destination = "";
+                                        if($routeType == "repost"){
+
+                                            $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
+
+                                            $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
+                                        }else{
+
+
+                                            $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
+
+                                            $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
+                                        }
+
+                                        @endphp
+
+                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
+                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
+                                            @isset($postRidePage->from_placeholder)
+                                                placeholder="{{ $postRidePage->from_placeholder }}"
+                                            @endisset>
+
+                                        <!-- Suggestions Container for 'from' field -->
+                                        <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                     </div>
-
-                                    @php
-                                    $departure = $destination = "";
-                                    if($routeType == "repost"){
-
-                                        $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
-
-                                        $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
-                                    }else{
-
-
-                                        $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
-
-                                        $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
-                                    }
-
-                                    @endphp
-
-                                    <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
-                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
-                                        @isset($postRidePage->from_placeholder)
-                                            placeholder="{{ $postRidePage->from_placeholder }}"
-                                        @endisset>
-
-                                    <!-- Suggestions Container for 'from' field -->
-                                    <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                    @error('from')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }} <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
+                                            </a> </p>
+                                        </div>
+                                    </div>
+                                    @enderror
                                 </div>
-                                @error('from')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }} <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                            {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                        </a> </p>
-                                    </div>
-                                  </div>
-                                @enderror
-                            </div>
                             </div>
                             <div class="w-full md:w-[10%] md:mt-10 flex justify-center items-start">
                                 <button type="button" onclick="swapLocations()">
@@ -422,6 +423,7 @@
                                 </iframe>
                             </div> --}}
                         </div>
+                        
                         <div>
                             <label for="date_time" class="block text-gray-900">
                                 @isset($postRidePage->date_time_label)
@@ -483,6 +485,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="flex items-center mb-4">
                             <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
@@ -492,69 +495,70 @@
                                 @endisset
                             </label>
                         </div>
-                    <div id="recurringtripDetails">
-                        <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
-                            <div class="w-full md:w-[45%] mb-4">
-                                <label for="recurring_type" class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->recurring_type_label)
-                                        {{ $postRidePage->recurring_type_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative mt-2">
-                                    <select id="type" name="recurring_type"
-                                        class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        <option value=""
-                                            {{ old('recurring_type') === '' ? 'selected' : '' }}>
-                                            Select
-                                        </option>
-                                        <option value="Daily"
-                                            {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
-                                            Daily
-                                        </option>
-                                        <option value="Weekly"
-                                            {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
-                                            Weekly
-                                        </option>
-                                    </select>
-                                </div>
-                                @error('recurring_type')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
-                                @enderror
-                            </div>
-                            <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
-                                <span class="text-center text-base lg:text-lg ">
-                                    or
-                                </span>
-                            </div>
-                            <div class="w-full md:w-[45%] mb-4">
-                                <label for="recurring_trips" class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->recurring_trips_label)
-                                        {{ $postRidePage->recurring_trips_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative mt-2">
-                                    <input type="number" min="1" max="10" name="recurring_trips" value="{{ old('recurring_trips') }}"
-                                        @isset($postRidePage->recurring_trips_placeholder)
-                                            placeholder="{{ $postRidePage->recurring_trips_placeholder }}"
+                        
+                        <div id="recurringtripDetails">
+                            <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
+                                <div class="w-full md:w-[45%] mb-4">
+                                    <label for="recurring_type" class="block mb-2 text-gray-900">
+                                        @isset($postRidePage->recurring_type_label)
+                                            {{ $postRidePage->recurring_type_label }}
                                         @endisset
-                                        class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                </div>
-                                @error('recurring_trips')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <select id="type" name="recurring_type"
+                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                            <option value=""
+                                                {{ old('recurring_type') === '' ? 'selected' : '' }}>
+                                                Select
+                                            </option>
+                                            <option value="Daily"
+                                                {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
+                                                Daily
+                                            </option>
+                                            <option value="Weekly"
+                                                {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
+                                                Weekly
+                                            </option>
+                                        </select>
                                     </div>
-                                  </div>
-                                @enderror
+                                    @error('recurring_type')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
+                                <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
+                                    <span class="text-center text-base lg:text-lg ">
+                                        or
+                                    </span>
+                                </div>
+                                <div class="w-full md:w-[45%] mb-4">
+                                    <label for="recurring_trips" class="block mb-2 text-gray-900">
+                                        @isset($postRidePage->recurring_trips_label)
+                                            {{ $postRidePage->recurring_trips_label }}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <input type="number" min="1" max="10" name="recurring_trips" value="{{ old('recurring_trips') }}"
+                                            @isset($postRidePage->recurring_trips_placeholder)
+                                                placeholder="{{ $postRidePage->recurring_trips_placeholder }}"
+                                            @endisset
+                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                    </div>
+                                    @error('recurring_trips')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
-                    </div>
                     </div>
                 </div>
                 <div class="mt-6">
@@ -581,6 +585,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="text-2xl bg-primary text-white py-2 px-4">
@@ -599,8 +604,8 @@
                                 <div class="relative">
                                     <label class="cursor-pointer" for="number-of-seat-{{ $i }}">
                                         <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 md:w-10 md:h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                        <span class="absolute left-3 top-2 md:left-4 md:top-3 seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                        <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-6 h-6 md:w-8 md:h-8  cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                        <span class="absolute sm:left-3 sm:top-1 left-2 top-0.5 text-sm sm:text-base seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
                                     </label>
                                 </div>
                                 @endfor
@@ -683,6 +688,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="mt-6 bg-white rounded-lg shadow-3xl">
                         <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
                             <h3 class="text-2xl">
@@ -1296,315 +1302,315 @@
                     </div>
                 </div>
 
-                    <div class="mt-6 bg-white rounded-lg shadow-3xl">
-                        <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->luggage_label)
-                                    {{ $postRidePage->luggage_label }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div class="border rounded-md divide-y">
-                                @isset($postRidePage->luggage_option1->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->luggage_option1->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                            <input id="{{ $postRidePage->luggage_option1->features_setting_id }}" type="radio" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                              {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            @isset($postRidePage->luggage_option1->icon)
-                                                <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option1->icon)}}" alt="">
-                                            @endisset
-                                            <span>
-                                                {{ $postRidePage->luggage_option1->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                                <div
-                                                  class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
-                                                >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            {{ $postRidePage->luggage_option1_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option2->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->luggage_option2->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                            <input type="radio" id="{{ $postRidePage->luggage_option2->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                              {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            @isset($postRidePage->luggage_option2->icon)
-                                                <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option2->icon)}}" alt="">
-                                            @endisset
-                                            <span class="">
-                                                {{ $postRidePage->luggage_option2->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                                <div
-                                                  class="absolute tooltip payment_tooltiptext_position -top-20 right-32 group-hover:flex hidden peer-hover:flex"
-                                                >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            {{ $postRidePage->luggage_option2_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option3->features_setting_id)
+                <div class="mt-6 bg-white rounded-lg shadow-3xl">
+                    <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->luggage_label)
+                                {{ $postRidePage->luggage_label }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div class="bg-white p-4">
+                        <div class="border rounded-md divide-y">
+                            @isset($postRidePage->luggage_option1->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option3->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio" id="{{ $postRidePage->luggage_option3->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                         {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            @isset($postRidePage->luggage_option3->icon)
-                                                <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option3->icon)}}" alt="">
-                                            @endisset
-                                            <span>
-                                                {{ $postRidePage->luggage_option3->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
+                                    <label for="{{ $postRidePage->luggage_option1->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input id="{{ $postRidePage->luggage_option1->features_setting_id }}" type="radio" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        @isset($postRidePage->luggage_option1->icon)
+                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option1->icon)}}" alt="">
+                                        @endisset
+                                        <span>
+                                            {{ $postRidePage->luggage_option1->name }}
+                                        </span>
+                                        <div class="sups relative inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div
+                                                class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
+                                            >
                                                 <div
-                                                  class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
+                                                    role="tooltip"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            {{ $postRidePage->luggage_option3_tooltip }}
-                                                        </p>
-                                                    </div>
+                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
+                                                        {{ $postRidePage->luggage_option1_tooltip }}
+                                                    </p>
                                                 </div>
                                             </div>
-                                        </label>
+                                        </div>
+                                    </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option4->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->luggage_option4->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                            <input type="radio" id="{{ $postRidePage->luggage_option4->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                              {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            @isset($postRidePage->luggage_option4->icon)
-                                                <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option4->icon)}}" alt="">
-                                            @endisset
-                                            <span>
-                                                {{ $postRidePage->luggage_option4->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
+                            @endisset
+                            @isset($postRidePage->luggage_option2->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->luggage_option2->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input type="radio" id="{{ $postRidePage->luggage_option2->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        @isset($postRidePage->luggage_option2->icon)
+                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option2->icon)}}" alt="">
+                                        @endisset
+                                        <span class="">
+                                            {{ $postRidePage->luggage_option2->name }}
+                                        </span>
+                                        <div class="sups relative inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div
+                                                class="absolute tooltip payment_tooltiptext_position -top-20 right-32 group-hover:flex hidden peer-hover:flex"
+                                            >
                                                 <div
-                                                  class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
+                                                    role="tooltip"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-16 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            {{ $postRidePage->luggage_option4_tooltip }}
-                                                        </p>
-                                                    </div>
+                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
+                                                        {{ $postRidePage->luggage_option2_tooltip }}
+                                                    </p>
                                                 </div>
                                             </div>
-                                        </label>
+                                        </div>
+                                    </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option5->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->luggage_option5->features_setting_id }}" class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
-                                            <input type="radio" id="{{ $postRidePage->luggage_option5->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                              {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                                            @isset($postRidePage->luggage_option5->icon)
-                                                <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option5->icon)}}" alt="">
-                                            @endisset
-                                            <div>
-                                                <p class="leading-normal mt-2">
-                                                    {{ $postRidePage->luggage_option5->name }}
-                                                </p>
-                                                <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                    <small>{{ $postRidePage->luggage_option5_label }}</small>
-                                                    <div class="sups relative inline-flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
+                            @endisset
+                            @isset($postRidePage->luggage_option3->features_setting_id)
+                            <div class="flex items-center gap-4 p-3">
+                                <label for="{{ $postRidePage->luggage_option3->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                    <input type="radio" id="{{ $postRidePage->luggage_option3->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}"
+                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        @isset($postRidePage->luggage_option3->icon)
+                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option3->icon)}}" alt="">
+                                        @endisset
+                                        <span>
+                                            {{ $postRidePage->luggage_option3->name }}
+                                        </span>
+                                        <div class="sups relative inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div
+                                                class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
+                                            >
+                                                <div
+                                                    role="tooltip"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                >
+                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
+                                                        {{ $postRidePage->luggage_option3_tooltip }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            @endisset
+                            @isset($postRidePage->luggage_option4->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->luggage_option4->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input type="radio" id="{{ $postRidePage->luggage_option4->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        @isset($postRidePage->luggage_option4->icon)
+                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option4->icon)}}" alt="">
+                                        @endisset
+                                        <span>
+                                            {{ $postRidePage->luggage_option4->name }}
+                                        </span>
+                                        <div class="sups relative inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div
+                                                class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
+                                            >
+                                                <div
+                                                    role="tooltip"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-16 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                >
+                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
+                                                        {{ $postRidePage->luggage_option4_tooltip }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            @endisset
+                            @isset($postRidePage->luggage_option5->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->luggage_option5->features_setting_id }}" class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
+                                        <input type="radio" id="{{ $postRidePage->luggage_option5->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                        @isset($postRidePage->luggage_option5->icon)
+                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option5->icon)}}" alt="">
+                                        @endisset
+                                        <div>
+                                            <p class="leading-normal mt-2">
+                                                {{ $postRidePage->luggage_option5->name }}
+                                            </p>
+                                            <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
+                                                <small>{{ $postRidePage->luggage_option5_label }}</small>
+                                                <div class="sups relative inline-flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
+                                                    <div
+                                                        class="absolute tooltip tooltip_position md:right-64 lg:right-52 xl:right-36 -top-14 group-hover:flex hidden peer-hover:flex"
+                                                    >
                                                         <div
-                                                          class="absolute tooltip tooltip_position md:right-64 lg:right-52 xl:right-36 -top-14 group-hover:flex hidden peer-hover:flex"
+                                                            role="tooltip"
+                                                            class="absolute sm:after:left-1/3 xl:after:left-1/3 2xl:after:left-1/3 luggage_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
-                                                            <div
-                                                                role="tooltip"
-                                                                class="absolute sm:after:left-1/3 xl:after:left-1/3 2xl:after:left-1/3 luggage_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                            >
-                                                                <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                    {{ $postRidePage->luggage_option5_tooltip }}
-                                                                </p>
-                                                            </div>
+                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
+                                                                {{ $postRidePage->luggage_option5_tooltip }}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </label>
-                                    </div>
-                                @endisset
-                            </div>
-                            @error('luggage')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                              </div>
-                            @enderror
-                            <div class="mt-6 space-y-2">
-                                <div class="flex items-start">
-                                    <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
-                                        {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
-                                        class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    <label for="heating"
-                                        class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                        <span class="">
-                                            @isset($postRidePage->luggage_checkbox_label1)
-                                                {{ $postRidePage->luggage_checkbox_label1 }}
-                                            @endisset
-                                        </span>
+                                        </div>
                                     </label>
                                 </div>
-                                {{-- <div class="flex items-start">
-                                    <input id="heating" type="checkbox" name="open_customized" value="1"
-                                        {{ old('open_customized', $ride->open_customized) == '1' ? 'checked' : '' }}
-                                        class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    <label for="heating"
-                                        class="ml-2 font-normal text-gray-900 flex space-x-1">
+                            @endisset
+                        </div>
+                        @error('luggage')
+                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                            </div>
+                        @enderror
+                        <div class="mt-6 space-y-2">
+                            <div class="flex items-start">
+                                <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
+                                    {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
+                                    class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                <label for="heating"
+                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                    <span class="">
+                                        @isset($postRidePage->luggage_checkbox_label1)
+                                            {{ $postRidePage->luggage_checkbox_label1 }}
+                                        @endisset
+                                    </span>
+                                </label>
+                            </div>
+                            {{-- <div class="flex items-start">
+                                <input id="heating" type="checkbox" name="open_customized" value="1"
+                                    {{ old('open_customized', $ride->open_customized) == '1' ? 'checked' : '' }}
+                                    class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                <label for="heating"
+                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                    <span class="">
+                                        @isset($postRidePage->luggage_checkbox_label2)
+                                            {{ $postRidePage->luggage_checkbox_label2 }}
+                                        @endisset
+                                        <sup class="text-red-500">*</sup>
+                                    </span>
+                                </label>
+                            </div> --}}
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+                    <div class="text-2xl bg-primary text-white py-2 px-4">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->smoking_label)
+                                {{ $postRidePage->smoking_label }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div class="bg-white p-4">
+                        <div class="border rounded-md overflow-hidden divide-y">
+                            @isset($postRidePage->smoking_option1->features_setting_id)
+                                <div class="flex items-center gap-4 p-3 w-full">
+                                    <label for="{{ $postRidePage->smoking_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->smoking_option1->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : ( 21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : "")) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
+                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+
                                         <span class="">
-                                            @isset($postRidePage->luggage_checkbox_label2)
-                                                {{ $postRidePage->luggage_checkbox_label2 }}
-                                            @endisset
-                                            <sup class="text-red-500">*</sup>
+                                            {{ $postRidePage->smoking_option1->name }}
                                         </span>
                                     </label>
-                                </div> --}}
-                            </div>
 
-                        </div>
-                    </div>
-
-                    <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->smoking_label)
-                                    {{ $postRidePage->smoking_label }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div class="border rounded-md overflow-hidden divide-y">
-                                @isset($postRidePage->smoking_option1->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3 w-full">
-                                        <label for="{{ $postRidePage->smoking_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                            <input id="{{ $postRidePage->smoking_option1->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                            {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : ( 21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : "")) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
-                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-
-                                            <span class="">
-                                                {{ $postRidePage->smoking_option1->name }}
-                                            </span>
-                                        </label>
-
-                                    </div>
-                                @endisset
-                                @isset($postRidePage->smoking_option2->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->smoking_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                            <input id="{{ $postRidePage->smoking_option2->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                            {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
-                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            {{ $postRidePage->smoking_option2->name }}
-                                        </label>
-                                    </div>
-                                @endisset
-                            </div>
-                            @error('smoke')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                 </div>
-                              </div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->animals_label)
-                                    {{ $postRidePage->animals_label }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div class="border rounded-md overflow-hidden divide-y">
-                                @isset($postRidePage->animals_option1->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->animals_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                            <input id="{{ $postRidePage->animals_option1->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                            {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            {{ $postRidePage->animals_option1->name }}
-                                        </label>
-                                    </div>
-                                @endisset
-                                @isset($postRidePage->animals_option2->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->animals_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                            <input id="{{ $postRidePage->animals_option2->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                            {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            {{ $postRidePage->animals_option2->name }}
-                                        </label>
-                                    </div>
-                                @endisset
-                                @isset($postRidePage->animals_option3->features_setting_id)
-                                    <div class="flex items-center gap-4 p-3">
-                                        <label for="{{ $postRidePage->animals_option3->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                            <input id="{{ $postRidePage->animals_option3->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                            {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                            {{ $postRidePage->animals_option3->name }}
-                                        </label>
-                                    </div>
-                                @endisset
-                            </div>
-                            @error('animal_friendly')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            @endisset
+                            @isset($postRidePage->smoking_option2->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->smoking_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->smoking_option2->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
+                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->smoking_option2->name }}
+                                    </label>
                                 </div>
-                              </div>
-                            @enderror
+                            @endisset
                         </div>
+                        @error('smoke')
+                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                            </div>
+                        @enderror
                     </div>
+                </div>
+
+                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+                    <div class="text-2xl bg-primary text-white py-2 px-4">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->animals_label)
+                                {{ $postRidePage->animals_label }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div class="bg-white p-4">
+                        <div class="border rounded-md overflow-hidden divide-y">
+                            @isset($postRidePage->animals_option1->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option1->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option1->name }}
+                                    </label>
+                                </div>
+                            @endisset
+                            @isset($postRidePage->animals_option2->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option2->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option2->name }}
+                                    </label>
+                                </div>
+                            @endisset
+                            @isset($postRidePage->animals_option3->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option3->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option3->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option3->name }}
+                                    </label>
+                                </div>
+                            @endisset
+                        </div>
+                        @error('animal_friendly')
+                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                            </div>
+                        @enderror
+                    </div>
+                </div>
 
                 <div class="mt-6">
                     <div class="bg-white rounded-lg shadow-3xl">
@@ -2548,16 +2554,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // If the date is today, set the time input value to the current time
             if (isToday) {
                 const utcTime = getCurrentProjectTime();
-                timeInput._flatpickr.setDate(utcTime, true, 'H:i');
+                // Convert 24-hour to Date object for flatpickr
+                const [hours, minutes] = utcTime.split(':');
+                const date = new Date();
+                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                timeInput._flatpickr.setDate(date, true);
             }
         },
     });
 
-    // Initialize the date picker for time input
+    // Initialize the date picker for time input with AM/PM control
+    // Use altInput to display 12-hour format to user but submit 24-hour format
     flatpickr(timeInput, {
         enableTime: true,
         noCalendar: true,
-        dateFormat: 'H:i',
+        dateFormat: 'H:i', // 24-hour format for backend (stored value)
+        altInput: true,
+        altFormat: 'h:i K', // 12-hour format with AM/PM (displayed to user)
+        time_24hr: false, // Enable AM/PM controls in picker
         disableMobile: true,
         minTime: getCurrentProjectTime(), // Set min time to current time
         defaultDate: oldTime || '',
@@ -2570,7 +2584,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!timeInput._flatpickr.input.value) {
             // Set the default time to the current time when the field is clicked
             const projectTime = getCurrentProjectTime();
-            timeInput._flatpickr.setDate(projectTime, true, 'H:i');
+            // Convert 24-hour to Date object for flatpickr
+            const [hours, minutes] = projectTime.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            timeInput._flatpickr.setDate(date, true);
         }
     });
 
