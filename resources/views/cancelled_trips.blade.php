@@ -299,7 +299,7 @@
                                                                             </p>
                                                                             @php
                                                                                 $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($booking) {
-                                                                                    return $rating->ride->added_by === $booking->ride->added_by;
+                                                                                    return $rating->ride && $booking->ride && $rating->ride->added_by === $booking->ride->added_by;
                                                                                 });
 
                                                                                 $totalAverage = $filteredRatings->avg('average_rating') ?? 0;

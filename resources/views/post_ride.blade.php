@@ -7,7 +7,7 @@
         content: "";
         border-width: 10px;
         border-style: solid;
-        border-color: #3b82f6 transparent transparent transparent;
+        border-color: #ef4444 transparent transparent transparent;
         position: absolute;
         bottom: -20px;
         /* left: 4rem; */
@@ -16,7 +16,7 @@
         content: "";
         border-width: 10px;
         border-style: solid;
-        border-color: #3b82f6 transparent transparent transparent;
+        border-color: #ef4444 transparent transparent transparent;
         position: absolute;
         bottom: -20px;
         /* left: 4rem; */
@@ -25,7 +25,7 @@
         content: "";
         border-width: 10px;
         border-style: solid;
-        border-color: #3b82f6 transparent transparent transparent;
+        border-color: #ef4444 transparent transparent transparent;
         position: absolute;
         bottom: -20px;
         /* left: 4rem; */
@@ -63,7 +63,7 @@
             content: "";
             border-width: 10px;
             border-style: solid;
-            border-color: transparent transparent #3b82f6 transparent;
+            border-color: transparent transparent #ef4444 transparent;
             position: absolute;
             top: -20px;
             bottom: auto;
@@ -720,8 +720,8 @@
                                         <li>
                                             <input type="radio" id="2-seats" name="middle_seats" value="2" class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '2' ? 'checked' : '' }}>
-                                            <label for="2-seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-base">
+                                            <label for="2-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <span class="font-medium text-md">
                                                     2 seats
                                                 </span>
                                             </label>
@@ -729,8 +729,8 @@
                                         <li>
                                             <input type="radio" id="3-seats" name="middle_seats" value="3" class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '3' ? 'checked' : '' }}>
-                                            <label for="3-seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-base">3 seats</span>
+                                            <label for="3-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <span class="font-medium text-md">3 seats</span>
                                             </label>
                                         </li>
                                     </ul>
@@ -753,8 +753,8 @@
                                         <li>
                                             <input type="radio" id="2-back_seats" name="back_seats" value="2" class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '2' ? 'checked' : '' }}>
-                                            <label for="2-back_seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-base">
+                                            <label for="2-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <span class="font-medium text-md">
                                                     2 seats
                                                 </span>
                                             </label>
@@ -762,8 +762,8 @@
                                         <li>
                                             <input type="radio" id="3-back_seats" name="back_seats" value="3" class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '3' ? 'checked' : '' }}>
-                                            <label for="3-back_seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-base">3 seats</span>
+                                            <label for="3-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <span class="font-medium text-md">3 seats</span>
                                             </label>
                                         </li>
                                     </ul>
@@ -850,7 +850,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->payment_methods_option1_tooltip }}
@@ -885,7 +885,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->payment_methods_option2_tooltip }}
@@ -920,7 +920,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute after:left-[9.8rem] md:after:left-[9.8rem] payment_tooltiptext -left-1/2 -top-20 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute after:left-[9.8rem] md:after:left-[9.8rem] payment_tooltiptext -left-1/2 -top-20 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->payment_methods_option3_tooltip }}
@@ -974,7 +974,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->booking_option1_tooltip }}
@@ -1003,7 +1003,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->booking_option2_tooltip }}
@@ -1424,7 +1424,7 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
                                                     <p class="text-white font-normal text-start text-sm lg:text-base">
                                                         {{ $postRidePage->luggage_option1_tooltip }}
@@ -1455,7 +1455,7 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
                                                     <p class="text-white font-normal text-start text-sm lg:text-base">
                                                         {{ $postRidePage->luggage_option2_tooltip }}
@@ -1486,7 +1486,7 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
                                                     <p class="text-white font-normal text-start text-sm lg:text-base">
                                                         {{ $postRidePage->luggage_option3_tooltip }}
@@ -1517,7 +1517,7 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-16 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-16 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                 >
                                                     <p class="text-white font-normal text-start text-sm lg:text-base">
                                                         {{ $postRidePage->luggage_option4_tooltip }}
@@ -1551,7 +1551,7 @@
                                                     >
                                                         <div
                                                             role="tooltip"
-                                                            class="absolute sm:after:left-1/3 xl:after:left-1/3 2xl:after:left-1/3 luggage_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            class="absolute sm:after:left-1/3 xl:after:left-1/3 2xl:after:left-1/3 luggage_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
                                                         >
                                                             <p class="text-white font-normal text-start text-sm lg:text-base">
                                                                 {{ $postRidePage->luggage_option5_tooltip }}
@@ -1787,7 +1787,7 @@
                                                 >
                                                     <div
                                                         role="tooltip"
-                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
+                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
                                                     >
                                                         <p class="text-white font-normal text-start text-sm lg:text-base">
                                                             @if ($user->pink_ride == '0')
@@ -1923,7 +1923,7 @@
                                                 >
                                                     <div
                                                         role="tooltip"
-                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
+                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
                                                     >
                                                         <p class="text-white font-normal text-start text-sm lg:text-base">
                                                             @if ($user->folks_ride == '0')
@@ -2402,8 +2402,8 @@
                 <div class="flex items-start my-4">
                     <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
                         {{ old('agree_terms') == '1' ? 'checked' : '' }}
-                        class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                        <label for="agree_terms" class="ml-2 font-normal text-gray-900 flex items-center space-x-0.5">
+                        class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                        <label for="agree_terms" class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
                             @isset($postRidePage->agree_terms_label)
                                 {!! $postRidePage->agree_terms_label !!}
                             @endisset

@@ -172,783 +172,790 @@
                     class="search-filter-close border w-6 h-6 overflow-hidden flex items-center justify-center border-gray-500 rounded-full text-gray-500 text-3xl absolute top-3 right-4 hover:text-red-500 lg:hidden">
                     &times;
                 </button>
-                <div
-                    class="search-filter-menu bg-white border lg:border-none rounded pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
-
-            <div class="">
-                <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                    <div class="bg-primary text-white font-medium text-xl flex items-center justify-center space-x-2 p-4">
-                        <div class="w-9 h-9 mr-2 p-1 flex items-center justify-center bg-white rounded-full border-2 border-[#1F4174]">
-                            <img class="w-5 h-5 object-contain" src="{{ asset('assets/filter.png') }}" alt="">
-                        </div>
-                        @isset($findRidePage->filter_section_heading)
-                         {{ $findRidePage->filter_section_heading }}
-                        @endisset
-                    </div>
-                    <div class="bg-white p-4 ">
-                        <div class="divide-y mb-2">
-                             @php  $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
-                                @endphp
-                                @isset($findRidePage->ride_features_option1->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="pink-ride" class="text-gray-900 flex space-x-1">
-                                        <span class="text-pink-500 text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option1->name }}
-                                        </span>
-                                        <div class="sups relative">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-info-circle-fill text-black peer"
-                                                viewBox="0 0 16 16">
-                                                <path
-                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                            </svg>
-                                            <div
-                                                class="absolute right-20 tooltip -top-10 group-hover:flex hidden peer-hover:flex">
-                                                <div role="tooltip"
-                                                    class="absolute tooltiptext_icon after:right-1/2 after:-left-1/2 -top-1 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded w-64 px-4">
-                                                    <p class="text-white font-semibold leading-none text-sm lg:text-base">
-                                                        tooltip text
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                <div class="search-filter-menu bg-white border lg:border-none rounded pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
+                    <div class="">
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                            <div class="bg-primary text-white font-medium text-xl flex items-center justify-center space-x-2 p-4">
+                                <div class="w-9 h-9 mr-2 p-1 flex items-center justify-center bg-white rounded-full border-2 border-[#1F4174]">
+                                    <img class="w-5 h-5 object-contain" src="{{ asset('assets/filter.png') }}" alt="">
                                 </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option2->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="extra-care" class="text-gray-900 flex space-x-1">
-                                        <span class="text-green-500 text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option2->name }}
-                                        </span>
-                                        <div class="sups">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                viewBox="0 0 16 16">
-                                                <path
-                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                            </svg>
-                                        </div>
-                                    </label>
-                                    <input id="extra-care" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option2->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 for="keyword" class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->search_section_keyword_label)
-                                    {{ $findRidePage->search_section_keyword_label }}
-                                @endisset
-                            </h3>
-                            <textarea id="keyword"
-                            class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
-                                @isset($findRidePage->search_section_keyword_placeholder)
-                                    placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
-                                @endisset>{{ old('keyword', $request->keyword) }}</textarea>
-                            <!-- <textarea type="text" id="keyword" value="{{ $request->keyword }}"
-                                class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 line-clamp-2"
-                                @isset($findRidePage->search_section_keyword_placeholder)
-                                    placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
-                                @endisset>
-                            </textarea> -->
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->filter1_driver_heading)
-                                    {{ $findRidePage->filter1_driver_heading }}
-                                @endisset
-                            </h3>
-                         <div>
-                            <label for="type" class="block mb-2 font-medium text-gray-900">
-                                @isset($findRidePage->driver_age_label)
-                                    {{ $findRidePage->driver_age_label }}
-                                @endisset
-                            </label>
-                            <div class="mt-2">
-                                <select id="driverAge" name=""
-                                    class="bg-gray-100 text-base md:text-lg border-0 text-black rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                    {{-- onchange="navigateToSearchRoute()" --}}
-                                    >
-                                    <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
-                                        @isset($findRidePage->driver_age_placeholder)
-                                            {{ $findRidePage->driver_age_placeholder }}
-                                        @endisset
-                                    </option>
-                                    <option {{ $request->driver_age == 20 ? 'selected' : '' }}>+20</option>
-                                    <option {{ $request->driver_age == 30 ? 'selected' : '' }}>+30</option>
-                                    <option {{ $request->driver_age == 40 ? 'selected' : '' }}>+40</option>
-                                    <option {{ $request->driver_age == 50 ? 'selected' : '' }}>+50</option>
-                                    <option {{ $request->driver_age == 60 ? 'selected' : '' }}>+60</option>
-                                </select>
-                            </div>
-                         </div>
-                         <div>
-                            <label for="type" class="block mb-2 font-medium text-gray-900">
-                                @isset($findRidePage->driver_rating_label)
-                                    {{ $findRidePage->driver_rating_label }}
-                                @endisset
-                            </label>
-                            <div class="mt-2">
-                                <select id="driverRating" name=""
-                                    class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                    {{-- onchange="navigateToSearchRoute()" --}}
-                                    >
-                                    <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
-                                        @isset($findRidePage->driver_rating_placeholder)
-                                            {{ $findRidePage->driver_rating_placeholder }}
-                                        @endisset
-                                    </option>
-                                    <option value="4.5" {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5</option>
-                                    <option value="4" {{ $request->driver_rating == 4 ? 'selected' : '' }}>4 and above</option>
-                                    <option value="3" {{ $request->driver_rating == 3 ? 'selected' : '' }}>3 and above</option>
-                                    <option value="2" {{ $request->driver_rating == 2 ? 'selected' : '' }}>2 and above</option>
-                                    <option value="1" {{ $request->driver_rating == 1 ? 'selected' : '' }}>1 and above</option>
-                                </select>
-                            </div>
-                         </div>
-                         <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
-                            <input id="driverPhone" name="" type="checkbox"
-                                {{ $request->driver_phone == 1 ? 'checked' : '' }}
-                                class="h-4 w-4 border-gray-300 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600"
-                                {{-- onchange="navigateToSearchRoute()" --}}
-                                >
-                            <label for="" class="block font-normal text-sm text-gray-900">
-                                @isset($findRidePage->driver_phone_access_label)
-                                    {{ $findRidePage->driver_phone_access_label }}
-                                @endisset
-                            </label>
-                         </div>
-                         <div>
-                            <label for="driverName" class="block mb-2 font-medium text-gray-900">
-                                @isset($findRidePage->driver_know_label)
-                                    {{ $findRidePage->driver_know_label }}
-                                @endisset
-                            </label>
-                            <input type="text" id="driverName" value="{{ $request->driver_name }}"
-                                class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg italic rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                @isset($findRidePage->driver_know_placeholder)
-                                    placeholder="{{ $findRidePage->driver_know_placeholder }}"
-                                @endisset>
-                         </div>
-                        </div>
-
-                        <div class="space-y-4 mb-4">
-                                <h3 class="text-primary text-2xl xl:text-3xl">
-                                    @isset($findRidePage->filter2_passengers_heading)
-                                        {{ $findRidePage->filter2_passengers_heading }}
-                                    @endisset
-                                </h3>
-                            <div>
-                                <label for="type" class="block mb-2 font-medium text-gray-900">
-                                    @isset($findRidePage->passengers_rating_label)
-                                        {{ $findRidePage->passengers_rating_label }}
-                                    @endisset
-                                </label>
-                                <div class="mt-2">
-                                    <select id="passengerRating" name=""
-                                        class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 whitespace-pre-line pr-8"
-                                        {{-- onchange="navigateToSearchRoute()" --}}
-                                        >
-                                        <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
-                                            @isset($findRidePage->passengers_rating_placeholder)
-                                                {{ $findRidePage->passengers_rating_placeholder }}
-                                            @endisset
-                                        </option>
-                                        @isset($findRidePage->ride_features_option13->features_setting_id)
-                                            <?php
-                                            $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option13->name);
-                                            ?>
-                                            <option value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
-                                                {{ $request->passenger_rating == $findRidePage->ride_features_option13->features_setting_id ? 'selected' : '' }}>
-                                                {{ $dynamicText }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->ride_features_option14->features_setting_id)
-                                            <?php
-                                            $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option14->name);
-                                            ?>
-                                            <option value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
-                                                {{ $request->passenger_rating == $findRidePage->ride_features_option14->features_setting_id ? 'selected' : '' }}>
-                                                {{ $dynamicText }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->ride_features_option15->features_setting_id)
-                                            <?php
-                                            $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option15->name);
-                                            ?>
-                                            <option value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
-                                                {{ $request->passenger_rating == $findRidePage->ride_features_option15->features_setting_id ? 'selected' : '' }}>
-                                                {{ $dynamicText }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->ride_features_option16->features_setting_id)
-                                            <?php
-                                            $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option16->name);
-                                            ?>
-                                            <option value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
-                                                {{ $request->passenger_rating == $findRidePage->ride_features_option16->features_setting_id ? 'selected' : '' }}>
-                                                {{ $dynamicText }}
-                                            </option>
-                                        @endisset
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->filter3_payment_methods_heading)
-                                    {{ $findRidePage->filter3_payment_methods_heading }}
-                                @endisset
-                            </h3>
-                            <div>
-                                {{-- <label for="payment-method" class="block mb-2 font-medium text-gray-900">
-                                    @isset($findRidePage->payment_methods_label)
-                                        {{ $findRidePage->payment_methods_label }}
-                                    @endisset
-                                </label> --}}
-                                <div class="">
-                                    <select id="payment-method" name=""
-                                        class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                        {{-- onchange="navigateToSearchRoute()" --}}
-                                        >
-                                        @isset($findRidePage->payment_methods_option1)
-                                            <option value=""
-                                                {{ $request->payment_method == '' ? 'selected' : '' }}>
-                                                {{ $findRidePage->payment_methods_option1 }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->payment_methods_option2->features_setting_id)
-                                            <option value="{{ $findRidePage->payment_methods_option2->features_setting_id }}"
-                                                {{ $request->payment_method == $findRidePage->payment_methods_option2->features_setting_id ? 'selected' : '' }}>
-                                                {{ $findRidePage->payment_methods_option2->name }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->payment_methods_option3->features_setting_id)
-                                            <option value="{{ $findRidePage->payment_methods_option3->features_setting_id }}"
-                                                {{ $request->payment_method == $findRidePage->payment_methods_option3->features_setting_id ? 'selected' : '' }}>
-                                                {{ $findRidePage->payment_methods_option3->name }}
-                                            </option>
-                                        @endisset
-                                        @isset($findRidePage->payment_methods_option4->features_setting_id)
-                                            <option value="{{ $findRidePage->payment_methods_option4->features_setting_id }}"
-                                                {{ $request->payment_method == $findRidePage->payment_methods_option4->features_setting_id ? 'selected' : '' }}>
-                                                {{ $findRidePage->payment_methods_option4->name }}
-                                            </option>
-                                        @endisset
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->filter4_vehicle_heading)
-                                    {{ $findRidePage->filter4_vehicle_heading }}
-                                @endisset
-                            </h3>
-                            <div>
-                               {{-- <label for="type" class="block mb-2 font-medium text-gray-900">
-                                    @isset($findRidePage->vehicle_type_label)
-                                        {{ $findRidePage->vehicle_type_label }}
-                                    @endisset
-                                </label> --}}
-                                <div class="">
-                                    <select id="VehicleType" name=""
-                                      class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                      {{-- onchange="navigateToSearchRoute()" --}}
-                                      >
-                                        <option {{ $request->vehicle_type == '' ? 'selected' : '' }} value="">
-                                            @isset($findRidePage->vehicle_type_placeholder)
-                                                {{ $findRidePage->vehicle_type_placeholder }}
-                                            @endisset
-                                        </option>
-
-                                        <option value="{{ $findRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_convertible_text ?? "Convertable"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_coupe_value ??'Coupe') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_coupe_text ?? "Coupe"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_hatchback_value ??'Hatchback' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_hatchback_value ??'Hatchback') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_hatchback_text ?? "Hatchback"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_minivan_value ??'Minivan' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_minivan_value ??'Minivan') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_minivan_text ?? "Minivan"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_sedan_value ??'Sedan' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_sedan_value ??'Sedan') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_sedan_text ?? "Sedan"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_station_wagon_value }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_station_wagon_value ??'Station wagon') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_station_wagon_text ?? "Station wagon"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_suv_value ??'SUV' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_suv_value ??'SUV') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_suv_text ?? "SUV"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_truck_value ??'Truck' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_truck_value ??'Truck') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_truck_text ?? "Truck"}}
-                                        </option>
-                                        <option value="{{ $findRidePage->vehicle_type_van_value ??'Van' }}"
-                                            {{ $request->vehicle_type === ($findRidePage->vehicle_type_van_value ??'Van') ? 'selected' : '' }}>
-                                            {{ $findRidePage->vehicle_type_van_text ?? "Van"}}
-                                        </option>
-
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->luggage_placeholder)
-                                    {{ $findRidePage->luggage_placeholder }}
-                                @endisset
-                            </h3>
-                            <div class="border rounded-md overflow-hidden divide-y">
-                                @php
-                                    $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
-                                @endphp
-
-                                @isset($findRidePage->ride_features_option3->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="wi-fi" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option3->name }}
-                                        </span>
-                                    </label>
-                                    <input id="wi-fi" type="checkbox" value="{{ $findRidePage->ride_features_option3->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option3->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option4->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="rating-passengers" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option4->name }}
-                                        </span>
-                                    </label>
-                                    <input id="rating-passengers" type="checkbox"
-                                        value="{{ $postRidePage->features_option4->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option5->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="provide-babyseats" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option5->name }}
-                                        </span>
-                                    </label>
-                                    <input id="provide-babyseats" type="checkbox"
-                                        value="{{ $postRidePage->features_option5->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option6->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="passenger-provide" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option6->name }}
-                                        </span>
-                                    </label>
-                                    <input id="passenger-provide" type="checkbox"
-                                        value="{{ $postRidePage->features_option6->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option7->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="take-children" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option7->name }}
-                                        </span>
-                                    </label>
-                                    <input id="take-children" type="checkbox" value="{{ $postRidePage->features_option7->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option8->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="passenger-provide1" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option8->name }}
-                                        </span>
-                                    </label>
-                                    <input id="passenger-provide1" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option8->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option8->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option9->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                     <label for="bike-rack" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option9->name }}
-                                        </span>
-                                    </label>
-                                    <input id="bike-rack" type="checkbox" value="{{ $findRidePage->ride_features_option9->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option9->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option10->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="ski-rack" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option10->name }}
-                                        </span>
-                                    </label>
-                                    <input id="ski-rack" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option10->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option10->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option11->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="winter-tires" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option11->name }}
-                                        </span>
-                                    </label>
-                                    <input id="winter-tires" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option11->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option11->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option12->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="air-conditioning" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-base md:text-lg">
-                                            {{ $findRidePage->ride_features_option12->name }}
-                                        </span>
-                                    </label>
-                                    <input id="air-conditioning" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option12->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option12->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
+                                @isset($findRidePage->filter_section_heading)
+                                {{ $findRidePage->filter_section_heading }}
                                 @endisset
                             </div>
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->luggage_label)
-                                    {{ $findRidePage->luggage_label }}
-                                @endisset
-                            </h3>
-                            <div class="border rounded-md divide-y">
-                                @php
-                                    $luggages_check = isset($_GET['luggage']) ? explode(';', $_GET['luggage']) : [];
-                                @endphp
-                                @isset($findRidePage->luggage_option1)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="small-luggage" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->luggage_option1->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <!-- Info Icon -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-  
-                                                <!-- Tooltip Content -->
-                                                <div class="absolute -left-32 -top-20 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                    <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                    <!-- Tooltip Arrow -->
-                                                    <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                    
-                                                    <!-- Tooltip Body -->
-                                                    <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                        <p class="text-white">
-                                                        {{ $postRidePage->luggage_option1_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        <input id="small-luggage" type="checkbox"
-                                            value="{{ $findRidePage->luggage_option1->features_setting_id }}"
-                                            {{ in_array($findRidePage->luggage_option1->features_setting_id, $luggages_check) ? 'checked' : '' }}
-                                            class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->luggage_option2)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="Medium-luggage" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->luggage_option2->name }}
-                                            </span>
-                                            <!-- <div class="sups relative inline-flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                                <div
-                                                  class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
-                                                >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    >
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                            {{ $postRidePage->luggage_option2_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div> -->
-                                            <div class="sups relative inline-flex">
-                                                <!-- Info Icon -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-  
-                                                <!-- Tooltip Content -->
-                                                <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                    <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                    <!-- Tooltip Arrow -->
-                                                    <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                    
-                                                    <!-- Tooltip Body -->
-                                                    <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                        <p class="text-white">
-                                                        {{ $postRidePage->luggage_option2_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        <input id="Medium-luggage" type="checkbox"
-                                            value="{{ $findRidePage->luggage_option2->features_setting_id }}"
-                                            {{ in_array($findRidePage->luggage_option2->features_setting_id, $luggages_check) ? 'checked' : '' }}
-                                            class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->luggage_option3)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="Large-luggage" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->luggage_option3->name }}
-                                            </span>
-                                           <div class="sups relative inline-flex">
-                                                <!-- Info Icon -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-  
-                                                <!-- Tooltip Content -->
-                                                <div class="absolute -left-28 -top-36 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                    <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                    <!-- Tooltip Arrow -->
-                                                    <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                    
-                                                    <!-- Tooltip Body -->
-                                                    <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                        <p class="text-white">
-                                                        {{ $postRidePage->luggage_option3_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        <input id="Large-luggage" type="checkbox"
-                                            value="{{ $findRidePage->luggage_option3->features_setting_id }}"
-                                            {{ in_array($findRidePage->luggage_option3->features_setting_id, $luggages_check) ? 'checked' : '' }}
-                                            class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->luggage_option4)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="multiple-luggage" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->luggage_option4->name }}
-                                            </span>
-                                            <div class="sups relative inline-flex">
-                                                <!-- Info Icon -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-  
-                                                <!-- Tooltip Content -->
-                                                <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                    <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                    <!-- Tooltip Arrow -->
-                                                    <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                    
-                                                    <!-- Tooltip Body -->
-                                                    <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                        <p class="text-white">
-                                                        {{ $postRidePage->luggage_option4_tooltip }}
-                                                        </p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                           
-                                        </label>
-                                        <input id="multiple-luggage" type="checkbox"
-                                            value="{{ $findRidePage->luggage_option4->features_setting_id }}"
-                                            {{ in_array($findRidePage->luggage_option4->features_setting_id, $luggages_check) ? 'checked' : '' }}
-                                            class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->luggage_option5)
-                                    <div class="p-3">
-                                        <div class="flex items-center justify-between">
-                                            <label for="no-luggage" class="font-normal text-gray-900 flex space-x-1">
-                                                <span class="text-base md:text-lg">
-                                                    {{ $findRidePage->luggage_option5->name }}
+                            
+                            <div class="bg-white p-4 ">
+                                <div class="divide-y mb-2">
+                                    @php  $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
+                                        @endphp
+                                        @isset($findRidePage->ride_features_option1->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="pink-ride" class="text-gray-900 flex space-x-1">
+                                                <span class="text-pink-500 text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option1->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                <!-- Info Icon -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-  
-                                                <!-- Tooltip Content -->
-                                                <div class="absolute -left-40 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                    <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                    <!-- Tooltip Arrow -->
-                                                    <div class="absolute -bottom-1 left-44 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                    
-                                                    <!-- Tooltip Body -->
-                                                    <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                        <p class="text-white">
-                                                        {{ $postRidePage->luggage_option5_tooltip }}
-                                                        </p>
-                                                    </div>
+                                                <div class="sups relative">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black peer"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                    </svg>
+                                                    <div
+                                                        class="absolute right-20 tooltip -top-10 group-hover:flex hidden peer-hover:flex">
+                                                        <div role="tooltip"
+                                                            class="absolute tooltiptext_icon after:right-1/2 after:-left-1/2 -top-1 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded w-64 px-4">
+                                                            <p class="text-white font-semibold leading-none text-sm lg:text-base">
+                                                                tooltip text
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                             </label>
-                                            <input id="no-luggage" type="checkbox"
-                                                value="{{ $findRidePage->luggage_option5->features_setting_id }}"
-                                                {{ in_array($findRidePage->luggage_option5->features_setting_id, $luggages_check) ? 'checked' : '' }}
-                                                class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         </div>
-                                        <p class="text-xs">{{ $findRidePage->luggage_option5_label }}</p>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option2->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="extra-care" class="text-gray-900 flex space-x-1">
+                                                <span class="text-green-500 text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option2->name }}
+                                                </span>
+                                                <div class="sups">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                    </svg>
+                                                </div>
+                                            </label>
+                                            <input id="extra-care" type="checkbox"
+                                                value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option2->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 for="keyword" class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->search_section_keyword_label)
+                                            {{ $findRidePage->search_section_keyword_label }}
+                                        @endisset
+                                    </h3>
+                                    <textarea id="keyword"
+                                    class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
+                                        @isset($findRidePage->search_section_keyword_placeholder)
+                                            placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
+                                        @endisset>{{ old('keyword', $request->keyword) }}</textarea>
+                                    <!-- <textarea type="text" id="keyword" value="{{ $request->keyword }}"
+                                        class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 line-clamp-2"
+                                        @isset($findRidePage->search_section_keyword_placeholder)
+                                            placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
+                                        @endisset>
+                                    </textarea> -->
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->filter1_driver_heading)
+                                            {{ $findRidePage->filter1_driver_heading }}
+                                        @endisset
+                                    </h3>
+                                <div>
+                                    <label for="type" class="block mb-2 font-medium text-gray-900">
+                                        @isset($findRidePage->driver_age_label)
+                                            {{ $findRidePage->driver_age_label }}
+                                        @endisset
+                                    </label>
+                                    <div class="mt-2">
+                                        <select id="driverAge" name=""
+                                            class="bg-gray-100 text-base md:text-lg border-0 text-black rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                            {{-- onchange="navigateToSearchRoute()" --}}
+                                            >
+                                            <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
+                                                @isset($findRidePage->driver_age_placeholder)
+                                                    {{ $findRidePage->driver_age_placeholder }}
+                                                @endisset
+                                            </option>
+                                            <option {{ $request->driver_age == 20 ? 'selected' : '' }}>+20</option>
+                                            <option {{ $request->driver_age == 30 ? 'selected' : '' }}>+30</option>
+                                            <option {{ $request->driver_age == 40 ? 'selected' : '' }}>+40</option>
+                                            <option {{ $request->driver_age == 50 ? 'selected' : '' }}>+50</option>
+                                            <option {{ $request->driver_age == 60 ? 'selected' : '' }}>+60</option>
+                                        </select>
                                     </div>
-                                @endisset
+                                </div>
+                                <div>
+                                    <label for="type" class="block mb-2 font-medium text-gray-900">
+                                        @isset($findRidePage->driver_rating_label)
+                                            {{ $findRidePage->driver_rating_label }}
+                                        @endisset
+                                    </label>
+                                    <div class="mt-2">
+                                        <select id="driverRating" name=""
+                                            class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                            {{-- onchange="navigateToSearchRoute()" --}}
+                                            >
+                                            <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
+                                                @isset($findRidePage->driver_rating_placeholder)
+                                                    {{ $findRidePage->driver_rating_placeholder }}
+                                                @endisset
+                                            </option>
+                                            <option value="4.5" {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5</option>
+                                            <option value="4" {{ $request->driver_rating == 4 ? 'selected' : '' }}>4 and above</option>
+                                            <option value="3" {{ $request->driver_rating == 3 ? 'selected' : '' }}>3 and above</option>
+                                            <option value="2" {{ $request->driver_rating == 2 ? 'selected' : '' }}>2 and above</option>
+                                            <option value="1" {{ $request->driver_rating == 1 ? 'selected' : '' }}>1 and above</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
+                                    <input id="driverPhone" name="" type="checkbox"
+                                        {{ $request->driver_phone == 1 ? 'checked' : '' }}
+                                        class="h-4 w-4 border-gray-300 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600"
+                                        {{-- onchange="navigateToSearchRoute()" --}}
+                                        >
+                                    <label for="" class="block font-normal text-sm text-gray-900">
+                                        @isset($findRidePage->driver_phone_access_label)
+                                            {{ $findRidePage->driver_phone_access_label }}
+                                        @endisset
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="driverName" class="block mb-2 font-medium text-gray-900">
+                                        @isset($findRidePage->driver_know_label)
+                                            {{ $findRidePage->driver_know_label }}
+                                        @endisset
+                                    </label>
+                                    <input type="text" id="driverName" value="{{ $request->driver_name }}"
+                                        class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg italic rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                        @isset($findRidePage->driver_know_placeholder)
+                                            placeholder="{{ $findRidePage->driver_know_placeholder }}"
+                                        @endisset>
+                                </div>
+                                </div>
+
+                                <div class="space-y-4 mb-4">
+                                        <h3 class="text-primary text-2xl xl:text-3xl">
+                                            @isset($findRidePage->filter2_passengers_heading)
+                                                {{ $findRidePage->filter2_passengers_heading }}
+                                            @endisset
+                                        </h3>
+                                    <div>
+                                        <label for="type" class="block mb-2 font-medium text-gray-900">
+                                            @isset($findRidePage->passengers_rating_label)
+                                                {{ $findRidePage->passengers_rating_label }}
+                                            @endisset
+                                        </label>
+                                        <div class="mt-2">
+                                            <select id="passengerRating" name=""
+                                                class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 whitespace-pre-line pr-8"
+                                                {{-- onchange="navigateToSearchRoute()" --}}
+                                                >
+                                                <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
+                                                    @isset($findRidePage->passengers_rating_placeholder)
+                                                        {{ $findRidePage->passengers_rating_placeholder }}
+                                                    @endisset
+                                                </option>
+                                                @isset($findRidePage->ride_features_option13->features_setting_id)
+                                                    <?php
+                                                    $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option13->name);
+                                                    ?>
+                                                    <option value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
+                                                        {{ $request->passenger_rating == $findRidePage->ride_features_option13->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $dynamicText }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->ride_features_option14->features_setting_id)
+                                                    <?php
+                                                    $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option14->name);
+                                                    ?>
+                                                    <option value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
+                                                        {{ $request->passenger_rating == $findRidePage->ride_features_option14->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $dynamicText }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->ride_features_option15->features_setting_id)
+                                                    <?php
+                                                    $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option15->name);
+                                                    ?>
+                                                    <option value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
+                                                        {{ $request->passenger_rating == $findRidePage->ride_features_option15->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $dynamicText }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->ride_features_option16->features_setting_id)
+                                                    <?php
+                                                    $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option16->name);
+                                                    ?>
+                                                    <option value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
+                                                        {{ $request->passenger_rating == $findRidePage->ride_features_option16->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $dynamicText }}
+                                                    </option>
+                                                @endisset
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->filter3_payment_methods_heading)
+                                            {{ $findRidePage->filter3_payment_methods_heading }}
+                                        @endisset
+                                    </h3>
+                                    <div>
+                                        {{-- <label for="payment-method" class="block mb-2 font-medium text-gray-900">
+                                            @isset($findRidePage->payment_methods_label)
+                                                {{ $findRidePage->payment_methods_label }}
+                                            @endisset
+                                        </label> --}}
+                                        <div class="">
+                                            <select id="payment-method" name=""
+                                                class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                {{-- onchange="navigateToSearchRoute()" --}}
+                                                >
+                                                @isset($findRidePage->payment_methods_option1)
+                                                    <option value=""
+                                                        {{ $request->payment_method == '' ? 'selected' : '' }}>
+                                                        {{ $findRidePage->payment_methods_option1 }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->payment_methods_option2->features_setting_id)
+                                                    <option value="{{ $findRidePage->payment_methods_option2->features_setting_id }}"
+                                                        {{ $request->payment_method == $findRidePage->payment_methods_option2->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $findRidePage->payment_methods_option2->name }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->payment_methods_option3->features_setting_id)
+                                                    <option value="{{ $findRidePage->payment_methods_option3->features_setting_id }}"
+                                                        {{ $request->payment_method == $findRidePage->payment_methods_option3->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $findRidePage->payment_methods_option3->name }}
+                                                    </option>
+                                                @endisset
+                                                @isset($findRidePage->payment_methods_option4->features_setting_id)
+                                                    <option value="{{ $findRidePage->payment_methods_option4->features_setting_id }}"
+                                                        {{ $request->payment_method == $findRidePage->payment_methods_option4->features_setting_id ? 'selected' : '' }}>
+                                                        {{ $findRidePage->payment_methods_option4->name }}
+                                                    </option>
+                                                @endisset
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->filter4_vehicle_heading)
+                                            {{ $findRidePage->filter4_vehicle_heading }}
+                                        @endisset
+                                    </h3>
+                                    <div>
+                                    {{-- <label for="type" class="block mb-2 font-medium text-gray-900">
+                                            @isset($findRidePage->vehicle_type_label)
+                                                {{ $findRidePage->vehicle_type_label }}
+                                            @endisset
+                                        </label> --}}
+                                        <div class="">
+                                            <select id="VehicleType" name=""
+                                            class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                            {{-- onchange="navigateToSearchRoute()" --}}
+                                            >
+                                                <option {{ $request->vehicle_type == '' ? 'selected' : '' }} value="">
+                                                    @isset($findRidePage->vehicle_type_placeholder)
+                                                        {{ $findRidePage->vehicle_type_placeholder }}
+                                                    @endisset
+                                                </option>
+
+                                                <option value="{{ $findRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_convertible_text ?? "Convertable"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_coupe_value ??'Coupe') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_coupe_text ?? "Coupe"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_hatchback_value ??'Hatchback' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_hatchback_value ??'Hatchback') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_hatchback_text ?? "Hatchback"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_minivan_value ??'Minivan' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_minivan_value ??'Minivan') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_minivan_text ?? "Minivan"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_sedan_value ??'Sedan' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_sedan_value ??'Sedan') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_sedan_text ?? "Sedan"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_station_wagon_value }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_station_wagon_value ??'Station wagon') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_station_wagon_text ?? "Station wagon"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_suv_value ??'SUV' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_suv_value ??'SUV') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_suv_text ?? "SUV"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_truck_value ??'Truck' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_truck_value ??'Truck') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_truck_text ?? "Truck"}}
+                                                </option>
+                                                <option value="{{ $findRidePage->vehicle_type_van_value ??'Van' }}"
+                                                    {{ $request->vehicle_type === ($findRidePage->vehicle_type_van_value ??'Van') ? 'selected' : '' }}>
+                                                    {{ $findRidePage->vehicle_type_van_text ?? "Van"}}
+                                                </option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->luggage_placeholder)
+                                            {{ $findRidePage->luggage_placeholder }}
+                                        @endisset
+                                    </h3>
+                                    <div class="border rounded-md overflow-hidden divide-y">
+                                        @php
+                                            $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
+                                        @endphp
+
+                                        @isset($findRidePage->ride_features_option3->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="wi-fi" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option3->name }}
+                                                </span>
+                                            </label>
+                                            <input id="wi-fi" type="checkbox" value="{{ $findRidePage->ride_features_option3->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option3->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option4->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="rating-passengers" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option4->name }}
+                                                </span>
+                                            </label>
+                                            <input id="rating-passengers" type="checkbox"
+                                                value="{{ $postRidePage->features_option4->features_setting_id }}"
+                                                {{ in_array($postRidePage->features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option5->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="provide-babyseats" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option5->name }}
+                                                </span>
+                                            </label>
+                                            <input id="provide-babyseats" type="checkbox"
+                                                value="{{ $postRidePage->features_option5->features_setting_id }}"
+                                                {{ in_array($postRidePage->features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option6->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="passenger-provide" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option6->name }}
+                                                </span>
+                                            </label>
+                                            <input id="passenger-provide" type="checkbox"
+                                                value="{{ $postRidePage->features_option6->features_setting_id }}"
+                                                {{ in_array($postRidePage->features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option7->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="take-children" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option7->name }}
+                                                </span>
+                                            </label>
+                                            <input id="take-children" type="checkbox" value="{{ $postRidePage->features_option7->features_setting_id }}"
+                                                {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option8->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="passenger-provide1" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option8->name }}
+                                                </span>
+                                            </label>
+                                            <input id="passenger-provide1" type="checkbox"
+                                                value="{{ $findRidePage->ride_features_option8->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option8->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option9->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="bike-rack" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option9->name }}
+                                                </span>
+                                            </label>
+                                            <input id="bike-rack" type="checkbox" value="{{ $findRidePage->ride_features_option9->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option9->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option10->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="ski-rack" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option10->name }}
+                                                </span>
+                                            </label>
+                                            <input id="ski-rack" type="checkbox"
+                                                value="{{ $findRidePage->ride_features_option10->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option10->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option11->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="winter-tires" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option11->name }}
+                                                </span>
+                                            </label>
+                                            <input id="winter-tires" type="checkbox"
+                                                value="{{ $findRidePage->ride_features_option11->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option11->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                        @isset($findRidePage->ride_features_option12->features_setting_id)
+                                        <div class="flex items-start justify-between p-3">
+                                            <label for="air-conditioning" class="font-normal text-gray-900 flex space-x-1">
+                                                <span class="text-base md:text-lg">
+                                                    {{ $findRidePage->ride_features_option12->name }}
+                                                </span>
+                                            </label>
+                                            <input id="air-conditioning" type="checkbox"
+                                                value="{{ $findRidePage->ride_features_option12->features_setting_id }}"
+                                                {{ in_array($findRidePage->ride_features_option12->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        </div>
+                                        @endisset
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->luggage_label)
+                                            {{ $findRidePage->luggage_label }}
+                                        @endisset
+                                    </h3>
+                                    <div class="border rounded-md divide-y">
+                                        @php
+                                            $luggages_check = isset($_GET['luggage']) ? explode(';', $_GET['luggage']) : [];
+                                        @endphp
+                                        @isset($findRidePage->luggage_option1)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="small-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->luggage_option1->name }}
+                                                    </span>
+                                                    <div class="sups relative inline-flex">
+                                                        <!-- Info Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+        
+                                                        <!-- Tooltip Content -->
+                                                        <div class="absolute -left-32 -top-20 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
+                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+                                                            
+                                                            <!-- Tooltip Body -->
+                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
+                                                                <p class="text-white">
+                                                                {{ $postRidePage->luggage_option1_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                <input id="small-luggage" type="checkbox"
+                                                    value="{{ $findRidePage->luggage_option1->features_setting_id }}"
+                                                    {{ in_array($findRidePage->luggage_option1->features_setting_id, $luggages_check) ? 'checked' : '' }}
+                                                    class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->luggage_option2)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="Medium-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->luggage_option2->name }}
+                                                    </span>
+                                                    <!-- <div class="sups relative inline-flex">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+                                                        <div
+                                                        class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
+                                                        >
+                                                            <div
+                                                                role="tooltip"
+                                                                class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                            >
+                                                                <p class="text-white font-semibold text-start text-sm lg:text-base">
+                                                                    {{ $postRidePage->luggage_option2_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div> -->
+                                                    <div class="sups relative inline-flex">
+                                                        <!-- Info Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+        
+                                                        <!-- Tooltip Content -->
+                                                        <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
+                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+                                                            
+                                                            <!-- Tooltip Body -->
+                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
+                                                                <p class="text-white">
+                                                                {{ $postRidePage->luggage_option2_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                <input id="Medium-luggage" type="checkbox"
+                                                    value="{{ $findRidePage->luggage_option2->features_setting_id }}"
+                                                    {{ in_array($findRidePage->luggage_option2->features_setting_id, $luggages_check) ? 'checked' : '' }}
+                                                    class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->luggage_option3)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="Large-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->luggage_option3->name }}
+                                                    </span>
+                                                <div class="sups relative inline-flex">
+                                                        <!-- Info Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+        
+                                                        <!-- Tooltip Content -->
+                                                        <div class="absolute -left-28 -top-36 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
+                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+                                                            
+                                                            <!-- Tooltip Body -->
+                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
+                                                                <p class="text-white">
+                                                                {{ $postRidePage->luggage_option3_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                <input id="Large-luggage" type="checkbox"
+                                                    value="{{ $findRidePage->luggage_option3->features_setting_id }}"
+                                                    {{ in_array($findRidePage->luggage_option3->features_setting_id, $luggages_check) ? 'checked' : '' }}
+                                                    class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->luggage_option4)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="multiple-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->luggage_option4->name }}
+                                                    </span>
+                                                    <div class="sups relative inline-flex">
+                                                        <!-- Info Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+        
+                                                        <!-- Tooltip Content -->
+                                                        <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
+                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+                                                            
+                                                            <!-- Tooltip Body -->
+                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
+                                                                <p class="text-white">
+                                                                {{ $postRidePage->luggage_option4_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                
+                                                </label>
+                                                <input id="multiple-luggage" type="checkbox"
+                                                    value="{{ $findRidePage->luggage_option4->features_setting_id }}"
+                                                    {{ in_array($findRidePage->luggage_option4->features_setting_id, $luggages_check) ? 'checked' : '' }}
+                                                    class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->luggage_option5)
+                                            <div class="p-3">
+                                                <div class="flex items-center justify-between">
+                                                    <label for="no-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <span class="text-base md:text-lg">
+                                                            {{ $findRidePage->luggage_option5->name }}
+                                                        </span>
+                                                        <div class="sups relative inline-flex">
+                                                        <!-- Info Icon -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                        </svg>
+        
+                                                        <!-- Tooltip Content -->
+                                                        <div class="absolute -left-40 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
+                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="absolute -bottom-1 left-44 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
+                                                            
+                                                            <!-- Tooltip Body -->
+                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
+                                                                <p class="text-white">
+                                                                {{ $postRidePage->luggage_option5_tooltip }}
+                                                                </p>
+                                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    </label>
+                                                    <input id="no-luggage" type="checkbox"
+                                                        value="{{ $findRidePage->luggage_option5->features_setting_id }}"
+                                                        {{ in_array($findRidePage->luggage_option5->features_setting_id, $luggages_check) ? 'checked' : '' }}
+                                                        class="luggage w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                </div>
+                                                <p class="text-xs">{{ $findRidePage->luggage_option5_label }}</p>
+                                            </div>
+                                        @endisset
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->smoking_label)
+                                            {{ $findRidePage->smoking_label }}
+                                        @endisset
+                                    </h3>
+                                    <div class="border rounded-md overflow-hidden divide-y">
+                                        @php
+                                            $smoking_check = isset($_GET['smoking']) ? explode(';', $_GET['smoking']) : [];
+                                        @endphp
+                                        @isset($findRidePage->smoking_option1->features_setting_id)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="indifferent" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->smoking_option1->name }}
+                                                    </span>
+                                                </label>
+                                                <input id="indifferent" type="checkbox"
+                                                    value="{{ $findRidePage->smoking_option1->features_setting_id }}"
+                                                    {{ in_array($findRidePage->smoking_option1->features_setting_id, $smoking_check) ? 'checked' : '' }}
+                                                    class="smoking w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->smoking_option2->features_setting_id)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="no-smoking" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->smoking_option2->name }}
+                                                    </span>
+                                                </label>
+                                                <input id="no-smoking" type="checkbox"
+                                                    value="{{ $findRidePage->smoking_option2->features_setting_id }}"
+                                                    {{ in_array($findRidePage->smoking_option2->features_setting_id, $smoking_check) ? 'checked' : '' }}
+                                                    class="smoking w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            </div>
+                                        @endisset
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($findRidePage->pets_allowed_label)
+                                            {{ $findRidePage->pets_allowed_label }}
+                                        @endisset
+                                    </h3>
+                                    <div class="border rounded-md overflow-hidden divide-y">
+                                        @php
+                                            $pets_check = isset($_GET['pets']) ? explode(';', $_GET['pets']) : [];
+                                        @endphp
+                                        @isset($findRidePage->pets_allowed_option1->features_setting_id)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="indifferent-pet" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->pets_allowed_option1->name }}
+                                                    </span>
+                                                </label>
+                                                <input id="indifferent-pet" type="checkbox"
+                                                    value="{{ $findRidePage->pets_allowed_option1->features_setting_id }}"
+                                                    {{ in_array($findRidePage->pets_allowed_option1->features_setting_id, $pets_check) ? 'checked' : '' }}
+                                                    class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->pets_allowed_option2->features_setting_id)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="no-pet" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->pets_allowed_option2->name }}
+                                                    </span>
+                                                </label>
+                                                <input id="no-pet" type="checkbox"
+                                                    value="{{ $findRidePage->pets_allowed_option2->features_setting_id }}"
+                                                    {{ in_array($findRidePage->pets_allowed_option2->features_setting_id, $pets_check) ? 'checked' : '' }}
+                                                    class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            </div>
+                                        @endisset
+                                        @isset($findRidePage->pets_allowed_option3->features_setting_id)
+                                            <div class="flex items-center justify-between p-3">
+                                                <label for="caged" class="font-normal text-gray-900 flex space-x-1">
+                                                    <span class="text-base md:text-lg">
+                                                        {{ $findRidePage->pets_allowed_option3->name }}
+                                                    </span>
+                                                </label>
+                                                <input id="caged" type="checkbox"
+                                                    value="{{ $findRidePage->pets_allowed_option3->features_setting_id }}"
+                                                    {{ in_array($findRidePage->pets_allowed_option3->features_setting_id, $pets_check) ? 'checked' : '' }}
+                                                    class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            </div>
+                                        @endisset
+                                    </div>
+                                </div>
+                                
+                                <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
+                                <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                             </div>
                         </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->smoking_label)
-                                    {{ $findRidePage->smoking_label }}
-                                @endisset
-                            </h3>
-                            <div class="border rounded-md overflow-hidden divide-y">
-                                @php
-                                    $smoking_check = isset($_GET['smoking']) ? explode(';', $_GET['smoking']) : [];
-                                @endphp
-                                @isset($findRidePage->smoking_option1->features_setting_id)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="indifferent" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->smoking_option1->name }}
-                                            </span>
-                                        </label>
-                                        <input id="indifferent" type="checkbox"
-                                            value="{{ $findRidePage->smoking_option1->features_setting_id }}"
-                                            {{ in_array($findRidePage->smoking_option1->features_setting_id, $smoking_check) ? 'checked' : '' }}
-                                            class="smoking w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->smoking_option2->features_setting_id)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="no-smoking" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->smoking_option2->name }}
-                                            </span>
-                                        </label>
-                                        <input id="no-smoking" type="checkbox"
-                                            value="{{ $findRidePage->smoking_option2->features_setting_id }}"
-                                            {{ in_array($findRidePage->smoking_option2->features_setting_id, $smoking_check) ? 'checked' : '' }}
-                                            class="smoking w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    </div>
-                                @endisset
-                            </div>
-                        </div>
-                        <div class="space-y-4 mb-4">
-                            <h3 class="text-primary text-2xl xl:text-3xl">
-                                @isset($findRidePage->pets_allowed_label)
-                                    {{ $findRidePage->pets_allowed_label }}
-                                @endisset
-                            </h3>
-                            <div class="border rounded-md overflow-hidden divide-y">
-                                @php
-                                    $pets_check = isset($_GET['pets']) ? explode(';', $_GET['pets']) : [];
-                                @endphp
-                                @isset($findRidePage->pets_allowed_option1->features_setting_id)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="indifferent-pet" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->pets_allowed_option1->name }}
-                                            </span>
-                                        </label>
-                                        <input id="indifferent-pet" type="checkbox"
-                                            value="{{ $findRidePage->pets_allowed_option1->features_setting_id }}"
-                                            {{ in_array($findRidePage->pets_allowed_option1->features_setting_id, $pets_check) ? 'checked' : '' }}
-                                            class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->pets_allowed_option2->features_setting_id)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="no-pet" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->pets_allowed_option2->name }}
-                                            </span>
-                                        </label>
-                                        <input id="no-pet" type="checkbox"
-                                            value="{{ $findRidePage->pets_allowed_option2->features_setting_id }}"
-                                            {{ in_array($findRidePage->pets_allowed_option2->features_setting_id, $pets_check) ? 'checked' : '' }}
-                                            class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    </div>
-                                @endisset
-                                @isset($findRidePage->pets_allowed_option3->features_setting_id)
-                                    <div class="flex items-center justify-between p-3">
-                                        <label for="caged" class="font-normal text-gray-900 flex space-x-1">
-                                            <span class="text-base md:text-lg">
-                                                {{ $findRidePage->pets_allowed_option3->name }}
-                                            </span>
-                                        </label>
-                                        <input id="caged" type="checkbox"
-                                            value="{{ $findRidePage->pets_allowed_option3->features_setting_id }}"
-                                            {{ in_array($findRidePage->pets_allowed_option3->features_setting_id, $pets_check) ? 'checked' : '' }}
-                                            class="pet w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    </div>
-                                @endisset
-                            </div>
-                        </div>
-                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
-                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                     </div>
-                </div>
-            </div>
                 </div>
             </div>
 
@@ -1056,11 +1063,13 @@
                 <div class="my-6">
 
                     <div class="mt-6 rounded-lg">
+                        @if ($rides && $rides->count() > 0)
                         <h1 class="can-exp-h1 text-center font-FuturaMdCnBT text-primary">
-                        @isset($findRidePage->heading_ride_card_section)
-                            {{ $findRidePage->heading_ride_card_section }}
-                        @endisset
-                    </h1>
+                            @isset($findRidePage->heading_ride_card_section)
+                                {{ $findRidePage->heading_ride_card_section }}
+                            @endisset
+                        </h1>
+                        @endif
                         @if ($rides && $rides->count() > 0)
                             @foreach ($rides as $ride)
                                 <div class="relative even:bg-white odd:bg-gray-100 space-y-4 rounded-lg">
@@ -1085,6 +1094,10 @@
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
                                         @endphp
                                     @endif
+                                    @php
+                                        $rideDetail = $ride->rideDetail->first();
+                                    @endphp
+                                    @if($rideDetail)
                                     <a
                                         @if ($ride->status === '2')
                                             href=""
@@ -1094,28 +1107,28 @@
                                             @if ($totalAverage < 1)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver only want passengers with reviews')"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() && in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 3)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-3 star reviews above')"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() && in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-4 star reviews above')"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() && in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4.5)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-5 star reviews above')"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @else
-                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                         @endif>
                                         <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1) &&
                                                 in_array($findRidePage->ride_features_option1->features_setting_id, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2) &&
@@ -1147,7 +1160,7 @@
                                                         <div class="flex items-center gap-2">
                                                             @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
                                                                 <span class="line-through">
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($rideDetail->price), 2) }}
                                                                     </span>
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
@@ -1155,11 +1168,11 @@
 
                                                                     <span>
 
-                                                                        ${{ $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $firm_cancellation_discount) / 100 }}
+                                                                        ${{ $rideDetail->price - ($rideDetail->price * $firm_cancellation_discount) / 100 }}
                                                                     </span>
 
                                                                 @else
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($rideDetail->price), 2) }}
                                                                 @endif
 
                                                                 <small>
@@ -1191,7 +1204,7 @@
                                                         <p class="font-medium">
                                                             Total {{ $ride->seats }} seats</p>
                                                     </div>
-                                                    <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                    <p class="text-xl font-semibold text-primary">${{ number_format(floatval($rideDetail->price), 2) }}
                                                         <small>
                                                             @isset($findRidePage->card_section_per_seat)
                                                                 {{ $findRidePage->card_section_per_seat }}
@@ -1212,7 +1225,7 @@
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
                                                                 <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{$ride->rideDetail[0]->departure }} {{ $ride->pickup }}</div>
+                                                                <div class="text-primary md:mb-4">{{$rideDetail->departure }} {{ $ride->pickup }}</div>
                                                             </div>
                                                         </div>
 
@@ -1225,7 +1238,7 @@
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
                                                                 <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{$ride->rideDetail[0]->destination }} {{ $ride->dropoff }}</div>
+                                                                <div class="text-primary md:mb-4">{{$rideDetail->destination }} {{ $ride->dropoff }}</div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1297,19 +1310,16 @@
                                                         @endif --}}
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
                                                             </a>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
                                                             </a>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
                                                             </a>
@@ -1318,7 +1328,6 @@
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option1_tooltip }}','{{ $findRidePage->smoking_label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option1->icon)}}" alt=""></a> --}}
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""></a>
                                                         @endif
                                                         {{-- @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
@@ -1327,44 +1336,37 @@
                                                                 alt=""></a> --}}
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}"
                                                                 alt=""></a>
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}"
                                                                 alt=""></a>
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}"
                                                                 alt=""></a>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}"
                                                                 alt=""></a>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}"
                                                                 alt=""></a>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}"
                                                                 alt=""></a>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}"
                                                                 alt=""></a>
@@ -1374,77 +1376,62 @@
                                                         @endif --}}
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""></a>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"
                                                             onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""></a>
                                                         @endif
                                                     </div>
@@ -1506,23 +1493,27 @@
                                                             </p>
                                                             @php
                                                                 $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($ride) {
-                                                                    return $rating->ride->added_by === $ride->added_by;
+                                                                    return $rating->ride && $rating->ride->added_by === $ride->added_by;
                                                                 });
 
                                                                 $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                                                $hasReviews = $filteredRatings->count() > 0;
                                                             @endphp
                                                         </div>
                                                     </div>
                                                     <div class="">
-                                                        <span
-                                                            class="font-semibold text-gray-800">{{ number_format($totalAverage, 1) }}</span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                            class="w-6 h-6 text-yellow-500 stroke-gray-600">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                                                                clip-rule="evenodd"></path>
-                                                        </svg>
+                                                        <span class="font-semibold text-gray-800">@if($hasReviews){{ number_format($totalAverage, 1) }}@else No Reviews Yet @endif</span>
+                                                        
+                                                        @if($hasReviews)
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                                class="w-6 h-6 text-yellow-500 stroke-gray-600">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        @endif
+                                                        
                                                     </div>
                                                 </div>
                                                 {{-- <div>
@@ -1572,19 +1563,25 @@
                                             </div>
                                         </div>
                                     </a>
+                                    @endif
                                 </div>
                             @endforeach
                             {{ $rides->appends(request()->except('page'))->links(); }}
 
                         @elseif ($rides && $rides->count() == 0 && $request->from && $request->to)
-                            <div class="flex items-center space-x-2">
-                                <img class="w-8 h-8 rounded-full" src="{{ asset('assets/exclamation-mark.png') }}">
-                                <p>Sorry, no rides found for your search.</p>
+                            <div class="text-center">
+                                <h1 class="font-FuturaMdCnBT">
+                                    @isset($findRidePage->search_result_no_found_message)
+                                        {{ $findRidePage->search_result_no_found_message }}
+                                    @else
+                                        No ride for this location exist
+                                    @endisset
+                                </h1>
                             </div>
                         @endif
                     </div>
                     @if ($recentSearches->count() > 0)
-                    <div class="font-medium text-lg mt-4">
+                    <div class="font-medium text-lg mt-16">
                         @isset($findRidePage->search_section_recent_searches)
                             {{ $findRidePage->search_section_recent_searches }}
                         @endisset

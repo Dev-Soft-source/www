@@ -1266,7 +1266,7 @@
                                                             </p>
                                                             @php
                                                                 $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($ride) {
-                                                                    return $rating->ride->added_by === $ride->added_by;
+                                                                    return $rating->ride && $rating->ride->added_by === $ride->added_by;
                                                                 });
 
                                                                 $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
@@ -1713,7 +1713,7 @@
                                                             </p>
                                                             @php
                                                                 $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($ride) {
-                                                                    return $rating->ride->added_by === $ride->added_by;
+                                                                    return $rating->ride && $rating->ride->added_by === $ride->added_by;
                                                                 });
 
                                                                 $totalAverage = $filteredRatings->avg('average_rating') ?? 0;

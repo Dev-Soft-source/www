@@ -869,8 +869,25 @@
                                         </label>
                                     </div>
                                     <div class="{{ $vehicles->count() > '1' ? '' : 'hidden' }}">
-                                        <input id="added" type="checkbox" name="added_vehicle" value="1" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ old('added_vehicle', $ride->added_vehicle) == '1' || collect($vehicles)->contains('primary_vehicle', 1) ? 'checked' : '' }}
+                                        @php
+                                            // Check if any vehicle has primary_vehicle = 1
+                                            $hasPrimaryVehicle = false;
+                                            foreach ($vehicles as $vehicle) {
+                                                if (isset($vehicle->primary_vehicle) && ($vehicle->primary_vehicle == '1' || $vehicle->primary_vehicle == 1)) {
+                                                    $hasPrimaryVehicle = true;
+                                                    break;
+                                                }
+                                            }
+                                            // Check if ride already has added_vehicle checked, or if there's a primary vehicle available
+                                            $currentAddedVehicle = old('added_vehicle');
+                                            if ($currentAddedVehicle === null) {
+                                                $currentAddedVehicle = $ride->added_vehicle ?? null;
+                                            }
+                                            // Check the box if: already checked, OR if there's a primary vehicle (and not explicitly unchecked)
+                                            $shouldCheckAddedVehicle = ($currentAddedVehicle == '1') || ($hasPrimaryVehicle && $currentAddedVehicle !== '0');
+                                        @endphp
+                                        <input id="added" type="checkbox" name="added_vehicle" value="1" {{ $bookings_count > 0 ? '' : 'disabled' }}
+                                            {{ $shouldCheckAddedVehicle ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                         @if ($bookings_count > 0)
                                             <input type="hidden" name="added_vehicle" value="{{ $ride->added_vehicle }}">
@@ -1164,15 +1181,23 @@
                                         Select vehicle
                                     </label>
                                     <div class="mt-2">
+                                        @php
+                                            $primaryVehicle = collect($vehicles)->firstWhere('primary_vehicle', 1);
+                                            $defaultVehicleId = old('vehicle_id', $ride->vehicle_id);
+                                            // If no vehicle is selected and there's a primary vehicle, use primary vehicle
+                                            if (empty($defaultVehicleId) && $primaryVehicle) {
+                                                $defaultVehicleId = $primaryVehicle->id;
+                                            }
+                                        @endphp
                                         <select id="type" name="vehicle_id" {{ $bookings_count > 0 ? 'readonly' : '' }}
                                             class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                             <option value=""
-                                                {{ old('vehicle_id', $ride->vehicle_id) === '' ? 'selected' : '' }}>
+                                                {{ empty($defaultVehicleId) ? 'selected' : '' }}>
                                                 Select
                                             </option>
                                             @foreach ($vehicles as $vehicle)
                                                 <option value="{{ $vehicle->id }}"
-                                                    {{ old('vehicle_id', $ride->vehicle_id) === $vehicle->id || $vehicle->primary_vehicle === '1' ? 'selected' : '' }}>
+                                                    {{ $defaultVehicleId == $vehicle->id ? 'selected' : '' }}>
                                                     {{ $vehicle->year }} / {{ $vehicle->model }} / {{ $vehicle->type }}
                                                 </option>
                                             @endforeach
