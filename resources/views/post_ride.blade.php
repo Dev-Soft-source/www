@@ -2885,12 +2885,29 @@ document.addEventListener('DOMContentLoaded', function() {
             // If the checkbox is checked, show the disclaimer; otherwise, hide it
             skipVehicle.style.display = this.checked ? 'block' : 'none';
             showVehicles.style.display = 'none';
+            
+            // Enable vehicle fields and set required when add checkbox is checked
+            const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+            vehicleFields.forEach(function(field) {
+                if (this.checked) {
+                    field.removeAttribute('disabled');
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                }
+            }.bind(this));
         });
         addedCheckbox.addEventListener('change', function () {
             handleCheckboxChange(addedCheckbox);
             // If the checkbox is checked, show the disclaimer; otherwise, hide it
             showVehicles.style.display = this.checked ? 'block' : 'none';
             skipVehicle.style.display = 'none';
+            
+            // Remove required from vehicle fields when using existing vehicle
+            const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+            vehicleFields.forEach(function(field) {
+                field.removeAttribute('required');
+            });
         });
         recurringTripCheckbox.addEventListener('change', function () {
             // If the checkbox is checked, show the recurring details; otherwise, hide it
@@ -2901,6 +2918,17 @@ document.addEventListener('DOMContentLoaded', function() {
         skipVehicle.style.display = addCheckbox.checked ? 'block' : 'none';
         showVehicles.style.display = addedCheckbox.checked ? 'block' : 'none';
         recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
+        
+        // Set initial required state for vehicle fields
+        const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+        vehicleFields.forEach(function(field) {
+            if (addCheckbox.checked) {
+                field.removeAttribute('disabled');
+                field.setAttribute('required', 'required');
+            } else {
+                field.removeAttribute('required');
+            }
+        });
     });
 
     function debounce(func, delay) {

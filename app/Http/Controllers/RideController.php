@@ -1451,6 +1451,15 @@ class RideController extends Controller
         // Join the selected checkboxes with semicolons.
         $features = implode('=', $request->input('features', []));
 
+        // Initialize vehicle variables to prevent undefined variable errors
+        $make = '';
+        $model = '';
+        $vehicle_type = '';
+        $year = '';
+        $color = '';
+        $license_no = '';
+        $car_type = '';
+
         if ($skip_vehicle !== 0) {
             $make = '';
             $model = '';
@@ -1462,27 +1471,31 @@ class RideController extends Controller
         }
 
         if ($add_vehicle !== 0) {
-            $make = $request->make;
-            $model = $request->model;
-            $vehicle_type = $request->vehicle_type;
-            $year = $request->year;
-            $color = $request->color;
-            $license_no = $request->license_no;
-            $car_type = $request->car_type;
+            // Preserve original values if request values are empty (for edit mode when fields are readonly/disabled)
+            $make = $request->make ?: $ride->make ?? '';
+            $model = $request->model ?: $ride->model ?? '';
+            $vehicle_type = $request->vehicle_type ?: $ride->vehicle_type ?? '';
+            $year = $request->year ?: $ride->year ?? '';
+            $color = $request->color ?: $ride->color ?? '';
+            $license_no = $request->license_no ?: $ride->license_no ?? '';
+            $car_type = $request->car_type ?: $ride->car_type ?? '';
 
-            $vehicle = Vehicle::create([
-                'user_id' => auth()->user()->id,
-                'make' => $request->make,
-                'model' => $request->model,
-                'type' => $request->vehicle_type,
-                'liscense_no' => $request->license_no,
-                'color' => $request->color,
-                'year' => $request->year,
-                'car_type' => $request->car_type,
-                'image' => $filename,
-                'original_image' => $filename,
-            ]);
-            $vehicle_id = $vehicle->id;
+            // Create new vehicle with the values (preserved from original if request was empty)
+            if ($make || $model || $vehicle_type) {
+                $vehicle = Vehicle::create([
+                    'user_id' => auth()->user()->id,
+                    'make' => $make,
+                    'model' => $model,
+                    'type' => $vehicle_type,
+                    'liscense_no' => $license_no,
+                    'color' => $color,
+                    'year' => $year,
+                    'car_type' => $car_type,
+                    'image' => $filename,
+                    'original_image' => $filename,
+                ]);
+                $vehicle_id = $vehicle->id;
+            }
         }
 
         if ($added_vehicle !== 0) {

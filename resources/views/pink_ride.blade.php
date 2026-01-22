@@ -943,7 +943,7 @@
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <button type="button" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
                                                         </button>
                                                     @endif
                                                 </div>
@@ -1426,7 +1426,7 @@
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <button type="button" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
                                                         </button>
                                                     @endif
                                                 </div>

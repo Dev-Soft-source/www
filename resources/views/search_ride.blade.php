@@ -1581,14 +1581,18 @@
                         @endif
                     </div>
                     @if ($recentSearches->count() > 0)
-                    <div class="font-medium text-lg mt-16">
+                    <h1 class="font-FuturaMdCnBT text-primary text-2xl mt-8">
                         @isset($findRidePage->search_section_recent_searches)
                             {{ $findRidePage->search_section_recent_searches }}
                         @endisset
-                    </div>
+                    </h1>
                     <div class="space-y-4 mt-4">
-                        @foreach ($recentSearches as $recentSearch)
-                            <div class="bg-white rounded-lg shadow-3xl border border-solid border-gray-100 cursor-pointer" onclick="SearchRoute('{{ $recentSearch->from }}', '{{ $recentSearch->to }}')">
+                        @foreach ($recentSearches as $index => $recentSearch)
+                            @php
+                                $colors = ['bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-pink-50', 'bg-indigo-50', 'bg-cyan-50', 'bg-teal-50'];
+                                $colorClass = $colors[$index % count($colors)];
+                            @endphp
+                            <div class="{{ $colorClass }} rounded-lg shadow-3xl border border-solid border-gray-100 cursor-pointer hover:shadow-xl transition-shadow duration-200" onclick="SearchRoute('{{ $recentSearch->from }}', '{{ $recentSearch->to }}')">
                                 <div class="flex flex-col sm:flex-col md:flex-row justify-between px-4">
                                     <div class="w-full">
                                         <div class="relative mt-5 text-left">

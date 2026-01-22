@@ -2203,6 +2203,136 @@ document.addEventListener('keydown', function(event) {
         showVehicles.style.display = addedCheckbox.checked ? 'block' : 'none';
         recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
     });
+    
+    // Ensure all form fields are submitted, especially disabled/readonly ones
+    document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+        // Function to check if hidden input already exists for a field
+        function hasHiddenInput(form, name) {
+            return form.querySelector(`input[type="hidden"][name="${name}"]`) !== null;
+        }
+        
+        // Function to add hidden input only if it doesn't exist
+        function ensureHiddenInput(form, name, value) {
+            if (value === null || value === undefined || value === '') return;
+            
+            // Check if hidden input already exists (from server-side)
+            if (hasHiddenInput(form, name)) {
+                // Update existing hidden input value
+                const existing = form.querySelector(`input[type="hidden"][name="${name}"]`);
+                if (existing) {
+                    existing.value = value;
+                }
+                return;
+            }
+            
+            // Create new hidden input only if it doesn't exist
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = name;
+            hiddenInput.value = value;
+            form.appendChild(hiddenInput);
+        }
+        
+        // Handle all disabled select fields
+        const disabledSelects = this.querySelectorAll('select[disabled]');
+        disabledSelects.forEach(select => {
+            if (select.disabled && select.value && select.name) {
+                ensureHiddenInput(this, select.name, select.value);
+            }
+        });
+        
+        // Handle all disabled radio buttons (only submit checked ones)
+        const disabledRadios = this.querySelectorAll('input[type="radio"][disabled]');
+        const radioGroups = {};
+        disabledRadios.forEach(radio => {
+            if (radio.disabled && radio.name) {
+                if (!radioGroups[radio.name]) {
+                    radioGroups[radio.name] = [];
+                }
+                radioGroups[radio.name].push(radio);
+            }
+        });
+        
+        // For each radio group, submit the checked value
+        Object.keys(radioGroups).forEach(name => {
+            const checkedRadio = radioGroups[name].find(radio => radio.checked);
+            if (checkedRadio && checkedRadio.value) {
+                ensureHiddenInput(this, name, checkedRadio.value);
+            }
+        });
+        
+        // Handle disabled checkboxes (only if they don't already have hidden inputs)
+        const disabledCheckboxes = this.querySelectorAll('input[type="checkbox"][disabled]');
+        const checkboxGroups = {};
+        
+        disabledCheckboxes.forEach(checkbox => {
+            if (checkbox.disabled && checkbox.name) {
+                // Group checkboxes by name (for array fields like features[])
+                if (!checkboxGroups[checkbox.name]) {
+                    checkboxGroups[checkbox.name] = [];
+                }
+                checkboxGroups[checkbox.name].push(checkbox);
+            }
+        });
+        
+        // Handle each checkbox group
+        Object.keys(checkboxGroups).forEach(name => {
+            const checkboxes = checkboxGroups[name];
+            const checkedBoxes = checkboxes.filter(cb => cb.checked);
+            
+            // For array fields (like features[]), submit all checked values
+            if (name.endsWith('[]')) {
+                // For array fields, we need to ensure all checked disabled checkboxes have hidden inputs
+                // Check which values already have hidden inputs
+                const existingHidden = Array.from(this.querySelectorAll(`input[type="hidden"][name="${name}"]`))
+                    .map(input => input.value);
+                
+                // Add hidden inputs only for checked checkboxes that don't already have hidden inputs
+                checkedBoxes.forEach(checkbox => {
+                    const value = checkbox.value || '1';
+                    if (!existingHidden.includes(value)) {
+                        ensureHiddenInput(this, name, value);
+                    }
+                });
+            } else {
+                // For non-array checkboxes, check if hidden input already exists
+                if (!hasHiddenInput(this, name)) {
+                    const checkedBox = checkboxes.find(cb => cb.checked);
+                    if (checkedBox) {
+                        ensureHiddenInput(this, name, checkedBox.value || '1');
+                    } else {
+                        // For unchecked disabled checkboxes, submit 0
+                        ensureHiddenInput(this, name, '0');
+                    }
+                }
+            }
+        });
+        
+        // Ensure readonly text fields are not also disabled (readonly fields ARE submitted)
+        const readonlyFields = this.querySelectorAll('input[readonly], textarea[readonly]');
+        readonlyFields.forEach(field => {
+            if (field.hasAttribute('disabled')) {
+                field.removeAttribute('disabled');
+            }
+        });
+        
+        // Handle vehicle fields specifically - ensure readonly fields are not disabled
+        const skipVehicle = document.getElementById('skipVehicle');
+        if (skipVehicle) {
+            const makeField = skipVehicle.querySelector('input[name="make"]');
+            const modelField = skipVehicle.querySelector('input[name="model"]');
+            const yearField = skipVehicle.querySelector('input[name="year"]');
+            const colorField = skipVehicle.querySelector('input[name="color"]');
+            const licenseNoField = skipVehicle.querySelector('input[name="license_no"]');
+            
+            // Ensure readonly vehicle text fields are not disabled
+            [makeField, modelField, yearField, colorField, licenseNoField].forEach(field => {
+                if (field && field.hasAttribute('readonly') && field.hasAttribute('disabled')) {
+                    field.removeAttribute('disabled');
+                }
+            });
+        }
+    });
 
 
     function fromInput(index){
