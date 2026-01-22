@@ -777,6 +777,24 @@
                                         </div>
                                     </div>
 
+                                    {{-- Second checkbox for Firm Cancellation Policy --}}
+                                    <div class="flex items-start my-4">
+                                        <input id="firm_cancellation_understand" type="checkbox" name="firm_cancellation_understand" value="1"
+                                            {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                        <label for="firm_cancellation_understand" class="ml-2 font-normal text-gray-900">
+                                            I understand that this booking is under the Firm Cancellation Policy and is non-refundable.
+                                            <span class="text-red-500">*</span>
+                                        </label>
+                                    </div>
+                                    @error('firm_cancellation_understand')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+
                                 @endif
 
                                 @if (in_array($postRidePage->features_option1->name, $features))
