@@ -4,7 +4,7 @@
         <template v-if="hasRideDetails">
             <div style="display: flex; justify-content: center; margin-bottom: 12px;">
                 <div style="background-color: #22c55e; color: white; border-radius: 8px; padding: 12px 16px; max-width: 90%;">
-                    <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Ride Details</div>
+                    <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Ride Detail</div>
                     <div style="font-size: 13px;">{{ rideDetailsLine }}</div>
                 </div>
             </div>
@@ -88,7 +88,9 @@ export default {
         },
         hasActualMessages() {
             // Check if there are any actual chat messages (not just ride detail messages)
-            return this.messages.some(m => !m.ride_detail && m.message);
+            // filteredMessages already excludes ride_detail messages, so if it has any items,
+            // that means there are actual chat messages and the disclaimer should be hidden
+            return this.filteredMessages.length > 0;
         }
     },
     methods: {
@@ -111,7 +113,7 @@ export default {
             if(message.user && message.user.id == this.logged_in_user_id) {
                 // My message (blue)
                 return {
-                    background: '#2563eb',
+                    background: '#3B82F6',
                     color: '#fff',
                     'border-radius': '16px',
                     'padding': '10px 16px',
@@ -124,8 +126,8 @@ export default {
             }
             // Their message (gray)
             return {
-                background: '#f4f4f4',
-                color: '#222',
+                background: '#45CEEB',
+                color: '#fff',
                 'border-radius': '16px',
                 'padding': '10px 16px',
                 'margin-bottom': '2px',

@@ -72,6 +72,13 @@ class ChatsController extends Controller
 
         $ride = Ride::whereId($id)->first();
         $passenger = User::whereId($passenger)->first();
+        
+        // Validate that ride and passenger exist
+        if (!$ride || !$passenger) {
+            return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
+                ->with('error', 'Ride or passenger not found.');
+        }
+        
         return view('chat', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
     }
 
@@ -123,6 +130,13 @@ class ChatsController extends Controller
 
         $ride = Ride::whereId($id)->first();
         $passenger = User::whereId($passenger)->first();
+        
+        // Validate that ride and passenger exist
+        if (!$ride || !$passenger) {
+            return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
+                ->with('error', 'Ride or passenger not found.');
+        }
+        
         return view('chat_detail', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
     }
 
@@ -462,8 +476,10 @@ class ChatsController extends Controller
             }
 
             // Broadcast the event synchronously (not queued) for immediate real-time updates
+            // Note: toOthers() only works for presence channels, not regular channels
+            // Since we're using regular channels, we broadcast to both sender and receiver channels
             try {
-                broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
+                broadcast(new MessageSentEvent($ride, $user, $message));
                 Log::info('Message broadcasted', [
                     'message_id' => $message->id,
                     'sender' => $message->sender,

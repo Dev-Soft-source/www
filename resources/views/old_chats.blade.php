@@ -18,21 +18,25 @@
                 @php
                     list($userId, $rideId) = explode('_', $userAndRideId);
                     $user = \App\Models\User::withTrashed()->find($userId);
-                    // Combine ride date and time into a single DateTime object
-                    $rideDateTime = \Carbon\Carbon::parse($latestMessage->ride->date . ' ' . $latestMessage->ride->time);
-                    // Calculate the difference in hours between the current time and the ride time
-                    $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                    // Check if ride exists before accessing its properties
+                    $hoursDifference = 0;
+                    if ($latestMessage->ride && $latestMessage->ride->date && $latestMessage->ride->time) {
+                        // Combine ride date and time into a single DateTime object
+                        $rideDateTime = \Carbon\Carbon::parse($latestMessage->ride->date . ' ' . $latestMessage->ride->time);
+                        // Calculate the difference in hours between the current time and the ride time
+                        $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                    }
                 @endphp
-                @if (strtotime($latestMessage->ride->date) < strtotime('today') || (strtotime($latestMessage->ride->date) == strtotime('today') && strtotime($latestMessage->ride->time) < strtotime('now')))
-                    @if ($hoursDifference > 48)
-                        <a href="{{ route('chat', ['lang' => $selectedLanguage->abbreviation,'departure' => $latestMessage->rideDetail->departure,'destination' => $latestMessage->rideDetail->destination,'id' => $latestMessage->ride_id,'passenger' => $user->id]) }}">
+                @if ($user && $latestMessage->ride && $latestMessage->ride->date && $latestMessage->ride->time && (strtotime($latestMessage->ride->date) < strtotime('today') || (strtotime($latestMessage->ride->date) == strtotime('today') && strtotime($latestMessage->ride->time) < strtotime('now'))))
+                    @if ($hoursDifference > 48 && $latestMessage->rideDetail)
+                        <a href="{{ route('chat', ['lang' => $selectedLanguage->abbreviation,'departure' => $latestMessage->rideDetail->departure ?? '','destination' => $latestMessage->rideDetail->destination ?? '','id' => $latestMessage->ride_id,'passenger' => $user->id]) }}">
                             <div class="border p-4 cursor-pointer rounded">
                                 <!-- Display sender's information -->
                                 <div class="flex items-end justify-between gap-2">
                                     <div class="flex gap-3 items-center">
-                                        <img class="w-10 h-10 rounded-full" src="{{ $user->profile_image }}" alt="">
+                                        <img class="w-10 h-10 rounded-full" src="{{ $user->profile_image ?? asset('assets/image-placeholder.png') }}" alt="">
                                         <div>
-                                            {{ $user->first_name }}
+                                            {{ $user->first_name ?? 'User' }}
                                             <p class="text-sm text-gray-500">{{ $latestMessage->message }}</p>
                                         </div>
                                     </div>

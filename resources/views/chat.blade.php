@@ -58,15 +58,12 @@
     window.authUserId = {{ Auth::id() ?? 'null' }};
       window.ride = @json($ride->id); // Pass $ride to JavaScript
       window.passenger = @json($passenger->id); // Pass $ride to JavaScript
-      @php
-          $rideDetailsArray = [
-              'departure' => $ride->rideDetail[0]->departure ?? '',
-              'destination' => $ride->rideDetail[0]->destination ?? '',
-              'date' => $ride->date ?? '',
-              'time' => $ride->time ?? ''
-          ];
-      @endphp
-      window.rideDetails = @json($rideDetailsArray);
+      window.rideDetails = {!! json_encode([
+          'departure' => $ride->rideDetail[0]->departure ?? '',
+          'destination' => $ride->rideDetail[0]->destination ?? '',
+          'date' => $ride->date ?? '',
+          'time' => $ride->time ?? ''
+      ]) !!};
     </script>
     <script>window.isOnChatDetailPage = true;</script>
   <script src="{{ asset('js/web.js') }}" defer></script>
@@ -93,7 +90,7 @@
                 <div class="py-3 text-center sm:text-left"></div>
                 <div class="mt-2 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="panel-body">
-                        {{-- <div class="ride-details-heading" style="font-weight: bold; color: #2563eb; margin-bottom:4px;">Ride Details</div> --}}
+                        {{-- <div class="ride-details-heading" style="font-weight: bold; color: #2563eb; margin-bottom:4px;">Ride Detail</div> --}}
                         <chat-messages 
                             :messages="messages" 
                             :logged_in_user_id="{{ auth()->id() }}"

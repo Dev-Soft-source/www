@@ -86,7 +86,7 @@
         <p class="mt-1">
             {{ $findRidePage->pink_ride_page_label ?? 'We are proud to be the first to introduce ProximaRide in North America. ProximaRide are perfect for our female passengers who want to travel or drive in “ladies-only” rides. We aim to keep you safe and with ProximaRide, women everywhere can travel at ease. Important: only female passengers and drivers can use ProximaRide' }}
         </p>
-        <div class="mt-4 p-4 bg-pink-50 border-l-4 border-pink-500 rounded">
+        <div class="mt-4 p-4 bg-[#f2d9f5] border-l-4 border-pink-500 rounded">
             <p class="text-gray-900 font-medium">
                 I understand that Pink Rides are for females only. I confirm that I will not book, attend, or send any male over the age of 12 in my place or as a companion.
             </p>

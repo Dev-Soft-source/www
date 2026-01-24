@@ -156,9 +156,24 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const warning = @json(session('price_warning'));
-                if (warning && warning.message) {
-                    showPriceWarningModal(warning.message, function() {
-                        // User acknowledged the warning - modal closes
+                if (warning) {
+                    showPriceWarningModal(function() {
+                        // User clicked "Keep Current Price" - submit the form
+                        console.log('User chose to keep current price, submitting form');
+                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                        if (formElement) {
+                            // Create a hidden input to bypass validation on next submit
+                            const bypassInput = document.createElement('input');
+                            bypassInput.type = 'hidden';
+                            bypassInput.name = 'bypass_price_validation';
+                            bypassInput.value = '1';
+                            formElement.appendChild(bypassInput);
+                            // Remove the event listener to prevent re-validation
+                            const newForm = formElement.cloneNode(true);
+                            formElement.parentNode.replaceChild(newForm, formElement);
+                            // Submit the form
+                            newForm.submit();
+                        }
                     });
                 }
             });
@@ -281,7 +296,7 @@
         </div>
     </div>
     
-    <!-- Modal for Price Error (Exceeds $0.72/km) -->
+    <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
     <div id="priceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-error-modal-title" role="dialog" aria-modal="true">
         <div onclick="closePriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -295,22 +310,24 @@
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="priceErrorHeading">Price Too High</h3>
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="priceErrorHeading">Price Limit Exceeded</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center" id="priceErrorMessage"></p>
+                                <p class="can-exp-p text-center mb-3" id="priceErrorParagraph1"></p>
+                                <p class="can-exp-p text-center mb-3" id="priceErrorParagraph2"></p>
+                                <p class="can-exp-p text-center" id="priceErrorParagraph3"></p>
                             </div>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" onclick="closePriceErrorModal()" class="button-exp-fill">Got it</button>
+                        <button type="button" id="priceErrorAdjustBtn" onclick="adjustPriceFromError()" class="button-exp-fill">Adjust Price</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Modal for Price Warning (Exceeds $0.66/km but <= $0.72/km) -->
+    <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
     <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title" role="dialog" aria-modal="true">
         <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -324,16 +341,17 @@
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Price Warning</h3>
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended Contribution Limit</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center" id="priceWarningMessage"></p>
+                                <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1"></p>
+                                <p class="can-exp-p text-center" id="priceWarningParagraph2"></p>
                             </div>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" onclick="closePriceWarningModal()" class="button-exp-no-fill">Cancel</button>
-                        <button type="button" id="priceWarningContinue" class="button-exp-fill">Continue</button>
+                        <button type="button" id="priceWarningAdjustBtn" onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">Adjust Price</button>
+                        <button type="button" id="priceWarningContinue" class="button-exp-fill">Keep Current Price</button>
                     </div>
                 </div>
             </div>
@@ -2577,65 +2595,176 @@ document.addEventListener('DOMContentLoaded', function() {
     // Store distance globally when fetched
     window.rideDistance = null;
     
-    // Function to validate price per kilometer
-    function validatePricePerKm(price, distance) {
-        if (!price || !distance || distance <= 0 || price <= 0) {
+    // Function to validate price per seat
+    // Formula: (Distance × Cap) ÷ Seats = Max price per seat
+    function validatePricePerSeat(price, distance, seats) {
+        if (!price || !distance || !seats || distance <= 0 || price <= 0 || seats <= 0) {
+            console.log('Validation skipped - missing data:', { price, distance, seats });
             return { valid: true, type: null };
         }
         
-        const pricePerKm = parseFloat(price) / parseFloat(distance);
+        const pricePerSeat = parseFloat(price);
+        const distanceKm = parseFloat(distance);
+        const numSeats = parseInt(seats);
         
-        if (pricePerKm > ERROR_TRIGGERING_CAP) {
+        // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
+        const maxPricePerSeat = (distanceKm * ERROR_TRIGGERING_CAP) / numSeats;
+        
+        // Calculate soft warning price per seat: $0.66/km
+        const softWarningPricePerSeat = (distanceKm * SOFT_WARNING_CAP) / numSeats;
+        
+        console.log('Price validation calculations:', {
+            pricePerSeat: pricePerSeat,
+            distanceKm: distanceKm,
+            numSeats: numSeats,
+            maxPricePerSeat: maxPricePerSeat,
+            softWarningPricePerSeat: softWarningPricePerSeat,
+            exceedsMax: pricePerSeat > maxPricePerSeat,
+            exceedsSoftWarning: pricePerSeat > softWarningPricePerSeat
+        });
+        
+        // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+        if (pricePerSeat > maxPricePerSeat) {
+            console.log('ERROR CAP TRIGGERED');
             return {
                 valid: false,
                 type: 'error',
-                message: 'The price per kilometer ($' + pricePerKm.toFixed(2) + '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.',
-                heading: 'Price Too High',
-                pricePerKm: pricePerKm.toFixed(2)
+                maxPricePerSeat: maxPricePerSeat.toFixed(2)
             };
         }
         
-        if (pricePerKm > SOFT_WARNING_CAP) {
+        // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+        // Check if price is ABOVE (greater than) the soft warning cap
+        // Note: If price equals soft warning, no warning is shown (user requirement: "above")
+        if (pricePerSeat > softWarningPricePerSeat) {
+            console.log('SOFT WARNING CAP TRIGGERED - Price exceeds soft warning');
+            console.log('Price per seat:', pricePerSeat, '> Soft warning:', softWarningPricePerSeat);
             return {
                 valid: true,
                 type: 'warning',
-                message: 'Your price per kilometer ($' + pricePerKm.toFixed(2) + '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
-                pricePerKm: pricePerKm.toFixed(2)
+                softWarningPrice: softWarningPricePerSeat.toFixed(2)
             };
         }
         
+        console.log('No warning or error - price is within limits');
         return { valid: true, type: null };
     }
     
-    // Function to show error modal
-    function showPriceErrorModal(heading, message) {
+    // Function to show error modal (Price Limit Exceeded)
+    function showPriceErrorModal(maxPricePerSeat) {
         const modal = document.getElementById('priceErrorModal');
         if (modal) {
-            document.getElementById('priceErrorHeading').textContent = heading;
-            document.getElementById('priceErrorMessage').textContent = message;
+            // Set the three paragraphs as specified
+            document.getElementById('priceErrorParagraph1').textContent = 
+                'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.';
+            document.getElementById('priceErrorParagraph2').textContent = 
+                'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.';
+            document.getElementById('priceErrorParagraph3').textContent = 
+                'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
+            
             modal.classList.remove('hidden');
             modal.style.display = 'block';
         }
     }
     
-    // Function to show warning modal (with continue button)
-    function showPriceWarningModal(message, callback) {
+    // Function to show warning modal (Recommended Contribution Limit)
+    function showPriceWarningModal(callback) {
+        console.log('showPriceWarningModal called');
+        const modal = document.getElementById('priceWarningModal');
+        if (!modal) {
+            console.error('Price warning modal not found!');
+            return;
+        }
+        
+        // Set the two paragraphs as specified
+        const para1 = document.getElementById('priceWarningParagraph1');
+        const para2 = document.getElementById('priceWarningParagraph2');
+        
+        if (para1) {
+            para1.textContent = 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+        }
+        if (para2) {
+            para2.textContent = 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+        }
+        
+        // Show the modal - ensure it's visible
+        // Remove hidden class and set display with !important to override Tailwind CSS
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'block', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
+        modal.style.setProperty('z-index', '50', 'important');
+        
+        console.log('Modal should be visible now', {
+            hasClassHidden: modal.classList.contains('hidden'),
+            display: modal.style.display,
+            computedDisplay: window.getComputedStyle(modal).display,
+            visibility: window.getComputedStyle(modal).visibility
+        });
+        
+        // Store callback for continue button (Keep Current Price)
+        const continueBtn = document.getElementById('priceWarningContinue');
+        if (continueBtn) {
+            // Remove any existing event listeners by cloning
+            const newContinueBtn = continueBtn.cloneNode(true);
+            continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+            
+            newContinueBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Keep Current Price clicked');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                if (callback) {
+                    callback();
+                }
+            };
+        } else {
+            console.error('Continue button not found!');
+        }
+    }
+    
+    // Function to adjust price (focus on price input field)
+    function adjustPriceFromError() {
+        const modal = document.getElementById('priceErrorModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        // Focus on price input field
+        const priceInput = document.getElementById('priceData0');
+        if (priceInput) {
+            priceInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                priceInput.focus();
+                priceInput.select();
+            }, 300);
+        }
+    }
+    
+    // Function to adjust price from warning (focus on price input field)
+    // This should NOT submit the form - just close popup and focus on price field
+    function adjustPriceFromWarning() {
+        console.log('Adjust Price clicked - closing modal and focusing on price field (NOT submitting form)');
         const modal = document.getElementById('priceWarningModal');
         if (modal) {
-            document.getElementById('priceWarningMessage').textContent = message;
-            modal.classList.remove('hidden');
-            modal.style.display = 'block';
-            
-            // Store callback for continue button
-            const continueBtn = document.getElementById('priceWarningContinue');
-            if (continueBtn) {
-                continueBtn.onclick = function() {
-                    modal.classList.add('hidden');
-                    modal.style.display = 'none';
-                    if (callback) callback();
-                };
-            }
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
+        // Focus on price input field (Price per Seat) - do NOT submit the form
+        const priceInput = document.getElementById('priceData0');
+        if (priceInput) {
+            // Scroll to the price input field
+            priceInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Focus and select the field after a short delay to ensure modal is closed
+            setTimeout(() => {
+                priceInput.focus();
+                priceInput.select();
+            }, 300);
+        }
+        // Explicitly do NOT submit the form - user needs to adjust price first
+        // Return false to prevent any default behavior
+        return false;
     }
     
     function closePriceErrorModal() {
@@ -2655,7 +2784,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Handle form submission errors
-    document.querySelector('form').addEventListener('submit', function(e) {
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('post-ride-form') || document.querySelector('form[method="POST"]') || document.querySelector('form');
+        if (!form) {
+            console.error('Form not found!');
+            return;
+        }
+        
+        // Add our submit handler with capture phase to run first
+        // Use capture phase and make sure we run before other handlers
+        form.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered - starting validation');
+        
+        // Check if validation should be bypassed (user clicked "Keep Current Price")
+        const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
+        if (bypassInput && bypassInput.value === '1') {
+            console.log('Bypassing price validation - user chose to keep current price');
+            return; // Allow form to submit normally
+        }
+        
         // First check HTML5 validation
         const firstInvalid = this.querySelector(':invalid');
         if (firstInvalid) {
@@ -2668,36 +2816,202 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Validate price per kilometer before submission
+        // Validate price per seat before submission
         const priceInput = document.getElementById('priceData0');
-        const price = priceInput ? priceInput.value : null;
+        const price = priceInput ? parseFloat(priceInput.value) : null;
         
         // Get distance - try from data attribute first, then global variable
         let distance = null;
-        if (priceInput) {
+        if (priceInput && typeof $ !== 'undefined') {
             distance = $(priceInput).data('distance') || window.rideDistance;
+        } else {
+            distance = window.rideDistance;
         }
         
-        // If we have both price and distance, validate
-        if (price && distance) {
-            const validation = validatePricePerKm(price, distance);
+        // If distance is not available, try to get it from hidden input or calculate it
+        if (!distance || distance <= 0) {
+            // Try to get from hidden input if available
+            const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
+            if (distanceInput && distanceInput.value) {
+                distance = parseFloat(distanceInput.value);
+            }
+        }
+        
+        // Get number of seats
+        let seats = null;
+        const seatsInput = document.querySelector('input[name="seats"]:checked');
+        if (seatsInput) {
+            seats = parseInt(seatsInput.value);
+        }
+        
+        // Debug logging
+        console.log('Form submission validation:', {
+            price: price,
+            distance: distance,
+            seats: seats,
+            hasPriceInput: !!priceInput,
+            hasSeatsInput: !!seatsInput,
+            windowRideDistance: window.rideDistance
+        });
+        
+        // If we have price, distance, and seats, validate
+        if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
+            const validation = validatePricePerSeat(price, distance, seats);
+            
+            console.log('Price validation result:', validation);
             
             if (!validation.valid) {
                 e.preventDefault();
-                showPriceErrorModal(validation.heading, validation.message);
-                return;
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                showPriceErrorModal(validation.maxPricePerSeat);
+                return false;
             }
             
             if (validation.type === 'warning') {
                 e.preventDefault();
-                showPriceWarningModal(validation.message, function() {
-                    // User confirmed - submit the form
-                    document.querySelector('form').submit();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('Showing soft warning modal - validation type is warning');
+                showPriceWarningModal(function() {
+                    // User clicked "Keep Current Price" - submit the form
+                    console.log('User chose to keep current price, submitting form');
+                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                    if (formElement) {
+                        // Create a hidden input to bypass validation on next submit
+                        const bypassInput = document.createElement('input');
+                        bypassInput.type = 'hidden';
+                        bypassInput.name = 'bypass_price_validation';
+                        bypassInput.value = '1';
+                        formElement.appendChild(bypassInput);
+                        // Remove the event listener to prevent re-validation
+                        const newForm = formElement.cloneNode(true);
+                        formElement.parentNode.replaceChild(newForm, formElement);
+                        // Submit the form
+                        newForm.submit();
+                    }
                 });
-                return;
+                return false;
+            }
+        } else {
+            console.warn('Skipping price validation - missing required data:', {
+                hasPrice: !!price && price > 0,
+                hasDistance: !!distance && distance > 0,
+                hasSeats: !!seats && seats > 0,
+                priceValue: price,
+                distanceValue: distance,
+                seatsValue: seats
+            });
+            
+            // If we have price and seats but no distance, we need to fetch it before allowing submission
+            if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
+                const fromInput = document.getElementById('from_spot_0') || document.querySelector('input[name="from"]');
+                const toInput = document.getElementById('to_spot_0') || document.querySelector('input[name="to"]');
+                
+                if (fromInput && toInput && fromInput.value && toInput.value) {
+                    console.log('Distance missing - attempting to fetch before validation');
+                    // Prevent form submission and fetch distance
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Fetch distance asynchronously
+                    if (typeof $ !== 'undefined') {
+                        $.ajax({
+                            url: "{{ url('get-cities-distance') }}",
+                            type: "POST",
+                            data: {
+                                search: fromInput.value,
+                                searchData: toInput.value,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            dataType: 'json',
+                            success: function(result) {
+                                console.log('Distance fetch response:', result);
+                                // Check if distance exists in response (could be result.distance or result.data.distance)
+                                const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                                
+                                if (distanceValue) {
+                                    const distanceKm = parseFloat(distanceValue);
+                                    if (!isNaN(distanceKm) && distanceKm > 0) {
+                                        window.rideDistance = distanceKm;
+                                        // Store in price input data attribute as well
+                                        if (priceInput && typeof $ !== 'undefined') {
+                                            $(priceInput).data('distance', distanceKm);
+                                        }
+                                        console.log('Distance fetched successfully:', distanceKm, 'km');
+                                        
+                                        // Now validate with the fetched distance
+                                        const validation = validatePricePerSeat(price, distanceKm, seats);
+                                        console.log('Price validation result after fetching distance:', validation);
+                                        
+                                        if (!validation.valid) {
+                                            showPriceErrorModal(validation.maxPricePerSeat);
+                                            return;
+                                        }
+                                        
+                                        if (validation.type === 'warning') {
+                                            showPriceWarningModal(function() {
+                                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                                if (formElement) {
+                                                    const bypassInput = document.createElement('input');
+                                                    bypassInput.type = 'hidden';
+                                                    bypassInput.name = 'bypass_price_validation';
+                                                    bypassInput.value = '1';
+                                                    formElement.appendChild(bypassInput);
+                                                    formElement.submit();
+                                                }
+                                            });
+                                            return;
+                                        }
+                                        
+                                        // No warning/error - submit form
+                                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                        if (formElement) {
+                                            formElement.submit();
+                                        }
+                                    } else {
+                                        console.error('Invalid distance value received:', distanceValue);
+                                        // If distance is invalid, let backend handle it
+                                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                        if (formElement) {
+                                            formElement.submit();
+                                        }
+                                    }
+                                } else {
+                                    // Distance might be 0 or missing - check the actual value
+                                    const distanceValue = result.distance || (result.data && result.data.distance);
+                                    if (distanceValue === 0 || distanceValue === null || distanceValue === undefined) {
+                                        console.warn('Distance is 0 or missing in API response. This might indicate invalid locations or API error.');
+                                        console.log('Full API response:', result);
+                                    } else {
+                                        console.error('Distance fetch failed - unexpected response structure. Response:', result);
+                                    }
+                                    // If we can't get valid distance, let backend handle validation
+                                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                    if (formElement) {
+                                        formElement.submit();
+                                    }
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error fetching distance:', error);
+                                // On error, let backend handle validation
+                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                if (formElement) {
+                                    formElement.submit();
+                                }
+                            }
+                        });
+                    } else {
+                        console.error('jQuery not available - cannot fetch distance. Allowing backend validation.');
+                        // If jQuery is not available, let backend handle it
+                    }
+                    return false;
+                }
             }
         }
 
+        }, true); // Use capture phase to run before other handlers
     });
     function swapLocations() {
         // Get the values of the "From" and "To" input fields
@@ -3005,20 +3319,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 debugger;
                 $("#priceData"+index+"").val(result.pricePerKm);
                 // Store distance for price validation (globally and on input)
-                if (result.distance) {
-                    $("#priceData"+index+"").data('distance', result.distance);
-                    window.rideDistance = result.distance; // Store globally for validation
+                // Check both result.distance and result.data.distance for compatibility
+                const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                if (distanceValue && parseFloat(distanceValue) > 0) {
+                    const distanceKm = parseFloat(distanceValue);
+                    $("#priceData"+index+"").data('distance', distanceKm);
+                    window.rideDistance = distanceKm; // Store globally for validation
+                    console.log('Distance stored for validation:', distanceKm, 'km');
+                } else {
+                    const distanceValue = result.distance || (result.data && result.data.distance);
+                    if (distanceValue === 0) {
+                        console.warn('Distance is 0 - locations might be invalid or same city');
+                    } else {
+                        console.warn('No valid distance returned from API. Response:', result);
+                    }
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching distance in fetchRecommendedPrice:', error, xhr);
             }
         });
     }
 
-    document.getElementById('close-modal').addEventListener('click', function () {
-        const modal = document.querySelector('.relative.z-50');
-        if (modal) {
-            modal.style.display = 'none'; // Hide the modal
-        }
-    });
+    const closeModalBtn = document.getElementById('close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function () {
+            const modal = document.querySelector('.relative.z-50');
+            if (modal) {
+                modal.style.display = 'none'; // Hide the modal
+            }
+        });
+    }
 
     function fromInput(index){
         debounce(function() {
@@ -3047,6 +3378,74 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchRecommendedPrice(searchTerm, searchData, index);
         }
     }
+    
+    // Function to fetch and store distance when both from and to are available
+    function fetchAndStoreDistance(index) {
+        const fromInput = $('#from_spot_' + index);
+        const toInput = $('#to_spot_' + index);
+        
+        if (fromInput.length && toInput.length && fromInput.val() && toInput.val()) {
+            if (typeof $ !== 'undefined') {
+                $.ajax({
+                    url: "{{ url('get-cities-distance') }}",
+                    type: "POST",
+                    data: {
+                        search: fromInput.val(),
+                        searchData: toInput.val(),
+                        _token: '{{ csrf_token() }}'
+                    },
+                    dataType: 'json',
+                    success: function(result) {
+                        const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                        if (distanceValue && parseFloat(distanceValue) > 0) {
+                            const distanceKm = parseFloat(distanceValue);
+                            window.rideDistance = distanceKm;
+                            // Store in price input data attribute as well
+                            const priceInput = $('#priceData' + index);
+                            if (priceInput.length) {
+                                priceInput.data('distance', distanceKm);
+                            }
+                            console.log('Distance fetched and stored:', distanceKm, 'km');
+                        } else {
+                            console.warn('No valid distance returned. Response:', result);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching distance:', error);
+                    }
+                });
+            }
+        }
+    }
+    
+    // Add event listeners to fetch distance when from/to fields change
+    document.addEventListener('DOMContentLoaded', function() {
+        // Listen for changes on from_spot_0 and to_spot_0
+        const fromInput0 = document.getElementById('from_spot_0');
+        const toInput0 = document.getElementById('to_spot_0');
+        
+        if (fromInput0) {
+            fromInput0.addEventListener('blur', function() {
+                // When from field loses focus, check if both are filled and fetch distance
+                setTimeout(() => {
+                    if (toInput0 && toInput0.value) {
+                        fetchAndStoreDistance(0);
+                    }
+                }, 500);
+            });
+        }
+        
+        if (toInput0) {
+            toInput0.addEventListener('blur', function() {
+                // When to field loses focus, check if both are filled and fetch distance
+                setTimeout(() => {
+                    if (fromInput0 && fromInput0.value) {
+                        fetchAndStoreDistance(0);
+                    }
+                }, 500);
+            });
+        }
+    });
 
 
     function addNewRow() {

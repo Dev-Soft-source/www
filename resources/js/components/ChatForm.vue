@@ -33,6 +33,13 @@
 
         methods: {
             handleEnter(event) {
+                // If Shift + Enter is pressed, allow default behavior (new line)
+                if (event.shiftKey) {
+                    return;
+                }
+                // If only Enter is pressed, prevent default and send message
+                event.preventDefault();
+                this.sendMessage();
             },
 
             sendMessage() {

@@ -514,6 +514,18 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    @elseif (auth()->user() && auth()->user()->charge_booking == '2')
+                                        <div class="relative sups inline-flex items-center group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-500 cursor-help hover:text-green-600 peer">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <!-- Tooltip -->
+                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
+                                                <div class="student-verification-tooltip bg-green-500">
+                                                    <p class="text-white text-sm">As a verified student, your booking fee is waived. You only pay the booking price.</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
                                 <p class="totalAmount text-black"></p>
@@ -670,6 +682,13 @@
                                 </div>
 
 
+                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                                    <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p class="text-yellow-800 text-sm">
+                                            <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
+                                        </p>
+                                    </div>
+                                @endif
                                 <div class="flex">
                                     @foreach ($ride->pendingSeatDetail as $detail)
                                         <div class="relative">
@@ -1349,18 +1368,30 @@ $(document).ready(function () {
     // Check if $setting is defined and not null
     var bookingPrice;
 
-    if (@json($ride->rideDetail[0]->price) <= 15) {
-        // Set a default value if $setting is null or not defined
+    // Check if user is a student who should NOT be charged booking fee
+    // charge_booking = '2' means booking fee is waived (student with valid card)
+    // charge_booking = '1' means booking fee is charged (regular user or student with expired card)
+    var chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
+    var isStudentFeeWaived = (chargeBooking == '2');
+
+    if (isStudentFeeWaived) {
+        // Student with valid card - booking fee is waived
         bookingPrice = 0.0;
-    } else if (@json($ride->rideDetail[0]->price) <= 30) {
-        bookingPrice = parseFloat((10 / 100) * @json($ride->rideDetail[0]->price));
     } else {
-        if (settingBookingPrice && settingBookingPrice !== '') {
-            // Get the booking price from $setting
-            bookingPrice = parseFloat(settingBookingPrice);
-        } else {
+        // Regular user or student with expired card - calculate booking fee
+        if (@json($ride->rideDetail[0]->price) <= 15) {
             // Set a default value if $setting is null or not defined
             bookingPrice = 0.0;
+        } else if (@json($ride->rideDetail[0]->price) <= 30) {
+            bookingPrice = parseFloat((10 / 100) * @json($ride->rideDetail[0]->price));
+        } else {
+            if (settingBookingPrice && settingBookingPrice !== '') {
+                // Get the booking price from $setting
+                bookingPrice = parseFloat(settingBookingPrice);
+            } else {
+                // Set a default value if $setting is null or not defined
+                bookingPrice = 0.0;
+            }
         }
     }
 
@@ -1573,6 +1604,21 @@ $(document).ready(function () {
         // Get the count of selected seats
         var selectedSeats = $("input[name='seats_id[]']:checked").length;
         console.log('Number of selected seats:', selectedSeats);
+
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        var isStudent = {{ (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2')) ? 'true' : 'false' }};
+        var paymentMethod = $('#check_payment_method').val(); // "cash" or "online"
+        var isCashPayment = (paymentMethod === 'cash');
+        
+        // If user is a student and payment is Cash, limit to 2 seats
+        if (isStudent && isCashPayment) {
+            // If trying to select more than 2 seats, prevent it
+            if ($(th).is(':checked') && selectedSeats > 2) {
+                $(th).prop('checked', false);
+                alert('Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.');
+                return;
+            }
+        }
 
         var seat = $(th).val();
 

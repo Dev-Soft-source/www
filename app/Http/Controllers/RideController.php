@@ -1679,45 +1679,62 @@ class RideController extends Controller
             'total_duration_seconds' => $duration
         ]);
         
-        // Cost-sharing cap validation: Error-Triggering Cap $0.72/km
-        if ($distance > 0 && isset($request->price) && $request->price > 0) {
-            $pricePerKm = $request->price / $distance;
+        // Cost-sharing cap validation: Price per seat validation
+        // Formula: (Distance × Cap) ÷ Seats = Max price per seat
+        // Skip validation if user explicitly chose to bypass (after seeing warning)
+        $bypassValidation = $request->has('bypass_price_validation') && $request->bypass_price_validation == '1';
+        
+        if (!$bypassValidation && $distance > 0 && isset($request->price) && $request->price > 0 && isset($request->seats) && $request->seats > 0) {
+            $seats = (int)$request->seats;
+            $pricePerSeat = (float)$request->price;
             
-            Log::info('Price per kilometer calculation (UpdateRide)', [
+            // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
+            $maxPricePerSeat = ($distance * 0.72) / $seats;
+            
+            // Calculate soft warning price per seat: $0.66/km
+            $softWarningPricePerSeat = ($distance * 0.66) / $seats;
+            
+            Log::info('Price per seat calculation (UpdateRide)', [
                 'ride_id' => $ride->id,
-                'price' => $request->price,
+                'price_per_seat' => $pricePerSeat,
                 'distance_km' => $distance,
-                'price_per_km' => round($pricePerKm, 4),
+                'seats' => $seats,
+                'max_price_per_seat' => round($maxPricePerSeat, 2),
+                'soft_warning_price_per_seat' => round($softWarningPricePerSeat, 2),
                 'error_cap' => 0.72,
                 'warning_cap' => 0.66
             ]);
             
             // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-            if ($pricePerKm > 0.72) {
-                Log::warning('Price exceeds error-triggering cap (UpdateRide)', [
+            if ($pricePerSeat > $maxPricePerSeat) {
+                Log::warning('Price per seat exceeds error-triggering cap (UpdateRide)', [
                     'ride_id' => $ride->id,
-                    'price_per_km' => round($pricePerKm, 4),
+                    'price_per_seat' => $pricePerSeat,
+                    'max_allowed' => round($maxPricePerSeat, 2),
                     'cap' => 0.72
                 ]);
                 
-                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
-                    ->with('heading', 'Price Too High')
+                return back()->with('error', 'The price per seat ($' . number_format($pricePerSeat, 2) . ') exceeds the maximum allowed for cost-sharing rides ($' . number_format($maxPricePerSeat, 2) . ' per seat). Please adjust your price.')
+                    ->with('heading', 'Price Limit Exceeded')
+                    ->with('max_price_per_seat', round($maxPricePerSeat, 2))
                     ->withInput();
             }
             
             // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-            if ($pricePerKm > 0.66) {
-                Log::info('Price exceeds soft warning cap but within error cap (UpdateRide)', [
+            if ($pricePerSeat > $softWarningPricePerSeat) {
+                Log::info('Price per seat exceeds soft warning cap but within error cap (UpdateRide)', [
                     'ride_id' => $ride->id,
-                    'price_per_km' => round($pricePerKm, 4),
+                    'price_per_seat' => $pricePerSeat,
+                    'soft_warning_price' => round($softWarningPricePerSeat, 2),
                     'warning_cap' => 0.66
                 ]);
                 
-                // Store warning in session - will be shown to user via modal/popup
-                session()->flash('price_warning', [
-                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
-                    'price_per_km' => round($pricePerKm, 2)
-                ]);
+                // Return back to form with warning - user will see modal and can choose to proceed or adjust
+                return back()->with('price_warning', [
+                    'message' => 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.',
+                    'price_per_seat' => $pricePerSeat,
+                    'soft_warning_price' => round($softWarningPricePerSeat, 2)
+                ])->withInput();
             }
         }
         
@@ -3322,42 +3339,60 @@ class RideController extends Controller
             'distance_meters' => $distance * 1000
         ]);
         
-        // Cost-sharing cap validation: Error-Triggering Cap $0.72/km
-        if ($distance > 0 && isset($request->price) && $request->price > 0) {
-            $pricePerKm = $request->price / $distance;
+        // Cost-sharing cap validation: Price per seat validation
+        // Formula: (Distance × Cap) ÷ Seats = Max price per seat
+        // Skip validation if user explicitly chose to bypass (after seeing warning)
+        $bypassValidation = $request->has('bypass_price_validation') && $request->bypass_price_validation == '1';
+        
+        $priceWarningData = null; // Initialize variable
+        if (!$bypassValidation && $distance > 0 && isset($request->price) && $request->price > 0 && isset($request->seats) && $request->seats > 0) {
+            $seats = (int)$request->seats;
+            $pricePerSeat = (float)$request->price;
             
-            Log::info('Price per kilometer calculation (PostRideStore)', [
-                'price' => $request->price,
+            // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
+            $maxPricePerSeat = ($distance * 0.72) / $seats;
+            
+            // Calculate soft warning price per seat: $0.66/km
+            $softWarningPricePerSeat = ($distance * 0.66) / $seats;
+            
+            Log::info('Price per seat calculation (PostRideStore)', [
+                'price_per_seat' => $pricePerSeat,
                 'distance_km' => $distance,
-                'price_per_km' => round($pricePerKm, 4),
+                'seats' => $seats,
+                'max_price_per_seat' => round($maxPricePerSeat, 2),
+                'soft_warning_price_per_seat' => round($softWarningPricePerSeat, 2),
                 'error_cap' => 0.72,
                 'warning_cap' => 0.66
             ]);
             
             // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-            if ($pricePerKm > 0.72) {
-                Log::warning('Price exceeds error-triggering cap (PostRideStore)', [
-                    'price_per_km' => round($pricePerKm, 4),
+            if ($pricePerSeat > $maxPricePerSeat) {
+                Log::warning('Price per seat exceeds error-triggering cap (PostRideStore)', [
+                    'price_per_seat' => $pricePerSeat,
+                    'max_allowed' => round($maxPricePerSeat, 2),
                     'cap' => 0.72
                 ]);
                 
-                return back()->with('error', 'The price per kilometer ($' . number_format($pricePerKm, 2) . '/km) exceeds the maximum allowed for cost-sharing rides ($0.72/km). Please adjust your price.')
-                    ->with('heading', 'Price Too High')
+                return back()->with('error', 'The price per seat ($' . number_format($pricePerSeat, 2) . ') exceeds the maximum allowed for cost-sharing rides ($' . number_format($maxPricePerSeat, 2) . ' per seat). Please adjust your price.')
+                    ->with('heading', 'Price Limit Exceeded')
+                    ->with('max_price_per_seat', round($maxPricePerSeat, 2))
                     ->withInput();
             }
             
             // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-            if ($pricePerKm > 0.66) {
-                Log::info('Price exceeds soft warning cap but within error cap (PostRideStore)', [
-                    'price_per_km' => round($pricePerKm, 4),
+            if ($pricePerSeat > $softWarningPricePerSeat) {
+                Log::info('Price per seat exceeds soft warning cap but within error cap (PostRideStore)', [
+                    'price_per_seat' => $pricePerSeat,
+                    'soft_warning_price' => round($softWarningPricePerSeat, 2),
                     'warning_cap' => 0.66
                 ]);
                 
-                // Store warning in session - will be shown to user via modal/popup
-                session()->flash('price_warning', [
-                    'message' => 'Your price per kilometer ($' . number_format($pricePerKm, 2) . '/km) is above the recommended cost-sharing rate ($0.66/km) but within the allowed maximum ($0.72/km).',
-                    'price_per_km' => round($pricePerKm, 2)
-                ]);
+                // Return back to form with warning - user will see modal and can choose to proceed or adjust
+                return back()->with('price_warning', [
+                    'message' => 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.',
+                    'price_per_seat' => $pricePerSeat,
+                    'soft_warning_price' => round($softWarningPricePerSeat, 2)
+                ])->withInput();
             }
         }
 
@@ -3962,8 +3997,21 @@ class RideController extends Controller
             }
         }
 
+        // Prepare redirect data
+        $redirectData = [
+            'message' => $message->ride_post_message,
+            'id' => $initialRide->id
+        ];
+        
+        // Include price_warning in redirect if it exists (soft warning cap)
+        if ($priceWarningData !== null) {
+            $redirectData['price_warning'] = $priceWarningData;
+        } elseif (session()->has('price_warning')) {
+            $redirectData['price_warning'] = session('price_warning');
+        }
+        
         // return redirect()->route('post_ride', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $message->ride_post_message, 'id' => $initialRide->id]);
-        return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $message->ride_post_message, 'id' => $initialRide->id])->withInput();
+        return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation])->with($redirectData)->withInput();
     }
 
 

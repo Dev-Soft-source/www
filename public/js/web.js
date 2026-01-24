@@ -18868,7 +18868,15 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
-    handleEnter: function handleEnter(event) {},
+    handleEnter: function handleEnter(event) {
+      // If Shift + Enter is pressed, allow default behavior (new line)
+      if (event.shiftKey) {
+        return;
+      }
+      // If only Enter is pressed, prevent default and send message
+      event.preventDefault();
+      this.sendMessage();
+    },
     sendMessage: function sendMessage() {
       if (this.newMessage.trim() === '') return;
       this.$emit('MessageSentEvent', {
@@ -18949,9 +18957,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     hasActualMessages: function hasActualMessages() {
       // Check if there are any actual chat messages (not just ride detail messages)
-      return this.messages.some(function (m) {
-        return !m.ride_detail && m.message;
-      });
+      // filteredMessages already excludes ride_detail messages, so if it has any items,
+      // that means there are actual chat messages and the disclaimer should be hidden
+      return this.filteredMessages.length > 0;
     }
   },
   methods: {
@@ -18974,7 +18982,7 @@ __webpack_require__.r(__webpack_exports__);
       if (message.user && message.user.id == this.logged_in_user_id) {
         // My message (blue)
         return {
-          background: '#2563eb',
+          background: '#3B82F6',
           color: '#fff',
           'border-radius': '16px',
           'padding': '10px 16px',
@@ -18987,8 +18995,8 @@ __webpack_require__.r(__webpack_exports__);
       }
       // Their message (gray)
       return {
-        background: '#f4f4f4',
-        color: '#222',
+        background: '#45CEEB',
+        color: '#fff',
         'border-radius': '16px',
         'padding': '10px 16px',
         'margin-bottom': '2px',
@@ -19097,7 +19105,7 @@ var _hoisted_3 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementV
     "margin-bottom": "4px",
     "font-size": "14px"
   }
-}, "Ride Details", -1 /* HOISTED */);
+}, "Ride Detail", -1 /* HOISTED */);
 var _hoisted_4 = {
   style: {
     "font-size": "13px"
@@ -47798,12 +47806,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _components_ChatMessages_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/ChatMessages.vue */ "./resources/js/components/ChatMessages.vue");
 /* harmony import */ var _components_ChatForm_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/ChatForm.vue */ "./resources/js/components/ChatForm.vue");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
@@ -47813,12 +47827,73 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
   data: function data() {
     return {
       messages: [],
-      chats: []
+      chats: [],
+      _messagesBackup: [] // Internal backup to prevent data loss
     };
+  },
+  watch: {
+    // Watch messages array to detect if it's being cleared unexpectedly
+    messages: {
+      handler: function handler(newMessages, oldMessages) {
+        // Update backup whenever messages change (for recovery)
+        if (newMessages && newMessages.length > 0) {
+          this._messagesBackup = newMessages.map(function (msg) {
+            return _objectSpread({}, msg);
+          });
+        }
+
+        // Only log warnings, don't auto-restore to avoid loops
+        if (oldMessages && oldMessages.length > 0 && newMessages.length === 0) {
+          console.error('CRITICAL ERROR: Messages array was cleared! Old count:', oldMessages.length);
+          console.error('Attempting to restore from backup...');
+          // Try to restore from backup if available
+          if (this._messagesBackup && this._messagesBackup.length > 0) {
+            console.error('Restoring', this._messagesBackup.length, 'messages from backup');
+            this.messages = this._messagesBackup.map(function (msg) {
+              return _objectSpread({}, msg);
+            });
+          }
+        } else if (oldMessages && newMessages.length < oldMessages.length && newMessages.length > 0) {
+          // Check if we lost messages (but not all of them)
+          var lostCount = oldMessages.length - newMessages.length;
+          if (lostCount > 1) {
+            // More than 1 message lost (1 is OK if it was a temp message being replaced)
+            console.warn('WARNING: Lost', lostCount, 'messages. Old:', oldMessages.length, 'New:', newMessages.length);
+            // Try to restore missing messages from backup
+            if (this._messagesBackup && this._messagesBackup.length > newMessages.length) {
+              var missingIds = new Set(newMessages.map(function (m) {
+                return String(m.id);
+              }));
+              var missingMessages = this._messagesBackup.filter(function (m) {
+                return !missingIds.has(String(m.id));
+              });
+              if (missingMessages.length > 0) {
+                console.warn('Restoring', missingMessages.length, 'missing messages from backup');
+                var restored = [].concat(_toConsumableArray(newMessages), _toConsumableArray(missingMessages));
+                restored.sort(function (a, b) {
+                  var aTime = new Date(a.created_at || 0);
+                  var bTime = new Date(b.created_at || 0);
+                  return aTime - bTime;
+                });
+                this.messages = restored;
+              }
+            }
+          }
+        }
+      },
+      deep: false // Don't watch deep to avoid performance issues
+    }
   },
   created: function created() {
     var _this = this;
-    this.fetchMessages();
+    // Fetch messages on initial load only
+    // Store initial state to prevent accidental clearing
+    var initialMessageCount = this.messages.length;
+    if (initialMessageCount === 0) {
+      this.fetchMessages();
+    } else {
+      console.log('Skipping initial fetch - messages already exist:', initialMessageCount);
+    }
     var authId = window.authUserId || window.logged_in_user_id || window.Laravel && window.Laravel.userId;
     var handleMessage = function handleMessage(e) {
       console.log('Pusher message received:', e);
@@ -47836,7 +47911,8 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
         messageReceiver: messageReceiver,
         currentPassenger: currentPassenger,
         currentUserId: currentUserId,
-        currentRideId: currentRideId
+        currentRideId: currentRideId,
+        isOnChatDetailPage: window.isOnChatDetailPage
       });
 
       // Check if message is for current conversation
@@ -47844,17 +47920,21 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
       var rideMatches = rideId && currentRideId && parseInt(rideId) === currentRideId;
       var involvesCurrentUser = messageSender === currentUserId || messageReceiver === currentUserId;
 
-      // If we have a passenger ID, also check that the message involves that user
-      var shouldProcess = rideMatches && involvesCurrentUser;
-      if (currentPassenger && window.isOnChatDetailPage) {
-        // On chat detail page, only show messages involving the current passenger
-        var _involvesPassenger = messageSender === currentPassenger || messageReceiver === currentPassenger;
-        shouldProcess = shouldProcess && _involvesPassenger;
+      // Determine if we should process this message
+      var shouldProcess = false;
+      if (window.isOnChatDetailPage && currentPassenger && currentRideId) {
+        // On chat detail page: message must match ride, involve current user, AND involve the passenger we're chatting with
+        var involvesPassenger = messageSender === currentPassenger || messageReceiver === currentPassenger;
+        shouldProcess = rideMatches && involvesCurrentUser && involvesPassenger;
+      } else if (rideMatches && involvesCurrentUser) {
+        // Not on chat detail page, or no passenger specified: just check ride and user involvement
+        shouldProcess = true;
       }
       console.log('Should process message:', shouldProcess, {
         rideMatches: rideMatches,
         involvesCurrentUser: involvesCurrentUser,
-        involvesPassenger: involvesPassenger
+        involvesPassenger: currentPassenger ? messageSender === currentPassenger || messageReceiver === currentPassenger : 'N/A',
+        isOnChatDetailPage: window.isOnChatDetailPage
       });
       if (shouldProcess) {
         var _e$message;
@@ -47876,18 +47956,130 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
           created_at: e.message && e.message.created_at || e.created_at || new Date().toISOString()
         };
         if (window.isOnChatDetailPage) {
-          // Immediately add message to messages array for instant display
-          if (!_this.messages.some(function (m) {
+          // CRITICAL: Store a deep copy of ALL current messages to ensure we never lose them
+          var messageCountBefore = _this.messages.length;
+          var currentMessagesCopy = _this.messages.map(function (msg) {
+            return _objectSpread({}, msg);
+          });
+          console.log('Pusher message received. Current messages:', messageCountBefore);
+
+          // Check if message already exists (by ID)
+          var existingIndex = currentMessagesCopy.findIndex(function (m) {
             return m.id === newMessage.id;
-          })) {
-            _this.messages.push(newMessage);
-            // Scroll to bottom after adding message
-            _this.$nextTick(function () {
-              var chatContainer = document.querySelector('.panel-body');
-              if (chatContainer) {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-              }
+          });
+          var finalMessages = [];
+          if (existingIndex === -1) {
+            // Message doesn't exist, check if it's a duplicate of an optimistic message
+            // Look for messages with same content and similar timestamp (within 5 seconds)
+            var duplicateIndex = currentMessagesCopy.findIndex(function (m) {
+              if (!m.message || !newMessage.message) return false;
+              var sameContent = m.message.trim() === newMessage.message.trim();
+              if (!sameContent) return false;
+
+              // Check if timestamps are close (within 5 seconds) - likely same message
+              var mTime = new Date(m.created_at || 0).getTime();
+              var newTime = new Date(newMessage.created_at || 0).getTime();
+              var timeDiff = Math.abs(mTime - newTime);
+              return timeDiff < 5000; // 5 seconds
             });
+            if (duplicateIndex !== -1) {
+              // Replace optimistic message with real one from Pusher
+              // Create new array with ALL messages, replacing only the duplicate
+              finalMessages = currentMessagesCopy.map(function (msg, idx) {
+                return idx === duplicateIndex ? _objectSpread({}, newMessage) : _objectSpread({}, msg);
+              });
+              console.log('Replacing optimistic message with Pusher message');
+            } else {
+              // New message, add it to ALL existing messages
+              finalMessages = [].concat(_toConsumableArray(currentMessagesCopy), [_objectSpread({}, newMessage)]);
+              console.log('Adding new Pusher message');
+            }
+          } else {
+            // Message already exists, update it with Pusher data (more complete)
+            // Create new array with ALL messages, updating only the existing one
+            finalMessages = currentMessagesCopy.map(function (msg, idx) {
+              return idx === existingIndex ? _objectSpread({}, newMessage) : _objectSpread({}, msg);
+            });
+            console.log('Updating existing message with Pusher data');
+          }
+
+          // Sort without mutating (create new sorted array)
+          finalMessages.sort(function (a, b) {
+            var aTime = new Date(a.created_at || 0);
+            var bTime = new Date(b.created_at || 0);
+            return aTime - bTime;
+          });
+
+          // CRITICAL: Verify we have at least as many messages as before (or one more for new message)
+          var expectedCount = existingIndex === -1 ? messageCountBefore + 1 : messageCountBefore;
+
+          // CRITICAL CHECK: Ensure we didn't lose any messages
+          if (finalMessages.length < messageCountBefore) {
+            console.error('CRITICAL ERROR: Message count decreased! Before:', messageCountBefore, 'After:', finalMessages.length);
+            console.error('Restoring ALL messages from backup to prevent data loss');
+            // Restore from backup - don't lose any messages
+            finalMessages = currentMessagesCopy.map(function (msg) {
+              return _objectSpread({}, msg);
+            });
+            // Still try to add the new message if it wasn't a duplicate
+            if (existingIndex === -1) {
+              var duplicateCheck = finalMessages.findIndex(function (m) {
+                if (!m.message || !newMessage.message) return false;
+                return m.message.trim() === newMessage.message.trim() && Math.abs(new Date(m.created_at || 0).getTime() - new Date(newMessage.created_at || 0).getTime()) < 5000;
+              });
+              if (duplicateCheck === -1) {
+                finalMessages.push(_objectSpread({}, newMessage));
+                finalMessages.sort(function (a, b) {
+                  var aTime = new Date(a.created_at || 0);
+                  var bTime = new Date(b.created_at || 0);
+                  return aTime - bTime;
+                });
+              }
+            }
+          }
+
+          // CRITICAL: Final verification before updating
+          if (finalMessages.length < messageCountBefore) {
+            console.error('FATAL: Still losing messages after recovery. Keeping original array.');
+            // Don't update at all if we're still losing messages
+            return;
+          }
+
+          // CRITICAL: Final check before updating - ensure we have at least the expected count
+          var safeToUpdate = finalMessages.length >= messageCountBefore || existingIndex === -1 && finalMessages.length >= messageCountBefore - 1;
+          if (safeToUpdate) {
+            // Update messages array with ALL messages preserved
+            _this.messages = finalMessages;
+            // Update backup
+            _this._messagesBackup = finalMessages.map(function (msg) {
+              return _objectSpread({}, msg);
+            });
+            console.log('Pusher message processed. Total messages:', _this.messages.length, 'Expected:', expectedCount);
+
+            // Scroll to bottom after adding message
+            _this.scrollToBottom();
+          } else {
+            console.error('FATAL: Cannot safely update messages. Keeping original array.');
+            console.error('Final messages count:', finalMessages.length, 'Expected at least:', messageCountBefore);
+            // Don't update - keep original messages to prevent data loss
+            // But still try to add the new message if it's truly new
+            if (existingIndex === -1 && !currentMessagesCopy.some(function (m) {
+              if (!m.message || !newMessage.message) return false;
+              return m.message.trim() === newMessage.message.trim();
+            })) {
+              var safeAdd = [].concat(_toConsumableArray(currentMessagesCopy), [_objectSpread({}, newMessage)]);
+              safeAdd.sort(function (a, b) {
+                var aTime = new Date(a.created_at || 0);
+                var bTime = new Date(b.created_at || 0);
+                return aTime - bTime;
+              });
+              _this.messages = safeAdd;
+              _this._messagesBackup = safeAdd.map(function (msg) {
+                return _objectSpread({}, msg);
+              });
+              console.log('Safely added new message. Total:', _this.messages.length);
+              _this.scrollToBottom();
+            }
           }
           // Also update chats preview
           if (!_this.chats.some(function (m) {
@@ -47895,10 +48087,9 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
           })) {
             _this.chats.push(newMessage);
           }
-          // Optionally fetch to ensure consistency (but message already displayed)
-          setTimeout(function () {
-            _this.fetchMessages();
-          }, 500);
+          // DON'T fetch automatically - the message is already displayed via Pusher
+          // Only fetch manually or on page load, not after receiving Pusher messages
+          // This prevents messages from disappearing
         } else {
           // Inbox view: update only chats preview/list (do not touch messages)
           // Optionally update or highlight chat preview for this ride/user
@@ -47960,35 +48151,356 @@ var app = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createApp)({
     }
   },
   methods: {
-    fetchMessages: function fetchMessages() {
+    scrollToBottom: function scrollToBottom() {
       var _this2 = this;
+      // Use double nextTick to ensure DOM is fully updated
+      this.$nextTick(function () {
+        _this2.$nextTick(function () {
+          var chatContainer = document.querySelector('.panel-body');
+          if (chatContainer) {
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }
+        });
+      });
+    },
+    fetchMessages: function fetchMessages() {
+      var _this3 = this;
+      var shouldScrollToBottom = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var preserveMessageId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       var rideId = window.ride;
       var userId = window.passenger;
+      if (!rideId || !userId) {
+        console.warn('Cannot fetch messages: missing rideId or userId');
+        return;
+      }
+
+      // CRITICAL: Store deep copy of ALL current messages to prevent disappearing during fetch
+      // This ensures we NEVER lose messages, even if server response is delayed or empty
+      var currentMessages = this.messages.map(function (msg) {
+        return _objectSpread({}, msg);
+      });
+      var currentMessageCount = currentMessages.length;
+      console.log('fetchMessages called. Current messages count:', currentMessageCount);
+
+      // If we need to preserve a specific message (from Pusher), find it and store it
+      var messageToPreserve = null;
+      if (preserveMessageId) {
+        messageToPreserve = currentMessages.find(function (m) {
+          // Compare both as strings and numbers to handle different ID types
+          return String(m.id) === String(preserveMessageId) || Number(m.id) === Number(preserveMessageId) || m.id === preserveMessageId;
+        });
+        console.log('Preserving message:', preserveMessageId, messageToPreserve ? 'FOUND' : 'NOT FOUND');
+      }
       axios__WEBPACK_IMPORTED_MODULE_1___default().get("/chat-messages/".concat(rideId, "/").concat(userId)).then(function (response) {
+        var _response$data;
+        console.log('Server response received. Messages count:', ((_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.length) || 0, 'Current messages:', currentMessages.length);
         if (Array.isArray(response.data) && response.data.length > 0) {
-          _this2.messages = response.data;
+          // Merge new messages with existing ones to prevent disappearing
+          // Use a Map to deduplicate by id
+          var messageMap = new Map();
+
+          // CRITICAL: First, add all current messages to the map (preserve what's already there)
+          // This ensures Pusher messages are kept even if server hasn't saved them yet
+          currentMessages.forEach(function (msg) {
+            if (msg && msg.id) {
+              var key = String(msg.id);
+              // Create a deep copy to avoid reference issues
+              messageMap.set(key, _objectSpread({}, msg));
+            }
+          });
+          console.log('After adding current messages to map:', messageMap.size, '(expected:', currentMessages.length, ')');
+
+          // Then, add/update with server messages (server data takes precedence for existing messages)
+          response.data.forEach(function (msg) {
+            if (msg && msg.id) {
+              var key = String(msg.id);
+              // Server data takes precedence (updates existing, adds new)
+              // Create deep copy
+              messageMap.set(key, _objectSpread({}, msg));
+            }
+          });
+          console.log('After adding server messages to map:', messageMap.size);
+
+          // CRITICAL: If we have a message to preserve that's not in the server response, add it
+          // This handles the race condition where Pusher message arrives before server saves it
+          if (messageToPreserve && messageToPreserve.id) {
+            var preserveKey = String(messageToPreserve.id);
+            if (!messageMap.has(preserveKey)) {
+              console.log('Adding preserved message that was not in server response:', preserveKey);
+              messageMap.set(preserveKey, _objectSpread({}, messageToPreserve));
+            } else {
+              console.log('Preserved message found in server response:', preserveKey);
+            }
+          }
+
+          // Convert map back to array and sort by created_at (create new array, don't mutate)
+          var mergedMessages = Array.from(messageMap.values());
+          mergedMessages.sort(function (a, b) {
+            var _a$message, _b$message;
+            var aTime = new Date(a.created_at || ((_a$message = a.message) === null || _a$message === void 0 ? void 0 : _a$message.created_at) || 0);
+            var bTime = new Date(b.created_at || ((_b$message = b.message) === null || _b$message === void 0 ? void 0 : _b$message.created_at) || 0);
+            return aTime - bTime;
+          });
+          console.log('Final merged messages count:', mergedMessages.length, 'Current was:', currentMessageCount);
+
+          // CRITICAL: Verify we didn't lose messages - NEVER allow fewer messages than we started with
+          // ALWAYS preserve current messages if merge would result in fewer
+          if (mergedMessages.length < currentMessageCount && currentMessageCount > 0) {
+            console.error('ERROR: Merged messages count is less than current! Keeping ALL current messages.');
+            console.error('Merged:', mergedMessages.length, 'Current:', currentMessageCount);
+            // Keep ALL current messages - don't lose any
+            // Only merge in new messages from server that we don't already have
+            var existingIds = new Set(currentMessages.map(function (m) {
+              return String(m.id);
+            }));
+            response.data.forEach(function (msg) {
+              if (msg && msg.id && !existingIds.has(String(msg.id))) {
+                currentMessages.push(_objectSpread({}, msg));
+              }
+            });
+            // Sort and update
+            currentMessages.sort(function (a, b) {
+              var _a$message2, _b$message2;
+              var aTime = new Date(a.created_at || ((_a$message2 = a.message) === null || _a$message2 === void 0 ? void 0 : _a$message2.created_at) || 0);
+              var bTime = new Date(b.created_at || ((_b$message2 = b.message) === null || _b$message2 === void 0 ? void 0 : _b$message2.created_at) || 0);
+              return aTime - bTime;
+            });
+            _this3.messages = currentMessages;
+            // Update backup
+            _this3._messagesBackup = currentMessages.map(function (msg) {
+              return _objectSpread({}, msg);
+            });
+            console.log('Preserved all current messages and added new ones. Total:', _this3.messages.length);
+          } else {
+            // Update messages array with merged data (should have same or more messages)
+            _this3.messages = mergedMessages;
+            // Update backup
+            _this3._messagesBackup = mergedMessages.map(function (msg) {
+              return _objectSpread({}, msg);
+            });
+            console.log('Messages updated successfully. Count:', _this3.messages.length);
+          }
+
+          // Always scroll to bottom if explicitly requested (when sending/receiving messages)
+          if (shouldScrollToBottom) {
+            _this3.scrollToBottom();
+          }
+        } else if (response.data && Array.isArray(response.data) && response.data.length === 0) {
+          // Empty array from server - keep current messages if we have any
+          console.log('Server returned empty array. Keeping current messages:', currentMessages.length);
+          // Always keep current messages, don't clear them
+          if (currentMessages.length > 0) {
+            // If we have a preserved message, make sure it's included
+            if (messageToPreserve && !currentMessages.some(function (m) {
+              return String(m.id) === String(messageToPreserve.id);
+            })) {
+              var updatedMessages = [].concat(_toConsumableArray(currentMessages), [_objectSpread({}, messageToPreserve)]);
+              updatedMessages.sort(function (a, b) {
+                var aTime = new Date(a.created_at || 0);
+                var bTime = new Date(b.created_at || 0);
+                return aTime - bTime;
+              });
+              _this3.messages = updatedMessages;
+            } else {
+              _this3.messages = currentMessages;
+              // Update backup
+              _this3._messagesBackup = currentMessages.map(function (msg) {
+                return _objectSpread({}, msg);
+              });
+            }
+          } else {
+            // Only clear if we truly have no messages AND this is the initial fetch
+            // Never clear if we had messages before (they might just not be in server response yet)
+            if (currentMessageCount === 0) {
+              // Safe to clear - we had no messages to begin with
+              _this3.messages = [];
+              _this3._messagesBackup = [];
+            } else {
+              // Keep current messages - server might not have them yet
+              console.warn('Server returned empty array but we have', currentMessageCount, 'messages. Keeping them.');
+              _this3.messages = currentMessages;
+              _this3._messagesBackup = currentMessages.map(function (msg) {
+                return _objectSpread({}, msg);
+              });
+            }
+          }
         } else {
-          // Do NOT clear messages on empty response, to prevent accidental UI wipeout
-          console.warn('Received empty or invalid chat thread from server; retaining previous messages.');
+          // Do NOT clear messages on invalid response, to prevent accidental UI wipeout
+          console.warn('Received invalid chat thread from server; retaining previous messages.');
+          // Keep current messages
+          _this3.messages = currentMessages;
+          // Update backup
+          _this3._messagesBackup = currentMessages.map(function (msg) {
+            return _objectSpread({}, msg);
+          });
         }
+      })["catch"](function (error) {
+        // On error, keep current messages to prevent disappearing
+        console.error('Error fetching messages:', error);
+        // Always keep current messages on error
+        _this3.messages = currentMessages;
+        // Update backup
+        _this3._messagesBackup = currentMessages.map(function (msg) {
+          return _objectSpread({}, msg);
+        });
       });
       axios__WEBPACK_IMPORTED_MODULE_1___default().get("/chat-details/".concat(userId)).then(function (response) {
-        _this2.chats = response.data;
+        _this3.chats = response.data;
+      })["catch"](function (error) {
+        console.error('Error fetching chat details:', error);
       });
     },
     addMessage: function addMessage(message) {
-      var _this3 = this;
-      if (!this.messages.some(function (m) {
-        return m.id === message.id && m.created_at === message.created_at;
+      var _this4 = this;
+      // CRITICAL: Store deep copy of ALL current messages to ensure we never lose them
+      var allCurrentMessages = this.messages.map(function (msg) {
+        return _objectSpread({}, msg);
+      });
+      var messageCountBefore = allCurrentMessages.length;
+      console.log('addMessage called. Current messages:', messageCountBefore);
+
+      // Generate a temporary ID for optimistic message if it doesn't have one
+      if (!message.id) {
+        message.id = 'temp_' + Date.now() + '_' + Math.random();
+      }
+      if (!message.created_at) {
+        message.created_at = new Date().toISOString();
+      }
+
+      // Optimistically add message to the array for instant display
+      // Use Vue's reactivity-safe method to add message
+      if (!allCurrentMessages.some(function (m) {
+        return m.id === message.id;
       })) {
-        this.messages.push(message);
+        // Create a new array with ALL existing messages plus the new one
+        var newMessages = [].concat(_toConsumableArray(allCurrentMessages), [_objectSpread({}, message)]);
+        // Sort without mutating
+        newMessages.sort(function (a, b) {
+          var aTime = new Date(a.created_at || 0);
+          var bTime = new Date(b.created_at || 0);
+          return aTime - bTime;
+        });
+        // Assign the new sorted array (preserves ALL old messages)
+        this.messages = newMessages;
+        // Update backup
+        this._messagesBackup = newMessages.map(function (msg) {
+          return _objectSpread({}, msg);
+        });
+        // Scroll to bottom after adding message
+        this.scrollToBottom();
+        console.log('Optimistic message added. Messages before:', messageCountBefore, 'after:', this.messages.length);
+
+        // CRITICAL: Verify we didn't lose any messages
+        if (this.messages.length < messageCountBefore) {
+          console.error('CRITICAL ERROR: Lost messages when adding! Before:', messageCountBefore, 'After:', this.messages.length);
+          console.error('Restoring ALL messages from backup');
+          // Restore ALL messages from backup
+          this.messages = allCurrentMessages.map(function (msg) {
+            return _objectSpread({}, msg);
+          });
+          // Try to add the new message again, but more carefully
+          if (!this.messages.some(function (m) {
+            return m.id === message.id;
+          })) {
+            var safeNewMessages = [].concat(_toConsumableArray(this.messages), [_objectSpread({}, message)]);
+            safeNewMessages.sort(function (a, b) {
+              var aTime = new Date(a.created_at || 0);
+              var bTime = new Date(b.created_at || 0);
+              return aTime - bTime;
+            });
+            if (safeNewMessages.length >= messageCountBefore) {
+              this.messages = safeNewMessages;
+              console.log('Recovered and added message. Total:', this.messages.length);
+            }
+          }
+        }
       }
       var userId = window.passenger;
+      var tempMessageId = message.id; // Store temp ID to track the optimistic message
+
       axios__WEBPACK_IMPORTED_MODULE_1___default().post('/chat-messages', _objectSpread(_objectSpread({}, message), {}, {
         userId: userId
       })).then(function (response) {
-        // After sending, always refetch full message list
-        _this3.fetchMessages();
+        // CRITICAL: Store current messages before updating
+        var messagesBeforeUpdate = _this4.messages.map(function (msg) {
+          return _objectSpread({}, msg);
+        });
+
+        // Update the optimistic message with server response if available
+        if (response.data && response.data.id) {
+          var index = messagesBeforeUpdate.findIndex(function (m) {
+            return m.id === tempMessageId;
+          });
+          if (index !== -1) {
+            // Create a new array with ALL messages, updating only the one at index
+            var updatedMessages = messagesBeforeUpdate.map(function (msg, idx) {
+              if (idx === index) {
+                // Update this message with server data
+                return _objectSpread(_objectSpread(_objectSpread({}, msg), response.data), {}, {
+                  // Ensure we keep the message content
+                  message: msg.message || response.data.message
+                });
+              }
+              return msg; // Keep all other messages unchanged
+            });
+            // Re-sort after update
+            updatedMessages.sort(function (a, b) {
+              var aTime = new Date(a.created_at || 0);
+              var bTime = new Date(b.created_at || 0);
+              return aTime - bTime;
+            });
+            // Update messages array (preserves ALL other messages)
+            _this4.messages = updatedMessages;
+            _this4.scrollToBottom();
+            console.log('Optimistic message updated with server response. New ID:', response.data.id, 'Total messages:', _this4.messages.length, 'Expected:', messagesBeforeUpdate.length);
+
+            // CRITICAL: Verify we didn't lose any messages
+            if (_this4.messages.length < messagesBeforeUpdate.length) {
+              console.error('CRITICAL ERROR: Lost messages when updating! Before:', messagesBeforeUpdate.length, 'After:', _this4.messages.length);
+              console.error('Restoring ALL messages from backup');
+              // Restore ALL messages from backup
+              _this4.messages = messagesBeforeUpdate.map(function (msg) {
+                return _objectSpread({}, msg);
+              });
+              // Try to update again more carefully
+              var _index = _this4.messages.findIndex(function (m) {
+                return m.id === tempMessageId;
+              });
+              if (_index !== -1) {
+                var safeUpdated = _this4.messages.map(function (msg, idx) {
+                  if (idx === _index) {
+                    return _objectSpread(_objectSpread(_objectSpread({}, msg), response.data), {}, {
+                      message: msg.message || response.data.message
+                    });
+                  }
+                  return _objectSpread({}, msg);
+                });
+                safeUpdated.sort(function (a, b) {
+                  var aTime = new Date(a.created_at || 0);
+                  var bTime = new Date(b.created_at || 0);
+                  return aTime - bTime;
+                });
+                if (safeUpdated.length >= messagesBeforeUpdate.length) {
+                  _this4.messages = safeUpdated;
+                  console.log('Recovered and updated message. Total:', _this4.messages.length);
+                }
+              }
+            }
+          }
+        }
+        // Don't refetch - let Pusher handle the real-time update
+        // Pusher will update/replace the message when it arrives
+      })["catch"](function (error) {
+        console.error('Error sending message:', error);
+        // Remove optimistic message on error, but preserve ALL other messages
+        var messagesBeforeError = _this4.messages.map(function (msg) {
+          return _objectSpread({}, msg);
+        });
+        _this4.messages = messagesBeforeError.filter(function (m) {
+          return m.id !== tempMessageId;
+        });
+        console.log('Removed optimistic message on error. Remaining messages:', _this4.messages.length, 'Expected:', messagesBeforeError.length - 1);
       });
     }
   }

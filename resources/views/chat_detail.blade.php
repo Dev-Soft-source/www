@@ -35,29 +35,29 @@
         }
 
         ::-webkit-scrollbar-track {
-            -webkit-box-shadow: #3b82f6;
-            background-color: #0369A1;
+            -webkit-box-shadow: #45CEEB;
+            background-color: #E0F6FF;
         }
 
         ::-webkit-scrollbar {
             width: 10px;
-            background-color: #0369A1;
+            background-color: #E0F6FF;
         }
 
         ::-webkit-scrollbar-thumb {
-            -webkit-box-shadow: #3b82f6;
-            background-color: #555;
+            -webkit-box-shadow: #45CEEB;
+            background-color: #45CEEB;
         }
     </style>
 
     <!-- Scripts -->
     <script>
         window.authUserId = {{ Auth::id() ?? 'null' }};
-        window.ride = @json($ride->id); // Pass $ride to JavaScript
-        window.passenger = @json($passenger->id); // Pass $ride to JavaScript
+        window.ride = @json($ride->id ?? null); // Pass $ride to JavaScript
+        window.passenger = @json($passenger->id ?? null); // Pass $ride to JavaScript
         window.rideDetails = {!! json_encode([
-            'departure' => $ride->rideDetail[0]->departure ?? '',
-            'destination' => $ride->rideDetail[0]->destination ?? '',
+            'departure' => ($ride && $ride->rideDetail && isset($ride->rideDetail[0])) ? $ride->rideDetail[0]->departure : '',
+            'destination' => ($ride && $ride->rideDetail && isset($ride->rideDetail[0])) ? $ride->rideDetail[0]->destination : '',
             'date' => $ride->date ?? '',
             'time' => $ride->time ?? ''
         ]) !!};
@@ -81,7 +81,7 @@
                                 <div
                                     class="flex items-center justify-between w-full border-b px-4 py-2 bg-primary text-white">
                                     <h1 class="mb-0 text-white" id="modal-title">
-                                        {{ $chatsPage->driver_chat_with ?? 'Chat with' }} {{ $passenger->first_name }}
+                                        {{ $chatsPage->driver_chat_with ?? 'Chat with' }} {{ $passenger->first_name ?? 'User' }}
                                     </h1>
                                     <a href="{{ route('my_chats', ['lang' => app()->getLocale()]) }}"
                                         class="h-fit block text-gray-100 bg-transparent rounded-full border border-gray-100 text-sm p-1 ml-auto">
@@ -98,8 +98,12 @@
                                     @php
                                         $allow_chat = false;
                                         $currentDateTime = now();
-                                        $rideDateTime = \Carbon\Carbon::parse($ride->date . ' ' . $ride->time);
-                                        $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                                        if ($ride && $ride->date && $ride->time) {
+                                            $rideDateTime = \Carbon\Carbon::parse($ride->date . ' ' . $ride->time);
+                                            $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                                        } else {
+                                            $hoursDifference = 0;
+                                        }
                                         $allow_chat = false;
                                         if (auth()->user()) {
                                             $user_id = auth()->user()->id;
@@ -117,7 +121,7 @@
                                             ) {
                                                 $allow_chat = true;
                                             } elseif (
-                                                in_array($passenger->id, explode(',', $contact_count->contact_user_id))
+                                                $passenger && $contact_count && in_array($passenger->id, explode(',', $contact_count->contact_user_id))
                                             ) {
                                                 $allow_chat = true;
                                             }
@@ -153,25 +157,29 @@
                                             @php
                                                 $currentDateTime = now();
                                                 // Combine ride date and time into a single DateTime object
-                                                $rideDateTime = \Carbon\Carbon::parse($ride->date . ' ' . $ride->time);
-                                                // Calculate the difference in hours between the current time and the ride time
-                                                $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                                                if ($ride && $ride->date && $ride->time) {
+                                                    $rideDateTime = \Carbon\Carbon::parse($ride->date . ' ' . $ride->time);
+                                                    // Calculate the difference in hours between the current time and the ride time
+                                                    $hoursDifference = $currentDateTime->diffInHours($rideDateTime);
+                                                } else {
+                                                    $hoursDifference = 0;
+                                                }
                                             @endphp
-                                            @if (strtotime($ride->date) < strtotime('today') ||
-                                                    (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
+                                            @if ($ride && $ride->date && $ride->time && (strtotime($ride->date) < strtotime('today') ||
+                                                    (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now'))))
                                                 @if ($hoursDifference <= 48)
                                                     <div class="panel-footer">
                                                         <chat-form allow_chat="{{ $allow_chat }}"
                                                             v-on:message-sent-event="addMessage"
-                                                            :ride_id="{{ $ride->id }}" :user="{{ auth()->user() }}"
+                                                            :ride_id="{{ $ride->id ?? 0 }}" :user="{{ auth()->user() }}"
                                                             type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
                                                     </div>
                                         </div>
                                         @endif
-                                    @else
+                                    @elseif ($ride)
                                         <div class="panel-footer">
                                             <chat-form allow_chat="{{ $allow_chat }}"
-                                                v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id }}"
+                                                v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id ?? 0 }}"
                                                 :user="{{ auth()->user() }}"
                                                 type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
                                         </div>

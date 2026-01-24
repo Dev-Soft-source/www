@@ -945,6 +945,24 @@ class BookingController extends Controller
             }
         }
 
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        // This limit does NOT apply to "Online" or "Secured-Cash" payment methods
+        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        if ($postRidePage) {
+            // Check if user is a student (student == 1 for verified, student == 2 for pending)
+            $isStudent = ($user->student == '1' || $user->student == '2');
+            
+            // Check if payment method is Cash (payment_methods_option1 is Cash)
+            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
+            
+            // Apply limit only for students on Cash rides
+            if ($isStudent && $isCashPayment) {
+                if ($request->seats > 2) {
+                    return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
+                }
+            }
+        }
+
         $rules = [
             'agree_terms' => 'accepted|required',
             'seats' => 'required|integer|min:1',
@@ -964,6 +982,12 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
+        // Student booking fee waiver: If user is a student with charge_booking = '2', 
+        // booking fee should be 0 (waived). Override any frontend value for security.
+        if ($user->charge_booking == '2') {
+            // Student with valid card - booking fee is waived
+            $request->merge(['booking_credit' => '0']);
+        }
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
         $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -1662,6 +1686,14 @@ class BookingController extends Controller
             $ride = Ride::where('id', $id)->first();
             $user = User::where('id', auth()->user()->id)->first();
 
+            // Student booking fee waiver: If user is a student with charge_booking = '2', 
+            // booking fee should be 0 (waived). Override any frontend value for security.
+            if ($user->charge_booking == '2') {
+                $booking_credit = '0';
+            } else {
+                $booking_credit = $booking_credit;
+            }
+
             // Calculate expiry time based on ride date and time
             $currentTime = now();
             $Time = now();
@@ -1881,6 +1913,12 @@ class BookingController extends Controller
             $booking = Booking::where('id', $id)->first();
             $ride = Ride::where('id', $booking->ride_id)->first();
             $user = User::where('id', auth()->user()->id)->first();
+
+            // Student booking fee waiver: If user is a student with charge_booking = '2', 
+            // booking fee should be 0 (waived). Override any frontend value for security.
+            if ($user->charge_booking == '2') {
+                $booking_credit = '0';
+            }
 
             // Calculate expiry time based on ride date and time
             $currentTime = now();

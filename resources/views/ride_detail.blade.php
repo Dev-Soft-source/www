@@ -23,18 +23,18 @@
         }
 
         ::-webkit-scrollbar-track {
-            -webkit-box-shadow: #3b82f6;
-            background-color: #0369A1;
+            -webkit-box-shadow: #87CEEB;
+            background-color: #E0F6FF;
         }
 
         ::-webkit-scrollbar {
             width: 10px;
-            background-color: #0369A1;
+            background-color: #E0F6FF;
         }
 
         ::-webkit-scrollbar-thumb {
-            -webkit-box-shadow: #3b82f6;
-            background-color: #555;
+            -webkit-box-shadow: #87CEEB;
+            background-color: #87CEEB;
         }
     </style>
 

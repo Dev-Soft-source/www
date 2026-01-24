@@ -207,8 +207,16 @@ class MyChatsController extends Controller
     
         $currentUserId = auth()->id();
 
-        $messages = Message::where('receiver', $request->receiver['id'])
-            ->where('sender', $request->sender['id'])
+        // Check if receiver and sender exist and have id
+        $receiverId = isset($request->receiver['id']) ? $request->receiver['id'] : null;
+        $senderId = isset($request->sender['id']) ? $request->sender['id'] : null;
+        
+        if (!$receiverId || !$senderId) {
+            return redirect()->back()->with('error', 'Invalid chat data.');
+        }
+
+        $messages = Message::where('receiver', $receiverId)
+            ->where('sender', $senderId)
             ->where('status','new')
             ->get();
         

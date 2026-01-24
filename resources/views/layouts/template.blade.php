@@ -739,6 +739,25 @@
                     const isInboxPage = window.location.pathname.includes('/my-chats') ||
                                         document.querySelector('[data-page="my-chats"]') !== null;
 
+                    // Check if we're on a chat detail page (actively viewing the conversation)
+                    const isOnChatPage = window.location.pathname.includes('/chat') ||
+                                        window.isOnChatDetailPage ||
+                                        document.querySelector('#ridesharing_app') !== null;
+
+                    // Get message details to check if it's for the current conversation
+                    const messageReceiver = parseInt((data.message && data.message.receiver) || data.receiver_id || (data.message && data.message.receiver));
+                    const messageSender = parseInt((data.message && data.message.sender) || data.user_id || (data.user && data.user.id));
+                    const currentUserId = {{ auth()->id() }};
+                    const currentRideId = parseInt(window.ride || 0);
+                    const messageRideId = parseInt((data.ride && data.ride.id) || (data.ride_id) || (data.message && data.message.ride_id) || 0);
+                    const currentPassenger = parseInt(window.passenger || 0);
+
+                    // Determine if this message is for the currently viewed chat
+                    const isCurrentChat = isOnChatPage && 
+                                         messageRideId === currentRideId && 
+                                         (messageReceiver === currentUserId || messageSender === currentUserId) &&
+                                         (currentPassenger === 0 || messageSender === currentPassenger || messageReceiver === currentPassenger);
+
                     if (isInboxPage) {
                         // Refresh the inbox page to show new messages
                         // Use a small delay to avoid too frequent refreshes
@@ -750,12 +769,66 @@
                         }
                     }
 
-                    // Update notification count in bell icon
-                    const countElement = document.querySelector('.absolute.-top-3.-right-2');
-                    if (countElement) {
-                        const currentCount = parseInt(countElement.textContent) || 0;
-                        countElement.textContent = currentCount + 1;
-                        countElement.style.display = 'flex';
+                    // Only update notification count if:
+                    // 1. User is NOT currently viewing this specific chat conversation
+                    // 2. The message is for the current user (they are the receiver)
+                    const shouldUpdateNotification = !isCurrentChat && messageReceiver === currentUserId;
+
+                    if (shouldUpdateNotification) {
+                        // Update notification count in bell icon using more specific selector
+                        const notificationButton = document.querySelector('#dropdownNotificationButton');
+                        if (notificationButton) {
+                            const countElement = notificationButton.querySelector('.absolute.-top-3.-right-2');
+                            if (countElement) {
+                                try {
+                                    const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                                    const newCount = currentCount + 1;
+                                    countElement.textContent = newCount;
+                                    // Ensure the element is visible
+                                    countElement.style.display = 'flex';
+                                    countElement.style.visibility = 'visible';
+                                    countElement.classList.remove('hidden');
+                                    // Make sure parent is visible too
+                                    if (countElement.parentElement) {
+                                        countElement.parentElement.style.display = '';
+                                    }
+                                    console.log('Notification count updated:', newCount);
+                                } catch (error) {
+                                    console.error('Error updating notification count:', error);
+                                }
+                            } else {
+                                console.warn('Notification count element not found within button');
+                            }
+                        } else {
+                            // Fallback: try to find the element directly
+                            const countElement = document.querySelector('#dropdownNotificationButton .absolute.-top-3.-right-2');
+                            if (countElement) {
+                                try {
+                                    const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                                    const newCount = currentCount + 1;
+                                    countElement.textContent = newCount;
+                                    // Ensure the element is visible
+                                    countElement.style.display = 'flex';
+                                    countElement.style.visibility = 'visible';
+                                    countElement.classList.remove('hidden');
+                                    // Make sure parent is visible too
+                                    if (countElement.parentElement) {
+                                        countElement.parentElement.style.display = '';
+                                    }
+                                    console.log('Notification count updated (fallback):', newCount);
+                                } catch (error) {
+                                    console.error('Error updating notification count (fallback):', error);
+                                }
+                            } else {
+                                console.warn('Notification count element not found anywhere');
+                            }
+                        }
+                    } else {
+                        console.log('Skipping notification update - user is viewing this chat or not the receiver', {
+                            isCurrentChat: isCurrentChat,
+                            messageReceiver: messageReceiver,
+                            currentUserId: currentUserId
+                        });
                     }
                 });
             }

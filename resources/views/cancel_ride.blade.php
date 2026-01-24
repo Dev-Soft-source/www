@@ -62,11 +62,7 @@
                                     <textarea id="meeting" rows="6" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2">{{ old('message') }}</textarea>
 
-
-
-
                                     {{-- <textarea id="meeting" rows="6" name="message" placeholder="Tell us why.&#10;Canceling a ride with passengers causes significant inconvenience to them, making the ridesharing experience unpleasant and affecting ProximaRide's reliability. Moreover, this may leave your passengers stranded, disrupting their travel plans.&#10;Please explain why you are canceling this ride. Provide as much detail as possible. Your passengers will not see this message.&#10;Tell your passengers why.&#10;Please inform your passengers why you are canceling this ride. A kind word of apology goes a long way.&#10;I confirm that I want to cancel this ride. I understand the inconvenience this will cause my passengers and that this action is irreversible." class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"></textarea> --}}
-
 
                                     @error('message')
                                         <p class="p-2 rounded-md px-4 bg-red-500 text-white mt-t w-fit">{{ $message }}</p>

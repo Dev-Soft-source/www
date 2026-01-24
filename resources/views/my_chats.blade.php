@@ -61,17 +61,22 @@
                                 </svg>
                             </button>
                         </div>
-                        @if ($chat['sender']['id'] == $user_id)
-                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['receiver']['id']]) }}">
+                        @if ($chat['sender'] && $chat['sender']['id'] == $user_id)
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['receiver']['id']]) }}" 
+                           onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
+                        @elseif ($chat['sender'])
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['sender']['id']]) }}" 
+                           onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
                         @else
-                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['sender']['id']]) }}">
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['receiver']['id']]) }}" 
+                           onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
                         @endif
                             <div class="border rounded p-4 cursor-pointer relative {{ $hasUnread ? 'bg-blue-50 border-l-4 border-l-primary' : '' }} hover:bg-gray-50 transition-colors">
 
                                 <!-- Display sender's information -->
                                 <div class="flex justify-between items-end">
                                     <div class="flex gap-3 items-center">
-                                        @if($chat['sender']['id'] == $user_id)
+                                        @if($chat['sender'] && $chat['sender']['id'] == $user_id)
                                             <div class="relative flex-shrink-0">
                                                 <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['receiver']['profile_image'] }}" alt="">
                                             </div>
@@ -79,7 +84,7 @@
                                                 <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['receiver']['first_name'] }}</span>
                                                 <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] }}</p>
                                             </div>
-                                        @else
+                                        @elseif($chat['sender'])
                                             <div class="relative flex-shrink-0">
                                                 <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['sender']['profile_image'] }}" alt="">
                                                 @if ($hasUnread)
@@ -88,6 +93,17 @@
                                             </div>
                                             <div>
                                                 <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['sender']['first_name'] }}</span>
+                                                @if ($hasUnread)
+                                                    <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $chat['unread_count'] }}</span>
+                                                @endif
+                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] }}</p>
+                                            </div>
+                                        @else
+                                            <div class="relative flex-shrink-0">
+                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['receiver']['profile_image'] ?? asset('assets/image-placeholder.png') }}" alt="">
+                                            </div>
+                                            <div>
+                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['receiver']['first_name'] ?? 'System' }}</span>
                                                 @if ($hasUnread)
                                                     <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $chat['unread_count'] }}</span>
                                                 @endif
@@ -130,6 +146,65 @@
     
     function closeModal() {
         document.getElementById('confirmationModal').classList.add('hidden');
+    }
+    
+    function updateNotificationCount(unreadCount) {
+        // Only update if there are unread messages
+        if (unreadCount > 0) {
+            // Find the notification count element in the bell icon
+            const notificationButton = document.querySelector('#dropdownNotificationButton');
+            if (notificationButton) {
+                const countElement = notificationButton.querySelector('.absolute.-top-3.-right-2');
+                if (countElement) {
+                    try {
+                        const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                        const newCount = Math.max(0, currentCount - unreadCount);
+                        
+                        if (newCount > 0) {
+                            countElement.textContent = newCount;
+                            countElement.style.display = 'flex';
+                            countElement.style.visibility = 'visible';
+                            countElement.classList.remove('hidden');
+                        } else {
+                            // Hide the count badge if it reaches 0
+                            countElement.textContent = '0';
+                            countElement.style.display = 'none';
+                            countElement.classList.add('hidden');
+                        }
+                        console.log('Notification count updated:', currentCount, '->', newCount, '(decremented by', unreadCount, ')');
+                    } catch (error) {
+                        console.error('Error updating notification count:', error);
+                    }
+                } else {
+                    console.warn('Notification count element not found within button');
+                }
+            } else {
+                // Fallback: try to find the element directly
+                const countElement = document.querySelector('#dropdownNotificationButton .absolute.-top-3.-right-2');
+                if (countElement) {
+                    try {
+                        const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                        const newCount = Math.max(0, currentCount - unreadCount);
+                        
+                        if (newCount > 0) {
+                            countElement.textContent = newCount;
+                            countElement.style.display = 'flex';
+                            countElement.style.visibility = 'visible';
+                            countElement.classList.remove('hidden');
+                        } else {
+                            countElement.textContent = '0';
+                            countElement.style.display = 'none';
+                            countElement.classList.add('hidden');
+                        }
+                        console.log('Notification count updated (fallback):', currentCount, '->', newCount);
+                    } catch (error) {
+                        console.error('Error updating notification count (fallback):', error);
+                    }
+                } else {
+                    console.warn('Notification count element not found anywhere');
+                }
+            }
+        }
     }
 </script>
 @endsection
