@@ -271,11 +271,13 @@ public function update($id, Request $request){
 public function sendVerificationCode(Request $request, $lang = null)
 {
     $user_id = auth()->user()->id;
+    $channel = $request->channel ?? 'sms'; // 'sms' or 'whatsapp'
 
     Log::info('Step5to5Controller@sendVerificationCode AJAX called', [
         'user_id' => $user_id,
         'country' => $request->country ?? null,
         'country_code' => $request->country_code ?? null,
+        'channel' => $channel,
     ]);
 
     $request->merge([
@@ -292,6 +294,7 @@ public function sendVerificationCode(Request $request, $lang = null)
     // Normalize phone using Laravel-Phone
     $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode ?: $request->country_code);
 
+    // Check if phone number already exists
     $existingPhone = PhoneNumber::where('phone', $normalizedPhone)->first();
 
     if ($existingPhone) {
@@ -304,10 +307,8 @@ public function sendVerificationCode(Request $request, $lang = null)
                 ], 400);
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already added this phone number.'
-            ], 400);
+            // Same user, use existing phone record (allow resending verification)
+            $phone = $existingPhone;
         }
     }
 
@@ -326,18 +327,21 @@ public function sendVerificationCode(Request $request, $lang = null)
         ], 422);
     }
 
-    try {
-        $request->validate([
-            'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,id,user_id,'.$user_id,
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 422);
+    // Only validate uniqueness if phone doesn't exist yet
+    if (!isset($phone)) {
+        try {
+            $request->validate([
+                'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,id,user_id,'.$user_id,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
-    // Normalize phone using Laravel-Phone
+    // Normalize phone using Laravel-Phone (again to ensure consistency)
     $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode ?: $request->country_code);
 
     $getBlockPhoneNumberUser = PhoneNumber::where('phone', $normalizedPhone)->whereHas('user', function($q){
@@ -351,89 +355,224 @@ public function sendVerificationCode(Request $request, $lang = null)
         ], 400);
     }
 
-    $phone = PhoneNumber::create([
-        'country_id' => $request->country,
-        'user_id' => $user_id,
-        'phone' => $normalizedPhone,
-    ]);
+    // Create phone record if it doesn't exist
+    if (!isset($phone)) {
+        $phone = PhoneNumber::create([
+            'country_id' => $request->country,
+            'user_id' => $user_id,
+            'phone' => $normalizedPhone,
+        ]);
+    }
 
-    Log::info('Phone record created for verification (AJAX)', [
+    Log::info('Phone record ready for verification (AJAX)', [
         'user_id' => $user_id,
         'phone_id' => $phone->id,
         'phone' => $phone->phone,
     ]);
 
-    $verificationCode = rand(1000, 9999);
+    // Rate Limiting: Check if phone number has exceeded max attempts (3) in last 24 hours
+    $attemptsInLast24Hours = DB::table('phone_verifications')
+        ->where('phone_number_id', $phone->id)
+        ->where('created_at', '>=', Carbon::now()->subHours(24))
+        ->count();
 
-    Log::info('Generated verification code (AJAX)', [
-        'user_id' => $user_id,
-        'phone_id' => $phone->id,
-        'code' => $verificationCode,
-    ]);
+    if ($attemptsInLast24Hours >= 3) {
+        Log::warning('Rate limit exceeded for phone verification', [
+            'phone_id' => $phone->id,
+            'phone' => $phone->phone,
+            'attempts' => $attemptsInLast24Hours,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Maximum verification attempts (3) reached for this number. Please try again after 24 hours.'
+        ], 429);
+    }
 
-    DB::table('phone_verifications')->insert([
-        'phone_number_id' => $phone->id,
-        'verification_code' => $verificationCode,
-        'expires_at' => Carbon::now()->addMinutes(30),
-    ]);
+    // Check if number is North American (+1)
+    $isNorthAmerican = isNorthAmericanNumber($normalizedPhone);
 
     $sid = env('TWILIO_ACCOUNT_SID');
     $token = env('TWILIO_AUTH_TOKEN');
     $from = env('TWILIO_PHONE_NUMBER');
+    $verifyServiceSid = env('TWILIO_VERIFY_SERVICE_SID');
     $appEnv = env('APP_ENV');
 
-    // Attempt to send SMS if credentials are available
-    if($sid != null && $token != null && $from != null){
-        try {
-            $twilio = new Client($sid, $token);
-            $to = $phone->phone;
-            $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+    if ($isNorthAmerican) {
+        // North American numbers: Use standard SMS
+        $verificationCode = rand(1000, 9999);
 
-            if($appEnv != 'local'){
-                $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
-                Log::info('Twilio SMS sent (AJAX)', ['to' => $to]);
-            } else {
-                Log::info('Skip sending SMS in local env (AJAX); verification code generated', [
-                    'to' => $to,
-                    'code' => $verificationCode,
+        Log::info('Generated verification code for North American number (AJAX)', [
+            'user_id' => $user_id,
+            'phone_id' => $phone->id,
+            'code' => $verificationCode,
+        ]);
+
+        DB::table('phone_verifications')->insert([
+            'phone_number_id' => $phone->id,
+            'verification_code' => $verificationCode,
+            'channel' => 'sms',
+            'expires_at' => Carbon::now()->addMinutes(30),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        // Send SMS via standard Twilio Messages API
+        if($sid != null && $token != null && $from != null){
+            try {
+                $twilio = new Client($sid, $token);
+                $to = $phone->phone;
+                $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+
+                if($appEnv != 'local'){
+                    $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
+                    Log::info('Twilio SMS sent (AJAX)', ['to' => $to]);
+                } else {
+                    Log::info('Skip sending SMS in local env (AJAX); verification code generated', [
+                        'to' => $to,
+                        'code' => $verificationCode,
+                    ]);
+                    session(['verification_code_' . $phone->id => $verificationCode]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Twilio SMS send failed (AJAX)', [
+                    'to' => $phone->phone,
+                    'error' => $e->getMessage(),
                 ]);
-                // Store code in session for local testing
-                session(['verification_code_' . $phone->id => $verificationCode]);
             }
-        } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
-            $isCurlError = strpos($errorMessage, 'CURLOPT') !== false || 
-                          strpos($errorMessage, 'curl') !== false ||
-                          strpos($errorMessage, 'Undefined constant') !== false;
-            
-            Log::error('Twilio SMS send failed (AJAX)', [
-                'to' => $phone->phone,
-                'error' => $errorMessage,
-                'is_curl_error' => $isCurlError,
-            ]);
-            
-            // If it's a cURL/SDK configuration error, log it but continue
-            // Verification code is saved in DB, user can enter it manually
-            if ($isCurlError) {
-                Log::warning('Twilio SDK cURL configuration issue - SMS not sent, but verification code is available in database', [
-                    'phone_id' => $phone->id,
-                ]);
-            }
-            // Continue anyway - don't block the user from entering code manually
         }
     } else {
-        Log::warning('Twilio credentials not configured - SMS not sent, but verification code is available in database', [
-            'phone_id' => $phone->id,
-        ]);
-        // In local/dev, store code in session for testing
-        if($appEnv == 'local' || $appEnv == 'development'){
-            session(['verification_code_' . $phone->id => $verificationCode]);
+        // International numbers: Use Twilio Verify API with WhatsApp support
+        if (!$verifyServiceSid) {
+            Log::error('Twilio Verify Service SID not configured', [
+                'phone_id' => $phone->id,
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification service is not properly configured. Please contact support.'
+            ], 500);
+        }
+
+        try {
+            $twilio = new Client($sid, $token);
+            
+            // Determine channel: 'whatsapp' if requested, otherwise 'sms' (Twilio Verify will try both)
+            $verifyChannel = ($channel === 'whatsapp') ? 'whatsapp' : 'sms';
+            
+            // Create verification using Twilio Verify API
+            $verification = $twilio->verify->v2->services($verifyServiceSid)
+                ->verifications
+                ->create($phone->phone, $verifyChannel);
+
+            $verifySid = $verification->sid;
+
+            Log::info('Twilio Verify API verification created (AJAX)', [
+                'phone_id' => $phone->id,
+                'phone' => $phone->phone,
+                'verify_sid' => $verifySid,
+                'channel' => $verifyChannel,
+                'status' => $verification->status,
+            ]);
+
+            // Store verification record (code is managed by Twilio, not stored in DB)
+            DB::table('phone_verifications')->insert([
+                'phone_number_id' => $phone->id,
+                'verification_code' => '', // Empty - code is managed by Twilio Verify
+                'channel' => $verifyChannel,
+                'twilio_verify_sid' => $verifySid,
+                'expires_at' => Carbon::now()->addMinutes(10), // Twilio Verify codes expire in 10 minutes
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            
+            // Check if WhatsApp channel is disabled and fall back to SMS
+            if ($channel === 'whatsapp' && strpos($errorMessage, 'Delivery channel disabled: WHATSAPP') !== false) {
+                Log::warning('WhatsApp channel disabled, falling back to SMS (AJAX)', [
+                    'phone_id' => $phone->id,
+                    'phone' => $phone->phone,
+                ]);
+                
+                try {
+                    // Retry with SMS channel
+                    $verification = $twilio->verify->v2->services($verifyServiceSid)
+                        ->verifications
+                        ->create($phone->phone, 'sms');
+                    
+                    $verifySid = $verification->sid;
+                    
+                    Log::info('Twilio Verify API verification created via SMS fallback (AJAX)', [
+                        'phone_id' => $phone->id,
+                        'phone' => $phone->phone,
+                        'verify_sid' => $verifySid,
+                        'channel' => 'sms',
+                        'status' => $verification->status,
+                    ]);
+                    
+                    // Store verification record with SMS channel
+                    DB::table('phone_verifications')->insert([
+                        'phone_number_id' => $phone->id,
+                        'verification_code' => '',
+                        'channel' => 'sms',
+                        'twilio_verify_sid' => $verifySid,
+                        'expires_at' => Carbon::now()->addMinutes(10),
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ]);
+                    
+                    // Return success but indicate SMS was used instead
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Verification code sent via SMS (WhatsApp not available).',
+                        'is_north_american' => false,
+                        'channel' => 'sms',
+                        'whatsapp_unavailable' => true,
+                        'remaining_attempts' => max(0, 3 - ($attemptsInLast24Hours + 1))
+                    ]);
+                    
+                } catch (\Exception $smsFallbackError) {
+                    Log::error('Twilio Verify API SMS fallback also failed (AJAX)', [
+                        'phone_id' => $phone->id,
+                        'phone' => $phone->phone,
+                        'error' => $smsFallbackError->getMessage(),
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to send verification code. WhatsApp is not available and SMS delivery failed. Please contact support.'
+                    ], 500);
+                }
+            }
+            
+            Log::error('Twilio Verify API failed (AJAX)', [
+                'phone_id' => $phone->id,
+                'phone' => $phone->phone,
+                'error' => $errorMessage,
+                'channel' => $verifyChannel,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send verification code. Please try again or contact support.'
+            ], 500);
         }
     }
 
     return response()->json([
         'success' => true,
-        'message' => 'Verification code sent successfully'
+        'message' => 'Verification code sent successfully',
+        'is_north_american' => $isNorthAmerican,
+        'channel' => $isNorthAmerican ? 'sms' : ($channel === 'whatsapp' ? 'whatsapp' : 'sms'),
+        'remaining_attempts' => max(0, 3 - ($attemptsInLast24Hours + 1)),
+        'whatsapp_unavailable' => false
     ]);
+}
+
+public function sendVerificationCodeWhatsApp(Request $request, $lang = null)
+{
+    // Same logic as sendVerificationCode but force channel to 'whatsapp'
+    $request->merge(['channel' => 'whatsapp']);
+    return $this->sendVerificationCode($request, $lang);
 }
 }

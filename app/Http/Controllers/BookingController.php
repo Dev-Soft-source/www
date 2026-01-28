@@ -1609,6 +1609,7 @@ class BookingController extends Controller
         }
         return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
     }
+    
     public function sendVerificationCodeBooking($id)
     {
         $phoneNumber = PhoneNumber::find($id);
@@ -6922,8 +6923,6 @@ class BookingController extends Controller
 
         return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->cancel_booking_message ?? null]);
     }
-
-
 
     public function createPaymentIntent(Request $request)
     {

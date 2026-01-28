@@ -7,9 +7,6 @@
 @section('content')
     @if (session('success'))
     <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-
-
-
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -142,7 +139,7 @@
                                         <span class="text-pink-500 text-lg">
                                             {{ $findRidePage->ride_features_option1->name }}
                                         </span>
-                                        <div class="sups relative">
+                                        <!-- <div class="sups relative">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 fill="currentColor" class="bi bi-info-circle-fill text-gray-900 peer"
                                                 viewBox="0 0 16 16">
@@ -158,7 +155,7 @@
                                                     </p>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </label>
                                     <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
                                         {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
@@ -171,14 +168,14 @@
                                         <span class="text-green-500 text-lg">
                                             {{ $findRidePage->ride_features_option2->name }}
                                         </span>
-                                        <div class="sups">
+                                        <!-- <div class="sups">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 fill="currentColor" class="bi bi-info-circle-fill text-gray-900"
                                                 viewBox="0 0 16 16">
                                                 <path
                                                     d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                             </svg>
-                                        </div>
+                                        </div> -->
                                     </label>
                                     <input id="extra-care" type="checkbox"
                                         value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
@@ -891,7 +888,8 @@
 
                                             // Assuming $ratings is a collection
                                             $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                return $rating->booking->user_id === $user_id;
+                                                // Check if booking exists and is not null before accessing user_id
+                                                return $rating->booking && $rating->booking->user_id === $user_id;
                                             });
 
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
@@ -1379,7 +1377,8 @@
 
                                             // Assuming $ratings is a collection
                                             $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                return $rating->booking->user_id === $user_id;
+                                                // Check if booking exists and is not null before accessing user_id
+                                                return $rating->booking && $rating->booking->user_id === $user_id;
                                             });
 
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;

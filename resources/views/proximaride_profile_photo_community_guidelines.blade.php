@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mx-auto my-10 md:my-14 px-4 pt-safe hideheader1">
         <div class="pb-2">
-            <h1 class="text-2xl md:text-3xl font-FuturaBdCnBT text-blue-600 mb-4 text-center">ProximaRide Profile Photo Community Guidelines</h1>
+            <h1 class="text-2xl md:text-3xl font-FuturaBdCnBT text-blue-600 mb-4 text-center">ProximaRide Profile Photo Guidelines</h1>
 
             <p class="mb-4">To participate in Pink Rides or Extra-Care Rides as a driver or passenger, you must upload a profile photo that adheres to the following guidelines to ensure trust and safety within the ProximaRide community:</p>
 

@@ -194,7 +194,7 @@
                                                 <span class="text-pink-500 text-base md:text-lg">
                                                     {{ $findRidePage->ride_features_option1->name }}
                                                 </span>
-                                                <div class="sups relative">
+                                                <!-- <div class="sups relative">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                         fill="currentColor" class="bi bi-info-circle-fill text-black peer"
                                                         viewBox="0 0 16 16">
@@ -210,7 +210,7 @@
                                                             </p>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </label>
                                             <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
                                                 {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
@@ -223,14 +223,14 @@
                                                 <span class="text-green-500 text-base md:text-lg">
                                                     {{ $findRidePage->ride_features_option2->name }}
                                                 </span>
-                                                <div class="sups">
+                                                <!-- <div class="sups">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                         fill="currentColor" class="bi bi-info-circle-fill text-black"
                                                         viewBox="0 0 16 16">
                                                         <path
                                                             d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                     </svg>
-                                                </div>
+                                                </div> -->
                                             </label>
                                             <input id="extra-care" type="checkbox"
                                                 value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
@@ -995,7 +995,7 @@
                               </div> --}}
                             <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
-                        <div class="mt-3 md:mt-0 w-full md:w-[5%] md:bg-gray-200 md:border border-gray-200 md:h-[3.1rem] flex items-center justify-center p-0.5 xl:p-0 mt-1 md:mt-0">
+                        <div class="mt-3 md:mt-0 w-full md:w-[5%] md:bg-gray-200 md:border border-gray-200 md:h-[3.1rem] flex items-center justify-center p-0.5 xl:p-0 ">
                             <button onclick="swapLocations()">
                                 @isset($findRidePage->swap_field_icon)
                                     <img src="{{asset('home_page_icons/' . $findRidePage->swap_field_icon)}}" class="w-8 md:w-full xl:w-8 h-8 md:h-full xl:h-8 mx-auto" alt="">
@@ -1088,7 +1088,8 @@
 
                                             // Assuming $ratings is a collection
                                             $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                return $rating->booking->user_id === $user_id;
+                                                // Check if booking exists and is not null before accessing user_id
+                                                return $rating->booking && $rating->booking->user_id === $user_id;
                                             });
 
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
@@ -1762,6 +1763,48 @@
             </div>
         </div>
     </div>
+
+<!-- Phone Verification Required Modal -->
+<div id="phoneVerificationModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="phone-verification-modal-title" role="dialog" aria-modal="true">
+    <div onclick="closePhoneVerificationModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border" onclick="event.stopPropagation()">
+                <button type="button" onclick="closePhoneVerificationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                    <div class="sm:flex sm:items-start justify-center">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-yellow-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-yellow-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="">
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="phone-verification-modal-title">Phone Verification Required</h3>
+                        </div>
+                        <div class="mt-2 w-full">
+                            <p class="can-exp-p text-center">To maintain a safe and reliable community, you must have a verified phone number before booking or posting a ride.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                    <button type="button" onclick="goToPhoneVerification()" class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                        Verify My Number
+                    </button>
+                    <button type="button" onclick="closePhoneVerificationModal()" class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('script')
@@ -2265,5 +2308,106 @@
     @if(session('success'))
     document.addEventListener('DOMContentLoaded', showModal);
     @endif
+
+    // Phone Verification Modal Functions
+    function showPhoneVerificationModal() {
+        const modal = document.getElementById('phoneVerificationModal');
+        if (!modal) {
+            console.error('Phone verification modal not found');
+            return;
+        }
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'block', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
+        modal.style.setProperty('z-index', '50', 'important');
+    }
+
+    function closePhoneVerificationModal() {
+        const modal = document.getElementById('phoneVerificationModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.removeProperty('display');
+            modal.style.removeProperty('visibility');
+            modal.style.removeProperty('opacity');
+            modal.style.removeProperty('z-index');
+        }
+    }
+
+    function goToPhoneVerification() {
+        @php
+            $lang = isset($selectedLanguage) && $selectedLanguage ? $selectedLanguage->abbreviation : (session('selectedLanguage') ?: 'en');
+        @endphp
+        window.location.href = '{{ route("step5to5", ["lang" => $lang]) }}';
+    }
+
+    // Make functions globally available
+    window.showPhoneVerificationModal = showPhoneVerificationModal;
+    window.closePhoneVerificationModal = closePhoneVerificationModal;
+    window.goToPhoneVerification = goToPhoneVerification;
+
+    // Check phone verification and intercept ride link clicks
+    @php
+        $needsPhoneVerification = false;
+        if (auth()->user()) {
+            $user = auth()->user();
+            // Check if user has any phone numbers from phone_numbers table
+            $phoneNumber = \App\Models\PhoneNumber::where('user_id', $user->id)->first();
+            $hasPhoneNumber = !is_null($phoneNumber);
+            // Check if user has a verified phone number from phone_numbers table
+            $verifiedPhoneNumber = \App\Models\PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
+            $hasVerifiedPhone = !is_null($verifiedPhoneNumber);
+            // User needs verification if they don't have a phone OR don't have a verified phone
+            $needsPhoneVerification = !$hasPhoneNumber || !$hasVerifiedPhone;
+        }
+    @endphp
+    @if($needsPhoneVerification)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Use event delegation on the document to catch all clicks
+        document.addEventListener('click', function(e) {
+            // Find the closest anchor tag from the click target
+            let link = e.target.closest('a');
+            if (!link) return;
+            
+            const href = link.getAttribute('href');
+            if (!href || href.trim() === '' || href === '#' || href.includes('javascript:void(0)')) {
+                return;
+            }
+            
+            // Check if this is a ride detail link - matches pattern: /lang/ride/departure/to/destination/id
+            // The route generates URLs like: /en/ride/Ottawa/to/Montreal/123
+            const rideDetailPattern = /\/ride\/[^\/]+\/to\/[^\/]+\/\d+/;
+            if (rideDetailPattern.test(href)) {
+                // Don't intercept if it already has an onclick handler (for other modals like pink ride, reviews, etc.)
+                const onclickAttr = link.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes('toggleModal')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Show the phone verification modal
+                if (typeof window.showPhoneVerificationModal === 'function') {
+                    window.showPhoneVerificationModal();
+                } else if (typeof showPhoneVerificationModal === 'function') {
+                    showPhoneVerificationModal();
+                } else {
+                    console.error('showPhoneVerificationModal function not found');
+                }
+                
+                return false;
+            }
+        }, true); // Use capture phase to intercept early
+    });
+    @endif
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePhoneVerificationModal();
+        }
+    });
     </script>
 @endsection

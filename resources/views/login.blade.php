@@ -198,8 +198,8 @@
                             @enderror
                         </div>
                         <div class="mt-2 items-center flex gap-2">
-                            <input type="checkbox" name="remember" id="remember" class="mt-1 form-check-input">
-                            <label for="remember" class="form-check-label mt-1 text-md md:text-lg">{{ $loginPage->remember_me_text ?? "Remember me" }}</label>
+                            <input type="checkbox" name="remember" id="remember" value="1" class="mt-1 form-check-input">
+                            <label for="remember" class="form-check-label mt-1 text-md md:text-lg cursor-pointer">{{ $loginPage->remember_me_text ?? "Remember me" }}</label>
                         </div>
                     </div>
                     <div class="flex w-full justify-center">
@@ -347,8 +347,23 @@
                 $('.tooltip-error').remove();
             }, 200);
             
-            // Get form data
-            const formData = form.serialize();
+            // Get form data - ensure remember checkbox is properly handled
+            const rememberChecked = $('#remember').is(':checked');
+            
+            // Build form data as object to ensure proper parsing
+            const formDataObj = {
+                email: $('#email').val(),
+                password: $('#password').val(),
+                _token: $('input[name="_token"]').val(),
+                remember: rememberChecked ? '1' : '0'
+            };
+            
+            console.log('Login form data:', {
+                rememberChecked: rememberChecked,
+                rememberValue: formDataObj.remember,
+                email: formDataObj.email ? 'present' : 'missing'
+            });
+            
             const lang = getCurrentLang();
             const url = lang ? `/${lang}/login` : '/login';
             
@@ -356,7 +371,7 @@
             $.ajax({
                 url: url,
                 type: 'POST',
-                data: formData,
+                data: formDataObj,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 },

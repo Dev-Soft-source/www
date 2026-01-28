@@ -284,6 +284,7 @@ Route::get('{lang?}/step3-5', [Step3to5Controller::class, 'create'])->middleware
 Route::get('{lang?}/step4-5', [Step4to5Controller::class, 'create'])->middleware('auth')->name('step4to5');
 Route::get('{lang?}/step5-5', [Step5to5Controller::class, 'create'])->middleware('auth')->name('step5to5');
 Route::post('{lang?}/step5-5-send-verification', [Step5to5Controller::class, 'sendVerificationCode'])->middleware('auth')->name('step5to5.send_verification');
+Route::post('{lang?}/step5-5-send-verification-whatsapp', [Step5to5Controller::class, 'sendVerificationCodeWhatsApp'])->middleware('auth')->name('step5to5.send_verification_whatsapp');
 Route::get('{lang?}/students', [StudentController::class, 'index'])->name('students');
 Route::get('{lang?}/drivers', [DriverController::class, 'index'])->name('drivers');
 Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('passengers');

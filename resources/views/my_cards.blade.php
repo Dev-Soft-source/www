@@ -372,8 +372,7 @@
         document.getElementById('payment-method-selection').classList.add('hidden');
         document.getElementById('card-form-container').classList.remove('hidden');
         initializeStripePaymentElement();
-        // Close the modal when card form is shown
-        closeAddPaymentMethodModal();
+        // Keep the modal open so user can fill out the card form
     }
     
     function initializePaymentMethods() {
@@ -458,21 +457,30 @@
                 return;
             }
             
+            // Get billing details from form
+            const billingDetails = {
+                name: document.getElementById('name_on_card').value.trim(),
+                address: {
+                    line1: document.getElementById('street_address').value.trim(),
+                    city: document.getElementById('city').value.trim(),
+                    postal_code: document.getElementById('postal_code').value.trim(),
+                    country: document.getElementById('country').value.trim(),
+                }
+            };
+            
+            // Validate required fields
+            if (!billingDetails.name || !billingDetails.address.line1 || !billingDetails.address.city || !billingDetails.address.postal_code || !billingDetails.address.country) {
+                document.getElementById('payment-element-errors').textContent = 'Please fill in all billing details.';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Card';
+                return;
+            }
+            
             const {error, setupIntent} = await stripe.confirmSetup({
                 elements,
                 clientSecret: setupIntentClientSecret,
                 confirmParams: {
-                    payment_method_data: {
-                        billing_details: {
-                            name: document.getElementById('name_on_card').value,
-                            address: {
-                                line1: document.getElementById('street_address').value,
-                                city: document.getElementById('city').value,
-                                postal_code: document.getElementById('postal_code').value,
-                                country: document.getElementById('country').value,
-                            }
-                        }
-                    }
+                    billing_details: billingDetails
                 },
                 redirect: 'if_required'
             });
@@ -482,8 +490,50 @@
                 submitButton.disabled = false;
                 submitButton.textContent = 'Save Card';
             } else {
-                document.getElementById('stripeToken').value = setupIntent.payment_method;
-                this.submit();
+                // Submit form via AJAX to handle response properly
+                const form = document.getElementById('payment-form');
+                const formData = new FormData(form);
+                formData.set('stripeToken', setupIntent.payment_method);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        // If it's a redirect (HTML response), reload the page
+                        window.location.reload();
+                        return;
+                    }
+                })
+                .then(data => {
+                    if (data && data.success) {
+                        // Close modal and reload page to show new card
+                        closeAddPaymentMethodModal();
+                        window.location.reload();
+                    } else if (data && data.message) {
+                        document.getElementById('payment-element-errors').textContent = data.message;
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Save Card';
+                    } else {
+                        // Reload on success
+                        closeAddPaymentMethodModal();
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving card:', error);
+                    document.getElementById('payment-element-errors').textContent = 'An error occurred while saving the card. Please try again.';
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Save Card';
+                });
             }
         } catch (err) {
             console.error('Payment confirmation error:', err);

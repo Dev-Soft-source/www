@@ -500,7 +500,8 @@
 
                                         // Assuming $ratings is a collection
                                         $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                            return $rating->booking->user_id === $user_id;
+                                            // Check if booking exists and is not null before accessing user_id
+                                            return $rating->booking && $rating->booking->user_id === $user_id;
                                         });
 
                                         $totalAverage = $filteredRatings->avg('average_rating') ?? 0;

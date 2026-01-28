@@ -234,7 +234,7 @@
                                                                 ->where('status', 1)
                                                                 ->where('type', '2')
                                                                 ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking->user_id === $user_id;
+                                                                    return $rating->booking && $rating->booking->user_id === $user_id;
                                                                 });
 
                                                             $totalAverage =
@@ -569,7 +569,7 @@
                                                                 ->where('status', 1)
                                                                 ->where('type', '2')
                                                                 ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking->user_id === $user_id;
+                                                                    return $rating->booking && $rating->booking->user_id === $user_id;
                                                                 });
 
                                                             $totalAverage =

@@ -150,7 +150,38 @@ class LoginController extends Controller
             }
         }
 
-        if ($user && !$user->trashed() && $user->email_verified != 0 && auth()->attempt($credentials, $request->has('remember'))) {
+        // Check if remember me is checked
+        // When checkbox is checked, it sends '1', when unchecked it sends '0' or is missing
+        $rememberValue = $request->input('remember', '0');
+        $remember = ($rememberValue == '1' || $rememberValue == 'on' || $rememberValue === true || $rememberValue === 1);
+        
+        Log::info('Login attempt with remember me', [
+            'email' => $request->email,
+            'remember_input' => $rememberValue,
+            'remember_input_type' => gettype($rememberValue),
+            'remember_boolean' => $remember
+        ]);
+        
+        // Attempt authentication with remember me
+        if ($user && !$user->trashed() && $user->email_verified != 0) {
+            $loginSuccessful = auth()->attempt($credentials, $remember);
+        } else {
+            $loginSuccessful = false;
+        }
+        
+        if ($loginSuccessful) {
+            // Refresh user to get updated remember_token if remember was true
+            $authenticatedUser = auth()->user();
+            
+            // Log successful authentication
+            Log::info('Login successful', [
+                'user_id' => $authenticatedUser->id,
+                'email' => $request->email,
+                'remember' => $remember,
+                'remember_token_exists' => $authenticatedUser->remember_token ? 'yes' : 'no',
+                'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0
+            ]);
+            
             // IP & user_details tracking (unchanged)
             $ipAddress = null;
             foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP',
@@ -167,25 +198,25 @@ class LoginController extends Controller
             }
             $ipAddress = $ipAddress ?? 'UNKNOWN';
 
-            $record = DB::table('user_details')->where('user_id', $user->id)->where('ip_address', $ipAddress)->first();
+            $record = DB::table('user_details')->where('user_id', $authenticatedUser->id)->where('ip_address', $ipAddress)->first();
             if (!$record) {
                 DB::table('user_details')->insert([
                     'ip_address' => $ipAddress,
                     'type'       => 'web',
-                    'user_id'    => $user->id,
+                    'user_id'    => $authenticatedUser->id,
                     'created_at' => now(),
                 ]);
             }
 
-            // Redirect logic
-            $user = auth()->user();
-            if ($user->step === '1') {
+            // Redirect logic (user is already authenticated from attempt above)
+            // Use authenticated user for redirect logic
+            if ($authenticatedUser->step === '1') {
                 $redirectUrl = route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '2') {
+            } elseif ($authenticatedUser->step === '2') {
                 $redirectUrl = route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '3') {
+            } elseif ($authenticatedUser->step === '3') {
                 $redirectUrl = route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '4') {
+            } elseif ($authenticatedUser->step === '4') {
                 $redirectUrl = route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
             } else {
                 // Use route helper instead of manual URL construction
@@ -193,10 +224,28 @@ class LoginController extends Controller
             }
 
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
+                $response = response()->json([
                     'success'      => true,
                     'redirect_url' => $redirectUrl,
+                    'remember_set' => $remember
                 ]);
+                
+                // Log cookie information for debugging
+                if ($remember) {
+                    // Note: Cookies are queued by middleware, so they may not appear in response headers here
+                    // The AddQueuedCookiesToResponse middleware will add them after this response
+                    $cookieName = Auth::getRecallerName();
+                    
+                    Log::info('Remember me authentication completed', [
+                        'user_id' => $authenticatedUser->id,
+                        'remember_token' => $authenticatedUser->remember_token ? 'exists' : 'missing',
+                        'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0,
+                        'expected_cookie_name' => $cookieName,
+                        'note' => 'Cookie will be set by AddQueuedCookiesToResponse middleware'
+                    ]);
+                }
+                
+                return $response;
             }
 
             return redirect()->intended($redirectUrl);
