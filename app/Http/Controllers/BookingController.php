@@ -61,6 +61,59 @@ use DateTime;
 
 class BookingController extends Controller
 {
+    /**
+     * Helper method to validate and apply student booking fee waiver
+     * Checks both charge_booking field and student card expiration date
+     * 
+     * @param User $user The user making the booking
+     * @param float|string $bookingCredit The booking credit amount from request
+     * @return float|string The adjusted booking credit (0 if waived, original if not)
+     */
+    protected function validateStudentBookingFee($user, $bookingCredit)
+    {
+        // Check if user has charge_booking = '2' (waived)
+        if ($user->charge_booking == '2') {
+            // Additional validation: Check if student card is expired
+            // If student is verified (student == '1') and card is expired, charge booking fee
+            if ($user->student == '1' && !empty($user->student_card_exp_date)) {
+                try {
+                    $expirationDate = Carbon::parse($user->student_card_exp_date);
+                    $now = Carbon::now();
+                    
+                    // If card is expired, charge booking fee (set charge_booking back to '1')
+                    if ($expirationDate->isPast()) {
+                        // Update user's charge_booking to '1' since card is expired
+                        $user->update(['charge_booking' => '1']);
+                        Log::info('Student card expired - booking fee will be charged', [
+                            'user_id' => $user->id,
+                            'expiration_date' => $user->student_card_exp_date,
+                            'current_date' => $now->toDateString()
+                        ]);
+                        return $bookingCredit; // Return original booking credit
+                    }
+                } catch (\Exception $e) {
+                    // If date parsing fails, log error but still apply waiver based on charge_booking
+                    Log::warning('Failed to parse student card expiration date', [
+                        'user_id' => $user->id,
+                        'exp_date' => $user->student_card_exp_date,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Student with valid card - booking fee is waived
+            Log::info('Student booking fee waived', [
+                'user_id' => $user->id,
+                'charge_booking' => $user->charge_booking,
+                'student_status' => $user->student
+            ]);
+            return '0';
+        }
+        
+        // Regular user or student with expired card - charge booking fee
+        return $bookingCredit;
+    }
+
     public function create($lang = null, $id, $rideDetailId)
     {
         $languages = Language::all();
@@ -378,6 +431,9 @@ class BookingController extends Controller
             'user_id' => $booking->ride->added_by,
             'type' => 'driver',
         ]);
+
+        // Revoke Extra Care eligibility when driver receives a no-show
+        User::where('id', $booking->ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
 
         $data['message'] = $successMessage->arbitration_success_message;
         return response()->json($data);
@@ -927,6 +983,21 @@ class BookingController extends Controller
 
         // Check if ride has Pink Ride feature (feature ID 1)
         if (in_array('1', $featuresArray)) {
+            // GENDER VALIDATION: Only female passengers can book Pink Rides
+            if ($pinkRideSetting && $pinkRideSetting->female === '1') {
+                // Check if user has admin override (pink_ride = '1')
+                if ($user->pink_ride !== '1') {
+                    // If user is explicitly disabled (pink_ride = '0'), block them
+                    if ($user->pink_ride === '0') {
+                        return redirect()->back()->with(['failure' => 'You are not allowed to book Pink Rides. Please contact support if you believe this is an error.']);
+                    }
+                    // If pink_ride is empty/null, check gender restriction
+                    if ($user->gender !== 'female') {
+                        return redirect()->back()->with(['failure' => 'Only female passengers can book Pink Rides.']);
+                    }
+                }
+            }
+            
             // For passengers booking Pink Rides, require government ID
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                 if (empty($user->government_id) && empty($user->driver_license_upload)) {
@@ -982,12 +1053,9 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
-        // Student booking fee waiver: If user is a student with charge_booking = '2', 
-        // booking fee should be 0 (waived). Override any frontend value for security.
-        if ($user->charge_booking == '2') {
-            // Student with valid card - booking fee is waived
-            $request->merge(['booking_credit' => '0']);
-        }
+        // Student booking fee waiver: Validate and apply waiver with card expiration check
+        $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+        $request->merge(['booking_credit' => $adjustedBookingCredit]);
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
         $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -1687,13 +1755,8 @@ class BookingController extends Controller
             $ride = Ride::where('id', $id)->first();
             $user = User::where('id', auth()->user()->id)->first();
 
-            // Student booking fee waiver: If user is a student with charge_booking = '2', 
-            // booking fee should be 0 (waived). Override any frontend value for security.
-            if ($user->charge_booking == '2') {
-                $booking_credit = '0';
-            } else {
-                $booking_credit = $booking_credit;
-            }
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
 
             // Calculate expiry time based on ride date and time
             $currentTime = now();
@@ -1915,11 +1978,8 @@ class BookingController extends Controller
             $ride = Ride::where('id', $booking->ride_id)->first();
             $user = User::where('id', auth()->user()->id)->first();
 
-            // Student booking fee waiver: If user is a student with charge_booking = '2', 
-            // booking fee should be 0 (waived). Override any frontend value for security.
-            if ($user->charge_booking == '2') {
-                $booking_credit = '0';
-            }
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
 
             // Calculate expiry time based on ride date and time
             $currentTime = now();
@@ -2272,8 +2332,6 @@ class BookingController extends Controller
             return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
         }
 
-
-
         $rules = [
             'agree_terms' => 'accepted|required'
         ];
@@ -2292,9 +2350,26 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        if ($postRidePage) {
+            // Check if user is a student (student == 1 for verified, student == 2 for pending)
+            $isStudent = ($user->student == '1' || $user->student == '2');
+            
+            // Check if payment method is Cash (payment_methods_option1 is Cash)
+            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
+            
+            // Apply limit only for students on Cash rides
+            if ($isStudent && $isCashPayment) {
+                if ($request->seats > 2) {
+                    return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
+                }
+            }
+        }
 
-
-
+        // Student booking fee waiver: Validate and apply waiver with card expiration check
+        $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+        $request->merge(['booking_credit' => $adjustedBookingCredit]);
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
 
@@ -3782,6 +3857,21 @@ class BookingController extends Controller
 
         // Check if ride has Pink Ride feature (feature ID 1)
         if (in_array('1', $featuresArray)) {
+            // GENDER VALIDATION: Only female passengers can book Pink Rides
+            if ($pinkRideSetting && $pinkRideSetting->female === '1') {
+                // Check if user has admin override (pink_ride = '1')
+                if ($user->pink_ride !== '1') {
+                    // If user is explicitly disabled (pink_ride = '0'), block them
+                    if ($user->pink_ride === '0') {
+                        return redirect()->back()->with(['failure' => 'You are not allowed to book Pink Rides. Please contact support if you believe this is an error.']);
+                    }
+                    // If pink_ride is empty/null, check gender restriction
+                    if ($user->gender !== 'female') {
+                        return redirect()->back()->with(['failure' => 'Only female passengers can book Pink Rides.']);
+                    }
+                }
+            }
+            
             // For passengers booking Pink Rides, require government ID
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                 if (empty($user->government_id) && empty($user->driver_license_upload)) {
@@ -3834,6 +3924,27 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        if ($postRidePage) {
+            // Check if user is a student (student == 1 for verified, student == 2 for pending)
+            $isStudent = ($user->student == '1' || $user->student == '2');
+            
+            // Check if payment method is Cash (payment_methods_option1 is Cash)
+            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
+            
+            // Apply limit only for students on Cash rides
+            if ($isStudent && $isCashPayment) {
+                if ($request->seats > 2) {
+                    return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
+                }
+            }
+        }
+
+        // Student booking fee waiver: Validate and apply waiver with card expiration check
+        $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+        $request->merge(['booking_credit' => $adjustedBookingCredit]);
 
         if ($request->online_payment > '0') {
 
@@ -5046,6 +5157,9 @@ class BookingController extends Controller
             $ride = Ride::where('id', $id)->first();
             $user = User::where('id', auth()->user()->id)->first();
 
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
+
             $selectedLanguage = session('selectedLanguage');
             $findRidePage = null;
             if ($selectedLanguage) {
@@ -5486,6 +5600,27 @@ class BookingController extends Controller
             }
 
             $validated = $request->validate($rules);
+
+            // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+            if ($postRidePage) {
+                // Check if user is a student (student == 1 for verified, student == 2 for pending)
+                $isStudent = ($user->student == '1' || $user->student == '2');
+                
+                // Check if payment method is Cash (payment_methods_option1 is Cash)
+                $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
+                
+                // Apply limit only for students on Cash rides
+                if ($isStudent && $isCashPayment) {
+                    if ($request->seats > 2) {
+                        return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
+                    }
+                }
+            }
+
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+            $request->merge(['booking_credit' => $adjustedBookingCredit]);
 
             if ($payable_amount > 0) {
                 $request->validate([

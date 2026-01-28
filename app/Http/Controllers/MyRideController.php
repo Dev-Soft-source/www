@@ -1716,6 +1716,9 @@ class MyRideController extends Controller
                     'user_id' => $ride->added_by,
                     'type' => 'driver',
                 ]);
+
+                // Revoke Extra Care eligibility when driver cancels ride
+                User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
                 
                 $selectedLanguageAbbreviation = session('selectedLanguage');
                 
@@ -1849,6 +1852,9 @@ class MyRideController extends Controller
                 'user_id' => $ride->added_by,
             ]);
 
+            // Revoke Extra Care eligibility when driver cancels a booking
+            User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
+
             $notification = Notification::create([
                 'type' => 2,
                 'ride_id' => $ride->id,
@@ -1981,6 +1987,9 @@ class MyRideController extends Controller
                 'user_id' => $ride->added_by,
                 'type' => 'driver',
             ]);
+
+            // Revoke Extra Care eligibility when driver cancels ride
+            User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
 
             // Notify passengers (if any)
             $bookings = Booking::where('ride_id', $id)->get();
@@ -2373,6 +2382,10 @@ class MyRideController extends Controller
             'booking_id' => $booking->id,
             'user_id' => $ride->added_by,
         ]);
+
+        // Revoke Extra Care eligibility when driver cancels a passenger booking
+        User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
+
         if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
 
             $data = ['passenger_name' => $booking->passenger->first_name, 'driver_name' => $booking->ride->driver->first_name, 'message' => $request->passenger_message, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($booking->ride->date)->format('F d, Y'), 'time' => $booking->ride->time, 'seats' => $booking->seats, 'total_price' => $booking->fare];

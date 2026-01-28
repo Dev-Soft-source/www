@@ -286,6 +286,18 @@ class ReviewController extends Controller
             ]);
         }
 
+        // If driver's average rating drops below Extra Care threshold, revoke Extra Care eligibility
+        $driverId = $ride->added_by;
+        $driverRatings = Rating::where('type', 1)->where('status', 1)
+            ->whereHas('ride', fn ($q) => $q->where('added_by', $driverId))->get();
+        if (!$driverRatings->isEmpty()) {
+            $avgRating = (float) $driverRatings->avg('average_rating');
+            $folkSetting = \App\Models\FolkRideSetting::first();
+            if ($folkSetting && $folkSetting->average_rating !== null && $avgRating < (float) $folkSetting->average_rating) {
+                User::where('id', $driverId)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
+            }
+        }
+
         $data = ['first_name' => $user->first_name];
         Mail::to($user->email)->queue(new ReviewLeftMail($data));
 

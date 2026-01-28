@@ -16,6 +16,7 @@ use App\Models\RegistrationRewardSetting;
 use App\Models\ReviewReply;
 use App\Models\ReviewSetting;
 use App\Models\Ride;
+use App\Models\FolkRideSetting;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\ReviewSettingDetail;
 use App\Models\RewardPoint;
@@ -635,6 +636,18 @@ class ReviewController extends Controller
         $data = ['first_name' => $ride->driver->first_name];
         if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
         Mail::to($ride->driver->email)->queue(new DriverReceivedReviewMail($data));
+        }
+
+        // If driver's average rating drops below Extra Care threshold, revoke Extra Care eligibility
+        $driverId = $ride->added_by;
+        $driverRatings = Rating::where('type', 1)->where('status', 1)
+            ->whereHas('ride', fn ($q) => $q->where('added_by', $driverId))->get();
+        if (!$driverRatings->isEmpty()) {
+            $avgRating = (float) $driverRatings->avg('average_rating');
+            $folkSetting = FolkRideSetting::first();
+            if ($folkSetting && $folkSetting->average_rating !== null && $avgRating < (float) $folkSetting->average_rating) {
+                User::where('id', $driverId)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
+            }
         }
 
         if(isset($ride) && !empty($ride)){

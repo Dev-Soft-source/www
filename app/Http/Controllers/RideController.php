@@ -1451,6 +1451,50 @@ class RideController extends Controller
         // Join the selected checkboxes with semicolons.
         $features = implode('=', $request->input('features', []));
 
+        // Feature gatekeeping logic for Pink Ride and Extra Care Ride
+        if ($request->has('features') && is_array($request->features)) {
+            $pinkRideSetting = \App\Models\PinkRideSetting::first();
+            $folkRideSetting = \App\Models\FolkRideSetting::first();
+            $postRidePage = \App\Models\PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+
+            // Get feature IDs for Pink Ride and Extra Care Ride
+            $pinkRideFeatureId = $postRidePage->features_option1->features_setting_id ?? null;
+            $extraCareFeatureId = $postRidePage->features_option2->features_setting_id ?? null;
+
+            // Check if Pink Ride feature is selected
+            if ($pinkRideFeatureId && in_array($pinkRideFeatureId, $request->features)) {
+                // GENDER VALIDATION: Only female users can post Pink Rides
+                if ($pinkRideSetting && $pinkRideSetting->female === '1') {
+                    // Check if user has admin override (pink_ride = '1')
+                    if ($user->pink_ride !== '1') {
+                        // If user is explicitly disabled (pink_ride = '0'), block them
+                        if ($user->pink_ride === '0') {
+                            return back()->with('message', 'You are not allowed to post Pink Rides. Please contact support if you believe this is an error.');
+                        }
+                        // If pink_ride is empty/null, check gender restriction
+                        if ($user->gender !== 'female') {
+                            return back()->with('message', 'Only female drivers can post Pink Rides.');
+                        }
+                    }
+                }
+                
+                // Check if driver's license is required and uploaded
+                if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
+                    if (empty($user->driver_license_upload)) {
+                        return back()->with('message', 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.');
+                    }
+                }
+            }
+
+            // Check if Extra Care Ride feature is selected
+            if ($extraCareFeatureId && is_array($request->features) && in_array($extraCareFeatureId, $request->features)) {
+                $extraCareError = $this->validateExtraCareEligibility($user);
+                if ($extraCareError) {
+                    return back()->with('message', $extraCareError);
+                }
+            }
+        }
+
         // Initialize vehicle variables to prevent undefined variable errors
         $make = '';
         $model = '';
@@ -1639,9 +1683,26 @@ class RideController extends Controller
         
         $googleApiData = $this->getDataFromGoogleApi($from, $to);
         if (isset($googleApiData) && !empty($googleApiData)) {
-            $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
-
-            $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+            // Check element status first before accessing distance/duration
+            $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
+            
+            if ($elementStatus === 'OK') {
+                $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
+                $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+            } else {
+                // Log element status when it's not 'OK' for debugging
+                Log::warning('Google Maps API element status is not OK for ride update', [
+                    'ride_id' => $ride->id,
+                    'from' => $from,
+                    'to' => $to,
+                    'element_status' => $elementStatus,
+                    'api_status' => $googleApiData['status'] ?? 'unknown',
+                    'error_message' => $googleApiData['error_message'] ?? 'No error message',
+                    'full_response' => $googleApiData
+                ]);
+                $duration = 0;
+                $distance = 0;
+            }
         }
 
         if ($distance != 0) {
@@ -1789,9 +1850,27 @@ class RideController extends Controller
                 $toArray = explode(',', $request->to_spot[$key]);
                 $googleApiData = $this->getDataFromGoogleApi($request->from_spot[$key], $request->to_spot[$key]);
                 if (isset($googleApiData) && !empty($googleApiData)) {
-                    $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
-
-                    $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+                    // Check element status first before accessing distance/duration
+                    $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
+                    
+                    if ($elementStatus === 'OK') {
+                        $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
+                        $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+                    } else {
+                        // Log element status when it's not 'OK' for debugging
+                        Log::warning('Google Maps API element status is not OK for ride update spot', [
+                            'ride_id' => $ride->id,
+                            'spot_index' => $key,
+                            'from' => $request->from_spot[$key],
+                            'to' => $request->to_spot[$key],
+                            'element_status' => $elementStatus,
+                            'api_status' => $googleApiData['status'] ?? 'unknown',
+                            'error_message' => $googleApiData['error_message'] ?? 'No error message',
+                            'full_response' => $googleApiData
+                        ]);
+                        $duration = 0;
+                        $distance = 0;
+                    }
                 }
 
                 if ($distance != 0) {
@@ -3083,6 +3162,21 @@ class RideController extends Controller
 
             // Check if Pink Ride feature is selected
             if ($pinkRideFeatureId && in_array($pinkRideFeatureId, $request->features)) {
+                // GENDER VALIDATION: Only female users can post Pink Rides
+                if ($pinkRideSetting && $pinkRideSetting->female === '1') {
+                    // Check if user has admin override (pink_ride = '1')
+                    if ($user->pink_ride !== '1') {
+                        // If user is explicitly disabled (pink_ride = '0'), block them
+                        if ($user->pink_ride === '0') {
+                            return back()->with('message', 'You are not allowed to post Pink Rides. Please contact support if you believe this is an error.');
+                        }
+                        // If pink_ride is empty/null, check gender restriction
+                        if ($user->gender !== 'female') {
+                            return back()->with('message', 'Only female drivers can post Pink Rides.');
+                        }
+                    }
+                }
+                
                 // Check if driver's license is required and uploaded
                 if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                     if (empty($user->driver_license_upload)) {
@@ -3093,11 +3187,9 @@ class RideController extends Controller
 
             // Check if Extra Care Ride feature is selected
             if ($extraCareFeatureId && is_array($request->features) && in_array($extraCareFeatureId, $request->features)) {
-                // Check if driver's license is required and uploaded
-                if ($folkRideSetting && $folkRideSetting->driver_license === '1') {
-                    if (empty($user->driver_license_upload)) {
-                        return back()->with('message', 'A government-issued photo ID (driver\'s license) is required to post Extra Care Rides. Please upload your driver\'s license in your profile.');
-                    }
+                $extraCareError = $this->validateExtraCareEligibility($user);
+                if ($extraCareError) {
+                    return back()->with('message', $extraCareError);
                 }
             }
         }
@@ -3322,9 +3414,25 @@ class RideController extends Controller
         $to = $request->to;
         $googleApiData = $this->getDataFromGoogleApi($from, $to);
         if (isset($googleApiData) && !empty($googleApiData)) {
-            $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
-
-            $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+            // Check element status first before accessing distance/duration
+            $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
+            
+            if ($elementStatus === 'OK') {
+                $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
+                $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+            } else {
+                // Log element status when it's not 'OK' for debugging
+                Log::warning('Google Maps API element status is not OK for post ride', [
+                    'from' => $from,
+                    'to' => $to,
+                    'element_status' => $elementStatus,
+                    'api_status' => $googleApiData['status'] ?? 'unknown',
+                    'error_message' => $googleApiData['error_message'] ?? 'No error message',
+                    'full_response' => $googleApiData
+                ]);
+                $duration = 0;
+                $distance = 0;
+            }
         }
 
         if ($distance != 0) {
@@ -3336,7 +3444,8 @@ class RideController extends Controller
             'to' => $to,
             'distance_km' => $distance,
             'duration_seconds' => $duration,
-            'distance_meters' => $distance * 1000
+            'distance_meters' => $distance * 1000,
+            'element_status' => $elementStatus ?? 'unknown'
         ]);
         
         // Cost-sharing cap validation: Price per seat validation
@@ -3662,9 +3771,26 @@ class RideController extends Controller
                 $toArray = explode(',', $request->to_spot[$key]);
                 $googleApiData = $this->getDataFromGoogleApi($request->from_spot[$key], $request->to_spot[$key]);
                 if (isset($googleApiData) && !empty($googleApiData)) {
-                    $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
-
-                    $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+                    // Check element status first before accessing distance/duration
+                    $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
+                    
+                    if ($elementStatus === 'OK') {
+                        $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
+                        $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
+                    } else {
+                        // Log element status when it's not 'OK' for debugging
+                        Log::warning('Google Maps API element status is not OK for post ride spot', [
+                            'spot_index' => $key,
+                            'from' => $request->from_spot[$key],
+                            'to' => $request->to_spot[$key],
+                            'element_status' => $elementStatus,
+                            'api_status' => $googleApiData['status'] ?? 'unknown',
+                            'error_message' => $googleApiData['error_message'] ?? 'No error message',
+                            'full_response' => $googleApiData
+                        ]);
+                        $duration = 0;
+                        $distance = 0;
+                    }
                 }
 
                 if ($distance != 0) {
@@ -4177,5 +4303,90 @@ class RideController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Validate that the user is eligible to post Extra Care Rides (rating, age, completed rides, no-shows, cancellations, verification).
+     * Returns an error message string if ineligible, or null if eligible.
+     */
+    protected function validateExtraCareEligibility(User $user)
+    {
+        $setting = FolkRideSetting::first();
+        if (!$setting) {
+            return null;
+        }
+
+        if ($user->folks_ride === '0') {
+            return 'You are not allowed to post Extra Care Rides. Please contact support if you believe this is an error.';
+        }
+
+        if ($user->folks_ride !== '1') {
+            if ($setting->verfiy_phone === '1') {
+                $hasVerifiedPhone = $user->relationLoaded('phone_numbers')
+                    ? $user->phone_numbers->contains('verified', 1)
+                    : $user->phoneNumbers()->where('verified', 1)->exists();
+                if (!$hasVerifiedPhone) {
+                    return 'A verified phone number is required to post Extra Care Rides.';
+                }
+            }
+            if ($setting->verify_email === '1' && $user->email_verified !== '1') {
+                return 'A verified email is required to post Extra Care Rides.';
+            }
+            if ($setting->driver_license === '1') {
+                if ($user->driver !== '1') {
+                    return 'Driver verification is required to post Extra Care Rides.';
+                }
+                if (empty($user->driver_license_upload)) {
+                    return 'A government-issued photo ID (driver\'s license) is required to post Extra Care Rides. Please upload your driver\'s license in your profile.';
+                }
+            }
+            if (empty($user->government_issued_id ?? $user->government_id ?? null) || empty($user->address ?? '')) {
+                return 'A complete address and government-issued ID are required to post Extra Care Rides.';
+            }
+
+            $noShowsCount = NoShowHistory::where('user_id', $user->id)->where('type', 'driver')
+                ->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
+            if ($noShowsCount > 0) {
+                return 'Drivers with recent no-shows cannot post Extra Care Rides.';
+            }
+            $cancellationCount = CancellationHistory::where('user_id', $user->id)->where('type', 'driver')
+                ->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
+            if ($cancellationCount > 0) {
+                return 'Drivers with recent cancellations cannot post Extra Care Rides.';
+            }
+
+            $ratings = Rating::where('type', 1)->where('status', 1)
+                ->whereHas('ride', fn ($q) => $q->where('added_by', $user->id))->get();
+            $overallRating = $ratings->isEmpty() ? 0 : $ratings->avg('average_rating');
+            $minRating = (float) ($setting->average_rating ?? 0);
+            if ($overallRating < $minRating) {
+                return 'Extra Care Rides require a minimum driver rating of ' . $minRating . ' stars. Your current rating is ' . number_format((float) $overallRating, 1) . '.';
+            }
+
+            $age = $user->dob ? Carbon::parse($user->dob)->diffInYears(Carbon::now()) : 0;
+            $minAge = (int) ($setting->driver_age ?? 0);
+            if ($minAge > 0 && $age < $minAge) {
+                return 'Extra Care Rides require drivers to be at least ' . $minAge . ' years old.';
+            }
+
+            $rideLimit = (int) ($setting->extra_rides_trip_limit ?? 0);
+            if ($rideLimit > 0) {
+                $totalCompleted = Ride::where('added_by', $user->id)->where('status', '!=', 2)
+                    ->where(function ($q) {
+                        $q->where(function ($q) {
+                            $q->whereDate('completed_date', '<', now()->toDateString())
+                                ->orWhere(function ($q) {
+                                    $q->whereDate('completed_date', '=', now()->toDateString())
+                                        ->whereTime('completed_time', '<', now()->toTimeString());
+                                });
+                        });
+                    })->count();
+                if ($totalCompleted < $rideLimit) {
+                    return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
+                }
+            }
+        }
+
+        return null;
     }
 }

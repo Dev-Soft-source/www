@@ -17,5 +17,6 @@ class FolkRideSetting extends Model
         'verfiy_phone',
         'verify_email',
         'driver_license',
+        'extra_rides_trip_limit',
     ];
 }

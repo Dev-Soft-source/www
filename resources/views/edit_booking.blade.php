@@ -730,6 +730,44 @@
     </div>
 </div>
 
+<!-- Student Seat Limit Modal -->
+<div id="studentSeatLimitModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="student-seat-limit-modal-title" role="dialog" aria-modal="true">
+    <div onclick="closeStudentSeatLimitModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border" onclick="event.stopPropagation()">
+                <button type="button" onclick="closeStudentSeatLimitModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                    <div class="sm:flex sm:items-start justify-center">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-yellow-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-yellow-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="">
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="student-seat-limit-modal-title">Seat Limit Reached</h3>
+                        </div>
+                        <div class="mt-2 w-full">
+                            <p class="can-exp-p text-center">Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                    <button type="button" onclick="closeStudentSeatLimitModal()" class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('script')
@@ -1179,10 +1217,64 @@ inputs.forEach((input, index) => {
     }
 
     // var lastSelectedIndex = -1;
+    
+    // Define modal functions early to ensure they're available
+    function showStudentSeatLimitModal() {
+        const modal = document.getElementById('studentSeatLimitModal');
+        if (!modal) {
+            console.error('Student seat limit modal not found');
+            // Fallback to alert if modal not found
+            alert('Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.');
+            return;
+        }
+        // Remove hidden class and ensure visibility
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'block', 'important');
+        modal.style.setProperty('visibility', 'visible', 'important');
+        modal.style.setProperty('opacity', '1', 'important');
+        modal.style.setProperty('z-index', '50', 'important');
+        
+        // Also ensure the backdrop is visible
+        const backdrop = modal.querySelector('.fixed.inset-0.bg-gray-500');
+        if (backdrop) {
+            backdrop.style.setProperty('display', 'block', 'important');
+        }
+    }
+    
+    function closeStudentSeatLimitModal() {
+        const modal = document.getElementById('studentSeatLimitModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.removeProperty('display');
+            modal.style.removeProperty('visibility');
+            modal.style.removeProperty('opacity');
+            modal.style.removeProperty('z-index');
+        }
+    }
+    
+    // Make functions globally available immediately
+    window.showStudentSeatLimitModal = showStudentSeatLimitModal;
+    window.closeStudentSeatLimitModal = closeStudentSeatLimitModal;
+
     function seat_selected(th) {
         // Get the count of selected seats
         var selectedSeats = $("input[name='seats_id[]']:checked").length;
         console.log('Number of selected seats:', selectedSeats);
+
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        var isStudent = {{ (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2')) ? 'true' : 'false' }};
+        var paymentMethod = $('#check_payment_method').val(); // "cash" or "online"
+        var isCashPayment = (paymentMethod === 'cash');
+        
+        // If user is a student and payment is Cash, limit to 2 seats
+        if (isStudent && isCashPayment) {
+            // If trying to select more than 2 seats, prevent it
+            if ($(th).is(':checked') && selectedSeats > 2) {
+                $(th).prop('checked', false);
+                showStudentSeatLimitModal();
+                return;
+            }
+        }
 
         var seat = $(th).val();
         var clickedIndex = $("input[name='seats_id[]']").index(th);
@@ -1259,6 +1351,13 @@ inputs.forEach((input, index) => {
             checkbox.checked = true;
         }
     }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeStudentSeatLimitModal();
+        }
+    });
 
     document.getElementById('close-modal').addEventListener('click', function () {
     const modal = document.getElementById('bookingModal');
