@@ -158,9 +158,9 @@
                                     </td>
                                 @elseif ($reviewButtonVisible)
                                     <!-- Show 'Review' button if no matching rating is found -->
-                                    @isset($booking->uuid)
+                                    @isset($booking->id)
                                         <td class="border border-slate-300 px-4 py-2 text-center">
-                                            <a href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->uuid]) }}" class="button-exp-fill me-1">
+                                            <a href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}" class="button-exp-fill me-1">
                                                 {{$myPassengerPage->web_reviewd_label ?? "Review"}}
                                             </a>
                                         </td>

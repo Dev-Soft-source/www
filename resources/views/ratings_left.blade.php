@@ -13,14 +13,22 @@
             @php $displayLimit = 5; @endphp
             @foreach ($ratings as $index => $rating)
                 <div class=" even:bg-gray-100 odd:bg-white rounded border border-gray-100 shadow p-4 md:p-6 {{ $index >= $displayLimit ? 'hidden-rating hidden' : '' }}">
+                    @php
+                        $reviewedUser = null;
+                        if ((int) $rating->type === 1 && $rating->ride && $rating->ride->driver) {
+                            $reviewedUser = $rating->ride->driver;
+                        } elseif ((int) $rating->type === 2 && $rating->booking && $rating->booking->passenger) {
+                            $reviewedUser = $rating->booking->passenger;
+                        }
+                    @endphp
                     <div class='flex items-start md:justify-center space-x-4'>
                         <div class="md:w-2/12">
                             <div class="w-16 h-16 md:w-28 md:h-28 bg-gray-50 border mx-auto rounded-full overflow-hidden">
-                                @isset($rating->ride->driver->profile_image)
+                                @if ($reviewedUser && isset($reviewedUser->profile_image))
                                     <img class="w-full h-full object-contain"
-                                        src="{{ $rating->ride->driver->profile_image }}"
+                                        src="{{ $reviewedUser->profile_image }}"
                                         alt="">
-                                @endisset
+                                @endif
                             </div>
                         </div>
                         <div class="flex-auto md:w-10/12">
@@ -33,14 +41,14 @@
                                 <div class="flex justify-between">
                                     <div>
                                         <h6 class='card-title leading-7 m-0'>
-                                            @isset($rating->ride->driver->type)
-                                                @if ($rating->ride->driver->type === '2')
-                                                    {{ $rating->ride->driver->last_name }}
-                                                @elseif ($rating->ride->driver->type === '3')
-                                                    {{ $rating->ride->driver->first_name }} {{ $rating->ride->driver->last_name }}
+                                            @if ($reviewedUser)
+                                                @if ($reviewedUser->type === '2')
+                                                    {{ $reviewedUser->last_name }}
+                                                @elseif ($reviewedUser->type === '3')
+                                                    {{ $reviewedUser->first_name }} {{ $reviewedUser->last_name }}
                                                 @else
-                                                    {{ $rating->ride->driver->first_name }}
-                                                @endisset
+                                                    {{ $reviewedUser->first_name }}
+                                                @endif
                                             @endif
                                         </h6>
                                         <div class="flex space-x-1">

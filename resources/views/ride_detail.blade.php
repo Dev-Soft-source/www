@@ -648,19 +648,41 @@
                         </div>
                     </div>
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <h3 class="cursor-pointer bg-primary text-white py-2 px-4 text-2xl xl:text-3xl w-full"
-                            onclick="window.location.href='{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}'">
-
-                            @if ($ride_cancelled)
-                                @isset($rideDetailPage->review_driver_info_label)
-                                    {{ $rideDetailPage->review_driver_info_label }}
-                                @endisset
+                        @php
+                            $passengerBookingUuid = null;
+                            if (auth()->user() && $ride->bookings) {
+                                $userBooking = $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', '3')->where('status', '<>', '4')->first();
+                                if ($userBooking && $userBooking->id) {
+                                    $passengerBookingUuid = $userBooking->id;
+                                }
+                            }
+                            $rideIsPast = strtotime($ride->date . ' ' . $ride->time) < strtotime('now');
+                            $showReviewLink = $passengerBookingUuid && ($ride_cancelled || $rideIsPast);
+                        @endphp
+                        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
+                            @if ($showReviewLink)
+                                <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}" class="w-full text-2xl xl:text-3xl text-white hover:text-white no-underline cursor-pointer">
+                                    @isset($rideDetailPage->review_driver_info_label)
+                                        {{ $rideDetailPage->review_driver_info_label }}
+                                    @endisset
+                                </a>
+                            @elseif (!$ride_cancelled && $ride->added_by)
+                                <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}" class="w-full text-white text-2xl xl:text-3xl hover:text-white no-underline cursor-pointer">
+                                    @isset($rideDetailPage->driver_info_label)
+                                        {{ $rideDetailPage->driver_info_label }}
+                                    @endisset
+                                </a>
                             @else
-                                @isset($rideDetailPage->driver_info_label)
-                                    {{ $rideDetailPage->driver_info_label }}
-                                @endisset
+                                @if ($ride_cancelled)
+                                    @isset($rideDetailPage->review_driver_info_label)
+                                        {{ $rideDetailPage->review_driver_info_label }}
+                                    @endisset
+                                @else
+                                    @isset($rideDetailPage->driver_info_label)
+                                        {{ $rideDetailPage->driver_info_label }}
+                                    @endisset
+                                @endif
                             @endif
-
                         </h3>
 
                         <div class="flex items-center justify-between p-4 w-full">

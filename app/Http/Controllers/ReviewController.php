@@ -24,6 +24,7 @@ use App\Models\TopUpBalance;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class ReviewController extends Controller
 {
@@ -216,7 +217,7 @@ class ReviewController extends Controller
     }
 
     public function ReviewPassenger($lang, $id){
-        $booking = Booking::where('uuid', $id)->first();
+        $booking = Booking::where('id', $id)->first();
         if ($booking) {
             $languages = Language::all();
             // Store the selected language in the session
@@ -475,7 +476,9 @@ class ReviewController extends Controller
     }
 
     public function ReviewDriver($lang, $id){
-        $booking = Booking::where('uuid', $id)->first();
+
+        $booking = Booking::where('id', $id)->first();
+        Log::info($booking);
         if ($booking) {
             $ride = Ride::whereId($booking->ride_id)->first();
     
