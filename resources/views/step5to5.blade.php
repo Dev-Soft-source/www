@@ -245,14 +245,16 @@
                               </div>
                               <div id="whatsappResendContainer" class="hidden mt-4">
                                 <p class="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-                                <button type="button" onclick="resendViaWhatsApp()" id="resendWhatsAppBtn" class="w-full bg-green-500 hover:bg-green-600 text-white text-sm rounded font-FuturaMdCnBT px-4 py-2 text-center shadow-md flex items-center justify-center gap-2">
-                                    Verify via WhatsApp
-                                </button>
                               </div>
                             </div>
                         </div>
-                        <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="submit" class="inline-flex w-42 justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3">
+                        <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                            <div id="whatsappResendBtnWrapper" class="hidden">
+                                <button type="button" onclick="resendViaWhatsApp()" id="resendWhatsAppBtn" class="inline-flex justify-center items-center gap-2 rounded bg-green-500 hover:bg-green-600 text-white text-sm font-FuturaMdCnBT px-4 py-2 text-center shadow-md">
+                                    Verify via WhatsApp
+                                </button>
+                            </div>
+                            <button type="submit" class="inline-flex w-42 justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
                                 @isset($step4Page->verify_button_label_1){{ $step4Page->verify_button_label_1 }}@endisset
                             </button>
                         </div>
@@ -512,9 +514,9 @@ function sendVerificationCode(channel = 'sms') {
                 
                 // Show WhatsApp resend option in verification modal
                 const whatsappResendContainer = document.getElementById('whatsappResendContainer');
-                if (whatsappResendContainer) {
-                    whatsappResendContainer.classList.remove('hidden');
-                }
+                const whatsappResendBtnWrapper = document.getElementById('whatsappResendBtnWrapper');
+                if (whatsappResendContainer) whatsappResendContainer.classList.remove('hidden');
+                if (whatsappResendBtnWrapper) whatsappResendBtnWrapper.classList.remove('hidden');
             } else {
                 // North American number: Show SMS button, hide WhatsApp button
                 if (sendCodeBtn) {
@@ -535,9 +537,9 @@ function sendVerificationCode(channel = 'sms') {
                     sendCodeBtn.classList.remove('hidden');
                 }
                 const whatsappResendContainer = document.getElementById('whatsappResendContainer');
-                if (whatsappResendContainer) {
-                    whatsappResendContainer.classList.add('hidden');
-                }
+                const whatsappResendBtnWrapper = document.getElementById('whatsappResendBtnWrapper');
+                if (whatsappResendContainer) whatsappResendContainer.classList.add('hidden');
+                if (whatsappResendBtnWrapper) whatsappResendBtnWrapper.classList.add('hidden');
             }
             
             // Show remaining attempts if provided

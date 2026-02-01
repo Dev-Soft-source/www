@@ -659,15 +659,15 @@
                             $rideIsPast = strtotime($ride->date . ' ' . $ride->time) < strtotime('now');
                             $showReviewLink = $passengerBookingUuid && ($ride_cancelled || $rideIsPast);
                         @endphp
-                        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
+                        <h3 class="bg-primary text-white hover:text-red-400 py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
                             @if ($showReviewLink)
-                                <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}" class="w-full text-2xl xl:text-3xl text-white hover:text-white no-underline cursor-pointer">
+                                <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}" class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
                                     @isset($rideDetailPage->review_driver_info_label)
                                         {{ $rideDetailPage->review_driver_info_label }}
                                     @endisset
                                 </a>
                             @elseif (!$ride_cancelled && $ride->added_by)
-                                <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}" class="w-full text-white text-2xl xl:text-3xl hover:text-white no-underline cursor-pointer">
+                                <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}" class="w-full text-white text-2xl xl:text-3xl hover:text-red-400 no-underline cursor-pointer">
                                     @isset($rideDetailPage->driver_info_label)
                                         {{ $rideDetailPage->driver_info_label }}
                                     @endisset

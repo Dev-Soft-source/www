@@ -119,32 +119,32 @@
                                                 </svg>
                                             </button>
                                              @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
-                                             <a @if ($notification->type == '1')
-                                                 @if($notification->departure && $notification->destination)
-                                                 href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $notification->departure , 'destination' => $notification->destination , 'id' => $notification->ride_id]) }}"
-                                                 @endif
-                                                 @elseif ($notification->type == '2')
-                                                     href="{{ route('ride_detail', [
-                                                         'lang' => $selectedLanguage->abbreviation ?? 'en',
-                                                         'departure' => $notification->departure ?? 'unknown',
-                                                         'destination' => $notification->destination ?? 'unknown',
-                                                         'id' => $notification->ride_id ?? 0
-                                                     ]) }}"
-                                                @elseif ($notification->type == null)
                                                     @php
-                                                        // Check if it's a welcome/system notification
-                                                        if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
-                                                            $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                        if ($notification->type == '1' && $notification->departure && $notification->destination) {
+                                                            $targetUrl = route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $notification->departure, 'destination' => $notification->destination, 'id' => $notification->ride_id]);
+                                                        } elseif ($notification->type == '2') {
+                                                            $targetUrl = route('ride_detail', [
+                                                                'lang' => $selectedLanguage->abbreviation ?? 'en',
+                                                                'departure' => $notification->departure ?? 'unknown',
+                                                                'destination' => $notification->destination ?? 'unknown',
+                                                                'id' => $notification->ride_id ?? 0
+                                                            ]);
+                                                        } elseif ($notification->type == null) {
+                                                            if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
+                                                                $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                            } else {
+                                                                $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
+                                                                $targetUrl = $hasChatTarget
+                                                                    ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
+                                                                    : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                            }
                                                         } else {
-                                                            $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
-                                                            $targetUrl = $hasChatTarget
-                                                                ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
-                                                                : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                            $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
                                                         }
                                                     @endphp
-                                                    href="javascript:void(0);"
-                                                    onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, '{{ $targetUrl }}')"
-                                                @endif
+                                             <a href="javascript:void(0);"
+                                                data-redirect-url="{{ $targetUrl }}"
+                                                onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, this.getAttribute('data-redirect-url'))"
                                                  class="block border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors duration-150">
                                                     <div class="flex gap-3 p-4 relative">
                                                         <div class="flex-shrink-0 relative">

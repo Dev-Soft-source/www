@@ -721,7 +721,7 @@ class PhoneController extends Controller
                 
                 if ($request->step) {
                     $response['redirect'] = route('profile', ['lang' => $selectedLanguage->abbreviation]);
-                    $response['message'] = "sdfsdfsdfsdfdsf";//"Your profile is all set. Welcome to ProximaRide!";
+                    $response['message'] = "Your profile is all set. Welcome to ProximaRide!";
                 } elseif ($returnUrl) {
                     $response['redirect'] = $returnUrl;
                 } elseif ($request->page && $request->page == "booking") {

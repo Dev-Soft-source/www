@@ -116,11 +116,11 @@ class ProfileController extends Controller
                 'step' => '5'
             ]);
 
-            $showWelcomePopup = session()->has('show_welcome_popup');
-            if ($user->step === '5' && !$showWelcomePopup) {
-                session(['show_welcome_popup' => true]);
-                return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");
-            }
+            // $showWelcomePopup = session()->has('show_welcome_popup');
+            // if ($user->step === '5' && !$showWelcomePopup) {
+            //     session(['show_welcome_popup' => true]);
+            //     return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");//"Your profile is all set. Welcome to ProximaRide!");
+            // }
 
             return view('profile',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'user' => $user,'editProfilePage' => $editProfilePage,'reviewSetting' => $reviewSetting,'ProfileSetting' => $ProfileSetting,'ProfilePage' => $ProfilePage,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
         } else {
@@ -208,7 +208,13 @@ class ProfileController extends Controller
         }
 
         $ride = Ride::whereId($id)->first();
-        $driver_id = $ride->driver->id;
+        if (!$ride) {
+            $ride = Ride::where('added_by', $id)->first();
+        }
+        if (!$ride || !$ride->driver) {
+            abort(404);
+        }
+        $driver_id = $ride->added_by;
 
         $ratings = Rating::where(function ($query) use ($driver_id) {
             // Ratings where type is 2 and user_id belongs to the user
