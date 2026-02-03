@@ -127,9 +127,9 @@
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <h6 class="text-lg font-medium text-gray-900 mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
                                 @isset($step4Page->confirm_title){{ $step4Page->confirm_title }}@endisset
-                            </h6>
+                            </h3>
                             <p class="text-gray-600">
                                 @isset($step4Page->confirm_text){{ $step4Page->confirm_text }}@endisset
                             </p>
@@ -155,9 +155,9 @@
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <h6 class="text-lg font-medium text-gray-900 mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
                                 @isset($step4Page->skip_confirmation_heading){{ $step4Page->skip_confirmation_heading }}@endisset
-                            </h6>
+                            </h3>
                             <p class="text-gray-600">
                                 @isset($step4Page->skip_confirmation_message){{ $step4Page->skip_confirmation_message }}@endisset
                             </p>
@@ -177,9 +177,9 @@
     </div>
 
     {{-- WhatsApp Unavailable Notification Modal --}}
-    <div id="whatsappUnavailableModal" class="hidden fixed inset-0 z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-40" onclick="closeWhatsAppUnavailableModal()"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div id="whatsappUnavailableModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeWhatsAppUnavailableModal()"></div>
+        <div class="fixed inset-0 z-60 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <button type="button" onclick="closeWhatsAppUnavailableModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
@@ -194,16 +194,16 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h6 class="text-lg font-medium text-gray-900 mb-4" id="whatsappUnavailableTitle">
+                            <h3 class="font-FuturaMdCnBT font-medium text-gray-700 mb-4" id="whatsappUnavailableTitle">
                                 WhatsApp Not Available
-                            </h6>
+                            </h3>
                             <p class="text-gray-600" id="whatsappUnavailableMessage">
                                 WhatsApp is not available for this number. Verification code has been sent via SMS instead.
                             </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                        <button type="button" onclick="closeWhatsAppUnavailableModal()" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                        <button type="button" onclick="closeWhatsAppUnavailableModal()" class="inline-flex justify-center rounded w-28 bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 ">
                             OK
                         </button>
                     </div>
@@ -228,9 +228,9 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="mt-2">
-                              <h6 class="text-left">
+                              <h3 class="text-left">
                                 @isset($step4Page->verify_code_heading){{ $step4Page->verify_code_heading }}@endisset
-                              </h6>
+                              </h3>
                               <p class="text-center mt-4">
                                 @isset($step4Page->verify_code_label_1){{ $step4Page->verify_code_label_1 }}@endisset
                               </p>
@@ -243,17 +243,9 @@
                               <div id="codeError" class="hidden mt-2">
                                 <p class="text-red-500 text-sm"></p>
                               </div>
-                              <div id="whatsappResendContainer" class="hidden mt-4">
-                                <p class="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-                              </div>
                             </div>
                         </div>
-                        <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                            <div id="whatsappResendBtnWrapper" class="hidden">
-                                <button type="button" onclick="resendViaWhatsApp()" id="resendWhatsAppBtn" class="inline-flex justify-center items-center gap-2 rounded bg-green-500 hover:bg-green-600 text-white text-sm font-FuturaMdCnBT px-4 py-2 text-center shadow-md">
-                                    Verify via WhatsApp
-                                </button>
-                            </div>
+                        <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center">
                             <button type="submit" class="inline-flex w-42 justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
                                 @isset($step4Page->verify_button_label_1){{ $step4Page->verify_button_label_1 }}@endisset
                             </button>
