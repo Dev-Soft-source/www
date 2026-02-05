@@ -22,7 +22,7 @@
                   'flex justify-end': message.user && message.user.id == logged_in_user_id,
                   'flex justify-start': message.user && message.user.id != logged_in_user_id
                 }, 'mb-2']"
-                :style="message.user && message.user.id == logged_in_user_id ? {'marginRight': '32px'} : {}"
+                :style="message.user && message.user.id == logged_in_user_id ? {'marginRight': '12px'} : {}"
             >
                 <div style="max-width:70%;">
                     <div class="header">
@@ -110,6 +110,7 @@ export default {
             return `${datePart} at ${timePart}`;
         },
         bubbleStyle(message) {
+            const fontFamily = "'FuturaMdCnBT', 'Futura', 'Futura Medium Condensed BT', Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif";
             if(message.user && message.user.id == this.logged_in_user_id) {
                 // My message (blue)
                 return {
@@ -122,6 +123,7 @@ export default {
                     'display': 'inline-block',
                     'max-width': '100%',
                     'word-break': 'break-word',
+                    'font-family': fontFamily,
                 };
             }
             // Their message (gray)
@@ -135,6 +137,7 @@ export default {
                 'display': 'inline-block',
                 'max-width': '100%',
                 'word-break': 'break-word',
+                'font-family': fontFamily,
             };
         }
     }

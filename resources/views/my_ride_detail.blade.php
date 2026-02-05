@@ -133,15 +133,15 @@
             <div class="col-span-2">
                 @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                         @if (count($ride->bookings->where('status', 0)) > 0)
-                        <div class=" bg-white rounded-lg overflow-hidden shadow-3xl mb-6">
-                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
+                        <div class="bg-white rounded-xl overflow-hidden shadow-2xl mb-6 border-2 border-amber-400 booking-request-frame ring-2 ring-amber-300 ring-offset-2">
+                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl ">
                                 {{ $rideDetailPage->booking_request_main_heading ?? 'You have the following booking requests' }}
                             </h3>
-                            <div class="bg-white p-2 py-4 md:p-4 space-y-3">
+                            <div class="bg-amber-50/30 p-2 py-4 md:p-4 space-y-3">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     @foreach ($ride->bookings->where('status', 0) as $booking)
                                         @if ($booking->passenger)
-                                            <div class="border rounded">
+                                            <div class="border-2 border-amber-200 rounded-xl shadow-lg bg-white booking-request-card animate__animated animate__fadeInUp overflow-hidden">
                                                 <div class="border-b border-slate-300 px-4 py-2 font-FuturaMdCnBT text-2xl">
                                                     {{ $rideDetailPage->booking_request_heading ?? 'Booking request' }}</div>
                                                 <div class="p-4">
@@ -166,14 +166,20 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center justify-center mt-4 gap-2">
-                                                        <a href="{{ route('reject_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}"
-                                                            class="button-exp-fill w-36">
-                                                            {{ $rideDetailPage->request_reject_label ?? 'Reject' }}
-                                                        </a>
-                                                        <a href="{{ route('accept_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}"
-                                                            class="bg-greenXS hover:bg-greenXS button-exp-fill w-36">
-                                                            {{ $rideDetailPage->request_accept_label ?? 'Accept' }}
-                                                        </a>
+                                                        @auth
+                                                        <button type="button"
+                                                            class="button-exp-fill w-36 booking-decline-btn"
+                                                            data-reject-url="{{ route('reject_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
+                                                            {{ $rideDetailPage->request_reject_label ?? 'Decline' }}
+                                                        </button>
+                                                        <button type="button"
+                                                            class="bg-greenXS hover:bg-greenXS button-exp-fill w-42 booking-approve-btn"
+                                                            data-accept-url="{{ route('accept_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
+                                                            {{ $rideDetailPage->request_accept_label ?? 'Approve Booking' }}
+                                                        </button>
+                                                        @else
+                                                        <span class="text-gray-500 text-sm">{{ $rideDetailPage->request_reject_label ?? 'Reject' }} / {{ $rideDetailPage->request_accept_label ?? 'Accept' }} ({{ __('Sign in to respond') }})</span>
+                                                        @endauth
                                                     </div>
                                                 </div>
                                             </div>
@@ -221,11 +227,13 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->driver_age_label ?? 'Age' }}:
-                                                            <span>{{ $age }}</span></p>
+                                                            <span>{{ $age }}</span></p> 
+                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->web_gender_label ?? 'Gender' }}:
                                                             <span>{{ $booking->passenger->gender }}</span></p>
+                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         @php
                                                             $user_id = $booking->passenger->id;
 
@@ -239,11 +247,17 @@
 
                                                             $totalAverage =
                                                                 $filteredRatings->avg('average_rating') ?? 0;
+                                                            $hasReviews = $filteredRatings->isNotEmpty();
                                                         @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            {{ $rideDetailPage->review_label ?? 'Review' }}:
-                                                            <span>{{ number_format($totalAverage, 1) }}</span></p>
+                                                            @if ($hasReviews)
+                                                                {{ $rideDetailPage->review_label ?? 'Review' }}:
+                                                                <span>{{ number_format($totalAverage, 1) }}</span>
+                                                            @else
+                                                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
+                                                            @endif
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -343,9 +357,12 @@
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
                             <p class="font-medium text-left text-black">
+                                @php
+                                    $bookedSeatsCount = $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats');
+                                @endphp
                                 {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: <span
-                                    class="text-black font-normal">{{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }}
-                                    {{ $rideDetailPage->seat_on_column_label ?? 'seats' }}</span></p>
+                                    class="text-black font-normal">{{ $bookedSeatsCount }}
+                                    {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}</span></p>
                         </div>
                         <div class="p-4">
                         <div class="flex items-center justify-between">
@@ -574,11 +591,17 @@
 
                                                             $totalAverage =
                                                                 $filteredRatings->avg('average_rating') ?? 0;
+                                                            $hasReviews = $filteredRatings->isNotEmpty();
                                                         @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            {{ $rideDetailPage->review_label ?? 'Review' }}:
-                                                            <span>{{ number_format($totalAverage, 1) }}</span></p>
+                                                            @if ($hasReviews)
+                                                                {{ $rideDetailPage->review_label ?? 'Review' }}:
+                                                                <span>{{ number_format($totalAverage, 1) }}</span>
+                                                            @else
+                                                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
+                                                            @endif
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -734,6 +757,82 @@
         </div>
     </div>
 
+    {{-- Decline booking request: confirmation modal --}}
+    <div id="declineConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('declineConfirmModal')"></div>
+            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('declineConfirmModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <p class="text-left text-gray-800">Are you sure you want to decline this booking request? This action cannot be undone.</p>
+                </div>
+                <div class="px-4 pb-6 pt-4 flex flex-wrap justify-center gap-2 sm:gap-3">
+                    <button type="button" id="declineConfirmYes" class="inline-flex justify-center rounded bg-red-500 px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-red-400 sm:w-auto">Yes, decline</button>
+                    <button type="button" onclick="closeBookingModal('declineConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No, take me back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Approve booking request: confirmation modal --}}
+    <div id="approveConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('approveConfirmModal')"></div>
+            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('approveConfirmModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <p class="text-left text-gray-800">Are you sure you want to approve this booking request?</p>
+                </div>
+                <div class="px-4 pb-6 pt-4 flex flex-wrap justify-center gap-2 sm:gap-3">
+                    <button type="button" id="approveConfirmYes" class="inline-flex justify-center rounded bg-greenXS px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 sm:w-auto">Yes, approve it!</button>
+                    <button type="button" onclick="closeBookingModal('approveConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No, take me back!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (session('decline_success_message'))
+    <div id="declineSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('declineSuccessModal')"></div>
+            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('declineSuccessModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <p class="text-left text-gray-800">{{ session('decline_success_message') }}</p>
+                </div>
+                <div class="px-4 pb-6 pt-4">
+                    <button type="button" onclick="closeBookingModal('declineSuccessModal')" class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $messages->popup_close_btn_text ?? 'Close' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if (session('approve_success_message'))
+    <div id="approveSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('approveSuccessModal')"></div>
+            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('approveSuccessModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <p class="text-left text-gray-800">{{ session('approve_success_message') }}</p>
+                </div>
+                <div class="px-4 pb-6 pt-4">
+                    <button type="button" onclick="closeBookingModal('approveSuccessModal')" class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $messages->popup_close_btn_text ?? 'Close' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div id="securedCashAttemptError" class="hidden fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -759,6 +858,25 @@
 
 @endsection
 
+@section('style')
+<style>
+    .booking-request-frame {
+        animation: booking-request-pulse 2.5s ease-in-out 2;
+    }
+    @keyframes booking-request-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+        50% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+    }
+    .booking-request-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .booking-request-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+@endsection
+
 @section('script')
     <script>
         function closeModal(modalId) {
@@ -767,6 +885,61 @@
                 modal.style.display = 'none';
             }
         }
+
+        function closeBookingModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var pendingRejectUrl = null;
+            var pendingAcceptUrl = null;
+
+            document.querySelectorAll('.booking-decline-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    pendingRejectUrl = this.getAttribute('data-reject-url');
+                    var modal = document.getElementById('declineConfirmModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.booking-approve-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    pendingAcceptUrl = this.getAttribute('data-accept-url');
+                    var modal = document.getElementById('approveConfirmModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            var declineConfirmYes = document.getElementById('declineConfirmYes');
+            if (declineConfirmYes) {
+                declineConfirmYes.addEventListener('click', function() {
+                    if (pendingRejectUrl) {
+                        window.location.href = pendingRejectUrl;
+                    }
+                });
+            }
+
+            var approveConfirmYes = document.getElementById('approveConfirmYes');
+            if (approveConfirmYes) {
+                approveConfirmYes.addEventListener('click', function() {
+                    if (pendingAcceptUrl) {
+                        window.location.href = pendingAcceptUrl;
+                    }
+                });
+            }
+        });
 
         // Rest of your existing JavaScript...
         document.addEventListener('DOMContentLoaded', function() {

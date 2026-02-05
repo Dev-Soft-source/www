@@ -561,8 +561,8 @@
             }
             
             const request = {
-                countryCode: 'US',
-                currencyCode: 'USD',
+                countryCode: 'CA',
+                currencyCode: 'CAD',
                 supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
                 merchantCapabilities: ['supports3DS'],
                 total: {
@@ -694,7 +694,7 @@
             },
             transactionInfo: {
                 totalPriceStatus: 'NOT_CURRENTLY_KNOWN',
-                currencyCode: 'USD'
+                currencyCode: 'CAD'
             }
         };
         

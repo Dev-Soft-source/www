@@ -207,12 +207,17 @@
         
         <input type="hidden" name="id" value="{{ $ride->id}}">
         <input type="hidden" name="gPayApplePayId" value="">
-        <h1>
-            @isset($bookingPage->main_heading)
-                {{ $bookingPage->main_heading }}
-            @endisset
-        </h1>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
+            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 -mb-4">
+                <h1 class="-mb-2">
+                    @isset($bookingPage->main_heading)
+                        {{ $bookingPage->main_heading }}
+                    @endisset
+                </h1>
+                <div class="text-red-500 text-lg  pr-4">
+                    <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
+                </div>
+            </div>
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
@@ -265,14 +270,14 @@
                         @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
                             @for ($i = 0; $i < $booking->seats; $i++)
                                 @if ($booking->passenger)
-                                        @if ($booking->passenger->profile_image)
-                                            <img class="w-10 h-10 rounded-full"
-                                                src="{{ $booking->passenger->profile_image }}"
-                                                alt="">
-                                        @else
-                                            <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
-                                                alt="">
-                                        @endif
+                                    @if ($booking->passenger->profile_image)
+                                        <img class="w-10 h-10 rounded-full"
+                                            src="{{ $booking->passenger->profile_image }}"
+                                            alt="">
+                                    @else
+                                        <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
+                                            alt="">
+                                    @endif
                                 @endif
                             @endfor
                         @endforeach
@@ -288,22 +293,18 @@
                             </p>
                         </div>
                         
-                        <div class="p-4">
-                            <p class="font-medium text-left text-gray-800">
-
-
+                        <div class="p-4 ">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                    Booking method:
+                                </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                <div class="w-full flex items-center justify-start">
                                     <div
                                         class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
                                         {{ $ride->booking_method->name }}
                                     </div>
-                                </div>
-                            @endisset
-                            
-
-                              
-                            </p>
+                                @endisset
+                            </div>
                         </div>
                     </div>
                     <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
@@ -311,8 +312,14 @@
                             <p class="text-left font-medium">{{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }} seats left </p>
                         </div>
                         <div class="p-4">
-                            <p class="font-medium text-left text-primary">${{ $ride->rideDetail[0]->price }} per seat</p>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h4 class="text-gray-600 text-lg xl:text-xl">
+                                    Booking Price:
+                                </h4>
+                                <p class="font-medium text-left text-primary">${{ $ride->rideDetail[0]->price }} per seat</p>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
@@ -400,7 +407,7 @@
             </div>
             <div class="col-span-1">
                 <div class="">
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl hidden">
+                    <!-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl hidden">
                         <div class="bg-primary text-white px-4 py-2">
                             <h3 class="text-2xl xl:text-3xl">
                                 @isset($bookingPage->cancellation_policy_label)
@@ -438,10 +445,83 @@
                                 @endif
                             @endisset
                         </div>
+                    </div> -->
+
+                    <div class=" bg-white rounded-lg shadow-3xl">
+                        <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
+                            <h3 class="text-2xl xl:text-3xl">
+                                @isset($bookingPage->booking_label)
+                                    {{ $bookingPage->booking_label }}
+                                @endisset
+                            </h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-b-lg">
+                            <div class="space-y-4 mb-4">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex relative">
+                                        <h3 class="text-primary text-2xl xl:text-3xl">
+                                            @isset($bookingPage->seats_available_label)
+                                                {{ $bookingPage->seats_available_label }}
+                                            @endisset
+                                        </h3>
+                                        <!-- <div class="sups inline-flex">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div
+                                              class="absolute tooltip payment_tooltiptext_position top-8 left-0 group-hover:flex hidden peer-hover:flex"
+                                            >
+                                                <div
+                                                    role="tooltip"
+                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-[#c75b5b]  border border-[#c75b5b] text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                >
+                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
+                                                        {{ $bookingPage->seats_available_info_text_ ?? 'seat avaialbe info text' }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                    </div>
+                                </div>
+
+                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                                    <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p class="text-yellow-800 text-sm">
+                                            <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
+                                        </p>
+                                    </div>
+                                @endif
+                                <div class="flex">
+                                    @foreach ($ride->pendingSeatDetail as $detail)
+                                        <div class="relative">
+                                            <label for="number-of-seat-{{ $detail->id }}">
+                                                <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden" {{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
+                                                <img src="{{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                <span class="absolute left-4 top-3 seat-number seat-number-{{ $detail->id }} {{ old('seats') == $detail->id ? 'text-green-300' : '' }}"></span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @error('seats')
+                                  <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base">Please select at least one seat to continue.</p>
+                                    </div>
+                                  </div>
+                                @enderror
+
+                                <div id ="seats-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded " >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                  </div>
+                                <!-- Hidden input to store count -->
+                                <input type="hidden" id="seat-count" name="seats" value="">
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-left text-red-500 text-lg">
-                        <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
-                    </div>
+
                     <div class="mt-4 bg-white rounded-lg shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
                             <h3 class="text-2xl xl:text-3xl">
@@ -486,7 +566,7 @@
                             <div class="flex items-center justify-between gap-2 mt-1">
                                 <div class="flex items-center gap-2">
                                     <p class="text-black">
-                                        @isset($bookingPage->booking_fee_label)`
+                                        @isset($bookingPage->booking_fee_label)
                                             {{ $bookingPage->booking_fee_label }}
                                         @endisset
                                     </p>
@@ -510,7 +590,7 @@
                                             <!-- Tooltip -->
                                             <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
                                                 <div class="student-verification-tooltip bg-green-500">
-                                                    <p class="text-white text-sm">As a verified student, your booking fee is waived. You only pay the booking price.</p>
+                                                    <p class="text-white text-md">As a verified student, your booking fee is waived. You only pay the booking price.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -526,7 +606,6 @@
                                 }else{
                                     $settingTaxPercentage = $setting->tax;
                                 }
-
                             @endphp
 
                             <input type="hidden" value="{{$settingTaxPercentage}}" name="tax_percentage">
@@ -628,119 +707,62 @@
                                     <span id="discount" class="text-right"></span>
                                 </div>
                                 <input type="hidden" name="total" class="totalSumInput form-control" readonly>
+                                <input type="hidden" id="stripeChargeAmount" value="">
                             </div>
                         </div>
                     </div>
+                    
                     <div class="mt-4 bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2">
                             <h3 class="text-2xl xl:text-3xl">
-                                @isset($bookingPage->booking_label)
-                                    {{ $bookingPage->booking_label }}
-                                @endisset
+                                {{ $bookingPage->message_to_driver_label ?? "Message to driver"}}
                             </h3>
                         </div>
                         <div class="bg-white p-4">
-                            <div class="space-y-4 mb-4">
-
-                                <div class="flex items-center justify-between gap-2">
-                                    <div class="flex relative">
-                                        <h3 class="text-primary text-2xl xl:text-3xl">
-                                            @isset($bookingPage->seats_available_label)
-                                                {{ $bookingPage->seats_available_label }}
-                                            @endisset
-                                        </h3>
-                                        <div class="sups inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                            </svg>
-                                            <div
-                                              class="absolute tooltip payment_tooltiptext_position top-8 left-0 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-[#c75b5b]  border border-[#c75b5b] text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                        {{ $bookingPage->seats_available_info_text_ ?? 'seat avaialbe info text' }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
-                                    <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                        <p class="text-yellow-800 text-sm">
-                                            <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
-                                        </p>
-                                    </div>
-                                @endif
-                                <div class="flex">
-                                    @foreach ($ride->pendingSeatDetail as $detail)
-                                        <div class="relative">
-                                            <label for="number-of-seat-{{ $detail->id }}">
-                                                <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden" {{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                                <img src="{{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
-                                                <span class="absolute left-4 top-3 seat-number seat-number-{{ $detail->id }} {{ old('seats') == $detail->id ? 'text-green-300' : '' }}"></span>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @error('seats')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
-                                @enderror
-
-                                <div id ="seats-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base"></p>
-                                    </div>
-                                  </div>
-                                <!-- Hidden input to store count -->
-                                <input type="hidden" id="seat-count" name="seats" value="">
-                            </div>
-
-                            <div class="my-6 w-full">
-                                <label for="meeting" class="text-gray-900 font-medium text-lg mb-2">{{ $bookingPage->message_to_driver_label ?? "Message to driver"}}</label>
+                            <div class="mb-4 w-full">
+                                <label for="meeting" class="text-gray-900 font-medium text-lg mb-2"></label>
                                 <textarea id="meeting" rows="5" name="driver_message"
                                     class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                     placeholder="{{ $bookingPage->message_driver_placeholder ?? '' }}">{{ old('driver_message') }}</textarea>
                                 @error('driver_message')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">Please include a brief message for the driver with your booking.</p>
                                     </div>
                                 </div>
                                 @enderror
                             </div>
+                        </div>
+                    </div>
 
+                    <div class="mt-4 bg-white rounded-lg overflow-hidden shadow-3xl">
+                        <div class="bg-primary text-white px-4 py-2">
+                            <h3 class="text-2xl xl:text-3xl">
+                                User Declarations
+                            </h3>
+                        </div>
+                        <div class="bg-white p-4">
                             <ul class="">
-                                <li>
-                                    <p class="text-left">{{ $bookingPage->booking_disclaimer_on_time ?? "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded" }}</p>
+                                <li>                                    
+                                    <p class="text-left"><strong>● Arrival Time: </strong> {{ $bookingPage->booking_disclaimer_on_time ?? "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded" }}</p>
                                 </li>
                                 <li>
-                                    <p class="text-left">{{ $bookingPage->booking_disclaimer_pink_ride ?? "I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}}</p></li>
+                                    <p class="text-left mt-4"><strong>● Pink Rides: </strong> {{ $bookingPage->booking_disclaimer_pink_ride ?? "I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}}</p></li>
                                 <li>
-                                    <p class="text-left">{{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards" }}</p></li>
+                                    <p class="text-left mt-4"><strong>● Extra-Care Rides: </strong> {{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards" }}</p></li>
                             </ul>
                             <div class="flex items-start my-4">
                                 <input id="" type="checkbox" name="agree_terms" value="1"
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="" class="ml-2 font-normal text-gray-900">
-                                        {{ $bookingPage->booking_term_agree_text ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age" }}
-                                        <span class="text-red-500">*</span>
+                                        <strong>Eligibility & Agreement:</strong> {{ $bookingPage->booking_term_agree_text ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age" }}
                                     </label>
                                 </div>
                                 @error('agree_terms')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">Please read and accept our Disclaimers and Policies before proceeding.</p>
                                     </div>
                                 </div>
                                 @enderror
@@ -750,8 +772,6 @@
                                         <p class="text-white leading-none text-sm lg:text-base"></p>
                                     </div>
                                 </div>
-
-
 
                                 @if ($ride->booking_type == "37")
                                 @php
@@ -764,16 +784,15 @@
                                 <div class="flex items-start my-4">
                                     <input id="" type="checkbox" name="firm_agree_terms" value="1"
                                         {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
                                             {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
-                                            <span class="text-red-500">*</span>
                                         </label>
                                     </div>
                                     @error('firm_agree_terms')
                                     <div class="relative tooltip -bottom-4 group-hover:flex">
                                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <p class="text-white leading-none text-sm lg:text-base">Before proceeding, please confirm that you are aware of and agree to the Firm Cancellation Policy for this ride.</p>
                                         </div>
                                     </div>
                                     @enderror
@@ -791,7 +810,6 @@
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                         <label for="firm_cancellation_understand" class="ml-2 font-normal text-gray-900">
                                             I understand that this booking is under the Firm Cancellation Policy and is non-refundable.
-                                            <span class="text-red-500">*</span>
                                         </label>
                                     </div>
                                     @error('firm_cancellation_understand')
@@ -808,10 +826,9 @@
                                     <div class="flex items-start my-4">
                                         <input id="" type="checkbox" name="pink_ride_agree_terms" value="1"
                                             {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
                                             {{ $bookingPage->booking_pink_ride_term_agree_text ?? "I understand that I am booking on a Pink Ride, which is exclusive for female passengers and drivers. I will not send a male passenger in my place, or bring one along with me, who is above 12 years of age. I understand that, if I do, I will not be allowed in the ride, and my booking fee and booking price will not be refunded" }}
-                                            <span class="text-red-500">*</span>
                                         </label>
                                     </div>
                                     @error('pink_ride_agree_terms')
@@ -836,7 +853,6 @@
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
                                             {{ $bookingPage->booking_extra_care_ride_term_agree_text ?? "I understand that I am booking on a Extra-care Ride" }}
-                                            <span class="text-red-500">*</span>
                                         </label>
                                     </div>
                                     @error('extra_care_ride_agree_terms')
@@ -857,84 +873,84 @@
 
                                 @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
 
-                            @else
-                                <div id="paymentSection" class="space-y-4 mb-4">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        @isset($bookingPage->like_to_pay_label)
-                                            {{ $bookingPage->like_to_pay_label }}
-                                        @endisset
-                                    </h3>
-                                    <div class="bg-white md:p-4">
-                                        <div class="border rounded-md overflow-hidden divide-y">
-                                            <div class="flex items-center justify-between p-3">
-                                                <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer">
-                                                <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                    <span class="font-medium text-xl">
-                                                        @isset($bookingPage->paypal_label)
-                                                        {{ $bookingPage->paypal_label }}
-                                                    @endisset
-                                                    </span>
-                                                </label>
-                                            </div>
-                                            <div>
+                                @else
+                                    <div id="paymentSection" class="space-y-4 mb-4">
+                                        <h3 class="text-primary text-2xl xl:text-3xl">
+                                            @isset($bookingPage->like_to_pay_label)
+                                                {{ $bookingPage->like_to_pay_label }}
+                                            @endisset
+                                        </h3>
+                                        <div class="bg-white md:p-4">
+                                            <div class="border rounded-md overflow-hidden divide-y">
                                                 <div class="flex items-center justify-between p-3">
-                                                    <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
-                                                    <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                                    <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer">
+                                                    <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                         <span class="font-medium text-xl">
-                                                            @isset($bookingPage->credit_card_label)
-                                                                {{ $bookingPage->credit_card_label }}
-                                                            @endisset
+                                                            @isset($bookingPage->paypal_label)
+                                                            {{ $bookingPage->paypal_label }}
+                                                        @endisset
                                                         </span>
                                                     </label>
                                                 </div>
-                                                <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
-                                                    @foreach ($cards as $card)
-                                                        @if ($card->paymentMethod)
-                                                            <div class="flex items-start justify-between p-3">
-                                                                <label for="card_id" class="font-normal text-gray-900 flex items-start space-x-1">
-                                                                    <div>
-                                                                        <p class="leading-normal mt-2">
-                                                                            **** **** **** {{ $card->paymentMethod->card->last4 }}
-                                                                        </p>
-                                                                        <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                                            <small>{{ ucfirst($card->paymentMethod->card->brand) }}</small>
-                                                                        </div>
-                                                                    </div>
-                                                                </label>
-                                                                <input type="radio" id="card_id" name="card_id" value="{{ $card->id }}"
-                                                                    {{ old('card_id', $card->primary_card ? $card->id : '') == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                    @error('card_id')
-                                                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                                        </div>
-                                                      </div>
-                                                    @enderror
-                                                    <div class="flex justify-center items-center mt-4">
-                                                        {{-- <a href="{{ route('my_cards.create', ['lang' => $selectedLanguage->abbreviation, 'rideDetailId' => $ride->rideDetail[0]->id, 'rideId' => $ride->rideDetail[0]->ride_id, 'type' => 'booking']) }}" class="button-exp-fill"> --}}
-                                                        <button onclick="storeDataAndRedirect()" class="button-exp-fill">
-                                                            @isset($bookingPage->add_card_label)
-                                                                {{ $bookingPage->add_card_label }}
-                                                            @endisset
-                                                        </button>
+                                                <div>
+                                                    <div class="flex items-center justify-between p-3">
+                                                        <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
+                                                        <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                                            <span class="font-medium text-xl">
+                                                                @isset($bookingPage->credit_card_label)
+                                                                    {{ $bookingPage->credit_card_label }}
+                                                                @endisset
+                                                            </span>
+                                                        </label>
                                                     </div>
+                                                    <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
+                                                        @foreach ($cards as $card)
+                                                            @if ($card->paymentMethod)
+                                                                <div class="flex items-start justify-between p-3">
+                                                                    <label for="card_id" class="font-normal text-gray-900 flex items-start space-x-1">
+                                                                        <div>
+                                                                            <p class="leading-normal mt-2">
+                                                                                **** **** **** {{ $card->paymentMethod->card->last4 }}
+                                                                            </p>
+                                                                            <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
+                                                                                <small>{{ ucfirst($card->paymentMethod->card->brand) }}</small>
+                                                                            </div>
+                                                                        </div>
+                                                                    </label>
+                                                                    <input type="radio" id="card_id" name="card_id" value="{{ $card->id }}"
+                                                                        {{ old('card_id', $card->primary_card ? $card->id : '') == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                        @error('card_id')
+                                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                            </div>
+                                                            </div>
+                                                        @enderror
+                                                        <div class="flex justify-center items-center mt-4">
+                                                            {{-- <a href="{{ route('my_cards.create', ['lang' => $selectedLanguage->abbreviation, 'rideDetailId' => $ride->rideDetail[0]->id, 'rideId' => $ride->rideDetail[0]->ride_id, 'type' => 'booking']) }}" class="button-exp-fill"> --}}
+                                                            <button onclick="storeDataAndRedirect()" class="button-exp-fill">
+                                                                @isset($bookingPage->add_card_label)
+                                                                    {{ $bookingPage->add_card_label }}
+                                                                @endisset
+                                                            </button>
+                                                        </div>
 
+                                                    </div>
                                                 </div>
                                             </div>
+                                            @error('payment_method')
+                                                <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                </div>
+                                                </div>
+                                            @enderror
                                         </div>
-                                        @error('payment_method')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
-                                          </div>
-                                        @enderror
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
 
                                 @isset($ride->booking_method->features_setting_id)
@@ -954,8 +970,6 @@
                                 </div>
                                 @endisset
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -971,7 +985,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                     <button type="button" id="close-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -986,17 +1000,17 @@
                                 </svg>
                             </div> -->
                         </div>
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
+                        <div class="text-center  sm:ml-4 sm:mt-0 sm:text-left">
+                            <!-- <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <p class="text-sm text-center text-gray-500"></p>
+                            </div> -->
+                            <div class="w-full">
+                                <p class="text-md text-center mt-10 text-gray-500"></p>
                             </div>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                        <button type="button" id="close-popup" class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
+                        <button type="button" id="close-popup" class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
                             Close
                         </button>
                     </div>
@@ -1175,8 +1189,8 @@
     const stripe = Stripe('{{ env('STRIPE_KEY') }}'); // Your public key from Stripe
 
         const paymentRequest = stripe.paymentRequest({
-        country: 'US',
-        currency: 'usd',
+        country: 'CA',
+        currency: 'cad',
         total: {
             label: 'Total',
             amount: 100,
@@ -1221,7 +1235,9 @@
 
     paymentRequest.on('paymentmethod', async (ev) => {
 
-        const amount = document.querySelector('[name="online_payment"]').value;
+        // Use the amount shown in Google/Apple Pay (same as paymentRequest.update)
+        const amountInput = document.getElementById('stripeChargeAmount');
+        const amount = amountInput && amountInput.value !== '' ? amountInput.value : (document.querySelectorAll('[name="online_payment"]')[1] ? document.querySelectorAll('[name="online_payment"]')[1].value : document.querySelector('[name="online_payment"]').value);
         
   const response = await fetch('/create-payment-intent', {
     method: 'POST',
@@ -1282,7 +1298,29 @@ function storeDataAndRedirect() {
 
         });
     }
+    var bookingSeatsStorageKey = 'booking_seats_{{ $ride->id }}_{{ $ride->rideDetail[0]->id }}';
+
 $(document).ready(function () {
+    // Restore seat selection after refresh
+    try {
+        var saved = sessionStorage.getItem(bookingSeatsStorageKey);
+        if (saved) {
+            var ids = JSON.parse(saved);
+            var selectedImg = '{{ asset("assets/seat-hover-1.png") }}';
+            var unselectedImg = '{{ asset("assets/seat.png") }}';
+            $("input[name='seats_id[]']").each(function() {
+                var id = $(this).val();
+                var shouldCheck = ids.indexOf(id) !== -1;
+                $(this).prop('checked', shouldCheck);
+                $(".seat-image.seat-unselect-" + id).attr('src', shouldCheck ? selectedImg : unselectedImg);
+                if (shouldCheck) {
+                    $(".seat-number.seat-number-" + id).addClass('text-green-300');
+                } else {
+                    $(".seat-number.seat-number-" + id).removeClass('text-green-300');
+                }
+            });
+        }
+    } catch (e) { /* ignore */ }
     updateTotalAmount();
 
     $('input[name="type"]').change(function () {
@@ -1608,13 +1646,16 @@ $(document).ready(function () {
         $('.totalSumInput').val(actualTotalSum);
 
         if($("#check_payment_method").val() =="cash"){
+                var chargeAmount = totalAmountIn + taxAmount;
+                $('#stripeChargeAmount').val(chargeAmount);
                 paymentRequest.update({
                 total: {
                     label: 'Total',
-                    amount: Math.round((totalAmountIn + taxAmount) * 100)
+                    amount: Math.round(chargeAmount * 100)
                 },
             });
             }else{
+                $('#stripeChargeAmount').val(totalSumIn);
                 paymentRequest.update({
                 total: {
                     label: 'Total',
@@ -1713,9 +1754,15 @@ $(document).ready(function () {
                     $(".seat-number.seat-number-" + seat).removeClass('text-green-300');
                 }
 
+                // Persist seat selection for refresh
+                try {
+                    var ids = [];
+                    $("input[name='seats_id[]']:checked").each(function() { ids.push($(this).val()); });
+                    sessionStorage.setItem(bookingSeatsStorageKey, JSON.stringify(ids));
+                } catch (e) { /* ignore */ }
 
                 if(response.message != "Seat on hold successfully"){
-                    const modalMessageElement = document.querySelector('#bookingModal .text-sm.text-gray-500');
+                    const modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
                     if (modalMessageElement) {
                     modalMessageElement.textContent = response.message; // Assuming 'message' is part of the response
                     }
@@ -1744,6 +1791,7 @@ $(document).ready(function () {
 
     document.getElementById('submitForm').addEventListener('submit', function () {
         document.getElementById('submitButton').setAttribute('disabled', 'true');
+        try { sessionStorage.removeItem(bookingSeatsStorageKey); } catch (e) { /* ignore */ }
     });
 
 

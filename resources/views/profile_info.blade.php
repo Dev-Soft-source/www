@@ -6,7 +6,8 @@
     <div class="bg-white border rounded py-4 border-gray-200 md:w-[70%] mx-auto shadow">
       <div class=" px-4">
         <div class="pb-2 flex flex-col md:flex-row items-center justify-between">
-            <h1 class="mb-0">{{ $user->first_name }} profile</h1>
+            <!-- <h1 class="mb-0">{{ $user->first_name }} profile</h1> -->
+            <h1 class="mb-0">Profile</h1>
         </div>
         <div class="flex pb-2 justify-between">
             <div class="flex items-start">
@@ -17,14 +18,14 @@
                     $age = $dob->diffInYears(\Carbon\Carbon::now());
                 @endphp
                 <div>
-                    <h3 class="mb-0 text-2xl xl:text-3xl">{{ $user->first_name }} {{ $user->last_name }}</h3>
-                    <p class="mb-0">Joined: {{ $user->created_at->format('F d, Y') }}</p>
+                    <!-- <h3 class="mb-0 text-2xl xl:text-3xl">{{ $user->first_name }} {{ $user->last_name }}</h3> -->
+                    <p class="mb-0 mt-4">Joined: {{ $user->created_at->format('F d, Y') }}</p>
                     <p class="mb-0">{{ ucfirst($user->gender) }}, {{ $age }} years old</p>
                 </div>
             </div>
         </div>
         <div class="pb-2">
-            <h3 class="mb-0text-2xl xl:text-3xl">Mini bio</h3>
+            <h3 class="mb-0text-2xl xl:text-3xl">Mini Bio</h3>
             <p>{{ $user->about }}</p>
         </div>
       </div>

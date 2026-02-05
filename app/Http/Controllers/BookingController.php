@@ -384,7 +384,7 @@ class BookingController extends Controller
                     $getSeatDetail->status = 'pending';
                     $getSeatDetail->save();
                     $data['getSeatDetail'] = $getSeatDetail;
-                    $data['message'] = 'Seat on pending successfully';
+                    $data['message'] = 'Your selected seat(s) will be held for 10 minutes. If the booking isn\'t completed within that time, the seat(s) will be released and made available to others.';
                     return response()->json($data);
                 } else {
                     $data['message'] = $messages->seat_hold_message ?? null;
@@ -857,7 +857,7 @@ class BookingController extends Controller
 
         $type = FeaturesSetting::whereId($booking->type)->first();
 
-        if ($type->slug === 'firm') {
+        if ($type && $type->slug === 'firm') {
             $sureMessage = $tripsPage->cancel_booking_confirm_firm_message ?? "Are you sure you want to cancel booking?";
         } else {
             if ($hoursDifference > 48) {
@@ -1187,7 +1187,7 @@ class BookingController extends Controller
                             // Create a payment intent
                             $paymentIntent = PaymentIntent::create([
                                 'amount' => round(($stripePay * 100), 0),
-                                'currency' => 'usd',
+                                'currency' => 'cad',
                                 'customer' => $user->stripe_customer_id,
                                 'payment_method' => $paymentMethod->id,
                                 'off_session' => true,
@@ -2521,7 +2521,7 @@ class BookingController extends Controller
 
                                     $paymentIntent = PaymentIntent::create([
                                         'amount' => round(($stripePay * 100), 0),
-                                        'currency' => 'usd',
+                                        'currency' => 'cad',
                                         'customer' => $user->stripe_customer_id,
                                         'payment_method' => $paymentMethod->id,
                                         'off_session' => true,
@@ -2816,7 +2816,7 @@ class BookingController extends Controller
                                     // Create a payment intent
                                     $paymentIntent = PaymentIntent::create([
                                         'amount' => round(($stripePay * 100), 0),
-                                        'currency' => 'usd',
+                                        'currency' => 'cad',
                                         'customer' => $user->stripe_customer_id,
                                         'payment_method' => $paymentMethod->id,
                                         'off_session' => true,
@@ -3230,7 +3230,8 @@ class BookingController extends Controller
                     }
                 }
 
-                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id]);
+                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id])
+                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
             } else {
 
                 $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
@@ -3572,7 +3573,8 @@ class BookingController extends Controller
                         Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
                     }
                 }
-                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]);
+                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
             }
         } else {
             return 'Request expired';
@@ -3787,7 +3789,8 @@ class BookingController extends Controller
             }
         }
 
-        return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]);
+        return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+            ->with('decline_success_message', 'You have declined the booking request. The seats are now available for other passengers to book.');
     }
 
     public function instantBooking($id, Request $request)
@@ -4133,15 +4136,15 @@ class BookingController extends Controller
                                 $stripePay = $request->input('online_payment');
                             }
                             // Create a payment intent
-                            $paymentIntent = PaymentIntent::create([
-                                'amount' => round(($stripePay * 100), 0),
-                                'currency' => 'usd',
-                                'customer' => $user->stripe_customer_id,
-                                'payment_method' => $paymentMethod->id,
-                                'off_session' => true,
-                                'confirm' => true,
-                            ]);
-                            $stripId = $paymentIntent->id;
+                                    $paymentIntent = PaymentIntent::create([
+                                        'amount' => round(($stripePay * 100), 0),
+                                        'currency' => 'cad',
+                                        'customer' => $user->stripe_customer_id,
+                                        'payment_method' => $paymentMethod->id,
+                                        'off_session' => true,
+                                        'confirm' => true,
+                                    ]);
+                                    $stripId = $paymentIntent->id;
                         }
                     }
 
@@ -5705,7 +5708,7 @@ class BookingController extends Controller
                             // Create a payment intent
                             $paymentIntent = PaymentIntent::create([
                                 'amount' => round(($stripePay * 100), 0),
-                                'currency' => 'usd',
+                                'currency' => 'cad',
                                 'customer' => $user->stripe_customer_id,
                                 'payment_method' => $paymentMethod->id,
                                 'off_session' => true,
@@ -6171,7 +6174,7 @@ class BookingController extends Controller
         $updatedFare = $updatedSeats * ($booking->fare / $booking->seats);
 
         $type = FeaturesSetting::whereId($booking->type)->first();
-        if ($type->slug === 'firm') {
+        if ($type && $type->slug === 'firm') {
             $transactions = Transaction::where('booking_id', $booking->id)
                 ->where('type', '1')
                 ->get();
@@ -6276,7 +6279,7 @@ class BookingController extends Controller
             $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
             $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
             $getPayout->save();
-        } elseif ($type->slug === 'standard') {
+        } elseif ($type && $type->slug === 'standard') {
 
             $transactions = Transaction::where('booking_id', $booking->id)
                 ->where('type', '1')
@@ -7063,8 +7066,8 @@ class BookingController extends Controller
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
         $paymentIntent = PaymentIntent::create([
-            'amount' => round(($request->amount * 100), 0),
-            'currency' => 'usd',
+            'amount' => round((float) $request->amount * 100, 0),
+            'currency' => 'cad',
             'payment_method_types' => ['card'],
         ]);
         return response()->json([

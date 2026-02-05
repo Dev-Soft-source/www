@@ -432,22 +432,17 @@
                             </p>
                         </div>
                         <div class="p-4">
-                            <div class="w-full">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                    Booking method:
+                                </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div class="w-full flex items-center justify-center">
-                                        <div
-                                            class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
-                                            {{ $ride->booking_method->name }}
-                                        </div>
+                                    <div
+                                        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                                        {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
                             </div>
-
-                            {{-- <p class="font-medium text-left text-black">
-                                @isset($rideDetailPage->luggage_label)
-                                    {{ $rideDetailPage->luggage_label }}
-                                @endisset
-                                <span class="text-black font-normal">{{ $ride->luggage }}</span></p> --}}
                         </div>
                     </div>
                     <a
@@ -628,22 +623,22 @@
                                 </div>
                             @endif
                             <div class="text-center">
-                                <div class="flex items-center space-x-2 text-sm text-black">
+                                <div class="flex items-center space-x-2 text-md text-black">
                                     @if ($ride->year)
-                                        <p class="text-sm">{{ $ride->year }}</p>
+                                        <p class="text-md">{{ $ride->year }}</p>
                                     @endif
-                                    {{-- <span>/</span> --}}
-                                    <p class="text-sm">{{ $ride->make }}</p>
-                                    <p class="text-sm">{{ $ride->model }}</p>
-                                    {{-- <span>/</span> --}}
+                                    <span>|</span> 
+                                    <p class="text-md">{{ $ride->make }}</p>
+                                    <p class="text-md">{{ $ride->model }}</p>
+                                    <span>|</span> 
                                     @if ($ride->color)
-                                        <p class="text-sm">{{ $ride->color }}</p>
+                                        <p class="text-md">{{ $ride->color }}</p>
                                     @endif
                                 </div>
-                                <p class="font-semibold text-lg text-left text-black">{{ $ride->license_no }}</p>
-                                @if ($ride->vehicle_type)
+                                <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
+                                <!-- @if ($ride->vehicle_type)
                                     <p class="text-sm text-left text-black">{{ $ride->vehicle_type }}</p>
-                                @endif
+                                @endif -->
                             </div>
                         </div>
                     </div>

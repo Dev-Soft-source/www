@@ -31,22 +31,12 @@
 
         .panel-body {
             overflow-y: auto;
-            height: 350px;
-        }
-
-        ::-webkit-scrollbar-track {
-            -webkit-box-shadow: #45CEEB;
-            background-color: #E0F6FF;
-        }
-
-        ::-webkit-scrollbar {
-            width: 10px;
-            background-color: #E0F6FF;
+            height: 400px;
         }
 
         ::-webkit-scrollbar-thumb {
-            -webkit-box-shadow: #45CEEB;
-            background-color: #45CEEB;
+            -webkit-box-shadow:rgb(138, 143, 145);
+            background-color:rgb(138, 143, 145);
         }
     </style>
 

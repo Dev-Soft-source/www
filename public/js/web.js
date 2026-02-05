@@ -18979,18 +18979,20 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(datePart, " at ").concat(timePart);
     },
     bubbleStyle: function bubbleStyle(message) {
+      var fontFamily = "' Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif";
       if (message.user && message.user.id == this.logged_in_user_id) {
         // My message (blue)
         return {
           background: '#3B82F6',
           color: '#fff',
           'border-radius': '16px',
-          'padding': '10px 16px',
+          'padding': '4px 16px',
           'margin-bottom': '2px',
           'margin-left': '10px',
           'display': 'inline-block',
           'max-width': '100%',
-          'word-break': 'break-word'
+          'word-break': 'break-word',
+          'font-family': fontFamily
         };
       }
       // Their message (gray)
@@ -18998,12 +19000,13 @@ __webpack_require__.r(__webpack_exports__);
         background: '#45CEEB',
         color: '#fff',
         'border-radius': '16px',
-        'padding': '10px 16px',
+        'padding': '4px 16px',
         'margin-bottom': '2px',
         'margin-right': '10px',
         'display': 'inline-block',
         'max-width': '100%',
-        'word-break': 'break-word'
+        'word-break': 'break-word',
+        'font-family': fontFamily
       };
     }
   }
@@ -19140,7 +19143,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         'flex justify-start': message.user && message.user.id != $props.logged_in_user_id
       }, 'mb-2']),
       style: (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeStyle)(message.user && message.user.id == $props.logged_in_user_id ? {
-        'marginRight': '32px'
+        'marginRight': '12px'
       } : {})
     }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", {
       "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["text-xs font-semibold mb-1", message.user && message.user.id == $props.logged_in_user_id ? 'text-right' : 'text-left'])

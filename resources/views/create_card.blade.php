@@ -133,7 +133,6 @@
                     @enderror
                 </div>
 
-
                 <div>
                     <label for="exp_month">{{$paymentSettingDetail->mobile_expiry_date_label ?? "Expiry date"}}</label>
                     <div id="card-expiry-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300"></div>

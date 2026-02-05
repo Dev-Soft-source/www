@@ -1384,8 +1384,6 @@ class RideController extends Controller
 
         $recurring = $request->filled('recurring') ? $request->recurring : '0';
 
-
-
         $request->validate([
             'from' => 'required',
             'to' => 'required',
@@ -1418,8 +1416,6 @@ class RideController extends Controller
             'recurring_trips' => $recurring !== '0' ? 'required' : 'nullable',
         ]);
 
-
-
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
@@ -1441,8 +1437,6 @@ class RideController extends Controller
         //         return back()->with('error', 'You already have a ride scheduled for the same date and time.')->with('heading', 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
         //     }
         // }
-
-
 
         $max_back_seats = $request->filled('max_back_seats') ? $request->max_back_seats : 0;
         $accept_more_luggage = $request->filled('accept_more_luggage') ? $request->accept_more_luggage : 0;
@@ -1578,8 +1572,6 @@ class RideController extends Controller
             $recurring_trips = '';
         }
 
-
-
         $ride->update([
             'departure' => "",
             'departure_lat' => '',
@@ -1650,12 +1642,10 @@ class RideController extends Controller
             'back_seats' => $request->back_seats,
         ]);
 
-
         $getSeatDetails = SeatDetail::where('ride_id', $ride->id)->get();
         foreach ($getSeatDetails as $key => $getSeatDetail) {
             $getSeatDetail->delete();
         }
-
 
         for ($i = 1; $i <= $ride->seats; $i++) {
             $seatDetail = new SeatDetail;
@@ -3053,8 +3043,6 @@ class RideController extends Controller
             }
         }
 
-
-
         if ($user->step === '1') {
             return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
         } elseif ($user->step === '2') {
@@ -3253,11 +3241,6 @@ class RideController extends Controller
         }
 
 
-        
-
-
-
-
         $customMessages = [
             'date' => 'Invalid date format',
             // 'time' => 'Invalid time format',
@@ -3287,8 +3270,6 @@ class RideController extends Controller
         }
 
         $recurring = $request->filled('recurring') ? $request->recurring : 0;
-
-
 
         $validator = Validator::make($request->all(), [
             'from' => 'required',
@@ -4241,6 +4222,7 @@ class RideController extends Controller
         $apiKey = env('GOOGLE_API_KEY');
         $ch = curl_init();
 
+        Log::info('Google Maps API Key: ' . $apiKey);
         // URL encode the addresses to properly handle spaces and special characters
         // This ensures city names like "Montreal, QC" and "Ottawa, ON" work correctly
         $fromEncoded = urlencode($from);

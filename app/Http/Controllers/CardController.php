@@ -26,6 +26,8 @@ class CardController extends Controller
 {
     public function index($lang = null)
     {
+        // Clear booking context when viewing payment options so "add card" from here doesn't redirect to a booking
+        session()->forget(['bookingId', 'rideDetailId', 'rideId', 'type']);
 
         $paymentSettingDetail = null;
         $languages = Language::all();
@@ -333,6 +335,24 @@ class CardController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true, 'message' => $message->card_add_message ?? 'Card added successfully']);
+        }
+
+        // If user came from booking flow, return to the correct booking page to complete payment
+        $bookingId = session('bookingId');
+        $rideId = session('rideId');
+        $rideDetailId = session('rideDetailId');
+        $type = session('type');
+
+        if ($bookingId && $type === 'edit-booking') {
+            // Came from edit-booking page
+            return redirect()->route('booking.edit', ['lang' => $selectedLanguage, 'id' => $bookingId])
+                ->with('message', $message->card_add_message ?? 'Card added successfully');
+        }
+
+        if ($rideId && $rideDetailId && $type === 'booking') {
+            // Came from initial booking page (booking.blade.php)
+            return redirect()->route('booking', ['lang' => $selectedLanguage, 'id' => $rideId, 'rideDetailId' => $rideDetailId])
+                ->with('message', $message->card_add_message ?? 'Card added successfully');
         }
 
         return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_add_message ?? 'Card added successfully');

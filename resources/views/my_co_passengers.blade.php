@@ -19,17 +19,17 @@
                                 @endphp
                                 <div class="flex">
                                     <p class="text-white leading-4 mt-2 mr-4 text-base">Age: <span>{{ $age }}</span></p>
-                                    <p class="text-white leading-4 mt-2 ml-4 text-base">Gender: <span>{{ $booking->passenger->gender }}</span></p>
+                                    <p class="text-white leading-4 mt-2 ml-4 text-base">Gender: <span>{{ ucfirst($booking->passenger->gender) }}</span></p>
                                 </div>
                             </div>
                             <a href="{{ route('profile_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->passenger->id]) }}" class="text-white underline">
-                                View profile
+                                View Profile
                             </a>
                         </div>
                     </div>
                     <div class="space-y-4 p-4">
                         <div class="flex justify-between items-center space-x-2 w-full border-b">
-                            <p>Seat booked</p>
+                            <p>Seats booked</p>
                             <p>{{ $booking->seats }}</p>
                         </div>
                     </div>

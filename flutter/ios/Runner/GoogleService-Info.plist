@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCk_YazOpBL9jGtUNlcLwR0b_0tM1P5z1k</string>
+	<key>GCM_SENDER_ID</key>
+	<string>785619130237</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.proximaRide</string>
+	<key>PROJECT_ID</key>
+	<string>proxima-ride-app-devop</string>
+	<key>STORAGE_BUCKET</key>
+	<string>proxima-ride-app-devop.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:785619130237:ios:12ab4eb3ed5b1e7db5de14</string>
+</dict>
+</plist>

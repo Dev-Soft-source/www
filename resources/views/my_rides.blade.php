@@ -238,10 +238,13 @@
                                                                     @endisset
                                                                 </small>
                                                             </p>
-                                                            @if (count($ride->bookings->where('status', 0)) > 0)
+                                                            @php
+                                                                $pendingBookingRequests = $ride->bookings->where('status', 0);
+                                                            @endphp
+                                                            @if ($pendingBookingRequests->isNotEmpty())
                                                                 <div class="">
                                                                     <p class="font-medium text-red-600">
-                                                                        {{ $ride->bookings->where('status', 0)->count() }} booking request</p>
+                                                                        You have booking request(s).</p>
                                                                 </div>
                                                             @endif
                                                             </div>

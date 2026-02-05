@@ -131,7 +131,7 @@
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
                     <div class="bg-primary text-white px-4 py-2">
-                        <h3 class="text-2xl xl:text-3xl">Ride features</h3>
+                        <h3 class="text-2xl xl:text-3xl">Ride Preferences</h3>
                     </div>
                     <div class="bg-white p-4 p space-y-4">
                         <div class="flex items-center space-x-2">
@@ -248,7 +248,7 @@
                     </div>
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2">
-                            <h3 class="text-2xl xl:text-3xl">Booking summary</h3>
+                            <h3 class="text-2xl xl:text-3xl">Booking Breakdown</h3>
                         </div>
                         <div class="bg-white p-4">
                             <div class="flex items-center justify-between">
@@ -383,6 +383,7 @@
                                         </p>
                                         <p class="totalPayableAmount text-black"></p>
                                     </div>
+                                    <input type="hidden" id="stripeChargeAmount" value="">
                                 {{-- @endif --}}
                                 @if ($ride->payment_method->features_setting_id == $postRidePage->payment_methods_option2)
                                     {{-- <div class="flex items-center justify-between">
@@ -400,7 +401,7 @@
                     </div>
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2">
-                            <h3 class="text-2xl xl:text-3xl">Booking</h3>
+                            <h3 class="text-2xl xl:text-3xl">Select Number of Seats</h3>
                         </div>
                         <div class="bg-white p-4">
                             <div class="space-y-4 mb-4">
@@ -412,7 +413,7 @@
                                                 {{ $bookingPage->seats_available_label }}
                                             @endisset
                                         </h3>
-                                        <div class="sups inline-flex">
+                                        <!-- <div class="sups inline-flex">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
@@ -428,7 +429,7 @@
                                                     </p>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
 
@@ -478,7 +479,7 @@
                             <div class="flex items-start my-4">
                                 <input id="" type="checkbox" name="agree_terms" value="1"
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-800  focus:ring-2">
                                     <label for="" class="ml-2 font-normal text-gray-900">
                                         {{ $bookingPage->booking_term_agree_text ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age" }}
                                         <span class="text-red-500">*</span>
@@ -877,8 +878,8 @@ inputs.forEach((input, index) => {
     const stripe = Stripe('{{ env('STRIPE_KEY') }}'); // Your public key from Stripe
 
         const paymentRequest = stripe.paymentRequest({
-        country: 'US',
-        currency: 'usd',
+        country: 'CA',
+        currency: 'cad',
         total: {
             label: 'Total',
             amount: 100,
@@ -924,7 +925,9 @@ inputs.forEach((input, index) => {
 
     paymentRequest.on('paymentmethod', async (ev) => {
 
-        const amount = document.querySelector('[name="online_payment"]').value;
+        // Use the amount shown in Google/Apple Pay (same as paymentRequest.update)
+        const amountInput = document.getElementById('stripeChargeAmount');
+        const amount = amountInput && amountInput.value !== '' ? amountInput.value : (document.querySelectorAll('[name="online_payment"]')[1] ? document.querySelectorAll('[name="online_payment"]')[1].value : document.querySelector('[name="online_payment"]').value);
         
   const response = await fetch('/create-payment-intent', {
     method: 'POST',
@@ -986,7 +989,29 @@ inputs.forEach((input, index) => {
         });
     }
 
+    var editBookingSeatsStorageKey = 'edit_booking_seats_{{ $ride->id }}_{{ $booking->ride_detail_id }}';
+
     $(document).ready(function () {
+        // Restore seat selection after refresh
+        try {
+            var saved = sessionStorage.getItem(editBookingSeatsStorageKey);
+            if (saved) {
+                var ids = JSON.parse(saved);
+                var selectedImg = '{{ asset("assets/seat-hover-1.png") }}';
+                var unselectedImg = '{{ asset("assets/seat.png") }}';
+                $("input[name='seats_id[]']").each(function() {
+                    var id = $(this).val();
+                    var shouldCheck = ids.indexOf(id) !== -1;
+                    $(this).prop('checked', shouldCheck);
+                    $(".seat-image.seat-unselect-" + id).attr('src', shouldCheck ? selectedImg : unselectedImg);
+                    if (shouldCheck) {
+                        $(".seat-number.seat-number-" + id).addClass('text-green-300');
+                    } else {
+                        $(".seat-number.seat-number-" + id).removeClass('text-green-300');
+                    }
+                });
+            }
+        } catch (e) { /* ignore */ }
         updateTotalAmount();
 
         $('input[name="coffee_wall"]').change(function () {
@@ -1199,6 +1224,7 @@ inputs.forEach((input, index) => {
         }
 
 
+        $('#stripeChargeAmount').val(totalPayableAmount);
         if($("#check_payment_method").val() =="cash"){
                 paymentRequest.update({
                 total: {
@@ -1320,6 +1346,13 @@ inputs.forEach((input, index) => {
     });
     updateTotalAmount();
 
+        // Persist seat selection for refresh
+        try {
+            var ids = [];
+            $("input[name='seats_id[]']:checked").each(function() { ids.push($(this).val()); });
+            sessionStorage.setItem(editBookingSeatsStorageKey, JSON.stringify(ids));
+        } catch (e) { /* ignore */ }
+
         $.ajax({
             url: '{{ route("seat_on_hold") }}', // Laravel route for the seat_on_hold
             type: 'POST',
@@ -1387,6 +1420,12 @@ document.getElementById('bookingModal').addEventListener('click', function (even
         updateTotalAmount();
     }
 
+    var submitFormEl = document.getElementById('submitForm');
+    if (submitFormEl) {
+        submitFormEl.addEventListener('submit', function () {
+            try { sessionStorage.removeItem(editBookingSeatsStorageKey); } catch (e) { /* ignore */ }
+        });
+    }
 
 </script>
 
