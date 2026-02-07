@@ -1226,7 +1226,14 @@
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
                                                                 <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{$rideDetail->departure }} {{ $ride->pickup }}</div>
+                                                                <div class="flex gap-2">
+                                                                    <p class="text-primary md:mb-4">
+                                                                        {{$rideDetail->departure }}.
+                                                                    </p>
+                                                                    <p class="text-sm mt-1">
+                                                                       Pick-up at: {{ $ride->pickup }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -1239,7 +1246,14 @@
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
                                                                 <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{$rideDetail->destination }} {{ $ride->dropoff }}</div>
+                                                                <div class="flex gap-2">
+                                                                    <p class="text-primary md:mb-4">
+                                                                        {{$rideDetail->destination }}.
+                                                                    </p>
+                                                                    <p class="text-sm mt-1">
+                                                                       Drop-off at: {{ $ride->dropoff }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1253,12 +1267,12 @@
                                                     </p>
                                                     <div class="my-4">
                                                         @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->booking_option1_tooltip }}')" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img class="w-8 h-8"
+                                                            <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $postRidePage->booking_option1->icon)}}"
                                                                 alt="">
                                                                 Instant booking</a>
                                                         @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->booking_option2_tooltip }}')" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img class="w-8 h-8"
+                                                            <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img class="w-8 h-8"
                                                                 src="{{asset('home_page_icons/' . $postRidePage->booking_option2->icon)}}"
                                                                 alt="">Request to book</a>
                                                         @endif
@@ -1502,8 +1516,8 @@
                                                             @endphp
                                                         </div>
                                                     </div>
-                                                    <div class="">
-                                                        <span class="font-semibold text-gray-800">@if($hasReviews){{ number_format($totalAverage, 1) }}@else No Reviews Yet @endif</span>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-semibold text-gray-800">@if($hasReviews){{ number_format($totalAverage, 1) }}@else No Reviews @endif</span>
                                                         
                                                         @if($hasReviews)
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -1598,12 +1612,12 @@
                                     <div class="w-full">
                                         <div class="relative mt-5 text-left">
                                             <div class="flex items-center relative">
-                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                            <span
-                                                                class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
-                                                            </span>
-                                                        </div>
+                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                    <span
+                                                        class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                    </span>
+                                                </div>
                                                 <div class="ml-10 md:ml-20 mt-1 mb-8 md:mb-0 flex flex-row md:flex-col">
                                                     <div class="font-bold text-black">
                                                         @isset($findRidePage->search_section_from_placeholder)

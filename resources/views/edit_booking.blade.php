@@ -1,4 +1,36 @@
-@extends('layouts.template')
+﻿@extends('layouts.template')
+
+@section('style')
+<style>
+    /* Wider tooltip on mobile for coffee wall tooltip */
+    @media (max-width: 639px) {
+        .tooltip_width {
+            width: min(90vw, 22rem) !important;
+            min-width: 18rem;
+        }
+    }
+
+    /* Student verification tooltips - expanded width */
+    .student-verification-tooltip {
+        position: relative;
+        background-color: #c75b5b;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        width: 24rem;
+        max-width: 70vw;
+    }
+
+    @media (max-width: 768px) {
+        .student-verification-tooltip::after {
+            left: 30px;
+        }
+    }
+
+    .tooltip.shift-left {
+        margin-left: -150px;
+    }
+</style>
+@endsection
 
 @section('content')
 
@@ -53,81 +85,190 @@
         
         <input type="hidden" value="{{ $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id ? "cash" : "online" }}" id="check_payment_method">
 
-        <h1>Edit booking</h1>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
+            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 -mb-4">
+                <h1 class="-mb-2">Edit Booking</h1>
+                <div class="text-red-500 text-lg pr-4">
+                    <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
+                </div>
+            </div>
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
                         <div class="w-full md:w-2/3 order-2 md:order-1">
-                            @php
-                                $from = $booking->departure;
-                                $to = $booking->destination;
-                            @endphp
                             <div class="relative mt-5 text-left">
                                 <div class="flex items-center relative">
-                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                    <div
+                                        class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                        <span
+                                            class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain"
+                                                src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
-                                        <div class="font-bold text-xl text-black">From</div>
-                                        <div class="text-primary md:mb-4">{{ $booking->departure }}, <br class="md:hidden"> {{ $ride->pickup }}</div>
+                                    <div class="ml-12 md:ml-20">
+                                        <div class="font-bold text-xl text-black">
+                                            @isset($rideDetailPage->from_label)
+                                                {{ $rideDetailPage->from_label }}
+                                            @endisset
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $booking->departure }}.
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Pick-up at: {{ $ride->pickup }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
+
                                 <div class="flex items-center relative">
-                                    <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                        <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                    <div
+                                        class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                        <span
+                                            class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain"
+                                                src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
-                                        <div class="font-bold text-xl text-black">To</div>
-                                        <div class="text-primary md:mb-4">{{ $booking->destination }}, <br class="md:hidden"> {{ $ride->dropoff }}</div>
+                                    <div class="ml-12 md:ml-20">
+                                        <div class="font-bold text-xl text-black">
+                                            @isset($rideDetailPage->to_label)
+                                                {{ $rideDetailPage->to_label }}
+                                            @endisset
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $booking->destination }},
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Drop-off at: {{ $ride->dropoff }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-4 order-1 md:order-2">
-                            <p class="whitespace-nowrap font-medium">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }} at {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                            <p class="whitespace-nowrap font-semibold">
+                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }}
+                                @isset($rideDetailPage->at_label)
+                                    {{ $rideDetailPage->at_label }}
+                                @endisset
+                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                             </p>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
-                        <div>
-                            <p class="font-medium text-left text-black mr-4">My co-passenger:</p>
-                        </div>
-                        <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
-                        @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
-                            @for ($i = 0; $i < $booking->seats; $i++)
-                                @if ($booking->passenger)
-                                        @if ($booking->passenger->profile_image)
-                                            <img class="w-10 h-10 rounded-full" src="{{ $booking->passenger->profile_image }}" alt="">
-                                        @else
-                                            <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}" alt="">
-                                        @endif
-                                @endif
-                            @endfor
-                        @endforeach
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
-                            <p class="font-medium text-left text-gray-800">Payment method: <span class="text-black">{{ $ride->payment_method->name }}</span></p>
-                        </div>
-                        <div class="p-4">
-                            <p class="font-medium text-left text-gray-800">{{ $rideDetailPage->luggage_label }} <span class="text-black">{{ $ride->luggage }}</span></p>
                         </div>
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="text-left font-medium">{{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }} seats left </p>
+
+                            <p class="text-left font-semibold">
+                                @if (auth()->user() &&
+                                        $ride->bookings &&
+                                        $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
+                                    @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
+                                        @if (strtotime($ride->date) > strtotime('today') ||
+                                                (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                            <a
+                                                href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
+                                                @isset($rideDetailPage->seats_left_label)
+                                                    {{ $rideDetailPage->seats_left_label }}:
+                                                @endisset
+                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                            </a>
+                                        @endif
+                                    @endif
+                                @elseif (
+                                    $ride->seats -
+                                        $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
+                                                $query->whereNull('deleted_at');
+                                            })->sum('seats') !=
+                                        0)
+                                    @if ($ride->status !== '2')
+                                        <div class="flex">
+                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                class="">
+                                                @isset($rideDetailPage->seats_left_label)
+                                                    {{ $rideDetailPage->seats_left_label }}:
+                                                @endisset
+                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endif
+
+
+                            </p>
                         </div>
-                        <div class="p-4">
-                            <p class="font-medium text-left text-primary">${{ $booking->price }} per seat</p>
+                        <div class="flex flex-wrap items-center gap-3 p-4">
+                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                Booking Price:
+                            </h4>
+                            <p class="font-semibold text-left text-primary">${{ $booking->price }}
+
+                                @isset($rideDetailPage->per_seat_label)
+                                    {{ $rideDetailPage->per_seat_label }}
+                                @endisset
+                            </p>
                         </div>
                     </div>
+                    <div
+                        class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                        <div class="p-4">
+                            <p class="font-medium text-left text-black pt-2">
+                                @isset($rideDetailPage->payment_method_label)
+                                    {{ $rideDetailPage->payment_method_label }}
+                                @endisset
+                                <span class="text-primary font-normal">{{ $ride->payment_method->name }}</span>
+                            </p>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                    Booking method:
+                                </h4>
+                                @isset($ride->booking_method->features_setting_id)
+                                    <div
+                                        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                                        {{ $ride->booking_method->name }}
+                                    </div>
+                                @endisset
+                            </div>
+                        </div>
+                    </div>
+                    <a
+                        @if (auth()->user() &&
+                                $ride->bookings &&
+                                $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty()) href="{{ route('my_co_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]) }}"
+                    @else
+                        href="javascript:void(0);" @endif>
+                        <div
+                            class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
+                            <div>
+                                <p class="font-medium md:text-center text-black mr-4">
+                                    @isset($rideDetailPage->co_passenger_label)
+                                        {{ $rideDetailPage->co_passenger_label }}
+                                    @endisset :
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+                                @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $bookingItem)
+                                    @for ($i = 0; $i < $bookingItem->seats; $i++)
+                                        @if ($bookingItem->passenger)
+                                            @if ($bookingItem->passenger->profile_image)
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ $bookingItem->passenger->profile_image }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ asset('images/59-booked-seat.png') }}" alt="">
+                                            @endif
+                                        @endif
+                                    @endfor
+                                @endforeach
+                            </div>
+                        </div>
+                    </a>
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
                     <div class="bg-primary text-white px-4 py-2">
@@ -210,7 +351,7 @@
 
             </div>
             <div class="col-span-1">
-                <div class="space-y-4">
+                <div class="space-y-4 -mt-4">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl hidden">
                         <div class="bg-primary text-white px-4 py-2">
                             <h3 class="text-2xl xl:text-3xl">Cancellation policy</h3>
@@ -243,34 +384,41 @@
                             @endisset
                         </div>
                     </div>
-                    <div class="text-left text-red-500 text-lg">
-                        <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
-                    </div>
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="bg-primary text-white px-4 py-2">
-                            <h3 class="text-2xl xl:text-3xl">Booking Breakdown</h3>
+                    
+                    <div class="mt-4 bg-white rounded-lg shadow-3xl">
+                        <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
+                            <h3 class="text-2xl xl:text-3xl">
+                                @isset($bookingPage->pricing_label)
+                                    {{ $bookingPage->pricing_label }}
+                                @endisset
+                            </h3>
                         </div>
-                        <div class="bg-white p-4">
-                            <div class="flex items-center justify-between">
-                                <p class="text-black"><span id="selectedSeats">1</span> seat</p>
+                        <div class="bg-white p-4 rounded-b-lg">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="text-black">
+                                    <span id="selectedSeats">1</span>
+                                    @isset($bookingPage->seat_label)
+                                        {{ $bookingPage->seat_label }}
+                                    @endisset
+                                </p>
                                 <p class="totalSeatsAmount text-black"></p>
                                 <input type="hidden" name="seats_amount" class="totalSeatsAmountInput form-control" readonly>
                             </div>
 
                             @if ($ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
-                                <div class="flex items-center justify-between">
+                                <!-- <div class="flex items-center justify-between gap-2">
                                     <p class="text-black">
                                         {{ $bookingPage->firm_cancellation_label_price_section ?? "Firm cancellation" }} {{$settingFirmDiscount}}%
                                     </p>
-                                </div>
+                                </div> -->
 
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-2">
                                     <p class="text-black">
                                         {{ $bookingPage->firm_discount_label_price_section ?? "Discount" }}
                                     </p>
                                     <p class="firmDiscountAmt text-black"></p>
                                 </div>
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-2">
                                     <p class="text-black">
                                         {{ $bookingPage->firm_your_price_label_price_section ?? "Your price" }}
                                     </p>
@@ -278,22 +426,57 @@
                                 </div>
                             @endif
 
-                            <div class="flex items-center justify-between">
-                                <p class="text-black">Booking fee</p>
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-black">
+                                        @isset($bookingPage->booking_fee_label)
+                                            {{ $bookingPage->booking_fee_label }}
+                                        @endisset
+                                    </p>
+                                    @if (auth()->user() && auth()->user()->student == 2)
+                                        <div class="relative sups inline-flex items-center group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-yellow-500 cursor-help hover:text-yellow-600 peer">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            </svg>
+                                            <!-- Tooltip -->
+                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
+                                                <div class="student-verification-tooltip">
+                                                    <p class="text-white text-sm">Your student verification is pending. Pay the Booking Fee now to secure your seat, and we will refund it automatically once your status is approved (usually within 72 hours).</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @elseif (auth()->user() && auth()->user()->charge_booking == '2')
+                                        <div class="relative sups inline-flex items-center group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-500 cursor-help hover:text-green-600 peer">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <!-- Tooltip -->
+                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
+                                                <div class="student-verification-tooltip bg-green-500">
+                                                    <p class="text-white text-md">As a verified student, your booking fee is waived. You only pay the booking price.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                                 <p class="totalAmount text-black"></p>
                                 <input type="hidden" name="booking_credit" class="totalAmountInput form-control" readonly>
                             </div>
 
-                            @if (isset($booking->transaction[0]->deduct_type) && $booking->transaction[0]->deduct_type == "deduct_from_passenger")
+                            @if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger")
                             @php
-                                $settingTaxPercentage = $booking->transaction[0]->tax_percentage;
+                                if($setting->tax_type == "state_wise_tax"){
+                                    $settingTaxPercentage = $stateTax;
+                                }else{
+                                    $settingTaxPercentage = $setting->tax;
+                                }
                             @endphp
 
                             <input type="hidden" value="{{$settingTaxPercentage}}" name="tax_percentage">
                             <input type="hidden" value="{{$setting->deduct_tax}}" name="deduct_tax">
                             <input type="hidden" value="{{$setting->tax_type}}" name="tax_type">
 
-                                <div class="flex items-center justify-between mt-1">
+                                <div class="flex items-center justify-between gap-2 mt-1">
                                     <p class="text-black">
                                         @isset($bookingPage->tax_label)
                                             {{ $bookingPage->tax_label ?? "Tax" }}
@@ -303,102 +486,89 @@
                                     <input type="hidden" name="tax_amount" class="totalTaxAmountInput form-control" readonly>
                                 </div>
                             @endif
+
                             @if ($coffeeBalance > 0)
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-1">
+                                <div class="flex items-center justify-between gap-2 mt-1">
+                                    <div class="flex">
                                         <input type="checkbox" id="apply_coffee_wall" name="coffee_wall" value="1" class="form-control hidden peer">
                                         <label for="apply_coffee_wall" class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded cursor-pointer peer-checked:bg-primary peer-checked:text-white">
-                                            <span class="font-medium font-FuturaMdCnBT text-xl">
-                                                Apply coffee wall
+                                            <span class="font-medium font-FuturaMdCnBT text-xl line-clamp-2 max-w-36 w-full">
+                                                {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                             </span>
                                         </label>
-                                        <div class="sups relative inline-flex">
+                                        <div class="sups relative inline-flex ml-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
                                             <div
-                                              class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
+                                                class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex"
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(180px);"
                                                 >
-                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                        If you can afford the booking fee, please go ahead and pay it; and leave the “Coffee on the Wall” for those who need it more If you, honestly and truthfully, cannot afford it, help yourself to a “Coffee from the Wall”; it has been donated from kind-hearted people like you, for good people like you
-                                                    </p>
+                                                    {!! str_replace('<p>', '<p class="text-white font-semibold text-start text-sm lg:text-base">', $bookingPage->coffee_from_wall_tooltip ?? '') !!}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="showDeduction" class="hidden items-center space-x-1">
+                                    <div id="hideBookingFee" class="hidden items-center space-x-1">
                                         <p class="text-black">-</p>
                                         <p class="totalAmount text-black"></p>
+                                        <div class="sups relative inline-flex ml-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                            </svg>
+                                            <div class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex">
+                                                <div role="tooltip" class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4" style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(150px);">
+                                                   {{ $bookingPage->coffee_from_amount_wall_tooltip ?? '' }}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             @endif
-                            @if ($ride->payment_method->features_setting_id == $postRidePage->payment_methods_option1->features_setting_id)
-                                <div class="flex items-center justify-between">
+                            @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                                <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total online payment</p>
                                     <p class="totalAmount text-black"></p> --}}
                                     <input type="hidden" name="online_payment" class="totalAmountIn form-control" readonly>
                                 </div>
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total cash payment</p>
                                     <p class="totalSeatsAmount text-black"></p> --}}
+                                    <input type="hidden" name="cash_payment" class="totalSeatsAmountInput form-control" readonly>
                                 </div>
                             @else
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total online payment</p>
                                     <p class="totalSum text-black"></p> --}}
-                                    <input type="hidden" name="online_payment" class="totalSumInput form-control" readonly>
+                                    <input type="hidden" name="online_payment" class="totalSumIn form-control" readonly>
                                 </div>
-                                <div class="flex items-center justify-between">
+                                <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total cash payment</p>
                                     <p class="text-black">$0.00</p> --}}
+                                    <input type="hidden" name="cash_payment" value="0" class="form-control" readonly>
                                 </div>
                             @endif
-                            <div class="flex items-center justify-between">
-                                <p>Total</p>
+                            <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control" readonly>
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <p>
+                                    @isset($bookingPage->total_label)
+                                        {{ $bookingPage->total_label }}
+                                    @endisset
+                                </p>
                                 <div>
                                     <p class="totalSum text-right"></p>
                                     <span id="discount" class="text-right"></span>
                                 </div>
-                            </div>
-                            <div class="border-t mt-4 pt-4">
-                                {{-- @if ($ride->payment_method->features_setting_id == $postRidePage->payment_methods_option1->features_setting_id) --}}
-                                    <div class="flex items-center justify-between">
-                                        <p>Total paid online payment</p>
-                                        <p class="totalPaidAmount text-black"></p>
-                                    </div>
-                                    {{-- <div class="refund items-center justify-between">
-                                        <p>Total refund payment</p>
-                                        <p class="totalPayableAmount text-black"></p>
-                                    </div> --}}
-
-                                    <div class="payable items-center justify-between">
-                                        <p>
-                                            @isset($bookingPage->payable_amount_label)
-                                            {{ $bookingPage->payable_amount_label }}
-                                            @endisset
-                                        </p>
-                                        <p class="totalPayableAmount text-black"></p>
-                                    </div>
-                                    <input type="hidden" id="stripeChargeAmount" value="">
-                                {{-- @endif --}}
-                                @if ($ride->payment_method->features_setting_id == $postRidePage->payment_methods_option2)
-                                    {{-- <div class="flex items-center justify-between">
-                                        <p>Total paid online payment</p>
-                                        <p class="totalPaidOnlineAmount text-black">${{ number_format(floatval($booking->fare+$booking->booking_credit), 2) }}</p>
-                                    </div> --}}
-                                    {{-- <div class="refund items-center justify-between">
-                                        <p>Total refund payment</p>
-                                        <p class="totalPayableOnlineAmount text-black"></p>
-                                    </div> --}}
-                                    
-                                @endif
+                                <input type="hidden" name="total" class="totalSumInput form-control" readonly>
+                                <input type="hidden" id="stripeChargeAmount" value="">
                             </div>
                         </div>
                     </div>
+                    
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2">
                             <h3 class="text-2xl xl:text-3xl">Select Number of Seats</h3>
@@ -643,6 +813,7 @@
                                                         </div>
                                                       </div>
                                                     @enderror
+                                                    @if($cards->isEmpty())
                                                     <div class="flex justify-center items-center mt-4">
                                                         {{-- <a href="{{ route('my_cards.create', ['lang' => $selectedLanguage->abbreviation, 'rideDetailId' => $ride->rideDetail[0]->id, 'rideId' => $ride->rideDetail[0]->ride_id, 'type' => 'booking']) }}" class="button-exp-fill"> --}}
                                                         <button onclick="storeDataAndRedirect()" class="button-exp-fill">
@@ -651,7 +822,7 @@
                                                             @endisset
                                                         </button>
                                                     </div>
-
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -677,7 +848,8 @@
                                 @isset($ride->booking_method->features_setting_id)
                                 <div class="flex justify-center items-center mt-4">
                                     <button id="submitButton" class="button-exp-fill" type="submit">
-                                        {{ $ride->booking_method->name }}
+                                        <!-- {{ $ride->booking_method->name }} -->
+                                        Pay and Request to Book
                                     </button>
                                 </div>
                                 @endisset
@@ -991,8 +1163,13 @@ inputs.forEach((input, index) => {
 
     var editBookingSeatsStorageKey = 'edit_booking_seats_{{ $ride->id }}_{{ $booking->ride_detail_id }}';
 
+    // Clear seat selection when leaving page without submitting (e.g. back button) so it doesn't persist on return
+    window.addEventListener('beforeunload', function() {
+        try { sessionStorage.removeItem(editBookingSeatsStorageKey); } catch (e) { /* ignore */ }
+    });
+
     $(document).ready(function () {
-        // Restore seat selection after refresh
+        // Restore seat selection only after in-page refresh (beforeunload clears on navigate away)
         try {
             var saved = sessionStorage.getItem(editBookingSeatsStorageKey);
             if (saved) {
@@ -1040,28 +1217,33 @@ inputs.forEach((input, index) => {
     // Check if $setting is defined and not null
     var bookingPrice;
 
-    if (@json($booking->price) <= 15) {
-        // Set a default value if $setting is null or not defined
+    // Check if user is a student who should NOT be charged booking fee
+    // charge_booking = '2' means booking fee is waived (student with valid card)
+    // charge_booking = '1' means booking fee is charged (regular user or student with expired card)
+    var chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
+    var isStudentFeeWaived = (chargeBooking == '2');
+
+    if (isStudentFeeWaived) {
+        // Student with valid card - booking fee is waived
         bookingPrice = 0.0;
-    } else if (@json($booking->price) <= 30) {
-        bookingPrice = parseFloat((10 / 100) * @json($booking->price));
     } else {
-        if (settingBookingPrice && settingBookingPrice !== '') {
-            // Get the booking price from $setting
-            bookingPrice = parseFloat(settingBookingPrice);
-        } else {
-            // Set a default value if $setting is null or not defined
+        // 10% of seat price for all rides above $15 (same logic as booking.blade.php)
+        if (@json($booking->price) <= 15) {
             bookingPrice = 0.0;
+        } else {
+            bookingPrice = parseFloat((10 / 100) * @json($booking->price));
         }
     }
     // Function to update the total amount
     function updateTotalAmount() {
         var seatPrice = parseFloat({{ $booking->price }});
-        var selectedSeats = $("input[name='seats_id[]']:checked").length;
+        var bookedSeats = parseInt("{{ $booking->seats }}") || 1;
+        var checkboxCount = $("input[name='seats_id[]']:checked").length;
+        // Use checkbox count when available, otherwise fall back to booked seats (e.g. when seatDetail is empty)
+        var selectedSeats = checkboxCount > 0 ? checkboxCount : bookedSeats;
         var totalAmount = bookingPrice * selectedSeats;
         var totalBookingCredit = "{{ $booking->booking_credit }}";
         var totalFare = "{{ $booking->fare }}";
-        var bookedSeats = "{{ $booking->seats }}";
         var totaltaxAmount = "{{ $booking->tax_amount }}";
         var totalPaid = Number(totalFare) + Number(totalBookingCredit) + Number(totaltaxAmount);
         var totalSeatsAmount = seatPrice * selectedSeats;
@@ -1073,14 +1255,14 @@ inputs.forEach((input, index) => {
         $('#discount').text('');
 
         var firm = "{{ $firm }}";
-
+        var isFirmRide = {{ ($ride->booking_type == ($postRidePage->cancellation_policy_label2->features_setting_id ?? false)) ? 'true' : 'false' }};
         var totalRideSeatAmout = totalSeatsAmount;
-        if ($('input[name="type"]:checked').val() === firm) {
+        var firmSelected = isFirmRide || ($('input[name="type"]:checked').length && $('input[name="type"]:checked').val() === firm);
+        if (firmSelected) {
             var settingFirmDiscount = "{{ $settingFirmDiscount }}";
             if (settingFirmDiscount && settingFirmDiscount !== '') {
-                // Get the booking price from $setting
-                totalSeatsAmount = totalSeatsAmount - (totalSeatsAmount * settingFirmDiscount / 100);
                 var firmAmt = (totalSeatsAmount * settingFirmDiscount / 100);
+                totalSeatsAmount = totalSeatsAmount - firmAmt;
                 $(".firmDiscountAmt").text('$'+firmAmt.toFixed(2));
                 $(".yourPriceAmt").text('$'+totalSeatsAmount.toFixed(2));
             }

@@ -30,6 +30,14 @@
             right: 0;
         }
     }
+
+    /* Wider tooltip on mobile for coffee wall tooltips */
+    @media (max-width: 639px) {
+        .tooltip_width {
+            width: min(90vw, 22rem) !important;
+            min-width: 18rem;
+        }
+    }
 </style>
 @endsection
 
@@ -204,7 +212,7 @@
         @csrf
 
         <input type="hidden" name="ride_detail_id" value="{{ $ride->rideDetail[0]->id }}">
-        
+        <input type="hidden" name="type" value="{{ $ride->booking_type }}">
         <input type="hidden" name="id" value="{{ $ride->id}}">
         <input type="hidden" name="gPayApplePayId" value="">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
@@ -222,78 +230,134 @@
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
                         <div class="w-full md:w-2/3 order-2 md:order-1">
-                            @php
-                                $from = $ride->rideDetail[0]->departure;
-                                $to = $ride->rideDetail[0]->destination;
-                            @endphp
                             <div class="relative mt-5 text-left">
                                 <div class="flex items-center relative">
-                                    <div class="border-r-2 border-black border-solid absolute h-full left-[26px] top-2 z-10">
-                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                    <div
+                                        class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                        <span
+                                            class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain"
+                                                src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
-                                        <div class="font-bold text-xl text-black">From</div>
-                                        <div class="text-primary md:mb-4">{{ $ride->rideDetail[0]->departure }}, <br class="md:hidden"> {{ $ride->pickup }}</div>
+                                    <div class="ml-12 md:ml-20">
+                                        <div class="font-bold text-xl text-black">
+                                            @isset($bookingPage->from_label)
+                                                {{ $bookingPage->from_label }}
+                                            @endisset
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $ride->rideDetail[0]->departure }}.
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Pick-up at: {{ $ride->pickup }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center relative">
-                                    <div class="border-r-2 border-black border-solid absolute h-0 left-[26px] top-2 z-10">
-                                        <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[13px] absolute flex justify-center items-center">
-                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                    <div
+                                        class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                        <span
+                                            class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain"
+                                                src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
-                                        <div class="font-bold text-xl text-black">To</div>
-                                        <div class="text-primary md:mb-4">{{ $ride->rideDetail[0]->destination }}, <br class="md:hidden"> {{ $ride->dropoff }}</div>
+                                    <div class="ml-12 md:ml-20">
+                                        <div class="font-bold text-xl text-black">
+                                            @isset($bookingPage->to_label)
+                                                {{ $bookingPage->to_label }}
+                                            @endisset
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $ride->rideDetail[0]->destination }}.
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Drop-off at: {{ $ride->dropoff }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-4 order-1 md:order-2">
-                            <p class="whitespace-nowrap font-medium">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }} at {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                            <p class="whitespace-nowrap font-semibold">
+                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }}
+                                @isset($bookingPage->at_label)
+                                    {{ $bookingPage->at_label }}
+                                @endisset
+                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                             </p>
                         </div>
                     </div>
-                    <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
-                        <div>
-                            <p class="font-medium text-left text-black mr-4">
-                                @isset($bookingPage->co_passenger_label)
-                                    {{ $bookingPage->co_passenger_label }}
+                    <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
+                        <div class="p-4">
+
+                            <p class="text-left font-semibold">
+                                @if (auth()->user() &&
+                                        $ride->bookings &&
+                                        $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
+                                    @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
+                                        @if (strtotime($ride->date) > strtotime('today') ||
+                                                (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                            <a
+                                                href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
+                                                @isset($bookingPage->seats_left_label)
+                                                    {{ $bookingPage->seats_left_label }}:
+                                                @endisset
+                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                            </a>
+                                        @endif
+                                    @endif
+                                @elseif (
+                                    $ride->seats -
+                                        $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
+                                                $query->whereNull('deleted_at');
+                                            })->sum('seats') !=
+                                        0)
+                                    @if ($ride->status !== '2')
+                                        <div class="flex">
+                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                class="">
+                                                @isset($bookingPage->seats_left_label)
+                                                    {{ $bookingPage->seats_left_label }}
+                                                @endisset
+                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endif
+
+
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 p-4">
+                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                Booking Price:
+                            </h4>
+                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
+
+                                @isset($bookingPage->per_seat_label)
+                                    {{ $bookingPage->per_seat_label }}
                                 @endisset
                             </p>
                         </div>
-                        <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
-                        @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
-                            @for ($i = 0; $i < $booking->seats; $i++)
-                                @if ($booking->passenger)
-                                    @if ($booking->passenger->profile_image)
-                                        <img class="w-10 h-10 rounded-full"
-                                            src="{{ $booking->passenger->profile_image }}"
-                                            alt="">
-                                    @else
-                                        <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
-                                            alt="">
-                                    @endif
-                                @endif
-                            @endfor
-                        @endforeach
-                        </div>
                     </div>
-                    <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                    <div
+                        class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-gray-800">
+                            <p class="font-medium text-left text-black pt-2">
                                 @isset($bookingPage->payment_method_label)
                                     {{ $bookingPage->payment_method_label }}
                                 @endisset
-                                <span class="text-black">{{ $ride->payment_method->name }}</span>
+                                <span class="text-primary font-normal">{{ $ride->payment_method->name }}</span>
                             </p>
                         </div>
-                        
-                        <div class="p-4 ">
+                        <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-gray-600 text-xl xl:text-2xl">
                                     Booking method:
@@ -307,20 +371,38 @@
                             </div>
                         </div>
                     </div>
-                    <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
-                            <p class="text-left font-medium">{{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }} seats left </p>
-                        </div>
-                        <div class="p-4">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-gray-600 text-lg xl:text-xl">
-                                    Booking Price:
-                                </h4>
-                                <p class="font-medium text-left text-primary">${{ $ride->rideDetail[0]->price }} per seat</p>
+                    <a
+                        @if (auth()->user() &&
+                                $ride->bookings &&
+                                $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty()) href="{{ route('my_co_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                    @else
+                        href="javascript:void(0);" @endif>
+                        <div
+                            class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
+                            <div>
+                                <p class="font-medium md:text-center text-black mr-4">
+                                    @isset($bookingPage->co_passenger_label)
+                                        {{ $bookingPage->co_passenger_label }}
+                                    @endisset
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+                                @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
+                                    @for ($i = 0; $i < $booking->seats; $i++)
+                                        @if ($booking->passenger)
+                                            @if ($booking->passenger->profile_image)
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ $booking->passenger->profile_image }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10 rounded-full"
+                                                    src="{{ asset('images/59-booked-seat.png') }}" alt="">
+                                            @endif
+                                        @endif
+                                    @endfor
+                                @endforeach
                             </div>
                         </div>
-                        
-                    </div>
+                    </a>
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
                     <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
@@ -543,11 +625,11 @@
                             </div>
 
                             @if ($ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
-                                <div class="flex items-center justify-between gap-2">
+                                <!-- <div class="flex items-center justify-between gap-2">
                                     <p class="text-black">
                                         {{ $bookingPage->firm_cancellation_label_price_section ?? "Firm cancellation" }} {{$settingFirmDiscount}}%
                                     </p>
-                                </div>
+                                </div> -->
 
                                 <div class="flex items-center justify-between gap-2">
                                     <p class="text-black">
@@ -641,7 +723,8 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute right-0 transition duration-150 ease-in-out shadow-lg p-2 bg-[#c75b5b]  border border-[#c75b5b] text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(180px);"
                                                 >
                                                     {!! str_replace('<p>', '<p class="text-white font-semibold text-start text-sm lg:text-base">', $bookingPage->coffee_from_wall_tooltip) !!}
                                                 </div>
@@ -660,7 +743,8 @@
                                             >
                                                 <div
                                                     role="tooltip"
-                                                    class="absolute right-0 transition duration-150 ease-in-out shadow-lg p-2 bg-[#c75b5b]  border border-[#c75b5b] text-white rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
+                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(150px);"
                                                 >
                                                    {{ $bookingPage->coffee_from_amount_wall_tooltip }}
                                                 </div>
@@ -903,11 +987,12 @@
                                                             </span>
                                                         </label>
                                                     </div>
+                                                    @php $primaryCardId = $cards->firstWhere(fn($c) => $c->primary_card == 1 || $c->primary_card === '1')?->id ?? ''; @endphp
                                                     <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
                                                         @foreach ($cards as $card)
                                                             @if ($card->paymentMethod)
                                                                 <div class="flex items-start justify-between p-3">
-                                                                    <label for="card_id" class="font-normal text-gray-900 flex items-start space-x-1">
+                                                                    <label for="card_id_{{ $card->id }}" class="font-normal text-gray-900 flex items-start space-x-1">
                                                                         <div>
                                                                             <p class="leading-normal mt-2">
                                                                                 **** **** **** {{ $card->paymentMethod->card->last4 }}
@@ -917,8 +1002,8 @@
                                                                             </div>
                                                                         </div>
                                                                     </label>
-                                                                    <input type="radio" id="card_id" name="card_id" value="{{ $card->id }}"
-                                                                        {{ old('card_id', $card->primary_card ? $card->id : '') == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                                                    <input type="radio" id="card_id_{{ $card->id }}" name="card_id" value="{{ $card->id }}"
+                                                                        {{ old('card_id', $primaryCardId) == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                                                                 </div>
                                                             @endif
                                                         @endforeach
@@ -929,23 +1014,24 @@
                                                             </div>
                                                             </div>
                                                         @enderror
+                                                        @if($cards->isEmpty())
                                                         <div class="flex justify-center items-center mt-4">
-                                                            {{-- <a href="{{ route('my_cards.create', ['lang' => $selectedLanguage->abbreviation, 'rideDetailId' => $ride->rideDetail[0]->id, 'rideId' => $ride->rideDetail[0]->ride_id, 'type' => 'booking']) }}" class="button-exp-fill"> --}}
                                                             <button onclick="storeDataAndRedirect()" class="button-exp-fill">
                                                                 @isset($bookingPage->add_card_label)
                                                                     {{ $bookingPage->add_card_label }}
                                                                 @endisset
                                                             </button>
                                                         </div>
+                                                        @endif
 
                                                     </div>
                                                 </div>
                                             </div>
                                             @error('payment_method')
                                                 <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                                </div>
+                                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                    </div>
                                                 </div>
                                             @enderror
                                         </div>
@@ -965,7 +1051,8 @@
 
                                 <div class="flex justify-center items-center mt-4">
                                     <button id="submitButton" class="button-exp-fill" type="submit">
-                                        {{ $ride->booking_method->name }}
+                                        <!-- {{ $ride->booking_method->name }} -->
+                                        Pay and Request to Book
                                     </button>
                                 </div>
                                 @endisset
@@ -1442,21 +1529,7 @@ $(document).ready(function () {
         // Student with valid card - booking fee is waived
         bookingPrice = 0.0;
     } else {
-        // Regular user or student with expired card - calculate booking fee
-        if (@json($ride->rideDetail[0]->price) <= 15) {
-            // Set a default value if $setting is null or not defined
-            bookingPrice = 0.0;
-        } else if (@json($ride->rideDetail[0]->price) <= 30) {
-            bookingPrice = parseFloat((10 / 100) * @json($ride->rideDetail[0]->price));
-        } else {
-            if (settingBookingPrice && settingBookingPrice !== '') {
-                // Get the booking price from $setting
-                bookingPrice = parseFloat(settingBookingPrice);
-            } else {
-                // Set a default value if $setting is null or not defined
-                bookingPrice = 0.0;
-            }
-        }
+        bookingPrice = parseFloat((10 / 100) * @json($ride->rideDetail[0]->price));
     }
 
     // Function to update the total amount
@@ -1474,15 +1547,14 @@ $(document).ready(function () {
         $('#discount').text('');
 
         var firm = "{{ $firm }}";
+        var isFirmRide = {{ ($ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id ?? false) ? 'true' : 'false' }};
         var totalRideSeatAmout = totalSeatsAmount;
-        if ($('input[name="type"]:checked').val() === firm) {
+        var firmSelected = isFirmRide || ($('input[name="type"]:checked').length && $('input[name="type"]:checked').val() === firm);
+        if (firmSelected) {
             var settingFirmDiscount = "{{ $settingFirmDiscount }}";
             if (settingFirmDiscount && settingFirmDiscount !== '') {
-                // Get the booking price from $setting
-                totalSeatsAmount = totalSeatsAmount - (totalSeatsAmount * settingFirmDiscount / 100);
-
-
                 var firmAmt = (totalSeatsAmount * settingFirmDiscount / 100);
+                totalSeatsAmount = totalSeatsAmount - firmAmt;
                 $(".firmDiscountAmt").text('$'+firmAmt.toFixed(2));
                 $(".yourPriceAmt").text('$'+totalSeatsAmount.toFixed(2));
                 // totalAmount = totalAmount - (totalAmount * settingFirmDiscount / 100);

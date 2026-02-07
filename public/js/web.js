@@ -18979,14 +18979,14 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(datePart, " at ").concat(timePart);
     },
     bubbleStyle: function bubbleStyle(message) {
-      var fontFamily = "' Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif";
+      var fontFamily = "'FuturaMdCnBT', 'Futura', 'Futura Medium Condensed BT', Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif";
       if (message.user && message.user.id == this.logged_in_user_id) {
         // My message (blue)
         return {
           background: '#3B82F6',
           color: '#fff',
           'border-radius': '16px',
-          'padding': '4px 16px',
+          'padding': '10px 16px',
           'margin-bottom': '2px',
           'margin-left': '10px',
           'display': 'inline-block',
@@ -19000,7 +19000,7 @@ __webpack_require__.r(__webpack_exports__);
         background: '#45CEEB',
         color: '#fff',
         'border-radius': '16px',
-        'padding': '4px 16px',
+        'padding': '10px 16px',
         'margin-bottom': '2px',
         'margin-right': '10px',
         'display': 'inline-block',

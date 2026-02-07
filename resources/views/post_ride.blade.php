@@ -711,10 +711,12 @@
                             <div class="flex items-center flex-wrap gap-2 mt-2">
                                 @for ($i = 1; $i <= 7; $i++)
                                 <div class="relative">
-                                    <label class="cursor-pointer relative inline-block" for="number-of-seat-{{ $i }}">
+                                    <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
                                         <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-6 h-6 md:w-8 md:h-8  cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                        <span class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}" style="margin-top: 2px;">{{ $i }}</span>
+                                        <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                            <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-7 h-7 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                        </span>
                                     </label>
                                 </div>
                                 @endfor

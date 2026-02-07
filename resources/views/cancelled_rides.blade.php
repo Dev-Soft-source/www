@@ -12,45 +12,7 @@
     <div class="bg-white rounded pt-0 lg:px-4 w-full col-span-12 lg:col-span-9">
         <div class="flex flex-wrap" id="tabs-id">
             <div class="w-full">
-                <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row">
-                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                        <a href="{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded border-gray-100 border block leading-normal text-blue-600 bg-white cursor-pointer">
-                            @isset($tripsPage->passenger_trips_heading)
-                            {{ $tripsPage->passenger_trips_heading }}
-                        @endisset
-                        </a>
-                    </li>
-                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                        <a href="{{ route('my_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded border-blue-600 border block leading-normal text-white bg-blue-600 cursor-pointer">
-                            @isset($tripsPage->driver_rides_heading)
-                            {{ $tripsPage->driver_rides_heading }}
-                        @endisset
-                        </a>
-                    </li>
-                </ul>
-                <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
-                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                        <a href="{{ route('my_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 border-gray-100 border shadow-lg rounded block leading-normal text-blue-600 bg-white cursor-pointer">
-                            @isset($tripsPage->upcoming_label)
-                            {{ $tripsPage->upcoming_label }}
-                        @endisset
-                        </a>
-                    </li>
-                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                        <a href="{{ route('past_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
-                            @isset($tripsPage->completed_label)
-                            {{ $tripsPage->completed_label }}
-                        @endisset
-                        </a>
-                    </li>
-                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                        <a href="{{ route('cancelled_rides', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-blue-600 border leading-normal text-white bg-blue-600 cursor-pointer">
-                            @isset($tripsPage->cancelled_label)
-                            {{ $tripsPage->cancelled_label }}
-                        @endisset
-                        </a>
-                    </li>
-                </ul>
+                @include('layouts.inc.trips_tabs')
                 <div class="relative flex flex-col min-w-0 break-words bg-white w-full py-5 shadow-lg rounded">
                     <div class="">
                     <div class="px-4 flex-auto">

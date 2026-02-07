@@ -320,15 +320,21 @@
                                                 src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
+                                    <div class="ml-12 md:ml-20">
                                         <div class="font-bold text-xl text-black">
                                             @isset($rideDetailPage->from_label)
                                                 {{ $rideDetailPage->from_label }}
                                             @endisset
                                         </div>
-                                        <div class="text-primary md:mb-4">{{ $ride->rideDetail[0]->departure }}, <br
-                                                class="md:hidden"> {{ $ride->pickup }}</div>
-                                    </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $ride->rideDetail[0]->departure }}.
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Pick-up at: {{ $ride->pickup }}
+                                            </p>
+                                        </div>
+                                    </div>                                    
                                 </div>
 
                                 <div class="flex items-center relative">
@@ -340,15 +346,21 @@
                                                 src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                         </span>
                                     </div>
-                                    <div class="ml-20">
+                                    <div class="ml-12 md:ml-20">
                                         <div class="font-bold text-xl text-black">
                                             @isset($rideDetailPage->to_label)
                                                 {{ $rideDetailPage->to_label }}
                                             @endisset
                                         </div>
-                                        <div class="text-primary md:mb-4">{{ $ride->rideDetail[0]->destination }}, <br
-                                                class="md:hidden"> {{ $ride->dropoff }}</div>
-                                    </div>
+                                        <div class="flex gap-2">
+                                            <p class="text-primary text-xl md:mb-4">
+                                                {{ $ride->rideDetail[0]->destination }}.
+                                            </p>
+                                            <p class="text-sm mt-2">
+                                                Drop-off at: {{ $ride->dropoff }}
+                                            </p>
+                                        </div>
+                                    </div>     
                                 </div>
                             </div>
                         </div>
@@ -373,7 +385,7 @@
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="p-4">
-
+                            
                             <p class="text-left font-semibold">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
@@ -413,8 +425,12 @@
 
                             </p>
                         </div>
-                        <div class="p-4">
+                        <div class="flex flex-wrap items-center gap-3 p-4">
+                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                                Booking Price:
+                            </h4>
                             <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
+                                
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -424,11 +440,11 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-black">
+                            <p class="font-medium text-left text-black pt-2">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-black font-normal">{{ $ride->payment_method }}</span>
+                                <span class="text-primary font-normal">{{ $ride->payment_method }}</span>
                             </p>
                         </div>
                         <div class="p-4">
@@ -652,16 +668,17 @@
                                 }
                             }
                             $rideIsPast = strtotime($ride->date . ' ' . $ride->time) < strtotime('now');
-                            $showReviewLink = $passengerBookingUuid && ($ride_cancelled || $rideIsPast);
+                            $alreadyReviewedDriver = auth()->user() && \App\Models\Rating::where('ride_id', $ride->id)->where('type', '1')->where('posted_by', auth()->user()->id)->exists();
+                            $showReviewLink = $passengerBookingUuid && $rideIsPast && !$alreadyReviewedDriver;
                         @endphp
                         <h3 class="bg-primary text-white hover:text-red-400 py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
-                            @if ($showReviewLink)
+                            @if ($showReviewLink && $passengerBookingUuid)
                                 <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}" class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
                                     @isset($rideDetailPage->review_driver_info_label)
                                         {{ $rideDetailPage->review_driver_info_label }}
                                     @endisset
                                 </a>
-                            @elseif (!$ride_cancelled && $ride->added_by)
+                            @elseif ($ride->added_by)
                                 <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}" class="w-full text-white text-2xl xl:text-3xl hover:text-red-400 no-underline cursor-pointer">
                                     @isset($rideDetailPage->driver_info_label)
                                         {{ $rideDetailPage->driver_info_label }}
@@ -781,18 +798,8 @@
                                         @endphp
 
                                         <div class="flex items-center gap-2 w-auto">
-                                            @if ($hasVerifiedPhone)
-                                                <span
-                                                    onclick="openVerifyModal('{{ $rideDetailPage->verified_phone ?? 'Phone number is verified' }}')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="h-5 ">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                                                    </svg>
-                                                </span>
-                                            @endif
                                             @if ($ride->driver?->email_verified == '1')
+                                                <span>|</span>
                                                 <span
                                                     onclick="openVerifyModal('{{ $rideDetailPage->verified_email ?? 'Email is verified' }}')">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -803,6 +810,20 @@
                                                     </svg>
                                                 </span>
                                             @endif
+
+                                            @if ($hasVerifiedPhone)
+                                                <span>|</span>
+                                                <span
+                                                    onclick="openVerifyModal('{{ $rideDetailPage->verified_phone ?? 'Phone number is verified' }}')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="h-5 ">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                                                    </svg>
+                                                </span>
+                                            @endif
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -1149,9 +1170,11 @@
                                                 class="">
                                                 <label for="instant-booking"
                                                     class="inline-flex items-center justify-center space-x-3 w-fit button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                    <span class="font-medium text-xl">
-                                                        Cancel booking
-                                                    </span>
+                                                    <h4 class="text-2xl">
+                                                        @isset($rideDetailPage->cancel_booking_btn_label)
+                                                            {{ $rideDetailPage->cancel_booking_btn_label }}
+                                                        @endisset
+                                                    </h4>
                                                 </label>
                                             </a>
                                         </div>

@@ -37,15 +37,7 @@ class MyTripController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
         
-        // Check if user has posted any rides (as a driver)
-        $hasPostedRides = Ride::where('added_by', $user_id)->exists();
-        
-        // If user has posted rides, redirect to "Driver Rides" (my_rides)
-        if ($hasPostedRides) {
-            return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
-        }
-        
-        // Continue with passenger trips if user hasn't posted rides
+        // Continue with passenger trips (users can be both drivers and passengers)
         $bookings = Booking::where('user_id', $user_id)
             ->where('bookings.status', '!=', '3')
             ->where('bookings.status', '!=', '4')

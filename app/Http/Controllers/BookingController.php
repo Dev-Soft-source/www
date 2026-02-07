@@ -312,6 +312,14 @@ class BookingController extends Controller
 
             $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
+            // If ride requires online payment, user has cards, but no primary card set - redirect to my_cards to select one
+            $isOnlinePaymentRide = $ride->payment_method->features_setting_id !== $postRidePage->payment_methods_option1->features_setting_id;
+            $hasPrimaryCard = $cards->contains(fn($c) => $c->primary_card == 1 || $c->primary_card === '1');
+            if ($isOnlinePaymentRide && $cards->isNotEmpty() && !$hasPrimaryCard) {
+                return redirect()->route('my_cards', ['lang' => $selectedLanguage->abbreviation])
+                    ->with('message', 'Please set a primary card to continue with your booking.');
+            }
+
             Stripe::setApiKey(env('STRIPE_SECRET'));
             // Fetch card details from Stripe
             foreach ($cards as $card) {
@@ -1120,7 +1128,7 @@ class BookingController extends Controller
                             "cancel_url" => route('paypal.cancel'),
                             "return_url" => route('paypal.success.booking_request', [
                                 'id' => $ride->id,
-                                'type' => $request->type,
+                                'type' => $request->type ?? $ride->booking_type,
                                 'seats' => $request->seats,
                                 'seats_amount' => $request->seats_amount,
                                 'booking_credit' => $request->booking_credit,
