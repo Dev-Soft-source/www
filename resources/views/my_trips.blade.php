@@ -129,7 +129,14 @@
                                                                                 {{ $rideDetailPage->card_section_from_label }}
                                                                             @endisset
                                                                             </div>
-                                                                            <div class="text-primary md:mb-4">{{ $from }} {{ $booking->ride->pickup }}</div>
+                                                                            <div class="flex gap-2">
+                                                                                <p class="text-primary md:mb-4">
+                                                                                    {{$from }}.
+                                                                                </p>
+                                                                                <p class="text-sm mt-1">
+                                                                                    Pick-up at: {{ $booking->ride->pickup }}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
 
@@ -146,7 +153,14 @@
                                                                                 {{ $rideDetailPage->card_section_to_label }}
                                                                             @endisset
                                                                             </div>
-                                                                            <div class="text-primary md:mb-4">{{ $to }} {{ $booking->ride->dropoff }}</div>
+                                                                            <div class="flex gap-2">
+                                                                                <p class="text-primary md:mb-4">
+                                                                                    {{$to }}.
+                                                                                </p>
+                                                                                <p class="text-sm mt-1">
+                                                                                    Drop-off at: {{ $booking->ride->dropoff }}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>

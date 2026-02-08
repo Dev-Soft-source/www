@@ -145,13 +145,22 @@ class Step5to5Controller extends Controller
     }
 
     /**
-     * Send OTP via SMS or WhatsApp with fallback
+     * Whether the normalized phone is North American (+1).
+     */
+    private function isNorthAmericanNumber(string $normalizedPhone): bool
+    {
+        return str_starts_with($normalizedPhone, '+1');
+    }
+
+    /**
+     * Send OTP via SMS or WhatsApp with fallback.
+     * North American (+1): Messages API. International: Twilio Verify API (WhatsApp preferred).
      */
     private function sendOtp(PhoneNumber $phone, string $channel = 'sms')
     {
         $user_id = $phone->user_id;
 
-        // Rate limit: max 3 OTPs per 24h
+        // Rate limit: max 3 attempts per number per 24h (SMS pumping protection)
         $attemptsIn24h = DB::table('phone_verifications')
             ->where('phone_number_id', $phone->id)
             ->where('created_at', '>=', now()->subHours(24))
@@ -159,13 +168,46 @@ class Step5to5Controller extends Controller
 
         if ($attemptsIn24h >= 3) {
             Log::warning('Max OTP attempts reached', ['phone_id' => $phone->id]);
-            return back()->withErrors(['phone' => 'Maximum verification attempts reached. Try again after 24 hours.']);
+            return back()->withErrors(['phone' => 'Maximum verification attempts (3) reached. Try again after 24 hours.']);
         }
 
-        // Generate 4-digit OTP
-        $otp = random_int(1000, 9999);
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $verifyServiceSid = env('TWILIO_VERIFY_SERVICE_SID');
 
-        // Store OTP in DB (phone_verifications: verification_code, expires_at, channel, timestamps)
+        // International: use Twilio Verify API with WhatsApp only (SMS often blocked/expensive)
+        if (!$this->isNorthAmericanNumber($phone->phone)) {
+            if (!$sid || !$token || !$verifyServiceSid) {
+                Log::warning('Twilio Verify not configured for international send');
+                return back()->withErrors(['phone' => 'Verification for international numbers is not available. Please use a North American number or try again later.'])->withInput();
+            }
+            $verifyChannel = 'whatsapp';
+            try {
+                $twilio = new Client($sid, $token);
+                $verification = $twilio->verify->v2->services($verifyServiceSid)
+                    ->verifications->create($phone->phone, $verifyChannel);
+                DB::table('phone_verifications')->insert([
+                    'phone_number_id' => $phone->id,
+                    'verification_code' => '',
+                    'channel' => $verifyChannel,
+                    'twilio_verify_sid' => $verification->sid,
+                    'expires_at' => now()->addMinutes(10),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                Log::info('International OTP sent via Twilio Verify', ['phone' => $phone->phone, 'channel' => $verifyChannel]);
+            } catch (\Exception $e) {
+                Log::error('Twilio Verify send failed', ['phone_id' => $phone->id, 'phone' => $phone->phone, 'error' => $e->getMessage()]);
+                return back()->withErrors(['phone' => $this->twilioErrorMessageForUser($e->getMessage(), 'sms')])->withInput();
+            }
+            $selectedLanguage = session('selectedLanguage')
+                ? Language::where('abbreviation', session('selectedLanguage'))->first() ?? Language::where('is_default', 1)->first()
+                : Language::where('is_default', 1)->first();
+            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+        }
+
+        // North American (+1): Messages API with our own OTP
+        $otp = random_int(1000, 9999);
         DB::table('phone_verifications')->insert([
             'phone_number_id' => $phone->id,
             'verification_code' => (string) $otp,
@@ -175,12 +217,10 @@ class Step5to5Controller extends Controller
             'updated_at' => now(),
         ]);
 
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
         $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
         $smsFrom = env('TWILIO_SMS_FROM') ?: env('TWILIO_PHONE_NUMBER');
         $whatsappFrom = env('TWILIO_WHATSAPP_FROM');
-        $twilio = new \Twilio\Rest\Client($sid, $token);
+        $twilio = new Client($sid, $token);
 
         $whatsappParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
         if ($messagingServiceSid) {
@@ -293,7 +333,7 @@ class Step5to5Controller extends Controller
         if ($attemptsIn24h >= 3) {
             return response()->json([
                 'success' => false,
-                'message' => 'Maximum verification attempts (3) reached. Try again after 24 hours.',
+                'message' => 'Maximum verification attempts (3) reached for this number. Try again after 24 hours.',
             ], 429);
         }
 
@@ -304,6 +344,7 @@ class Step5to5Controller extends Controller
         $smsFrom = env('TWILIO_SMS_FROM') ?: env('TWILIO_PHONE_NUMBER');
         $whatsappFrom = env('TWILIO_WHATSAPP_FROM');
         $whatsappUnavailable = false;
+        $isNorthAmerican = $this->isNorthAmericanNumber($normalizedPhone);
 
         if (!$sid || !$token) {
             return response()->json([
@@ -312,7 +353,48 @@ class Step5to5Controller extends Controller
             ], 500);
         }
 
-        // SMS or WhatsApp via Messages API (our own 4-digit OTP)
+        // International: Twilio Verify API (WhatsApp or SMS) — avoids expensive international SMS
+        if (!$isNorthAmerican) {
+            if (!$verifyServiceSid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Verification for international numbers is not configured. Please use a North American number or contact support.',
+                ], 500);
+            }
+            // International: use WhatsApp only (SMS often blocked/expensive for many prefixes)
+            $verifyChannel = 'whatsapp';
+            try {
+                $twilio = new Client($sid, $token);
+                $verification = $twilio->verify->v2->services($verifyServiceSid)
+                    ->verifications->create($phone->phone, $verifyChannel);
+                DB::table('phone_verifications')->insert([
+                    'phone_number_id' => $phone->id,
+                    'verification_code' => '',
+                    'channel' => $verifyChannel,
+                    'twilio_verify_sid' => $verification->sid,
+                    'expires_at' => now()->addMinutes(10),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                Log::info('International verification sent via Twilio Verify', ['phone' => $phone->phone, 'channel' => $verifyChannel]);
+            } catch (\Exception $e) {
+                Log::error('Twilio Verify send failed', ['phone_id' => $phone->id, 'phone' => $phone->phone, 'error' => $e->getMessage()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $this->twilioErrorMessageForUser($e->getMessage(), $verifyChannel),
+                ], 500);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification code sent successfully',
+                'is_north_american' => false,
+                'channel' => $verifyChannel,
+                'remaining_attempts' => max(0, 3 - ($attemptsIn24h + 1)),
+                'whatsapp_unavailable' => false,
+            ]);
+        }
+
+        // North American (+1): Messages API with our own 4-digit OTP
         $otp = random_int(1000, 9999);
         DB::table('phone_verifications')->insert([
             'phone_number_id' => $phone->id,
@@ -385,12 +467,10 @@ class Step5to5Controller extends Controller
             }
         }
 
-        $isNorthAmerican = function_exists('isNorthAmericanNumber') ? isNorthAmericanNumber($normalizedPhone) : (str_starts_with($normalizedPhone, '+1'));
-
         return response()->json([
             'success' => true,
             'message' => 'Verification code sent successfully',
-            'is_north_american' => $isNorthAmerican,
+            'is_north_american' => true,
             'channel' => $whatsappUnavailable ? 'sms' : $channel,
             'remaining_attempts' => max(0, 3 - ($attemptsIn24h + 1)),
             'whatsapp_unavailable' => $whatsappUnavailable,

@@ -107,7 +107,7 @@
                         <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn" class="verify-button-modern w-full md:w-36 text-white text-base rounded font-FuturaMdCnBT px-5 py-2.5 text-center shadow-md">@isset($step4Page->verify_button_label){{ $step4Page->verify_button_label }}@endisset</button>
                         <div id="whatsappButtonContainer" class="hidden">
                             <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn" class="w-full bg-green-500 hover:bg-green-600 text-white text-base rounded font-FuturaMdCnBT px-5 py-2.5 text-center shadow-md flex items-center justify-center gap-2">
-                                Verify via WhatsApp
+                                Send code via WhatsApp
                             </button>
                         </div>
                         <div class="font-FuturaMdCnBT flex flex-col md:flex-row lg:flex-row items-center justify-center gap-2 w-full md:w-auto">
@@ -243,6 +243,14 @@
                               <div id="codeError" class="hidden mt-2">
                                 <p class="text-red-500 text-sm"></p>
                               </div>
+                              <!-- <div id="whatsappResendContainer" class="hidden mt-4 pt-3 border-t border-gray-100">
+                                <p class="text-sm text-gray-600 mb-2">Didn't get the code?</p>
+                                <div id="whatsappResendBtnWrapper">
+                                    <button type="button" onclick="resendViaWhatsApp()" id="resendWhatsAppBtn" class="inline-flex items-center justify-center gap-2 rounded bg-green-500 hover:bg-green-600 text-white text-sm font-FuturaMdCnBT px-4 py-2">
+                                        Send code via WhatsApp
+                                    </button>
+                                </div>
+                              </div> -->
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center">
@@ -792,6 +800,12 @@ function showWhatsAppUnavailableModal(message, title = null) {
                 if (iconElement) {
                     iconElement.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4';
                     iconElement.innerHTML = '<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                }
+            } else if (message && message.includes('Send code via WhatsApp')) {
+                titleElement.textContent = 'Use WhatsApp';
+                if (iconElement) {
+                    iconElement.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4';
+                    iconElement.innerHTML = '<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
                 }
             } else if (message && (message.includes('Error') || message.includes('error') || message.includes('failed'))) {
                 titleElement.textContent = 'Error';

@@ -1044,6 +1044,7 @@
                                         @if ($booking->status !== '3')
                                             @if (strtotime($ride->date) > strtotime('today') ||
                                                     (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                                @if ($ride->seats - $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) { $query->whereNull('deleted_at'); })->sum('seats') != 0)
                                                 <td class="border border-slate-300 px-4 py-2 text-center">
                                                     <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}"
                                                         class="button-exp-fill whitespace-nowrap me-1">
@@ -1052,6 +1053,7 @@
                                                         @endisset
                                                     </a>
                                                 </td>
+                                                @endif
                                             @endif
                                         @endif
                                     </div>
@@ -1620,9 +1622,9 @@
                 </div>
                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                     <a id="delete-card-link" href="#"
-                        class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $rideDetailPage->firm_cancellation_confirm_poup_yes_label ?? 'Yes' }}</a>
+                        class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">{{ $rideDetailPage->firm_cancellation_confirm_poup_yes_label ?? 'Yes' }}</a>
                     <button type="button" onclick="toggleModalCard('card-modal')"
-                        class="button-exp-fill sm:w-24">{{ $rideDetailPage->firm_cancellation_confirm_poup_no_label ?? 'No' }}</button>
+                        class="button-exp-fill sm:w-42">{{ $rideDetailPage->firm_cancellation_confirm_poup_no_label ?? 'No' }}</button>
                 </div>
             </div>
         </div>

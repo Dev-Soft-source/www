@@ -372,12 +372,8 @@ class BookingController extends Controller
                     $current_timestamp = time();
 
                     if ($ride_timestamp > $current_timestamp) {
-                        $time_difference = $ride_timestamp - $current_timestamp;
-                        $hours_difference = $time_difference / 3600;
-
-                        $delay_minutes = ($hours_difference <= 1) ? 5 : 10;
-
-                        UpdateSeatOnHold::dispatch($getSeatDetail->id)->delay(now()->addMinutes((int)$delay_minutes));
+                        // Strict 10 minutes: seat is released if not booked within 10 minutes
+                        UpdateSeatOnHold::dispatch($getSeatDetail->id)->delay(now()->addMinutes($jobTime));
                     }
                 }
                 $data['getSeatDetail'] = $getSeatDetail;
