@@ -54,6 +54,10 @@ class BillingAddressSettingDetailResource extends JsonResource
             'card_number_placeholder' => $this->card_number_placeholder,
             'cvc_placeholder' => $this->cvc_placeholder,
             'card_name_placeholder' => $this->card_name_placeholder,
+            'delete_card_button_text' => $this->delete_card_button_text,
+            'mobile_default_card_tab' => $this->mobile_default_card_tab,
+            'set_primary_card_label' => $this->set_primary_card_label,
+            'delete_card_message' => $this->delete_card_message,
             // 'edit_card_button_text' => $this->edit_card_button_text,
             'language' => $this->when($this->relationLoaded('language'), function() {
                 return [

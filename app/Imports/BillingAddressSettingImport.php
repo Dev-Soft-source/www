@@ -166,7 +166,11 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
             // Postal code fields
             'mobile_postal_code_label' => $row['mobile_postal_code_label'] ?? null,
             'mobile_postal_code_placeholder' => $row['mobile_postal_code_placeholder'] ?? null,
-            
+
+            'delete_card_button_text' => $row['delete_card_button_text'] ?? null,
+            'mobile_default_card_tab' => $row['mobile_default_card_tab'] ?? null,
+            'set_primary_card_label' => $row['set_primary_card_label'] ?? null,
+            'delete_card_message' => $row['delete_card_message'] ?? null,
             // Primary card option
             'mobile_primary_card_placeholder' => $row['mobile_primary_card_placeholder'] ?? null,
             

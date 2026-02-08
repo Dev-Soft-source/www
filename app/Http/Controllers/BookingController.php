@@ -811,6 +811,11 @@ class BookingController extends Controller
 
     public function cancel($lang = null, $id)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login', ['lang' => $lang])->with('error', __('Please log in to cancel your booking.'));
+        }
+
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
             // Find the language by abbreviation
@@ -834,7 +839,7 @@ class BookingController extends Controller
                 $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
             }
         }
-        $user_id = auth()->user()->id;
+        $user_id = $user->id;
         $setting = SiteSetting::first();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration);
 

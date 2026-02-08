@@ -304,7 +304,7 @@ Route::get('{lang?}/review-driver/{id}', [ReviewController::class, 'ReviewDriver
 Route::get('{lang?}/review-reply/{id}', [ReviewController::class, 'ReviewReply'])->name('review_reply');
 Route::get('{lang?}/booking/{id}/{rideDetailId}', [BookingController::class, 'create'])->name('booking');
 Route::get('{lang?}/edit-booking/{id}', [BookingController::class, 'edit'])->name('booking.edit');
-Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])->name('booking.cancel');
+Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])->middleware('auth')->name('booking.cancel');
 Route::get('{lang?}/accept-booking-request/{id}/{email}', [BookingController::class, 'AcceptBookingRequest'])->name('accept_booking_request');
 Route::get('{lang?}/reject-booking-request/{id}/{email}', [BookingController::class, 'RejectBookingRequest'])->name('reject_booking_request');
 Route::get('{lang?}/post-ride', [RideController::class, 'PostRide'])->name('post_ride')->middleware('auth');

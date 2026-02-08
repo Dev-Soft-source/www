@@ -1859,10 +1859,185 @@
                                                 ></p>
                                             </div>
 
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`delete_card_button_text_${activeLanguageId}`"
+                                                            >Delete Card Button Text</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`delete_card_button_text_${activeLanguageId}`"
+                                                        :id="`delete_card_button_text_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'delete_card_button_text'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'delete_card_button_text'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `delete_card_button_text.delete_card_button_text_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `delete_card_button_text.delete_card_button_text_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`mobile_default_card_tab_${activeLanguageId}`"
+                                                            >Primary Card Button Text</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`mobile_default_card_tab_${activeLanguageId}`"
+                                                        :id="`mobile_default_card_tab_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'mobile_default_card_tab'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'mobile_default_card_tab'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `mobile_default_card_tab.mobile_default_card_tab_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `mobile_default_card_tab.mobile_default_card_tab_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
 
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`set_primary_card_label_${activeLanguageId}`"
+                                                            >Set Primary Card Label</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`set_primary_card_label_${activeLanguageId}`"
+                                                        :id="`set_primary_card_label_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'set_primary_card_label'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'set_primary_card_label'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `set_primary_card_label.set_primary_card_label_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `set_primary_card_label.set_primary_card_label_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
 
-
-
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`delete_card_message_${activeLanguageId}`"
+                                                            >Delete Card Message</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`delete_card_message_${activeLanguageId}`"
+                                                        :id="`delete_card_message_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'delete_card_message'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'delete_card_message'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `delete_card_message.delete_card_message_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `delete_card_message.delete_card_message_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
 
                                     </div>
                                 </div>
@@ -1959,6 +2134,8 @@ export default {
                         let defaultLang = this.languages.filter(
                             (x) => x.is_default == "1"
                         );
+
+                       
                         this.activeLanguageId = defaultLang?.[0]?.id || null;
                         let languages = res?.data?.data;
                         languages.map((language) => {
@@ -2001,7 +2178,10 @@ export default {
                             this.handleInput("", language, "card_number_placeholder");
                             this.handleInput("", language, "cvc_placeholder");
                             this.handleInput("", language, "card_name_placeholder");
-                            
+                            this.handleInput("", language, "delete_card_button_text");
+                            this.handleInput("", language, "mobile_default_card_tab");
+                            this.handleInput("", language, "set_primary_card_label");
+                            this.handleInput("", language, "delete_card_message");
                         });
                         this.fetchBillingAddressPageSetting();
                     }
@@ -2020,6 +2200,7 @@ export default {
                                 setting?.language,
                                 "name"
                             );
+                            console.log("setting",res.data);
                             this.handleInput(
                                 setting?.mobile_indicate_required_field_label,
                                 setting?.language,
@@ -2206,6 +2387,26 @@ export default {
                                 setting?.expiry_month_placeholder,
                                 setting?.language,
                                 "expiry_month_placeholder"
+                            );
+                            this.handleInput(
+                                setting?.delete_card_button_text,
+                                setting?.language,
+                                "delete_card_button_text"
+                            );
+                            this.handleInput(
+                                setting?.mobile_default_card_tab,
+                                setting?.language,
+                                "mobile_default_card_tab"
+                            );
+                            this.handleInput(
+                                setting?.set_primary_card_label,
+                                setting?.language,
+                                "set_primary_card_label"
+                            );
+                            this.handleInput(
+                                setting?.delete_card_message,
+                                setting?.language,
+                                "delete_card_message"
                             );
 
                         });
@@ -2435,6 +2636,18 @@ export default {
                 )||
                 validationErros.has(
                     `mobile_card_type_label.mobile_card_type_label_${language.id}`
+                )||
+                validationErros.has(
+                    `delete_card_button_text.delete_card_button_text_${language.id}`
+                )||
+                validationErros.has(
+                    `mobile_default_card_tab.mobile_default_card_tab_${language.id}`
+                )||
+                validationErros.has(
+                    `set_primary_card_label.set_primary_card_label_${language.id}`
+                )||
+                validationErros.has(
+                    `delete_card_message.delete_card_message_${language.id}`
                 )
             );
         },

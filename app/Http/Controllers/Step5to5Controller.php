@@ -206,12 +206,12 @@ class Step5to5Controller extends Controller
             return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
         }
 
-        // North American (+1): Messages API with our own OTP
+        // North American (+1): Messages API with our own OTP (SMS only)
         $otp = random_int(1000, 9999);
         DB::table('phone_verifications')->insert([
             'phone_number_id' => $phone->id,
             'verification_code' => (string) $otp,
-            'channel' => $channel,
+            'channel' => 'sms',
             'expires_at' => now()->addMinutes(10),
             'created_at' => now(),
             'updated_at' => now(),
@@ -219,15 +219,8 @@ class Step5to5Controller extends Controller
 
         $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
         $smsFrom = env('TWILIO_SMS_FROM') ?: env('TWILIO_PHONE_NUMBER');
-        $whatsappFrom = env('TWILIO_WHATSAPP_FROM');
         $twilio = new Client($sid, $token);
 
-        $whatsappParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
-        if ($messagingServiceSid) {
-            $whatsappParams['messagingServiceSid'] = $messagingServiceSid;
-        } else {
-            $whatsappParams['from'] = 'whatsapp:' . $whatsappFrom;
-        }
         $smsParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
         if ($messagingServiceSid) {
             $smsParams['messagingServiceSid'] = $messagingServiceSid;
@@ -235,36 +228,8 @@ class Step5to5Controller extends Controller
             $smsParams['from'] = $smsFrom;
         }
 
-        try {
-            if ($channel === 'whatsapp') {
-                $twilio->messages->create("whatsapp:{$phone->phone}", $whatsappParams);
-                Log::info('OTP sent via WhatsApp', ['phone' => $phone->phone, 'otp' => $otp]);
-            } else {
-                $twilio->messages->create($phone->phone, $smsParams);
-                Log::info('OTP sent via SMS', ['phone' => $phone->phone, 'otp' => $otp]);
-            }
-        } catch (\Exception $e) {
-            Log::error('OTP send failed', [
-                'phone_id' => $phone->id,
-                'channel' => $channel,
-                'error' => $e->getMessage(),
-            ]);
-
-            if ($channel === 'whatsapp') {
-                try {
-                    $twilio->messages->create($phone->phone, $smsParams);
-                    Log::info('OTP fallback sent via SMS', ['phone' => $phone->phone, 'otp' => $otp]);
-                } catch (\Exception $smsFallback) {
-                    Log::error('WhatsApp + SMS OTP failed', [
-                        'phone_id' => $phone->id,
-                        'error' => $smsFallback->getMessage(),
-                    ]);
-                    throw $smsFallback;
-                }
-            } else {
-                throw $e;
-            }
-        }
+        $message = $twilio->messages->create($phone->phone, $smsParams);
+        Log::info('OTP sent via SMS', ['phone' => $phone->phone, 'otp' => $otp, 'sid' => $message->sid, 'status' => $message->status]);
     }
 
     /**
@@ -432,35 +397,46 @@ class Step5to5Controller extends Controller
                 } else {
                     $whatsappParams['from'] = 'whatsapp:' . $whatsappFrom;
                 }
-                $twilio->messages->create("whatsapp:{$phone->phone}", $whatsappParams);
+                $message = $twilio->messages->create("whatsapp:{$phone->phone}", $whatsappParams);
+                Log::info('WhatsApp message result', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
             } else {
                 Log::info('Sending SMS message', ['phone' => $phone->phone, 'otp' => $otp]);
                 if ($channel === 'whatsapp' && !$canSendWhatsApp) {
                     $whatsappUnavailable = true;
                 }
-                $smsParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
-                if ($messagingServiceSid) {
-                    $smsParams['messagingServiceSid'] = $messagingServiceSid;
-                } else {
-                    $smsParams['from'] = $smsFrom;
+                $smsParams = $this->buildSmsParams($otp, $smsFrom, $messagingServiceSid);
+                try {
+                    $message = $twilio->messages->create($phone->phone, $smsParams);
+                    Log::info('SMS message result', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
+                } catch (\Exception $smsEx) {
+                    if ($smsFrom && (str_contains($smsEx->getMessage(), '21704') || str_contains($smsEx->getMessage(), 'no phone numbers'))) {
+                        Log::warning('Messaging Service has no numbers, retrying with From number', ['phone' => $phone->phone]);
+                        $smsParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes.", 'from' => $smsFrom];
+                        $message = $twilio->messages->create($phone->phone, $smsParams);
+                        Log::info('SMS message result', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
+                    } else {
+                        throw $smsEx;
+                    }
                 }
-                $twilio->messages->create($phone->phone, $smsParams);
             }
         } catch (\Exception $e) {
             Log::error('Send verification code failed', ['phone_id' => $phone->id, 'error' => $e->getMessage()]);
             $userMessage = $this->twilioErrorMessageForUser($e->getMessage(), $channel);
             if ($channel === 'whatsapp' && $canSendSms) {
                 try {
-                    $smsFallbackParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
-                    if ($messagingServiceSid) {
-                        $smsFallbackParams['messagingServiceSid'] = $messagingServiceSid;
-                    } else {
-                        $smsFallbackParams['from'] = $smsFrom;
-                    }
-                    $twilio->messages->create($phone->phone, $smsFallbackParams);
+                    $smsFallbackParams = $this->buildSmsParams($otp, $smsFrom, $messagingServiceSid);
+                    $message = $twilio->messages->create($phone->phone, $smsFallbackParams);
+                    Log::info('SMS fallback message result', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
                     $whatsappUnavailable = true;
                 } catch (\Exception $e2) {
-                    return response()->json(['success' => false, 'message' => $this->twilioErrorMessageForUser($e2->getMessage(), 'whatsapp_sms_fallback')], 500);
+                    if ($smsFrom && (str_contains($e2->getMessage(), '21704') || str_contains($e2->getMessage(), 'no phone numbers'))) {
+                        Log::warning('Messaging Service has no numbers, retrying with From number', ['phone' => $phone->phone]);
+                        $message = $twilio->messages->create($phone->phone, ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes.", 'from' => $smsFrom]);
+                        Log::info('SMS fallback message result', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
+                        $whatsappUnavailable = true;
+                    } else {
+                        return response()->json(['success' => false, 'message' => $this->twilioErrorMessageForUser($e2->getMessage(), 'whatsapp_sms_fallback')], 500);
+                    }
                 }
             } else {
                 return response()->json(['success' => false, 'message' => $userMessage], 500);
@@ -475,6 +451,20 @@ class Step5to5Controller extends Controller
             'remaining_attempts' => max(0, 3 - ($attemptsIn24h + 1)),
             'whatsapp_unavailable' => $whatsappUnavailable,
         ]);
+    }
+
+    /**
+     * Build SMS params. Prefer 'from' number when set to avoid error 21704 (Messaging Service contains no phone numbers).
+     */
+    private function buildSmsParams(int $otp, ?string $smsFrom, ?string $messagingServiceSid): array
+    {
+        $params = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
+        if ($smsFrom) {
+            $params['from'] = $smsFrom;
+        } elseif ($messagingServiceSid) {
+            $params['messagingServiceSid'] = $messagingServiceSid;
+        }
+        return $params;
     }
 
     /**

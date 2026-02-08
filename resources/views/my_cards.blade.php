@@ -88,7 +88,7 @@
                                     <span class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded font-FuturaMdCnBT whitespace-nowrap text-center cursor-default">{{$paymentSettingDetail->mobile_default_card_tab ?? "Primary"}}</span>
                                 @endif
                                 <button type="button" onclick="toggleModalCard('card-modal', {{ $card->id }})" class="button-exp-fill whitespace-nowrap">
-                                    {{$paymentSettingDetail->delete_card_button_text ?? "Delete"}}
+                                    {{$paymentSettingDetail->delete_card_button_text}}
                                 </button>
                             </div>
                         </div>
@@ -236,13 +236,13 @@
                         <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">Delete Payment Method?</h3>
                     </div>
                     <div class="mt-2 w-full">
-                        <p class="can-exp-p text-center">Are you sure you want to delete this payment method?</p>
+                        <p class="can-exp-p text-center">{{$paymentSettingDetail->delete_card_message ?? "Are you sure you want to delete this payment method?"}}</p>
                     </div>
                 </div>
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Delete</a>
-                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill sm:w-24">Cancel</button>
+                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-28">Yes, remove it</a>
+                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill w-42">No, take me back</button>
             </div>
         </div>
     </div>

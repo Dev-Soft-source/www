@@ -25558,6 +25558,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             _this.handleInput("", language, "card_number_placeholder");
             _this.handleInput("", language, "cvc_placeholder");
             _this.handleInput("", language, "card_name_placeholder");
+            _this.handleInput("", language, "delete_card_button_text");
+            _this.handleInput("", language, "mobile_default_card_tab");
+            _this.handleInput("", language, "set_primary_card_label");
+            _this.handleInput("", language, "delete_card_message");
           });
           _this.fetchBillingAddressPageSetting();
         }
@@ -25572,6 +25576,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           var billing_address_setting_detail = (res === null || res === void 0 || (_res$data5 = res.data) === null || _res$data5 === void 0 || (_res$data5 = _res$data5.data) === null || _res$data5 === void 0 ? void 0 : _res$data5.billing_address_setting_detail) || [];
           billing_address_setting_detail.map(function (setting) {
             _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.name, setting === null || setting === void 0 ? void 0 : setting.language, "name");
+            console.log("setting", res.data);
             _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.mobile_indicate_required_field_label, setting === null || setting === void 0 ? void 0 : setting.language, "mobile_indicate_required_field_label");
             // this.handleInput(
             //     setting?.edit_card_button_text,
@@ -25613,6 +25618,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.cvc_placeholder, setting === null || setting === void 0 ? void 0 : setting.language, "cvc_placeholder");
             _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.card_number_placeholder, setting === null || setting === void 0 ? void 0 : setting.language, "card_number_placeholder");
             _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.expiry_month_placeholder, setting === null || setting === void 0 ? void 0 : setting.language, "expiry_month_placeholder");
+            _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.delete_card_button_text, setting === null || setting === void 0 ? void 0 : setting.language, "delete_card_button_text");
+            _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.mobile_default_card_tab, setting === null || setting === void 0 ? void 0 : setting.language, "mobile_default_card_tab");
+            _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.set_primary_card_label, setting === null || setting === void 0 ? void 0 : setting.language, "set_primary_card_label");
+            _this2.handleInput(setting === null || setting === void 0 ? void 0 : setting.delete_card_message, setting === null || setting === void 0 ? void 0 : setting.language, "delete_card_message");
           });
         }
       });
@@ -25759,7 +25768,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     checkValidationError: function checkValidationError(validationErros, language) {
-      return validationErros.has("name.name_".concat(language.id)) || validationErros.has("mobile_indicate_required_field_label.mobile_indicate_required_field_label_".concat(language.id)) || validationErros.has("main_heading.main_heading_".concat(language.id)) || validationErros.has("name_on_card_label.name_on_card_label_".concat(language.id)) || validationErros.has("name_on_card_placeholder.name_on_card_placeholder_".concat(language.id)) || validationErros.has("card_number_label.card_number_label_".concat(language.id)) || validationErros.has("card_number_placeholder.card_number_placeholder_".concat(language.id)) || validationErros.has("mobile_card_type_placholder.mobile_card_type_placholder_".concat(language.id)) || validationErros.has("mobile_expiry_date_label.mobile_expiry_date_label_".concat(language.id)) || validationErros.has("mobile_month_placeholder.mobile_month_placeholder_".concat(language.id)) || validationErros.has("mobile_year_placeholder.mobile_year_placeholder_".concat(language.id)) || validationErros.has("mobile_city_placeholder.mobile_city_placeholder_".concat(language.id)) || validationErros.has("mobile_city_label.mobile_city_label_".concat(language.id)) || validationErros.has("mobile_house_number_placeholder.mobile_house_number_placeholder_".concat(language.id)) || validationErros.has("mobile_house_number_label.mobile_house_number_label_".concat(language.id)) || validationErros.has("mobile_street_name_placeholder.mobile_street_name_placeholder_".concat(language.id)) || validationErros.has("mobile_street_name_label.mobile_street_name_label_".concat(language.id)) || validationErros.has("mobile_billing_address_label.mobile_billing_address_label_".concat(language.id)) || validationErros.has("security_code_palceholder.security_code_palceholder_".concat(language.id)) || validationErros.has("security_code_label.security_code_label_".concat(language.id)) || validationErros.has("web_expiry_month_placeholder.web_expiry_month_placeholder_".concat(language.id)) || validationErros.has("web_expiry_month_label.web_expiry_month_label_".concat(language.id)) || validationErros.has("mobile_province_label.mobile_province_label_".concat(language.id)) || validationErros.has("mobile_province_placeholder.mobile_province_placeholder_".concat(language.id)) || validationErros.has("mobile_country_label.mobile_country_label_".concat(language.id)) || validationErros.has("mobile_country_placeholder.mobile_country_placeholder_".concat(language.id)) || validationErros.has("mobile_postal_code_label.mobile_postal_code_label_".concat(language.id)) || validationErros.has("mobile_postal_code_placeholder.mobile_postal_code_placeholder_".concat(language.id)) || validationErros.has("mobile_primary_card_placeholder.mobile_primary_card_placeholder_".concat(language.id)) || validationErros.has("save_button_text.save_button_text_".concat(language.id)) || validationErros.has("mobile_card_type_label.mobile_card_type_label_".concat(language.id));
+      return validationErros.has("name.name_".concat(language.id)) || validationErros.has("mobile_indicate_required_field_label.mobile_indicate_required_field_label_".concat(language.id)) || validationErros.has("main_heading.main_heading_".concat(language.id)) || validationErros.has("name_on_card_label.name_on_card_label_".concat(language.id)) || validationErros.has("name_on_card_placeholder.name_on_card_placeholder_".concat(language.id)) || validationErros.has("card_number_label.card_number_label_".concat(language.id)) || validationErros.has("card_number_placeholder.card_number_placeholder_".concat(language.id)) || validationErros.has("mobile_card_type_placholder.mobile_card_type_placholder_".concat(language.id)) || validationErros.has("mobile_expiry_date_label.mobile_expiry_date_label_".concat(language.id)) || validationErros.has("mobile_month_placeholder.mobile_month_placeholder_".concat(language.id)) || validationErros.has("mobile_year_placeholder.mobile_year_placeholder_".concat(language.id)) || validationErros.has("mobile_city_placeholder.mobile_city_placeholder_".concat(language.id)) || validationErros.has("mobile_city_label.mobile_city_label_".concat(language.id)) || validationErros.has("mobile_house_number_placeholder.mobile_house_number_placeholder_".concat(language.id)) || validationErros.has("mobile_house_number_label.mobile_house_number_label_".concat(language.id)) || validationErros.has("mobile_street_name_placeholder.mobile_street_name_placeholder_".concat(language.id)) || validationErros.has("mobile_street_name_label.mobile_street_name_label_".concat(language.id)) || validationErros.has("mobile_billing_address_label.mobile_billing_address_label_".concat(language.id)) || validationErros.has("security_code_palceholder.security_code_palceholder_".concat(language.id)) || validationErros.has("security_code_label.security_code_label_".concat(language.id)) || validationErros.has("web_expiry_month_placeholder.web_expiry_month_placeholder_".concat(language.id)) || validationErros.has("web_expiry_month_label.web_expiry_month_label_".concat(language.id)) || validationErros.has("mobile_province_label.mobile_province_label_".concat(language.id)) || validationErros.has("mobile_province_placeholder.mobile_province_placeholder_".concat(language.id)) || validationErros.has("mobile_country_label.mobile_country_label_".concat(language.id)) || validationErros.has("mobile_country_placeholder.mobile_country_placeholder_".concat(language.id)) || validationErros.has("mobile_postal_code_label.mobile_postal_code_label_".concat(language.id)) || validationErros.has("mobile_postal_code_placeholder.mobile_postal_code_placeholder_".concat(language.id)) || validationErros.has("mobile_primary_card_placeholder.mobile_primary_card_placeholder_".concat(language.id)) || validationErros.has("save_button_text.save_button_text_".concat(language.id)) || validationErros.has("mobile_card_type_label.mobile_card_type_label_".concat(language.id)) || validationErros.has("delete_card_button_text.delete_card_button_text_".concat(language.id)) || validationErros.has("mobile_default_card_tab.mobile_default_card_tab_".concat(language.id)) || validationErros.has("set_primary_card_label.set_primary_card_label_".concat(language.id)) || validationErros.has("delete_card_message.delete_card_message_".concat(language.id));
     }
   }
 });
@@ -63041,7 +63050,43 @@ var _hoisted_222 = {
 var _hoisted_223 = ["for"];
 var _hoisted_224 = ["name", "id", "value", "onInput"];
 var _hoisted_225 = ["textContent"];
-var _hoisted_226 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+var _hoisted_226 = {
+  "class": "relative z-0 w-full group"
+};
+var _hoisted_227 = {
+  "class": "flex justify-between"
+};
+var _hoisted_228 = ["for"];
+var _hoisted_229 = ["name", "id", "value", "onInput"];
+var _hoisted_230 = ["textContent"];
+var _hoisted_231 = {
+  "class": "relative z-0 w-full group"
+};
+var _hoisted_232 = {
+  "class": "flex justify-between"
+};
+var _hoisted_233 = ["for"];
+var _hoisted_234 = ["name", "id", "value", "onInput"];
+var _hoisted_235 = ["textContent"];
+var _hoisted_236 = {
+  "class": "relative z-0 w-full group"
+};
+var _hoisted_237 = {
+  "class": "flex justify-between"
+};
+var _hoisted_238 = ["for"];
+var _hoisted_239 = ["name", "id", "value", "onInput"];
+var _hoisted_240 = ["textContent"];
+var _hoisted_241 = {
+  "class": "relative z-0 w-full group"
+};
+var _hoisted_242 = {
+  "class": "flex justify-between"
+};
+var _hoisted_243 = ["for"];
+var _hoisted_244 = ["name", "id", "value", "onInput"];
+var _hoisted_245 = ["textContent"];
+var _hoisted_246 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
   type: "submit",
   "class": "button-exp-fill mt-5"
 }, " Submit ", -1 /* HOISTED */);
@@ -63689,8 +63734,72 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           key: 0,
           "class": "mt-2 text-sm text-red-400",
           textContent: (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.validationErros.get("card_name_placeholder.card_name_placeholder_".concat($data.activeLanguageId)))
-        }, null, 8 /* PROPS */, _hoisted_225)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" main section end ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */);
-      }), 128 /* KEYED_FRAGMENT */)), _hoisted_226], 32 /* HYDRATE_EVENTS */)])])])];
+        }, null, 8 /* PROPS */, _hoisted_225)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_226, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_227, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+          "for": "delete_card_button_text_".concat($data.activeLanguageId)
+        }, "Delete Card Button Text", 8 /* PROPS */, _hoisted_228)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+          type: "text",
+          name: "delete_card_button_text_".concat($data.activeLanguageId),
+          id: "delete_card_button_text_".concat($data.activeLanguageId),
+          "class": "can-exp-input w-full block border border-gray-300 rounded",
+          placeholder: " ",
+          value: $options.getCurrentValue('delete_card_button_text'),
+          onInput: function onInput($event) {
+            return $options.handleInput($event.target.value, language, 'delete_card_button_text');
+          }
+        }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_229)]), $data.validationErros.has("delete_card_button_text.delete_card_button_text_".concat($data.activeLanguageId)) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", {
+          key: 0,
+          "class": "mt-2 text-sm text-red-400",
+          textContent: (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.validationErros.get("delete_card_button_text.delete_card_button_text_".concat($data.activeLanguageId)))
+        }, null, 8 /* PROPS */, _hoisted_230)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_231, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_232, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+          "for": "mobile_default_card_tab_".concat($data.activeLanguageId)
+        }, "Primary Card Button Text", 8 /* PROPS */, _hoisted_233)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+          type: "text",
+          name: "mobile_default_card_tab_".concat($data.activeLanguageId),
+          id: "mobile_default_card_tab_".concat($data.activeLanguageId),
+          "class": "can-exp-input w-full block border border-gray-300 rounded",
+          placeholder: " ",
+          value: $options.getCurrentValue('mobile_default_card_tab'),
+          onInput: function onInput($event) {
+            return $options.handleInput($event.target.value, language, 'mobile_default_card_tab');
+          }
+        }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_234)]), $data.validationErros.has("mobile_default_card_tab.mobile_default_card_tab_".concat($data.activeLanguageId)) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", {
+          key: 0,
+          "class": "mt-2 text-sm text-red-400",
+          textContent: (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.validationErros.get("mobile_default_card_tab.mobile_default_card_tab_".concat($data.activeLanguageId)))
+        }, null, 8 /* PROPS */, _hoisted_235)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_236, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_237, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+          "for": "set_primary_card_label_".concat($data.activeLanguageId)
+        }, "Set Primary Card Label", 8 /* PROPS */, _hoisted_238)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+          type: "text",
+          name: "set_primary_card_label_".concat($data.activeLanguageId),
+          id: "set_primary_card_label_".concat($data.activeLanguageId),
+          "class": "can-exp-input w-full block border border-gray-300 rounded",
+          placeholder: " ",
+          value: $options.getCurrentValue('set_primary_card_label'),
+          onInput: function onInput($event) {
+            return $options.handleInput($event.target.value, language, 'set_primary_card_label');
+          }
+        }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_239)]), $data.validationErros.has("set_primary_card_label.set_primary_card_label_".concat($data.activeLanguageId)) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", {
+          key: 0,
+          "class": "mt-2 text-sm text-red-400",
+          textContent: (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.validationErros.get("set_primary_card_label.set_primary_card_label_".concat($data.activeLanguageId)))
+        }, null, 8 /* PROPS */, _hoisted_240)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_241, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_242, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+          "for": "delete_card_message_".concat($data.activeLanguageId)
+        }, "Delete Card Message", 8 /* PROPS */, _hoisted_243)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+          type: "text",
+          name: "delete_card_message_".concat($data.activeLanguageId),
+          id: "delete_card_message_".concat($data.activeLanguageId),
+          "class": "can-exp-input w-full block border border-gray-300 rounded",
+          placeholder: " ",
+          value: $options.getCurrentValue('delete_card_message'),
+          onInput: function onInput($event) {
+            return $options.handleInput($event.target.value, language, 'delete_card_message');
+          }
+        }, null, 40 /* PROPS, HYDRATE_EVENTS */, _hoisted_244)]), $data.validationErros.has("delete_card_message.delete_card_message_".concat($data.activeLanguageId)) ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("p", {
+          key: 0,
+          "class": "mt-2 text-sm text-red-400",
+          textContent: (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.validationErros.get("delete_card_message.delete_card_message_".concat($data.activeLanguageId)))
+        }, null, 8 /* PROPS */, _hoisted_245)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" main section end ")])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 64 /* STABLE_FRAGMENT */);
+      }), 128 /* KEYED_FRAGMENT */)), _hoisted_246], 32 /* HYDRATE_EVENTS */)])])])];
     }),
     _: 1 /* STABLE */
   });

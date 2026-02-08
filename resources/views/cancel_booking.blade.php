@@ -91,6 +91,7 @@
                                     </div>
                                 </div>
                                 @enderror
+                                <div id="messageError" class="hidden mt-1 text-sm text-white bg-[#f87171] w-fit p-2 rounded-md" role="alert"></div>
                             </div>
                         </div>
                             <div class="flex justify-center items-center mt-4">
@@ -214,11 +215,36 @@
 
 <script>
    const cancelRideBtn = document.getElementById('cancelRideBtn');
+   const messageField = document.querySelector('textarea[name="message"]');
+   const messageErrorEl = document.getElementById('messageError');
+   const requiredMessage = '{{ $tripsPage->cancel_all_feilds_are_required ?? "All fields are required"}}';
+
         cancelRideBtn.addEventListener('click', function(event) {
         event.preventDefault();
+
+        // 1. Validate message first — show error before any popup
+        var messageVal = (messageField && messageField.value) ? messageField.value.trim() : '';
+        if (messageErrorEl) {
+            messageErrorEl.classList.add('hidden');
+            messageErrorEl.textContent = '';
+        }
+        if (messageField) messageField.classList.remove('border-red-500');
+
+        if (!messageVal) {
+            if (messageErrorEl) {
+                messageErrorEl.textContent = requiredMessage;
+                messageErrorEl.classList.remove('hidden');
+            }
+            if (messageField) {
+                messageField.classList.add('border-red-500');
+                messageField.focus();
+            }
+            return;
+        }
+
+        // 2. Only after validation passes, show confirmation popup
         swal.fire({
         title: '{{ $sureMessage ?? "Are you sure you want to cancel booking?"}}',
-        // icon: 'warning',
         showCloseButton: true,
         showCancelButton: true,
         confirmButtonColor: '#f87171',
@@ -230,12 +256,21 @@
         }
         }).then((result) => {
         if (result.isConfirmed) {
-            const cancelRideBtn = document.getElementById('formCancelRide');
-            $("#formCancelRide").submit();
+            document.getElementById('formCancelRide').submit();
         }
         });
-        
     });
+
+    // Clear message error when user types
+    if (messageField && messageErrorEl) {
+        messageField.addEventListener('input', function() {
+            if (this.value.trim()) {
+                messageErrorEl.classList.add('hidden');
+                messageErrorEl.textContent = '';
+                this.classList.remove('border-red-500');
+            }
+        });
+    }
 
     function closeModalcancel() {
     const modal = document.getElementById('myModal');

@@ -49,6 +49,14 @@ class BillingAddressSettingService
                 $errorMessages = array_merge($errorMessages, ['mobile_country_label.mobile_country_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['mobile_postal_code_label.mobile_postal_code_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['mobile_postal_code_label.mobile_postal_code_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['delete_card_button_text.delete_card_button_text_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['delete_card_button_text.delete_card_button_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['mobile_default_card_tab.mobile_default_card_tab_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['mobile_default_card_tab.mobile_default_card_tab_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['set_primary_card_label.set_primary_card_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['set_primary_card_label.set_primary_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['delete_card_message.delete_card_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['delete_card_message.delete_card_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 // $validationRule = array_merge($validationRule, ['mobile_primary_card_placeholder.mobile_primary_card_placeholder_' . $language->id => ['required', 'string']]);
                 // $errorMessages = array_merge($errorMessages, ['mobile_primary_card_placeholder.mobile_primary_card_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['save_button_text.save_button_text_' . $language->id => ['required', 'string']]);
@@ -116,6 +124,10 @@ class BillingAddressSettingService
             'card_number_placeholder' => $this->data($request, $language, 'card_number_placeholder'),
             'cvc_placeholder' => $this->data($request, $language, 'cvc_placeholder'),
             'card_name_placeholder' => $this->data($request, $language, 'card_name_placeholder'),
+            'delete_card_button_text' => $this->data($request, $language, 'delete_card_button_text'),
+            'mobile_default_card_tab' => $this->data($request, $language, 'mobile_default_card_tab'),
+            'set_primary_card_label' => $this->data($request, $language, 'set_primary_card_label'),
+            'delete_card_message' => $this->data($request, $language, 'delete_card_message'),
             // 'edit_card_button_text' => $this->data($request, $language, 'edit_card_button_text'),
         ];
     }
