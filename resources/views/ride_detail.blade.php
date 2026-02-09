@@ -300,11 +300,25 @@
                 @endisset
             </div>
         @endif
-        <h1>
-            @isset($rideDetailPage->main_heading)
-                {{ $rideDetailPage->main_heading }}
-            @endisset
-        </h1>
+        <div class="flex items-center gap-3 border-gray-400">
+            <h1>
+                @isset($rideDetailPage->main_heading)
+                    {{ $rideDetailPage->main_heading }}
+                @endisset
+            </h1>
+
+            <!-- @if(!empty($ride->extra_care_ride))
+                <p class="text-gray-600 font-semibold text-lg mb-0">
+                    (This is an Extra-Care Ride)
+                </p>
+            @endif
+
+            @if(!empty($ride->pink_ride))
+                <p class="text-gray-600 font-semibold text-lg mb-0">
+                    (This is a Pink Ride)
+                </p>
+            @endif -->
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-4">
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
@@ -539,24 +553,31 @@
                                 <p>{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}</p>
                             </div>
                         @endisset
+                        @if(!empty($ride->pink_ride))
+                            <div class="flex items-center space-x-2">
+                                <img class="w-7 h-7"
+                                    src="{{ asset('home_page_icons/' . $ride->pink_ride->icon) }}"
+                                    alt="">
+                                <p class="font-semibold">{{ rtrim($ride->pink_ride->name, 's') }}</p>
+                            </div>
+                        @endif
+                        @if(!empty($postRidePage->features_option2->name))
+                            <div class="flex items-center space-x-2">
+                                <img class="w-7 h-7"
+                                    src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
+                                    alt="">
+                                <p class="font-semibold">{{ rtrim($postRidePage->features_option2->name, 's') }}</p>
+                            </div>
+                        @endif                        
                         @php
                             $features = !empty($ride->features) ? explode('=', $ride->features) : [];
                         @endphp
                         @foreach ($features as $feature)
+                            @if($feature === ($postRidePage->features_option11->name ?? null) || $feature === ($postRidePage->features_option1->name ?? null) || $feature === ($postRidePage->features_option2->name ?? null))
+                                @continue
+                            @endif
                             <div class="flex items-start space-x-2">
-                                @if ($feature === $postRidePage->features_option11->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option11->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option1->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option2->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option9->name)
+                                @if ($feature === $postRidePage->features_option9->name)
                                     <img class="w-7 h-7"
                                         src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}"
                                         alt="">

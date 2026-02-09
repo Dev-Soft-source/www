@@ -753,7 +753,9 @@ class RideController extends Controller
                     ->whereLanguageId($selectedLanguage->id)
                     ->first();
 
-                $featureIds = explode('=', $ride->features);
+                $featureIds = array_filter(explode('=', $ride->features ?? ''));
+                $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
+                $ride->extra_care_ride = ($postRidePage->features_option11 && in_array((string) $postRidePage->features_option11->features_setting_id, $featureIds)) ? $postRidePage->features_option11 : null;
                 // Fetch data for each feature ID and concatenate with '='
                 $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
                     return FeaturesSettingDetail::whereFeaturesSettingId($id)
@@ -866,7 +868,10 @@ class RideController extends Controller
                     ->whereLanguageId($selectedLanguage->id)
                     ->first();
 
-                $featureIds = explode('=', $ride->features);
+                $featureIds = array_filter(explode('=', $ride->features ?? ''));
+                $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
+                $ride->extra_care_ride = ($postRidePage->features_option11 && in_array((string) $postRidePage->features_option11->features_setting_id, $featureIds)) ? $postRidePage->features_option11 : null;
+
                 // Fetch data for each feature ID and concatenate with '='
                 $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
                     return FeaturesSettingDetail::whereFeaturesSettingId($id)
@@ -920,6 +925,8 @@ class RideController extends Controller
         if (isset($ride_booking) && ($completed_date_time < Carbon::now() ||  $ride_booking->status == '3' ||  $ride_booking->status == '4')) {
             $ride_cancelled = true;
         }
+        Log::info('pink_ride: ' . $ride->pink_ride);
+        Log::info('extra_care_ride: ' . $postRidePage);
         return view('ride_detail', ['notificationPage' => $notificationPage, 'ride_cancelled' => $ride_cancelled, 'ride_cancelled' => $ride_cancelled, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'setting' => $setting, 'cancelSetting' => $cancelSetting, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'ratings' => $ratings, 'chatsPage' => $chatsPage, 'successMessage' => $successMessage]);
     }
 

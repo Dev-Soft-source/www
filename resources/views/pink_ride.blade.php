@@ -6,7 +6,7 @@
 
 @section('content')
     @if (session('success'))
-    <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -41,35 +41,35 @@
     @endif
 
     @if (session('failure'))
-    <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start justify-center">
-                            <!-- <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
-                        </div>
-                        <div class="text-center">
-                            <div class="w-full">
-                                <p class="can-exp-p text-center">{!! session('failure') !!}</p>
+        <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <!-- <div
+                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                    </svg>
+                                </div> -->
+                            </div>
+                            <div class="text-center">
+                                <div class="w-full">
+                                    <p class="can-exp-p text-center">{!! session('failure') !!}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                        <a href=""
-                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                        <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                            <a href=""
+                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <div class="container mx-auto my-14 px-4 md:px-8 xl:px-0">
@@ -859,8 +859,8 @@
                         @endforeach
                     @elseif ($paginatedRides && $paginatedRides->count() > 0)
                         @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() > 0)
-                            <div class="flex flex-col items-center justify-center">
-                                <h2 class="text-primary">{{ $findRidePage->search_results_pink_ride_label ?? 'Search results for ProximaRide' }}</h2>
+                            <div class="flex flex-col items-center justify-center border-b border-gray-400">
+                                <h3 class="text-primary">{{ $findRidePage->search_results_pink_ride_label ?? 'Search results for ProximaRide' }}</h3>
                             </div>
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'ride') as $ride)
 
@@ -1345,7 +1345,7 @@
                         @endif
                         {{-- {{ $rides->appends(request()->query())->links() }} --}}
                         @if($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
-                            <div class="border-b border-gray-400 flex flex-col items-center justify-center">
+                            <div class="border-b border-gray-400 flex flex-col items-center justify-center pt-6">
                             @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
                                 <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
                             @endif
@@ -1841,14 +1841,14 @@
                         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                             <!--content-->
                             <div
-                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                                 <!--body-->
                                 <button type="button" onclick="toggleModal1('modal-id1')" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
-                                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 sm:pt-16">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div
                                             class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
@@ -1879,27 +1879,25 @@
 
                 <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
                     <div>
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <div class="flex flex-row flex-wrap items-center justify-center gap-2 py-2 px-4 border-b border-gray-400" style="background-color: #f2d9f5;">
-                                <p class="text-2xl text-pink-700 font-FuturaMdCnBT text-center mb-0">
-                                    FAQs on the ProximaRide
-                                </p>
-                                <p class="text-xl text-black font-FuturaMdCnBT text-center mb-0" style="background-color: #f2d9f5;">
-                                    (for ladies only)
-                                </p>
-                            </div>
-                            <div class="bg-white p-4">
-                                @foreach ($pinkRideFaqs as $pinkRideFaq)
-                                    <div>
-                                        <button class="faq-question block w-full text-left mb-3 font-medium text-gray-900 focus:outline-none rounded px-4 py-2.5 shadow text-base md:text-lg bg-gray-100 hover:bg-gray-200 transition-colors font-FuturaMdCnBT" onclick="toggleAnswer(this)">
-                                            {{ $pinkRideFaq->question }}
-                                        </button>
-                                        <div class="faq-answer hidden bg-white p-4 rounded text-base md:text-lg text-gray-900">
-                                            {!! $pinkRideFaq->answer !!}
-                                        </div>
+                        <div class="flex flex-row flex-wrap items-center justify-center gap-2 py-2 px-4 border-b border-gray-400" >
+                            <h3 class="text-2xl xl:text-3xl text-primary font-FuturaMdCnBT text-center mb-0">
+                                FAQs on the ProximaRide
+                            </h3>
+                            <h4 class="text-xl text-black font-FuturaMdCnBT text-center mb-0">
+                                (for ladies only)
+                            </h4>
+                        </div>
+                        <div class="bg-white p-4">
+                            @foreach ($pinkRideFaqs as $pinkRideFaq)
+                                <div>
+                                    <button class="faq-question block w-full text-left mb-3 font-medium text-gray-900 focus:outline-none rounded px-4 py-2.5 shadow text-base md:text-lg bg-gray-100 hover:bg-gray-200 transition-colors font-FuturaMdCnBT" onclick="toggleAnswer(this)">
+                                        {{ $pinkRideFaq->question }}
+                                    </button>
+                                    <div class="faq-answer hidden bg-white p-4 rounded text-base md:text-lg text-gray-900">
+                                        {!! $pinkRideFaq->answer !!}
                                     </div>
-                                @endforeach
-                            </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>

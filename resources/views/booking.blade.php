@@ -222,6 +222,13 @@
                         {{ $bookingPage->main_heading }}
                     @endisset
                 </h1>
+                @php
+                    $extraCareId = optional($postRidePage->features_option11 ?? null)->features_setting_id ?? ($postRidePage->features_option11 ?? null);
+                    $isExtraCareRide = $extraCareId && !empty($ride->features) && in_array((string)$extraCareId, array_filter(explode('=', $ride->features)));
+                @endphp
+                @if($isExtraCareRide)
+                    <p class="text-primary font-semibold text-lg mt-1 mb-0 w-full">This is an Extra-Care Ride</p>
+                @endif
                 <div class="text-red-500 text-lg  pr-4">
                     <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
                 </div>
@@ -870,7 +877,7 @@
                                         {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
+                                        <strong>Cancellation Policy (Firm): </strong> {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
                                         </label>
                                     </div>
                                     @error('firm_agree_terms')
@@ -891,7 +898,7 @@
                                     <div class="flex items-start my-4">
                                         <input id="firm_cancellation_understand" type="checkbox" name="firm_cancellation_understand" value="1"
                                             {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
                                         <label for="firm_cancellation_understand" class="ml-2 font-normal text-gray-900">
                                             I understand that this booking is under the Firm Cancellation Policy and is non-refundable.
                                         </label>
@@ -903,7 +910,6 @@
                                         </div>
                                     </div>
                                     @enderror
-
                                 @endif
 
                                 @if (in_array($postRidePage->features_option1->name, $features))
@@ -934,7 +940,7 @@
                                     <div class="flex items-start my-4">
                                         <input id="" type="checkbox" name="extra_care_ride_agree_terms" value="1"
                                             {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
                                             {{ $bookingPage->booking_extra_care_ride_term_agree_text ?? "I understand that I am booking on a Extra-care Ride" }}
                                         </label>
