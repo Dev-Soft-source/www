@@ -47,7 +47,7 @@
 
     <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
         <div class=" pb-2">
-            <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Add card"}}</h1>
+            <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Add a New Card"}}</h1>
         </div>
 
 
@@ -77,6 +77,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="card_number">{{$paymentSettingDetail->card_number_label ?? "Card number"}}</label>
                     <div id="card-number-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300"></div>
@@ -142,6 +143,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="cvv_code">{{$paymentSettingDetail->security_code_label ?? "Security code (CVV / CVC)"}}</label>
                     <div id="card-cvc-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300"></div>
@@ -151,7 +153,10 @@
                         </div>
                     </div>
                 </div>
-                <p>{{$paymentSettingDetail->mobile_billing_address_label ?? "Billing Address"}}</p>
+            </div>
+                
+            <h1 class="mt-8">{{$paymentSettingDetail->mobile_billing_address_label ?? "Billing Address"}}</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                 <div>
                     <label for="street_address">{{$paymentSettingDetail->mobile_street_name_label ?? "Street number/name"}}</label>
                     <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -168,6 +173,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="house_apartment_number">{{$paymentSettingDetail->mobile_house_number_label ?? "House/apartment number (optional)"}}</label>
                     <input type="text" id="house_apartment_number" name="house_apartment_number" value="{{ old('house_apartment_number') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
@@ -179,6 +185,7 @@
                     </div>
                     @enderror
                 </div>
+                
                 <div>
                     <label for="city">{{$paymentSettingDetail->mobile_city_label ?? "City"}}</label>
                     <input type="text" id="city" name="city" value="{{ old('city') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -195,6 +202,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="province">{{$paymentSettingDetail->mobile_province_label ?? "Province"}}</label>
                     <input type="text" id="province" name="province" value="{{ old('province') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -211,6 +219,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="country">{{$paymentSettingDetail->mobile_country_label ?? "Country"}}</label>
                     <input type="text" id="country" name="country" value="{{ old('country') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -227,6 +236,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div>
                     <label for="postal_code">{{$paymentSettingDetail->mobile_postal_code_label ?? "Postal code"}}</label>
                     <input type="text" maxlength="7" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -243,12 +253,14 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="md:col-span-2">
                     <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                         <input name="primary_card" type="checkbox" value="1" {{ old('primary_card') == '1' ? 'checked' : '' }} class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                         <label for="primary_card" class="block text-gray-900">{{$paymentSettingDetail->mobile_primary_card_placeholder ?? "Primary card"}}</label>
                     </div>
                 </div>
+                
                 <div class="md:col-span-2 mt-4 flex justify-center">
                     <button type="submit" class="button-exp-fill">{{$paymentSettingDetail->save_button_text ?? "Save"}}</button>
                 </div>
@@ -266,14 +278,19 @@
     var stripe = Stripe('{{ env('STRIPE_KEY') }}');
     var elements = stripe.elements();
 
+    var stripePlaceholders = {
+        cardNumber: @json(optional($paymentSettingDetail)->card_number_placeholder ?? 'Card number'),
+        cardExpiry: @json(optional($paymentSettingDetail)->web_expiry_month_placeholder ?? optional($paymentSettingDetail)->expiry_month_placeholder ?? 'MM / YY'),
+        cardCvc: @json(optional($paymentSettingDetail)->security_code_palceholder ?? optional($paymentSettingDetail)->security_code_placeholder ?? 'CVC')
+    };
 
-    var cardNumberElement = elements.create('cardNumber');
+    var cardNumberElement = elements.create('cardNumber', { placeholder: stripePlaceholders.cardNumber });
     cardNumberElement.mount('#card-number-element');
 
-    var cardExpiryElement = elements.create('cardExpiry');
+    var cardExpiryElement = elements.create('cardExpiry', { placeholder: stripePlaceholders.cardExpiry });
     cardExpiryElement.mount('#card-expiry-element');
 
-    var cardCvcElement = elements.create('cardCvc');
+    var cardCvcElement = elements.create('cardCvc', { placeholder: stripePlaceholders.cardCvc });
     cardCvcElement.mount('#card-cvc-element');
 
     var form = document.getElementById('payment-form');

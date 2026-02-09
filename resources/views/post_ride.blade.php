@@ -2414,6 +2414,22 @@
                                 {!! str_replace('<ol>', '<ol class="list-decimal list-inside">', str_replace('<li>', '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">', $postRidePage->disclaimers_description)) !!}
                             @endisset
                         </div>
+                        @isset($postRidePage->features_option1->features_setting_id)
+                            @php
+                                $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
+                                $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
+                                $pinkRideChecked = is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
+                            @endphp
+                            <div id="pink-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+                                <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                                    <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
+                                    5. I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.
+                                </p>
+                                <!-- <p class="text-base lg:text-lg py-2 text-gray-700">
+                                    <a href="{{ route('pink_ride', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="text-primary underline hover:no-underline" target="_blank" rel="noopener">Explain Pink Ride rules</a>. Safety measures for rides.
+                                </p> -->
+                            </div>
+                        @endisset
                     </div>
                 </div>
 
@@ -3725,6 +3741,15 @@ document.addEventListener('DOMContentLoaded', function() {
             agreeTermsCheckbox.addEventListener('change', function() {
                 // Remove highlight when checkbox is checked
                 this.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
+            });
+        }
+
+        // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
+        const pinkRideCheckbox = document.getElementById('pink-ride');
+        const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
+        if (pinkRideCheckbox && pinkRideDisclaimer) {
+            pinkRideCheckbox.addEventListener('change', function() {
+                pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
             });
         }
     });

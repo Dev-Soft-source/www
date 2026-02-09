@@ -80,7 +80,7 @@
                     <img class="" src="{{asset('/images/heart.png')}}" alt="">
                 </div>
                 <h1 class="">
-                    Search for Extra-Care Rides
+                    {{ $findRidePage->extra_care_ride_page_label ?? 'Search for Extra-Care Rides' }}
                 </h1>
             </div>
         </div>
@@ -91,7 +91,7 @@
         </p> -->
         <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
             <p class="text-gray-900 font-medium">
-                I understand that Extra-Care Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.
+                {{ $findRidePage->extra_ride_description ?? 'I understand that Extra-Care Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.' }}
             </p>
         </div>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
@@ -103,7 +103,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                     </svg>
                     <span class="text-xl">
-                    Search filters
+                    {{ $findRidePage->search_section_heading ?? 'Search Filters' }}
                     </span>
                 </button>
 
@@ -1918,8 +1918,13 @@
                 <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
                     <div>
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <div class="text-2xl bg-primary text-white py-2 px-4 font-FuturaMdCnBT text-center">
-                                FAQs on the Extra-Care Rides
+                            <div class="flex flex-row flex-wrap items-center justify-center gap-2 py-2 px-4" style="background-color:rgb(126, 212, 126);">
+                                <p class="text-2xl text-green-900 font-FuturaMdCnBT text-center mb-0">
+                                    {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra-Care Rides' }}
+                                </p>
+                                <p class="text-xl text-black font-FuturaMdCnBT text-center mb-0" style="background-color: rgb(126, 212, 126);">
+                                    (for your peace of mind)
+                                </p>
                             </div>
                             <div class="bg-white p-4 ">
                                 @foreach ($extraCareFaqs as $extraCareFaq)

@@ -950,6 +950,13 @@
                                         @endisset
                                     </div>
                                 </div>
+
+                                <div class="flex items-center justify-between p-3 mt-2 mb-2">
+                                    <label for="hide-full-rides" class="flex items-center gap-2 cursor-pointer select-none font-normal text-gray-900">
+                                        <input type="checkbox" id="hide-full-rides" class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer">
+                                        <span class="text-base font-medium">Hide Full Rides</span>
+                                    </label>
+                                </div>
                                 
                                 <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
                                 <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
@@ -1064,7 +1071,7 @@
 
                     <div class="mt-6 rounded-lg">
                         @if ($rides && $rides->count() > 0)
-                        <h1 class="can-exp-h1 text-center font-FuturaMdCnBT text-primary">
+                        <h1 class="can-exp-h1 text-center font-FuturaMdCnBT text-primary mb-4">
                             @isset($findRidePage->heading_ride_card_section)
                                 {{ $findRidePage->heading_ride_card_section }}
                             @endisset
@@ -1072,7 +1079,12 @@
                         @endif
                         @if ($rides && $rides->count() > 0)
                             @foreach ($rides as $ride)
-                                <div class="relative even:bg-white odd:bg-gray-100 space-y-4 rounded-lg">
+                                @php
+                                    $bookedSeats = intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($q) { $q->whereNull('deleted_at'); })->sum('seats'));
+                                    $seatsLeft = intval($ride->seats) - $bookedSeats;
+                                    $isFull = $seatsLeft <= 0;
+                                @endphp
+                                <div class="ride-card-item relative even:bg-white odd:bg-gray-100 space-y-4 rounded-lg" data-ride-full="{{ $isFull ? '1' : '0' }}">
                                     <div class="absolute right-4 top-8">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -2354,6 +2366,23 @@
         @endphp
         window.location.href = '{{ route("step5to5", ["lang" => $lang]) }}';
     }
+
+    // Hide Full Rides checkbox: show/hide fully-booked ride cards
+    function applyHideFullRides() {
+        var checkbox = document.getElementById('hide-full-rides');
+        var fullCards = document.querySelectorAll('.ride-card-item[data-ride-full="1"]');
+        if (!checkbox || !fullCards.length) return;
+        fullCards.forEach(function(el) {
+            el.style.display = checkbox.checked ? 'none' : '';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var checkbox = document.getElementById('hide-full-rides');
+        if (checkbox) {
+            checkbox.addEventListener('change', applyHideFullRides);
+            applyHideFullRides();
+        }
+    });
 
     // Make functions globally available
     window.showPhoneVerificationModal = showPhoneVerificationModal;

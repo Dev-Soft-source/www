@@ -62,6 +62,19 @@ use DateTime;
 class BookingController extends Controller
 {
     /**
+     * Log Twilio SMS failure and add a hint when Twilio rejects the From/To combination
+     * (e.g. sending from US number to unsupported destination).
+     */
+    protected function logTwilioSmsFailure(string $to, string $message, \Throwable $e, string $context = ''): void
+    {
+        $msgPreview = strlen($message) > 80 ? substr($message, 0, 80) . '...' : $message;
+        Log::info('SMS failed to ' . $to . ($context ? " ({$context})" : '') . '. Message: ' . $msgPreview . ' because ' . $e->getMessage());
+        if (str_contains($e->getMessage(), "current combination of 'To'") || str_contains($e->getMessage(), "combination of 'To'")) {
+            Log::info('Twilio From/To hint: Enable the destination country in Twilio Console (Phone Numbers → Manage → Active Numbers → your number → Geographic permissions), or use a sending number that supports the recipient region.');
+        }
+    }
+
+    /**
      * Helper method to validate and apply student booking fee waiver
      * Checks both charge_booking field and student card expiration date
      * 
@@ -1426,7 +1439,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
 
                             // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                         }
@@ -1679,7 +1692,7 @@ class BookingController extends Controller
                     ]
                 );
             } catch (\Exception  $e) {
-                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                $this->logTwilioSmsFailure($to, $message, $e);
 
                 // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
             }
@@ -1730,7 +1743,7 @@ class BookingController extends Controller
                 );
             }
         } catch (\Exception  $e) {
-            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+            $this->logTwilioSmsFailure($to, $message, $e);
 
             // return redirect()->back()->with(['error' => 'Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate']);
         }
@@ -1957,7 +1970,7 @@ class BookingController extends Controller
                         ]
                     );
                 } catch (\Exception  $e) {
-                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                    $this->logTwilioSmsFailure($to, $message, $e);
 
                     // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                 }
@@ -2286,7 +2299,7 @@ class BookingController extends Controller
                         ]
                     );
                 } catch (\Exception  $e) {
-                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                    $this->logTwilioSmsFailure($to, $message, $e);
 
                     // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                 }
@@ -3158,7 +3171,7 @@ class BookingController extends Controller
                             ]
                         );
                     } catch (\Exception  $e) {
-                        Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        $this->logTwilioSmsFailure($to, $message, $e);
 
                         // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                     }
@@ -3200,7 +3213,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
                         }
                     }
                 }
@@ -3293,7 +3306,7 @@ class BookingController extends Controller
                             ]
                         );
                     } catch (\Exception $e) {
-                        Log::info('Cannot send text to driver ' . $to . ' with message: ' . $message . ' because ' . $e->getMessage());
+                        $this->logTwilioSmsFailure($to, $message, $e, 'driver');
                     }
                 }
 
@@ -3384,7 +3397,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
                         }
                     }
 
@@ -3546,7 +3559,7 @@ class BookingController extends Controller
                             ]
                         );
                     } catch (\Exception  $e) {
-                        Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        $this->logTwilioSmsFailure($to, $message, $e);
 
                         // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                     }
@@ -3792,7 +3805,7 @@ class BookingController extends Controller
                     ]
                 );
             } catch (\Exception  $e) {
-                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                $this->logTwilioSmsFailure($to, $message, $e);
 
                 // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
             }
@@ -4112,7 +4125,7 @@ class BookingController extends Controller
                                     ]
                                 );
                             } catch (\Exception  $e) {
-                                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                                $this->logTwilioSmsFailure($to, $message, $e);
                             }
                         }
                     } else {
@@ -4478,18 +4491,22 @@ class BookingController extends Controller
                             "\nNumber of seats: " . $seatWords;
 
 
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                        } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        if (!empty($from)) {
+                            try {
+                                $res = $twilio->messages->create(
+                                    $to,
+                                    [
+                                        'from' => $from,
+                                        'body' => $message,
+                                    ]
+                                );
+                            } catch (\Exception  $e) {
+                                $this->logTwilioSmsFailure($to, $message, $e);
 
-                            // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                                // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                            }
+                        } else {
+                            Log::info('SMS skipped (driver instant booking): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
                         }
                     }
 
@@ -4538,16 +4555,20 @@ class BookingController extends Controller
                             ") Phone " . $driverPhoneToUse .
                             "\nNumber of seats: " . $seatWords;
 
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                        } catch (\Exception $e) {
-                            Log::info('Cannot send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        if (!empty($from)) {
+                            try {
+                                $res = $twilio->messages->create(
+                                    $to,
+                                    [
+                                        'from' => $from,
+                                        'body' => $message,
+                                    ]
+                                );
+                            } catch (\Exception $e) {
+                                $this->logTwilioSmsFailure($to, $message, $e);
+                            }
+                        } else {
+                            Log::info('SMS skipped (passenger booking confirmation): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
                         }
                     }
 
@@ -4631,7 +4652,7 @@ class BookingController extends Controller
                                         ]
                                     );
                                 } catch (\Exception  $e) {
-                                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                                    $this->logTwilioSmsFailure($to, $message, $e);
                                 }
                             }
                         }
@@ -4700,7 +4721,7 @@ class BookingController extends Controller
                             ]
                         );
                     } catch (\Exception  $e) {
-                        Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        $this->logTwilioSmsFailure($to, $message, $e);
                     }
                 }
             } else {
@@ -4987,18 +5008,22 @@ class BookingController extends Controller
                     "\nNumber of seats: " . $seatWords;
 
 
-                try {
-                    $res = $twilio->messages->create(
-                        $to,
-                        [
-                            'from' => $from,
-                            'body' => $message,
-                        ]
-                    );
-                } catch (\Exception  $e) {
-                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                if (!empty($from)) {
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception  $e) {
+                        $this->logTwilioSmsFailure($to, $message, $e);
 
-                    // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                        // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                    }
+                } else {
+                    Log::info('SMS skipped (driver instant booking): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
                 }
             }
 
@@ -5049,16 +5074,20 @@ class BookingController extends Controller
                     " phone " . $driverPhoneToUse .
                     "\nNumber of seats: " . $seatWords;
 
-                try {
-                    $res = $twilio->messages->create(
-                        $to,
-                        [
-                            'from' => $from,
-                            'body' => $message,
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    Log::info('Cannot send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                if (!empty($from)) {
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception $e) {
+                        $this->logTwilioSmsFailure($to, $message, $e);
+                    }
+                } else {
+                    Log::info('SMS skipped (passenger booking confirmation): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
                 }
             }
 
@@ -5145,7 +5174,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
                         }
                     }
                 }
@@ -5229,7 +5258,7 @@ class BookingController extends Controller
                             ]
                         );
                     } catch (\Exception  $e) {
-                        Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                        $this->logTwilioSmsFailure($to, $message, $e);
                     }
                 }
             } else {
@@ -5439,7 +5468,7 @@ class BookingController extends Controller
                         ]
                     );
                 } catch (\Exception  $e) {
-                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                    $this->logTwilioSmsFailure($to, $message, $e);
 
                     // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                 }
@@ -5502,7 +5531,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
                         }
                     }
                 }
@@ -6055,7 +6084,7 @@ class BookingController extends Controller
                         ]
                     );
                 } catch (\Exception  $e) {
-                    Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                    $this->logTwilioSmsFailure($to, $message, $e);
 
                     // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                 }
@@ -6118,7 +6147,7 @@ class BookingController extends Controller
                                 ]
                             );
                         } catch (\Exception  $e) {
-                            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e);
                         }
                     }
                 }
@@ -6992,7 +7021,7 @@ class BookingController extends Controller
                             );
                             Log::info('SMS sent to ' . $to . ' for updated passenger list on ride ' . $booking->ride_id);
                         } catch (\Exception $e) {
-                            Log::error('Cannot send text to ' . $to . ' for ride ' . $booking->ride_id . '. Error: ' . $e->getMessage());
+                            $this->logTwilioSmsFailure($to, $message, $e, 'ride ' . $booking->ride_id);
                         }
                     }
                 }
@@ -7062,7 +7091,7 @@ class BookingController extends Controller
                     ]
                 );
             } catch (\Exception  $e) {
-                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
+                $this->logTwilioSmsFailure($to, $message, $e);
 
                 // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
             }

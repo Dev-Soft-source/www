@@ -235,7 +235,7 @@
                                 <img class="" src="{{asset('home_page_icons/' . $homePage->section1_pink_rides_image)}}" alt="">
                             </div>
                             <div>
-                                <h3 class="mt-4 text-center">
+                                <h3 class="mt-4 text-center text-pink-500 font-FuturaMdCnBT hover:text-pink-700">
                                     @isset($homePage->section1_pink_rides_label)
                                         {{ $homePage->section1_pink_rides_label }}
                                     @endisset

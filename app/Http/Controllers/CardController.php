@@ -401,6 +401,8 @@ class CardController extends Controller
             'paypal_email' => $request->paypal_email,
             'paypal_payer_id' => $request->paypal_payer_id,
             'primary_card' => $primary_card,
+            'exp_month' => '0',
+            'exp_year' => '0',
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -593,20 +595,23 @@ class CardController extends Controller
         $user = auth()->user();
         $card = Card::find($id);
 
+        if (!$card) {
+            return back()->withErrors(['error' => 'Card not found']);
+        }
+
         // Ensure the card belongs to the authenticated user
         if ($card->user_id != $user->id) {
             return back()->withErrors(['error' => 'You do not have permission to delete this card']);
         }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-
         try {
-            $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-
-            // Check if the payment method is attached to a customer
-            if ($paymentMethod->customer) {
-                // Detach the payment method from the customer on Stripe
-                $paymentMethod->detach();
+            // Only call Stripe for card/apple_pay/google_pay (they have stripe_payment_method_id); PayPal does not
+            if (!empty($card->stripe_payment_method_id)) {
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                if ($paymentMethod->customer) {
+                    $paymentMethod->detach();
+                }
             }
 
             // Check if we're deleting the primary card
