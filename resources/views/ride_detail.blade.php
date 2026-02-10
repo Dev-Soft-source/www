@@ -342,7 +342,7 @@
                                         </div>
                                         <div class="flex gap-2">
                                             <p class="text-primary text-xl md:mb-4">
-                                                {{ $ride->rideDetail[0]->departure }}.
+                                                {{ $ride->rideDetail->first()?->departure }}.
                                             </p>
                                             <p class="text-sm mt-2">
                                                 Pick-up at: {{ $ride->pickup }}
@@ -368,7 +368,7 @@
                                         </div>
                                         <div class="flex gap-2">
                                             <p class="text-primary text-xl md:mb-4">
-                                                {{ $ride->rideDetail[0]->destination }}.
+                                                {{ $ride->rideDetail->first()?->destination }}.
                                             </p>
                                             <p class="text-sm mt-2">
                                                 Drop-off at: {{ $ride->dropoff }}
@@ -443,7 +443,7 @@
                             <h4 class="text-gray-600 text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
+                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail->first()?->price }}
                                 
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
@@ -475,12 +475,18 @@
                             </div>
                         </div>
                     </div>
+                    @php
+                        $rideDetail = $ride->rideDetail->first();
+                    @endphp
+
                     <a
-                        @if (auth()->user() &&
-                                $ride->bookings &&
-                                $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty()) href="{{ route('my_co_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
-                    @else
-                        href="javascript:void(0);" @endif>
+                        @if ( auth()->user() && $ride->bookings?->where('status', '<>', 3) ->where('status', '<>', 4) ->where('user_id', auth()->id()) ->isNotEmpty() && $rideDetail )
+                            href="{{ route('my_co_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
+                        @else
+                            href="javascript:void(0);"
+                        @endif
+                    >
+
                         <div
                             class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
                             <div>
