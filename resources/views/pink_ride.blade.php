@@ -83,14 +83,18 @@
                 </h1>
             </div>
         </div>
-        <p class="mt-1">
-            {{ $findRidePage->pink_ride_page_label ?? 'We are proud to be the first to introduce ProximaRide in North America. ProximaRide are perfect for our female passengers who want to travel or drive in “ladies-only” rides. We aim to keep you safe and with ProximaRide, women everywhere can travel at ease. Important: only female passengers and drivers can use ProximaRide' }}
+
+        <p class="mt-6">
+            {{ $findRidePage->pink_ride_page_label ?? 'As a North American first, Pink Rides is a dedicated community for female passengers and drivers, built on mutual respect, comfort, and peace of mind.' }}
         </p>
-        <div class="mt-4 p-4 bg-[#f2d9f5] border-l-4 border-pink-500 rounded">
+
+        <div class="mt-4 p-4 bg-pink-200 border-l-4 border-pink-500 rounded">
             <p class="text-gray-900 font-medium">
-                {{ $findRidePage->pink_ride_description ?? 'I understand that Pink Rides are for females only. I confirm that I will not book, attend, or send any male over the age of 12 in my place or as a companion.' }}
+                @isset($findRidePage->pink_ride_description)
+                    {!! $findRidePage->pink_ride_description !!}
+                @endisset
             </p>
-        </div>
+        </div> 
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
             <div>
             <div class="search-filter-container flex flex-col relative">

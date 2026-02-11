@@ -54,13 +54,13 @@
             <ul class="text-white space-y-2 mt-2">
                 <li><a
                   href="{{ route('drivers', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For drivers</a></li>
+                  class="text-white">For Drivers</a></li>
                 <li><a
                   href="{{ route('passengers', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For passengers</a></li>
+                  class="text-white">For Passengers</a></li>
                 <li><a
                   href="{{ route('students', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For students</a></li>
+                  class="text-white">For Students</a></li>
                 {{-- <li><a class="text-white" href="#">Help</a></li> --}}
             </ul>
         </div>
@@ -79,9 +79,9 @@
             <p class="font-FuturaBdCnBT text-white text-lg">Terms</p>
                 
             <ul class="text-white space-y-2 mt-2">
-                <li><a class="text-white" href="{{ route('terms_conditions', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms and conditions</a></li>
-                <li><a class="text-white" href="{{ route('terms_use', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms of use</a></li>
-                <li><a class="text-white" href="{{ route('privacy_policy', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Privacy policy</a></li>
+                <li><a class="text-white" href="{{ route('terms_conditions', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms and Conditions</a></li>
+                <li><a class="text-white" href="{{ route('terms_use', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms of Use</a></li>
+                <li><a class="text-white" href="{{ route('privacy_policy', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Privacy Policy</a></li>
             </ul>
         </div>
 

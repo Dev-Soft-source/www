@@ -128,13 +128,13 @@
     <div class="bg-black bg-opacity-50 h-full relative top-0 z-30">
         <section class="pt-14 pb-14 flex flex-col justify-center items-center h-full space-y-8" >
             <div>
-                <div class="text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded">
+                <div class="text-white text-lg font-FuturaMdCnBT px-3 py-2 bg-blue-600 rounded">
                     @isset($homePage->slider_heading)
                         {{ $homePage->slider_heading }}
                     @endisset
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
+            <div class="flex flex-col sm:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
                     <div>
                         <div class="relative">
@@ -149,7 +149,7 @@
                                 @isset($homePage->slider_from_placeholder)
                                     placeholder="{{ $homePage->slider_from_placeholder }}"
                                 @endisset
-                                class="bg-white pl-10 bg-opacity-60 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
+                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
                             <!-- Suggestions Container for 'from' field -->
                             <div id="fromInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                         </div>
@@ -180,7 +180,7 @@
                                 @isset($homePage->slider_to_placeholder)
                                     placeholder="{{ $homePage->slider_to_placeholder }}"
                                 @endisset
-                                class="bg-white pl-10 bg-opacity-60 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
+                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
                             <!-- Suggestions Container for 'from' field -->
                             <div id="toInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                         </div>
@@ -200,7 +200,7 @@
                             @isset($homePage->slider_date_placeholder)
                                 placeholder="{{ $homePage->slider_date_placeholder }}"
                             @endisset
-                            class="bg-white pl-10 bg-opacity-60 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0 cursor-pointer">
+                            class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0 cursor-pointer">
                     </div>
                     <div class="flex justify-center items-center">
                         <button onclick="navigateToSearchRoute()" class="bg-primary py-2 px-3 rounded button-exp-fill">
@@ -235,16 +235,26 @@
                                 <img class="" src="{{asset('home_page_icons/' . $homePage->section1_pink_rides_image)}}" alt="">
                             </div>
                             <div>
-                                <h3 class="mt-4 text-center text-pink-500 font-FuturaMdCnBT hover:text-pink-700">
+                                <h3 class="mt-4 text-center text-pink-700 font-FuturaMdCnBT hover:text-pink-800">
                                     @isset($homePage->section1_pink_rides_label)
                                         {{ $homePage->section1_pink_rides_label }}
                                     @endisset
                                 </h3>
-                                <p class="text-justify mt-4 lg:text-lg md:text-base text-base">
+                                <p class="text-black text-justify font-semibold mt-4 lg:text-lg md:text-base text-base">
                                     @isset($homePage->section1_pink_rides_description)
                                         {!! $homePage->section1_pink_rides_description !!}
                                     @endisset
                                 </p>
+                                <p class="text-black text-justify lg:text-lg md:text-base text-base mt-4">
+                                    @isset($homePage->section1_pink_rides_description1)
+                                        {!! $homePage->section1_pink_rides_description1 !!}
+                                    @endisset
+                                </p>  
+                                <p class="text-black text-justify lg:text-lg md:text-base text-base mt-4">
+                                    @isset($homePage->section1_pink_rides_description2)
+                                        {!! $homePage->section1_pink_rides_description2 !!}
+                                    @endisset
+                                </p>                                   
                             </div>
                         </div>
                     </a>

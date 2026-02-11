@@ -85,7 +85,7 @@
         <div class="flex items-center justify-end space-x-2 w-1/2">
             @if(auth()->check())
                 <div class="relative">
-                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center">
+                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5  button-exp-no-fill ml-2 flex gap-2 items-center">
                         <span>Coffee on the Wall</span>
                     </a>
                 </div>

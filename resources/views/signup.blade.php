@@ -122,7 +122,7 @@
           </div>
 
           <div class="sm:mx-auto sm:w-full sm:max-w-xl md:min-w-[26rem]">
-            <div class="pt-6 flex justify-start">
+            <div class="pt-6 flex justify-end">
                 @isset($signupPage->required_label)
                     <p class="text-red-500">* {{ $signupPage->required_label }}</p>
                 @endisset
