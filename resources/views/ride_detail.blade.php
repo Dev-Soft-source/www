@@ -2,8 +2,7 @@
 
 @section('style')
     <style>
-        .ride-detail-page p,
-        .ride-detail-page a {
+        .ride-detail-page p {
             font-family: 'Roboto', sans-serif;
         }
         .chat {
