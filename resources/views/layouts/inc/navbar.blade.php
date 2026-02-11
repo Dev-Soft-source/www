@@ -38,7 +38,7 @@
                 <img class="h-14" src="/assets/Proximaride logo.png" alt="">
             </a>
             <div>
-                <ul class="inline-flex space-x-3 lg:space-x-6 text-blue-600 mt-2 font-FuturaMdCnBT">
+                <ul class="inline-flex space-x-3 lg:space-x-6 text-blue-600 text-base xl:text-lg mt-2 font-FuturaMdCnBT">
                     @php
                         $studentPage = App\Models\StudentPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                     @endphp
@@ -85,7 +85,7 @@
         <div class="flex items-center justify-end space-x-2 w-1/2">
             @if(auth()->check())
                 <div class="relative">
-                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5  button-exp-no-fill ml-2 flex gap-2 items-center">
+                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center !text-base xl:!text-lg">
                         <span>Coffee on the Wall</span>
                     </a>
                 </div>
@@ -232,12 +232,12 @@
                 </div>
             @else
                 <div class="relative">
-                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-1 flex gap-2 items-center">
+                    <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-1 flex gap-2 items-center !text-base xl:!text-lg">
                         <span>Coffee on the Wall</span>
                     </a>
                 </div>
                 <div class="relative">
-                    <a href="{{ route('login', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-1 flex gap-2 items-center">
+                    <a href="{{ route('login', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="px-2 py-1.5 button-exp-no-fill ml-1 flex gap-2 items-center !text-base xl:!text-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>

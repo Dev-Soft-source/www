@@ -2,6 +2,10 @@
 
 @section('style')
     <style>
+        .ride-detail-page p,
+        .ride-detail-page a {
+            font-family: 'Roboto', sans-serif;
+        }
         .chat {
             list-style: none;
             margin: 0;
@@ -48,7 +52,7 @@
 @endsection
 
 @section('content')
-
+<div class="font-FuturaMdCnBT ride-detail-page">
     @if (session('message'))
         <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -1022,8 +1026,7 @@
                                                 class="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-primary text-white transform rotate-45 -mt-2">
                                             </div>
 
-                                            <p class="text-white text-sm lg:text-base font-medium"
-                                                style="font-family: 'Roboto', sans-serif;">
+                                            <p class="text-white text-sm lg:text-base font-medium">
                                                 {{ $rideDetailPage->cancellation_policy_tooltip ?? 'Cancellation policy information' }}
                                                 @if (isset($rideDetailPage->cancellation_policy_tooltip_url))
                                                     @php
@@ -1597,7 +1600,7 @@
                     <!--footer-->
                     <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <button
-                            class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
+                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
                             type="button" onclick="toggleModal1('modal-id3')">
                             Close
                         </button>
@@ -1657,7 +1660,7 @@
         </div>
     </div>
     <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="card-modal-backdrop"></div>
-
+</div>
 @endsection
 
 @section('script')
