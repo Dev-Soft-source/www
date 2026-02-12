@@ -2,9 +2,56 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Feature icon hover tooltips - same as folk_ride, content in fixed floating tooltip */
+        .folk-ride-feature-tooltip {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .folk-ride-feature-tooltip-inner {
+            display: block;
+            color: #fff !important;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            text-align: left;
+            white-space: normal;
+            min-width: 8rem;
+        }
+        .folk-ride-feature-tooltip-inner p { color: #fff !important; margin: 0; }
+        #folk-ride-floating-tooltip {
+            position: fixed;
+            z-index: 99999;
+            transform: translateX(-50%);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            text-align: left;
+            color: #fff;
+            background-color: #ef4444;
+            border-radius: 0.25rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            max-width: 240px;
+            pointer-events: none;
+        }
+        #folk-ride-floating-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #ef4444;
+        }
+        #folk-ride-floating-tooltip p { color: #fff !important; margin: 0; }
+    </style>
 @endsection
 
 @section('content')
+    <div id="folk-ride-floating-tooltip" class="hidden" aria-hidden="true"></div>
+
     @if (session('success'))
         <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -50,7 +97,7 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
                                         <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
                                     </svg>
@@ -64,7 +111,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-[#c75b5b] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
                         </div>
                     </div>
                 </div>
@@ -975,72 +1022,96 @@
                                                 <div class="w-full">
                                                     <div class="relative mt-5 text-left">
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->pickup }},
-                                                                    {{ $ride->rideDetail[0]->departure }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_from_label)
+                                                                        {{ $findRidePage->card_section_from_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->departure }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                                 <span
-                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->dropoff }},
-                                                                    {{ $ride->rideDetail[0]->destination }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_to_label)
+                                                                        {{ $findRidePage->card_section_to_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->destination }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="mt-4">
+                                                <div class="mt-4 flex-shrink-0 min-w-[11rem]">
                                                     <p class="text-xl font-semibold text-primary">
-                                                        <div class="flex items-center gap-2">
+                                                        <div class="flex flex-wrap items-center justify-end gap-2">
                                                             @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
-                                                                <span class="line-through">
+                                                                <span class="line-through whitespace-nowrap">
                                                                     ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
                                                                     </span>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 flex-shrink-0">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                                                                     </svg>
 
-                                                                    <span>
+                                                                    <span class="whitespace-nowrap">
 
                                                                         ${{ $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $firm_cancellation_discount) / 100 }}
                                                                     </span>
 
                                                                 @else
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    <span class="whitespace-nowrap">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}</span>
                                                                 @endif
 
-                                                                <small>
+                                                                <small class="whitespace-nowrap">
                                                                     @isset($findRidePage->card_section_per_seat)
                                                                         {{ $findRidePage->card_section_per_seat }}
                                                                     @endisset
                                                                 </small>
 
-                                                                <div class="sups inline-flex relative">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                                    </svg>
-                                                                    <div
-                                                                      class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-blue-500 px-4 py-2 rounded right-0 w-60 z-10"
-                                                                    >
-                                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                                            {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
-                                                                        </p>
-                                                                    </div>
+                                                            <div class="sups inline-flex relative">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                                </svg>
+                                                                <div
+                                                                    class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-[#c75b5b] px-4 py-2 rounded right-0 w-60 z-10"
+                                                                >
+                                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
+                                                                        {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
+                                                                    </p>
                                                                 </div>
+                                                            </div>
                                                         </div>
                                                     </p>
                                                     {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
@@ -1070,7 +1141,7 @@
                                                         @endisset
                                                     </p>
                                                 </div> --}}
-                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
+                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
                                                     @unless(old('skip_vehicle', $ride->skip_vehicle) == '0')
                                                         @if ($ride->remove_car_image == 0)
                                                             <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
@@ -1081,149 +1152,86 @@
                                                         @endif
                                                     @endunless
 
-                                                    <div class="flex items-center space-x-1">
+                                                    <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option1_tooltip }}</span></span>
+                                                            </span>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option2_tooltip }}</span></span>
+                                                            </span>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option3_tooltip }}</span></span>
+                                                            </span>
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->smoking_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option2_tooltip }}</span></span></span>
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option3_tooltip }}</span></span></span>
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option1_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option2_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option3_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option8_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option9_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option10_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option11_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option12_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option13_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option14_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option15_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option16_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option4_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option5_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option6_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option7_tooltip }}</span></span></span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -1464,30 +1472,54 @@
                                                 <div class="md:w-2/3">
                                                     <div class="relative mt-5 text-left">
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->pickup }},
-                                                                    {{ $ride->rideDetail[0]->departure }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_from_label)
+                                                                        {{ $findRidePage->card_section_from_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->departure }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                                 <span
-                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->dropoff }},
-                                                                    {{ $ride->rideDetail[0]->destination }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_to_label)
+                                                                        {{ $findRidePage->card_section_to_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->destination }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1520,7 +1552,7 @@
                                                         @endisset
                                                     </p>
                                                 </div> --}}
-                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
+                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
                                                     @unless(old('skip_vehicle', $ride->skip_vehicle) == '0')
                                                         @if ($ride->remove_car_image == 0)
                                                             <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
@@ -1531,149 +1563,86 @@
                                                         @endif
                                                     @endunless
 
-                                                    <div class="flex items-center space-x-1">
+                                                    <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}', '{{ $findRidePage->payment_methods_option2->name ?? $findRidePage->payment_methods_option2->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option1_tooltip }}</span></span>
+                                                            </span>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}', '{{ $findRidePage->payment_methods_option3->name ?? $findRidePage->payment_methods_option3->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option2_tooltip }}</span></span>
+                                                            </span>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}', '{{ $findRidePage->payment_methods_option4->name ?? $findRidePage->payment_methods_option4->label }}')">
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                            </a>
+                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option3_tooltip }}</span></span>
+                                                            </span>
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}','{{ $findRidePage->smoking_label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->smoking_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option2_tooltip }}</span></span></span>
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}','{{ $findRidePage->pets_allowed_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option3_tooltip }}</span></span></span>
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option1_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option2_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option3_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}','{{ $findRidePage->luggage_label }}')"><img class="w-8 h-8"
-                                                                src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}"
-                                                                alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}', '{{ $findRidePage->ride_features_option3->name ?? $findRidePage->ride_features_option3->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}', '{{ $findRidePage->ride_features_option8->name ?? $findRidePage->ride_features_option8->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option8_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}', '{{ $findRidePage->ride_features_option9->name ?? $findRidePage->ride_features_option9->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option9_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}', '{{ $findRidePage->ride_features_option10->name ?? $findRidePage->ride_features_option10->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option10_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}', '{{ $findRidePage->ride_features_option11->name ?? $findRidePage->ride_features_option11->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option11_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}', '{{ $findRidePage->ride_features_option12->name ?? $findRidePage->ride_features_option12->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option12_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}', '{{ $findRidePage->ride_features_option13->name ?? $findRidePage->ride_features_option13->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option13_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}', '{{ $findRidePage->ride_features_option14->name ?? $findRidePage->ride_features_option14->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option14_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}', '{{ $findRidePage->ride_features_option15->name ?? $findRidePage->ride_features_option15->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option15_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}', '{{ $findRidePage->ride_features_option16->name ?? $findRidePage->ride_features_option16->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option16_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}'), '{{ $findRidePage->ride_features_option4->name ?? $findRidePage->ride_features_option4->label }}'"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option4_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);"
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}', '{{ $findRidePage->ride_features_option5->name ?? $findRidePage->ride_features_option5->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option5_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}', '{{ $findRidePage->ride_features_option6->name ?? $findRidePage->ride_features_option6->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option6_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <a href="javascript:void(0);" 
-                                                            onmouseover="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"
-                                                            onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}', '{{ $findRidePage->ride_features_option7->name ?? $findRidePage->ride_features_option7->label }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""></a>
+                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option7_tooltip }}</span></span></span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -1857,7 +1826,7 @@
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 sm:pt-16">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
                                                 <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
                                             </svg>
@@ -1873,7 +1842,7 @@
                                 <div
                                     class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button
-                                        class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
+                                        class="inline-flex w-full justinline-flex justify-center rounded bg-[#c75b5b] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
                                         type="button" onclick="toggleModal1('modal-id1')">
                                         Close
                                     </button>
@@ -2317,5 +2286,25 @@
             close.addEventListener('click', () => toggleSearchFilters(false));
             overlay.addEventListener('click', () => toggleSearchFilters(false));
         });
+
+        // Feature icon tooltips: show content in fixed-position element (same as folk_ride)
+        (function() {
+            var floating = document.getElementById('folk-ride-floating-tooltip');
+            if (!floating) return;
+            document.querySelectorAll('.group').forEach(function(group) {
+                var inner = group.querySelector('.folk-ride-feature-tooltip-inner');
+                if (!inner) return;
+                group.addEventListener('mouseenter', function() {
+                    floating.innerHTML = inner.innerHTML;
+                    floating.classList.remove('hidden');
+                    var rect = group.getBoundingClientRect();
+                    floating.style.left = (rect.left + rect.width / 2) + 'px';
+                    floating.style.top = (rect.bottom + 8) + 'px';
+                });
+                group.addEventListener('mouseleave', function() {
+                    floating.classList.add('hidden');
+                });
+            });
+        })();
     </script>
 @endsection
