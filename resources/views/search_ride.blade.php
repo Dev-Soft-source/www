@@ -29,7 +29,7 @@
             line-height: 1.25rem;
             text-align: left;
             color: #fff;
-            background-color: #ef4444;
+            background-color: #c75b5b;
             border-radius: 0.25rem;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
             max-width: 240px;
@@ -43,7 +43,7 @@
             transform: translateX(-50%);
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 6px solid #ef4444;
+            border-bottom: 6px solid #c75b5b;
         }
         #folk-ride-floating-tooltip p { color: #fff !important; margin: 0; }
     </style>
@@ -156,7 +156,7 @@
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href=""
-                            class="inline-flex w-full justify-center rounded bg-[#c75b5b] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                            class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
                     </div>
                 </div>
             </div>
@@ -189,7 +189,7 @@
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
 
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-[#c75b5b] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
                         </div>
                     </div>
                 </div>
@@ -1741,7 +1741,7 @@
                                 <div
                                     class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button
-                                        class="inline-flex w-full justinline-flex justify-center rounded bg-[#c75b5b] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
+                                        class="inline-flex w-full justinline-flex justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
                                         type="button" onclick="toggleModal1('modal-id1')">
                                         Close
                                     </button>
