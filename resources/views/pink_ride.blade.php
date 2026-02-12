@@ -46,6 +46,73 @@
             border-bottom: 6px solid #c75b5b;
         }
         #folk-ride-floating-tooltip p { color: #fff !important; margin: 0; }
+
+        /* FAQ - Pink Rides: themed bar (blue) and smooth expand/collapse */
+        .pink-ride-faq {
+            border: 1px solid rgba(3, 105, 161, 0.3);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(3, 105, 161, 0.08);
+        }
+        .pink-ride-faq__header {
+            background: linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(172, 186, 194) 100%);
+            color: #fff;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        .pink-ride-faq__body {
+            background: #f0f9ff;
+            padding: 0.75rem;
+        }
+        .pink-ride-faq__item {
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(3, 105, 161, 0.2);
+        }
+        .pink-ride-faq__item:last-child { margin-bottom: 0; }
+        .pink-ride-faq__question {
+            width: 100%;
+            text-align: left;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1f2937;
+            background: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.25s ease, color 0.25s ease;
+            font-family: inherit;
+            border-radius: 0.5rem;
+        }
+        .pink-ride-faq__question:hover {
+            background: #eff6ff;
+            color: #0369a1;
+        }
+        .pink-ride-faq__question[aria-expanded="true"] {
+            background: #0369a1;
+            color: #fff;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        .pink-ride-faq__question[aria-expanded="true"]:hover {
+            background: #0284c7;
+            color: #fff;
+        }
+        .pink-ride-faq__answer {
+            overflow: hidden;
+            height: 0;
+            transition: height 0.35s ease-out;
+        }
+        .pink-ride-faq__answer-inner {
+            padding: 1rem 1.25rem;
+            background: #fff;
+            border: 1px solid rgba(3, 105, 161, 0.2);
+            border-top: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            color: #374151;
+        }
     </style>
 @endsection
 
@@ -792,23 +859,24 @@
             <div class="col-span-3">
                 <div class="bg-gray-100 rounded-md p-4 py-6">
                     <div
-                        class="flex items-end flex-col md:flex-row justify-between gap-4 md:gap-0 rounded-lg overflow-hidden">
+                        class="flex items-end flex-col md:flex-row justify-between gap-4 md:gap-0 rounded-lg">
                         <div class="w-full md:w-[30%]">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6"
                                         alt="">
                                 </div>
-                                <input type="text" id="fromInput" value="{{ $request->from }}"
+                                <input type="text" id="from_spot_0" value="{{ $request->from }}" oninput="fromInput('0')" autocomplete="off"
                                     class="bg-white rounded-md md:rounded-none pl-7 border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                     @isset($findRidePage->search_section_from_placeholder)
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
                                     @endisset>
+                                <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
                             <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
-                            <button onclick="swapLocations()">
+                            <button type="button" onclick="swapLocations()">
                                 <img src="{{ asset('assets/arrow.png') }}" class="w-8 h-8 mx-auto" alt="">
                             </button>
                         </div>
@@ -817,11 +885,12 @@
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
                                 </div>
-                                <input type="text" id="toInput" value="{{ $request->to }}"
+                                <input type="text" id="to_spot_0" value="{{ $request->to }}" oninput="toInput('0')" autocomplete="off"
                                     class="bg-white pl-7 rounded-md md:rounded-none md:border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
                                     @isset($findRidePage->search_section_to_placeholder)
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
                                     @endisset>
+                                <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
                             <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
@@ -834,24 +903,15 @@
                                             d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
                                     </svg>
                                 </div>
-                                <input type="text" id="dateInput" value="{{ $request->date }}"
-                                    class="bg-white rounded-md md:rounded-none px-7 sm:border-l italic border-gray-300 border-0 text-gray-900 text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                <input type="text" id="dateInput" value="{{ $request->date }}" readonly
+                                    class="bg-white rounded-md md:rounded-none px-7 sm:border-l italic border-gray-300 border-0 text-gray-900 text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 cursor-pointer"
                                     @isset($findRidePage->search_section_date_placeholder)
                                         placeholder="{{ $findRidePage->search_section_date_placeholder }}"
                                     @endisset>
-                                <div class="absolute inset-y-0 end-0 flex items-center pr-2 cursor-pointer"
-                                    onclick="clearDateInput()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" data-slot="icon"
-                                        class="w-6 h-6 text-gray-400">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                </div>
                             </div>
                         </div>
                         <div class="w-24 mx-auto md:w-[5%] h-12 flex items-center justify-center">
-                            <button onclick="navigateToSearchRoute()"
+                            <button type="button" onclick="navigateToSearchRoute()"
                                 class="bg-blue-500 w-full h-full flex items-center justify-center text-white rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -1853,23 +1913,22 @@
                 </div>
 
                 <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
-                    <div>
-                        <div class="flex flex-row flex-wrap items-center justify-center gap-2 py-2 px-4 border-b border-gray-400" >
-                            <h3 class="text-2xl xl:text-3xl text-primary font-FuturaMdCnBT text-center mb-0">
-                                FAQs on the ProximaRide
+                    <div class="pink-ride-faq">
+                        <div class="pink-ride-faq__header">
+                            <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
+                                FAQ - Pink Rides
                             </h3>
-                            <h4 class="text-xl text-black font-FuturaMdCnBT text-center mb-0">
-                                (for ladies only)
-                            </h4>
                         </div>
-                        <div class="bg-white p-4">
+                        <div class="pink-ride-faq__body">
                             @foreach ($pinkRideFaqs as $pinkRideFaq)
-                                <div>
-                                    <button class="faq-question block w-full text-left mb-3 font-medium text-gray-900 focus:outline-none rounded px-4 py-2.5 shadow text-base md:text-lg bg-gray-100 hover:bg-gray-200 transition-colors font-FuturaMdCnBT" onclick="toggleAnswer(this)">
+                                <div class="pink-ride-faq__item">
+                                    <button type="button" class="pink-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="togglePinkRideFaq(this)">
                                         {{ $pinkRideFaq->question }}
                                     </button>
-                                    <div class="faq-answer hidden bg-white p-4 rounded text-base md:text-lg text-gray-900">
-                                        {!! $pinkRideFaq->answer !!}
+                                    <div class="pink-ride-faq__answer" role="region" aria-hidden="true">
+                                        <div class="pink-ride-faq__answer-inner">
+                                            {!! $pinkRideFaq->answer !!}
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -1961,13 +2020,34 @@
         function toggleAnswer(element) {
             let answer = element.nextElementSibling;
             answer.classList.toggle("hidden");
-            // Change the background color of the button based on the answer's visibility
             if (!answer.classList.contains("hidden")) {
                 element.classList.remove("bg-gray-100", "hover:bg-gray-200");
                 element.classList.add("bg-greenXS", "text-white");
             } else {
                 element.classList.remove("bg-greenXS", "text-white");
                 element.classList.add("bg-gray-100", "hover:bg-gray-200");
+            }
+        }
+
+        function togglePinkRideFaq(button) {
+            const answer = button.nextElementSibling;
+            const isOpen = button.getAttribute('aria-expanded') === 'true';
+            if (isOpen) {
+                answer.style.height = answer.scrollHeight + 'px';
+                answer.offsetHeight;
+                answer.style.height = '0';
+                button.setAttribute('aria-expanded', 'false');
+                answer.setAttribute('aria-hidden', 'true');
+            } else {
+                answer.style.height = answer.scrollHeight + 'px';
+                button.setAttribute('aria-expanded', 'true');
+                answer.setAttribute('aria-hidden', 'false');
+                answer.addEventListener('transitionend', function onEnd() {
+                    answer.removeEventListener('transitionend', onEnd);
+                    if (button.getAttribute('aria-expanded') === 'true') {
+                        answer.style.height = 'auto';
+                    }
+                }, { once: true });
             }
         }
 
@@ -1988,51 +2068,121 @@
         }
 
         function swapLocations() {
-            // Get the values of the "From" and "To" input fields
-            const fromValue = document.getElementById('fromInput').value;
-            const toValue = document.getElementById('toInput').value;
-
-            // Swap the values
-            document.getElementById('fromInput').value = toValue;
-            document.getElementById('toInput').value = fromValue;
-            navigateToSearchRoute();
+            const fromValue = document.getElementById('from_spot_0').value;
+            const toValue = document.getElementById('to_spot_0').value;
+            document.getElementById('from_spot_0').value = toValue;
+            document.getElementById('to_spot_0').value = fromValue;
         }
+
+        function debounce(func, delay) {
+            let timer;
+            return function() {
+                const args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, delay);
+            };
+        }
+
+        function fetchCities(searchTerm, fieldId, fieldIndex) {
+            const container = document.getElementById(fieldId + '_suggestions' + fieldIndex);
+            if (!container) return;
+            if (searchTerm.length < 2) {
+                container.innerHTML = '';
+                return;
+            }
+            const body = new URLSearchParams({
+                search: searchTerm,
+                _token: '{{ csrf_token() }}'
+            });
+            fetch('{{ url('get-cities-by-state') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString()
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Request failed: ' + r.status);
+                return r.json();
+            })
+            .then(result => {
+                container.innerHTML = '';
+                const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object.values(result.cities)) : [];
+                cities.forEach(value => {
+                    const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
+                    const countryName = value.state && value.state.country && value.state.country.name ? value.state.country.name : '';
+                    const displayText = [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
+                    div.textContent = displayText;
+                    div.addEventListener('click', function() {
+                        const input = document.getElementById(fieldId + '_' + fieldIndex);
+                        if (input) input.value = displayText;
+                        container.innerHTML = '';
+                    });
+                    container.appendChild(div);
+                });
+            })
+            .catch(err => console.error('fetchCities error', err));
+        }
+
+        const debouncedFromFetch = debounce(function() {
+            const searchTerm = (document.getElementById('from_spot_0') || {}).value || '';
+            fetchCities(searchTerm, 'from_spot', '0');
+        }, 500);
+        const debouncedToFetch = debounce(function() {
+            const searchTerm = (document.getElementById('to_spot_0') || {}).value || '';
+            fetchCities(searchTerm, 'to_spot', '0');
+        }, 500);
+
+        function fromInput(index) {
+            const el = document.getElementById('from_spot_' + index);
+            if (el && el.value.length < 2) {
+                const container = document.getElementById('from_spot_suggestions' + index);
+                if (container) container.innerHTML = '';
+            }
+            debouncedFromFetch();
+        }
+
+        function toInput(index) {
+            const el = document.getElementById('to_spot_' + index);
+            if (el && el.value.length < 2) {
+                const container = document.getElementById('to_spot_suggestions' + index);
+                if (container) container.innerHTML = '';
+            }
+            debouncedToFetch();
+        }
+
+        document.addEventListener('click', function(e) {
+            const fromSuggest = document.getElementById('from_spot_suggestions0');
+            const toSuggest = document.getElementById('to_spot_suggestions0');
+            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
+            if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
+        });
 
         const dateInput = document.getElementById('dateInput');
 
-        // Initialize the date picker
+        // Initialize the date picker (same as post_ride: calendar only, no typing)
         flatpickr(dateInput, {
-            dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
-            altInput: true,
-            altFormat: 'F d, Y',
-            minDate: 'today', // Restrict to future dates only
-            disableMobile: true, // Disable mobile-friendly mode for consistent experience
-            allowInput: true, // Allow manual input
-            clickOpens: true, // Open calendar on click
-            theme: 'default' // Use default theme
+            dateFormat: 'F d, Y',
+            minDate: 'today',
+            disableMobile: true,
+            allowInput: false,
+            clickOpens: true
         });
 
-        // Add an event listener to the input fields
-        document.getElementById('fromInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
+        // Enter key: submit search
+        document.getElementById('from_spot_0').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
         });
-
-        document.getElementById('toInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
+        document.getElementById('to_spot_0').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
         });
-
         document.getElementById('dateInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
-        })
+            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
+        });
 
         document.getElementById('driverName').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
@@ -2161,8 +2311,8 @@
             localStorage.setItem('removedRideIds', JSON.stringify([]));
 
             // Get the values of the input fields
-            const fromValue = document.getElementById('fromInput').value;
-            const toValue = document.getElementById('toInput').value;
+            const fromValue = document.getElementById('from_spot_0').value;
+            const toValue = document.getElementById('to_spot_0').value;
             const dateValue = document.getElementById('dateInput').value;
             const driverAge = document.getElementById('driverAge').value;
             const passengerRating = document.getElementById('passengerRating').value;
