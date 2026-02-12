@@ -19,6 +19,7 @@ const tailwindcss = require('tailwindcss');
  .postCss("resources/css/app.css", "public/css", [
      tailwindcss(),
  ])
+ .copy("resources/css/front.css", "public/css/front.css")
  .options({
      postCss: [
          require("postcss-import"),

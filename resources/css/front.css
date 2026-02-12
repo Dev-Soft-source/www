@@ -1,0 +1,39 @@
+
+.form-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+/* tooltip css */
+.tooltip-error {
+    position: relative;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #c75b5b;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 6px;
+    display: inline-block;
+    animation: fadeIn 0.25s ease-in-out;
+}
+
+.tooltip-error::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;  /* At the top of the tooltip */
+    left: 50%;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #c75b5b transparent;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

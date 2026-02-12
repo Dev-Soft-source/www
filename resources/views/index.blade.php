@@ -850,7 +850,7 @@
 
                     @if (!empty($videoId))
                         {{-- Embed the YouTube video using an iframe --}}
-                        <iframe class="mx-auto rounded-md md:w-full md:h-[700px] w-full h-[700px]"
+                        <iframe class="mx-auto rounded-md h-full w-full md:h-[700px]"
                         src="https://www.youtube.com/embed/{{ $videoId }}">
                         </iframe>
                     @else
