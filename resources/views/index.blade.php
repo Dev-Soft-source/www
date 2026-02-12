@@ -1764,6 +1764,9 @@
 <script>
     // Google Places Autocomplete initialization - Define function before loading Google Maps API
     let fromAutocomplete, toAutocomplete;
+    // Store selected place data for validation
+    let selectedFromPlace = null;
+    let selectedToPlace = null;
 
     // This function will be called by Google Maps API when it loads
     window.initGooglePlaces = function() {
@@ -1773,7 +1776,7 @@
             {
                 componentRestrictions: { country: 'ca' }, // Restrict to Canada
                 types: ['(cities)'], // Focus on cities
-                fields: ['address_components', 'formatted_address', 'name']
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
             }
         );
 
@@ -1783,14 +1786,19 @@
             {
                 componentRestrictions: { country: 'ca' }, // Restrict to Canada
                 types: ['(cities)'], // Focus on cities
-                fields: ['address_components', 'formatted_address', 'name']
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
             }
         );
 
         // Handle place selection for "From" input
         fromAutocomplete.addListener('place_changed', function() {
             const place = fromAutocomplete.getPlace();
-            if (place.address_components) {
+            if (place.address_components && place.place_id) {
+                selectedFromPlace = {
+                    place_id: place.place_id,
+                    formatted_address: formatPlaceAddress(place),
+                    value: formatPlaceAddress(place)
+                };
                 formatPlaceAddress(place, 'fromInput');
             }
         });
@@ -1798,14 +1806,37 @@
         // Handle place selection for "To" input
         toAutocomplete.addListener('place_changed', function() {
             const place = toAutocomplete.getPlace();
-            if (place.address_components) {
+            if (place.address_components && place.place_id) {
+                selectedToPlace = {
+                    place_id: place.place_id,
+                    formatted_address: formatPlaceAddress(place),
+                    value: formatPlaceAddress(place)
+                };
                 formatPlaceAddress(place, 'toInput');
+            }
+        });
+
+        // Clear selected place when user manually types in "From" input
+        document.getElementById('fromInput').addEventListener('input', function() {
+            const currentValue = this.value.trim();
+            // If user manually edits and it doesn't match the selected place, clear the selection
+            if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
+                selectedFromPlace = null;
+            }
+        });
+
+        // Clear selected place when user manually types in "To" input
+        document.getElementById('toInput').addEventListener('input', function() {
+            const currentValue = this.value.trim();
+            // If user manually edits and it doesn't match the selected place, clear the selection
+            if (selectedToPlace && currentValue !== selectedToPlace.value) {
+                selectedToPlace = null;
             }
         });
     };
 
     // Format place address to "City, Province, Canada" format
-    function formatPlaceAddress(place, inputId) {
+    function formatPlaceAddress(place, inputId = null) {
         let city = '';
         let province = '';
         let country = '';
@@ -1832,15 +1863,21 @@
             formattedAddress += ', ' + country;
         }
 
-        // Set the formatted address in the input
-        document.getElementById(inputId).value = formattedAddress;
-        
-        // Hide error message if it was showing
-        if (inputId === 'fromInput') {
-            document.getElementById('fromError').classList.add('hidden');
-        } else if (inputId === 'toInput') {
-            document.getElementById('toError').classList.add('hidden');
+        // If inputId is provided, set the formatted address in the input
+        if (inputId) {
+            document.getElementById(inputId).value = formattedAddress;
+            
+            // Hide error message if it was showing
+            if (inputId === 'fromInput') {
+                const fromError = document.getElementById('fromError');
+                if (fromError) fromError.classList.add('hidden');
+            } else if (inputId === 'toInput') {
+                const toError = document.getElementById('toError');
+                if (toError) toError.classList.add('hidden');
+            }
         }
+
+        return formattedAddress;
     }
 </script>
 <!-- Google Places Autocomplete API -->
@@ -1926,6 +1963,11 @@
         // Swap the values
         document.getElementById('fromInput').value = toValue;
         document.getElementById('toInput').value = fromValue;
+
+        // Swap the selected place data as well
+        const tempPlace = selectedFromPlace;
+        selectedFromPlace = selectedToPlace;
+        selectedToPlace = tempPlace;
     }
     
    
@@ -2025,7 +2067,41 @@
             return; // Prevent navigation
         }
 
-        // Both fields are filled, hide error tooltip if it's showing
+        // Validate that both inputs contain valid selected places (not just any string)
+        let isValid = true;
+        let errorMessage = '';
+
+        // Check if "From" field has a valid selected place
+        if (!selectedFromPlace || fromValue !== selectedFromPlace.value) {
+            isValid = false;
+            errorMessage = 'Please select a valid location from the suggestions for "From" field.';
+        }
+
+        // Check if "To" field has a valid selected place
+        if (!selectedToPlace || toValue !== selectedToPlace.value) {
+            isValid = false;
+            if (errorMessage) {
+                errorMessage = 'Please select valid locations from the suggestions for both "From" and "To" fields.';
+            } else {
+                errorMessage = 'Please select a valid location from the suggestions for "To" field.';
+            }
+        }
+
+        // If validation fails, show error tooltip
+        if (!isValid) {
+            if (fromToError) {
+                // Update error message if needed (you can customize this)
+                fromToError.classList.remove('hidden');
+                
+                // Hide the tooltip after 3 seconds
+                setTimeout(function() {
+                    fromToError.classList.add('hidden');
+                }, 3000);
+            }
+            return; // Prevent navigation
+        }
+
+        // Both fields are filled and valid, hide error tooltip if it's showing
         if (fromToError) {
             fromToError.classList.add('hidden');
         }
