@@ -975,72 +975,96 @@
                                                 <div class="w-full">
                                                     <div class="relative mt-5 text-left">
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->pickup }},
-                                                                    {{ $ride->rideDetail[0]->departure }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_from_label)
+                                                                        {{ $findRidePage->card_section_from_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->departure }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                                 <span
-                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->dropoff }},
-                                                                    {{ $ride->rideDetail[0]->destination }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_to_label)
+                                                                        {{ $findRidePage->card_section_to_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->destination }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="mt-4">
+                                                <div class="mt-4 flex-shrink-0 min-w-[11rem]">
                                                     <p class="text-xl font-semibold text-primary">
-                                                        <div class="flex items-center gap-2">
+                                                        <div class="flex flex-wrap items-center justify-end gap-2">
                                                             @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
-                                                                <span class="line-through">
+                                                                <span class="line-through whitespace-nowrap">
                                                                     ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
                                                                     </span>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 flex-shrink-0">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                                                                     </svg>
 
-                                                                    <span>
+                                                                    <span class="whitespace-nowrap">
 
                                                                         ${{ $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $firm_cancellation_discount) / 100 }}
                                                                     </span>
 
                                                                 @else
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    <span class="whitespace-nowrap">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}</span>
                                                                 @endif
 
-                                                                <small>
+                                                                <small class="whitespace-nowrap">
                                                                     @isset($findRidePage->card_section_per_seat)
                                                                         {{ $findRidePage->card_section_per_seat }}
                                                                     @endisset
                                                                 </small>
 
-                                                                <div class="sups inline-flex relative">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                                    </svg>
-                                                                    <div
-                                                                      class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-blue-500 px-4 py-2 rounded right-0 w-60 z-10"
-                                                                    >
-                                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                                            {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
-                                                                        </p>
-                                                                    </div>
+                                                            <div class="sups inline-flex relative">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                                </svg>
+                                                                <div
+                                                                    class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-[#c75b5b] px-4 py-2 rounded right-0 w-60 z-10"
+                                                                >
+                                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
+                                                                        {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
+                                                                    </p>
                                                                 </div>
+                                                            </div>
                                                         </div>
                                                     </p>
                                                     {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
@@ -1464,30 +1488,54 @@
                                                 <div class="md:w-2/3">
                                                     <div class="relative mt-5 text-left">
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->pickup }},
-                                                                    {{ $ride->rideDetail[0]->departure }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_from_label)
+                                                                        {{ $findRidePage->card_section_from_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->departure }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
 
                                                         <div class="flex items-center relative">
-                                                            <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                            <div
+                                                                class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                                 <span
-                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                                                    <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                    <img class="w-5 h-5 object-contain"
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                 </span>
                                                             </div>
-                                                            <div class="ml-20">
-                                                                <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary md:mb-4">{{ $ride->dropoff }},
-                                                                    {{ $ride->rideDetail[0]->destination }}</div>
+                                                            <div class="ml-12 md:ml-20">
+                                                                <p class="font-bold text-xl text-black">
+                                                                    @isset($findRidePage->card_section_to_label)
+                                                                        {{ $findRidePage->card_section_to_label }}
+                                                                    @endisset
+                                                                </p>
+                                                                <div class="flex gap-2">
+                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        {{ $ride->rideDetail[0]->destination }}.
+                                                                    </h3>
+                                                                    <p class="text-sm mt-2">
+                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
