@@ -2,56 +2,9 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-        /* Feature icon hover tooltips - same as folk_ride, content in fixed floating tooltip */
-        .folk-ride-feature-tooltip {
-            position: absolute;
-            left: -9999px;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .folk-ride-feature-tooltip-inner {
-            display: block;
-            color: #fff !important;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            text-align: left;
-            white-space: normal;
-            min-width: 8rem;
-        }
-        .folk-ride-feature-tooltip-inner p { color: #fff !important; margin: 0; }
-        #folk-ride-floating-tooltip {
-            position: fixed;
-            z-index: 99999;
-            transform: translateX(-50%);
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            text-align: left;
-            color: #fff;
-            background-color: #c75b5b;
-            border-radius: 0.25rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            max-width: 240px;
-            pointer-events: none;
-        }
-        #folk-ride-floating-tooltip::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-bottom: 6px solid #c75b5b;
-        }
-        #folk-ride-floating-tooltip p { color: #fff !important; margin: 0; }
-    </style>
 @endsection
 
 @section('content')
-    <div id="folk-ride-floating-tooltip" class="hidden" aria-hidden="true"></div>
-
     @if (session('success'))
     <div id="my-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <!-- Backdrop with transition -->
@@ -241,23 +194,7 @@
                                                 <span class="text-pink-500 text-base md:text-lg">
                                                     {{ $findRidePage->ride_features_option1->name }}
                                                 </span>
-                                                <!-- <div class="sups relative">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-info-circle-fill text-black peer"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                    </svg>
-                                                    <div
-                                                        class="absolute right-20 tooltip -top-10 group-hover:flex hidden peer-hover:flex">
-                                                        <div role="tooltip"
-                                                            class="absolute tooltiptext_icon after:right-1/2 after:-left-1/2 -top-1 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded w-64 px-4">
-                                                            <p class="text-white font-semibold leading-none text-sm lg:text-base">
-                                                                tooltip text
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div> -->
+                                               
                                             </label>
                                             <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
                                                 {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
@@ -717,27 +654,11 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option1->name }}
                                                     </span>
-                                                    <div class="sups relative inline-flex">
-                                                        <!-- Info Icon -->
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                    <x-tooltip text="{{ $postRidePage->luggage_option1_tooltip }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                         </svg>
-        
-                                                        <!-- Tooltip Content -->
-                                                        <div class="absolute -left-32 -top-20 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                            <!-- Tooltip Arrow -->
-                                                            <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                            
-                                                            <!-- Tooltip Body -->
-                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                                <p class="text-white">
-                                                                {{ $postRidePage->luggage_option1_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </x-tooltip>
                                                 </label>
                                                 <input id="small-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option1->features_setting_id }}"
@@ -751,44 +672,11 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option2->name }}
                                                     </span>
-                                                    <!-- <div class="sups relative inline-flex">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                    <x-tooltip text="{{ $postRidePage->luggage_option2_tooltip }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                         </svg>
-                                                        <div
-                                                        class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
-                                                        >
-                                                            <div
-                                                                role="tooltip"
-                                                                class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                            >
-                                                                <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                                    {{ $postRidePage->luggage_option2_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div> -->
-                                                    <div class="sups relative inline-flex">
-                                                        <!-- Info Icon -->
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-        
-                                                        <!-- Tooltip Content -->
-                                                        <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                            <!-- Tooltip Arrow -->
-                                                            <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                            
-                                                            <!-- Tooltip Body -->
-                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                                <p class="text-white">
-                                                                {{ $postRidePage->luggage_option2_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </x-tooltip>
                                                 </label>
                                                 <input id="Medium-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option2->features_setting_id }}"
@@ -802,27 +690,11 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option3->name }}
                                                     </span>
-                                                <div class="sups relative inline-flex">
-                                                        <!-- Info Icon -->
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <x-tooltip text="{{ $postRidePage->luggage_option3_tooltip }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                         </svg>
-        
-                                                        <!-- Tooltip Content -->
-                                                        <div class="absolute -left-28 -top-36 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                            <!-- Tooltip Arrow -->
-                                                            <div class="absolute -bottom-1 left-36 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                            
-                                                            <!-- Tooltip Body -->
-                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                                <p class="text-white">
-                                                                {{ $postRidePage->luggage_option3_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </x-tooltip>
                                                 </label>
                                                 <input id="Large-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option3->features_setting_id }}"
@@ -836,27 +708,11 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option4->name }}
                                                     </span>
-                                                    <div class="sups relative inline-flex">
-                                                        <!-- Info Icon -->
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                    <x-tooltip text="{{ $postRidePage->luggage_option4_tooltip }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                         </svg>
-        
-                                                        <!-- Tooltip Content -->
-                                                        <div class="absolute -left-20 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                            <!-- Tooltip Arrow -->
-                                                            <div class="absolute -bottom-1 left-24 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                            
-                                                            <!-- Tooltip Body -->
-                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                                <p class="text-white">
-                                                                {{ $postRidePage->luggage_option4_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </x-tooltip>
 
 
                                                 
@@ -874,27 +730,11 @@
                                                         <span class="text-base md:text-lg">
                                                             {{ $findRidePage->luggage_option5->name }}
                                                         </span>
-                                                        <div class="sups relative inline-flex">
-                                                        <!-- Info Icon -->
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                        <x-tooltip text="{{ $postRidePage->luggage_option5_tooltip }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                             <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                         </svg>
-        
-                                                        <!-- Tooltip Content -->
-                                                        <div class="absolute -left-40 -top-28 z-50 hidden peer-hover:block hover:block transition-opacity duration-300 ease-in-out opacity-0 peer-hover:opacity-100 hover:opacity-100">
-                                                            <div class="relative w-64 sm:w-72 md:w-80 lg:w-96 px-4 mt-2">
-                                                            <!-- Tooltip Arrow -->
-                                                            <div class="absolute -bottom-1 left-44 transform -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
-                                                            
-                                                            <!-- Tooltip Body -->
-                                                            <div class="bg-primary text-white rounded-lg shadow-xl p-4">
-                                                                <p class="text-white">
-                                                                {{ $postRidePage->luggage_option5_tooltip }}
-                                                                </p>
-                                                            </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </x-tooltip>
                                                     </label>
                                                     <input id="no-luggage" type="checkbox"
                                                         value="{{ $findRidePage->luggage_option5->features_setting_id }}"
@@ -1042,11 +882,7 @@
                                 <!-- Suggestions Container for 'from' field -->
                                 <div id="fromInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                             </div>
-                            {{-- <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-primary text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">validation.required</p>
-                                </div>
-                              </div> --}}
+
                             <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
                         <div class="mt-3 md:mt-0 w-full md:w-[5%] md:bg-gray-200 md:border border-gray-200 md:h-[3.1rem] flex items-center justify-center p-0.5 xl:p-0 ">
@@ -1071,11 +907,7 @@
                                 <!-- Suggestions Container for 'to' field -->
                                 <div id="toInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                             </div>
-                            {{-- <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-primary text-gray-600 w-full md:w-1/2 rounded ">
-                                    <p class="text-white leading-none text-sm lg:text-base">validation.required</p>
-                                </div>
-                              </div> --}}
+
                             <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
                         <div class="w-44 mx-auto md:mx-0 md:w-[35%] mt-4 md:mt-0">
@@ -1242,18 +1074,11 @@
                                                                 </small>
                                                                 @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
 
-                                                                <div class="sups inline-flex relative">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                                <x-tooltip text="{!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                                     </svg>
-                                                                    <div
-                                                                      class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-blue-500 px-4 py-2 rounded right-0 w-60 z-10"
-                                                                    >
-                                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                                            {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
+                                                                </x-tooltip>
                                                                 @endif
 
                                                         </div>
@@ -1368,7 +1193,7 @@
                                                         @endisset
                                                     </p>
                                                 </div> --}}
-                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
+                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar space-x-2 md:space-x-4">
                                                     @unless(old('skip_vehicle', $ride->skip_vehicle) == '0')
                                                         @if ($ride->remove_car_image == 0)
                                                             <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
@@ -1381,84 +1206,127 @@
 
                                                     <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
+                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
-                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option1_tooltip }}</span></span>
-                                                            </span>
+                                                            </x-tooltip>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
+                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option2_tooltip }}</span></span>
-                                                            </span>
+                                                            </x-tooltip>
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
+                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                                 <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                                <span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option3_tooltip }}</span></span>
-                                                            </span>
+                                                            </x-tooltip>
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->smoking_option2_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->smoking_option2_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option2_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->animals_option2_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->animals_option3_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->animals_option3_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option1_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->luggage_option1_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option2_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->luggage_option2_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option3_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->luggage_option3_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->luggage_option4_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->luggage_option5_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option2_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option2_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option3_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option8_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option8_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option9_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option9_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option10_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option10_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option11_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option11_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option12_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option12_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option13_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option13_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option14_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option14_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option15_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option15_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option16_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option16_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option4_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option4_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option5_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option5_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option6_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option6_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""><span class="folk-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="folk-ride-feature-tooltip-inner">{{ $postRidePage->features_option7_tooltip }}</span></span></span>
+                                                            <x-tooltip text="{{ $postRidePage->features_option7_tooltip }}">
+                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="">
+                                                            </x-tooltip>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -2452,24 +2320,5 @@
         }
     });
 
-    // Feature icon tooltips: show content in fixed-position element (same as folk_ride)
-    (function() {
-        var floating = document.getElementById('folk-ride-floating-tooltip');
-        if (!floating) return;
-        document.querySelectorAll('.group').forEach(function(group) {
-            var inner = group.querySelector('.folk-ride-feature-tooltip-inner');
-            if (!inner) return;
-            group.addEventListener('mouseenter', function() {
-                floating.innerHTML = inner.innerHTML;
-                floating.classList.remove('hidden');
-                var rect = group.getBoundingClientRect();
-                floating.style.left = (rect.left + rect.width / 2) + 'px';
-                floating.style.top = (rect.bottom + 8) + 'px';
-            });
-            group.addEventListener('mouseleave', function() {
-                floating.classList.add('hidden');
-            });
-        });
-    })();
     </script>
 @endsection

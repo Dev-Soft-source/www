@@ -16,10 +16,10 @@ const tailwindcss = require('tailwindcss');
      tailwindcss("web.config.js")
  ])
  .vue()
- .postCss("resources/css/app.css", "public/css", [
-     tailwindcss(),
- ])
- .copy("resources/css/front.css", "public/css/front.css")
+.postCss("resources/css/app.css", "public/css", [
+    tailwindcss(),
+])
+.postCss("resources/css/front.css", "public/css/front.css", [])
  .options({
      postCss: [
          require("postcss-import"),

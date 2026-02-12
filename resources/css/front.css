@@ -4,7 +4,160 @@
     margin-bottom: 25px;
 }
 
-/* tooltip css */
+
+/* hover tooltip */
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Tooltip box */
+.tooltip-box {
+    position: absolute;
+    background: #c75b5b;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    white-space: normal;
+    width: max-content;         /* fit content width */
+    max-width: min(300px, calc(100vw - 40px));  /* Prevent overflow with padding */
+    min-width: 100px;           /* minimum width for better appearance */
+    word-wrap: break-word;
+    /* white-space: nowrap; */
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.1s ease-in-out, visibility 0.1s ease-in-out;
+    z-index: 99999;
+    pointer-events: none;
+    
+    /* Ensure tooltip stays within viewport - prevent overflow */
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    
+    /* Prevent tooltip from going off-screen */
+    max-width: min(300px, calc(100vw - 20px));
+    box-sizing: border-box;
+}
+
+/* Show on hover */
+.tooltip-wrapper:hover .tooltip-box {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Position: top */
+.tooltip-top {
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    /* Allow JavaScript to override for edge cases */
+}
+
+/* Edge-aligned top tooltip (when centered would overflow) */
+.tooltip-top[style*="left: 0"],
+.tooltip-top[style*="translateX(10px)"] {
+    left: 0 !important;
+    transform: translateX(10px) !important;
+}
+
+.tooltip-top[style*="right: 0"],
+.tooltip-top[style*="right: auto"] {
+    right: 0 !important;
+    left: auto !important;
+    transform: translateX(0) !important;
+}
+
+/* Arrow for top position - points down */
+.tooltip-top::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #c75b5b transparent transparent transparent;
+}
+
+/* Position: bottom */
+.tooltip-bottom {
+    top: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Allow JavaScript to override for edge cases */
+}
+
+/* Edge-aligned bottom tooltip (when centered would overflow) */
+.tooltip-bottom[style*="left: 0"],
+.tooltip-bottom[style*="translateX(10px)"] {
+    left: 0 !important;
+    transform: translateX(10px) !important;
+}
+
+.tooltip-bottom[style*="right: 0"],
+.tooltip-bottom[style*="right: auto"] {
+    right: 0 !important;
+    left: auto !important;
+    transform: translateX(0) !important;
+}
+
+/* Arrow for bottom position - points up */
+.tooltip-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #c75b5b transparent;
+}
+
+/* Position: left */
+.tooltip-left {
+    right: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Arrow for left position - points right */
+.tooltip-left::after {
+    content: "";
+    position: absolute;
+    left: 100%;
+    top: var(--arrow-top, 50%);
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #c75b5b;
+}
+
+/* Position: right */
+.tooltip-right {
+    left: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Arrow for right position - points left */
+.tooltip-right::after {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: var(--arrow-top, 50%);
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent #c75b5b transparent transparent;
+}
+
+
+/* error tooltip css */
 .tooltip-error {
     position: relative;
     margin-top: 6px;
