@@ -27,6 +27,8 @@
     border-color: transparent transparent #c75b5b transparent;
 }
 
+
+
 @keyframes fadeIn {
     from {
         opacity: 0;

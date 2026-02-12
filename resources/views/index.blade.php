@@ -149,21 +149,19 @@
                                 @isset($homePage->slider_from_placeholder)
                                     placeholder="{{ $homePage->slider_from_placeholder }}"
                                 @endisset
-                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
-                            <!-- Suggestions Container for 'from' field -->
-                            <div id="fromInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
-                        </div>
-                        <div id="fromError" class="hidden absolute z-10 top-16 bg-blue-600 text-white px-4 py-2 rounded-md shadow-md before:absolute before:left-1/2 before:-top-2 before:-translate-x-1/2 before:w-0 before:h-0 before:border-l-8 before:border-l-transparent before:border-r-8 before:border-r-transparent before:border-b-8 before:border-b-blue-600 mx-auto left-0 right-0 w-fit">
+                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
+                                autocomplete="off">
+                           
                         </div>
                     </div>
-                    <div>
+                    <div class="relative">
                         <div class="flex justify-center items-center">
                             <button onclick="swapLocations()">
-                            <div class="w-8 h-8">
-                                @isset($homePage->swap_field_icon)
+                                <div class="w-8 h-8">
+                                    @isset($homePage->swap_field_icon)
                                     <img class="w-full h-full object-contain" src="{{asset('home_page_icons/' . $homePage->swap_field_icon)}}" alt="">
-                                @endisset
-                            </div>
+                                    @endisset
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -180,11 +178,15 @@
                                 @isset($homePage->slider_to_placeholder)
                                     placeholder="{{ $homePage->slider_to_placeholder }}"
                                 @endisset
-                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0">
-                            <!-- Suggestions Container for 'from' field -->
-                            <div id="toInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
+                                autocomplete="off">
                         </div>
-                        <p id="toError" class="text-sm hidden text-white"></p>
+                    </div>
+                    {{-- error tooltip --}}
+                    <div id="fromToError" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1">
+                        <div  class="tooltip-error">
+                            {{ $homePage->slider_required_error }}
+                        </div>
                     </div>
                 </div>
                 <div class="w-44 mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
@@ -1760,6 +1762,90 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    // Google Places Autocomplete initialization - Define function before loading Google Maps API
+    let fromAutocomplete, toAutocomplete;
+
+    // This function will be called by Google Maps API when it loads
+    window.initGooglePlaces = function() {
+        // Initialize autocomplete for "From" input - Canada only
+        fromAutocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('fromInput'),
+            {
+                componentRestrictions: { country: 'ca' }, // Restrict to Canada
+                types: ['(cities)'], // Focus on cities
+                fields: ['address_components', 'formatted_address', 'name']
+            }
+        );
+
+        // Initialize autocomplete for "To" input - Canada only
+        toAutocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('toInput'),
+            {
+                componentRestrictions: { country: 'ca' }, // Restrict to Canada
+                types: ['(cities)'], // Focus on cities
+                fields: ['address_components', 'formatted_address', 'name']
+            }
+        );
+
+        // Handle place selection for "From" input
+        fromAutocomplete.addListener('place_changed', function() {
+            const place = fromAutocomplete.getPlace();
+            if (place.address_components) {
+                formatPlaceAddress(place, 'fromInput');
+            }
+        });
+
+        // Handle place selection for "To" input
+        toAutocomplete.addListener('place_changed', function() {
+            const place = toAutocomplete.getPlace();
+            if (place.address_components) {
+                formatPlaceAddress(place, 'toInput');
+            }
+        });
+    };
+
+    // Format place address to "City, Province, Canada" format
+    function formatPlaceAddress(place, inputId) {
+        let city = '';
+        let province = '';
+        let country = '';
+
+        // Extract address components
+        for (const component of place.address_components) {
+            const componentType = component.types[0];
+
+            if (componentType === 'locality' || componentType === 'administrative_area_level_2') {
+                city = component.long_name;
+            } else if (componentType === 'administrative_area_level_1') {
+                province = component.short_name; // Use short name for province code (e.g., ON, BC)
+            } else if (componentType === 'country') {
+                country = component.long_name;
+            }
+        }
+
+        // Format: "City, Province, Canada"
+        let formattedAddress = city;
+        if (province) {
+            formattedAddress += ', ' + province;
+        }
+        if (country) {
+            formattedAddress += ', ' + country;
+        }
+
+        // Set the formatted address in the input
+        document.getElementById(inputId).value = formattedAddress;
+        
+        // Hide error message if it was showing
+        if (inputId === 'fromInput') {
+            document.getElementById('fromError').classList.add('hidden');
+        } else if (inputId === 'toInput') {
+            document.getElementById('toError').classList.add('hidden');
+        }
+    }
+</script>
+<!-- Google Places Autocomplete API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initGooglePlaces" async defer></script>
+<script>
     const dateInput = document.getElementById('dateInput');
 
     // Initialize the date picker
@@ -1918,117 +2004,44 @@
 
     function navigateToSearchRoute() {
         // Get the values of the "From," "To," and "Date" input fields
-        const fromValue = document.getElementById('fromInput').value;
-        const toValue = document.getElementById('toInput').value;
+        const fromValue = document.getElementById('fromInput').value.trim();
+        const toValue = document.getElementById('toInput').value.trim();
         const dateValue = document.getElementById('dateInput').value;
 
-        // Get the error message elements
-        const fromError = document.getElementById('fromError');
-        const toError = document.getElementById('toError');
+        // Get the tooltip error element
+        const fromToError = document.getElementById('fromToError');
 
-        // Check if "From" and "To" fields are empty
-        if (fromValue.trim() === '') {
-            @isset($homePage->slider_required_error)
-                fromError.textContent = '{{ $homePage->slider_required_error }}';
-            @endisset
-            fromError.classList.remove('hidden');
-            toError.classList.add('hidden');
-            return;
-        } else if (toValue.trim() === '') {
-            @isset($homePage->slider_required_error)
-                toError.textContent = '{{ $homePage->slider_required_error }}';
-            @endisset
-            toError.classList.remove('hidden');
-            fromError.classList.add('hidden');
-            return;
-        } else {
-            // Both fields are filled, hide error messages
-            fromError.classList.add('hidden');
-            toError.classList.add('hidden');
+        // Check if "From" or "To" fields are empty
+        if (fromValue === '' || toValue === '') {
+            // Show the tooltip
+            if (fromToError) {
+                fromToError.classList.remove('hidden');
+                
+                // Hide the tooltip after 3 seconds
+                setTimeout(function() {
+                    fromToError.classList.add('hidden');
+                }, 3000);
+            }
+            return; // Prevent navigation
+        }
+
+        // Both fields are filled, hide error tooltip if it's showing
+        if (fromToError) {
+            fromToError.classList.add('hidden');
         }
 
         // Construct the URL with query parameters
-        let searchUrl = `{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}?from=${fromValue}&to=${toValue}`;
+        let searchUrl = `{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}`;
 
         // Check if a date is provided and append it to the URL if available
         if (dateValue) {
-            searchUrl += `&date=${dateValue}`;
+            searchUrl += `&date=${encodeURIComponent(dateValue)}`;
         }
 
         // Navigate to the constructed URL
         window.location.href = searchUrl;
     }
 
-    // Debounce function to limit the number of AJAX requests
-    function debounce(func, delay) {
-        let timer;
-        return function() {
-            clearTimeout(timer);
-            timer = setTimeout(func, delay);
-        };
-    }
-
-    // Function to fetch cities based on search input
-    function fetchCities(searchTerm, fieldId) {
-        // Get the state_id (if required) or set it to null or default
-        let stateId = 0;  // You can adjust this if you need to pass state_id
-        let url = '{{ url('get-cities-by-state') }}';
-        let params = {
-            state_id: stateId,
-            search: searchTerm
-        };
-
-        $.ajax({
-            url: "{{ url('get-cities-by-state') }}",
-            type: "POST",
-            data: {
-                search: searchTerm,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                let suggestionsContainer = $('#' + fieldId + '-suggestions');
-                suggestionsContainer.empty();  // Clear previous suggestions
-
-                $.each(result.cities, function(key, value) {
-                    // Create a list item for each city
-                    let displayText = `${value.name}, ${value.state.abrv}, ${value.state.country.name}`;
-
-                    let suggestionItem = $('<div class="suggestion-item p-2 hover:bg-gray-200 cursor-pointer"></div>')
-                        .text(displayText)
-                        .on('click', function() {
-                            $('#' + fieldId).val(displayText);  // Set the selected city in the input field
-                            suggestionsContainer.empty();  // Clear the suggestions
-                        });
-
-                    suggestionsContainer.append(suggestionItem);
-                });
-            }
-        });
-    }
-
-    // Attach event listener to the input fields with debounce
-    $(document).ready(function() {
-        $('#fromInput').on('input', debounce(function() {
-            let searchTerm = $('#fromInput').val();
-            if (searchTerm.length >= 2) {  // Start searching after 3 characters are entered
-                fetchCities(searchTerm, 'fromInput');
-            } else {
-                let suggestionsContainer = $('#fromInput-suggestions');
-                suggestionsContainer.empty();  // Clear previous suggestions
-            }
-        }, 500));
-
-        $('#toInput').on('input', debounce(function() {
-            let searchTerm = $('#toInput').val();
-            if (searchTerm.length >= 2) {  // Start searching after 3 characters are entered
-                fetchCities(searchTerm, 'toInput');
-            } else {
-                let suggestionsContainer = $('#toInput-suggestions');
-                suggestionsContainer.empty();  // Clear previous suggestions
-            }
-        }, 500));
-    });
 
 
     function closeModal() {
