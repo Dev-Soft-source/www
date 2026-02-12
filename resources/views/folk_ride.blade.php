@@ -818,7 +818,7 @@
 
                 <div class="mt-6 space-y-4">
                     @if (!$paginatedRides && $recentSearches->count() > 0)
-                        <div class="font-medium text-lg">
+                        <div class="font-medium text-primary text-xl xl:text-2xl font-FuturaMdCnBT pl-2">
                             @isset($findRidePage->search_section_recent_searches)
                                 {{ $findRidePage->search_section_recent_searches }}
                             @endisset
@@ -826,14 +826,14 @@
                         @foreach ($recentSearches as $recentSearch)
                             <div class="bg-white rounded-lg shadow-3xl border border-solid border-gray-100 cursor-pointer" onclick="SearchRoute('{{ $recentSearch->from }}', '{{ $recentSearch->to }}')">
                                 <div class="flex justify-between px-4">
-                                    <div class="md:w-2/3">
+                                    <div class="w-full">
                                         <div class="relative mt-5 text-left">
                                             <div class="flex items-center relative">
-                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
-                                                        </span>
-                                                    </div>
+                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                    <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                    </span>
+                                                </div>
                                                 <div class="ml-20">
                                                     <div class="font-bold text-black">
                                                         @isset($findRidePage->search_section_from_placeholder)
@@ -846,7 +846,7 @@
 
                                             <div class="flex items-center relative">
                                                 <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                    <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                    <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
                                                         <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
                                                     </span>
                                                 </div>

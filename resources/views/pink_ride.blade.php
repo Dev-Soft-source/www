@@ -227,6 +227,7 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        
                                         <div>
                                             <label for="type" class="block mb-2 font-medium text-gray-900">
                                                 @isset($findRidePage->driver_rating_label)
@@ -251,6 +252,7 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        
                                         <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="driverPhone" name="" type="checkbox"
                                                 {{ $request->driver_phone == 1 ? 'checked' : '' }}
@@ -263,6 +265,7 @@
                                                 @endisset
                                             </label>
                                         </div>
+                                        
                                         <div>
                                             <label for="driverName" class="block mb-2 font-medium text-gray-900">
                                                 @isset($findRidePage->driver_know_label)
@@ -815,7 +818,7 @@
 
                 <div class="mt-6 space-y-4">
                     @if (!$paginatedRides && $recentSearches->count() > 0)
-                        <div class="font-medium text-lg">
+                        <div class="font-medium text-primary text-xl xl:text-2xl font-FuturaMdCnBT pl-2">
                             @isset($findRidePage->search_section_recent_searches)
                                 {{ $findRidePage->search_section_recent_searches }}
                             @endisset
@@ -1350,11 +1353,10 @@
                         {{-- {{ $rides->appends(request()->query())->links() }} --}}
                         @if($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
                             <div class="border-b border-gray-400 flex flex-col items-center justify-center pt-6">
-                            @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
-                                <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
-                            @endif
-                                <h3 class="text-primary">{{ $findRidePage->more_rides_pink_ride_label ?? 'More rides from' }} {{ $request->from }} {{ $findRidePage->to_pink_ride_label ?? 'to' }} {{ $request->to }}. {{ $findRidePage->imp_pink_ride_label ?? 'Important: these are NOT ProximaRide' }}</h3>
-
+                                @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
+                                    <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
+                                @endif
+                                    <h3 class="text-primary">{{ $findRidePage->more_rides_pink_ride_label ?? 'More rides from' }} {{ $request->from }} {{ $findRidePage->to_pink_ride_label ?? 'to' }} {{ $request->to }}. {{ $findRidePage->imp_pink_ride_label ?? 'Important: these are NOT ProximaRide' }}</h3>
                             </div>
                             @foreach($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide') as $ride)
 

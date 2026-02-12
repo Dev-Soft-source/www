@@ -289,8 +289,9 @@ class FolkRideController extends Controller
                     return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
                 }
 
-                // Check if the search already exists
+                // Check if the search already exists (Folk Rides page only)
                 $existingSearch = RecentSearch::where('user_id', auth()->user()->id)
+                    ->where('page_type', 'folk_ride')
                     ->where('from','like', '%'.$request->from.'%')
                     ->where('to','like', '%'.$request->to.'%')
                     ->first();
@@ -299,11 +300,12 @@ class FolkRideController extends Controller
                     // Update the updated_at timestamp
                     $existingSearch->touch();
                 } else {
-                    // Store recent search
+                    // Store recent search for Folk Rides page only
                     RecentSearch::create([
                         'from' => $request->from,
                         'to' => $request->to,
                         'user_id' => auth()->user()->id,
+                        'page_type' => 'folk_ride',
                     ]);
                 }
             }
@@ -597,7 +599,11 @@ class FolkRideController extends Controller
         }
 
         $ratings = Rating::all();
-        $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(3)->get();
+        // Recent searches: only those made on the Folk Rides page
+        $recentSearches = RecentSearch::where('page_type', 'folk_ride')
+            ->orderBy('updated_at', 'desc')
+            ->limit(3)
+            ->get();
 
         $notifications = null;
         if (auth()->user()) {
@@ -621,8 +627,11 @@ class FolkRideController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-
-            $recentSearches = RecentSearch::where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(2)->get();
+            $recentSearches = RecentSearch::where('page_type', 'folk_ride')
+                ->where('user_id', $user_id)
+                ->orderBy('updated_at', 'desc')
+                ->limit(3)
+                ->get();
         }
         return view('folk_ride',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'postRidePage' => $postRidePage,'findRidePage' => $findRidePage,'extraCareFaqs' => $extraCareFaqs,'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,'request' => $request,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }

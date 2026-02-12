@@ -9,5 +9,5 @@ class RecentSearch extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['from', 'to', 'user_id'];
+    protected $fillable = ['from', 'to', 'user_id', 'page_type'];
 }

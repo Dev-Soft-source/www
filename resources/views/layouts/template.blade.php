@@ -104,6 +104,9 @@
         .modal-border {
             border: 3px solid #00A99D;
         }
+        .modal-border1 {
+            border: 3px solid #a74444;
+        }
     </style>
     <script type="application/ld+json">
     {

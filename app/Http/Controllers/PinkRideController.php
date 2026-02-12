@@ -290,8 +290,9 @@ class PinkRideController extends Controller
                     return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
                 }
 
-                // Check if the search already exists
+                // Check if the search already exists (Pink Rides page only)
                 $existingSearch = RecentSearch::where('user_id', auth()->user()->id)
+                    ->where('page_type', 'pink_ride')
                     ->where('from','like', '%'.$request->from.'%')
                     ->where('to','like', '%'.$request->to.'%')
                     ->first();
@@ -300,11 +301,12 @@ class PinkRideController extends Controller
                     // Update the updated_at timestamp
                     $existingSearch->touch();
                 } else {
-                    // Store recent search
+                    // Store recent search for Pink Rides page only
                     RecentSearch::create([
                         'from' => $request->from,
                         'to' => $request->to,
                         'user_id' => auth()->user()->id,
+                        'page_type' => 'pink_ride',
                     ]);
                 }
             }
@@ -598,7 +600,11 @@ class PinkRideController extends Controller
         }
 
         $ratings = Rating::all();
-        $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(3)->get();
+        // Recent searches: only those made on the Pink Rides page
+        $recentSearches = RecentSearch::where('page_type', 'pink_ride')
+            ->orderBy('updated_at', 'desc')
+            ->limit(3)
+            ->get();
 
         $notifications = null;
         if (auth()->user()) {
@@ -622,7 +628,11 @@ class PinkRideController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-            $recentSearches = RecentSearch::where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(3)->get();
+            $recentSearches = RecentSearch::where('page_type', 'pink_ride')
+                ->where('user_id', $user_id)
+                ->orderBy('updated_at', 'desc')
+                ->limit(3)
+                ->get();
 
         }
         return view('pink_ride',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'postRidePage' => $postRidePage,'pinkRideFaqs' => $pinkRideFaqs,'findRidePage' => $findRidePage,'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,'request' => $request,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);

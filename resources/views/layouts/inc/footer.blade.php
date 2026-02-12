@@ -108,7 +108,7 @@
         </a> --}}
       </div>
       <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 justify-center items-center py-2 text-white">
-        <p class="text-white">© ProximaRide 2024. All rights reserved</p>
+        <p class="text-white">© ProximaRide {{ date('Y') }}. All rights reserved</p>
         <div class="relative">
             <button id="dropdownDesktopButton" data-dropdown-toggle="dropdown_desktop" class="min-w-fit px-3 py-1.5 border border-white rounded flex gap-2 items-center bg-white/10 hover:bg-white/20 transition-colors" type="button">
                 <img class="h-4" src="{{ $selectedLanguage->flag_icon ?? 'assets/flag.png' }}" alt="">
