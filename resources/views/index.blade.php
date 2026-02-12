@@ -1981,26 +1981,26 @@
     });
 
     // Add an event listener to the input fields
-    document.getElementById('fromInput').addEventListener('keypress', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            navigateToSearchRoute();
-        }
-    });
+    // document.getElementById('fromInput').addEventListener('keypress', function (event) {
+    //     if (event.key === 'Enter') {
+    //         event.preventDefault();
+    //         navigateToSearchRoute();
+    //     }
+    // });
 
-    document.getElementById('toInput').addEventListener('keypress', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            navigateToSearchRoute();
-        }
-    });
+    // document.getElementById('toInput').addEventListener('keypress', function (event) {
+    //     if (event.key === 'Enter') {
+    //         event.preventDefault();
+    //         navigateToSearchRoute();
+    //     }
+    // });
 
-    document.getElementById('dateInput').addEventListener('keypress', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            navigateToSearchRoute();
-        }
-    })
+    // document.getElementById('dateInput').addEventListener('keypress', function (event) {
+    //     if (event.key === 'Enter') {
+    //         event.preventDefault();
+    //         navigateToSearchRoute();
+    //     }
+    // })
 
     function navigateToSearchRoute() {
         // Get the values of the "From," "To," and "Date" input fields

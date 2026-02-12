@@ -167,15 +167,15 @@
 
             <div id="search-filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden"></div>
             <div id="search-filter"
-                class="search-filter fixed top-0 right-0 h-full overflow-y-auto bg-white w-11/12 sm:w-96 lg:w-full transform translate-x-full lg:translate-x-0 lg:static lg:shadow-3xl lg:h-auto transition-transform duration-300 z-40">
+                class="search-filter fixed top-0 right-0 h-full bg-white w-11/12 sm:w-96 lg:w-full transform translate-x-full lg:translate-x-0 lg:static lg:h-auto transition-transform duration-300 z-40">
                 <button id="search-filter-close"
                     class="search-filter-close border w-6 h-6 overflow-hidden flex items-center justify-center border-gray-500 rounded-full text-gray-500 text-3xl absolute top-3 right-4 hover:text-red-500 lg:hidden">
                     &times;
                 </button>
-                <div class="search-filter-menu bg-white border lg:border-none rounded pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
+                <div class="search-filter-menu bg-white border lg:border-none rounded-t-lg rounded-b-lg pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
                     <div class="">
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <div class="bg-primary text-white font-medium text-xl flex items-center justify-center space-x-2 p-4">
+                        <div class="bg-white rounded-t-lg shadow-3xl">
+                            <div class="rounded-t-lg bg-primary text-white font-medium text-xl flex items-center justify-center space-x-2 p-4">
                                 <div class="w-9 h-9 mr-2 p-1 flex items-center justify-center bg-white rounded-full border-2 border-[#1F4174]">
                                     <img class="w-5 h-5 object-contain" src="{{ asset('assets/filter.png') }}" alt="">
                                 </div>
