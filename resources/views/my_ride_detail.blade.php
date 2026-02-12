@@ -286,7 +286,7 @@
                                     <div class="relative mt-5 text-left">
                                         <div class="flex items-center relative">
                                             <div
-                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-[26px] top-2 z-10">
+                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                 <span
                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                                     <img class="w-5 h-5 object-contain"
@@ -294,26 +294,48 @@
                                                 </span>
                                             </div>
                                             <div class="ml-12 md:ml-20">
-                                                <div class="font-bold text-xl text-black">
-                                                    {{ $rideDetailPage->from_label ?? 'From' }}</div>
-                                                <div class="text-primary md:mb-4">{{ $detail->departure }}, <br
-                                                        class="md:hidden"> {{ $ride->pickup }}</div>
+                                                <p class="font-bold text-xl text-black">
+                                                    @isset($rideDetailPage->from_label)
+                                                        {{ $rideDetailPage->from_label }}
+                                                    @else
+                                                        From
+                                                    @endisset
+                                                </p>
+                                                <div class="flex gap-2">
+                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                        {{ $detail->departure }}.
+                                                    </h3>
+                                                    <p class="text-sm mt-2">
+                                                        Pick-up at: {{ $ride->pickup }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
+
                                         <div class="flex items-center relative">
                                             <div
                                                 class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                 <span
-                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[8px] absolute flex justify-center items-center">
+                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
                                                     <img class="w-5 h-5 object-contain"
                                                         src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                 </span>
                                             </div>
                                             <div class="ml-12 md:ml-20">
-                                                <div class="font-bold text-xl text-black">{{ $rideDetailPage->to_label ?? 'To' }}
-                                                </div>
-                                                <div class="text-primary md:mb-4">{{ $detail->destination }}, <br
-                                                        class="md:hidden"> {{ $ride->dropoff }}
+                                                <p class="font-bold text-xl text-black">
+                                                    @isset($rideDetailPage->to_label)
+                                                        {{ $rideDetailPage->to_label }}
+                                                    @else
+                                                        To
+                                                    @endisset
+                                                </p>
+                                                <div class="flex gap-2">
+                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                        {{ $detail->destination }}.
+                                                    </h3>
+                                                    <p class="text-sm mt-2">
+                                                        Drop-off at: {{ $ride->dropoff }}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
@@ -343,44 +365,62 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-black">
-                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}: <span
-                                    class="text-black font-normal">{{ $ride->payment_method }}</span></p>
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+                                @isset($rideDetailPage->payment_method_label)
+                                    {{ $rideDetailPage->payment_method_label }}
+                                @else
+                                    Payment method
+                                @endisset
+                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
+                            </h4>
                         </div>
                         <div class="p-4">
-                            {{-- <p class="font-medium text-left text-black">Luggage: <span class="text-black font-normal">{{ $ride->luggage }}</span></p> --}}
-                            <button
-                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">{{ $ride->booking_method }}</button>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    Booking method:
+                                </h4>
+                                @isset($ride->booking_method->features_setting_id)
+                                    <div class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                        {{ $ride->booking_method->name }}
+                                    </div>
+                                @else
+                                    <div class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                        {{ is_object($ride->booking_method) ? $ride->booking_method->name : $ride->booking_method }}
+                                    </div>
+                                @endisset
+                            </div>
                         </div>
                     </div>
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
-                            <p class="font-medium text-left text-black">
+                        <div class="p-4 flex items-center">
+                            <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 @php
                                     $bookedSeatsCount = $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats');
                                 @endphp
-                                {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: <span
-                                    class="text-black font-normal">{{ $bookedSeatsCount }}
-                                    {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}</span></p>
+                                {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: </h4>
+                            <span
+                                class="text-primary font-normal ml-2">{{ $bookedSeatsCount }}
+                                {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}</span>
+                            
                         </div>
                         <div class="p-4">
-                        <div class="flex items-center justify-between">
-                                <p class="font-semibold">{{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </p>
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">{{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </h4>
                                 <p class="">
                                     ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
                                 </p>
                             </div>
                             <div class="flex items-center justify-between">
-                                <p class="font-semibold">
-                                    {{ $rideDetailPage->mobile_seat_booking_fee_label ?? 'Booking fee' }}: </p>
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    {{ $rideDetailPage->mobile_seat_booking_fee_label ?? 'Booking fee' }}: </h4>
                                 <p class="">
                                     ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                 </p>
                             </div>
                             <div class="flex items-center justify-between">
-                                <p class="font-semibold">
-                                    {{ $rideDetailPage->mobile_seat_total_amount_label ?? 'Total amount' }}: </p>
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    {{ $rideDetailPage->mobile_seat_total_amount_label ?? 'Total amount' }}: </h4>
                                 <p class="">
                                     ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->rideDetail[0]->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                 </p>

@@ -338,15 +338,15 @@
                                         </span>
                                     </div>
                                     <div class="ml-12 md:ml-20">
-                                        <div class="font-bold text-xl text-black">
+                                        <p class="font-bold text-xl text-black">
                                             @isset($rideDetailPage->from_label)
                                                 {{ $rideDetailPage->from_label }}
                                             @endisset
-                                        </div>
+                                        </p>
                                         <div class="flex gap-2">
-                                            <p class="text-primary text-xl md:mb-4">
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                 {{ $ride->rideDetail->first()?->departure }}.
-                                            </p>
+                                            </h3>
                                             <p class="text-sm mt-2">
                                                 Pick-up at: {{ $ride->pickup }}
                                             </p>
@@ -364,15 +364,15 @@
                                         </span>
                                     </div>
                                     <div class="ml-12 md:ml-20">
-                                        <div class="font-bold text-xl text-black">
+                                        <p class="font-bold text-xl text-black">
                                             @isset($rideDetailPage->to_label)
                                                 {{ $rideDetailPage->to_label }}
                                             @endisset
-                                        </div>
+                                        </p>
                                         <div class="flex gap-2">
-                                            <p class="text-primary text-xl md:mb-4">
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                 {{ $ride->rideDetail->first()?->destination }}.
-                                            </p>
+                                            </h3>
                                             <p class="text-sm mt-2">
                                                 Drop-off at: {{ $ride->dropoff }}
                                             </p>
@@ -427,9 +427,9 @@
                                             })->sum('seats') !=
                                         0)
                                     @if ($ride->status !== '2')
-                                        <div class="flex">
+                                        <div class="flex ">
                                             <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="">
+                                                class="text-xl xl:text-2xl">
                                                 @isset($rideDetailPage->seats_left_label)
                                                     {{ $rideDetailPage->seats_left_label }}:
                                                 @endisset
@@ -443,7 +443,7 @@
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4">
-                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                            <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
                             <p class="font-semibold text-left text-primary">${{ $ride->rideDetail->first()?->price }}
@@ -457,21 +457,21 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-black pt-2">
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-primary font-normal">{{ $ride->payment_method }}</span>
-                            </p>
+                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method }}</span>
+                            </h4>
                         </div>
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-gray-600 text-xl xl:text-2xl">
-                                    Booking method:
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div
-                                        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                                        class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -493,11 +493,11 @@
                         <div
                             class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
                             <div>
-                                <p class="font-medium md:text-center text-black mr-4">
+                                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
                                     @isset($rideDetailPage->co_passenger_label)
                                         {{ $rideDetailPage->co_passenger_label }}
                                     @endisset :
-                                </p>
+                                </h4>
                             </div>
                             <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
                                 @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
@@ -538,7 +538,7 @@
                                         src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
                                         alt="">
                                 @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
                             @endif
                         </div>
                         @isset($ride->animal_friendly->features_setting_id)
@@ -550,7 +550,7 @@
                                     @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
                                         src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}" @endif
                                         alt="">
-                                    <p>{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
+                                    <p class="font-semibold" >{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
                                 </div>
                             @endif
                         @endisset
@@ -559,7 +559,7 @@
                                 <img class="w-7 h-7"
                                     src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
                                     alt="">
-                                <p>{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}</p>
                             </div>
                         @endisset
                         @if(!empty($ride->pink_ride))
@@ -643,7 +643,7 @@
                                         disabled
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 @endif
-                                <p>{{ $feature }}</p>
+                                <p class="font-semibold">{{ $feature }}</p>
                             </div>
                         @endforeach
                     </div>
@@ -671,14 +671,14 @@
                             <div class="text-center">
                                 <div class="flex items-center space-x-2 text-md text-black">
                                     @if ($ride->year)
-                                        <p class="text-md">{{ $ride->year }}</p>
+                                        <p class="text-md font-semibold">{{ $ride->year }}</p>
                                     @endif
                                     <span>|</span> 
-                                    <p class="text-md">{{ $ride->make }}</p>
-                                    <p class="text-md">{{ $ride->model }}</p>
+                                    <p class="text-md font-semibold">{{ $ride->make }}</p>
+                                    <p class="text-md font-semibold">{{ $ride->model }}</p>
                                     <span>|</span> 
                                     @if ($ride->color)
-                                        <p class="text-md">{{ $ride->color }}</p>
+                                        <p class="text-md font-semibold">{{ $ride->color }}</p>
                                     @endif
                                 </div>
                                 <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
@@ -1239,7 +1239,8 @@
                                                         alt="">
                                                 @endif
                                                 <span class="font-medium text-xl">
-                                                    {{ $ride->booking_method->name }}
+                                                    Book Your Seats
+                                                    <!-- {{ $ride->booking_method->name }} -->
                                                 </span>
                                             @endisset
                                         </label>

@@ -2,6 +2,10 @@
 
 @section('style')
 <style>
+    /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
+    .booking-page p {
+        font-family: 'Roboto', sans-serif;
+    }
     /* Tooltip styles for student verification pending notice */
     @media (max-width: 768px) {
         .student-verification-tooltip::after {
@@ -42,7 +46,7 @@
 @endsection
 
 @section('content')
-
+<div class="font-FuturaMdCnBT booking-page">
 @php
 
     $settingTaxPercentage = 0;
@@ -248,15 +252,15 @@
                                         </span>
                                     </div>
                                     <div class="ml-12 md:ml-20">
-                                        <div class="font-bold text-xl text-black">
+                                        <p class="font-bold text-xl text-black">
                                             @isset($bookingPage->from_label)
                                                 {{ $bookingPage->from_label }}
                                             @endisset
-                                        </div>
+                                        </p>
                                         <div class="flex gap-2">
-                                            <p class="text-primary text-xl md:mb-4">
-                                                {{ $ride->rideDetail[0]->departure }}.
-                                            </p>
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                {{ $ride->rideDetail->first()?->departure }}.
+                                            </h3>
                                             <p class="text-sm mt-2">
                                                 Pick-up at: {{ $ride->pickup }}
                                             </p>
@@ -274,15 +278,15 @@
                                         </span>
                                     </div>
                                     <div class="ml-12 md:ml-20">
-                                        <div class="font-bold text-xl text-black">
+                                        <p class="font-bold text-xl text-black">
                                             @isset($bookingPage->to_label)
                                                 {{ $bookingPage->to_label }}
                                             @endisset
-                                        </div>
+                                        </p>
                                         <div class="flex gap-2">
-                                            <p class="text-primary text-xl md:mb-4">
-                                                {{ $ride->rideDetail[0]->destination }}.
-                                            </p>
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                {{ $ride->rideDetail->first()?->destination }}.
+                                            </h3>
                                             <p class="text-sm mt-2">
                                                 Drop-off at: {{ $ride->dropoff }}
                                             </p>
@@ -303,7 +307,6 @@
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="p-4">
-
                             <p class="text-left font-semibold">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
@@ -311,7 +314,7 @@
                                     @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
                                         @if (strtotime($ride->date) > strtotime('today') ||
                                                 (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                            <a
+                                            <a class="text-xl xl:text-2xl"
                                                 href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
                                                 @isset($bookingPage->seats_left_label)
                                                     {{ $bookingPage->seats_left_label }}:
@@ -329,7 +332,7 @@
                                     @if ($ride->status !== '2')
                                         <div class="flex">
                                             <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="">
+                                                class="font-FuturaMdCnBT text-xl xl:text-2xl">
                                                 @isset($bookingPage->seats_left_label)
                                                     {{ $bookingPage->seats_left_label }}
                                                 @endisset
@@ -343,7 +346,7 @@
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4">
-                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                            <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 Booking Price:
                             </h4>
                             <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
@@ -357,21 +360,21 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-black pt-2">
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($bookingPage->payment_method_label)
                                     {{ $bookingPage->payment_method_label }}
                                 @endisset
-                                <span class="text-primary font-normal">{{ $ride->payment_method->name }}</span>
-                            </p>
+                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
+                            </h4>
                         </div>
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-gray-600 text-xl xl:text-2xl">
-                                    Booking method:
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div
-                                        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                                        class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -387,11 +390,11 @@
                         <div
                             class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
                             <div>
-                                <p class="font-medium md:text-center text-black mr-4">
+                                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
                                     @isset($bookingPage->co_passenger_label)
                                         {{ $bookingPage->co_passenger_label }}
-                                    @endisset
-                                </p>
+                                    @endisset :
+                                </h4>
                             </div>
                             <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
                                 @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
@@ -412,25 +415,23 @@
                     </a>
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
-                    <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
-                        <h3 class="text-2xl xl:text-3xl">
-                            @isset($bookingPage->ride_features_label)
-                                    {{ $bookingPage->ride_features_label }}
-                                @endisset
-                        </h3>
-                    </div>
-                    <div class="bg-white p-4 space-y-4">
+                    <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl font-FuturaMdCnBT">
+                        @isset($bookingPage->ride_features_label)
+                            {{ $bookingPage->ride_features_label }}
+                        @endisset
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
                         <div class="flex items-center gap-2">
                             @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
                                 @isset($postRidePage->smoking_option1->icon)
                                     <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option1->icon)}}" alt="">
                                 @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option1->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option1->name }}</p>
                             @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
                                 @isset($postRidePage->smoking_option2->icon)
                                     <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option2->icon)}}" alt="">
                                 @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
                             @endif
                         </div>
                         @isset ($ride->animal_friendly->features_setting_id)
@@ -441,7 +442,7 @@
                                     @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
                                         src="{{asset('home_page_icons/' . $postRidePage->animals_option3->icon)}}" @endif
                                     alt="">
-                                <p>{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
                             </div>
                         @endisset
                         @php
@@ -485,7 +486,7 @@
                                     <input id="wi-fi" type="checkbox" name="features[]" value="" checked disabled
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 @endif
-                                <p>{{ $feature }}</p>
+                                <p class="font-semibold">{{ $feature }}</p>
                             </div>
                         @endforeach
                     </div>
@@ -847,7 +848,9 @@
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="" class="ml-2 font-normal text-gray-900">
-                                        <strong>Eligibility & Agreement:</strong> {{ $bookingPage->booking_term_agree_text ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age" }}
+                                        @isset($bookingPage->booking_term_agree_text)
+                                         {!! $bookingPage->booking_term_agree_text !!}
+                                        @endisset
                                     </label>
                                 </div>
                                 @error('agree_terms')
@@ -918,7 +921,9 @@
                                             {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ $bookingPage->booking_pink_ride_term_agree_text ?? "I understand that I am booking on a Pink Ride, which is exclusive for female passengers and drivers. I will not send a male passenger in my place, or bring one along with me, who is above 12 years of age. I understand that, if I do, I will not be allowed in the ride, and my booking fee and booking price will not be refunded" }}
+                                            @isset($bookingPage->booking_pink_ride_term_agree_text)
+                                                {!! $bookingPage->booking_pink_ride_term_agree_text !!}
+                                            @endisset
                                         </label>
                                     </div>
                                     @error('pink_ride_agree_terms')
@@ -942,7 +947,9 @@
                                             {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ $bookingPage->booking_extra_care_ride_term_agree_text ?? "I understand that I am booking on a Extra-care Ride" }}
+                                            @isset($bookingPage->booking_extra_care_ride_term_agree_text)
+                                                {!! $bookingPage->booking_extra_care_ride_term_agree_text !!}
+                                            @endisset
                                         </label>
                                     </div>
                                     @error('extra_care_ride_agree_terms')
@@ -1150,7 +1157,7 @@
         </div>
     </div>
 </div>
-
+</div>
 @endsection
 
 @section('script')

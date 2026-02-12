@@ -157,23 +157,25 @@
                                                             <div class="w-full md:w-2/3 order-2 md:order-1">
                                                                 <div class="relative mt-5 text-left">
                                                                     <div class="flex items-center relative">
-                                                                        <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                                        <div
+                                                                            class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                             <span
                                                                                 class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                                                <img class="w-5 h-5 object-contain"
+                                                                                    src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                                             </span>
                                                                         </div>
-                                                                        <div class="ml-20">
-                                                                            <div class="font-bold text-black">
+                                                                        <div class="ml-12 md:ml-20">
+                                                                            <p class="font-bold text-xl text-black">
                                                                                 @isset($rideDetailPage->card_section_from_label)
-                                                                                {{ $rideDetailPage->card_section_from_label }}
-                                                                            @endisset
-                                                                            </div>
+                                                                                    {{ $rideDetailPage->card_section_from_label }}
+                                                                                @endisset
+                                                                            </p>
                                                                             <div class="flex gap-2">
-                                                                                <p class="text-primary md:mb-4">
-                                                                                    {{$from }}.
-                                                                                </p>
-                                                                                <p class="text-sm mt-1">
+                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                                    {{ $from }}.
+                                                                                </h3>
+                                                                                <p class="text-sm mt-2">
                                                                                     Pick-up at: {{ $ride->pickup }}
                                                                                 </p>
                                                                             </div>
@@ -181,23 +183,25 @@
                                                                     </div>
 
                                                                     <div class="flex items-center relative">
-                                                                        <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                                        <div
+                                                                            class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
                                                                             <span
-                                                                                class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[13px] md:-ml-[10px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                                                class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                                <img class="w-5 h-5 object-contain"
+                                                                                    src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                             </span>
                                                                         </div>
-                                                                        <div class="ml-20">
-                                                                            <div class="font-bold text-black">
+                                                                        <div class="ml-12 md:ml-20">
+                                                                            <p class="font-bold text-xl text-black">
                                                                                 @isset($rideDetailPage->card_section_to_label)
-                                                                                {{ $rideDetailPage->card_section_to_label }}
-                                                                            @endisset
-                                                                            </div>
+                                                                                    {{ $rideDetailPage->card_section_to_label }}
+                                                                                @endisset
+                                                                            </p>
                                                                             <div class="flex gap-2">
-                                                                                <p class="text-primary md:mb-4">
-                                                                                    {{$to }}.
-                                                                                </p>
-                                                                                <p class="text-sm mt-1">
+                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                                    {{ $to }}.
+                                                                                </h3>
+                                                                                <p class="text-sm mt-2">
                                                                                     Drop-off at: {{ $ride->dropoff }}
                                                                                 </p>
                                                                             </div>
@@ -207,30 +211,30 @@
                                                             </div>
                                                             <div class="mt-4 order-1 md:order-2">
                                                                 <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
-                                                                <small>
-                                                                    @isset($rideDetailPage->card_section_per_seat)
-                                                                        {{ $rideDetailPage->card_section_per_seat }}
-                                                                    @endisset
-                                                                </small>
-                                                            </p>
-                                                            @php
-                                                                $pendingBookingRequests = $ride->bookings->where('status', 0);
-                                                            @endphp
-                                                            @if ($pendingBookingRequests->isNotEmpty())
-                                                                <div class="">
-                                                                    <p class="font-medium text-red-600">
-                                                                        You have booking request(s).</p>
-                                                                </div>
-                                                            @endif
+                                                                    <small>
+                                                                        @isset($rideDetailPage->card_section_per_seat)
+                                                                            {{ $rideDetailPage->card_section_per_seat }}
+                                                                        @endisset
+                                                                    </small>
+                                                                </p>
+                                                                @php
+                                                                    $pendingBookingRequests = $ride->bookings->where('status', 0);
+                                                                @endphp
+                                                                @if ($pendingBookingRequests->isNotEmpty())
+                                                                    <div class="">
+                                                                        <p class="font-medium text-red-600">
+                                                                            You have booking request(s).</p>
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                         <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                                                             <div class="flex items-center justify-between p-4">
                                                                 <p class="font-semibold">
                                                                     @isset($rideDetailPage->card_section_booked)
-                                                                    {{ $rideDetailPage->card_section_booked }}
-                                                                @endisset
-                                                                    : </p>
+                                                                        {{ $rideDetailPage->card_section_booked }}
+                                                                    @endisset
+                                                                </p>
                                                                 <p class="">
                                                                     {{
                                                                         $ride->bookings()
