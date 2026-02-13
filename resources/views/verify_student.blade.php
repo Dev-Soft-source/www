@@ -123,7 +123,7 @@
             @method('PUT')
             <div class="w-full md:w-1/2 mt-4">
                 <div class="mb-4">
-                    @if ($user->student_card)
+                    @if (!empty($user->student_card))
                         <div for="dropzone-file"
                             class="flex flex-col items-center justify-center w-full h-auto p-4 border-2 border-gray-300 border-dashed rounded bg-white hover:bg-gray-100">
                             <div class="flex flex-col items-center justify-center pb-6">
@@ -155,7 +155,7 @@
                             <input id="dropzone-file" name="student_card" type="file" onchange="previewImage(this)" class="hidden" />
                         </label>
                     @endif
-                    @if ($user->student_card)
+                    @if (!empty($user->student_card))
                         @php
                             $imageName = basename($user->student_card);
                         @endphp
@@ -249,15 +249,15 @@
     });
     
     function closeModal() {
-    const modal = document.querySelector('.relative.z-50[aria-modal="true"]');
-    if (modal) {
-        modal.style.display = 'none';
+        const modal = document.getElementById('myModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
     }
-}
 
 // Also make the "Close" button link use the same function
 document.addEventListener('DOMContentLoaded', function() {
-    const closeLinks = document.querySelectorAll('a[href=""].inline-flex.justify-center.rounded');
+    const closeLinks = document.querySelectorAll('a[href=""].button-exp-fill');
     closeLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -373,8 +373,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateExpiryDate();
     updateMonthsDropdown(); // Initialize months dropdown
 
+    
     // Check if user already has a student card uploaded, enable button if so
-    @if ($user->student_card)
+    @if (empty($user->student_card))
         submitBtn.removeAttribute('disabled');
         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         submitBtn.classList.add('opacity-100');
@@ -398,18 +399,6 @@ document.addEventListener('DOMContentLoaded', function() {
             yearDropdown.classList.add('hidden');
         }, 200);
     });
-    function closeModal() {
-    const modal = document.getElementById('myModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-function closeModal() {
-    const modal = document.getElementById('myModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
 </script>
 
 @endsection
