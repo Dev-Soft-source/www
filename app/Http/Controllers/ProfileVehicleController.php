@@ -24,7 +24,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileVehicleController extends Controller
 {
-    public function index(Request $request ,$lang = null){
+    public function index(Request $request, $lang = null)
+    {
         $languages = Language::all();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -50,39 +51,40 @@ class ProfileVehicleController extends Controller
         }
         if (auth()->user()) {
             $user_id = auth()->user()->id;
-            $vehicles = Vehicle::where('user_id',$user_id)->orderBy('id', 'desc')->get();
+            $vehicles = Vehicle::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
 
-            return view('profile_vehicle',['vehicles' => $vehicles ,'reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'myVehiclePage' => $myVehiclePage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+            return view('profile_vehicle', ['vehicles' => $vehicles, 'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
         }
     }
 
-    public function create(Request $request ,$lang = null){
+    public function create(Request $request, $lang = null)
+    {
         $languages = Language::all();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -99,7 +101,7 @@ class ProfileVehicleController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message','no_go_back_button_text','yes_remove_it_button_text')->first();
+            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -107,12 +109,12 @@ class ProfileVehicleController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message','no_go_back_button_text','yes_remove_it_button_text')->first();
+            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
         }
-        
+
         $myVehiclePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
         $myVehiclePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
@@ -140,32 +142,33 @@ class ProfileVehicleController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        
-        return view('create_vehicle',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage,'myVehiclePage' => $myVehiclePage, 'messages' => $messages, 'userVehicleCount' => $userVehicleCount]);
+
+        return view('create_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage, 'messages' => $messages, 'userVehicleCount' => $userVehicleCount]);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $message = null;
         $myVehiclePage = null;
         $niceNames = [];
@@ -211,14 +214,14 @@ class ProfileVehicleController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
         } elseif ($request->has('existing_image')) {
             $filename = $request->input('existing_image');
         } else {
             $filename = '';
         }
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
             'type' => 'required',
@@ -244,14 +247,14 @@ class ProfileVehicleController extends Controller
 
         $remove_image = $request->filled('remove_image') ? $request->remove_image : 0;
 
-        if(isset($request->primary_vehicle) && $request->primary_vehicle === "1"){
+        if (isset($request->primary_vehicle) && $request->primary_vehicle === "1") {
             Vehicle::where('user_id', auth()->user()->id)->update(['primary_vehicle' => 0]);
         }
 
         // Check if this is user's first vehicle and auto-set as primary
         $userVehicleCount = Vehicle::where('user_id', auth()->user()->id)->count();
         $primaryVehicleValue = $request->primary_vehicle;
-        
+
         // If this is the first vehicle, automatically set it as primary
         if ($userVehicleCount == 0) {
             $primaryVehicleValue = '1';
@@ -273,44 +276,45 @@ class ProfileVehicleController extends Controller
         ]);
         $user = auth()->user();
         if ($user->email_notification == 1) {
-        $emailData = [
-            'first_name' => $user->first_name,
-        ];
-        Mail::to($user->email)->send(new NewVehicleAddedMail($emailData));
-    }
-
-      $notification = Notification::create([
-        'type' => null,
-        'category' => 'system', 
-        'receiver_id' => $user->id,
-        'posted_by' => $user->id, 
-        'message' => 'A new vehicle added to your profile',
-        'status' => 'completed',
-        'notification_type' => 'vehicle'
-    ]);
-    
-    // Send push notification
-    $fcmService = new FCMService();
-    $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-    $body = $notification->message;
-
-    $fcmToken = $user->mobile_fcm_token;
-    if ($fcmToken) {
-        $fcmService->sendNotification($fcmToken, $body);
-    }
-
-    foreach ($fcm_tokens as $fcm_token) {
-        try {
-            $fcmService->sendNotification($fcm_token->token, $body);
-        } catch (\Exception $e) {
-            Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+            $emailData = [
+                'first_name' => $user->first_name,
+            ];
+            Mail::to($user->email)->queue(new NewVehicleAddedMail($emailData));
         }
-    }
+
+        $notification = Notification::create([
+            'type' => null,
+            'category' => 'system',
+            'receiver_id' => $user->id,
+            'posted_by' => $user->id,
+            'message' => 'A new vehicle added to your profile',
+            'status' => 'completed',
+            'notification_type' => 'vehicle'
+        ]);
+
+        // Send push notification
+        $fcmService = new FCMService();
+        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+        $body = $notification->message;
+
+        $fcmToken = $user->mobile_fcm_token;
+        if ($fcmToken) {
+            $fcmService->sendNotification($fcmToken, $body);
+        }
+
+        foreach ($fcm_tokens as $fcm_token) {
+            try {
+                $fcmService->sendNotification($fcm_token->token, $body);
+            } catch (\Exception $e) {
+                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+            }
+        }
 
         return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_add_message);
     }
 
-    public function edit(Request $request ,$lang = null, $id){
+    public function edit(Request $request, $lang = null, $id)
+    {
         $languages = Language::all();
         // Store the selected language in the session
         $selectedLanguage = session('selectedLanguage');
@@ -324,7 +328,7 @@ class ProfileVehicleController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message','no_go_back_button_text','yes_remove_it_button_text')->first();
+            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -332,7 +336,7 @@ class ProfileVehicleController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message','no_go_back_button_text', 'yes_remove_it_button_text')->first();
+            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
             $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
@@ -364,32 +368,33 @@ class ProfileVehicleController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        
-        return view('edit_vehicle',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'vehicle' => $vehicle,'myVehiclePage' => $myVehiclePage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage, 'messages' => $messages]);
+
+        return view('edit_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'vehicle' => $vehicle, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage, 'messages' => $messages]);
     }
 
-     public function update($id, Request $request){
+    public function update($id, Request $request)
+    {
         // Debugging: Log request data and file size
         \Log::info('Request data:', $request->all());
         if ($request->hasFile('image')) {
@@ -409,22 +414,22 @@ class ProfileVehicleController extends Controller
 
         // Store old filename for potential deletion
         $oldFilename = isset($attributes['image']) && !empty($attributes['image']) ? $attributes['image'] : null;
-        
+
         // Handle new image upload - check this FIRST before anything else
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $originalName = $file->getClientOriginalName();
-            
+
             // Generate new filename with timestamp to ensure uniqueness
             $filename = time() . '_' . $originalName;
             $destination_path = public_path('/car_images');
-            
+
             // Delete old file if it exists and is different from new filename
             if ($oldFilename && $oldFilename !== $filename && file_exists($destination_path . '/' . $oldFilename)) {
                 @unlink($destination_path . '/' . $oldFilename);
                 \Log::info('Old image deleted: ' . $oldFilename);
             }
-            
+
             // Move new file
             $file->move($destination_path, $filename);
             \Log::info('New image uploaded: ' . $filename);
@@ -445,7 +450,7 @@ class ProfileVehicleController extends Controller
             \Log::info('Using existing image: ' . $filename);
         }
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
             'type' => 'required',
@@ -471,13 +476,13 @@ class ProfileVehicleController extends Controller
 
         $remove_image = $request->filled('remove_image') ? $request->remove_image : 0;
 
-        if(isset($request->primary_vehicle) && $request->primary_vehicle === "1"){
+        if (isset($request->primary_vehicle) && $request->primary_vehicle === "1") {
             Vehicle::where('user_id', auth()->user()->id)->update(['primary_vehicle' => 0]);
         }
 
-       // Always update the vehicle, including image fields
-       // This ensures the update happens even if the filename appears the same
-       $updateData = [
+        // Always update the vehicle, including image fields
+        // This ensures the update happens even if the filename appears the same
+        $updateData = [
             'make' => $request->make,
             'model' => $request->model,
             'type' => $request->type,
@@ -490,11 +495,11 @@ class ProfileVehicleController extends Controller
             'original_image' => $filename, // Always include original_image
             'remove_image' => $remove_image,
         ];
-        
+
         $getVehicle = Vehicle::whereId($id)->update($updateData);
         \Log::info('Vehicle updated with image: ' . ($filename ?? 'null'));
 
-        if(isset($getVehicle->remove_image) && $getVehicle->remove_image != "0"){
+        if (isset($getVehicle->remove_image) && $getVehicle->remove_image != "0") {
             $getRides = Ride::where('vehicle_id', $getVehicle->id)->get();
             foreach ($getRides as $key => $getRide) {
                 $getRide->remove_car_image = 1;
@@ -524,7 +529,7 @@ class ProfileVehicleController extends Controller
         // $user_id = auth()->user()->id;
         $user = auth()->user();
         $user_id = $user->id;
-        $rides = Ride::where('added_by',$user_id)->where('vehicle_id',$id)->get();
+        $rides = Ride::where('added_by', $user_id)->where('vehicle_id', $id)->get();
 
         $message = null;
         $languages = Language::all();
@@ -558,7 +563,7 @@ class ProfileVehicleController extends Controller
         // Check if we're deleting the primary vehicle
         $deletingVehicle = Vehicle::findOrFail($id);
         $wasPrimary = $deletingVehicle->primary_vehicle == '1';
-        
+
         $result = Vehicle::whereId($id)->delete();
         if ($result) {
             // If we deleted the primary vehicle, set the first remaining vehicle (chronologically by id) as primary
@@ -574,28 +579,28 @@ class ProfileVehicleController extends Controller
                 'first_name' => $user->first_name,
             ];
             if (isset($user->email_notification) && $user->email_notification == 1) {
-            Mail::to($user->email)->send(new VehicleRemovedEmail($emailData));
+                Mail::to($user->email)->send(new VehicleRemovedEmail($emailData));
             }
 
             $notification = Notification::create([
-                'type' => null, 
+                'type' => null,
                 'receiver_id' => $user->id,
-                'posted_by' => $user->id, 
+                'posted_by' => $user->id,
                 'message' => ' Vehicle removed from your profile',
                 'status' => 'completed',
                 'notification_type' => 'vehicle'
             ]);
-            
+
             // Send push notification
             $fcmService = new FCMService();
             $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
             $body = $notification->message;
-    
+
             $fcmToken = $user->mobile_fcm_token;
             if ($fcmToken) {
                 $fcmService->sendNotification($fcmToken, $body);
             }
-    
+
             foreach ($fcm_tokens as $fcm_token) {
                 try {
                     $fcmService->sendNotification($fcm_token->token, $body);

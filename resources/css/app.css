@@ -207,6 +207,11 @@ body {
         font-size: 22px;
     }
 
+    .button-exp-red-fill {
+        @apply bg-red-700 hover:bg-red-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-red-700 hover:border-red-600 hover:text-white text-center focus:bg-red-800 focus:text-white active:text-white active:bg-red-800;
+        font-size: 22px;
+    }
+
     .button-exp-no-fill {
         @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
         font-size: 22px;
@@ -219,10 +224,12 @@ body {
 
     /* Force all buttons (red, green, blue/primary) to use 22px font size */
     button.bg-red-500,
+    button.bg-red-700,
     button.bg-greenXS,
     button.bg-primary,
     button.bg-blue-600,
     a.bg-red-500,
+    a.bg-red-700,
     a.bg-greenXS,
     a.bg-primary,
     a.bg-blue-600,
@@ -235,6 +242,7 @@ body {
     a[class*="bg-blue"],
     a[class*="bg-primary"],
     .bg-red-500.font-FuturaMdCnBT,
+    .bg-red-700.font-FuturaMdCnBT,
     .bg-greenXS.font-FuturaMdCnBT,
     .bg-primary.font-FuturaMdCnBT,
     .bg-blue-600.font-FuturaMdCnBT {
@@ -278,6 +286,7 @@ body {
     .can-exp-input {
         @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
     }
+
     label {
         font-size: 16px;
     }
@@ -344,6 +353,11 @@ body {
             font-size: 22px;
         }
 
+        .button-exp-red-fill {
+            @apply bg-red-700 hover:bg-red-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-red-700 hover:border-red-600 hover:text-white text-center focus:bg-red-800 focus:text-white active:text-white active:bg-red-800;
+            font-size: 22px;
+        }
+
         .button-exp-no-fill {
             @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
             font-size: 22px;
@@ -356,10 +370,12 @@ body {
 
         /* Force all buttons (red, green, blue/primary) to use 22px font size in tablet view */
         button.bg-red-500,
+        button.bg-red-700,
         button.bg-greenXS,
         button.bg-primary,
         button.bg-blue-600,
         a.bg-red-500,
+        a.bg-red-700,
         a.bg-greenXS,
         a.bg-primary,
         a.bg-blue-600,
@@ -372,6 +388,7 @@ body {
         a[class*="bg-blue"],
         a[class*="bg-primary"],
         .bg-red-500.font-FuturaMdCnBT,
+        .bg-red-700.font-FuturaMdCnBT,
         .bg-greenXS.font-FuturaMdCnBT,
         .bg-primary.font-FuturaMdCnBT,
         .bg-blue-600.font-FuturaMdCnBT {
@@ -393,6 +410,7 @@ body {
         .can-exp-input {
             @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
         }
+
         label {
             font-size: 16px;
         }
@@ -459,6 +477,10 @@ body {
             @apply bg-primary hover:bg-blue-500 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-primary hover:border-blue-500 hover:text-white text-center focus:bg-blue-600 focus:text-white active:text-white active:bg-blue-600;
         }
 
+        .button-exp-red-fill {
+            @apply bg-red-700 hover:bg-red-600 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-red-700 hover:border-red-600 hover:text-white text-center focus:bg-red-800 focus:text-white active:text-white active:bg-red-800;
+        }
+
         .button-exp-no-fill {
             @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 text-lg hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
         }
@@ -482,6 +504,7 @@ body {
         .can-exp-input {
             @apply border border-gray-300 text-lg block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
         }
+
         label {
             font-size: 18px;
         }
@@ -514,6 +537,7 @@ body {
 .ridesharing_movement_section p {
     color: #fff !important;
 }
+
 /* .ridesharing_reliability_section p{
     font-size: 18px;
 
@@ -522,17 +546,21 @@ body {
     padding: 8px 0;
     transition: all 500ms ease-in-out;
 }
+
 .ridesharing_reliability_section ul {
     list-style: disc;
     padding-left: 16px;
     margin-top: 16px;
 }
+
 .ridesharing_reliability_section ul li {
     margin-bottom: 10px;
 }
+
 .ridesharing_reliability_section ul li::marker {
     color: #2563eb;
 }
+
 .ridesharing_driver_description_section p {
     margin-top: 8px;
     font-size: 16px;
@@ -547,17 +575,21 @@ body {
 .text_center p {
     text-align: center;
 }
+
 .text_sm p {
     font-size: 14px;
 }
+
 .text_base p {
     font-size: 16px;
 }
+
 .Signup-bottom p {
     font-family: theme("fontFamily.FuturaMdCnBT") !important;
 }
 
-.content ul, .content ol{
+.content ul,
+.content ol {
     list-style: disc !important;
     padding-left: 40px !important;
     margin: unset !important;
