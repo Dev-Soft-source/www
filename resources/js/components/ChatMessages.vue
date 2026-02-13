@@ -41,21 +41,8 @@
 import clsx from 'clsx';
 
 export default {
-    props: ['messages', 'logged_in_user_id', 'empty_chat_placeholder', 'current_lang'],
-    data() {
-        return {
-            // Local cache to preserve messages if prop becomes empty temporarily
-            _cachedMessages: []
-        };
-    },
+    props: ['messages', 'logged_in_user_id'],
     mounted() {
-        // console.log('ChatMessages - messages prop:', this.messages);
-        console.log('ChatMessages - messages length:', this.messages?.length);
-        // console.log('ChatMessages - messages array:', JSON.stringify(this.messages, null, 2));
-        // Initialize cache with current messages
-        if (Array.isArray(this.messages) && this.messages.length > 0) {
-            this._cachedMessages = this.messages.map(msg => ({ ...msg }));
-        }
         // Scroll to bottom on initial mount
         this.$nextTick(() => {
             this.scrollToBottom();
@@ -63,53 +50,7 @@ export default {
     },
     watch: {
         messages: {
-            handler(newMessages, oldMessages) {
-                console.log('ChatMessages - messages changed');
-                // console.log('ChatMessages - new messages:', newMessages);
-                // console.log('ChatMessages - old messages:', oldMessages);
-                console.log('ChatMessages - new messages length:', newMessages?.length);
-
-                // // CRITICAL: Merge new messages with cached messages to preserve all old messages
-                // if (Array.isArray(newMessages) && newMessages.length > 0) {
-                //     // Create a map to deduplicate by ID
-                //     const messageMap = new Map();
-
-                //     // First, add all cached messages (preserve existing messages)
-                //     this._cachedMessages.forEach(msg => {
-                //         if (msg && msg.id) {
-                //             messageMap.set(String(msg.id), { ...msg });
-                //         }
-                //     });
-
-                //     // Then, add/update with new messages (new messages take precedence)
-                //     newMessages.forEach(msg => {
-                //         if (msg && msg.id) {
-                //             messageMap.set(String(msg.id), { ...msg });
-                //         }
-                //     });
-
-                //     // Convert back to array and sort
-                //     const mergedMessages = Array.from(messageMap.values());
-                //     mergedMessages.sort((a, b) => {
-                //         const aTime = new Date((a.created_at || a.message?.created_at || 0));
-                //         const bTime = new Date((b.created_at || b.message?.created_at || 0));
-                //         return aTime - bTime;
-                //     });
-
-                //     console.log('ChatMessages - merged messages count:', mergedMessages.length, 'cached:', this._cachedMessages.length, 'new:', newMessages.length);
-
-                //     // Update cache with merged messages (preserves all old messages)
-                //     this._cachedMessages = mergedMessages;
-
-                //     // Warn if we're losing messages
-                //     if (newMessages.length < this._cachedMessages.length && this._cachedMessages.length > 0) {
-                //         console.warn('ChatMessages - WARNING: New messages array is smaller than cache! Using merged cache to preserve all messages.');
-                //     }
-                // } else if (Array.isArray(newMessages) && newMessages.length === 0 && this._cachedMessages.length > 0) {
-                //     console.warn('ChatMessages - WARNING: messages prop became empty but we have cached messages. Preserving cache.');
-                //     // Don't update cache - keep old messages
-                // }
-
+            handler() {
                 // Scroll to bottom when messages change
                 this.$nextTick(() => {
                     this.scrollToBottom();
@@ -120,8 +61,7 @@ export default {
         },
         filteredMessages: {
             handler() {
-                console.log('ChatMessages - filteredMessages changed');
-                // Also watch filteredMessages to scroll when they update
+                // Scroll when filtered messages update
                 this.$nextTick(() => {
                     this.scrollToBottom();
                 });
@@ -131,10 +71,10 @@ export default {
     },
     computed: {
         rideDetailMessage() {
-            const messagesToUse = (Array.isArray(this.messages) && this.messages.length > 0)
-                ? this.messages
-                : this._cachedMessages;
-            return messagesToUse.find(m => m.ride_detail) || null;
+            if (!Array.isArray(this.messages) || this.messages.length === 0) {
+                return null;
+            }
+            return this.messages.find(m => m.ride_detail) || null;
         },
         hasRideDetails() {
             // Check if we have ride details from messages or from window.rideDetails
@@ -164,49 +104,20 @@ export default {
             return '';
         },
         filteredMessages() {
-            // ALWAYS use cache if it has messages (cache has merged/all messages)
-            // Only use prop if cache is empty and prop has messages
-            let messagesToUse;
-
-            if (this._cachedMessages.length > 0) {
-                // Use cache - it has all merged messages
-                messagesToUse = this._cachedMessages;
-                console.log('ChatMessages - filteredMessages using cache:', messagesToUse.length, 'messages');
-            } else if (Array.isArray(this.messages) && this.messages.length > 0) {
-                // Fallback to prop if cache is empty
-                messagesToUse = this.messages;
-                console.log('ChatMessages - filteredMessages using prop:', messagesToUse.length, 'messages');
-            } else {
-                // No messages available
+            if (!Array.isArray(this.messages) || this.messages.length === 0) {
                 return [];
             }
 
-            // Defensive check: ensure we have an array
-            if (!Array.isArray(messagesToUse) || messagesToUse.length === 0) {
-                return [];
-            }
-
-            // Create a new array to avoid mutation issues
-            const list = Array.from(messagesToUse);
-
-            // Sort by created_at (create new sorted array to avoid mutation)
-            const sorted = [...list].sort((a, b) => {
+            // Sort by created_at
+            const sorted = [...this.messages].sort((a, b) => {
                 const at = new Date((a.created_at || a.message?.created_at || 0));
                 const bt = new Date((b.created_at || b.message?.created_at || 0));
                 return at - bt;
             });
 
-            // Filter out ride_detail messages if there are non-ride-detail messages
-            // const hasNonRideDetail = sorted.some(m => !m.ride_detail);
-            // if (hasNonRideDetail) {
-            //     return sorted.filter(m => !m.ride_detail);
-            // }
             return sorted;
         },
         hasActualMessages() {
-            // Check if there are any actual chat messages (not just ride detail messages)
-            // filteredMessages already excludes ride_detail messages, so if it has any items,
-            // that means there are actual chat messages and the disclaimer should be hidden
             return this.filteredMessages.length > 0;
         }
     },
