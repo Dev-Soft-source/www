@@ -676,7 +676,7 @@
                 }).then(({
                     data
                 }) => {
-                    console.log(data);
+                    // console.log(data);
                 }).catch(({
                     response: {
                         data

@@ -44,6 +44,7 @@
                 </div>
 
                 <script>
+                    
                     // Function to show modal with transitions
                     function showModal() {
                         const modal = document.getElementById('my-modal');
@@ -81,7 +82,10 @@
 
                     // Auto-show modal if there's a message
                     @if(session('message'))
-                        document.addEventListener('DOMContentLoaded', showModal);
+                        // Only show on initial load, not on cached back navigation
+                        if (performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
+                            document.addEventListener('DOMContentLoaded', showModal);
+                        }
                     @endif
                 </script>
             @endif
@@ -199,6 +203,7 @@
 
 
 <script>
+
     function toggleModalCard(modalId, cardId = null, lang = null) {
         let modal = document.getElementById(modalId);
         let backdrop = document.getElementById(modalId + "-backdrop");

@@ -315,6 +315,8 @@ class ProfileVehicleController extends Controller
 
     public function edit(Request $request, $lang = null, $id)
     {
+        session()->forget('message');
+
         $languages = Language::all();
         // Store the selected language in the session
         $selectedLanguage = session('selectedLanguage');
@@ -390,13 +392,12 @@ class ProfileVehicleController extends Controller
                 ->get();
         }
 
-        return view('edit_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'vehicle' => $vehicle, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage, 'messages' => $messages]);
+        return view('edit_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'vehicle' => $vehicle, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage]);
     }
 
     public function update($id, Request $request)
     {
         // Debugging: Log request data and file size
-        \Log::info('Request data:', $request->all());
         if ($request->hasFile('image')) {
             \Log::info('Uploaded file size: ' . ($request->file('image')->getSize() / 1024) . ' KB');
         }
@@ -497,7 +498,7 @@ class ProfileVehicleController extends Controller
         ];
 
         $getVehicle = Vehicle::whereId($id)->update($updateData);
-        \Log::info('Vehicle updated with image: ' . ($filename ?? 'null'));
+        // \Log::info('Vehicle updated with image: ' . ($filename ?? 'null'));
 
         if (isset($getVehicle->remove_image) && $getVehicle->remove_image != "0") {
             $getRides = Ride::where('vehicle_id', $getVehicle->id)->get();
