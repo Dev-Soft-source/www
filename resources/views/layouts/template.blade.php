@@ -10,7 +10,7 @@
     <meta name="author" content="ProximaRide">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
-    <title>{{ config('app.name', 'Home') }}</title>
+    <title>@yield('title', config('app.name', 'Home'))</title>
 
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
@@ -153,8 +153,8 @@
         {
           "@type": "SiteNavigationElement",
           "position": 7,
-          "name": "Short-Distance Ridesharing",
-          "url": "{{ url(route('pink_ride', ['lang' => optional($selectedLanguage)->abbreviation], false)) }}"
+          "name": "ProximaLocal Rides",
+          "url": "{{ url(route('proximalocal_ride', ['lang' => optional($selectedLanguage)->abbreviation], false)) }}"
         },
         {
           "@type": "SiteNavigationElement",

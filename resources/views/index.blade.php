@@ -237,7 +237,7 @@
                                 <img class="" src="{{asset('home_page_icons/' . $homePage->section1_pink_rides_image)}}" alt="">
                             </div>
                             <div>
-                                <h3 class="mt-4 text-center text-pink-700 font-FuturaMdCnBT hover:text-pink-800">
+                                <h3 class="mt-4 text-center text-pink-700 font-FuturaMdCnBT hover:text-black">
                                     @isset($homePage->section1_pink_rides_label)
                                         {{ $homePage->section1_pink_rides_label }}
                                     @endisset
@@ -290,24 +290,25 @@
 
             <div class="relative">
                 <div class="h-full">
-
-                    <div class="w-full h-full py-8 px-4 border border-gray-100 shadow rounded-md">
-                        <div class="h-20 w-20 mx-auto flex justify-center items-center">
-                            <img class="" src="{{asset('home_page_icons/' . $homePage->section1_customize_image)}}" alt="">
+                    <a href="{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}">
+                        <div class="w-full h-full py-8 px-4 border border-gray-100 shadow rounded-md">
+                            <div class="h-20 w-20 mx-auto flex justify-center items-center">
+                                <img class="" src="{{asset('home_page_icons/' . $homePage->section1_customize_image)}}" alt="">
+                            </div>
+                            <div>
+                                <h3 class="mt-4 text-center text-green-700 hover:text-black">
+                                    @isset($homePage->section1_customize_label)
+                                        {{ $homePage->section1_customize_label }}
+                                    @endisset
+                                </h3>
+                                <p class="text-black text-justify lg:text-lg md:text-base text-base mt-4">
+                                    @isset($homePage->section1_customize_description)
+                                        {!! $homePage->section1_customize_description !!}
+                                    @endisset
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="mt-2 text-center">
-                                @isset($homePage->section1_customize_label)
-                                    {{ $homePage->section1_customize_label }}
-                                @endisset
-                            </h3>
-                            <p class="text-justify mt-2 lg:text-lg md:text-base text-base">
-                                @isset($homePage->section1_customize_description)
-                                    {!! $homePage->section1_customize_description !!}
-                                @endisset
-                            </p>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>

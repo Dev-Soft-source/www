@@ -1075,6 +1075,12 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
+        // ProximaLocal: no booking fee on rides under $15 per seat
+        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        if ($pricePerSeat < 15) {
+            $request->merge(['booking_credit' => '0']);
+        }
+
         // Student booking fee waiver: Validate and apply waiver with card expiration check
         $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
         $request->merge(['booking_credit' => $adjustedBookingCredit]);
@@ -2387,6 +2393,12 @@ class BookingController extends Controller
                     return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
                 }
             }
+        }
+
+        // ProximaLocal: no booking fee on rides under $15 per seat
+        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        if ($pricePerSeat < 15) {
+            $request->merge(['booking_credit' => '0']);
         }
 
         // Student booking fee waiver: Validate and apply waiver with card expiration check
@@ -3965,6 +3977,12 @@ class BookingController extends Controller
                     return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
                 }
             }
+        }
+
+        // ProximaLocal: no booking fee on rides under $15 per seat
+        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        if ($pricePerSeat < 15) {
+            $request->merge(['booking_credit' => '0']);
         }
 
         // Student booking fee waiver: Validate and apply waiver with card expiration check
@@ -5657,6 +5675,12 @@ class BookingController extends Controller
                         return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
                     }
                 }
+            }
+
+            // ProximaLocal: no booking fee on rides under $15 per seat
+            $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+            if ($pricePerSeat < 15) {
+                $request->merge(['booking_credit' => '0']);
             }
 
             // Student booking fee waiver: Validate and apply waiver with card expiration check

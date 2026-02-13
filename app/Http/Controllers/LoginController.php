@@ -294,7 +294,7 @@ class LoginController extends Controller
                 return back()->withErrors(['password' => $errorMsg])->withInput();
             } else {
                 // User doesn't exist - email is incorrect
-                $errorEmailMsg = $message->no_user_match_message ?? 'We couldn’t find an account with this email. Please check the address or sign up.';
+                $errorEmailMsg =  'We couldn’t find an account with this email address. Please check the spelling and try again.';
 
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json([

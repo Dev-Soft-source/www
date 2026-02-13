@@ -1538,11 +1538,15 @@ $(document).ready(function () {
     var chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
     var isStudentFeeWaived = (chargeBooking == '2');
 
+    var pricePerSeat = parseFloat(@json($ride->rideDetail[0]->price));
     if (isStudentFeeWaived) {
         // Student with valid card - booking fee is waived
         bookingPrice = 0.0;
+    } else if (pricePerSeat < 15) {
+        // ProximaLocal: no booking fee on rides under $15 per seat
+        bookingPrice = 0.0;
     } else {
-        bookingPrice = parseFloat((10 / 100) * @json($ride->rideDetail[0]->price));
+        bookingPrice = parseFloat((10 / 100) * pricePerSeat);
     }
 
     // Function to update the total amount
