@@ -853,92 +853,81 @@
                                 {{ $findRidePage->main_heading }}
                             @endisset
                         </h1>
-                        <button 
-    data-tippy-content="Danger action"
-    data-theme="danger">
-    Delete
-</button>
                     </div>
-                    <div
-                        class="flex items-start flex-col md:flex-row justify-between">
-                        <div class="w-full md:w-[30%]">
-                            <!-- <label for="" class="md:hidden mt-2 m-1 block font-medium text-gray-900">From</label> -->
+                    <div class="flex flex-col md:flex-row items-stretch gap-0 relative">
+                        <!-- From Input -->
+                        <div class="flex-1">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{asset('home_page_icons/' . $findRidePage->from_field_icon)}}" class="w-auto h-6"
                                         alt="">
                                 </div>
                                 <input type="text" id="fromInput" value="{{ $request->from }}"
-                                    class="bg-white pl-7 rounded-md md:rounded-r-none italic md:border-r-0 border border-gray-200 placeholder:text-gray-900 focus:outline-none text-base md:text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                    class="bg-white pl-7 rounded-l-md md:rounded-r-none italic border-r-0 border border-gray-200 placeholder:text-gray-900 focus:outline-none text-base md:text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 h-[3.1rem]"
                                     @isset($findRidePage->search_section_from_placeholder)
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
-                                    @endisset>
-
-                                <!-- Suggestions Container for 'from' field -->
-                                <div id="fromInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                    @endisset
+                                    autocomplete="off">
                             </div>
-
-                            <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
-                        <div class="mt-3 md:mt-0 w-full md:w-[5%] md:bg-gray-200 md:border border-gray-200 md:h-[3.1rem] flex items-center justify-center p-0.5 xl:p-0 ">
-                            <button onclick="swapLocations()">
+                        <!-- Swap Button -->
+                        <div class="bg-gray-200 border border-gray-200 h-[3.1rem] flex items-center justify-center px-2">
+                            <button onclick="swapLocations()" class="flex items-center justify-center">
                                 @isset($findRidePage->swap_field_icon)
-                                    <img src="{{asset('home_page_icons/' . $findRidePage->swap_field_icon)}}" class="w-8 md:w-full xl:w-8 h-8 md:h-full xl:h-8 mx-auto" alt="">
+                                    <img src="{{asset('home_page_icons/' . $findRidePage->swap_field_icon)}}" class="w-8 h-8" alt="">
                                 @endisset
                             </button>
                         </div>
-                        <div class="w-full md:w-[30%] mt-2 md:mt-0">
-                            <!-- <label for="" class="md:hidden block font-medium text-gray-900">To</label> -->
+                        <!-- To Input -->
+                        <div class="flex-1">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{asset('home_page_icons/' . $findRidePage->to_field_icon)}}" class="w-auto h-6" alt="">
                                 </div>
                                 <input type="text" id="toInput" value="{{ $request->to }}"
-                                    class="bg-white pl-7 border-x-0 placeholder:text-gray-900 italic focus:outline-none border border-gray-200 text-base md:text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 rounded-md md:rounded-none"
+                                    class="bg-white pl-7 border-x-0 placeholder:text-gray-900 italic focus:outline-none border border-gray-200 text-base md:text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 h-[3.1rem]"
                                     @isset($findRidePage->search_section_to_placeholder)
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
+                                    @endisset
+                                    autocomplete="off">
+                            </div>
+                        </div>
+                        <!-- Date Input -->
+                        <div class="flex-1">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                    <img src="{{asset('home_page_icons/' . $findRidePage->date_field_icon)}}" class="w-4 h-6" alt="">
+                                </div>
+                                <input type="text" id="dateInput" value="{{ $request->date }}"
+                                    class="bg-white pl-7 pr-10 border border-gray-200 italic border-r-0 placeholder:text-gray-900 text-base md:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 h-[3.1rem]"
+                                    @isset($findRidePage->search_section_date_placeholder)
+                                        placeholder="{{ $findRidePage->search_section_date_placeholder }}"
                                     @endisset>
-
-                                <!-- Suggestions Container for 'to' field -->
-                                <div id="toInput-suggestions" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
-                            </div>
-
-                            <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
-                        </div>
-                        <div class="w-44 mx-auto md:mx-0 md:w-[35%] mt-4 md:mt-0">
-                            <!-- <label for="" class="md:hidden m-1 mt-2 block font-medium text-gray-900">Date (Optional)</label> -->
-                            <div class="flex flex-col sm:flex-col md:flex-row items-center">
-                                <div class="w-full md:w-[85%]">
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <img src="{{asset('home_page_icons/' . $findRidePage->date_field_icon)}}" class="w-4 h-6" alt="">
-                                        </div>
-                                        <input type="text" id="dateInput" value="{{ $request->date }}"
-                                            class="bg-white px-7 border border-gray-200 italic border-r-0 placeholder:text-gray-900 text-base md:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 rounded-md md:rounded-none"
-                                            @isset($findRidePage->search_section_date_placeholder)
-                                                placeholder="{{ $findRidePage->search_section_date_placeholder }}"
-                                            @endisset>
-                                        <div class="absolute inset-y-0 end-0 flex items-center pr-2 cursor-pointer"
-                                            onclick="clearDateInput()">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" data-slot="icon"
-                                                class="w-6 h-6 text-gray-400">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 md:mt-0 w-1/2 md:w-[15%] h-[2.8rem] md:h-[3.1rem] flex items-center justify-center -mr-1">
-                                    <button
-                                    onclick="navigateToSearchRoute()"
-                                        class="font-FuturaMdCnBT bg-blue-500 w-full h-full flex items-center justify-center text-white rounded-md">
-                                        <span class="block md:hidden">Serach</span>
-                                        <img src="{{asset('home_page_icons/' . $findRidePage->search_field_icon)}}" class="w-auto h-6" alt="">
-                                    </button>
+                                <div class="absolute inset-y-0 end-0 flex items-center pr-2 cursor-pointer"
+                                    onclick="clearDateInput()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" data-slot="icon"
+                                        class="w-6 h-6 text-gray-400">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
                                 </div>
                             </div>
                         </div>
+                        <!-- Search Button -->
+                        <button
+                            onclick="navigateToSearchRoute()"
+                            class="font-FuturaMdCnBT bg-blue-500 h-[3.1rem] px-4 flex items-center justify-center text-white rounded-r-md hover:bg-blue-600 transition-colors">
+                            <span class="block md:hidden mr-2">Search</span>
+                            <img src="{{asset('home_page_icons/' . $findRidePage->search_field_icon)}}" class="w-auto h-6" alt="">
+                        </button>
+                        {{-- error tooltip --}}
+                        <div id="fromToError" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
+                            <div class="tooltip-error">
+                                {{ $findRidePage->search_section_required_error }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="my-6">
@@ -1416,7 +1405,7 @@
                         @endif
                     </div>
                     @if ($recentSearches->count() > 0)
-                    <h1 class="font-FuturaMdCnBT text-primary text-2xl mt-8">
+                    <h1 class="font-FuturaMdCnBT text-primary text-3xl mt-12">
                         @isset($findRidePage->search_section_recent_searches)
                             {{ $findRidePage->search_section_recent_searches }}
                         @endisset
@@ -1740,6 +1729,14 @@
             // Swap the values
             document.getElementById('fromInput').value = toValue;
             document.getElementById('toInput').value = fromValue;
+
+            // Swap the selected place data as well (if using Google Places)
+            if (typeof selectedFromPlace !== 'undefined' && typeof selectedToPlace !== 'undefined') {
+                const tempPlace = selectedFromPlace;
+                selectedFromPlace = selectedToPlace;
+                selectedToPlace = tempPlace;
+            }
+
             navigateToSearchRoute();
         }
 
@@ -1759,27 +1756,7 @@
             }
         });
 
-        // Add an event listener to the input fields
-        document.getElementById('fromInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
-        });
-
-        document.getElementById('toInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
-        });
-
-        document.getElementById('dateInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
-        })
+        
 
         document.getElementById('driverName').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
@@ -1914,8 +1891,8 @@
             localStorage.setItem('removedRideIds', JSON.stringify([]));
 
             // Get the values of the input fields
-            const fromValue = document.getElementById('fromInput').value;
-            const toValue = document.getElementById('toInput').value;
+            const fromValue = document.getElementById('fromInput').value.trim();
+            const toValue = document.getElementById('toInput').value.trim();
             const dateValue = document.getElementById('dateInput').value;
             const driverAge = document.getElementById('driverAge').value;
             const passengerRating = document.getElementById('passengerRating').value;
@@ -1935,34 +1912,67 @@
 
             const petsValue = selectedPets.join(';');
 
-            // Get the error message elements
-            const fromError = document.getElementById('fromError');
-            const toError = document.getElementById('toError');
+            // Get the tooltip error element
+            const fromToError = document.getElementById('fromToError');
 
-            // Check if "From" and "To" fields are empty
-            if (fromValue.trim() === '') {
-                @isset($findRidePage->search_section_required_error)
-                    fromError.textContent = '{{ $findRidePage->search_section_required_error }}';
-                @endisset
-                fromError.classList.remove('hidden');
-                toError.classList.add('hidden');
-                return;
-            } else if (toValue.trim() === '') {
-                @isset($findRidePage->search_section_required_error)
-                    toError.textContent = '{{ $findRidePage->search_section_required_error }}';
-                @endisset
-                toError.classList.remove('hidden');
-                fromError.classList.add('hidden');
-                return;
-            } else {
-                // Both fields are filled, hide error messages
-                fromError.classList.add('hidden');
-                toError.classList.add('hidden');
+            // Check if "From" or "To" fields are empty
+            if (fromValue === '' || toValue === '') {
+                // Show the tooltip
+                if (fromToError) {
+                    fromToError.classList.remove('hidden');
+                    
+                    // Hide the tooltip after 3 seconds
+                    setTimeout(function() {
+                        fromToError.classList.add('hidden');
+                    }, 3000);
+                }
+                return; // Prevent navigation
+            }
+
+            // Validate that both inputs contain valid selected places (if Google Places is available)
+            if (typeof selectedFromPlace !== 'undefined' && typeof selectedToPlace !== 'undefined') {
+                let isValid = true;
+                let errorMessage = '';
+
+                // Check if "From" field has a valid selected place
+                if (!selectedFromPlace || fromValue !== selectedFromPlace.value) {
+                    isValid = false;
+                    errorMessage = 'Please select a valid location from the suggestions for "From" field.';
+                }
+
+                // Check if "To" field has a valid selected place
+                if (!selectedToPlace || toValue !== selectedToPlace.value) {
+                    isValid = false;
+                    if (errorMessage) {
+                        errorMessage = 'Please select valid locations from the suggestions for both "From" and "To" fields.';
+                    } else {
+                        errorMessage = 'Please select a valid location from the suggestions for "To" field.';
+                    }
+                }
+
+                // If validation fails, show error tooltip
+                if (!isValid) {
+                    if (fromToError) {
+                        // Update error message if needed (you can customize this)
+                        fromToError.classList.remove('hidden');
+                        
+                        // Hide the tooltip after 3 seconds
+                        setTimeout(function() {
+                            fromToError.classList.add('hidden');
+                        }, 3000);
+                    }
+                    return; // Prevent navigation
+                }
+            }
+
+            // Both fields are filled and valid, hide error tooltip if it's showing
+            if (fromToError) {
+                fromToError.classList.add('hidden');
             }
 
             // Construct the URL with query parameters
             let searchUrl =
-                `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${fromValue}&to=${toValue}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&keyword=${keyword}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}`;
+                `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${encodeURIComponent(dateValue)}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${encodeURIComponent(driverName)}&keyword=${encodeURIComponent(keyword)}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${encodeURIComponent(VehicleType)}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}`;
 
             // Navigate to the constructed URL
             window.location.href = searchUrl;
@@ -1994,70 +2004,178 @@
     // Optionally refresh the page or navigate back
     window.location.href = "{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}";
 }
-        // Debounce function to limit the number of AJAX requests
-        function debounce(func, delay) {
-            let timer;
-            return function() {
-                clearTimeout(timer);
-                timer = setTimeout(func, delay);
-            };
-        }
+        // Google Places Autocomplete initialization - Define function before loading Google Maps API
+        let fromAutocomplete, toAutocomplete;
+        // Store selected place data for validation
+        let selectedFromPlace = null;
+        let selectedToPlace = null;
+        // Flag to prevent input event from interfering with place selection
+        let isSettingPlaceValue = false;
 
-        // Function to fetch cities based on search input
-        function fetchCities(searchTerm, fieldId) {
-            // Get the state_id (if required) or set it to null or default
-            let stateId = 0;  // You can adjust this if you need to pass state_id
-            let url = '{{ url('get-cities-by-state') }}';
-            let params = {
-                state_id: stateId,
-                search: searchTerm
-            };
+        // This function will be called by Google Maps API when it loads
+        window.initGooglePlaces = function() {
+            // Initialize autocomplete for "From" input - Canada only
+            fromAutocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('fromInput'),
+                {
+                    componentRestrictions: { country: 'ca' }, // Restrict to Canada
+                    types: ['(cities)'], // Focus on cities
+                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
+                }
+            );
 
-            $.ajax({
-                url: "{{ url('get-cities-by-state') }}",
-                type: "POST",
-                data: {
-                    search: searchTerm,
-                    _token: '{{ csrf_token() }}'
-                },
-                dataType: 'json',
-                success: function(result) {
-                    let suggestionsContainer = $('#' + fieldId + '-suggestions');
-                    suggestionsContainer.empty();  // Clear previous suggestions
+            // Initialize autocomplete for "To" input - Canada only
+            toAutocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('toInput'),
+                {
+                    componentRestrictions: { country: 'ca' }, // Restrict to Canada
+                    types: ['(cities)'], // Focus on cities
+                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
+                }
+            );
 
-                    $.each(result.cities, function(key, value) {
-                        // Create a list item for each city
-                        let displayText = `${value.name}, ${value.state.abrv}, ${value.state.country.name}`;
-
-                        let suggestionItem = $('<div class="suggestion-item p-2 hover:bg-gray-200 cursor-pointer"></div>')
-                            .text(displayText)
-                            .on('click', function() {
-                                $('#' + fieldId).val(displayText);  // Set the selected city in the input field
-                                suggestionsContainer.empty();  // Clear the suggestions
-                            });
-
-                        suggestionsContainer.append(suggestionItem);
-                    });
+            // Handle place selection for "From" input
+            fromAutocomplete.addListener('place_changed', function() {
+                const place = fromAutocomplete.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValue = true; // Set flag to prevent input event interference
+                    const formattedAddress = formatPlaceAddress(place);
+                    selectedFromPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
+                    // Set the formatted address in the input
+                    document.getElementById('fromInput').value = formattedAddress;
+                    // Hide error message if it was showing
+                    const fromToError = document.getElementById('fromToError');
+                    if (fromToError) fromToError.classList.add('hidden');
+                    // Reset flag after a short delay to allow input event to process
+                    setTimeout(() => {
+                        isSettingPlaceValue = false;
+                    }, 100);
                 }
             });
+
+            // Handle place selection for "To" input
+            toAutocomplete.addListener('place_changed', function() {
+                const place = toAutocomplete.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValue = true; // Set flag to prevent input event interference
+                    const formattedAddress = formatPlaceAddress(place);
+                    selectedToPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
+                    // Set the formatted address in the input
+                    document.getElementById('toInput').value = formattedAddress;
+                    // Hide error message if it was showing
+                    const fromToError = document.getElementById('fromToError');
+                    if (fromToError) fromToError.classList.add('hidden');
+                    // Reset flag after a short delay to allow input event to process
+                    setTimeout(() => {
+                        isSettingPlaceValue = false;
+                    }, 100);
+                }
+            });
+
+            // Clear selected place when user manually types in "From" input
+            document.getElementById('fromInput').addEventListener('input', function() {
+                // Don't clear selection if we're programmatically setting the value
+                if (isSettingPlaceValue) {
+                    return;
+                }
+                const currentValue = this.value.trim();
+                // If user manually edits and it doesn't match the selected place, clear the selection
+                if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
+                    selectedFromPlace = null;
+                }
+            });
+
+            // Clear selected place when user manually types in "To" input
+            document.getElementById('toInput').addEventListener('input', function() {
+                // Don't clear selection if we're programmatically setting the value
+                if (isSettingPlaceValue) {
+                    return;
+                }
+                const currentValue = this.value.trim();
+                // If user manually edits and it doesn't match the selected place, clear the selection
+                if (selectedToPlace && currentValue !== selectedToPlace.value) {
+                    selectedToPlace = null;
+                }
+            });
+        };
+
+        // Format place address to "City, Province, Canada" format
+        function formatPlaceAddress(place) {
+            let city = '';
+            let province = '';
+            let country = 'Canada'; // Default to Canada since we're restricting to CA
+
+            // First, try to extract from address components
+            for (const component of place.address_components) {
+                const types = component.types;
+
+                // Prioritize locality for city (this is the most reliable for cities)
+                if (!city && types.includes('locality')) {
+                    city = component.long_name;
+                }
+                // Fallback to administrative_area_level_2 if no locality found
+                else if (!city && types.includes('administrative_area_level_2')) {
+                    city = component.long_name;
+                }
+
+                // Get province/state (administrative_area_level_1)
+                if (!province && types.includes('administrative_area_level_1')) {
+                    province = component.short_name; // Use short name for province code (e.g., ON, BC)
+                }
+
+                // Get country
+                if (types.includes('country')) {
+                    country = component.long_name;
+                }
+            }
+
+            // If we still don't have a city, try parsing from place name
+            // The place.name is what's shown in the autocomplete dropdown
+            if (!city && place.name) {
+                // Parse "City, Province" or "City, Province, Country" format
+                const nameParts = place.name.split(',').map(part => part.trim());
+                if (nameParts.length >= 1) {
+                    city = nameParts[0];
+                }
+                if (nameParts.length >= 2 && !province) {
+                    // Check if second part is a province code (2-3 letters) or full name
+                    const secondPart = nameParts[1];
+                    if (secondPart.length <= 3) {
+                        province = secondPart.toUpperCase();
+                    }
+                }
+            }
+
+            // If still no city, try formatted_address as last resort
+            if (!city && place.formatted_address) {
+                const addrParts = place.formatted_address.split(',').map(part => part.trim());
+                if (addrParts.length >= 1) {
+                    city = addrParts[0];
+                }
+            }
+
+            // Format: "City, Province, Canada"
+            let formattedAddress = city || '';
+            if (province) {
+                formattedAddress += (formattedAddress ? ', ' : '') + province;
+            }
+            if (country && formattedAddress) {
+                formattedAddress += ', ' + country;
+            }
+
+            return formattedAddress || place.name || place.formatted_address || '';
         }
 
-        // Attach event listener to the input fields with debounce
-        $(document).ready(function() {
-            $('#fromInput').on('input', debounce(function() {
-                let searchTerm = $('#fromInput').val();
-                if (searchTerm.length >= 2) {  // Start searching after 3 characters are entered
-                    fetchCities(searchTerm, 'fromInput');
-                }
-            }, 500));
-
-            $('#toInput').on('input', debounce(function() {
-                let searchTerm = $('#toInput').val();
-                if (searchTerm.length >= 2) {  // Start searching after 3 characters are entered
-                    fetchCities(searchTerm, 'toInput');
-                }
-            }, 500));
-        });
+        // Note: Google Places Autocomplete handles all suggestions natively
+        // No custom city search fallback is needed as Google Places provides its own dropdown
     </script>
     <script>
 
@@ -2262,4 +2380,6 @@
     });
 
     </script>
+    <!-- Google Places Autocomplete API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initGooglePlaces" async defer></script>
 @endsection

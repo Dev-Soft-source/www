@@ -2113,7 +2113,7 @@
                 
                 // Hide the tooltip after 3 seconds
                 setTimeout(function() {
-                    // fromToError.classList.add('hidden');
+                    fromToError.classList.add('hidden');
                 }, 3000);
             }
             return; // Prevent navigation
