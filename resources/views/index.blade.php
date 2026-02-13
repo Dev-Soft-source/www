@@ -183,7 +183,7 @@
                         </div>
                     </div>
                     {{-- error tooltip --}}
-                    <div id="fromToError" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1">
+                    <div id="fromToError" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
                         <div  class="tooltip-error">
                             {{ $homePage->slider_required_error }}
                         </div>
@@ -2113,7 +2113,7 @@
                 
                 // Hide the tooltip after 3 seconds
                 setTimeout(function() {
-                    fromToError.classList.add('hidden');
+                    // fromToError.classList.add('hidden');
                 }, 3000);
             }
             return; // Prevent navigation
