@@ -192,18 +192,8 @@ class EmailController extends Controller
             'token' => $token
         ];
         
-        // Send email immediately with error handling
-        try {
-            Mail::to($user->email)->send(new EmailAddressUpdatedEmail($verificationData));
-            Log::info('EmailAddressUpdatedEmail sent successfully', ['email' => $user->email]);
-        } catch (\Exception $e) {
-            Log::error('Failed to send EmailAddressUpdatedEmail', [
-                'email' => $user->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            // Continue execution even if email fails
-        }
+        // Queue email for sending
+        Mail::to($user->email)->queue(new EmailAddressUpdatedEmail($verificationData));
         // Mail::to($user->email)->queue(new UserEmailVerification($verificationData));
 
         return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])

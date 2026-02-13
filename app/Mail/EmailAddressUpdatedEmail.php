@@ -7,7 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class EmailAddressUpdatedEmail extends Mailable
+class EmailAddressUpdatedEmail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
     private $data = [];
