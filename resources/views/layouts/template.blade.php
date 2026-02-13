@@ -632,6 +632,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ asset('js/front.js') }}" defer></script>
 
     <script>
         if ('serviceWorker' in navigator) {

@@ -10,8 +10,9 @@ const tailwindcss = require('tailwindcss');
  | file for the application as well as bundling up all the JS files.
  |
  */
- mix.js("resources/js/app.js", "public/js")
- .js("resources/js/web.js", "public/js")
+mix.js("resources/js/app.js", "public/js")
+.js("resources/js/web.js", "public/js")
+.js("resources/js/front.js", "public/js")
  .postCss("resources/css/web.css", "public/css/web.css", [
      tailwindcss("web.config.js")
  ])

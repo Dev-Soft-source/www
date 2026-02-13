@@ -654,11 +654,9 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option1->name }}
                                                     </span>
-                                                    <x-tooltip text="{{ $postRidePage->luggage_option1_tooltip }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-                                                    </x-tooltip>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
                                                 </label>
                                                 <input id="small-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option1->features_setting_id }}"
@@ -672,11 +670,9 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option2->name }}
                                                     </span>
-                                                    <x-tooltip text="{{ $postRidePage->luggage_option2_tooltip }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-                                                    </x-tooltip>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
                                                 </label>
                                                 <input id="Medium-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option2->features_setting_id }}"
@@ -690,11 +686,9 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option3->name }}
                                                     </span>
-                                                <x-tooltip text="{{ $postRidePage->luggage_option3_tooltip }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-                                                    </x-tooltip>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
                                                 </label>
                                                 <input id="Large-luggage" type="checkbox"
                                                     value="{{ $findRidePage->luggage_option3->features_setting_id }}"
@@ -708,11 +702,9 @@
                                                     <span class="text-base md:text-lg">
                                                         {{ $findRidePage->luggage_option4->name }}
                                                     </span>
-                                                    <x-tooltip text="{{ $postRidePage->luggage_option4_tooltip }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-                                                    </x-tooltip>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
 
 
                                                 
@@ -730,11 +722,9 @@
                                                         <span class="text-base md:text-lg">
                                                             {{ $findRidePage->luggage_option5->name }}
                                                         </span>
-                                                        <x-tooltip text="{{ $postRidePage->luggage_option5_tooltip }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                        </svg>
-                                                    </x-tooltip>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
                                                     </label>
                                                     <input id="no-luggage" type="checkbox"
                                                         value="{{ $findRidePage->luggage_option5->features_setting_id }}"
@@ -863,6 +853,11 @@
                                 {{ $findRidePage->main_heading }}
                             @endisset
                         </h1>
+                        <button 
+    data-tippy-content="Danger action"
+    data-theme="danger">
+    Delete
+</button>
                     </div>
                     <div
                         class="flex items-start flex-col md:flex-row justify-between">
@@ -1074,11 +1069,9 @@
                                                                 </small>
                                                                 @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
 
-                                                                <x-tooltip text="{!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
                                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                                     </svg>
-                                                                </x-tooltip>
                                                                 @endif
 
                                                         </div>
@@ -1206,127 +1199,75 @@
 
                                                     <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option1_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option2_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="" data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->payment_methods_option3_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->smoking_option2_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}">
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->animals_option2_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}">
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->animals_option3_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt="" data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->luggage_option1_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->luggage_option2_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->luggage_option3_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->luggage_option4_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <x-tooltip text="{{ $postRidePage->luggage_option5_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option2_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option2_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option3_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option3_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option8_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option8_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option9_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option9_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option10_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option10_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option11_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option11_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option12_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option12_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option13_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option13_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option14_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option14_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option15_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option15_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option16_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option4_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option5_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option6_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option6_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <x-tooltip text="{{ $postRidePage->features_option7_tooltip }}">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="">
-                                                            </x-tooltip>
+                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option7_tooltip }}">
                                                         @endif
                                                     </div>
                                                 </div>
