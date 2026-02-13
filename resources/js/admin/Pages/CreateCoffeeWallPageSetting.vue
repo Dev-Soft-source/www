@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <section class="coffee-wall-section relative md:top-16">
+        <section class="coffee-wall-section relative">
             <main class="flex-1 max-h-full p-3 bg-gray-200 pb-2">
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
