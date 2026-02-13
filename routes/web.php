@@ -29,6 +29,7 @@ use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Controllers\PinkRideController;
+use App\Http\Controllers\ProximaLocalRideController;
 use App\Http\Controllers\PostRideAgainController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\ProfileController;
@@ -291,6 +292,7 @@ Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('pa
 Route::get('{lang?}/search-rides', [RideController::class, 'SearchRide'])->name('search_ride');
 Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
 Route::get('{lang?}/Extra-Care-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
+Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
 Route::get('{lang?}/ride/{departure}/to/{destination}/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
 Route::get('{lang?}/my-ride/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyRideDetail'])->name('my_ride_detail');
 Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');

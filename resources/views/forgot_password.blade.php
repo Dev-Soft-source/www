@@ -94,12 +94,7 @@
                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                                     type="text" name="email" value="{{ old('email') }}" autofocus />
                                 @error('email')
-                                    <div class="relative tooltip tooltip-error -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -191,10 +186,7 @@
             submitButton.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
             
             // Clear previous errors
-            $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
-            setTimeout(() => {
-                $('.tooltip-error').remove();
-            }, 200);
+            $('.tooltip-error').remove();
             
             // Get form data
             const formData = form.serialize();
@@ -248,35 +240,20 @@
 
     // Handle validation errors
     function handleValidationErrors(errors) {
-        // Remove existing error tooltips
-        $('.tooltip-error').removeClass('tooltip-show').addClass('tooltip-hide');
-        setTimeout(() => {
-            $('.tooltip-error').remove();
-        }, 200);
-        
-        // Add new error tooltips with animation
-        setTimeout(() => {
-            Object.keys(errors).forEach(function(field) {
-                const input = $(`#${field}`);
-                const errorMessage = errors[field][0];
-                
+        Object.keys(errors).forEach(function(field) {
+            const input = $(`#${field}`);
+            const errorMessage = errors[field][0];
+            
                 if (input.length) {
-                    const tooltip = $(`
-                        <div class="relative tooltip tooltip-error tooltip-init -bottom-4">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                <p class="text-white leading-none text-sm lg:text-base">${errorMessage}</p>
-                            </div>
-                        </div>
-                    `);
-                    
-                    input.parent().append(tooltip);
-                    // Trigger animation - remove init class and add show class
-                    setTimeout(() => {
-                        tooltip.removeClass('tooltip-init').addClass('tooltip-show');
-                    }, 10);
-                }
-            });
-        }, 200);
+                // Remove any existing tooltip for this field first (prevents duplicate tooltips)
+                const fieldContainer = input.parent();
+                fieldContainer.find('.tooltip-error').remove();
+                fieldContainer.siblings('.tooltip-error').remove();
+                
+                const tooltip = $(`<div class="tooltip-error">${errorMessage}</div>`);
+                input.parent().append(tooltip);
+            }
+        });
     }
 
     // Handle forgot password errors
