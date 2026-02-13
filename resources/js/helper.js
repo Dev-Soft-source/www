@@ -1,5 +1,6 @@
 import swal from "sweetalert2";
 const helpers = {
+
     cutText(text, length) {
         if (text.split(" ").length > 1) {
             let string = text.substring(0, length);

@@ -3,36 +3,34 @@
         <!-- Ride details header - always show if ride details are available -->
         <template v-if="hasRideDetails">
             <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-                <div style="background-color: #22c55e; color: white; border-radius: 8px; padding: 12px 16px; max-width: 90%;">
-                    <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Ride Detail</div>
-                    <div style="font-size: 13px;">{{ rideDetailsLine }}</div>
+                <div class="bg-green-200 px-4 py-2 rounded-md">
+                    <div class="text-xl text-gray-800 font-bold">Ride Detail</div>
+                    <div class="text-sm text-gray-600">{{ rideDetailsLine }}</div>
                 </div>
             </div>
         </template>
         <!-- Initial system message - shown only when no actual messages exist -->
         <div v-if="!hasActualMessages" class="text-center mb-4 px-4">
             <p class="text-gray-600 text-sm italic">
-                This marks the start of your chat with the driver. Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.
+                This marks the start of your chat with the driver. Please avoid sharing any contact details such as
+                phone
+                numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments
+                outside the
+                ProximaRide platform.
             </p>
         </div>
         <!-- Chat messages -->
-        <ul class="chat" v-if="messages.length > 0">
-            <li v-for="message in filteredMessages" :key="message.id"
-                :class="[{
-                  'flex justify-end': message.user && message.user.id == logged_in_user_id,
-                  'flex justify-start': message.user && message.user.id != logged_in_user_id
-                }, 'mb-2']"
-                :style="message.user && message.user.id == logged_in_user_id ? {'marginRight': '12px'} : {}"
-            >
+        <ul ref="messagesContainer" class="chat" v-if="messages.length > 0">
+            <li v-for="message in filteredMessages" :key="message.id" :class="getListItemClasses(message)">
                 <div style="max-width:70%;">
                     <div class="header">
-                        <p class="text-xs font-semibold mb-1"
-                            :class="message.user && message.user.id == logged_in_user_id ? 'text-right' : 'text-left'">
-                            {{ message.user ? message.user.first_name : 'User' }}
+                        <p class="text-xs mb-1 font-montserrat text-gray-500 font-semibold"
+                            :class="isMe(message) ? 'text-right' : 'text-left'">
+                            {{ formatMessageTime(message) }}
                         </p>
                     </div>
-                    <div :style="bubbleStyle(message)">
-                        <span>{{ message.message }}</span>
+                    <div :class="getMessageClasses(message)">
+                        {{ message.message }}
                     </div>
                 </div>
             </li>
@@ -40,11 +38,103 @@
     </div>
 </template>
 <script>
+import clsx from 'clsx';
+
 export default {
     props: ['messages', 'logged_in_user_id', 'empty_chat_placeholder', 'current_lang'],
+    data() {
+        return {
+            // Local cache to preserve messages if prop becomes empty temporarily
+            _cachedMessages: []
+        };
+    },
+    mounted() {
+        // console.log('ChatMessages - messages prop:', this.messages);
+        console.log('ChatMessages - messages length:', this.messages?.length);
+        // console.log('ChatMessages - messages array:', JSON.stringify(this.messages, null, 2));
+        // Initialize cache with current messages
+        if (Array.isArray(this.messages) && this.messages.length > 0) {
+            this._cachedMessages = this.messages.map(msg => ({ ...msg }));
+        }
+        // Scroll to bottom on initial mount
+        this.$nextTick(() => {
+            this.scrollToBottom();
+        });
+    },
+    watch: {
+        messages: {
+            handler(newMessages, oldMessages) {
+                console.log('ChatMessages - messages changed');
+                // console.log('ChatMessages - new messages:', newMessages);
+                // console.log('ChatMessages - old messages:', oldMessages);
+                console.log('ChatMessages - new messages length:', newMessages?.length);
+
+                // // CRITICAL: Merge new messages with cached messages to preserve all old messages
+                // if (Array.isArray(newMessages) && newMessages.length > 0) {
+                //     // Create a map to deduplicate by ID
+                //     const messageMap = new Map();
+
+                //     // First, add all cached messages (preserve existing messages)
+                //     this._cachedMessages.forEach(msg => {
+                //         if (msg && msg.id) {
+                //             messageMap.set(String(msg.id), { ...msg });
+                //         }
+                //     });
+
+                //     // Then, add/update with new messages (new messages take precedence)
+                //     newMessages.forEach(msg => {
+                //         if (msg && msg.id) {
+                //             messageMap.set(String(msg.id), { ...msg });
+                //         }
+                //     });
+
+                //     // Convert back to array and sort
+                //     const mergedMessages = Array.from(messageMap.values());
+                //     mergedMessages.sort((a, b) => {
+                //         const aTime = new Date((a.created_at || a.message?.created_at || 0));
+                //         const bTime = new Date((b.created_at || b.message?.created_at || 0));
+                //         return aTime - bTime;
+                //     });
+
+                //     console.log('ChatMessages - merged messages count:', mergedMessages.length, 'cached:', this._cachedMessages.length, 'new:', newMessages.length);
+
+                //     // Update cache with merged messages (preserves all old messages)
+                //     this._cachedMessages = mergedMessages;
+
+                //     // Warn if we're losing messages
+                //     if (newMessages.length < this._cachedMessages.length && this._cachedMessages.length > 0) {
+                //         console.warn('ChatMessages - WARNING: New messages array is smaller than cache! Using merged cache to preserve all messages.');
+                //     }
+                // } else if (Array.isArray(newMessages) && newMessages.length === 0 && this._cachedMessages.length > 0) {
+                //     console.warn('ChatMessages - WARNING: messages prop became empty but we have cached messages. Preserving cache.');
+                //     // Don't update cache - keep old messages
+                // }
+
+                // Scroll to bottom when messages change
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            },
+            deep: true,
+            immediate: true
+        },
+        filteredMessages: {
+            handler() {
+                console.log('ChatMessages - filteredMessages changed');
+                // Also watch filteredMessages to scroll when they update
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            },
+            deep: true
+        }
+    },
     computed: {
         rideDetailMessage() {
-            return this.messages.find(m => m.ride_detail) || null;
+            const messagesToUse = (Array.isArray(this.messages) && this.messages.length > 0)
+                ? this.messages
+                : this._cachedMessages;
+            return messagesToUse.find(m => m.ride_detail) || null;
         },
         hasRideDetails() {
             // Check if we have ride details from messages or from window.rideDetails
@@ -74,17 +164,44 @@ export default {
             return '';
         },
         filteredMessages() {
-            const list = Array.from(this.messages);
-            list.sort((a, b) => {
-                const at = new Date((a.created_at || a.message?.created_at));
-                const bt = new Date((b.created_at || b.message?.created_at));
+            // ALWAYS use cache if it has messages (cache has merged/all messages)
+            // Only use prop if cache is empty and prop has messages
+            let messagesToUse;
+
+            if (this._cachedMessages.length > 0) {
+                // Use cache - it has all merged messages
+                messagesToUse = this._cachedMessages;
+                console.log('ChatMessages - filteredMessages using cache:', messagesToUse.length, 'messages');
+            } else if (Array.isArray(this.messages) && this.messages.length > 0) {
+                // Fallback to prop if cache is empty
+                messagesToUse = this.messages;
+                console.log('ChatMessages - filteredMessages using prop:', messagesToUse.length, 'messages');
+            } else {
+                // No messages available
+                return [];
+            }
+
+            // Defensive check: ensure we have an array
+            if (!Array.isArray(messagesToUse) || messagesToUse.length === 0) {
+                return [];
+            }
+
+            // Create a new array to avoid mutation issues
+            const list = Array.from(messagesToUse);
+
+            // Sort by created_at (create new sorted array to avoid mutation)
+            const sorted = [...list].sort((a, b) => {
+                const at = new Date((a.created_at || a.message?.created_at || 0));
+                const bt = new Date((b.created_at || b.message?.created_at || 0));
                 return at - bt;
             });
-            const hasNonRideDetail = list.some(m => !m.ride_detail);
-            if (hasNonRideDetail) {
-                return list.filter(m => !m.ride_detail);
-            }
-            return list;
+
+            // Filter out ride_detail messages if there are non-ride-detail messages
+            // const hasNonRideDetail = sorted.some(m => !m.ride_detail);
+            // if (hasNonRideDetail) {
+            //     return sorted.filter(m => !m.ride_detail);
+            // }
+            return sorted;
         },
         hasActualMessages() {
             // Check if there are any actual chat messages (not just ride detail messages)
@@ -109,36 +226,64 @@ export default {
             });
             return `${datePart} at ${timePart}`;
         },
-        bubbleStyle(message) {
-            const fontFamily = "'FuturaMdCnBT', 'Futura', 'Futura Medium Condensed BT', Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif";
-            if(message.user && message.user.id == this.logged_in_user_id) {
-                // My message (blue)
-                return {
-                    background: '#3B82F6',
-                    color: '#fff',
-                    'border-radius': '16px',
-                    'padding': '10px 16px',
-                    'margin-bottom': '2px',
-                    'margin-left': '10px',
-                    'display': 'inline-block',
-                    'max-width': '100%',
-                    'word-break': 'break-word',
-                    'font-family': fontFamily,
-                };
+
+        formatMessageTime(message) {
+            const timestamp = message.created_at || message.message?.created_at;
+            if (!timestamp) return '';
+            const messageDate = new Date(timestamp);
+            const today = new Date();
+
+            // Check if message is from today
+            const isToday = messageDate.getDate() === today.getDate() &&
+                messageDate.getMonth() === today.getMonth() &&
+                messageDate.getFullYear() === today.getFullYear();
+
+            if (isToday) {
+                // Show only time for today's messages
+                return messageDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                });
+            } else {
+                // Show full date and time for other days: "Jan 4,2026 02:40AM"
+                const datePart = messageDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                }).replace(', ', ','); // Remove space after comma
+                const timePart = messageDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                }).replace(' ', ''); // Remove space before AM/PM
+                return `${datePart} ${timePart}`;
             }
-            // Their message (gray)
-            return {
-                background: '#45CEEB',
-                color: '#fff',
-                'border-radius': '16px',
-                'padding': '10px 16px',
-                'margin-bottom': '2px',
-                'margin-right': '10px',
-                'display': 'inline-block',
-                'max-width': '100%',
-                'word-break': 'break-word',
-                'font-family': fontFamily,
-            };
+        },
+
+        isMe(message) {
+            return message.user && message.user.id == this.logged_in_user_id;
+        },
+
+        getListItemClasses(message) {
+            return clsx('flex mb-2', this.isMe(message) ? 'justify-end mr-2' : 'justify-start ml-2');
+        },
+
+        getMessageClasses(message) {
+            return clsx('rounded-md px-4 py-2 text-base whitespace-pre-wrap', this.isMe(message) ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800');
+        },
+
+        scrollToBottom() {
+            // Try scrolling the messages container itself
+            if (this.$refs.messagesContainer) {
+                this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+            }
+
+            // Also scroll to the last message element (works with any scroll container)
+            const lastMessage = this.$el?.querySelector('li:last-child');
+            if (lastMessage) {
+                lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
         }
     }
 }

@@ -70,9 +70,9 @@
 
                                 <div
                                     class="flex items-center justify-between w-full border-b px-4 py-2 bg-primary text-white">
-                                    <h1 class="mb-0 text-white" id="modal-title">
+                                    <h3 class="mb-0 text-white" id="modal-title">
                                         {{ $chatsPage->driver_chat_with ?? 'Chat with' }} {{ $passenger->first_name ?? 'User' }}
-                                    </h1>
+                                    </h3>
                                     <a href="{{ route('my_chats', ['lang' => app()->getLocale()]) }}"
                                         class="h-fit block text-gray-100 bg-transparent rounded-full border border-gray-100 text-sm p-1 ml-auto">
                                         <svg aria-hidden="true" class="w-3 h-3 text-gray-100" fill="currentColor"
@@ -84,7 +84,7 @@
                                         </svg>
                                     </a>
                                 </div>
-                                <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                <div class="p-4 sm:p-6">
                                     @php
                                         $allow_chat = false;
                                         $currentDateTime = now();
@@ -119,23 +119,7 @@
 
                                     @endphp
                                     <div class="text-center sm:text-left">
-                                        {{-- <div class="ride-details-heading" style="font-weight:bold;color:#2563eb;margin-bottom:4px;">Ride Details</div>
-                                        <div style="display:flex;justify-content:center;margin-bottom:8px;">
-                                            <span class="bg-blue-100 p-2 rounded-md border-gray-200 w-fit whitespace-pre-wrap">
-                                                @if(isset($ride) && $ride)
-                                                    {{ $ride->departure ?? '-' }} to {{ $ride->destination ?? '-' }}
-                                                    @if(!empty($ride->date))
-                                                        {{ \Carbon\Carbon::parse($ride->date)->format('M d, Y') }}
-                                                    @endif
-                                                    @if(!empty($ride->time))
-                                                        at {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') }}
-                                                    @endif
-                                                @else
-                                                    - Ride details not available -
-                                                @endif
-                                            </span>
-                                        </div> --}}
-                                        <div class="mt-2">
+                                        <div class="">
                                             <div class="panel-body">
                                                 <chat-messages 
                                                     :logged_in_user_id="{{ Auth::user()->id }}"
