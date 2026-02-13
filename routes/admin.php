@@ -91,10 +91,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/user', function (Request $request) {
-        $admin = $request->user('admin');
-        if (!$admin) {
-            return response()->json(['data' => null, 'status' => 'Error', 'message' => 'Admin not authenticated'], 401);
+        // Ensure session is started
+        if (!$request->hasSession()) {
+            $request->session()->start();
         }
+        
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        
+        if (!$admin) {
+            return response()->json(['data' => null, 'status' => 'Error', 'message' => 'Alert! Admin not authenticated'], 401);
+        }
+        
         $user = new AdminResource($admin);
         return response()->json(['data' => $user, 'status' => 'Success']);
     });

@@ -23,7 +23,7 @@ class AuthController extends Controller
         ];
         $this->validate($request, $rules);
         
-        $admin = $request->user('admin');
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
         if (!$admin) {
             return $this->errorResponse('Admin not authenticated', 401);
         }
