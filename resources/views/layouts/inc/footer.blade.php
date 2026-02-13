@@ -90,6 +90,7 @@
       @php
         $settingPage = App\Models\SiteSetting::first();
       @endphp
+      {{-- social link list --}}
       <div class="flex items-center gap-4 justify-center mb-3 mt-4">
         <a aria-label="Candian Riders" target="_blank" href="{{ $settingPage->facebook }}" class="flex justify-center items-center bg-gray-50 border-2 border-gray-300 hover:border-blue-900 rounded-full h-10 w-10">
           <img class="h-5" src="/assets/icons/facebook.png" alt="facebook icon">
@@ -107,9 +108,13 @@
           <img class="h-5" src="/assets/icons/google.png" alt="google icon">
         </a> --}}
       </div>
-      <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 justify-center items-center py-2 text-white">
-        <p class="text-white">© ProximaRide {{ date('Y') }}. All rights reserved</p>
-        <div class="relative">
+      <div class="flex flex-row items-center pb-7 md:pb-14 relative">
+        {{-- copylight --}}
+        <div class="w-full flex justify-center">
+          <p class="text-white">© ProximaRide {{ date('Y') }}. All rights reserved</p>
+        </div> 
+        {{-- multi language list --}}
+        <div class="relative lg:w-1/2 flex justify-end lg:absolute lg:right-0">
             <button id="dropdownDesktopButton" data-dropdown-toggle="dropdown_desktop" class="min-w-fit px-3 py-1.5 border border-white rounded flex gap-2 items-center bg-white/10 hover:bg-white/20 transition-colors" type="button">
                 <img class="h-4" src="{{ $selectedLanguage->flag_icon ?? 'assets/flag.png' }}" alt="">
                 <span class="truncate text-white">{{ $selectedLanguage->name ?? 'Eng' }}</span>
