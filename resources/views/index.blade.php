@@ -1767,6 +1767,8 @@
     // Store selected place data for validation
     let selectedFromPlace = null;
     let selectedToPlace = null;
+    // Flag to prevent input event from interfering with place selection
+    let isSettingPlaceValue = false;
 
     // This function will be called by Google Maps API when it loads
     window.initGooglePlaces = function() {
@@ -1794,12 +1796,22 @@
         fromAutocomplete.addListener('place_changed', function() {
             const place = fromAutocomplete.getPlace();
             if (place.address_components && place.place_id) {
+                isSettingPlaceValue = true; // Set flag to prevent input event interference
+                const formattedAddress = formatPlaceAddress(place);
                 selectedFromPlace = {
                     place_id: place.place_id,
-                    formatted_address: formatPlaceAddress(place),
-                    value: formatPlaceAddress(place)
+                    formatted_address: formattedAddress,
+                    value: formattedAddress
                 };
-                formatPlaceAddress(place, 'fromInput');
+                // Set the formatted address in the input
+                document.getElementById('fromInput').value = formattedAddress;
+                // Hide error message if it was showing
+                const fromError = document.getElementById('fromError');
+                if (fromError) fromError.classList.add('hidden');
+                // Reset flag after a short delay to allow input event to process
+                setTimeout(() => {
+                    isSettingPlaceValue = false;
+                }, 100);
             }
         });
 
@@ -1807,17 +1819,31 @@
         toAutocomplete.addListener('place_changed', function() {
             const place = toAutocomplete.getPlace();
             if (place.address_components && place.place_id) {
+                isSettingPlaceValue = true; // Set flag to prevent input event interference
+                const formattedAddress = formatPlaceAddress(place);
                 selectedToPlace = {
                     place_id: place.place_id,
-                    formatted_address: formatPlaceAddress(place),
-                    value: formatPlaceAddress(place)
+                    formatted_address: formattedAddress,
+                    value: formattedAddress
                 };
-                formatPlaceAddress(place, 'toInput');
+                // Set the formatted address in the input
+                document.getElementById('toInput').value = formattedAddress;
+                // Hide error message if it was showing
+                const toError = document.getElementById('toError');
+                if (toError) toError.classList.add('hidden');
+                // Reset flag after a short delay to allow input event to process
+                setTimeout(() => {
+                    isSettingPlaceValue = false;
+                }, 100);
             }
         });
 
         // Clear selected place when user manually types in "From" input
         document.getElementById('fromInput').addEventListener('input', function() {
+            // Don't clear selection if we're programmatically setting the value
+            if (isSettingPlaceValue) {
+                return;
+            }
             const currentValue = this.value.trim();
             // If user manually edits and it doesn't match the selected place, clear the selection
             if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
@@ -1827,6 +1853,10 @@
 
         // Clear selected place when user manually types in "To" input
         document.getElementById('toInput').addEventListener('input', function() {
+            // Don't clear selection if we're programmatically setting the value
+            if (isSettingPlaceValue) {
+                return;
+            }
             const currentValue = this.value.trim();
             // If user manually edits and it doesn't match the selected place, clear the selection
             if (selectedToPlace && currentValue !== selectedToPlace.value) {
@@ -1836,48 +1866,70 @@
     };
 
     // Format place address to "City, Province, Canada" format
-    function formatPlaceAddress(place, inputId = null) {
+    function formatPlaceAddress(place) {
         let city = '';
         let province = '';
-        let country = '';
+        let country = 'Canada'; // Default to Canada since we're restricting to CA
 
-        // Extract address components
+        // First, try to extract from address components
         for (const component of place.address_components) {
-            const componentType = component.types[0];
+            const types = component.types;
 
-            if (componentType === 'locality' || componentType === 'administrative_area_level_2') {
+            // Prioritize locality for city (this is the most reliable for cities)
+            if (!city && types.includes('locality')) {
                 city = component.long_name;
-            } else if (componentType === 'administrative_area_level_1') {
+            }
+            // Fallback to administrative_area_level_2 if no locality found
+            else if (!city && types.includes('administrative_area_level_2')) {
+                city = component.long_name;
+            }
+
+            // Get province/state (administrative_area_level_1)
+            if (!province && types.includes('administrative_area_level_1')) {
                 province = component.short_name; // Use short name for province code (e.g., ON, BC)
-            } else if (componentType === 'country') {
+            }
+
+            // Get country
+            if (types.includes('country')) {
                 country = component.long_name;
             }
         }
 
-        // Format: "City, Province, Canada"
-        let formattedAddress = city;
-        if (province) {
-            formattedAddress += ', ' + province;
-        }
-        if (country) {
-            formattedAddress += ', ' + country;
-        }
-
-        // If inputId is provided, set the formatted address in the input
-        if (inputId) {
-            document.getElementById(inputId).value = formattedAddress;
-            
-            // Hide error message if it was showing
-            if (inputId === 'fromInput') {
-                const fromError = document.getElementById('fromError');
-                if (fromError) fromError.classList.add('hidden');
-            } else if (inputId === 'toInput') {
-                const toError = document.getElementById('toError');
-                if (toError) toError.classList.add('hidden');
+        // If we still don't have a city, try parsing from place name
+        // The place.name is what's shown in the autocomplete dropdown
+        if (!city && place.name) {
+            // Parse "City, Province" or "City, Province, Country" format
+            const nameParts = place.name.split(',').map(part => part.trim());
+            if (nameParts.length >= 1) {
+                city = nameParts[0];
+            }
+            if (nameParts.length >= 2 && !province) {
+                // Check if second part is a province code (2-3 letters) or full name
+                const secondPart = nameParts[1];
+                if (secondPart.length <= 3) {
+                    province = secondPart.toUpperCase();
+                }
             }
         }
 
-        return formattedAddress;
+        // If still no city, try formatted_address as last resort
+        if (!city && place.formatted_address) {
+            const addrParts = place.formatted_address.split(',').map(part => part.trim());
+            if (addrParts.length >= 1) {
+                city = addrParts[0];
+            }
+        }
+
+        // Format: "City, Province, Canada"
+        let formattedAddress = city || '';
+        if (province) {
+            formattedAddress += (formattedAddress ? ', ' : '') + province;
+        }
+        if (country && formattedAddress) {
+            formattedAddress += ', ' + country;
+        }
+
+        return formattedAddress || place.name || place.formatted_address || '';
     }
 </script>
 <!-- Google Places Autocomplete API -->
