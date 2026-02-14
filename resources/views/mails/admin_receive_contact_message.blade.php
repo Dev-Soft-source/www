@@ -46,11 +46,17 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hello {{ $data['username'] }},</h1>
-                        <p style="font-weight: 400;color: #000;">{{ $data['name'] }} has sent you a message. Please visit your dashboard to check.</p>
-                        <p style="font-weight: 400;color: #000;">The details are:</p>
-                        <p style="font-weight: 400;color: #000;">Email: {{ $data['email'] }}</p>
-                        <p style="font-weight: 400;color: #000;">Phone: {{ $data['phone'] }}</p>
-                        <p style="font-weight: 400;color: #000;">Message: {{ $data['message'] }}</p>
+                        <p style="font-weight: 400;color: #000;">{{ $data['name'] }} has sent you a message and it requires your attention.</p>
+                        <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Name:</strong> {{ $data['name'] }}</p>
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Email:</strong> {{ $data['email'] }}</p>
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Phone:</strong> {{ $data['phone'] }}</p>
+                            @if(isset($data['transaction_date']))
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Date Received:</strong> {{ $data['transaction_date'] }}</p>
+                            @endif
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Message:</strong> {{ $data['message'] }}</p>
+                        </div>
+                        <p style="font-weight: 400;color: #000;">Please visit your dashboard to respond.</p>
                     </td>
                 </tr>
                 <tr>

@@ -28,8 +28,11 @@ class CancelPassengerAdminMail extends Mailable
      */
     public function build()
     {
+        $driver = $this->data['driver_name'] ?? 'Driver';
+        $passenger = $this->data['passenger_name'] ?? 'Passenger';
+        $date = isset($this->data['date']) ? \Carbon\Carbon::parse($this->data['date'])->format('M d, Y') : now()->format('M d, Y');
         return $this->markdown('mails/cancel_passenger_admin')
-            ->subject("Passenger removed from a ride")
+            ->subject("Passenger Removed: {$passenger} by {$driver} - {$date}")
             ->with("data", $this->data);
     }
 }

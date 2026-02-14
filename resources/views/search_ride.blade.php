@@ -979,7 +979,9 @@
                                             href=""
                                         @elseif (auth()->user() && in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) && (auth()->user()->gender !== 'female' || ($pinkRideSetting->verfiy_phone_passenger == 1 ? !auth()->user()->phone_numbers->contains('verified', 1) : false)))
                                             href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only female passengers @if ($pinkRideSetting->verfiy_phone_passenger == 1) with verified number @endif can select this ride')"
-                                        @elseif (auth()->user() && in_array($findRidePage->ride_features_option16->features_setting_id, explode('=', $ride->features)))
+                                        @elseif (isset($findRidePage->ride_features_option18) && auth()->user() && in_array($findRidePage->ride_features_option18->features_setting_id, explode('=', $ride->features)) && !auth()->user()->phone_numbers->contains('verified', 1))
+                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'This driver accepts only phone-verified passengers.')"
+                                        @elseif (auth()->user() && in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 1)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver only want passengers with reviews')"
                                             @else
@@ -1248,6 +1250,9 @@
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
+                                                        @if (in_array($findRidePage->ride_features_option18->features_setting_id ?? null, explode('=', $ride->features)))
+                                                            <img class="w-6 h-6" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option18->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option18_tooltip }}">
+                                                        @endif  
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif

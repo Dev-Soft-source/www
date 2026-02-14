@@ -117,6 +117,9 @@ class RideController extends Controller
                     $findRidePage->ride_features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option16)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
+                    $findRidePage->ride_features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option18)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
                     $findRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option1)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
@@ -261,6 +264,9 @@ class RideController extends Controller
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $findRidePage->ride_features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option16)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
+                    $findRidePage->ride_features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option18)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $findRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option1)
@@ -1089,6 +1095,9 @@ class RideController extends Controller
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
@@ -1210,6 +1219,9 @@ class RideController extends Controller
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
@@ -2227,6 +2239,9 @@ class RideController extends Controller
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
@@ -2334,6 +2349,9 @@ class RideController extends Controller
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
@@ -2539,6 +2557,9 @@ class RideController extends Controller
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
@@ -2646,6 +2667,9 @@ class RideController extends Controller
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
@@ -2849,6 +2873,9 @@ class RideController extends Controller
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
@@ -2975,6 +3002,9 @@ class RideController extends Controller
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option16)
+                        ->whereLanguageId($selectedLanguage->id)
+                        ->first();
+                    $postRidePage->features_option18 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option18)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
                     $postRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->luggage_option1)

@@ -28,8 +28,10 @@ class ClaimRewardMail extends Mailable
      */
     public function build()
     {
+        $name = $this->data['person_name'] ?? 'A user';
+        $date = $this->data['transaction_date'] ?? now()->format('F j, Y');
         return $this->markdown('mails/claim_reward')
-            ->subject("Reward Claim Notification")
+            ->subject("Reward Claim from {$name} - {$date}")
             ->with("data", $this->data);
     }
 }

@@ -47,7 +47,11 @@ class CloseAccountController extends Controller
         ]);
 
         $admin = Admin::first();
-        $data = ['username' => $admin->username,'name' => $submission->name];
+        $data = [
+            'username' => $admin->username,
+            'name' => $submission->name,
+            'transaction_date' => $submission->created_at->format('M d, Y H:i:s'),
+        ];
         // Send email to admin
         Mail::to($admin->admin_email)->queue(new ClosedAccountMail($data));
 

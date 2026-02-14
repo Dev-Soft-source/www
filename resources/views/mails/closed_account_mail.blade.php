@@ -46,7 +46,14 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hi {{ $data['username'] }},</h1>
-                        <p style="font-weight: 400;color:#000;">{{ $data['name'] }} has closed his account. Please visit your dashboard to check.</p>
+                        <p style="font-weight: 400;color:#000;">{{ $data['name'] }} has closed their account and requires your attention.</p>
+                        <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Member Name:</strong> {{ $data['name'] }}</p>
+                            @if(isset($data['transaction_date']))
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Date:</strong> {{ $data['transaction_date'] }}</p>
+                            @endif
+                        </div>
+                        <p style="font-weight: 400;color:#000;">Please visit your dashboard to check.</p>
                     </td>
                 </tr>
                 <tr>

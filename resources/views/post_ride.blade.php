@@ -2312,6 +2312,29 @@
                                         </label>
                                     </div>
                                 @endisset
+                                @isset($postRidePage->features_option18->features_setting_id)
+                                    <div class="flex items-start">
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option18->features_setting_id }}"
+                                        {{ $isNewForm
+                                            ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
+                                                ? 'checked'
+                                                : '')
+                                            : (old('features')
+                                                ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
+                                                    ? 'checked'
+                                                    : '')
+                                                : (in_array($postRidePage->features_option18->features_setting_id, explode('=', $ride->features))
+                                                    ? 'checked'
+                                                    : '')) }}
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        <label for="heating"
+                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                            <span class="">
+                                                {{ $postRidePage->features_option18->name }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endisset
                             </div>
                         </div>
                     </div>

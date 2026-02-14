@@ -28,8 +28,10 @@ class StudentCardUploadMail extends Mailable
      */
     public function build()
     {
+        $name = trim(($this->data['first_name'] ?? '') . ' ' . ($this->data['last_name'] ?? '')) ?: 'Unknown';
+        $date = $this->data['upload_date'] ?? now()->format('M d, Y');
         return $this->markdown('mails/student_card_upload')
-            ->subject("Student Card Added - Approval Required")
+            ->subject("Student Card from {$name} - {$date} - Approval Required")
             ->with("data", $this->data);
     }
 }

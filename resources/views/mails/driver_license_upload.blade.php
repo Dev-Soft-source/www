@@ -48,9 +48,13 @@
                         <h1 style="font-weight: 700;color: #000;">Hello {{ $data['username'] }},</h1>
                         <p style="font-weight: 400;color: #000;">{{ $data['first_name'] }} {{ $data['last_name'] }} has uploaded driver license details. Please visit your dashboard to check.</p>
                         <p style="font-weight: 400;color: #000;">The driver details are:</p>
-                        <p style="font-weight: 400;color: #000;">Email: {{ $data['email'] }}</p>
-                        <p style="font-weight: 400;color: #000;">Phone: {{ $data['phone'] }}</p>
-                        <p style="font-weight: 400;color: #000;">Country: {{ $data['country'] }}</p>
+                        <p style="font-weight: 400;color: #000;"><strong>Name:</strong> {{ $data['first_name'] }} {{ $data['last_name'] }}</p>
+                        <p style="font-weight: 400;color: #000;"><strong>Email:</strong> {{ $data['email'] }}</p>
+                        <p style="font-weight: 400;color: #000;"><strong>Phone:</strong> {{ $data['phone'] }}</p>
+                        <p style="font-weight: 400;color: #000;"><strong>Country:</strong> {{ $data['country'] }}</p>
+                        @if(isset($data['upload_date']))
+                        <p style="font-weight: 400;color: #000;"><strong>Upload Date:</strong> {{ $data['upload_date'] }}</p>
+                        @endif
                     </td>
                 </tr>
                 <tr>
