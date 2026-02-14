@@ -136,21 +136,6 @@ class ProximaLocalRideController extends Controller
                 if (auth()->user()->suspand === '1') {
                     return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
                 }
-                $existingSearch = RecentSearch::where('user_id', auth()->user()->id)
-                    ->where('page_type', 'proximalocal_ride')
-                    ->where('from', 'like', '%' . $request->from . '%')
-                    ->where('to', 'like', '%' . $request->to . '%')
-                    ->first();
-                if ($existingSearch) {
-                    $existingSearch->touch();
-                } else {
-                    RecentSearch::create([
-                        'from' => $request->from,
-                        'to' => $request->to,
-                        'user_id' => auth()->user()->id,
-                        'page_type' => 'proximalocal_ride',
-                    ]);
-                }
             }
 
             $from = $request->from;
@@ -263,6 +248,25 @@ class ProximaLocalRideController extends Controller
             $rides = $rides->orderBy('date', 'asc')->orderBy('time', 'asc')->get()->map(fn($ride) => tap($ride, fn($r) => $r->type = 'ride'));
             $otherRides = $otherRides->orderBy('date', 'asc')->orderBy('time', 'asc')->get()->map(fn($ride) => tap($ride, fn($r) => $r->type = 'otherRide'));
             $allRides = $rides->merge($otherRides);
+
+            // Only save to recent searches if the search returned at least one ProximaLocal ride (under $15)
+            if (auth()->user() && $rides->count() > 0) {
+                $existingSearch = RecentSearch::where('user_id', auth()->user()->id)
+                    ->where('page_type', 'proximalocal_ride')
+                    ->where('from', 'like', '%' . $request->from . '%')
+                    ->where('to', 'like', '%' . $request->to . '%')
+                    ->first();
+                if ($existingSearch) {
+                    $existingSearch->touch();
+                } else {
+                    RecentSearch::create([
+                        'from' => $request->from,
+                        'to' => $request->to,
+                        'user_id' => auth()->user()->id,
+                        'page_type' => 'proximalocal_ride',
+                    ]);
+                }
+            }
 
             $paginatedRides = new LengthAwarePaginator(
                 $allRides->forPage(Paginator::resolveCurrentPage(), 6),
