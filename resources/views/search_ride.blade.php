@@ -853,11 +853,20 @@
                                 {{ $findRidePage->main_heading }}
                             @endisset
                         </h1>
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
                         <button 
                             data-tippy-content="Danger action"
                             data-theme="danger">
                             Delete
                         </button>
+<<<<<<< Updated upstream
+=======
+>>>>>>> 4097a01 (# fix driver_info and search ride)
+>>>>>>> Stashed changes
                     </div>
                     <div
                         class="flex items-start flex-col md:flex-row justify-between">
