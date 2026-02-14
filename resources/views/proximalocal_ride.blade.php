@@ -1059,9 +1059,14 @@
                                                         @endisset
                                                         {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                                                     </p>
+                                                    @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
+                                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
+                                                            <img class="ml-2w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        </button>
+                                                    @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')">
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
+                                                            <img class="ml-2w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
                                                         </button>
                                                     @endif
                                                 </div>
@@ -1243,9 +1248,6 @@
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
@@ -1516,7 +1518,12 @@
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                            <img class="ml-2 w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        </button>
+                                                    @endif
+                                                    @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
+                                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')">
+                                                            <img class="ml-2 w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
                                                         </button>
                                                     @endif
                                                 </div>
@@ -1698,9 +1705,6 @@
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option2_tooltip }}</span></span></span>
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
@@ -1968,15 +1972,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
+                <!-- <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
                     <div class="proximalocal-ride-faq">
                         <div class="flex flex-col items-center justify-center proximalocal-ride-faq__header">
                             <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
                                 FAQs on ProximaLocal Rides
                             </h3>
-                            <!-- <h4 class="text-sm font-FuturaMdCnBT text-center text-black mb-0 mt-1 opacity-90">
-                                (for your peace of mind)
-                            </h4> -->
+
                         </div>
                         <div class="proximalocal-ride-faq__body">
                             @foreach ($extraCareFaqs as $extraCareFaq)
@@ -1993,7 +1995,7 @@
                             @endforeach
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

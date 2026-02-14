@@ -152,7 +152,20 @@
                         @isset($editProfilePage->km_shared_icon)
                             <img class="w-12 h-12 object-contain" src="{{ asset('home_page_icons/' . $editProfilePage->km_shared_icon) }}" alt="">
                         @endisset
-                        <p class="text-xl font-semibold">0</p>
+                        <p class="text-xl font-semibold">
+                            {{ number_format($user->rides()
+                                ->where('status', '!=', 2)
+                                ->where(function ($query) {
+                                    $query->whereDate('rides.date', '<', now()->toDateString())
+                                        ->orWhere(function ($query) {
+                                            $query->whereDate('rides.date', '=', now()->toDateString())
+                                                ->whereTime('rides.time', '<=', now()->toTimeString());
+                                        });
+                                })
+                                ->with('rideDetail')
+                                ->get()
+                                ->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))), 0) }}
+                        </p>
                         <h4 class="text-black">
                             @isset($editProfilePage->km_shared_label)
                                 {{ $editProfilePage->km_shared_label }}

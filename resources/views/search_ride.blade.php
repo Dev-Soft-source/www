@@ -854,10 +854,10 @@
                             @endisset
                         </h1>
                         <button 
-    data-tippy-content="Danger action"
-    data-theme="danger">
-    Delete
-</button>
+                            data-tippy-content="Danger action"
+                            data-theme="danger">
+                            Delete
+                        </button>
                     </div>
                     <div
                         class="flex items-start flex-col md:flex-row justify-between">
@@ -1031,8 +1031,13 @@
                                                         {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <button type="button" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        <button type="button" class="ml-2" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
+                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        </button>
+                                                    @endif
+                                                    @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
+                                                        <button type="button" class="ml-2" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')">
+                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
                                                         </button>
                                                     @endif
                                                 </div>
@@ -1223,9 +1228,6 @@
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt="" data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option2_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option3_tooltip }}">

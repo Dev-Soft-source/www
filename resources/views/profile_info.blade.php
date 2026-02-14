@@ -73,7 +73,20 @@
                 <div class="bg-gray-500 w-0.5 h-20"></div>
                 <div class="flex flex-col justify-center items-center w-48 my-4">
                     <img class="w-12 h-12 object-contain" src="{{ asset('assets/kmshared.png') }}" alt="">
-                    <p class="text-xl font-semibold">0</p>
+                    <p class="text-xl font-semibold">
+                        {{ number_format($user->rides()
+                            ->where('status', '!=', 2)
+                            ->where(function ($query) {
+                                $query->whereDate('rides.date', '<', now()->toDateString())
+                                    ->orWhere(function ($query) {
+                                        $query->whereDate('rides.date', '=', now()->toDateString())
+                                            ->whereTime('rides.time', '<=', now()->toTimeString());
+                                    });
+                            })
+                            ->with('rideDetail')
+                            ->get()
+                            ->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))), 0) }}
+                    </p>
                     <h4 class="text-black">KM shared</h4>
                 </div>
             </div>

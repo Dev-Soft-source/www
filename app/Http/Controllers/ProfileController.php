@@ -207,9 +207,10 @@ class ProfileController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
 
-        $ride = Ride::whereId($id)->first();
+        // Support both: driver user ID (added_by) from ride_detail, or ride ID from other callers
+        $ride = Ride::where('added_by', $id)->first();
         if (!$ride) {
-            $ride = Ride::where('added_by', $id)->first();
+            $ride = Ride::whereId($id)->first();
         }
         if (!$ride || !$ride->driver) {
             abort(404);
