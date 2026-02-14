@@ -209,6 +209,42 @@
         @include('layouts.inc.footer')
     </div>
 
+    @if(isset($birthdayData) && $birthdayData)
+    {{-- Birthday Fireworks Overlay (Google Doodle style) --}}
+    <div id="birthday-fireworks-overlay" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center hidden overflow-hidden">
+        <canvas id="birthday-fireworks-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+        <div class="relative z-10 flex flex-col items-center gap-6 p-8 mx-4 rounded-2xl bg-white shadow-2xl animate__animated animate__fadeIn">
+            <button type="button" id="birthday-close-btn" class="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition" title="Close" aria-label="Close">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            {{-- Circle: user photo or country flag --}}
+            <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg flex-shrink-0">
+                @if($birthdayData['has_profile_image'] && $birthdayData['profile_image'])
+                    <img src="{{ $birthdayData['profile_image'] }}" alt="{{ $birthdayData['username'] }}" class="w-full h-full object-cover" />
+                @else
+                    <img src="{{ $birthdayData['flag_url'] }}" alt="" class="w-full h-full object-cover" />
+                @endif
+            </div>
+            {{-- Rectangle: Happy Birthday message --}}
+            <div class="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 shadow-lg">
+                <p class="text-xl md:text-2xl font-bold text-white text-center">Happy Birthday {{ $birthdayData['username'] }}!</p>
+            </div>
+        </div>
+        {{-- Replay button (bottom center, like Google Doodle) --}}
+        <button type="button" id="birthday-replay-btn" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 p-3 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all hover:scale-110" title="Replay fireworks">
+            <svg class="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            </svg>
+        </button>
+    </div>
+    {{-- Floating icon to replay birthday (visible when overlay was shown today, like Google) --}}
+    <button type="button" id="birthday-floating-icon" class="fixed bottom-20 left-5 z-[9998] p-2.5 rounded-full bg-amber-400/90 hover:bg-amber-400 shadow-lg transition-all hover:scale-110 hidden" title="Replay birthday fireworks" aria-label="Replay birthday fireworks">
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+        </svg>
+    </button>
+    @endif
+
     <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
         id="modal-id">
         <div class="relative w-full my-6 mx-auto max-w-2xl animate__animated animate__fadeIn">
@@ -633,6 +669,277 @@
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ asset('js/front.js') }}" defer></script>
+
+    @if(isset($birthdayData) && $birthdayData)
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+    (function() {
+        var storageKey = 'birthday_seen_{{ date("Y-m-d") }}_{{ $birthdayData["user_id"] ?? 0 }}';
+        var overlay = document.getElementById('birthday-fireworks-overlay');
+        var canvas = document.getElementById('birthday-fireworks-canvas');
+        var replayBtn = document.getElementById('birthday-replay-btn');
+        var closeBtn = document.getElementById('birthday-close-btn');
+        var floatingIcon = document.getElementById('birthday-floating-icon');
+        var fireworksRunning = false;
+        var fireworksRaf = null;
+        var fireworks = [];
+        var particles = [];
+        var sparks = [];
+        var explosions = [];
+        var colors = ['#f59e0b', '#fbbf24', '#facc15', '#eab308', '#f97316', '#fb923c', '#ef4444', '#f43f5e', '#ec4899', '#f472b6', '#f9a8d4', '#a855f7', '#c084fc', '#e879f9', '#8b5cf6', '#6366f1', '#818cf8', '#3b82f6', '#60a5fa', '#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#14b8a6', '#2dd4bf', '#10b981', '#34d399', '#22c55e', '#84cc16', '#a3e635', '#f0abfc', '#e879f9', '#d946ef', '#c026d3'];
+        var lastLaunch = 0;
+
+        function resizeCanvas() {
+            if (!canvas || !overlay) return;
+            var rect = overlay.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function createRocket() {
+            var targetY = random(canvas.height * 0.1, canvas.height * 0.75);
+            return {
+                x: random(canvas.width * 0.15, canvas.width * 0.85),
+                y: canvas.height + 5,
+                vx: random(-0.3, 0.3),
+                vy: -random(11, 15),
+                targetY: targetY,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                trail: []
+            };
+        }
+
+        function explode(rocket) {
+            var cx = rocket.x, cy = rocket.y;
+            explosions.push({ x: cx, y: cy, life: 1, decay: 0.04 });
+            var sparkCount = 100 + Math.floor(Math.random() * 50);
+            for (var i = 0; i < sparkCount; i++) {
+                var angle = (Math.PI * 2 * i) / sparkCount + random(-0.3, 0.3);
+                var len = random(20, 55);
+                sparks.push({
+                    cx: cx, cy: cy, angle: angle, length: 0, maxLength: len,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 1, decay: random(0.006, 0.015),
+                    extend: random(2, 4), lineWidth: random(1, 2.5)
+                });
+            }
+            var particleCount = 60 + Math.floor(Math.random() * 30);
+            for (var j = 0; j < particleCount; j++) {
+                var a = Math.PI * 2 * Math.random();
+                var s = random(3, 8);
+                particles.push({
+                    x: cx, y: cy, vx: Math.cos(a) * s, vy: Math.sin(a) * s - random(0.5, 2),
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 1, decay: random(0.008, 0.018), size: random(1.5, 3)
+                });
+            }
+        }
+
+        function drawFireworks() {
+            if (!canvas || !fireworksRunning || !overlay.classList.contains('flex')) return;
+            var ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var now = Date.now();
+            if (now - lastLaunch > 200) {
+                fireworks.push(createRocket());
+                fireworks.push(createRocket());
+                lastLaunch = now;
+            }
+
+            for (var e = explosions.length - 1; e >= 0; e--) {
+                var ex = explosions[e];
+                ex.life -= ex.decay;
+                if (ex.life <= 0) {
+                    explosions.splice(e, 1);
+                    continue;
+                }
+                var r = 8 + (1 - ex.life) * 25;
+                var g = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r);
+                g.addColorStop(0, 'rgba(255,255,255,' + ex.life * 0.9 + ')');
+                g.addColorStop(0.3, 'rgba(255,220,180,' + ex.life * 0.4 + ')');
+                g.addColorStop(1, 'rgba(255,200,100,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(ex.x, ex.y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            for (var i = fireworks.length - 1; i >= 0; i--) {
+                var r = fireworks[i];
+                r.x += r.vx;
+                r.y += r.vy;
+                r.vy += 0.08;
+                r.trail.push({ x: r.x, y: r.y });
+                if (r.trail.length > 35) r.trail.shift();
+
+                if (r.trail.length > 2) {
+                    for (var t = 1; t < r.trail.length; t++) {
+                        var frac = t / r.trail.length;
+                        ctx.strokeStyle = r.color;
+                        ctx.lineWidth = 1 + frac * 1.5;
+                        ctx.globalAlpha = 0.3 + frac * 0.65;
+                        ctx.beginPath();
+                        ctx.moveTo(r.trail[t-1].x, r.trail[t-1].y);
+                        ctx.lineTo(r.trail[t].x, r.trail[t].y);
+                        ctx.stroke();
+                    }
+                }
+                ctx.globalAlpha = 1;
+
+                if (r.y <= r.targetY || r.vy >= 0) {
+                    explode(r);
+                    fireworks.splice(i, 1);
+                }
+            }
+
+            for (var s = sparks.length - 1; s >= 0; s--) {
+                var sp = sparks[s];
+                var expandEase = 1 - Math.pow(1 - sp.length / sp.maxLength, 2);
+                sp.length = Math.min(sp.length + sp.extend * (0.5 + expandEase * 0.5), sp.maxLength);
+                sp.life -= sp.decay;
+                if (sp.life <= 0) {
+                    sparks.splice(s, 1);
+                    continue;
+                }
+                var ex = sp.cx + Math.cos(sp.angle) * sp.length;
+                var ey = sp.cy + Math.sin(sp.angle) * sp.length;
+                var alpha = sp.life * Math.pow(sp.length / sp.maxLength, 0.7);
+                ctx.strokeStyle = sp.color;
+                ctx.lineWidth = (sp.lineWidth || 1.5) * alpha;
+                ctx.globalAlpha = Math.min(1, alpha * 1.2);
+                ctx.beginPath();
+                ctx.moveTo(sp.cx, sp.cy);
+                ctx.lineTo(ex, ey);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            for (var j = particles.length - 1; j >= 0; j--) {
+                var p = particles[j];
+                var px = p.x, py = p.y;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.08;
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                p.life -= p.decay;
+
+                if (p.life <= 0) {
+                    particles.splice(j, 1);
+                    continue;
+                }
+                var sz = (p.size || 2) * p.life;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = p.life * 0.5;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, sz * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            fireworksRaf = requestAnimationFrame(drawFireworks);
+        }
+
+        function startCanvasFireworks() {
+            if (!canvas || !overlay) return;
+            fireworks = [];
+            particles = [];
+            sparks = [];
+            explosions = [];
+            lastLaunch = 0;
+            fireworksRunning = true;
+            requestAnimationFrame(function() {
+                resizeCanvas();
+                drawFireworks();
+            });
+        }
+
+        function stopCanvasFireworks() {
+            fireworksRunning = false;
+            if (fireworksRaf) {
+                cancelAnimationFrame(fireworksRaf);
+                fireworksRaf = null;
+            }
+            if (canvas) {
+                var ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function runConfettiBurst() {
+            if (typeof confetti !== 'function') return;
+            confetti({ particleCount: 30, spread: 70, origin: { y: 0.6 }, colors: colors });
+        }
+
+        function showOverlay() {
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                if (floatingIcon) floatingIcon.classList.add('hidden');
+                startCanvasFireworks();
+                runConfettiBurst();
+                window.addEventListener('resize', resizeCanvas);
+            }
+        }
+
+        function hideOverlay() {
+            stopCanvasFireworks();
+            window.removeEventListener('resize', resizeCanvas);
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+            if (floatingIcon) floatingIcon.classList.remove('hidden');
+        }
+
+        function initBirthday() {
+            if (!overlay) return;
+            var alreadySeen = localStorage.getItem(storageKey);
+            if (!alreadySeen) {
+                localStorage.setItem(storageKey, '1');
+                showOverlay();
+            } else {
+                if (floatingIcon) floatingIcon.classList.remove('hidden');
+            }
+        }
+
+        if (replayBtn) {
+            replayBtn.addEventListener('click', function() {
+                runConfettiBurst();
+                if (fireworksRunning) {
+                    fireworks.push(createRocket());
+                    fireworks.push(createRocket());
+                }
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', hideOverlay);
+        }
+        if (floatingIcon) {
+            floatingIcon.addEventListener('click', function() {
+                showOverlay();
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBirthday);
+        } else {
+            initBirthday();
+        }
+    })();
+    </script>
+    @endif
 
     <script>
         if ('serviceWorker' in navigator) {

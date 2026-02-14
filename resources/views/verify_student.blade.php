@@ -2,6 +2,20 @@
 
 @section('style')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+@if ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) > now())
+<style>
+    @keyframes success-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 50% { transform: scale(1.02); box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); } }
+    @keyframes check-draw { 0% { stroke-dashoffset: 50; } 100% { stroke-dashoffset: 0; } }
+    @keyframes float-confetti { 0%, 100% { transform: translateY(0) rotate(0deg); opacity: 1; } 50% { transform: translateY(-8px) rotate(5deg); opacity: 0.9; } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .student-approved-card { animation: success-pulse 2s ease-in-out infinite; }
+    .check-svg path { stroke-dasharray: 50; stroke-dashoffset: 50; animation: check-draw 0.6s ease-out 0.3s forwards; }
+    .confetti-dot { animation: float-confetti 2s ease-in-out infinite; }
+    .confetti-dot:nth-child(1) { animation-delay: 0s; left: 10%; } .confetti-dot:nth-child(2) { animation-delay: 0.2s; left: 25%; }
+    .confetti-dot:nth-child(3) { animation-delay: 0.4s; left: 40%; } .confetti-dot:nth-child(4) { animation-delay: 0.1s; left: 60%; }
+    .confetti-dot:nth-child(5) { animation-delay: 0.3s; left: 75%; } .confetti-dot:nth-child(6) { animation-delay: 0.5s; left: 90%; }
+</style>
+@endif
 @endsection
 
 @section('content')
@@ -104,8 +118,26 @@
                 Your student card is under review. You can update it anytime if needed.
             </div> --}}
         @if ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) > now())
-            <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-                Thank you for uploading your student card
+            <div id="student-approved-celebration" class="mt-4 relative overflow-hidden rounded-xl px-6 py-6 student-approved-card bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 border-2 border-emerald-200" role="alert">
+                <div class="absolute inset-0 opacity-30">
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-emerald-500 top-2"></span>
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-green-400 top-3"></span>
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-teal-400 top-4"></span>
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-emerald-400 top-2"></span>
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-green-500 top-3"></span>
+                    <span class="confetti-dot absolute w-2 h-2 rounded-full bg-teal-500 top-4"></span>
+                </div>
+                <div class="relative flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <div class="flex-shrink-0 w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+                        <svg class="check-svg w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                    </div>
+                    <div class="text-center sm:text-left">
+                        <h3 class="text-xl font-bold text-emerald-800 animate__animated animate__fadeIn">Student Card Approved!</h3>
+                        <p class="text-emerald-700 mt-1">Thank you for uploading your student card. You're all set to enjoy student benefits.</p>
+                    </div>
+                </div>
             </div>
         @elseif ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) <= now())
             <div class="mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
@@ -222,6 +254,22 @@
 @section('script')
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+@if ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) > now())
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof confetti === 'function') {
+            setTimeout(function() {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#6ee7b7', '#059669', '#14b8a6', '#2dd4bf'] });
+                setTimeout(function() {
+                    confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#10b981', '#34d399', '#059669'] });
+                    confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#14b8a6', '#2dd4bf', '#0d9488'] });
+                }, 200);
+            }, 300);
+        }
+    });
+</script>
+@endif
 
 <script>
     function hideTooltip(parms) {
