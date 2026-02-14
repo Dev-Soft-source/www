@@ -146,7 +146,7 @@
                                                         <chat-form allow_chat="{{ $allow_chat }}"
                                                             v-on:message-sent-event="addMessage"
                                                             :ride_id="{{ $ride->id ?? 0 }}" :user="{{ auth()->user() }}"
-                                                            type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
+                                                            type_message_placeholder = "{{ $chatsPage->type_message_placeholder ?? 'Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.' }}"></chat-form>
                                                     </div>
                                         </div>
                                         @endif
@@ -155,7 +155,7 @@
                                             <chat-form allow_chat="{{ $allow_chat }}"
                                                 v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id ?? 0 }}"
                                                 :user="{{ auth()->user() }}"
-                                                type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
+                                                type_message_placeholder = "{{ $chatsPage->type_message_placeholder ?? 'Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.' }}"></chat-form>
                                         </div>
                                         @endif
 

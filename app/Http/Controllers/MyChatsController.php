@@ -70,8 +70,6 @@ class MyChatsController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        Log::info($notifications);
-
         $chats = Message::where(function ($query) use($user_id){
             $query->where('sender', $user_id)->orWhere('receiver', $user_id);
         })
@@ -129,7 +127,6 @@ class MyChatsController extends Controller
             })
             ->values();
 
-        Log::info($chats);
         return view('my_chats', ['successMessage' => $successMessage,'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
     }
 

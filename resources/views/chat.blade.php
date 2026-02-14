@@ -133,12 +133,12 @@
                     @if (strtotime($ride->date) < strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
                         @if ($hoursDifference <= 48)
                         <div class="panel-footer">
-                            <chat-form allow_chat="{{ $allow_chat }}" v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id }}" :user="{{ auth()->user() }}" type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
+                            <chat-form allow_chat="{{ $allow_chat }}" v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id }}" :user="{{ auth()->user() }}" type_message_placeholder = "{{ $chatsPage->type_message_placeholder ?? 'Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.' }}"></chat-form>
                         </div>
                         @endif
                     @else
                         <div class="panel-footer">
-                            <chat-form allow_chat="{{ $allow_chat }}" v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id }}" :user="{{ auth()->user() }}" type_message_placeholder = "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform."></chat-form>
+                            <chat-form allow_chat="{{ $allow_chat }}" v-on:message-sent-event="addMessage" :ride_id="{{ $ride->id }}" :user="{{ auth()->user() }}" type_message_placeholder = "{{ $chatsPage->type_message_placeholder ?? 'Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.' }}"></chat-form>
                         </div>
                     @endif
                 </div>

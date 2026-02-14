@@ -78,6 +78,8 @@ class ChatsController extends Controller
             return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
                 ->with('error', 'Ride or passenger not found.');
         }
+
+        // dd($chatsPage);
         
         return view('chat', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
     }
