@@ -349,7 +349,7 @@
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 Booking Price:
                             </h4>
-                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
+                            <p class="text-lg font-normal text-left text-primary" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail[0]->price }}
 
                                 @isset($bookingPage->per_seat_label)
                                     {{ $bookingPage->per_seat_label }}
@@ -364,7 +364,7 @@
                                 @isset($bookingPage->payment_method_label)
                                     {{ $bookingPage->payment_method_label }}
                                 @endisset
-                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
+                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -374,7 +374,7 @@
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div
-                                        class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                        class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
