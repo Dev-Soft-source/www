@@ -5,6 +5,46 @@
 @endsection
 
 @section('content')
+@if(session('error'))
+<div id="errorModal" class="relative z-50" aria-labelledby="error-modal-title" role="dialog" aria-modal="true">
+    <div onclick="closeErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                <button type="button" onclick="closeErrorModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start justify-center">
+                        <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12 text-red-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="error-modal-title">Notice</h3>
+                        <div class="mt-2 w-full">
+                            <p class="can-exp-p text-center text-gray-700">{!! session('error') !!}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
+                    <button type="button" onclick="closeErrorModal()" class="button-exp-fill">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function closeErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) modal.style.display = 'none';
+}
+</script>
+@endif
 @if(session('message'))
 <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>

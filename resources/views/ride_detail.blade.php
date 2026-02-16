@@ -401,8 +401,7 @@
                         </div>
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
-                        <div class="p-4">
-                            
+                        <div class="p-4">                            
                             <p class="text-left font-semibold">
                                 @if (auth()->user() &&
                                         $ride->bookings &&

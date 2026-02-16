@@ -1332,25 +1332,29 @@ class BookingController extends Controller
                         'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
                     ]);
 
-                    $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i')];
+                    $driver = $ride->driver ?? User::find($ride->added_by);
+                    if ($driver) {
+                        $data = ['first_name' => $driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $driver->email, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i')];
 
-                    // Send booking request email
-                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+                        // Send booking request email
+                        if (isset($driver->email_notification) && $driver->email_notification == 1) {
 
-                        Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                            Mail::to($driver->email)->queue(new BookingRequestMail($data));
+                        }
                     }
                     if (isset($user->email_notification) && $user->email_notification == 1) {
 
                         $data = ['first_name' => $user->first_name];
                         Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
 
-
-                        $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
+                        if ($driver) {
+                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
                             // ->where('verified', '1')
                             ->where('default', '1')
                             ->first();
 
-                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
+                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
+                        }
 
                         // Get the verified phone number for the passenger (user)
                         $passengerPhoneNumber = PhoneNumber::where('user_id', $user->id)
@@ -1398,7 +1402,7 @@ class BookingController extends Controller
                         $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->first();
                     }
 
-                    if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
+                    if ($phoneNumber && $driver && env('APP_ENV') != 'local' && isset($driver->sms_notification) && $driver->sms_notification == 1) {
                         // Send the secured cash code via Twilio
                         $sid = env('TWILIO_ACCOUNT_SID');
                         $token = env('TWILIO_AUTH_TOKEN');
@@ -1410,11 +1414,11 @@ class BookingController extends Controller
                         $title = "";
                         $currentHour = date('H');
                         if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $ride->driver->first_name . ",";
+                            $title = "Good morning " . $driver->first_name . ",";
                         } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $ride->driver->first_name . ",";
+                            $title = "Good afternoon " . $driver->first_name . ",";
                         } else {
-                            $title = "Good evening " . $ride->driver->first_name . ",";
+                            $title = "Good evening " . $driver->first_name . ",";
                         }
 
                         // $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
@@ -3611,7 +3615,9 @@ class BookingController extends Controller
                     ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
             }
         } else {
-            return 'Request expired';
+            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
+            return redirect()->route('my_rides', ['lang' => $lang])
+                ->with('error', __('Request expired'));
         }
     }
 
@@ -3725,7 +3731,10 @@ class BookingController extends Controller
                 }
             }
         } else {
-            return 'Request expired';
+            $selectedLanguage = session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : Language::where('is_default', 1)->first();
+            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
+            return redirect()->route('my_rides', ['lang' => $lang])
+                ->with('error', __('Request expired'));
         }
 
         $notification = Notification::create([
@@ -4292,23 +4301,26 @@ class BookingController extends Controller
                         'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
                     ]);
 
-                    $fcmService = new FCMService();
-                    $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
-                    $body = $notification->message;
+                    $driverUserId = $ride->driver?->id ?? $ride->added_by;
+                    if ($driverUserId) {
+                        $fcmService = new FCMService();
+                        $fcm_tokens = FCMToken::where('user_id', $driverUserId)->get();
+                        $body = $notification->message;
 
-                    $fcmToken = $ride->driver->mobile_fcm_token;
-                    if ($fcmToken) {
-                        $fcmService->sendNotification($fcmToken, $body);
-                    }
+                        $driverUser = $ride->driver ?? User::find($ride->added_by);
+                        $fcmToken = $driverUser?->mobile_fcm_token;
+                        if ($fcmToken) {
+                            $fcmService->sendNotification($fcmToken, $body);
+                        }
 
-                    foreach ($fcm_tokens as $fcm_token) {
-                        try {
-                            $fcmService->sendNotification($fcm_token->token, $body);
-                        } catch (\Exception $e) {
-                            Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                        foreach ($fcm_tokens as $fcm_token) {
+                            try {
+                                $fcmService->sendNotification($fcm_token->token, $body);
+                            } catch (\Exception $e) {
+                                Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                            }
                         }
                     }
-
 
                     $notification = Notification::create([
                         'type' => 2,
@@ -4368,9 +4380,10 @@ class BookingController extends Controller
 
                     $bookingPrice = $booking->price * $booking->seats;
 
-                    // $data = ['first_name' => $ride->driver->first_name, 'passenger_first_name' => $user->first_name,'secured_cash_code' => $secured_cash_code];
-                    // Mail::to($ride->driver->email)->queue(new InstantBookingMail($data));
-                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+                    $driver = $ride->driver ?? User::find($ride->added_by);
+                    // $data = ['first_name' => $driver->first_name, 'passenger_first_name' => $user->first_name,'secured_cash_code' => $secured_cash_code];
+                    // Mail::to($driver->email)->queue(new InstantBookingMail($data));
+                    if ($driver && isset($driver->email_notification) && $driver->email_notification == 1) {
 
                         $passengerPhoneNumber = PhoneNumber::where('user_id', $user->id)
                             // ->where('verified', '1')
@@ -4378,16 +4391,18 @@ class BookingController extends Controller
                             ->first();
 
                         $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone : $user->phone;
-                        $data = ['first_name' => $ride->driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
-                        Mail::to($ride->driver->email)->queue(new PassengerDetailsMail($data));
+                        $data = ['first_name' => $driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
+                        Mail::to($driver->email)->queue(new PassengerDetailsMail($data));
                     }
 
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
-                        ->where('default', '1')
-                        ->first();
-                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
-                    $data = ['first_name' => $user->first_name, 'driver_first_name' => $ride->driver->first_name, 'driver_last_name' => $ride->driver->last_name, 'gender' => $ride->driver->gender, 'email' => $ride->driver->email, 'phone' => $driverPhoneToUse, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
-                    Mail::to($user->email)->queue(new DriverDetailsMail($data));
+                    if ($driver) {
+                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
+                            ->where('default', '1')
+                            ->first();
+                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
+                        $data = ['first_name' => $user->first_name, 'driver_first_name' => $driver->first_name, 'driver_last_name' => $driver->last_name, 'gender' => $driver->gender, 'email' => $driver->email, 'phone' => $driverPhoneToUse, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                        Mail::to($user->email)->queue(new DriverDetailsMail($data));
+                    }
 
                     // $data = ['first_name' => $user->first_name, 'seats' => $booking->seats, 'seats_amount' => $request->seats_amount, 'booking_credit' => $booking->booking_credit, 'online_payment' => $request->online_payment, 'cash_payment' => $request->cash_payment, 'total' => $request->total];
                     $data = [
@@ -4406,19 +4421,19 @@ class BookingController extends Controller
                     ];
                     Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
 
-                    if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
-                        $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
+                    if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1 && $driver) {
+                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
                             ->where('default', '1')
                             ->first();
-                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
+                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
 
                         $emailData = [
                             'first_name' => $user->first_name,
                             'secured_cash_code' => $secured_cash_code,
-                            'driver_first_name' => $ride->driver->first_name,
-                            'driver_last_name' => $ride->driver->last_name,
+                            'driver_first_name' => $driver->first_name,
+                            'driver_last_name' => $driver->last_name,
                             'driver_phone' => $driverPhoneToUse,
-                            'driver_email' => $ride->driver->email,
+                            'driver_email' => $driver->email,
                             'departure' => $ride->rideDetail[0]->departure,
                             'destination' => $ride->rideDetail[0]->destination,
                             'date' => Carbon::parse($ride->date)->format('F d, Y'),
@@ -4468,7 +4483,7 @@ class BookingController extends Controller
                         $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
                     }
 
-                    if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
+                    if ($phoneNumber && $driver && env('APP_ENV') != 'local' && isset($driver->sms_notification) && $driver->sms_notification == 1) {
                         // Send the secured cash code via Twilio
                         $sid = env('TWILIO_ACCOUNT_SID');
                         $token = env('TWILIO_AUTH_TOKEN');
@@ -4481,11 +4496,11 @@ class BookingController extends Controller
                         $title = "";
                         $currentHour = date('H');
                         if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $ride->driver->first_name . ",";
+                            $title = "Good morning " . $driver->first_name . ",";
                         } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $ride->driver->first_name . ",";
+                            $title = "Good afternoon " . $driver->first_name . ",";
                         } else {
-                            $title = "Good evening " . $ride->driver->first_name . ",";
+                            $title = "Good evening " . $driver->first_name . ",";
                         }
 
                         $passengerPhoneNumber = PhoneNumber::where('user_id', $user->id)
@@ -4540,6 +4555,8 @@ class BookingController extends Controller
                     }
 
                     if ($passengerPhoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
+                        $driver = $driver ?? $ride->driver ?? User::find($ride->added_by);
+                        if ($driver) {
                         $sid = env('TWILIO_ACCOUNT_SID');
                         $token = env('TWILIO_AUTH_TOKEN');
                         $from = env('TWILIO_PHONE_NUMBER');
@@ -4560,16 +4577,16 @@ class BookingController extends Controller
                         $departureDate = date('d F, Y', strtotime($ride->date));
                         $seatWords = numberToWords($booking->seats);
 
-                        $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
+                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
                             ->where('default', '1')
                             ->first();
-                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
+                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
 
                         $message = $title . "\n" . "From ProximaRide: You have just booked on the ride from " . $booking->departure .
                             " to " . $booking->destination .
                             " on " . $departureDate .
                             " at " . $departureTime .
-                            ".\nDriver name is (" . $ride->driver->first_name .
+                            ".\nDriver name is (" . $driver->first_name .
                             ") Phone " . $driverPhoneToUse .
                             "\nNumber of seats: " . $seatWords;
 
@@ -4587,6 +4604,7 @@ class BookingController extends Controller
                             }
                         } else {
                             Log::info('SMS skipped (passenger booking confirmation): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
+                        }
                         }
                     }
 
@@ -6891,20 +6909,24 @@ class BookingController extends Controller
             'destination' => $booking->destination
         ]);
 
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $booking->ride->added_by)->get();
-        $body = $notification->message;
+        $driverUserId = $booking->ride->added_by;
+        if ($driverUserId) {
+            $fcmService = new FCMService();
+            $fcm_tokens = FCMToken::where('user_id', $driverUserId)->get();
+            $body = $notification->message;
 
-        $fcmToken = $booking->ride->driver->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
+            $driver = $booking->ride->driver ?? User::find($driverUserId);
+            $fcmToken = $driver?->mobile_fcm_token;
+            if ($fcmToken) {
+                $fcmService->sendNotification($fcmToken, $body);
+            }
 
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+            foreach ($fcm_tokens as $fcm_token) {
+                try {
+                    $fcmService->sendNotification($fcm_token->token, $body);
+                } catch (\Exception $e) {
+                    Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                }
             }
         }
 

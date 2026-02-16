@@ -252,7 +252,7 @@
         confirmButtonText: '{{ $tripsPage->booking_cancel_btn_yes_label ?? "Yes, cancel it!"}}',
         cancelButtonText: '{{ $tripsPage->booking_cancel_btn_no_label ?? "No, take me back"}}',
         customClass: {
-            popup: 'modal-border'
+            popup: 'modal-border1'
         }
         }).then((result) => {
         if (result.isConfirmed) {

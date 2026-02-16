@@ -42,6 +42,25 @@
             min-width: 18rem;
         }
     }
+
+    /* Payment method tooltip: above exclamation icon with arrow pointing down to icon */
+    .payment-method-tooltip {
+        position: relative;
+        background-color: #c75b5b;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        min-width: 300px;
+        max-width: 380px;
+    }
+    .payment-method-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #c75b5b;
+    }
 </style>
 @endsection
 
@@ -622,12 +641,35 @@
                         </div>
                         <div class="bg-white p-4 rounded-b-lg">
                             <div class="flex items-center justify-between gap-2">
-                                <p class="text-black">
-                                    <span id="selectedSeats">1</span>
-                                    @isset($bookingPage->seat_label)
-                                        {{ $bookingPage->seat_label }}
-                                    @endisset
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-black">
+                                        <span id="selectedSeats">1</span>
+                                        @isset($bookingPage->seat_label)
+                                            {{ $bookingPage->seat_label }}
+                                        @endisset
+                                    </p>
+                                    <div class="relative sups inline-flex items-center group">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 cursor-help hover:text-gray-600 peer">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        </svg>
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
+                                            <div class="payment-method-tooltip">
+                                                @php
+                                                    $paymentOption1Id = is_object($postRidePage->payment_methods_option1 ?? null) ? ($postRidePage->payment_methods_option1->features_setting_id ?? null) : ($postRidePage->payment_methods_option1 ?? null);
+                                                    $paymentOption3Id = isset($postRidePage->payment_methods_option3) ? (is_object($postRidePage->payment_methods_option3) ? ($postRidePage->payment_methods_option3->features_setting_id ?? null) : $postRidePage->payment_methods_option3) : null;
+                                                    $ridePaymentId = is_object($ride->payment_method ?? null) ? ($ride->payment_method->features_setting_id ?? null) : ($ride->payment_method ?? null);
+                                                @endphp
+                                                @if ($ridePaymentId !== null && $ridePaymentId == $paymentOption1Id)
+                                                    <p class="text-white text-sm">To be paid in cash directly to the driver at the time of the ride.</p>
+                                                @elseif ($paymentOption3Id !== null && $ridePaymentId == $paymentOption3Id)
+                                                    <p class="text-white text-sm">This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.</p>
+                                                @else
+                                                    <p class="text-white text-sm">ProximaRide will transfer this amount to the driver only after the ride is completed.</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="totalSeatsAmount text-black"></p>
                                 <input type="hidden" name="seats_amount" class="totalSeatsAmountInput form-control" readonly>
                             </div>
@@ -722,18 +764,12 @@
                                                 {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                             </span>
                                         </label>
-                                        <div class="sups relative inline-flex ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <div class="sups relative inline-flex ml-2 group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                              class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(180px);"
-                                                >
+                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
+                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
                                                     {!! str_replace('<p>', '<p class="text-white font-semibold text-start text-sm lg:text-base">', $bookingPage->coffee_from_wall_tooltip) !!}
                                                 </div>
                                             </div>
@@ -742,19 +778,13 @@
                                     <div id="hideBookingFee" class="hidden items-center space-x-1">
                                         <p class="text-black">-</p>
                                         <p class="totalAmount text-black"></p>
-                                        <div class="sups relative inline-flex ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <div class="sups relative inline-flex ml-2 group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                              class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(150px);"
-                                                >
-                                                   {{ $bookingPage->coffee_from_amount_wall_tooltip }}
+                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
+                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
+                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">{{ $bookingPage->coffee_from_amount_wall_tooltip }}</p>
                                                 </div>
                                             </div>
                                         </div>

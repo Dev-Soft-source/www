@@ -1,4 +1,4 @@
-﻿@extends('layouts.template')
+@extends('layouts.template')
 
 @section('style')
 <style>
@@ -162,7 +162,6 @@
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="p-4">
-
                             <p class="text-left font-semibold">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
@@ -175,7 +174,7 @@
                                                 @isset($rideDetailPage->seats_left_label)
                                                     {{ $rideDetailPage->seats_left_label }}:
                                                 @endisset
-                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                             </a>
                                         @endif
                                     @endif
@@ -186,13 +185,13 @@
                                             })->sum('seats') !=
                                         0)
                                     @if ($ride->status !== '2')
-                                        <div class="flex">
+                                        <div class="flex ">
                                             <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="">
+                                                class="text-xl xl:text-2xl">
                                                 @isset($rideDetailPage->seats_left_label)
                                                     {{ $rideDetailPage->seats_left_label }}:
                                                 @endisset
-                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                             </a>
                                         </div>
                                     @endif
@@ -202,11 +201,10 @@
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4">
-                            <h4 class="text-gray-600 text-xl xl:text-2xl">
+                            <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="font-semibold text-left text-primary">${{ $booking->price }}
-
+                            <p class="text-lg font-normal text-left text-primary" style="font-family: 'Roboto', sans-serif;">${{ $booking->price }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -216,21 +214,20 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="font-medium text-left text-black pt-2">
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-primary font-normal">{{ $ride->payment_method->name }}</span>
-                            </p>
+                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
+                            </h4>
                         </div>
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-gray-600 text-xl xl:text-2xl">
-                                    Booking method:
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div
-                                        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                                    <div class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -246,11 +243,11 @@
                         <div
                             class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
                             <div>
-                                <p class="font-medium md:text-center text-black mr-4">
+                                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
                                     @isset($rideDetailPage->co_passenger_label)
                                         {{ $rideDetailPage->co_passenger_label }}
                                     @endisset :
-                                </p>
+                                </h4>
                             </div>
                             <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
                                 @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $bookingItem)
@@ -651,7 +648,9 @@
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-800  focus:ring-2">
                                     <label for="" class="ml-2 font-normal text-gray-900">
-                                        {{ $bookingPage->booking_term_agree_text ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age" }}
+                                        @isset($bookingPage->booking_term_agree_text)
+                                            {!! $bookingPage->booking_term_agree_text !!}
+                                        @endisset
                                         <span class="text-red-500">*</span>
                                     </label>
                                 </div>
@@ -684,7 +683,9 @@
                                         {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
+                                            @isset($firmText)
+                                                {!! $firmText !!}
+                                            @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                     </div>
@@ -710,7 +711,9 @@
                                             {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ $bookingPage->booking_pink_ride_term_agree_text ?? "I understand that I am booking on a Pink Ride, which is exclusive for female passengers and drivers. I will not send a male passenger in my place, or bring one along with me, who is above 12 years of age. I understand that, if I do, I will not be allowed in the ride, and my booking fee and booking price will not be refunded" }}
+                                            @isset($bookingPage->booking_pink_ride_term_agree_text)
+                                                {!! $bookingPage->booking_pink_ride_term_agree_text !!}
+                                            @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                     </div>
@@ -735,7 +738,9 @@
                                             {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="" class="ml-2 font-normal text-gray-900">
-                                            {{ $bookingPage->booking_extra_care_ride_term_agree_text ?? "I understand that I am booking on a Extra-care Ride" }}
+                                            @isset($bookingPage->booking_extra_care_ride_term_agree_text)
+                                                {!! $bookingPage->booking_extra_care_ride_term_agree_text !!}
+                                            @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                     </div>
@@ -771,8 +776,8 @@
                                                 <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                     <span class="font-medium text-xl">
                                                         @isset($bookingPage->paypal_label)
-                                                        {{ $bookingPage->paypal_label }}
-                                                    @endisset
+                                                            {!! $bookingPage->paypal_label !!}
+                                                        @endisset
                                                     </span>
                                                 </label>
                                             </div>
@@ -782,7 +787,7 @@
                                                     <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                         <span class="font-medium text-xl">
                                                             @isset($bookingPage->credit_card_label)
-                                                                {{ $bookingPage->credit_card_label }}
+                                                                {!! $bookingPage->credit_card_label !!}
                                                             @endisset
                                                         </span>
                                                     </label>
@@ -818,7 +823,7 @@
                                                         {{-- <a href="{{ route('my_cards.create', ['lang' => $selectedLanguage->abbreviation, 'rideDetailId' => $ride->rideDetail[0]->id, 'rideId' => $ride->rideDetail[0]->ride_id, 'type' => 'booking']) }}" class="button-exp-fill"> --}}
                                                         <button onclick="storeDataAndRedirect()" class="button-exp-fill">
                                                             @isset($bookingPage->add_card_label)
-                                                                {{ $bookingPage->add_card_label }}
+                                                                {!! $bookingPage->add_card_label !!}
                                                             @endisset
                                                         </button>
                                                     </div>
