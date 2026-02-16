@@ -1008,10 +1008,18 @@
                                         @else
                                             href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                         @endif>
-                                        <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1) &&
-                                                in_array($findRidePage->ride_features_option1->features_setting_id, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2) &&
-                                                in_array($findRidePage->ride_features_option2->features_setting_id, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
-                                            id="ride-{{ $ride->id }}">
+                                        @php
+                                            $isPink = isset($findRidePage->ride_features_option1) && in_array($findRidePage->ride_features_option1->features_setting_id, explode('=', $ride->features));
+                                            $isExtraCare = isset($findRidePage->ride_features_option2) && in_array($findRidePage->ride_features_option2->features_setting_id, explode('=', $ride->features));
+                                            $isPinkAndExtraCare = $isPink && $isExtraCare;
+                                        @endphp
+                                        @if ($isPinkAndExtraCare)
+                                            {{-- Double frame: green outside, pink inside, ~1–2mm gap --}}
+                                            <div class="rounded-lg border-[3px] border-solid border-green-500 p-[2px] shadow-3xl">
+                                                <div class="rounded-[6px] border-[3px] border-solid border-pink-500" id="ride-{{ $ride->id }}">
+                                        @else
+                                            <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif($isPink) border-pink-500 @elseif($isExtraCare) border-green-500 @else border-gray-100 @endif" id="ride-{{ $ride->id }}">
+                                        @endif
                                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
                                                     <p class="flex items-center space-x-2 font-semibold">
@@ -1393,6 +1401,9 @@
                                                 </div> --}}
                                             </div>
                                         </div>
+                                        @if ($isPinkAndExtraCare)
+                                            </div>
+                                        @endif
                                     </a>
                                     @endif
                                 </div>
