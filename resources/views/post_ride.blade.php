@@ -371,7 +371,7 @@
             @endisset
         </a>
     </div>
-    <div class="pt-1 flex mt-2 md:mt-0">
+    <div class="pt-1 flex justify-end mt-2 md:mt-0">
         <p>
             <span class="text-red-500">* {{ $postRideSubDetailPage->feilds_required_text??'Indicates required fields' }} </span>
         </p>
