@@ -9,10 +9,14 @@
                 @endisset
             </h1>
         </div>
-
+        
         <div class="pb-2">
             @isset($coffeeWallPage->main_text)
-                {!! $coffeeWallPage->main_text !!}
+                @php
+                    $storyUrl = route('coffee_on_wall_story', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+                    $mainText = preg_replace('/\{\{\s*route\s*\(\s*[\'"]coffee_on_wall_story[\'"].*?\}\}\s*/s', $storyUrl, $coffeeWallPage->main_text);
+                @endphp
+                {!! $mainText !!}
             @endisset
         </div>
         <div class="text-right md:mr-20 text-red-500 text-lg">

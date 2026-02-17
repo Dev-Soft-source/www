@@ -38,3 +38,4 @@ package-lock.json
 CLAUDE.local.md
 public/css/front.css
 public/mix-manifest.json
+public/js/front.js
