@@ -323,8 +323,7 @@ class HomeController extends Controller
                     $postRidePage->booking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->booking_option2)
                         ->whereLanguageId($selectedLanguage->id)
                         ->first();
-                }
-
+                }                
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $homePage = HomePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 // Fetch video_details for the Introduction Video using the video's ID.

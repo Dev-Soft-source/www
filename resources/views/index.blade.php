@@ -606,115 +606,122 @@
                                                     @endisset
                                                 </p>
                                             </div> --}}
+                                            @php
+                                                $iconPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                                                $iconSrc = function ($detail) use ($iconPlaceholder) {
+                                                    $icon = $detail?->display_icon;
+                                                    return ($icon !== null && $icon !== '') ? asset('home_page_icons/' . $icon) : $iconPlaceholder;
+                                                };
+                                            @endphp
                                             <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
                                                 <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
                                                     <img class="w-full h-full object-cover rounded-full"
-                                                        src="{{ $ride->car_image }}"
+                                                        src="{{ $ride->car_image ?? $iconPlaceholder }}"
                                                         alt="">
                                                 </div>
                                                 <div class="flex items-center space-x-1">
                                                     @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->booking_option1_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $postRidePage->booking_option1->icon)}}"
+                                                            src="{{ $iconSrc($postRidePage->booking_option1) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->booking_option2_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $postRidePage->booking_option2->icon)}}"
+                                                            src="{{ $iconSrc($postRidePage->booking_option2) }}"
                                                             alt=""></a>
                                                     @endif
                                                     @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option1_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->payment_methods_option2) }}" alt=""></a>
                                                     @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option2_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->payment_methods_option3) }}" alt=""></a>
                                                     @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->payment_methods_option3_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->payment_methods_option4) }}" alt=""></a>
                                                     @endif
                                                     @if ($ride->smoke == ($findRidePage->smoking_option1->features_setting_id ?? null))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option1_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option1->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option1_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->smoking_option1) }}" alt=""></a>
                                                     @elseif ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->smoking_option2_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->smoking_option2) }}" alt=""></a>
                                                     @endif
                                                     @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option1_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option1->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option1) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option2_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option2) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->animals_option3_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option3) }}"
                                                             alt=""></a>
                                                     @endif
                                                     @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option1_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->luggage_option1) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option2_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->luggage_option2) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option3_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->luggage_option3) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option4_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->luggage_option4) }}"
                                                             alt=""></a>
                                                     @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
                                                         <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->luggage_option5_tooltip }}')"><img class="w-8 h-8"
-                                                            src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}"
+                                                            src="{{ $iconSrc($findRidePage->luggage_option5) }}"
                                                             alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option1) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option2) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option3_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option3) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option8_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option8) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option9_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option9) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option10_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option10) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option11_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option11) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option12_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option12) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option13_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option13) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option14_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option14) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option15_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option15) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option16_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($findRidePage->ride_features_option16) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option4_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($postRidePage->features_option4) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option5_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($postRidePage->features_option5) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option6_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($postRidePage->features_option6) }}" alt=""></a>
                                                     @endif
                                                     @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}')"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""></a>
+                                                        <a href="javascript:void(0);" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option7_tooltip }}')"><img class="w-8 h-8" src="{{ $iconSrc($postRidePage->features_option7) }}" alt=""></a>
                                                     @endif
                                                 </div>
                                             </div>
@@ -724,7 +731,7 @@
                                                 <div class="flex items-center space-x-2">
                                                     <div class="w-12 h-12 rounded-full overflow-hidden">
                                                         <img class="w-full h-full object-contain"
-                                                            src="{{ $ride->driver?->profile_image }}" alt="">
+                                                            src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}" alt="">
                                                     </div>
                                                     <div class="text-center">
                                                         <p class="font-semibold">
