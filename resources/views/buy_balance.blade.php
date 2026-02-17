@@ -44,26 +44,33 @@
                                             <div class="w-full md:w-1/2">
                                                 <label for="payment_method" class="block mb-3 font-medium text-gray-900 mt-12 font-FuturaMdCnBT can-exp-h4">Pay with</label>
                                                 <div class="border rounded-md overflow-hidden divide-y">
+                                                    @php
+                                                    $paymentMethodOld = old('payment_method');
+                                                    $defaultPaymentMethod = $paymentMethodOld ?: (count($cards) > 0 ? 'credit_card' : 'paypal');
+                                                @endphp
                                                     <div class="flex items-center justify-between p-3">
-                                                        <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer">
+                                                        <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer" {{ $defaultPaymentMethod === 'paypal' ? 'checked' : '' }}>
                                                         <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                             <img class="h-12" src="{{ asset('assets/paypal.png') }}" alt="">
                                                         </label>
                                                     </div>
                                                     <div>
                                                         <div class="flex items-center justify-between p-3">
-                                                            <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
+                                                            <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ $defaultPaymentMethod === 'credit_card' ? 'checked' : '' }}>
                                                             <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                                 <span class="font-medium text-xl">
-                                                                    Pay with credit card
+                                                                    Debit or Credit Card
                                                                 </span>
                                                             </label>
                                                         </div>
-                                                        <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
+                                                        <div class="cards mt-2 pb-2 {{ $defaultPaymentMethod === 'credit_card' ? '' : 'hidden' }}">
+                                                            @php
+                                                                $cardCheckedAssigned = false;
+                                                            @endphp
                                                             @foreach ($cards as $card)
                                                                 @if ($card->paymentMethod)
                                                                     <div class="flex items-start justify-between p-3">
-                                                                        <label for="card_id" class="font-normal text-gray-900 flex items-start space-x-1">
+                                                                        <label for="card_id_{{ $card->id }}" class="font-normal text-gray-900 flex items-start space-x-1 cursor-pointer">
                                                                             <div>
                                                                                 <p class="leading-normal mt-2">
                                                                                     **** **** **** {{ $card->paymentMethod->card->last4 }}
@@ -74,17 +81,18 @@
                                                                             </div>
                                                                         </label>
                                                                         @php
-                                                                         $checked = "";
-                                                                        if(old('card_id') == $card->id){
-                                                                            $checked = "checked";
-                                                                            
-                                                                        }else if($card->primary_card == true){
-                                                                            $checked = "checked";
-                                                                            $cardSelected = true;
-                                                                        } 
+                                                                            $checked = '';
+                                                                            if ($paymentMethodOld && (string) old('card_id') === (string) $card->id) {
+                                                                                $checked = 'checked';
+                                                                                $cardSelected = true;
+                                                                            } elseif (!$cardCheckedAssigned && $card->primary_card) {
+                                                                                $checked = 'checked';
+                                                                                $cardSelected = true;
+                                                                                $cardCheckedAssigned = true;
+                                                                            }
                                                                         @endphp
-                                                                        <input type="radio" id="card_id" name="card_id" value="{{ $card->id }}"
-                                                                            {{ $checked}} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                                                        <input type="radio" id="card_id_{{ $card->id }}" name="card_id" value="{{ $card->id }}"
+                                                                            {{ $checked }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
                                                                     </div>
                                                                 @endif
                                                             @endforeach
@@ -101,9 +109,17 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <br>
-                                                    <div id="paymentSectionGPay" class="hidden">
-                                                        <div id="payment-request-button"></div>
+                                                    <div class="flex items-center justify-between p-3 border-t">
+                                                        <span class="font-medium text-xl flex items-center gap-2">
+                                                            <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="" class="h-6" width="48" height="24" onerror="this.style.display='none'">
+                                                            Google Pay / Apple Pay
+                                                        </span>
+                                                    </div>
+                                                    <div id="paymentSectionGPay" class="px-3 pb-3">
+                                                        <p id="gpayPlaceholder" class="text-sm text-gray-500 mb-2">Enter an amount above to pay with Google Pay or Apple Pay.</p>
+                                                        <div id="payment-request-button" class="min-h-[48px]"></div>
+                                                        <p id="gpayError" class="text-red-500 text-sm mt-2 hidden" role="alert"></p>
+                                                        <p id="gpayUnsupported" class="text-sm text-gray-500 mt-2 hidden">Google Pay and Apple Pay are not available. Requirements: <strong>HTTPS</strong>, domain registered in Stripe Dashboard (Settings → Payment methods), and a card in Google Pay (<a href="https://pay.google.com" target="_blank" rel="noopener" class="underline">pay.google.com</a>) or Apple Wallet. In Chrome, enable &quot;Payment methods&quot; in Settings → Privacy and security → Site settings.</p>
                                                     </div>
                                                 </div>
                                                 @error('payment_method')
@@ -188,110 +204,172 @@ function hideTooltip(parms) {
 
 
 <script>
-    const stripe = Stripe('{{ env('STRIPE_KEY') }}'); // Your public key from Stripe
-
-        const paymentRequest = stripe.paymentRequest({
-        country: 'US',
-        currency: 'usd',
+    var stripePk = '{{ env('STRIPE_KEY') ?? '' }}';
+    if (!stripePk || stripePk.length < 10) {
+        document.addEventListener('DOMContentLoaded', function () {
+            var el = document.getElementById('gpayUnsupported');
+            if (el) {
+                el.textContent = 'Google Pay / Apple Pay are not configured (missing Stripe key).';
+                el.classList.remove('hidden');
+            }
+            var ph = document.getElementById('gpayPlaceholder');
+            if (ph) ph.classList.add('hidden');
+        });
+    } else {
+    const stripe = Stripe(stripePk);
+    // Payment Request (Google Pay / Apple Pay) – currency must match create-payment-intent backend (CAD)
+    const paymentRequest = stripe.paymentRequest({
+        country: 'CA',
+        currency: 'cad',
         total: {
-            label: 'Total',
-            amount: 100,
+            label: 'Top up balance',
+            amount: 100, // 1 CAD minimum when section is shown
         },
         requestPayerName: true,
         requestPayerEmail: true,
         paymentMethodTypes: ['card'],
-        });
-
-        // Check if the device/browser supports Apple Pay or Google Pay
-        paymentRequest.canMakePayment().then(function(result){
-        console.log(result); // Log the result to understand what's being returned
-
-        if (result && result.googlePay) {
-            // Google Pay is available, enable the button
-            const elements = stripe.elements();
-            const prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            });
-
-            
-            prButton.mount('#payment-request-button');
-
-            //validateBookingAndShowGPay();
-
-        } else if (result && result.applePay) {
-            // Apple Pay is available (on Safari for Apple devices), enable the button
-            const elements = stripe.elements();
-            const prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            });
-
-            prButton.mount('#payment-request-button');
-        } else {
-            // If neither is available, log a message
-            console.log("Neither Apple Pay nor Google Pay is available on this device.");
-        }
-        }).catch(function(error) {
-        // Handle errors
-        console.error('Error checking payment method availability:', error);
-        });
-
-
-    paymentRequest.on('paymentmethod', async (ev) => {
-
-        const amount = document.querySelector('[name="dr_amount"]').value;
-        
-  const response = await fetch('/create-payment-intent', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-    },
-    body: JSON.stringify({ payment_method: ev.paymentMethod.id, amount: amount}),
-  });
-
-  const { clientSecret } = await response.json();
-
-  // Confirm the payment
-  const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-    payment_method: ev.paymentMethod.id,
-  });
-
-  if (error) {
-    ev.complete('fail');
-    console.error(error.message);
-  } else {
-    ev.complete('success');
-
-    
-    document.querySelector('[name="gPayApplePayId"]').value = paymentIntent.id;
-    document.querySelector('[name="payment_method"][value="credit_card"]').checked = true;
-    
-
-    console.log('Transaction ID:', paymentIntent.id); // <--- HERE
-    console.log('Status:', paymentIntent.status);
-
-    document.getElementById('submitForm').submit();
-    // Handle post-payment success (e.g., show a confirmation page)
-    console.log('Payment Successful!');
-  }
-});
-
-
-    $('#dr_amount').change(function () {
-        var amount = $('#dr_amount').val();
-        if(parseInt(amount) > 0){
-            $('#paymentSectionGPay').removeClass('hidden');
-        }else{
-            $('#paymentSectionGPay').addClass('hidden');
-        }
-        paymentRequest.update({
-            total: {
-                label: 'Total',
-                amount: Math.round(amount * 100)
-            },
-        });
     });
 
+    var gpayButtonMounted = false;
+    var gpaySupported = null;
+
+    function mountGPayButtonIfSupported() {
+        if (gpayButtonMounted) return;
+        var container = document.getElementById('payment-request-button');
+        var placeholder = document.getElementById('gpayPlaceholder');
+        var unsupported = document.getElementById('gpayUnsupported');
+        var amount = parseFloat(document.querySelector('[name="dr_amount"]').value) || 0;
+        if (amount <= 0) return;
+
+        function tryMount(result) {
+            gpaySupported = result;
+            if (result && (result.googlePay || result.applePay)) {
+                if (container && container.children.length === 0) {
+                    var elements = stripe.elements();
+                    var prButton = elements.create('paymentRequestButton', {
+                        paymentRequest: paymentRequest,
+                        style: {
+                            paymentRequestButton: {
+                                type: 'default',
+                                theme: 'dark',
+                                height: '48px',
+                            },
+                        },
+                    });
+                    prButton.mount('#payment-request-button');
+                    gpayButtonMounted = true;
+                }
+                if (placeholder) placeholder.classList.add('hidden');
+                if (unsupported) unsupported.classList.add('hidden');
+            } else {
+                if (placeholder) placeholder.classList.add('hidden');
+                if (unsupported) unsupported.classList.remove('hidden');
+            }
+        }
+
+        if (gpaySupported !== null) {
+            tryMount(gpaySupported);
+            return;
+        }
+        paymentRequest.canMakePayment().then(tryMount).catch(function (error) {
+            console.error('Error checking Google Pay / Apple Pay availability:', error);
+            if (placeholder) placeholder.classList.add('hidden');
+            if (unsupported) unsupported.classList.remove('hidden');
+        });
+    }
+
+    paymentRequest.canMakePayment().then(function (result) {
+        gpaySupported = result;
+    }).catch(function () {});
+
+    paymentRequest.on('paymentmethod', async function (ev) {
+        const amountInput = document.querySelector('[name="dr_amount"]');
+        const amount = parseFloat(amountInput.value) || 0;
+        const gpayErrorEl = document.getElementById('gpayError');
+
+        function showError(msg) {
+            if (gpayErrorEl) {
+                gpayErrorEl.textContent = msg;
+                gpayErrorEl.classList.remove('hidden');
+            }
+            ev.complete('fail');
+        }
+
+        if (amount <= 0) {
+            showError('Please enter an amount greater than 0.');
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ url("/create-payment-intent") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ payment_method: ev.paymentMethod.id, amount: amount }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showError(data.message || data.error || 'Unable to create payment. Please try again.');
+                return;
+            }
+
+            const clientSecret = data.clientSecret;
+            if (!clientSecret) {
+                showError('Invalid payment response. Please try again.');
+                return;
+            }
+
+            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: ev.paymentMethod.id,
+            });
+
+            if (error) {
+                showError(error.message || 'Payment failed.');
+                return;
+            }
+
+            ev.complete('success');
+            if (gpayErrorEl) gpayErrorEl.classList.add('hidden');
+
+            document.querySelector('[name="gPayApplePayId"]').value = paymentIntent.id;
+            document.querySelector('[name="payment_method"][value="credit_card"]').checked = true;
+            document.getElementById('submitForm').submit();
+        } catch (err) {
+            console.error(err);
+            showError('Something went wrong. Please try again.');
+        }
+    });
+
+    function updateGPaySection() {
+        const amount = parseFloat($('#dr_amount').val()) || 0;
+        const placeholder = document.getElementById('gpayPlaceholder');
+        const amountCents = Math.max(100, Math.round(amount * 100));
+        if (amount > 0) {
+            if (placeholder) placeholder.classList.add('hidden');
+            paymentRequest.update({
+                total: {
+                    label: 'Top up balance',
+                    amount: amountCents,
+                },
+            });
+            mountGPayButtonIfSupported();
+        } else {
+            if (placeholder) placeholder.classList.remove('hidden');
+            var unsupported = document.getElementById('gpayUnsupported');
+            if (unsupported) unsupported.classList.add('hidden');
+            var gpayErr = document.getElementById('gpayError');
+            if (gpayErr) gpayErr.classList.add('hidden');
+        }
+    }
+
+    $('#dr_amount').on('input change', updateGPaySection);
+    $(document).ready(updateGPaySection);
+    }
 </script>
 
 @endsection
