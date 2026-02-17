@@ -46,8 +46,14 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hi {{ $data['username'] }},</h1>
-                        <p style="font-weight: 400;color: #000;">A reward claim has been submitted.</p>
-                        <p style="font-weight: 400;color: #000;">Please take the necessary action.</p>
+                        <p style="font-weight: 400;color: #000;">A reward claim has been submitted and requires your attention.</p>
+                        <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                            <h3 style="margin-top: 0; color: #000;">Claim Details:</h3>
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Claimant Name:</strong> {{ $data['person_name'] ?? 'N/A' }}</p>
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Reward Type:</strong> {{ $data['reward_type'] ?? 'N/A' }}</p>
+                            <p style="font-weight: 400;color: #000; margin: 8px 0;"><strong>Date Submitted:</strong> {{ $data['transaction_date'] ?? 'N/A' }}</p>
+                        </div>
+                        <p style="font-weight: 400;color: #000;">Please take the necessary action in your admin dashboard.</p>
                     </td>
                 </tr>
                 <tr>

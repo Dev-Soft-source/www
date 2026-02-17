@@ -420,9 +420,22 @@ class PassengerWalletController extends Controller
         } elseif ($request->payment_method == 'credit_card') {
 
             $stripId = "";
-            if(isset($request->gPayApplePayId) && $request->gPayApplePayId != '0'){
-                $stripId = $request->gPayApplePayId;
-            }else{
+            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '0') {
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+                try {
+                    $paymentIntent = PaymentIntent::retrieve($request->gPayApplePayId);
+                    if ($paymentIntent->status !== 'succeeded') {
+                        return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment was not completed. Please try again.']);
+                    }
+                    $expectedAmount = (int) round((float) $request->dr_amount * 100);
+                    if ($paymentIntent->amount !== $expectedAmount) {
+                        return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment amount does not match. Please try again.']);
+                    }
+                    $stripId = $request->gPayApplePayId;
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    return redirect()->back()->with(['error' => $message->general_error_message ?? 'Invalid payment. Please try again.']);
+                }
+            } else {
                 $card = Card::where('id', $request->card_id)
                 ->where('user_id', $user->id)
                 ->firstOrFail();

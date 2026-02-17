@@ -16,6 +16,7 @@
             <div class="md:w-4/5 w-full text-center p-4">
                 <p class="text-2xl font-medium font-FuturaMdCnBT">{{ $referralSettingPage->your_referral_url_label ?? "Your Referral URL"}}</p>
                 <div class="relative bg-gray-50 mt-2">
+                    @if(auth()->user()->getRawOriginal('referral_uuid'))
                     <div class="absolute right-2 top-1.5 pl-2 border-l border-gray-300">
                         <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-6 h-6 text-gray-500 cursor-pointer hover:text-primary transition-colors">
@@ -23,8 +24,10 @@
                                 d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                         </svg>
                     </div>
-                    <input type="text" id="referralUrl" value="{{ url('/signup-with-referral/' . auth()->user()->referral_uuid) }}" readonly
-                        class="block mt-1 border p-1.5 w-full rounded text-sm md:text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 bg-gray-50 pr-12">
+                    @endif
+                    <input type="text" id="referralUrl" value="{{ ($uuid = auth()->user()->getRawOriginal('referral_uuid')) ? route('signup_with_referral', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'uuid' => $uuid]) : '' }}" readonly
+                        class="block mt-1 border p-1.5 w-full rounded text-sm md:text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 bg-gray-50 pr-12"
+                        placeholder="{{ !auth()->user()->getRawOriginal('referral_uuid') ? 'Referral link not available.' : '' }}">
                 </div>
                 <p id="copyMessage" class="text-green-600 text-sm mt-2 hidden">Copied to clipboard!</p>
             </div>
@@ -33,7 +36,7 @@
         <div class="border-b py-2 mt-4">
             <h2 class="text-primary">{{ $referralSettingPage->my_referral_text ?? "My Referrals"}}</h2>
         </div>
-        @if ($referrals->count() > 0)
+        @if ($referrals && $referrals->count() > 0)
             <div class="overflow-auto">
                 <table class="border border-collapse overflow-auto w-full mt-6">
                     <thead class="">

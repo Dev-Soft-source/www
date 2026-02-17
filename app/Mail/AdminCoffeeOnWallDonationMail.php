@@ -30,8 +30,10 @@ class AdminCoffeeOnWallDonationMail extends Mailable
      */
     public function build()
     {
+        $name = $this->data['donor_name'] ?? 'Donor';
+        $date = $this->data['transaction_date'] ?? now()->format('F j, Y');
         return $this->markdown('mails/admin_coffee_on_wall_donation')
-            ->subject("Coffee on the Wall Donation Received - $" . $this->data['amount'])
+            ->subject("Coffee on the Wall: {$name} - {$date} - \$" . number_format($this->data['amount'], 2))
             ->with("data", $this->data);
     }
 }

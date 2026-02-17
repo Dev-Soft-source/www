@@ -1,89 +1,52 @@
+@php
+    $footerSetting = getFooterSetting($selectedLanguage ?? 1);
+    $footerSettingDetail = $footerSetting->footerSettingDetail ?? [];
+    $langAbbr = optional($selectedLanguage)->abbreviation ?? 'en';
+    $isStepRoute = in_array(Route::currentRouteName(), ['step1to5', 'step2to5', 'step3to5', 'step4to5', 'step5to5']);
+@endphp
 <footer class="py-10 md:py-14 w-full bg-sky-700 px-4 sm:px-8 flex-initial hidefooter">
     <div class="container mx-auto">
 
       <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-8 pb-7 md:pb-14">
         <div class="col-span-2 md:col-span-4 lg:col-span-2">
           <a
-                @if (Route::currentRouteName() === 'step1to5' || Route::currentRouteName() === 'step2to5' || Route::currentRouteName() === 'step3to5' || Route::currentRouteName() === 'step4to5' || Route::currentRouteName() === 'step5to5')
+                @if ($isStepRoute)
                     href=""
                 @else
-                    href="{{ route('home', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                    href="{{ route('home', ['lang' => $langAbbr]) }}"
                 @endif>
                 <img class="h-20 mx-auto" src="/assets/PROXIMARIDE.png" alt="">
             </a>
             <p class="text-white mt-8 text-center">Ride with Purpose. Powered by Community Values.</p>
         </div>
-  
-        <div>
-            <p class="font-FuturaBdCnBT text-white text-lg">Useful links</p>
-                
-            <ul class="text-white space-y-2 mt-2">
-              @if(auth()->check())
-                <li><a
-                  @if (Route::currentRouteName() === 'step1to5' || Route::currentRouteName() === 'step2to5' || Route::currentRouteName() === 'step3to5' || Route::currentRouteName() === 'step4to5' || Route::currentRouteName() === 'step5to5')
-                      href=""
-                  @else
-                      href="{{ route('profile', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  @endif
-                  class="text-white">My Profile</a></li>
-                <li><a class="text-white" href="{{ route('my_rides', ['lang' => optional($selectedLanguage)->abbreviation]) }}">My Rides</a></li>
-              @else
-                <li><a class="text-white" href="{{ route('signup', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Sign up</a></li>
-                <li><a class="text-white" href="{{ route('login', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Log in</a></li>
-              @endif
-                <li><a
-                  @if (Route::currentRouteName() === 'step1to5' || Route::currentRouteName() === 'step2to5' || Route::currentRouteName() === 'step3to5' || Route::currentRouteName() === 'step4to5' || Route::currentRouteName() === 'step5to5')
-                      href=""
-                  @else
-                      href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  @endif
-                  class="text-white">Post a Ride</a></li>
-                <li><a
-                  @if (Route::currentRouteName() === 'step1to5' || Route::currentRouteName() === 'step2to5' || Route::currentRouteName() === 'step3to5' || Route::currentRouteName() === 'step4to5' || Route::currentRouteName() === 'step5to5')
-                      href=""
-                  @else
-                      href="{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  @endif
-                  class="text-white">Find a Ride</a></li>
-            </ul>
-        </div>
 
+        @foreach ($footerSettingDetail as $section)
         <div>
-            <p class="font-FuturaBdCnBT text-white text-lg">How it works</p>
-                
+            <p class="font-FuturaBdCnBT text-white text-lg">{{ $section->sectionTitle }}</p>
             <ul class="text-white space-y-2 mt-2">
-                <li><a
-                  href="{{ route('drivers', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For Drivers</a></li>
-                <li><a
-                  href="{{ route('passengers', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For Passengers</a></li>
-                <li><a
-                  href="{{ route('students', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                  class="text-white">For Students</a></li>
-                {{-- <li><a class="text-white" href="#">Help</a></li> --}}
+                @foreach ($section->menuItems as $item)
+                    @php
+                        $link = $item['link'] ?? '';
+                        $name = $item['name'] ?? '';
+                        $authOnly = in_array($link, ['profile', 'my_rides']);
+                        $guestOnly = in_array($link, ['signup', 'login']);
+                        $show = (!$authOnly && !$guestOnly) || ($authOnly && auth()->check()) || ($guestOnly && !auth()->check());
+                    @endphp
+                    @if ($show && $link && \Illuminate\Support\Facades\Route::has($link))
+                        <li>
+                            <a class="text-white"
+                                @if ($isStepRoute)
+                                    href=""
+                                @else
+                                    href="{{ route($link, ['lang' => $langAbbr]) }}"
+                                @endif
+                            >{{ $name }}</a>
+                        </li>
+                    @endif
+                @endforeach
             </ul>
         </div>
-
-        <div>
-            <p class="font-FuturaBdCnBT text-white text-lg">Contact us</p>
-                
-            <ul class="text-white space-y-2 mt-2">
-                <li><a class="text-white" href="{{ route('contact_us', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Contact us / Support</a></li>
-                {{-- <li><a class="text-white" href="#">Partners</a></li> --}}
-                <li><a class="text-white" href="{{ route('news', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Media</a></li>
-            </ul>
-        </div>
-
-        <div>
-            <p class="font-FuturaBdCnBT text-white text-lg">Terms</p>
-                
-            <ul class="text-white space-y-2 mt-2">
-                <li><a class="text-white" href="{{ route('terms_conditions', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms and Conditions</a></li>
-                <li><a class="text-white" href="{{ route('terms_use', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Terms of Use</a></li>
-                <li><a class="text-white" href="{{ route('privacy_policy', ['lang' => optional($selectedLanguage)->abbreviation]) }}">Privacy Policy</a></li>
-            </ul>
-        </div>
+        @endforeach
 
       </div>
       <hr>

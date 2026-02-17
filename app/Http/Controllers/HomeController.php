@@ -676,6 +676,23 @@ class HomeController extends Controller
         ]);
     }
 
+    public function coffeeOnWallStory($lang = null)
+    {
+        $languages = Language::all();
+        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
+            session(['selectedLanguage' => $lang]);
+        }
+        $selectedLanguage = session('selectedLanguage');
+        $selectedLanguage = $selectedLanguage ? Language::where('abbreviation', $selectedLanguage)->first() : null;
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        return view('coffee_wall_story', [
+            'selectedLanguage' => $selectedLanguage,
+            'languages' => $languages,
+        ]);
+    }
+
     public function coffeeOnWall($lang = null)
     {
         $languages = Language::all();

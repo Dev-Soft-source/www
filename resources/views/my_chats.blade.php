@@ -49,8 +49,13 @@
             
             @if ($chats && $chats->count() > 0)
                 @foreach ($chats as $chat)
+                    @if (!$chat)
+                        @continue
+                    @endif
                     @php
                         $hasUnread = isset($chat['unread_count']) && $chat['unread_count'] > 0;
+                        $chatSender = $chat['sender'] ?? null;
+                        $chatReceiver = $chat['receiver'] ?? null;
                     @endphp
                     <div class="relative w-full">
                         <div class="absolute top-3 right-4 w-auto h-auto flex items-center bg-primary text-white rounded-full p-1 z-10">
@@ -61,14 +66,14 @@
                                 </svg>
                             </button>
                         </div>
-                        @if ($chat['sender'] && $chat['sender']['id'] == $user_id)
-                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['receiver']['id']]) }}" 
+                        @if ($chatSender && ($chatSender['id'] ?? null) == $user_id)
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => ($chatReceiver ?? [])['id'] ?? 0]) }}"
                            onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
-                        @elseif ($chat['sender'])
-                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['sender']['id']]) }}" 
+                        @elseif ($chatSender)
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => ($chatSender['id'] ?? 0)]) }}"
                            onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
                         @else
-                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => $chat['receiver']['id']]) }}" 
+                        <a href="{{ route('chat_detail', ['lang' => $selectedLanguage->abbreviation,'id' => $chat['ride_id'],'passenger' => ($chatReceiver ?? [])['id'] ?? 0]) }}"
                            onclick="updateNotificationCount({{ $chat['unread_count'] ?? 0 }}); return true;">
                         @endif
                             <div class="border rounded p-4 cursor-pointer relative {{ $hasUnread ? 'bg-blue-50 border-l-4 border-l-primary' : '' }} hover:bg-gray-50 transition-colors">
@@ -76,38 +81,38 @@
                                 <!-- Display sender's information -->
                                 <div class="flex justify-between items-end">
                                     <div class="flex gap-3 items-center">
-                                        @if($chat['sender'] && $chat['sender']['id'] == $user_id)
+                                        @if($chatSender && ($chatSender['id'] ?? null) == $user_id)
                                             <div class="relative flex-shrink-0">
-                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['receiver']['profile_image'] }}" alt="">
+                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ ($chatReceiver ?? [])['profile_image'] ?? asset('assets/image-placeholder.png') }}" alt="">
                                             </div>
                                             <div>
-                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['receiver']['first_name'] }}</span>
-                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] }}</p>
+                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ ($chatReceiver ?? [])['first_name'] ?? 'User' }}</span>
+                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] ?? '' }}</p>
                                             </div>
-                                        @elseif($chat['sender'])
+                                        @elseif($chatSender)
                                             <div class="relative flex-shrink-0">
-                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['sender']['profile_image'] }}" alt="">
+                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ ($chatSender ?? [])['profile_image'] ?? asset('assets/image-placeholder.png') }}" alt="">
                                                 @if ($hasUnread)
                                                     <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
                                                 @endif
                                             </div>
                                             <div>
-                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['sender']['first_name'] }}</span>
+                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ ($chatSender ?? [])['first_name'] ?? 'User' }}</span>
                                                 @if ($hasUnread)
                                                     <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $chat['unread_count'] }}</span>
                                                 @endif
-                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] }}</p>
+                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] ?? '' }}</p>
                                             </div>
                                         @else
                                             <div class="relative flex-shrink-0">
-                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ $chat['receiver']['profile_image'] ?? asset('assets/image-placeholder.png') }}" alt="">
+                                                <img class="w-10 h-10 rounded-full object-cover" src="{{ ($chatReceiver ?? [])['profile_image'] ?? asset('assets/image-placeholder.png') }}" alt="">
                                             </div>
                                             <div>
-                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ $chat['receiver']['first_name'] ?? 'System' }}</span>
+                                                <span class="{{ $hasUnread ? 'font-semibold' : '' }}">{{ ($chatReceiver ?? [])['first_name'] ?? 'System' }}</span>
                                                 @if ($hasUnread)
                                                     <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $chat['unread_count'] }}</span>
                                                 @endif
-                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] }}</p>
+                                                <p class="text-sm {{ $hasUnread ? 'text-gray-800' : 'text-gray-500' }} text-left">{{ $chat['message'] ?? '' }}</p>
                                             </div>
                                         @endif
                                     </div>

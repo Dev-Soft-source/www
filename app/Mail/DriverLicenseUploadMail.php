@@ -28,8 +28,10 @@ class DriverLicenseUploadMail extends Mailable
      */
     public function build()
     {
+        $name = trim(($this->data['first_name'] ?? '') . ' ' . ($this->data['last_name'] ?? '')) ?: 'Unknown';
+        $date = $this->data['upload_date'] ?? now()->format('M d, Y');
         return $this->markdown('mails/driver_license_upload')
-            ->subject("Document uploaded to ProximaRide")
+            ->subject("Driver License from {$name} - {$date} - Approval Required")
             ->with("data", $this->data);
     }
 }

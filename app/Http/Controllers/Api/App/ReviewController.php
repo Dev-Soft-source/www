@@ -535,13 +535,13 @@ class ReviewController extends Controller
                                 $topUpBalance->added_date = date('Y-m-d');
                                 $topUpBalance->save();
                             }
-                            
                         }
-    
-                        $getReferralSetting = ReferralSystemSetting::first();
-    
-                        $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
-                        if(isset($getReferralUser) && !empty($getReferralUser)){
+
+                        // Referrer reward only when referred user has good reputation (rating >= 4)
+                        if ($averageRating >= 4) {
+                            $getReferralSetting = ReferralSystemSetting::first();
+                            $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
+                            if(isset($getReferralUser) && !empty($getReferralUser)){
                             if($getReferralUser->driver == 1){
                                 if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
                                     $rewardPoint = new RewardPoint;
@@ -592,7 +592,8 @@ class ReviewController extends Controller
                                 }
                             }
                         }
-                        
+                        }
+
                         $checkUserReferral->status = "completed";
                         $checkUserReferral->save();
                 }
@@ -604,10 +605,11 @@ class ReviewController extends Controller
         return $this->apiErrorResponse(strip_tags($message->general_error_message ?? "Booking not found"), 404);
     }
 
-    public function ReviewReplyStore(Request $request){
 
+    public function ReviewReplyStore(Request $request)
+    {
         $selectedLanguage = app()->getLocale();
-            $message = null;
+        $message = null;
             if ($selectedLanguage) {
                 // Find the language by abbreviation
                 $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();

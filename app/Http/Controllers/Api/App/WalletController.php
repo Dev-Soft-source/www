@@ -358,7 +358,13 @@ class WalletController extends Controller
 
         $admin = Admin::first();
 
-        $data = ['username' => $admin->username];
+        $claimReward = ClaimReward::where('status', 'request')->where('type', $request->type)->where('user_id', $user_id)->first();
+        $data = [
+            'username' => $admin->username,
+            'person_name' => trim($user->first_name . ' ' . $user->last_name) ?: $user->email,
+            'transaction_date' => $claimReward ? Carbon::parse($claimReward->request_date)->format('F j, Y \a\t H:i') : Carbon::now()->format('F j, Y \a\t H:i'),
+            'reward_type' => ucfirst($request->type),
+        ];
         Mail::to($admin->admin_email)->queue(new ClaimRewardMail($data));
 
         if($request->type == "student"){

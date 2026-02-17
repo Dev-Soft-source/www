@@ -1081,7 +1081,7 @@
                                 </div>
                                 <div class="{{ $vehicles->count() > '0' ? '' : 'hidden' }}">
                                     <input id="added" type="checkbox" name="added_vehicle" value="1"
-                                        {{ old('added_vehicle', $ride->added_vehicle, $ride->add_vehicle) == '1' || collect($vehicles)->contains('primary_vehicle', 1) ? 'checked' : '' }}
+                                        {{ old('added_vehicle', $ride->added_vehicle, $ride->add_vehicle, $vehicles->count() > 0 ? '1' : '0') == '1' ? 'checked' : '' }}
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                     <label for="added" class="ml-2  text-gray-900">
                                         @isset($postRidePage->existing_label)
@@ -1385,17 +1385,19 @@
                                 <label for="type" class="text-gray-900 mb-2">
                                     Select vehicle <span class="text-red-500">*</span>
                                 </label>
-                                {{ old('vehicle_id') }}
                                 <div class="mt-2">
                                     <select id="type" name="vehicle_id"
                                         class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                        @php
+                                            $selectedVehicleId = old('vehicle_id', $ride->vehicle_id);
+                                        @endphp
                                         <option value=""
-                                            {{ old('vehicle_id', $ride->vehicle_id) === '' ? 'selected' : '' }}>
+                                            {{ $selectedVehicleId === '' || $selectedVehicleId === null ? 'selected' : '' }}>
                                             Select
                                         </option>
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
-                                                {{ (int) old('vehicle_id', $ride->vehicle_id) === (int) $vehicle->id || $vehicle->primary_vehicle === '1' ? 'selected' : '' }}>
+                                                {{ (int) $selectedVehicleId === (int) $vehicle->id || (empty($selectedVehicleId) && $vehicle->primary_vehicle === '1') ? 'selected' : '' }}>
                                                 {{ $vehicle->year }} / {{ $vehicle->model }} / {{ $vehicle->type }}
                                             </option>
                                         @endforeach
@@ -2308,6 +2310,29 @@
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
                                             <span class="">
                                                 {{ $postRidePage->features_option16->name }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endisset
+                                @isset($postRidePage->features_option18->features_setting_id)
+                                    <div class="flex items-start">
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option18->features_setting_id }}"
+                                        {{ $isNewForm
+                                            ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
+                                                ? 'checked'
+                                                : '')
+                                            : (old('features')
+                                                ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
+                                                    ? 'checked'
+                                                    : '')
+                                                : (in_array($postRidePage->features_option18->features_setting_id, explode('=', $ride->features))
+                                                    ? 'checked'
+                                                    : '')) }}
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        <label for="heating"
+                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                            <span class="">
+                                                {{ $postRidePage->features_option18->name }}
                                             </span>
                                         </label>
                                     </div>

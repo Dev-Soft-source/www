@@ -979,7 +979,9 @@
                                             href=""
                                         @elseif (auth()->user() && in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) && (auth()->user()->gender !== 'female' || ($pinkRideSetting->verfiy_phone_passenger == 1 ? !auth()->user()->phone_numbers->contains('verified', 1) : false)))
                                             href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only female passengers @if ($pinkRideSetting->verfiy_phone_passenger == 1) with verified number @endif can select this ride')"
-                                        @elseif (auth()->user() && in_array($findRidePage->ride_features_option16->features_setting_id, explode('=', $ride->features)))
+                                        @elseif (isset($findRidePage->ride_features_option18) && auth()->user() && in_array($findRidePage->ride_features_option18->features_setting_id, explode('=', $ride->features)) && !auth()->user()->phone_numbers->contains('verified', 1))
+                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'This driver accepts only phone-verified passengers.')"
+                                        @elseif (auth()->user() && in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 1)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver only want passengers with reviews')"
                                             @else
@@ -1006,10 +1008,18 @@
                                         @else
                                             href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                         @endif>
-                                        <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1) &&
-                                                in_array($findRidePage->ride_features_option1->features_setting_id, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2) &&
-                                                in_array($findRidePage->ride_features_option2->features_setting_id, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
-                                            id="ride-{{ $ride->id }}">
+                                        @php
+                                            $isPink = isset($findRidePage->ride_features_option1) && in_array($findRidePage->ride_features_option1->features_setting_id, explode('=', $ride->features));
+                                            $isExtraCare = isset($findRidePage->ride_features_option2) && in_array($findRidePage->ride_features_option2->features_setting_id, explode('=', $ride->features));
+                                            $isPinkAndExtraCare = $isPink && $isExtraCare;
+                                        @endphp
+                                        @if ($isPinkAndExtraCare)
+                                            {{-- Double frame: green outside, pink inside, ~1–2mm gap --}}
+                                            <div class="rounded-lg border-[3px] border-solid border-green-500 p-[2px] shadow-3xl">
+                                                <div class="rounded-[6px] border-[3px] border-solid border-pink-500" id="ride-{{ $ride->id }}">
+                                        @else
+                                            <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif($isPink) border-pink-500 @elseif($isExtraCare) border-green-500 @else border-gray-100 @endif" id="ride-{{ $ride->id }}">
+                                        @endif
                                             <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
                                                     <p class="flex items-center space-x-2 font-semibold">
@@ -1248,6 +1258,9 @@
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
+                                                        @if (in_array($findRidePage->ride_features_option18->features_setting_id ?? null, explode('=', $ride->features)))
+                                                            <img class="w-6 h-6" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option18->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option18_tooltip }}">
+                                                        @endif  
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="" data-tippy-content="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif
@@ -1388,6 +1401,9 @@
                                                 </div> --}}
                                             </div>
                                         </div>
+                                        @if ($isPinkAndExtraCare)
+                                            </div>
+                                        @endif
                                     </a>
                                     @endif
                                 </div>

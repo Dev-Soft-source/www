@@ -407,7 +407,17 @@ class ProfileController extends Controller
         
         $defaultLangId = Language::where('is_default', '1')->value('id');
 
-        $data = ['username' => $admin->username,'first_name' => $user->first_name,'last_name' => $user->last_name,'email' => $user->email,'phone' => $user->phone,'country' => $country->name, 'lang_id' => $user->lang_id, 'defaultLangId' => $defaultLangId];
+        $data = [
+            'username' => $admin->username,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'country' => $country->name,
+            'lang_id' => $user->lang_id,
+            'defaultLangId' => $defaultLangId,
+            'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
+        ];
         // Send upload email
         Mail::to($admin->admin_email)->queue(new GovernmentIssuedIdUploadMail($data));
 

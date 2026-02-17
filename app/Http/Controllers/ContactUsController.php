@@ -97,7 +97,14 @@ class ContactUsController extends Controller
         ]);
 
         $admin = Admin::first();
-        $data = ['username' => $admin->username,'name' => $message->name,'email' => $message->email,'phone' => $message->phone,'message' => $message->message];
+        $data = [
+            'username' => $admin->username,
+            'name' => $message->name,
+            'email' => $message->email,
+            'phone' => $message->phone,
+            'message' => $message->message,
+            'transaction_date' => $message->created_at->format('M d, Y H:i:s'),
+        ];
         // Send email to admin
         Mail::to($admin->admin_email)->queue(new AdminReceiveContactMessageMail($data));
 

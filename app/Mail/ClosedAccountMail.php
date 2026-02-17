@@ -28,8 +28,10 @@ class ClosedAccountMail extends Mailable
      */
     public function build()
     {
+        $name = $this->data['name'] ?? 'Unknown';
+        $date = $this->data['transaction_date'] ?? now()->format('M d, Y');
         return $this->markdown('mails/closed_account_mail')
-            ->subject("Account closed message")
+            ->subject("Account Closed: {$name} - {$date}")
             ->with("data", $this->data);
     }
 }

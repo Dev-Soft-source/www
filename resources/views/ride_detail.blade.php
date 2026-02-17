@@ -401,8 +401,7 @@
                         </div>
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
-                        <div class="p-4">
-                            
+                        <div class="p-4">                            
                             <p class="text-left font-semibold">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
@@ -446,8 +445,7 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail->first()?->price }}
-                                
+                            <p class="text-lg font-normal text-left text-primary" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail->first()?->price }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -461,7 +459,7 @@
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method }}</span>
+                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -470,8 +468,7 @@
                                     Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div
-                                        class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset

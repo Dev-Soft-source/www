@@ -76,7 +76,16 @@ class VerifyDriverController extends Controller
         $country = Country::whereId($user->country)->first();
         $admin = Admin::first();
 
-        $data = ['username' => $admin->username,'first_name' => $user->first_name,'last_name' => $user->last_name,'email' => $user->email,'phone' => $user->phone,'country' => $country->name, 'driver_liscense' => $user->driver_liscense];
+        $data = [
+            'username' => $admin->username,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'country' => $country->name,
+            'driver_liscense' => $user->driver_liscense,
+            'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
+        ];
         // Send upload email
         Mail::to($admin->admin_email)->queue(new DriverLicenseUploadMail($data));
 

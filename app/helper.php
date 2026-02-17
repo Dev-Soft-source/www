@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\FooterSetting;
 use App\Models\Language;
+use App\Models\MenuDetail;
 use Illuminate\Support\Facades\Session;
 
 if (!function_exists('getAllLanguages')) {
@@ -34,6 +36,110 @@ if (!function_exists("updateLangByAbber")) {
         }
         Session::put('webLanguage', $language->id);
         return 1;
+    }
+}
+
+if (!function_exists('getFooterSetting')) {
+    /**
+     * Get footer menu settings for the given language.
+     * Returns an object with footerSettingDetail (array of 4 sections: Useful links, How it works, Contact us, Terms).
+     * If no menu_detail exists for the language, falls back to language_id 1 (English).
+     *
+     * @param int|object $lang Language id or Language model instance
+     * @return object { footerSettingDetail: array }
+     */
+    function getFooterSetting($lang)
+    {
+        $languageId = is_object($lang) ? (int) $lang->id : (int) $lang;
+        if ($languageId < 1) {
+            $languageId = 1;
+        }
+
+        $footerSetting = FooterSetting::first();
+        $footerSettingDetail = [];
+
+        $menuIds = $footerSetting
+            ? array_filter([
+                $footerSetting->menu1,
+                $footerSetting->menu2,
+                $footerSetting->menu3,
+                $footerSetting->menu4,
+            ])
+            : [2, 3, 4, 5];
+
+        if (empty($menuIds)) {
+            return (object) ['footerSettingDetail' => []];
+        }
+
+        if (!$footerSetting) {
+            $footerSetting = (object) ['footerSettingDetail' => []];
+        }
+
+        foreach ($menuIds as $menuId) {
+            $menu = \App\Models\Menu::find($menuId);
+            if (!$menu) {
+                $footerSettingDetail[] = (object) ['sectionTitle' => '', 'menuItems' => []];
+                continue;
+            }
+
+            $detail = MenuDetail::where('menu_id', $menuId)
+                ->where('language_id', $languageId)
+                ->first();
+
+            if (!$detail) {
+                $detail = MenuDetail::where('menu_id', $menuId)
+                    ->where('language_id', 1)
+                    ->first();
+            }
+
+            $menuItems = $detail && !empty($detail->menu_items) ? $detail->menu_items : [];
+            $sectionTitle = ($detail && !empty($detail->section_title)) ? $detail->section_title : $menu->name;
+            $footerSettingDetail[] = (object) [
+                'sectionTitle' => $sectionTitle,
+                'menuItems' => $menuItems,
+            ];
+        }
+
+        $footerSetting->footerSettingDetail = $footerSettingDetail;
+        return $footerSetting;
+    }
+}
+
+if (!function_exists('getTopMenuSetting')) {
+    /**
+     * Get Top Menu (menu_id 1) items for the given language.
+     * Returns an object with topMenuItems (array of {id, link, name}).
+     * If no menu_detail exists for the language, falls back to language_id 1 (English).
+     * If no Top Menu data exists, returns default items (Students, Post a Ride, Find a Ride).
+     *
+     * @param int|object $lang Language id or Language model instance
+     * @return object { topMenuItems: array }
+     */
+    function getTopMenuSetting($lang)
+    {
+        $languageId = is_object($lang) ? (int) $lang->id : (int) $lang;
+        if ($languageId < 1) {
+            $languageId = 1;
+        }
+
+        $menuId = 1; // Top Menu
+        $detail = MenuDetail::where('menu_id', $menuId)
+            ->where('language_id', $languageId)
+            ->first();
+
+        if (!$detail) {
+            $detail = MenuDetail::where('menu_id', $menuId)
+                ->where('language_id', 1)
+                ->first();
+        }
+
+        $topMenuItems = ($detail && !empty($detail->menu_items)) ? $detail->menu_items : [
+            ['id' => 1, 'link' => 'students', 'name' => 'Students'],
+            ['id' => 2, 'link' => 'post_ride', 'name' => 'Post a Ride'],
+            ['id' => 3, 'link' => 'search_ride', 'name' => 'Find a Ride'],
+        ];
+
+        return (object) ['topMenuItems' => $topMenuItems];
     }
 }
 
