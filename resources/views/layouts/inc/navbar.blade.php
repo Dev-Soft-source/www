@@ -38,46 +38,41 @@
                 <img class="h-14" src="/assets/Proximaride logo.png" alt="">
             </a>
             <div>
+                @php
+                    $topMenu = getTopMenuSetting($selectedLanguage ?? 1);
+                    $topMenuItems = $topMenu->topMenuItems ?? [];
+                    $studentPage = App\Models\StudentPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                    $postRidePage = App\Models\PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                    $findRidePage = App\Models\FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                    $langAbbr = optional($selectedLanguage)->abbreviation ?? 'en';
+                @endphp
                 <ul class="inline-flex space-x-3 lg:space-x-6 text-blue-600 text-base xl:text-lg mt-2 font-FuturaMdCnBT">
-                    @php
-                        $studentPage = App\Models\StudentPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                    @endphp
-                    <li>
-                        <a href="{{ route('students', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center whitespace-nowrap">
-                            <div>
-                                @isset($studentPage->page_image)
-                                    <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $studentPage->page_image)}}" alt="">
-                                @endisset
-                            </div>
-                            <p class="text-blue-600">Students</p>
-                        </a>
-                    </li>
-                    @php
-                        $postRidePage = App\Models\PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                    @endphp
-                    <li class="flex gap-x-1 items-center-">
-                        <a href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center whitespace-nowrap">
-                            <div>
-                                @isset($postRidePage->navbar_icon)
-                                    <img class="w-5 h-5 object-contain" src="{{ asset('home_page_icons/' . $postRidePage->navbar_icon)}}" alt="">
-                                @endisset
-                            </div>
-                            <p class="text-blue-600">Post a Ride</p>
-                        </a>
-                    </li>
-                    @php
-                        $findRidePage = App\Models\FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                    @endphp
-                    <li class="flex gap-x-1 items-center">
-                        <a href="{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center whitespace-nowrap">
-                            <div class="">
-                                @isset($findRidePage->navbar_icon)
-                                    <img class="w-5 h-5 object-contain" src="{{ asset('home_page_icons/' . $findRidePage->navbar_icon)}}" alt="">
-                                @endisset
-                            </div>
-                            <p class="text-blue-600">Find a Ride</p>
-                        </a>
-                    </li>
+                    @foreach ($topMenuItems as $item)
+                        @php
+                            $link = $item['link'] ?? '';
+                            $name = $item['name'] ?? '';
+                            $iconUrl = null;
+                            if ($link === 'students' && isset($studentPage->page_image)) {
+                                $iconUrl = asset('home_page_icons/' . $studentPage->page_image);
+                            } elseif ($link === 'post_ride' && isset($postRidePage->navbar_icon)) {
+                                $iconUrl = asset('home_page_icons/' . $postRidePage->navbar_icon);
+                            } elseif ($link === 'search_ride' && isset($findRidePage->navbar_icon)) {
+                                $iconUrl = asset('home_page_icons/' . $findRidePage->navbar_icon);
+                            }
+                        @endphp
+                        @if ($link && \Illuminate\Support\Facades\Route::has($link))
+                            <li class="flex gap-x-1 items-center">
+                                <a href="{{ route($link, ['lang' => $langAbbr]) }}" class="flex gap-x-1 group items-center whitespace-nowrap">
+                                    <div>
+                                        @if ($iconUrl)
+                                            <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}" src="{{ $iconUrl }}" alt="">
+                                        @endif
+                                    </div>
+                                    <p class="text-blue-600">{{ $name }}</p>
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
                 </ul>
             </div>
         </div>
@@ -306,30 +301,30 @@
     </div>
     <div class="hidden w-full md:block md:w-auto" id="navbar-default">
         <ul class="font-FuturaMdCnBT text-blue-600 flex flex-col space-y-2 mt-2 pb-4 border-t pt-2 md:flex-row md:space-x-8 md:mt-0 md:border-0">
-            <li>
-                <a href="{{ route('students', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
-                    @isset($studentPage->page_image)
-                        <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $studentPage->page_image)}}" alt="">
-                    @endisset
-                    <p>Students</p>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
-                    @isset($postRidePage->navbar_icon)
-                        <img class="w-5 h-5 object-contain" src="{{ asset('home_page_icons/' . $postRidePage->navbar_icon)}}" alt="">
-                    @endisset
-                    <p>Post a Ride</p>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
-                    @isset($findRidePage->navbar_icon)
-                        <img class="w-5 h-5 object-contain" src="{{ asset('home_page_icons/' . $findRidePage->navbar_icon)}}" alt="">
-                    @endisset
-                    <p>Find a Ride</p>
-                </a>
-            </li>
+            @foreach ($topMenuItems as $item)
+                @php
+                    $link = $item['link'] ?? '';
+                    $name = $item['name'] ?? '';
+                    $iconUrl = null;
+                    if ($link === 'students' && isset($studentPage->page_image)) {
+                        $iconUrl = asset('home_page_icons/' . $studentPage->page_image);
+                    } elseif ($link === 'post_ride' && isset($postRidePage->navbar_icon)) {
+                        $iconUrl = asset('home_page_icons/' . $postRidePage->navbar_icon);
+                    } elseif ($link === 'search_ride' && isset($findRidePage->navbar_icon)) {
+                        $iconUrl = asset('home_page_icons/' . $findRidePage->navbar_icon);
+                    }
+                @endphp
+                @if ($link && \Illuminate\Support\Facades\Route::has($link))
+                    <li>
+                        <a href="{{ route($link, ['lang' => $langAbbr]) }}" class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
+                            @if ($iconUrl)
+                                <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}" src="{{ $iconUrl }}" alt="">
+                            @endif
+                            <p>{{ $name }}</p>
+                        </a>
+                    </li>
+                @endif
+            @endforeach
             <li>
                 <div class="flex items-center gap-2 justify-center mt-2">
                     <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="button-exp-no-fill">
