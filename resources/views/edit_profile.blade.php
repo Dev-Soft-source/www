@@ -196,12 +196,16 @@
                 <div class="col-span-2">
                     <label for="">Notifications</label>
                     <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center gap-6 mt-2">
+                        @php
+                            $emailNotifChecked = old('email_notification') !== null ? (old('email_notification') === 'on' || old('email_notification') == 1) : ($user->email_notification == 1);
+                            $smsNotifChecked = old('sms_notification') !== null ? (old('sms_notification') === 'on' || old('sms_notification') == 1) : ($user->sms_notification == 1);
+                        @endphp
                         <div class="flex items-center gap-2">
-                            <input {{ $user->email_notification ? 'checked' : '' }} type="checkbox" id="email_notification" name="email_notification" >
+                            <input type="checkbox" id="email_notification" name="email_notification" value="1" {{ $emailNotifChecked ? 'checked' : '' }}>
                             <label for="email_notification">Email Notification</label>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input {{ $user->sms_notification ? 'checked' : '' }} type="checkbox" id="sms_notification" name="sms_notification" >
+                            <input type="checkbox" id="sms_notification" name="sms_notification" value="1" {{ $smsNotifChecked ? 'checked' : '' }}>
                             <label for="sms_notification">Sms Notification</label>
                         </div>
                     </div>

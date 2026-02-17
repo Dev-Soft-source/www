@@ -406,64 +406,65 @@ class ReviewController extends Controller
                             $topUpBalance->added_date = date('Y-m-d');
                             $topUpBalance->save();
                         }
-                        
                     }
 
-                    $getReferralSetting = ReferralSystemSetting::first();
+                    // Referrer reward only when referred user has good reputation (rating >= 4)
+                    if ($averageRating >= 4) {
+                        $getReferralSetting = ReferralSystemSetting::first();
+                        $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
+                        if(isset($getReferralUser) && !empty($getReferralUser)){
+                            if($getReferralUser->driver == 1){
+                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
+                                    $rewardPoint = new RewardPoint;
+                                    $rewardPoint->type = "driver";
+                                    $rewardPoint->user_id = $getReferralUser->id;
+                                    $rewardPoint->point = $getReferralSetting->d_2_s_reward_point ?? 0; 
+                                    $rewardPoint->status = "pending";
+                                    $rewardPoint->save();
+                                }else{
+                                    $rewardPoint = new RewardPoint;
+                                    $rewardPoint->type = "driver";
+                                    $rewardPoint->user_id = $getReferralUser->id;
+                                    $rewardPoint->point = $getReferralSetting->d_2_p_reward_point ?? 0; 
+                                    $rewardPoint->status = "pending";
+                                    $rewardPoint->save();
+                                }                                
+                            }else if($getReferralUser->student == 1){
 
-                    $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
-                    if(isset($getReferralUser) && !empty($getReferralUser)){
-                        if($getReferralUser->driver == 1){
-                            if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-                                $rewardPoint = new RewardPoint;
-                                $rewardPoint->type = "driver";
-                                $rewardPoint->user_id = $getReferralUser->id;
-                                $rewardPoint->point = $getReferralSetting->d_2_s_reward_point ?? 0; 
-                                $rewardPoint->status = "pending";
-                                $rewardPoint->save();
+                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
+                                    $rewardPoint = new RewardPoint;
+                                    $rewardPoint->type = "student";
+                                    $rewardPoint->user_id = $getReferralUser->id;
+                                    $rewardPoint->point = $getReferralSetting->s_2_s_reward_point ?? 0; 
+                                    $rewardPoint->status = "pending";
+                                    $rewardPoint->save();
+                                }else{
+                                    $rewardPoint = new RewardPoint;
+                                    $rewardPoint->type = "student";
+                                    $rewardPoint->user_id = $getReferralUser->id;
+                                    $rewardPoint->point = $getReferralSetting->s_2_p_reward_point ?? 0; 
+                                    $rewardPoint->status = "pending";
+                                    $rewardPoint->save();
+                                }
                             }else{
-                                $rewardPoint = new RewardPoint;
-                                $rewardPoint->type = "driver";
-                                $rewardPoint->user_id = $getReferralUser->id;
-                                $rewardPoint->point = $getReferralSetting->d_2_p_reward_point ?? 0; 
-                                $rewardPoint->status = "pending";
-                                $rewardPoint->save();
-                            }                                
-                        }else if($getReferralUser->student == 1){
+                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
 
-                            if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-                                $rewardPoint = new RewardPoint;
-                                $rewardPoint->type = "student";
-                                $rewardPoint->user_id = $getReferralUser->id;
-                                $rewardPoint->point = $getReferralSetting->s_2_s_reward_point ?? 0; 
-                                $rewardPoint->status = "pending";
-                                $rewardPoint->save();
-                            }else{
-                                $rewardPoint = new RewardPoint;
-                                $rewardPoint->type = "student";
-                                $rewardPoint->user_id = $getReferralUser->id;
-                                $rewardPoint->point = $getReferralSetting->s_2_p_reward_point ?? 0; 
-                                $rewardPoint->status = "pending";
-                                $rewardPoint->save();
-                            }
-                        }else{
-                            if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-
-                                $topUpBalance = new TopUpBalance;
-                                $topUpBalance->user_id = $getReferralUser->id;
-                                $topUpBalance->dr_amount = $getReferralSetting->p_2_s_booking_credit ?? 0;
-                                $topUpBalance->added_date = date('Y-m-d');
-                                $topUpBalance->save();
-                            }else{
-                                $topUpBalance = new TopUpBalance;
-                                $topUpBalance->user_id = $getReferralUser->id;
-                                $topUpBalance->dr_amount = $getReferralSetting->p_2_p_booking_credit ?? 0;
-                                $topUpBalance->added_date = date('Y-m-d');
-                                $topUpBalance->save();
+                                    $topUpBalance = new TopUpBalance;
+                                    $topUpBalance->user_id = $getReferralUser->id;
+                                    $topUpBalance->dr_amount = $getReferralSetting->p_2_s_booking_credit ?? 0;
+                                    $topUpBalance->added_date = date('Y-m-d');
+                                    $topUpBalance->save();
+                                }else{
+                                    $topUpBalance = new TopUpBalance;
+                                    $topUpBalance->user_id = $getReferralUser->id;
+                                    $topUpBalance->dr_amount = $getReferralSetting->p_2_p_booking_credit ?? 0;
+                                    $topUpBalance->added_date = date('Y-m-d');
+                                    $topUpBalance->save();
+                                }
                             }
                         }
                     }
-                    
+
                     $checkUserReferral->status = "completed";
                     $checkUserReferral->save();
             }

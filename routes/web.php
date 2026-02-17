@@ -345,7 +345,7 @@ Route::get('{lang?}/profile/vehicles', [ProfileVehicleController::class, 'index'
 Route::get('{lang?}/profile/vehicle/create', [ProfileVehicleController::class, 'create'])->middleware('auth')->name('profile.vehicle.create');
 Route::get('{lang?}/profile/vehicle/edit/{id}', [ProfileVehicleController::class, 'edit'])->middleware('auth')->name('profile.vehicle.edit');
 Route::get('{lang?}/profile/vehicle/delete/{id}', [ProfileVehicleController::class, 'destroy'])->middleware('auth')->name('profile.vehicle.delete');
-Route::get('{lang?}/profile/referrals', [ProfileReferralController::class, 'index'])->name('profile.referrals');
+Route::get('{lang?}/profile/referrals', [ProfileReferralController::class, 'index'])->middleware('auth')->name('profile.referrals');
 Route::get('{lang?}/ratings-left', [RatingController::class, 'RatingsLeft'])->name('ratings.left');
 Route::get('{lang?}/ratings-left-to-passenger', [RatingController::class, 'RatingsLeftToPassengers'])->name('ratings.leftToPassengers');
 Route::get('{lang?}/ratings-received', [RatingController::class, 'RatingsReceived'])->name('ratings.received');

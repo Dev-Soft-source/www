@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('payment_section_icon2')->after('payment_section_icon1')->nullable();
             $table->text('payment_section_icon3')->after('payment_section_icon2')->nullable();
             $table->text('payment_section_icon4')->after('payment_section_icon3')->nullable();
+            $table->text('payment_section_icon5')->after('payment_section_icon4')->nullable();
         });
     }
 
@@ -41,7 +42,7 @@ return new class extends Migration
             $table->dropColumn(['movement_section_icon', 'news_section_icon1', 'news_section_icon2', 'news_section_icon3',
                 'news_section_icon4', 'use_section_point1_image', 'use_section_point2_image', 'use_section_point3_image',
                 'use_section_point4_image', 'payment_section_icon1', 'payment_section_icon2', 'payment_section_icon3',
-                'payment_section_icon4'
+                'payment_section_icon4', 'payment_section_icon5'
             ]);
         });
     }

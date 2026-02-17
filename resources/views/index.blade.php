@@ -1751,6 +1751,11 @@
                         <img class="h-full w-full object-contain" src="{{asset('home_page_icons/' . $homePage->payment_section_icon4)}}" alt="">
                     @endisset
                 </div>
+                <div class="flex justify-center items-center h-10 md:h-14">
+                    @isset($homePage->payment_section_icon5)
+                        <img class="h-full w-full object-contain" src="{{asset('home_page_icons/' . $homePage->payment_section_icon5)}}" alt="">
+                    @endisset
+                </div>
             </div>
         </div>
     </div>
