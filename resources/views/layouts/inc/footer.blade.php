@@ -17,7 +17,7 @@
                 @endif>
                 <img class="h-20 mx-auto" src="/assets/PROXIMARIDE.png" alt="">
             </a>
-            <p class="text-white mt-8 text-center">Ride with Purpose. Powered by Community Values.</p>
+            <p class="text-white mt-8 text-center">{{ getTranslatedText('footer_tagline', $selectedLanguage ?? 1, [], 'Ride with Purpose. Powered by Community Values.') }}</p>
         </div>
 
         @foreach ($footerSettingDetail as $section)
@@ -72,9 +72,9 @@
         </a> --}}
       </div>
       <div class="flex flex-row items-center pb-7 md:pb-14 relative">
-        {{-- copylight --}}
+        {{-- copyright --}}
         <div class="w-full flex justify-center">
-          <p class="text-white">© ProximaRide {{ date('Y') }}. All rights reserved</p>
+          <p class="text-white">{!! getTranslatedText('footer_copyright', $selectedLanguage ?? 1, ['year' => date('Y')], '© ProximaRide ' . date('Y') . '. All rights reserved') !!}</p>
         </div> 
         {{-- multi language list --}}
         <div class="relative lg:w-1/2 flex justify-end lg:absolute lg:right-0">

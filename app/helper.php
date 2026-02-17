@@ -3,6 +3,7 @@
 use App\Models\FooterSetting;
 use App\Models\Language;
 use App\Models\MenuDetail;
+use App\Models\SiteText;
 use Illuminate\Support\Facades\Session;
 
 if (!function_exists('getAllLanguages')) {
@@ -36,6 +37,45 @@ if (!function_exists("updateLangByAbber")) {
         }
         Session::put('webLanguage', $language->id);
         return 1;
+    }
+}
+
+if (!function_exists('getTranslatedText')) {
+    /**
+     * Get a translated sentence/text by slug for the given language.
+     * Falls back to language_id 1 (English) if no row exists for the requested language.
+     * Placeholders in the stored text (e.g. {year}) are replaced using the $replacements array.
+     *
+     * @param string $slug Unique key for the text (e.g. 'footer_tagline', 'footer_copyright')
+     * @param int|object $lang Language id or Language model instance
+     * @param array $replacements Optional key => value to replace {key} in the text (e.g. ['year' => date('Y')])
+     * @param string $default Default string if no record found
+     * @return string
+     */
+    function getTranslatedText($slug, $lang, array $replacements = [], $default = '')
+    {
+        $languageId = is_object($lang) ? (int) $lang->id : (int) $lang;
+        if ($languageId < 1) {
+            $languageId = 1;
+        }
+
+        $row = SiteText::where('slug', $slug)
+            ->where('language_id', $languageId)
+            ->first();
+
+        if (!$row) {
+            $row = SiteText::where('slug', $slug)
+                ->where('language_id', 1)
+                ->first();
+        }
+
+        $text = ($row && $row->text !== null && $row->text !== '') ? $row->text : $default;
+
+        foreach ($replacements as $key => $value) {
+            $text = str_replace('{' . $key . '}', (string) $value, $text);
+        }
+
+        return $text;
     }
 }
 
@@ -140,6 +180,53 @@ if (!function_exists('getTopMenuSetting')) {
         ];
 
         return (object) ['topMenuItems' => $topMenuItems];
+    }
+}
+
+if (!function_exists('getNavbarMenuSetting')) {
+    /**
+     * Get navbar menu items for profile dropdown (menu_id 6) and guest nav (menu_id 7).
+     * Returns profileDropdownItems (My Profile, My Rides, My Chats, Sign out) and guestNavItems (Coffee on the Wall, Log in / Sign up).
+     * If no menu_detail for the language, falls back to language_id 1. Use link 'logout' for Sign out (no route).
+     *
+     * @param int|object $lang Language id or Language model instance
+     * @return object { profileDropdownItems: array, guestNavItems: array }
+     */
+    function getNavbarMenuSetting($lang)
+    {
+        $languageId = is_object($lang) ? (int) $lang->id : (int) $lang;
+        if ($languageId < 1) {
+            $languageId = 1;
+        }
+
+        $defaultProfile = [
+            ['id' => 1, 'link' => 'profile', 'name' => 'My Profile'],
+            ['id' => 2, 'link' => 'my_rides', 'name' => 'My Rides'],
+            ['id' => 3, 'link' => 'my_chats', 'name' => 'My Chats'],
+            ['id' => 4, 'link' => 'logout', 'name' => 'Sign out'],
+        ];
+        $defaultGuest = [
+            ['id' => 1, 'link' => 'coffee_on_wall', 'name' => 'Coffee on the Wall'],
+            ['id' => 2, 'link' => 'login', 'name' => 'Log in / Sign up'],
+        ];
+
+        foreach ([6 => 'profileDropdownItems', 7 => 'guestNavItems'] as $menuId => $key) {
+            $detail = MenuDetail::where('menu_id', $menuId)
+                ->where('language_id', $languageId)
+                ->first();
+            if (!$detail) {
+                $detail = MenuDetail::where('menu_id', $menuId)
+                    ->where('language_id', 1)
+                    ->first();
+            }
+            $items = ($detail && !empty($detail->menu_items)) ? $detail->menu_items : ($menuId === 6 ? $defaultProfile : $defaultGuest);
+            $$key = $items;
+        }
+
+        return (object) [
+            'profileDropdownItems' => $profileDropdownItems,
+            'guestNavItems' => $guestNavItems,
+        ];
     }
 }
 
