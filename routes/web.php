@@ -261,6 +261,7 @@ Route::get('/show-ride', function () {
 })->name('show_ride');
 
 Route::get('/{lang?}', [HomeController::class, 'index'])->name('home')->where('lang', '[a-zA-Z]{2}');
+Route::get('{lang?}/coffee-on-the-wall/story', [HomeController::class, 'coffeeOnWallStory'])->name('coffee_on_wall_story');
 Route::get('{lang?}/coffee-on-the-wall', [HomeController::class, 'coffeeOnWall'])->name('coffee_on_wall');
 Route::get('{lang?}/signup', [SignupController::class, 'create'])->middleware('guest')->name('signup');
 Route::get('{lang?}/signup/{provider}', [SignupController::class, 'redirectToProvider'])->name('signup.redirectToProvider');
