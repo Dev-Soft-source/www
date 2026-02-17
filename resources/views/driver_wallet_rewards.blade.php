@@ -53,12 +53,12 @@
                         <div class="tab-content tab-space">
                             <div class="block" id="tab-profile">
                                 <div class="space-y-4">
-                                    <p>You have {{ $driverTotalRewardPoint }} points as driver</p>
+                                    <p>You have {{ $driverTotalRewardPoint }} {{ $walletSettingPage->driver_my_reward_description1 ?? "points as driver" }}</p>
                                     <div class="relative">
                                         <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                             <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">Rewards</p>
-                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">Points</p>                                                
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->driver_reward_reward_table_label ?? "Reward" }}</p>
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->driver_reward_points_table_label ?? "Points" }}</p>                                                
                                             </div>
                                             @if (!empty($rewardPointSettings) && count($rewardPointSettings) > 0)
                                                 @foreach ($rewardPointSettings as $rewardPointSetting)
