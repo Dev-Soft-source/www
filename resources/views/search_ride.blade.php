@@ -194,11 +194,11 @@
                                                 <span class="text-pink-500 text-base md:text-lg">
                                                     {{ $findRidePage->ride_features_option1->name }}
                                                 </span>
-                                               
+                                                
                                             </label>
                                             <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
-                                                {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            {{ in_array($findRidePage->ride_features_option1->features_setting_id, $features_check) ? 'checked' : '' }}
+                                            class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         </div>
                                         @endisset
                                         @isset($findRidePage->ride_features_option2->features_setting_id)
@@ -219,7 +219,7 @@
                                             <input id="extra-care" type="checkbox"
                                                 value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
                                                 {{ in_array($findRidePage->ride_features_option2->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                                class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                         </div>
                                         @endisset
                                 </div>
@@ -300,10 +300,10 @@
                                 <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
                                     <input id="driverPhone" name="" type="checkbox"
                                         {{ $request->driver_phone == 1 ? 'checked' : '' }}
-                                        class="h-4 w-4 border-gray-300 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600"
+                                        class="w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2"
                                         {{-- onchange="navigateToSearchRoute()" --}}
                                         >
-                                    <label for="" class="block font-normal text-sm text-gray-900">
+                                    <label for="driverPhone" class="block font-normal text-gray-900">
                                         @isset($findRidePage->driver_phone_access_label)
                                             {{ $findRidePage->driver_phone_access_label }}
                                         @endisset
