@@ -384,35 +384,10 @@ class PinkRideController extends Controller
             ->limit(3)
             ->get();
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
 
-            $recentSearches = RecentSearch::where('page_type', 'pink_ride')
-                ->where('user_id', $user_id)
-                ->orderBy('updated_at', 'desc')
-                ->limit(3)
-                ->get();
-
-        }
-        return view('pink_ride',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'postRidePage' => $postRidePage,'pinkRideFaqs' => $pinkRideFaqs,'findRidePage' => $findRidePage,'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,'request' => $request,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('pink_ride',[
+            'postRidePage' => $postRidePage,'pinkRideFaqs' => $pinkRideFaqs,'findRidePage' => $findRidePage,
+            'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,
+            'request' => $request,'ratings' => $ratings]);
     }
 }

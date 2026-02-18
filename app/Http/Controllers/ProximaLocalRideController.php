@@ -31,28 +31,10 @@ class ProximaLocalRideController extends Controller
             session(['selectedLanguage' => $lang]);
         }
         $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
+        
+        $findRidePage = $this->getFindRidePageWithSettingDetail();
 
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         if ($request->from && $request->to) {
             if (auth()->user()) {
@@ -215,29 +197,11 @@ class ProximaLocalRideController extends Controller
 
         $ratings = Rating::all();
         $recentSearches = RecentSearch::where('page_type', 'proximalocal_ride')->orderBy('updated_at', 'desc')->limit(3)->get();
-        $notifications = collect();
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')
-                ->where(function ($query) use ($user_id) {
-                    $query->where('type', '1')->whereHas('ride', fn($q) => $q->where('added_by', $user_id))
-                        ->orWhere(function ($query) use ($user_id) {
-                            $query->where('type', '2')->whereHas('booking', fn($q) => $q->where('user_id', $user_id));
-                        })
-                        ->orWhere(function ($query) use ($user_id) {
-                            $query->whereNull('type')->whereHas('receiver', fn($q) => $q->where('id', $user_id));
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-            $recentSearches = RecentSearch::where('page_type', 'proximalocal_ride')->where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(3)->get();
-        }
+        
 
         $extraCareFaqs = collect();
 
         return view('proximalocal_ride', [
-            'notificationPage' => $notificationPage ?? null,
-            'successMessage' => $successMessage ?? null,
             'postRidePage' => $postRidePage,
             'findRidePage' => $findRidePage,
             'extraCareFaqs' => $extraCareFaqs,
@@ -245,9 +209,6 @@ class ProximaLocalRideController extends Controller
             'recentSearches' => $recentSearches ?? collect(),
             'request' => $request,
             'ratings' => $ratings,
-            'notifications' => $notifications ?? collect(),
-            'languages' => $languages,
-            'selectedLanguage' => $selectedLanguage,
         ]);
     }
 }

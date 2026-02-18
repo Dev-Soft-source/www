@@ -32,34 +32,12 @@ class FolkRideController extends Controller
             session(['selectedLanguage' => $lang]);
         }
         $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $selectedLanguage->id)->get();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
-                
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
-                $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $selectedLanguage->id)->get();
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
         
+                
+        $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
+        $findRidePage = $this->getFindRidePageWithSettingDetail();
+
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
         if ($request->from && $request->to) {
             if (auth()->user()) {
                 // Check if user has suspanded
@@ -383,34 +361,6 @@ class FolkRideController extends Controller
             ->limit(3)
             ->get();
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
-            $recentSearches = RecentSearch::where('page_type', 'folk_ride')
-                ->where('user_id', $user_id)
-                ->orderBy('updated_at', 'desc')
-                ->limit(3)
-                ->get();
-        }
-        return view('folk_ride',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'postRidePage' => $postRidePage,'findRidePage' => $findRidePage,'extraCareFaqs' => $extraCareFaqs,'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,'request' => $request,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('folk_ride',['postRidePage' => $postRidePage,'findRidePage' => $findRidePage,'extraCareFaqs' => $extraCareFaqs,'paginatedRides' => $paginatedRides,'recentSearches' => $recentSearches,'request' => $request,'ratings' => $ratings]);
     }
 }

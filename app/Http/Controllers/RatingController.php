@@ -140,8 +140,6 @@ class RatingController extends Controller
                 'timeliness' => $timeliness,
                 'totalAverage' => $totalAverage,
                 'notifications' => $notifications,
-                'languages' => $languages,
-                'selectedLanguage' => $selectedLanguage,
                 'reviewSettingPage' => $reviewSettingPage
             ]);
         } else {
@@ -256,8 +254,6 @@ class RatingController extends Controller
                 'timeliness' => $timeliness,
                 'totalAverage' => $totalAverage,
                 'notifications' => $notifications,
-                'languages' => $languages,
-                'selectedLanguage' => $selectedLanguage,
             ]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
@@ -495,8 +491,6 @@ class RatingController extends Controller
             'timeliness' => $timeliness,
             'totalAverage' => $totalAverage,
             'notifications' => $notifications,
-            'languages' => $languages,
-            'selectedLanguage' => $selectedLanguage,
         ]);
     }
 }

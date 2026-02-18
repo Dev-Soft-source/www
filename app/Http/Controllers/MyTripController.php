@@ -118,7 +118,10 @@ class MyTripController extends Controller
         }
 
 
-        return view('my_trips',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'reviewSetting' => $reviewSetting,'messages' => $messages,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'ratings' => $ratings,'postRidePage' => $postRidePage,'rideDetailPage' => $rideDetailPage,'tripsPage' => $tripsPage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('my_trips',[
+            'reviewSetting' => $reviewSetting,'messages' => $messages,'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'ratings' => $ratings,
+            'postRidePage' => $postRidePage,'rideDetailPage' => $rideDetailPage,'tripsPage' => $tripsPage]);
     }
 
     public function PastTrips($lang = null){
@@ -203,7 +206,10 @@ class MyTripController extends Controller
 
         }
 
-        return view('past_trips',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'rideDetailPage' => $rideDetailPage,'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting,'postRidePage' => $postRidePage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('past_trips',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,
+        'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'rideDetailPage' => $rideDetailPage,
+        'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting,
+        'postRidePage' => $postRidePage]);
     }
 
     public function CancelledTrips($lang = null){
@@ -276,6 +282,9 @@ class MyTripController extends Controller
 
         }
 
-        return view('cancelled_trips',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'postRidePage' => $postRidePage,'rideDetailPage' => $rideDetailPage,'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('cancelled_trips',[
+            'reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,
+            'bookings' => $bookings,'postRidePage' => $postRidePage,'rideDetailPage' => $rideDetailPage,
+            'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting]);
     }
 }

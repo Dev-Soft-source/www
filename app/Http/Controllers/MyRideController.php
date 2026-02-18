@@ -401,7 +401,12 @@ class MyRideController extends Controller
         if(($completed_date_time < Carbon::now() || $ride->status =='2'|| $ride->status =='3')){
             $ride_cancelled=true;
         }
-        return view('my_ride_detail', ['notificationPage'=>$notificationPage, 'siteSetting'=>$siteSetting ,'successMessage'=>$successMessage,'ride_cancelled' => $ride_cancelled,'ride' => $ride, 'setting' => $setting, 'ratings' => $ratings, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'cancelSetting' => $cancelSetting, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage, 'messages' => $messages]);
+        return view('my_ride_detail', [
+            'siteSetting'=>$siteSetting ,
+            'ride_cancelled' => $ride_cancelled,'ride' => $ride, 
+            'setting' => $setting, 'ratings' => $ratings, 
+            'postRidePage' => $postRidePage, 'cancelSetting' => $cancelSetting, 
+            'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage, 'messages' => $messages]);
     }
 
     public function enterCode(Request $request)
@@ -847,7 +852,9 @@ class MyRideController extends Controller
 
         $ratings = Rating::all();
 
-        return view('my_passengers', ['ride' => $ride, 'setting' => $setting, 'cancelSetting' => $cancelSetting, 'ratings' => $ratings, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myPassengerPage' => $myPassengerPage, 'messages' => $messages]);
+        return view('my_passengers', ['ride' => $ride, 'setting' => $setting, 'cancelSetting' => $cancelSetting,
+         'ratings' => $ratings, 
+         'myPassengerPage' => $myPassengerPage, 'messages' => $messages]);
     }
 
     public function cancel($lang = null, $id)

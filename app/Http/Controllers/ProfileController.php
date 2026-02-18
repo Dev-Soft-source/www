@@ -135,7 +135,8 @@ class ProfileController extends Controller
         ->orderBy('id', 'desc')
         ->get();
 
-        return view('profile_info',['user' => $user,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('profile_info',['user' => $user,'ratings' => $ratings,
+        'notifications' => $notifications]);
     }
 
     public function driverInfo($lang = null, $id){
@@ -209,7 +210,8 @@ class ProfileController extends Controller
         ->orderBy('id', 'desc')
         ->get();
 
-        return view('driver_info',['ride' => $ride,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('driver_info',['ride' => $ride,'ratings' => $ratings,
+        'notifications' => $notifications]);
     }
     
     public function edit($lang = null){

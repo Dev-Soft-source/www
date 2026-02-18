@@ -280,7 +280,10 @@ class HomeController extends Controller
             $query->where('language_id', $langId);
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
-        return view('index',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage, 'token' => $token, 'rides' => $rides,'video' => $videoDetails,'articles' => $articles,'reviews' => $latestFilteredReviews,'homePage' => $homePage,'languages' => $languages,'selectedLanguage' => $selectedLanguage,'notifications' => $notifications, 'ratings' => $ratings, 'findRidePage' => $findRidePage, 'postRidePage' => $postRidePage]);
+        return view('index',['token' => $token, 'rides' => $rides,'video' => $videoDetails,
+        'articles' => $articles,'reviews' => $latestFilteredReviews,
+        'homePage' => $homePage,
+        'ratings' => $ratings, 'findRidePage' => $findRidePage, 'postRidePage' => $postRidePage]);
     }
 
     function redirectToAdminDashboard()  {
