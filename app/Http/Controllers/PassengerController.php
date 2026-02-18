@@ -20,7 +20,7 @@ class PassengerController extends Controller
 
         $video = Video::where('page', 'For Passengers')->orderBy('id', 'desc')->first();
         if ($video) {
-            $videoDetails = VideoDetail::getByLanguageWithFallback($video->id, $this->selectedLanguage->id, $this->defaultLang->id);
+            $videoDetails = VideoDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id, ['video_id' => $video->id]);
         }
 
         return view('passengers', [
