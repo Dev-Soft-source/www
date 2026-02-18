@@ -42,251 +42,56 @@ use Stripe\Subscription;
 
 class HomeController extends Controller
 {
-    public function index($lang = null){
-
-
-    //     $getRides = Ride::get();
-    //     foreach ($getRides as $key => $getRide) {
-
-    //         $getRideDetail = RideDetail::where('ride_id', $getRide->id)->first();
-    //         if(isset($getRideDetail) && !empty($getRideDetail)){
-
-    //         }else{
-    //             $rideDetail = new RideDetail();
-    //             $rideDetail->ride_id = $getRide->id;
-    //             $rideDetail->departure = $getRide->departure;
-    //             $rideDetail->destination = $getRide->destination;
-    //             $rideDetail->default_ride = 1;
-    //             $rideDetail->total_distance = $getRide->total_distance;
-    //             $rideDetail->total_duration = $getRide->total_time;
-    //             $rideDetail->price = isset($getRide->price) && $getRide->price != "" ? $getRide->price : 0;
-    //             $rideDetail->time = $getRide->time;
-    //             $rideDetail->date = $getRide->date;
-    //             $rideDetail->destination_time = $getRide->destination_time;
-    //             $rideDetail->destination_date = $getRide->destination_date;
-    //             $rideDetail->completed_time = $getRide->completed_time;
-    //             $rideDetail->completed_date = $getRide->completed_date;
-    //             $rideDetail->save();
-    //         }
-
-    //         $getRide->departure= "";
-    //         $getRide->destination= "";
-    //         $getRide->total_distance= "";
-    //         $getRide->total_time= "";
-    //         $getRide->price= "";
-    //         $getRide->save();
-
-    //     }
-
-
-    // //  //   Update Booking
-
-    //     $getBooking = Booking::all();
-    //     foreach ($getBooking as $key => $booking) {
-    //         $getRideDetail = RideDetail::where('ride_id', $booking->ride_id)->where('default_ride', '1')->first();
-    //         $booking->ride_detail_id = $getRideDetail->id;
-    //         $booking->departure = $getRideDetail->departure;
-    //         $booking->destination = $getRideDetail->destination;
-    //         $booking->price = $getRideDetail->price;
-    //         $booking->save();
-    //     }
-
-
-    //     $getNotifcations = Notification::get();
-    //     foreach ($getNotifcations as $key => $getNotifcation) {
-    //         $getRideDetail = RideDetail::where('ride_id', $getNotifcation->ride_id)->where('default_ride', '1')->first();
-    //         if(isset($getRideDetail)){
-    //             $getNotifcation->ride_detail_id = $getRideDetail->id;
-    //             $getNotifcation->departure = $getRideDetail->departure;
-    //             $getNotifcation->destination = $getRideDetail->destination;
-    //             $getNotifcation->save();
-    //         }
-    //     }
-
-    //     $getMessages = Message::get();
-    //     foreach ($getMessages as $key => $getMessage) {
-    //         $getRideDetail = RideDetail::where('ride_id', $getMessage->ride_id)->where('default_ride', '1')->first();
-    //         if(isset($getRideDetail)){
-    //             $getMessage->ride_detail_id = $getRideDetail->id;
-    //             $getMessage->save();
-    //         }
-    //     }
-
-    //      return "Hello";
-
-    //    // Initialize cURL session
-    //     $ch = curl_init();
-
-    //     // Set the cURL options
-    //     curl_setopt($ch, CURLOPT_URL, "https://maps.googleapis.com/maps/api/distancematrix/json?origins=Faisalabad&destinations=Lahore&units=imperial&key=AIzaSyBZWXZAUBOyBMVtY0Zs0M8sNvkbZd_OzFM");
-    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-
-    //     // Execute the cURL session and store the result
-    //     $response = curl_exec($ch);
-
-    //     // Check for cURL errors
-    //     if(curl_errno($ch)) {
-    //         echo 'cURL Error: ' . curl_error($ch);
-    //     }
-
-    //     // Close the cURL session
-    //     curl_close($ch);
-
-    //     // Optionally, decode the JSON response if needed
-    //     $data = json_decode($response, true);
-
-    //     // Display the result
-    //     return $data;
-
-
-    //     $adminSetting = SiteSetting::first();
-    //     if(isset($adminSetting)){
-
-    //         $getRides = Ride::get();
-    //         if(isset($getRides) && !empty($getRides)){
-    //             foreach ($getRides as $key => $initialRide) {
-    //                 if(isset($initialRide->date) && isset($initialRide->time)){
-    //                     $rideDateTime = Carbon::parse("$initialRide->date $initialRide->time");
-    //                     $rideDateTime->addHours($adminSetting->destination_hours);
-    //                     $rideDateTime->addHours($adminSetting->ride_completed_hours);
-    //                     $completedDate = $rideDateTime->toDateString();
-    //                     $completedTime = $rideDateTime->toTimeString();
-
-    //                     $initialRide->completed_date = $completedDate;
-    //                     $initialRide->completed_time = $completedTime;
-    //                     $initialRide->save();
-    //                 }
-
-    //             }
-    //         }
-
-    //     }
-
-    //     return $getRides;
-
+    public function index($lang = null)
+    {
         $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->where('status', '!=', 2)->where('suspand', '!=', 1)->take(4)->get();
-        // $reviews = Rating::latest('added_on')->where('status', '!=', 0)->get();
-        // Filter the reviews with average rating above 4.5
-        // $filteredReviews = $reviews->filter(function ($review) {
-        //     $sum = 0;
-        //     $count = 0;
-
-        //     $columns = ['vehicle_condition', 'timeliness', 'safety', 'conscious', 'comfort', 'communication', 'attitude', 'respect', 'hygiene'];
-
-        //     foreach ($columns as $column) {
-        //         if (!is_null($review->$column)) {
-        //             $sum += $review->$column;
-        //             $count++;
-        //         }
-        //     }
-
-        //     // Calculate average rating for the review
-        //     $averageRating = $count > 0 ? $sum / $count : null;
-
-        //     return $averageRating >= 4.5;
-        // });
-        // Take the latest 4 filtered reviews
-        // $latestFilteredReviews = $filteredReviews->take(4);
+        
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
+        
+        $findRidePage = $this->getFindRidePageWithSettingDetail();
+        
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        
+        $homePage = HomePageSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
 
-        $video = Video::where('page','Introduction Video')->orderBy('id', 'desc')->first();
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
+        $video = Video::where('page', 'Introduction Video')->orderBy('id', 'desc')->first();
+        if ($video) {
+            $videoDetails = VideoDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id,['video_id' => $video->id]);
         }
-        $selectedLanguage = session('selectedLanguage');
-        $videoDetails = null;
-        $homePage = null;
-        $findRidePage = null;
+            
         $token = null;
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();                
-                
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $homePage = HomePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // Fetch video_details for the Introduction Video using the video's ID.
-                if($video){
-                    $videoDetails = VideoDetail::where('video_id', $video->id)
-                        ->where('language_id', $selectedLanguage->id)
-                        ->first();
-                }
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();                
-
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                // Retrieve the HomePageSettingDetail associated with the default language
-
-                $homePage = HomePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                if($video){
-                    $videoDetails = VideoDetail::where('video_id', $video->id)
-                        ->whereHas('language', function ($query) {
-                            $query->where('is_default', 1);
-                        })->first();
-                }
-            }
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where('is_read', '0');
-
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
+        if(auth()->user()){
+            // $token = FCMToken::where('user_id', auth()->user()->id)->pluck('token')->first();
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
         }
 
 
         $ratings = Rating::all();
 
-        $langId = $selectedLanguage->id;
+        $langId = $this->selectedLanguage->id;
 
         $articles = Article::whereHas('articleDetail', function ($query) use ($langId) {
             $query->where('language_id', $langId);
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
-        return view('index',['token' => $token, 'rides' => $rides,'video' => $videoDetails,
-        'articles' => $articles,'reviews' => $latestFilteredReviews,
-        'homePage' => $homePage,
-        'ratings' => $ratings, 'findRidePage' => $findRidePage, 'postRidePage' => $postRidePage]);
+        return view(
+            'index',
+            [
+                'token' => $token,
+                'rides' => $rides,
+                'video' => $videoDetails,
+                'articles' => $articles,
+                'reviews' => $latestFilteredReviews,
+                'homePage' => $homePage,
+                'ratings' => $ratings,
+                'findRidePage' => $findRidePage,
+                'postRidePage' => $postRidePage
+            ]
+        );
     }
 
-    function redirectToAdminDashboard()  {
+    function redirectToAdminDashboard()
+    {
         return view('admin.app');
     }
 
@@ -298,7 +103,7 @@ class HomeController extends Controller
 
         $user_id = auth()->user()->id;
 
-        $fcm_token = FCMToken::where('user_id',$user_id)->where('token',$request->token)->first();
+        $fcm_token = FCMToken::where('user_id', $user_id)->where('token', $request->token)->first();
 
         if (!$fcm_token) {
             FCMToken::create([
@@ -491,7 +296,7 @@ class HomeController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $coffeeWallPage = CoffeeWallPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
@@ -499,7 +304,7 @@ class HomeController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $coffeeWallPage = CoffeeWallPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
@@ -513,27 +318,26 @@ class HomeController extends Controller
                 $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                     $query->where('added_by', $user_id);
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
                     });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
             })
-            ->orderBy('id', 'desc')
-            ->get();
-
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
         $packages = Package::where('custom', 0)->with(['PackageDetail' => function ($query) use ($selectedLanguage) {
             $query->where('language_id', $selectedLanguage->id);
         }])
-        ->get();
-        return view('coffee_wall',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'coffeeWallPage' => $coffeeWallPage,'packages' => $packages,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);
+            ->get();
+        return view('coffee_wall', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'coffeeWallPage' => $coffeeWallPage, 'packages' => $packages, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);
     }
 
     public function coffeeOnWallStore(Request $request)
@@ -705,7 +509,7 @@ class HomeController extends Controller
                     $subscription_id = $request->gPayApplePayId;
                 } else {
                     $interval = null;
-    
+
                     if ($request->frequency == 'weekly') {
                         $interval = 'week';
                         $interval_count = 1; // Charge every 1 week
@@ -720,7 +524,7 @@ class HomeController extends Controller
                     } else if ($request->frequency == 'annually') {
                         $interval = 'year';
                     }
-    
+
                     // Create a PaymentMethod with Stripe using the token
                     $paymentMethods = PaymentMethod::create([
                         'type' => 'card',
@@ -732,47 +536,47 @@ class HomeController extends Controller
                             ],
                         ],
                     ]);
-    
+
                     $stripeCustomer = Customer::create([
                         'name' => $request->name,
                         'email' => $request->email,
                     ]);
-    
+
                     $stripe_customer_id = $stripeCustomer->id;
-    
+
                     // Attach a payment method to the customer
                     $paymentMethods->attach(['customer' => $stripe_customer_id]);
-    
+
                     // Set the attached payment method as the default for the customer
                     $stripeCustomer->update(
                         $stripe_customer_id,
                         ['invoice_settings' => ['default_payment_method' => $paymentMethods->id]]
                     );
-    
+
                     $subscription_items = [
                         ['price' => $package->stripe_price_id],
                     ];
-    
+
                     $subscription_params = [
                         'customer' => $stripe_customer_id,
                         'items' => $subscription_items,
                         'cancel_at_period_end' => false,
                     ];
-    
+
                     // Add the interval and interval_count if applicable
                     if ($interval) {
-    
+
                         $timeStamp = now()->timestamp;
-                        if($interval == "week"){
+                        if ($interval == "week") {
                             $timeStamp = now()->addDays(7)->timestamp;
-                        }elseif($interval == 'month'){
+                        } elseif ($interval == 'month') {
                             $timeStamp = now()->addMonth(1)->timestamp;
-                        }elseif($interval == 'year'){
+                        } elseif ($interval == 'year') {
                             $timeStamp = now()->addMonth(12)->timestamp;
-                        }else{
+                        } else {
                             $timeStamp = now()->addMonth($interval_count)->timestamp;
                         }
-    
+
                         $subscription_params['billing_cycle_anchor'] = $timeStamp; // Anchor the subscription
                         $subscription_items[0]['plan'] = [
                             'interval' => $interval,
@@ -781,9 +585,9 @@ class HomeController extends Controller
                             $subscription_items[0]['plan']['interval_count'] = $interval_count;
                         }
                     }
-    
+
                     $subscription = Subscription::create($subscription_params);
-    
+
                     $subscription_id = $subscription->id;
                     $stripe_item_id = isset($subscription->items->data[0]) ? $subscription->items->data[0]->id : null;
                 }
@@ -913,7 +717,7 @@ class HomeController extends Controller
                 'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
                 'payment_method' => $request->payment_method,
             ];
-            
+
             if ($request->payment_method == 'paypal') {
                 $data['paypal_email'] = $request->email;
             } elseif ($request->payment_method == 'stripe') {
@@ -921,9 +725,9 @@ class HomeController extends Controller
                 $data['card_type'] = $request->card_type ?? $card->card_type ?? 'Card';
                 $data['cardholder_name'] = $request->name ?? $card->name ?? 'Cardholder';
                 $data['last_four_digits'] = $request->card_number ?? $card->card_number ?? '****';
-                $data['expiration_date'] = ($request->exp_month ?? $card->exp_month ?? 'MM').'/'.($request->exp_year ?? $card->exp_year ?? 'YY');
+                $data['expiration_date'] = ($request->exp_month ?? $card->exp_month ?? 'MM') . '/' . ($request->exp_year ?? $card->exp_year ?? 'YY');
             }
-            
+
             if ($request->email) {
                 Mail::to($request->email)->send(new CoffeeOnWallReceiptMail($data));
             }
@@ -940,7 +744,7 @@ class HomeController extends Controller
                     'payment_method' => $request->payment_method,
                     'frequency' => $request->frequency ?? null,
                 ];
-                
+
                 // Add payment method specific details
                 if ($request->payment_method == 'paypal') {
                     $adminData['paypal_email'] = $request->email;
@@ -949,9 +753,9 @@ class HomeController extends Controller
                     $adminData['card_type'] = $request->card_type ?? $card->card_type ?? 'Card';
                     $adminData['cardholder_name'] = $request->name ?? $card->name ?? 'Cardholder';
                     $adminData['last_four_digits'] = $request->card_number ?? $card->card_number ?? '****';
-                    $adminData['expiration_date'] = ($request->exp_month ?? $card->exp_month ?? 'MM').'/'.($request->exp_year ?? $card->exp_year ?? 'YY');
+                    $adminData['expiration_date'] = ($request->exp_month ?? $card->exp_month ?? 'MM') . '/' . ($request->exp_year ?? $card->exp_year ?? 'YY');
                 }
-                
+
                 Mail::to($admin->admin_email)->queue(new AdminCoffeeOnWallDonationMail($adminData));
             }
 
@@ -997,10 +801,10 @@ class HomeController extends Controller
             'status' => 'completed',
         ]);
         $user = User::where('email', $email)->first();
-        $fullName = $user 
-            ? $user->first_name . ' ' . $user->last_name 
+        $fullName = $user
+            ? $user->first_name . ' ' . $user->last_name
             : ($name ?? 'Anonymous Donor');
-        
+
         $data = [
             'full_name' => $fullName,
             'amount' => $package->price,
@@ -1009,7 +813,7 @@ class HomeController extends Controller
             'payment_method' => 'paypal',
             'paypal_email' => $email,
         ];
-        
+
         if ($email) {
             Mail::to($email)->send(new CoffeeOnWallReceiptMail($data));
         }
@@ -1037,9 +841,9 @@ class HomeController extends Controller
         }
 
         $data['packages'] = Package::with(['PackageDetail' => function ($query) use ($selectedLanguage) {
-                        $query->where('language_id', $selectedLanguage->id);
-                    }])
-                    ->get();
+            $query->where('language_id', $selectedLanguage->id);
+        }])
+            ->get();
         return response()->json($data);
     }
 }
