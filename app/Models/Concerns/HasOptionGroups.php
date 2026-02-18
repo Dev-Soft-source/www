@@ -35,27 +35,52 @@ trait HasOptionGroups
     }
 
     public function loadOptionGroup(
-        string $prefix,
-        int $selectedLangId,
-        int $defaultLangId
-    ): Collection {
+    string $prefix,
+    int $selectedLangId,
+    int $defaultLangId
+): Collection {
 
-        $ids = $this->getOptionIds($prefix);
+    $ids = $this->getOptionIds($prefix);
 
-        if (empty($ids)) {
-            return collect();
+    if (empty($ids)) {
+        return collect();
+    }
+
+    $settings = FeaturesSetting::whereIn('id', $ids)
+        ->with(['featuresSettingDetail' => function ($query) use ($selectedLangId, $defaultLangId) {
+            $query->whereIn('language_id', [$selectedLangId, $defaultLangId])
+                  ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId]);
+        }])
+        ->get();
+
+    return $settings->map(function ($setting) use ($selectedLangId, $defaultLangId) {
+        // Group details by language_id
+        $detailsByLang = $setting->featuresSettingDetail->keyBy('language_id');
+
+        $selected = $detailsByLang->get($selectedLangId);
+        $default  = $detailsByLang->get($defaultLangId);
+
+        if (!$selected) {
+            // fallback entirely to default
+            return $default;
         }
 
-        return FeaturesSetting::whereIn('id', $ids)
-            ->with(['featuresSettingDetail' => function ($query) use ($selectedLangId, $defaultLangId) {
-                $query->whereIn('language_id', [$selectedLangId, $defaultLangId])
-                      ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId]);
-            }])
-            ->get()
-            ->map(fn ($setting) => $setting->featuresSettingDetail->first())
-            ->filter()
-            ->values();
-    }
+        if (!$default) {
+            // no default available, just return selected as-is
+            return $selected;
+        }
+
+        // Merge fields: if selected field is null or empty string, take from default
+        foreach ($default->getAttributes() as $key => $value) {
+            if (!isset($selected->$key) || $selected->$key === '' || $selected->$key === null) {
+                $selected->$key = $value;
+            }
+        }
+
+        return $selected;
+    })->filter()->values();
+}
+
 
     public function mapOptionColumnsToDetails(string $prefix, $selectedLangId, $defaultLangId)
     {
