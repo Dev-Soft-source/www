@@ -1138,7 +1138,7 @@
                                                 <div class="mt-4">
                                                     <p class="text-xl font-semibold text-primary">
                                                         <div class="flex items-center gap-2">
-                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
+                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
                                                                 <span class="line-through">
                                                                     ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
                                                                     </span>
@@ -1595,7 +1595,7 @@
                                                 <div class="mt-4">
                                                     <p class="text-xl font-semibold text-primary">
                                                         <div class="flex items-center gap-2">
-                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
+                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
                                                                 <span class="line-through">
                                                                     ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
                                                                     </span>

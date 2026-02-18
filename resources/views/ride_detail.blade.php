@@ -91,14 +91,14 @@
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                             <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
-                                class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
-                                Login
+                                class="inline-flex w-28 justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
+                                Log in
                             </a>
-                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="button-exp-no-fill">
-                                Signup
+                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="inline-flex w-28 justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
+                                Sign up
                             </a>
                             <button onclick="closeModal()"
-                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
+                                class="inline-flex w-28 justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
                                 Close
                             </button>
                         </div>
@@ -672,6 +672,7 @@
                                     @endif
                                     <span>|</span> 
                                     <p class="text-md font-semibold">{{ $ride->make }}</p>
+                                    <span>|</span>
                                     <p class="text-md font-semibold">{{ $ride->model }}</p>
                                     <span>|</span> 
                                     @if ($ride->color)
@@ -765,9 +766,6 @@
                                             @else
                                                 {{ $ride->driver?->first_name }}
                                             @endif
-                                            {{-- @if ($ride->driver?->gender && $ride->driver?->gender !== 'Prefer not to say')
-                                                    ({{ strtoupper(substr($ride->driver?->gender, 0, 1)) }})
-                                                @endif --}}
                                         </span>
                                     </p>
                                     {{-- @php
@@ -827,35 +825,27 @@
                                         <div class="flex items-center gap-2 w-auto">
                                             @if ($ride->driver?->email_verified == '1')
                                                 <span>|</span>
-                                                <span
-                                                    class="group relative inline-block cursor-pointer"
-                                                    onclick="openVerifyModal('{{ $rideDetailPage->verified_email ?? 'Email is verified' }}')">
+                                                <span class="inline-block cursor-pointer"
+                                                    data-tippy-content="{{ $rideDetailPage->verified_email ?? 'Email is verified' }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="h-5">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                                                     </svg>
-                                                    <span class="verify-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[24px] px-6 font-medium text-white whitespace-nowrap rounded bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-10 pointer-events-none">
-                                                        Email Verified
-                                                    </span>
                                                 </span>
                                             @endif
 
                                             @if ($hasVerifiedPhone)
                                                 <span>|</span>
-                                                <span
-                                                    class="group relative inline-block cursor-pointer"
-                                                    onclick="openVerifyModal('{{ $rideDetailPage->verified_phone ?? 'Phone number is verified' }}')">
+                                                <span class="inline-block cursor-pointer"
+                                                    data-tippy-content="{{ $rideDetailPage->verified_phone ?? 'Phone number is verified' }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="h-5 ">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
                                                     </svg>
-                                                    <span class="verify-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[24px] px-6 font-medium text-white whitespace-nowrap rounded bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-10 pointer-events-none">
-                                                        Phone Number Verified
-                                                    </span>
                                                 </span>
                                             @endif                                            
                                         </div>

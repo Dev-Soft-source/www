@@ -714,7 +714,7 @@
                                     <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
                                         <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
                                         <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                            <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-7 h-7 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                            <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
                                             <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
                                         </span>
                                     </label>
@@ -846,7 +846,7 @@
                                     <span class="text-red-500">*</span>
                                 </label>
                                 <div class="space-y-2 mt-2">
-                                    @isset($postRidePage->payment_methods_option1->features_setting_id)
+                                    @if($postRidePage->payment_methods_option1?->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
@@ -861,27 +861,15 @@
                                                 <span class="">
                                                     {{ $postRidePage->payment_methods_option1->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                      class="absolute tooltip payment_tooltiptext_position right-32 -top-12 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->payment_methods_option1_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </label>
                                         </div>
-                                    @endisset
-                                    @isset($postRidePage->payment_methods_option2->features_setting_id)
+                                    @endif
+                                    @if($postRidePage->payment_methods_option2?->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
@@ -896,27 +884,15 @@
                                                 <span class="">
                                                     {{ $postRidePage->payment_methods_option2->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                      class="absolute tooltip right-48 -top-20 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->payment_methods_option2_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </label>
                                         </div>
-                                    @endisset
-                                    @isset($postRidePage->payment_methods_option3->features_setting_id)
+                                    @endif
+                                    @if($postRidePage->payment_methods_option3?->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
@@ -931,26 +907,14 @@
                                                 <span class="">
                                                     {{ $postRidePage->payment_methods_option3->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                      class="absolute tooltip right-44 -top-14 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute after:left-[9.8rem] md:after:left-[9.8rem] payment_tooltiptext -left-1/2 -top-20 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->payment_methods_option3_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </label>
                                         </div>
-                                    @endisset
+                                    @endif
                                 </div>
                                 @error('payment_method')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -976,7 +940,7 @@
                             </div>
                             <div class="bg-white p-4">
                                 <ul class="grid w-full gap-6 md:grid-cols-2">
-                                    @isset($postRidePage->booking_option1->features_setting_id)
+                                    @if($postRidePage->booking_option1?->features_setting_id)
                                         <li>
                                             <input type="radio" id="instant-booking" name="booking_method" value="{{ $postRidePage->booking_option1->features_setting_id }}"
                                                 {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }} class="hidden peer">
@@ -985,27 +949,15 @@
                                                 <span class="font-medium text-xl">
                                                     {{ $postRidePage->booking_option1->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                      class="absolute tooltip right-48 -top-20 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->booking_option1_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </label>
                                         </li>
-                                    @endisset
-                                    @isset($postRidePage->booking_option2->features_setting_id)
+                                    @endif
+                                    @if($postRidePage->booking_option2?->features_setting_id)
                                         <li>
                                             <input type="radio" id="manual-approval" name="booking_method" value="{{ $postRidePage->booking_option2->features_setting_id }}"
                                                 {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }} class="hidden peer">
@@ -1014,26 +966,14 @@
                                                 <span class="font-medium text-xl">
                                                     {{ $postRidePage->booking_option2->name }}
                                                 </span>
-                                                <div class="sups relative inline-flex">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                      class="absolute tooltip right-48 -top-20 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute after:left-[10.8rem] lg:after:left-[10.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->booking_option2_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </label>
                                         </li>
-                                    @endisset
+                                    @endif
                                 </ul>
                                 @error('booking_method')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -1079,9 +1019,12 @@
                                         @endisset
                                     </label>
                                 </div>
+                                @php
+                                    $defaultAddedVehicle = $ride->added_vehicle ?? $ride->add_vehicle ?? ($vehicles->firstWhere('primary_vehicle', '1') ? '1' : '0');
+                                @endphp
                                 <div class="{{ $vehicles->count() > '0' ? '' : 'hidden' }}">
                                     <input id="added" type="checkbox" name="added_vehicle" value="1"
-                                        {{ old('added_vehicle', $ride->added_vehicle, $ride->add_vehicle, $vehicles->count() > 0 ? '1' : '0') == '1' ? 'checked' : '' }}
+                                        {{ old('added_vehicle', $defaultAddedVehicle) == '1' ? 'checked' : '' }}
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                     <label for="added" class="ml-2  text-gray-900">
                                         @isset($postRidePage->existing_label)
@@ -1381,30 +1324,36 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="showVehicles" class="md:col-span-2">
+                            <div id="showVehicles" class="md:col-span-2 group">
                                 <label for="type" class="text-gray-900 mb-2">
                                     Select vehicle <span class="text-red-500">*</span>
                                 </label>
                                 <div class="mt-2">
+                                    @php
+                                        $selectedVehicleId = old('vehicle_id', $ride->vehicle_id ?? null);
+                                        if ($selectedVehicleId === '' || $selectedVehicleId === null) {
+                                            $primaryVehicle = $vehicles->firstWhere('primary_vehicle', '1');
+                                            if ($primaryVehicle) {
+                                                $selectedVehicleId = $primaryVehicle->id;
+                                            }
+                                        }
+                                    @endphp
                                     <select id="type" name="vehicle_id"
                                         class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        @php
-                                            $selectedVehicleId = old('vehicle_id', $ride->vehicle_id);
-                                        @endphp
                                         <option value=""
                                             {{ $selectedVehicleId === '' || $selectedVehicleId === null ? 'selected' : '' }}>
                                             Select
                                         </option>
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
-                                                {{ (int) $selectedVehicleId === (int) $vehicle->id || (empty($selectedVehicleId) && $vehicle->primary_vehicle === '1') ? 'selected' : '' }}>
-                                                {{ $vehicle->year }} / {{ $vehicle->model }} / {{ $vehicle->type }}
+                                                {{ (string)$selectedVehicleId === (string)$vehicle->id ? 'selected' : '' }}>
+                                                {{$vehicle->make}} / {{ $vehicle->model }} / {{ $vehicle->year }} / {{ $vehicle->type }}
                                             </option>
                                         @endforeach
                                     </select>
                                     @error('vehicle_id')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <div class="relative tooltip -bottom-4 flex mt-1">
+                                            <div role="alert" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                                 <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                             </div>
                                         </div>
@@ -1426,7 +1375,7 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md divide-y">
-                            @isset($postRidePage->luggage_option1->features_setting_id)
+                            @if($postRidePage->luggage_option1?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option1->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                         <input id="{{ $postRidePage->luggage_option1->features_setting_id }}" type="radio" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}"
@@ -1437,27 +1386,15 @@
                                         <span>
                                             {{ $postRidePage->luggage_option1->name }}
                                         </span>
-                                        <div class="sups relative inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option1_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                                class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                        {{ $postRidePage->luggage_option1_tooltip }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </span>
                                     </label>
                                     </div>
-                            @endisset
-                            @isset($postRidePage->luggage_option2->features_setting_id)
+                            @endif
+                            @if($postRidePage->luggage_option2?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option2->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                         <input type="radio" id="{{ $postRidePage->luggage_option2->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}"
@@ -1468,27 +1405,15 @@
                                         <span class="">
                                             {{ $postRidePage->luggage_option2->name }}
                                         </span>
-                                        <div class="sups relative inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option2_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                                class="absolute tooltip payment_tooltiptext_position -top-20 right-32 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                        {{ $postRidePage->luggage_option2_tooltip }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </span>
                                     </label>
                                     </div>
-                            @endisset
-                            @isset($postRidePage->luggage_option3->features_setting_id)
+                            @endif
+                            @if($postRidePage->luggage_option3?->features_setting_id)
                             <div class="flex items-center gap-4 p-3">
                                 <label for="{{ $postRidePage->luggage_option3->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                     <input type="radio" id="{{ $postRidePage->luggage_option3->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}"
@@ -1499,27 +1424,15 @@
                                         <span>
                                             {{ $postRidePage->luggage_option3->name }}
                                         </span>
-                                        <div class="sups relative inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option3_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                                class="absolute tooltip payment_tooltiptext_position -top-20 sm:-top-16 right-32 lg:-top-28 xl:right-32 xl:-top-24 2xl:-top-24 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                        {{ $postRidePage->luggage_option3_tooltip }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </span>
                                     </label>
                                 </div>
-                            @endisset
-                            @isset($postRidePage->luggage_option4->features_setting_id)
+                            @endif
+                            @if($postRidePage->luggage_option4?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option4->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                         <input type="radio" id="{{ $postRidePage->luggage_option4->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}"
@@ -1530,27 +1443,15 @@
                                         <span>
                                             {{ $postRidePage->luggage_option4->name }}
                                         </span>
-                                        <div class="sups relative inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                                class="absolute tooltip payment_tooltiptext_position -top-12 right-32 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-16 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                        {{ $postRidePage->luggage_option4_tooltip }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </span>
                                     </label>
                                 </div>
-                            @endisset
-                            @isset($postRidePage->luggage_option5->features_setting_id)
+                            @endif
+                            @if($postRidePage->luggage_option5?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option5->features_setting_id }}" class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
                                         <input type="radio" id="{{ $postRidePage->luggage_option5->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}"
@@ -1564,23 +1465,11 @@
                                             </p>
                                             <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
                                                 <small>{{ $postRidePage->luggage_option5_label }}</small>
-                                                <div class="sups relative inline-flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <span class="inline-flex cursor-help items-center" data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                     </svg>
-                                                    <div
-                                                        class="absolute tooltip tooltip_position md:right-64 lg:right-52 xl:right-36 -top-14 group-hover:flex hidden peer-hover:flex"
-                                                    >
-                                                        <div
-                                                            role="tooltip"
-                                                            class="absolute sm:after:left-1/3 xl:after:left-1/3 2xl:after:left-1/3 luggage_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                        >
-                                                            <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                                {{ $postRidePage->luggage_option5_tooltip }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                </span>
                                             </div>
                                         </div>
                                     </label>
@@ -1638,7 +1527,7 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
-                            @isset($postRidePage->smoking_option1->features_setting_id)
+                            @if($postRidePage->smoking_option1?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3 w-full">
                                     <label for="{{ $postRidePage->smoking_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
                                         <input id="{{ $postRidePage->smoking_option1->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}"
@@ -1651,8 +1540,8 @@
                                     </label>
 
                                 </div>
-                            @endisset
-                            @isset($postRidePage->smoking_option2->features_setting_id)
+                            @endif
+                            @if($postRidePage->smoking_option2?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->smoking_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
                                         <input id="{{ $postRidePage->smoking_option2->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}"
@@ -1684,7 +1573,7 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
-                            @isset($postRidePage->animals_option1->features_setting_id)
+                            @if($postRidePage->animals_option1?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->animals_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
                                         <input id="{{ $postRidePage->animals_option1->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}"
@@ -1693,8 +1582,8 @@
                                         {{ $postRidePage->animals_option1->name }}
                                     </label>
                                 </div>
-                            @endisset
-                            @isset($postRidePage->animals_option2->features_setting_id)
+                            @endif
+                            @if($postRidePage->animals_option2?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->animals_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
                                         <input id="{{ $postRidePage->animals_option2->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}"
@@ -1703,8 +1592,8 @@
                                         {{ $postRidePage->animals_option2->name }}
                                     </label>
                                 </div>
-                            @endisset
-                            @isset($postRidePage->animals_option3->features_setting_id)
+                            @endif
+                            @if($postRidePage->animals_option3?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->animals_option3->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
                                         <input id="{{ $postRidePage->animals_option3->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}"
@@ -1736,7 +1625,7 @@
                         </div>
                         <div class="bg-white p-4">
                             <div class="space-y-2">
-                                @isset($postRidePage->features_option1->features_setting_id)
+                                @if($postRidePage->features_option1?->features_setting_id)
                                     <div class="flex items-center">
                                         <input id="pink-ride" type="checkbox" name="features[]"
                                             @php $disabled = false; @endphp
@@ -1800,54 +1689,44 @@
                                                 @endif">
                                                 {{ $postRidePage->features_option1->name }}
                                             </span>
-                                            <div class="sups relative">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-text-black peer" viewBox="0 0 16 16">
+                                            @php
+                                                $pinkRideTooltipText = '';
+                                                if ($user->pink_ride == '0') {
+                                                    $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_disable_text ?? '';
+                                                } elseif ($user->pink_ride == '1') {
+                                                    $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
+                                                } elseif ($pinkRideSetting) {
+                                                    $pinkRideTooltipText = ($postRidePage->pink_ride_tooltip_only_text ?? '') . ' ' . ($postRidePage->pink_ride_tooltip_female_text ?? '') . ' ' . ($postRidePage->pink_ride_tooltip_driver_text ?? '');
+                                                    if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1' || $pinkRideSetting->profile_complete === '1') {
+                                                        $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_with_text ?? '');
+                                                        if ($pinkRideSetting->profile_complete === '1') {
+                                                            $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_complete_profile_text ?? '');
+                                                        }
+                                                        if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1') {
+                                                            if ($pinkRideSetting->verfiy_phone === '1') {
+                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_phone_number_text ?? '');
+                                                            }
+                                                            if ($pinkRideSetting->verify_email === '1') {
+                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_email_text ?? '');
+                                                            }
+                                                            if ($pinkRideSetting->driver_license === '1') {
+                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_driver_license_text ?? '');
+                                                            }
+                                                            $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_verified_text ?? '');
+                                                        }
+                                                    }
+                                                    $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_select_this_ride_text ?? '');
+                                                }
+                                            @endphp
+                                            <span class="inline-flex cursor-help" data-tippy-content="{{ $pinkRideTooltipText }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                     <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                 </svg>
-                                                <div
-                                                  class="absolute right-28 md:right-24 tooltip -top-16 group-hover:flex hidden peer-hover:flex"
-                                                >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            @if ($user->pink_ride == '0')
-                                                                {{ $postRidePage->pink_ride_tooltip_admin_disable_text }}
-                                                            @elseif ($user->pink_ride == '1')
-                                                                {{ $postRidePage->pink_ride_tooltip_admin_enable_text }}
-                                                            @else
-                                                                @if ($pinkRideSetting)
-                                                                    {{ $postRidePage->pink_ride_tooltip_only_text }} {{ $postRidePage->pink_ride_tooltip_female_text }} {{ $postRidePage->pink_ride_tooltip_driver_text }}
-                                                                    @if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1' || $pinkRideSetting->profile_complete === '1')
-                                                                        {{ $postRidePage->pink_ride_tooltip_with_text }}
-                                                                        @if ($pinkRideSetting->profile_complete === '1')
-                                                                            {{ $postRidePage->pink_ride_tooltip_complete_profile_text }}
-                                                                        @endif
-                                                                        @if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1')
-                                                                            @if ($pinkRideSetting->verfiy_phone === '1')
-                                                                                {{ $postRidePage->pink_ride_tooltip_phone_number_text }}
-                                                                            @endif
-                                                                            @if ($pinkRideSetting->verify_email === '1')
-                                                                                {{ $postRidePage->pink_ride_tooltip_email_text }}
-                                                                            @endif
-                                                                            @if ($pinkRideSetting->driver_license === '1')
-                                                                                {{ $postRidePage->pink_ride_tooltip_driver_license_text }}
-                                                                            @endif
-                                                                            {{ $postRidePage->pink_ride_tooltip_verified_text }}
-                                                                        @endif
-                                                                    @endif
-                                                                    {{ $postRidePage->pink_ride_tooltip_select_this_ride_text }}
-                                                                @endif
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option2->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option2?->features_setting_id)
                                     @php
                                         // Calculate the age based on the driver's date of birth
                                         $dob = \Carbon\Carbon::parse($user->dob);
@@ -1936,63 +1815,42 @@
                                                     >
                                                 {{ $postRidePage->features_option2->name }}
                                             </span>
-                                            <div class="sups relative">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                            @php
+                                                $extraCareTooltipText = '';
+                                                if ($user->folks_ride == '0') {
+                                                    $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_disable_text ?? '';
+                                                } elseif ($user->folks_ride == '1') {
+                                                    $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
+                                                } else {
+                                                    $extraCareTooltipText = ($postRidePage->extra_care_tooltip_driver_review_text ?? '') . ' ' . (isset($setting) ? $setting->average_rating : '0') . ' ' . ($postRidePage->extra_care_tooltip_greater_age_text ?? '') . ' ' . (isset($setting) ? $setting->driver_age : '0') . ' ' . ($postRidePage->extra_care_tooltip_greater_text ?? '');
+                                                    if ($setting && ($setting->verfiy_phone === '1' || $setting->verify_email === '1' || $setting->driver_license === '1' || $setting->profile_complete === '1')) {
+                                                        if (isset($pinkRideSetting) && $pinkRideSetting->profile_complete === '1') {
+                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_complete_profile_text ?? '');
+                                                        }
+                                                        $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_and_his_text ?? '');
+                                                        if ($setting->verfiy_phone === '1') {
+                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_phone_number_text ?? '');
+                                                        }
+                                                        if ($setting->verify_email === '1') {
+                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_email_text ?? '');
+                                                        }
+                                                        if ($setting->driver_license === '1') {
+                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_driver_license_text ?? '');
+                                                        }
+                                                        $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_verified_text ?? '');
+                                                    }
+                                                    $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_eligible_text ?? '');
+                                                }
+                                            @endphp
+                                            <span class="inline-flex cursor-help" data-tippy-content="{{ $extraCareTooltipText }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
                                                     <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                 </svg>
-                                                <div
-                                                    class="absolute right-28 md:right-24 tooltip -bottom-3 md:-top-14 lg:-top-16 group-hover:flex hidden peer-hover:flex"
-                                                >
-                                                    <div
-                                                        role="tooltip"
-                                                        class="absolute after:left-[4.8rem] features_tooltiptext -left-1/2 -top-10 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500  border border-red-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] px-4"
-                                                    >
-                                                        <p class="text-white font-normal text-start text-sm lg:text-base">
-                                                            @if ($user->folks_ride == '0')
-                                                                {{ $postRidePage->extra_care_tooltip_admin_disable_text }}
-                                                            @elseif ($user->folks_ride == '1')
-                                                                {{ $postRidePage->extra_care_tooltip_admin_enable_text }}
-                                                            @else
-                                                                {{ $postRidePage->extra_care_tooltip_driver_review_text }}
-                                                                @if ($setting)
-                                                                    {{ $setting->average_rating }}
-                                                                @else
-                                                                    0
-                                                                @endif
-                                                                {{ $postRidePage->extra_care_tooltip_greater_age_text }}
-                                                                @if ($setting)
-                                                                    {{ $setting->driver_age }}
-                                                                @else
-                                                                    0
-                                                                @endif
-                                                                {{ $postRidePage->extra_care_tooltip_greater_text }}
-                                                                @if ($setting)
-                                                                    @if ($setting->verfiy_phone === '1' || $setting->verify_email === '1' || $setting->driver_license === '1' || $setting->profile_complete === '1')
-                                                                        @if ($pinkRideSetting->profile_complete === '1')
-                                                                            {{ $postRidePage->extra_care_tooltip_complete_profile_text }}
-                                                                        @endif
-                                                                        {{ $postRidePage->extra_care_tooltip_and_his_text }}
-                                                                        @if ($setting->verfiy_phone === '1')
-                                                                            {{ $postRidePage->extra_care_tooltip_phone_number_text }}
-                                                                        @endif
-                                                                        @if ($setting->verify_email === '1')
-                                                                            {{ $postRidePage->extra_care_tooltip_email_text }}
-                                                                        @endif
-                                                                        @if ($setting->driver_license === '1')
-                                                                            {{ $postRidePage->extra_care_tooltip_driver_license_text }}
-                                                                        @endif
-                                                                        {{ $postRidePage->extra_care_tooltip_verified_text }}
-                                                                    @endif
-                                                                @endif {{ $postRidePage->extra_care_tooltip_eligible_text }}
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option3->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option3?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="wi-fi" type="checkbox" name="features[]" value="{{ $postRidePage->features_option3->features_setting_id }}"
                                         {{ $isNewForm
@@ -2014,8 +1872,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option4->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option4?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="rating-passengers" type="checkbox" name="features[]" value="{{ $postRidePage->features_option4->features_setting_id }}"
                                         {{ $isNewForm
@@ -2037,8 +1895,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option5->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option5?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="provide-babyseats" type="checkbox" name="features[]" value="{{ $postRidePage->features_option5->features_setting_id }}"
                                         {{ $isNewForm
@@ -2060,8 +1918,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option6->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option6?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="passenger-provide" type="checkbox" name="features[]" value="{{ $postRidePage->features_option6->features_setting_id }}"
                                         {{ $isNewForm
@@ -2083,8 +1941,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option7->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option7?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="take-children" type="checkbox" name="features[]" value="{{ $postRidePage->features_option7->features_setting_id }}"
                                         {{ $isNewForm
@@ -2106,8 +1964,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option8->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option8?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="passenger-provide1" type="checkbox" name="features[]" value="{{ $postRidePage->features_option8->features_setting_id }}"
                                         {{ $isNewForm
@@ -2129,8 +1987,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option9->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option9?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="bike-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option9->features_setting_id }}"
                                         {{ $isNewForm
@@ -2152,8 +2010,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option10->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option10?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="ski-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option10->features_setting_id }}"
                                         {{ $isNewForm
@@ -2175,8 +2033,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option11->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option11?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="winter-tires" type="checkbox" name="features[]" value="{{ $postRidePage->features_option11->features_setting_id }}"
                                         {{ $isNewForm
@@ -2198,8 +2056,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option12->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option12?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="air-conditioning" type="checkbox" name="features[]" value="{{ $postRidePage->features_option12->features_setting_id }}"
                                         {{ $isNewForm
@@ -2221,8 +2079,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option13->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option13?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option13->features_setting_id }}"
                                         {{ $isNewForm
@@ -2244,8 +2102,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option14->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option14?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option14->features_setting_id }}"
                                         {{ $isNewForm
@@ -2267,8 +2125,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option15->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option15?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option15->features_setting_id }}"
                                         {{ $isNewForm
@@ -2290,8 +2148,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option16->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option16?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option16->features_setting_id }}"
                                         {{ $isNewForm
@@ -2313,8 +2171,8 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
-                                @isset($postRidePage->features_option18->features_setting_id)
+                                @endif
+                                @if($postRidePage->features_option18?->features_setting_id)
                                     <div class="flex items-start">
                                         <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option18->features_setting_id }}"
                                         {{ $isNewForm
@@ -2336,7 +2194,7 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endisset
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -2358,7 +2216,7 @@
                         <div class="bg-white p-4">
                             <div>
                                 <div class="space-y-2 mt-2">
-                                    @isset($postRidePage->cancellation_policy_label1->features_setting_id)
+                                    @if($postRidePage->cancellation_policy_label1?->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="standard" name="booking_type" type="radio" value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
                                                 {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id || (empty(old('booking_type'))) ? 'checked' : '' }}
@@ -2370,8 +2228,8 @@
                                                 </span>
                                             </label>
                                         </div>
-                                    @endisset
-                                    @isset($postRidePage->cancellation_policy_label2->features_setting_id)
+                                    @endif
+                                    @if($postRidePage->cancellation_policy_label2?->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                             <input id="firm" name="booking_type" type="radio" value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
                                                 {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
@@ -2383,7 +2241,7 @@
                                                 </span>
                                             </label>
                                         </div>
-                                    @endisset
+                                    @endif
                                 </div>
                                 @error('booking_type')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -2439,7 +2297,7 @@
                                 {!! str_replace('<ol>', '<ol class="list-decimal list-inside">', str_replace('<li>', '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">', $postRidePage->disclaimers_description)) !!}
                             @endisset
                         </div>
-                        @isset($postRidePage->features_option1->features_setting_id)
+                        @if($postRidePage->features_option1?->features_setting_id)
                             @php
                                 $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
                                 $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
@@ -2451,8 +2309,8 @@
                                     5. I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.
                                 </p>
                             </div>
-                        @endisset
-                        @isset($postRidePage->features_option2->features_setting_id)
+                        @endif
+                        @if($postRidePage->features_option2?->features_setting_id)
                             @php
                                 $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
                                 $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));

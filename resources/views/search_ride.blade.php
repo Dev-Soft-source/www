@@ -1030,14 +1030,14 @@
                                                         {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <button type="button" class="ml-2" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
-                                                        </button>
+                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12" src="{{ asset('home_page_icons/' . ($findRidePage->ride_features_option1->icon ?? '')) }}" alt="">
+                                                        </span>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <button type="button" class="ml-2" onclick="toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')">
-                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
-                                                        </button>
+                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12" src="{{ asset('home_page_icons/' . ($findRidePage->ride_features_option2->icon ?? '')) }}" alt="">
+                                                        </span>
                                                     @endif
                                                 </div>
 
@@ -1049,7 +1049,7 @@
                                                     {{-- {{ dd($postRidePage->cancellation_policy_label1->features_setting_id,$ride->booking_type) }} --}}
                                                     <p class="text-xl font-semibold text-primary">
                                                         <div class="flex items-center gap-2">
-                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
+                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
                                                                 <span class="line-through">
                                                                     ${{ number_format(floatval($rideDetail->price), 2) }}
                                                                     </span>
@@ -1071,7 +1071,7 @@
                                                                         {{ $findRidePage->card_section_per_seat }}
                                                                     @endisset
                                                                 </small>
-                                                                @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == $postRidePage->cancellation_policy_label2->features_setting_id)
+                                                                @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
 
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16" data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
                                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>

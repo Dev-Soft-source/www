@@ -67,43 +67,43 @@
                     @endisset
                      <span class="text-red-500">*</span></label>
                     @php
-                        $selectedType = $errors->count() > 0 ? old('type') : optional($vehicle)->type;
+                        $selectedType = old('type', optional($vehicle)->type ?? '');
                     @endphp
                     <select id="type" name="type" class="block mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         <option value="" {{ ($selectedType === '' || $selectedType === null) ? 'selected' : '' }}>
                             {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                         </option>
-                        <option value="Convertable" {{ ($selectedType == 'Convertable' || $selectedType === 'Convertable') ? 'selected' : '' }}>
+                        <option value="Convertable" {{ (string)($selectedType ?? '') === 'Convertable' ? 'selected' : '' }}>
                             Convertable
                         </option>
-                        <option value="Coupe" {{ ($selectedType == 'Coupe' || $selectedType === 'Coupe') ? 'selected' : '' }}>
+                        <option value="Coupe" {{ (string)($selectedType ?? '') === 'Coupe' ? 'selected' : '' }}>
                             Coupe
                         </option>
-                        <option value="Hatchback" {{ ($selectedType == 'Hatchback' || $selectedType === 'Hatchback') ? 'selected' : '' }}>
+                        <option value="Hatchback" {{ (string)($selectedType ?? '') === 'Hatchback' ? 'selected' : '' }}>
                             Hatchback
                         </option>
-                        <option value="Minivan" {{ ($selectedType == 'Minivan' || $selectedType === 'Minivan') ? 'selected' : '' }}>
+                        <option value="Minivan" {{ (string)($selectedType ?? '') === 'Minivan' ? 'selected' : '' }}>
                             Minivan
                         </option>
-                        <option value="Sedan" {{ ($selectedType == 'Sedan' || $selectedType === 'Sedan') ? 'selected' : '' }}>
+                        <option value="Sedan" {{ (string)($selectedType ?? '') === 'Sedan' ? 'selected' : '' }}>
                             Sedan
                         </option>
-                        <option value="Station wagon" {{ ($selectedType == 'Station wagon' || $selectedType === 'Station wagon') ? 'selected' : '' }}>
+                        <option value="Station wagon" {{ (string)($selectedType ?? '') === 'Station wagon' ? 'selected' : '' }}>
                             Station wagon
                         </option>
-                        <option value="SUV" {{ ($selectedType == 'SUV' || $selectedType === 'SUV') ? 'selected' : '' }}>
+                        <option value="SUV" {{ (string)($selectedType ?? '') === 'SUV' ? 'selected' : '' }}>
                             SUV
                         </option>
-                        <option value="Truck" {{ ($selectedType == 'Truck' || $selectedType === 'Truck') ? 'selected' : '' }}>
+                        <option value="Truck" {{ (string)($selectedType ?? '') === 'Truck' ? 'selected' : '' }}>
                             Truck
                         </option>
-                        <option value="Van" {{ ($selectedType == 'Van' || $selectedType === 'Van') ? 'selected' : '' }}>
+                        <option value="Van" {{ (string)($selectedType ?? '') === 'Van' ? 'selected' : '' }}>
                             Van
                         </option>
                     </select>
                     @error('type')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                      <div class="relative tooltip flex mt-1">
+                        <div role="alert" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                         </div>
                       </div>
@@ -116,16 +116,12 @@
                     @endisset
                     <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="liscense_no" maxlength="8"
-                        @if ($errors->count() > 0)
-                            value="{{ old('liscense_no') }}"
-                        @else
-                            value="{{ optional($vehicle)->liscense_no }}"
-                        @endif
+                    <input type="text" name="liscense_no" id="liscense_no" maxlength="8" autocomplete="off"
+                        value="{{ old('liscense_no', optional($vehicle)->liscense_no) }}"
                         class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('liscense_no')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                      <div class="relative tooltip flex mt-1">
+                        <div role="alert" class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                         </div>
                       </div>
