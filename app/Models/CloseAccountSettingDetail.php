@@ -7,10 +7,11 @@ use App\Models\CloseAccountSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\HasLanguageFallback;
 
 class CloseAccountSettingDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLanguageFallback;
     public $table = "close_my_account_setting_detail";
     protected $guarded = [];
 
@@ -24,10 +25,4 @@ class CloseAccountSettingDetail extends Model
         return $this->belongsTo(Language::class);
     }
 
-    public static function getByLanguageWithFallback($selectedLangId, $defaultLangId)
-    {
-        return self::whereIn('language_id', [$selectedLangId, $defaultLangId])
-            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
-            ->first();
-    }
 }

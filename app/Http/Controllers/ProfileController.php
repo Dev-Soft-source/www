@@ -40,31 +40,13 @@ class ProfileController extends Controller
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $user = User::whereId($user_id)->first();
-
-
-            if ($user->step === '1') {
-                return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '2') {
-                return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '3') {
-                return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-            }
-
-            User::whereId($user_id)->update([
-                'step' => '5'
-            ]);
-
-            // $showWelcomePopup = session()->has('show_welcome_popup');
-            // if ($user->step === '5' && !$showWelcomePopup) {
-            //     session(['show_welcome_popup' => true]);
-            //     return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");//"Your profile is all set. Welcome to ProximaRide!");
-            // }
+        if (auth()->check()) {
+            
+            $user = auth()->user();
 
             return view('profile',[
-                'user' => $user,'editProfilePage' => $editProfilePage,
+                'user' => $user,
+                'editProfilePage' => $editProfilePage,
                 'reviewSetting' => $reviewSetting,
                 'ProfileSetting' => $ProfileSetting,
                 'ProfilePage' => $ProfilePage]);

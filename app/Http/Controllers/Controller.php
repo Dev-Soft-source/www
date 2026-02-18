@@ -15,6 +15,7 @@ use App\Models\Rating;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
+use App\Models\VideoDetail;
 
 class Controller extends BaseController
 {
@@ -29,7 +30,6 @@ class Controller extends BaseController
         
         // todo : If admin, ...
         // 
-
 
         $this->defaultLang = getDefaultLanguage();
 

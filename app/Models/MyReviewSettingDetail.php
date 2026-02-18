@@ -6,10 +6,12 @@ use App\Models\MyPhoneSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\HasLanguageFallback;
 
 class MyReviewSettingDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLanguageFallback;
+    
     public $table = "my_review_setting_detail";
     protected $guarded = [];
 
@@ -22,11 +24,5 @@ class MyReviewSettingDetail extends Model
     {
         return $this->belongsTo(Language::class);
     }
-    
-    public static function getByLanguageWithFallback($selectedLangId, $defaultLangId)
-    {
-        return self::whereIn('language_id', [$selectedLangId, $defaultLangId])
-            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
-            ->first();
-    }
+
 }

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasLanguageFallback;
 
 class MenuDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLanguageFallback;
 
     public $timestamps = false;
 
@@ -34,10 +35,4 @@ class MenuDetail extends Model
         return $this->belongsTo(Language::class);
     }
 
-    public static function getByLanguageWithFallback($selectedLangId, $defaultLangId)
-    {
-        return self::whereIn('language_id', [$selectedLangId, $defaultLangId])
-            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
-            ->first();
-    }
 }
