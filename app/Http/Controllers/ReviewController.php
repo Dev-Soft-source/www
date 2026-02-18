@@ -73,7 +73,7 @@ class ReviewController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         }
-        return view('review',['rating' => $rating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+        return view('review',[]);
     }
 
     public function passengerReviewIndex($lang, $id){
@@ -81,139 +81,19 @@ class ReviewController extends Controller
             $query->withTrashed(); // Include soft-deleted users
         }])->first();
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
-        return view('passenger_review',['rating' => $rating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+        return view('passenger_review',['rating' => $rating,]);
     }
 
     public function reviewLeftIndex($lang, $id){
         $rating = Rating::whereId($id)->first();
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
-        return view('review_left',['rating' => $rating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+        return view('review_left',['rating' => $rating]);
     }
 
     public function passengerLeftReviewIndex($lang, $id){
         $rating = Rating::whereId($id)->first();
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
-        return view('passenger_review_left',['rating' => $rating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+        return view('passenger_review_left',['rating' => $rating]);
     }
 
     public function ReviewPassenger($lang, $id){
@@ -713,52 +593,9 @@ class ReviewController extends Controller
 
     public function ReviewReply($lang, $id){
         $rating = Rating::whereId($id)->first();
-        $reviewSettingPage= null;
-
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $reviewSettingPage = ReviewSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $reviewSettingPage = ReviewSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
-        return view('review_reply', ['rating' => $rating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'reviewSettingPage' => $reviewSettingPage]);
+        $reviewSettingPage = ReviewSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+        
+        return view('review_reply', ['rating' => $rating, 'reviewSettingPage' => $reviewSettingPage]);
     }
 
     public function ReviewReplyStore($id, Request $request){

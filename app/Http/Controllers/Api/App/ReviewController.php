@@ -512,7 +512,6 @@ class ReviewController extends Controller
         
             $data = ['rating' => $rating];
 
-
             if(isset($booking) && !empty($booking)){
                 $checkUserReferral = ReferralDetail::where('user_id', $booking->user_id)->where('status', 'pending')->first();
                 if(isset($checkUserReferral) && !empty($checkUserReferral)){

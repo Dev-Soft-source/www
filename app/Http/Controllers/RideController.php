@@ -50,36 +50,8 @@ class RideController extends Controller
     {
         $rides = null;
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
+        $findRidePage = $this->getFindRidePageWithSettingDetail();
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         if (!auth()->user()) {
             $rides = Ride::where('status', '!=', 2)
@@ -312,39 +284,20 @@ class RideController extends Controller
             }
         }
 
-        
-
-        $ratings = Rating::all();
         $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(2)->get();
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
 
-            $recentSearches = RecentSearch::where('user_id', $user_id)->orderBy('updated_at', 'desc')->limit(2)->get();
-        }
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
-        return view('search_ride', ['notificationPage' => $notificationPage, 'pinkRideSetting' => $pinkRideSetting, 'successMessage' => $successMessage, 'postRidePage' => $postRidePage, 'findRidePage' => $findRidePage, 'rides' => $rides, 'recentSearches' => $recentSearches, 'request' => $request, 'ratings' => $ratings, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'firm_cancellation_discount' => $firm_cancellation_discount]);
+        return view('search_ride', [
+            'pinkRideSetting' => $pinkRideSetting, 
+            'postRidePage' => $postRidePage, 
+            'findRidePage' => $findRidePage, 
+            'rides' => $rides, 
+            'recentSearches' => $recentSearches, 
+            'request' => $request, 
+            'firm_cancellation_discount' => $firm_cancellation_discount]);
     }
 
     public function RideDetail(Request $request, $lang = null)
@@ -385,10 +338,6 @@ class RideController extends Controller
                 $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('id', 'chats_page_setting_id', 'language_id', 'type_message_placeholder')->first();
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('popup_close_btn_text', 'popup_login_btn_text', 'popup_signup_btn_text', 'cancel_button', 'delete_button')->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-
-                
 
                 $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
                     ->whereLanguageId($selectedLanguage->id)
@@ -425,9 +374,6 @@ class RideController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('popup_close_btn_text', 'popup_login_btn_text', 'popup_signup_btn_text', 'cancel_button', 'delete_button')->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-
 
                 $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('id', 'chats_page_setting_id', 'language_id', 'type_message_placeholder')->first();
 
@@ -467,50 +413,23 @@ class RideController extends Controller
             }
         }
 
-        if (auth()->check()) {
-            $user = auth()->user();
-            if ($user->step === '1') {
-                return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '2') {
-                return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '3') {
-                return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($user->step === '4') {
-                return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
-            }
-        }
+        
 
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-
-            $ride_booking = Booking::where('ride_id', $ride->id)->where('user_id', auth()->user()->id)->select('status')->first();
-        }
         $ride_cancelled = false;
         $completed_date_time = Carbon::parse($ride->completed_date . ' ' . $ride->completed_time);
         if (isset($ride_booking) && ($completed_date_time < Carbon::now() ||  $ride_booking->status == '3' ||  $ride_booking->status == '4')) {
             $ride_cancelled = true;
         }
-        return view('ride_detail', ['notificationPage' => $notificationPage, 'ride_cancelled' => $ride_cancelled, 'ride_cancelled' => $ride_cancelled, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'setting' => $setting, 'cancelSetting' => $cancelSetting, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'ratings' => $ratings, 'chatsPage' => $chatsPage, 'successMessage' => $successMessage]);
+        return view('ride_detail', ['ride_cancelled' => $ride_cancelled,
+         'ride_cancelled' => $ride_cancelled, 
+         'rideDetailPage' => $rideDetailPage, 
+         'ride' => $ride, 'setting' => $setting,
+          'cancelSetting' => $cancelSetting, 
+          'languages' => $languages, 
+          'selectedLanguage' => $selectedLanguage, 
+          'postRidePage' => $postRidePage, 
+          'ratings' => $ratings, 'chatsPage' => $chatsPage]);
     }
 
     public function MyCoPassengers(Request $request, $lang = null)
