@@ -184,7 +184,7 @@
                     </div>
                     <div class="flex w-full justify-center">
                         @isset($loginPage->submit_button_label)
-                            <button class="button-exp-fill w-28 " type="submit">
+                            <button class="button-exp-fill min-w-[7.5rem]" type="submit">
                                 {{ $loginPage->submit_button_label }}
                             </button>
                         @endisset

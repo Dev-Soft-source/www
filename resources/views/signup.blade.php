@@ -346,7 +346,7 @@
               </div>
 
               <div class="flex justify-center font-FuturaMdCnBT mt-4">
-                <button  id="signupButton" class="button-exp-fill w-28 text-lg" type="submit">
+                <button  id="signupButton" class="button-exp-fill min-w-[7.5rem] text-lg" type="submit">
                     @isset($signupPage->button_label)
                         {{ $signupPage->button_label }}
                     @endisset

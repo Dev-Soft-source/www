@@ -279,7 +279,7 @@
                 @endif --}}
 
                 <div class="md:col-span-2 flex justify-center mt-4">
-                    <button type="submit" id="nextButton" class="button-exp-fill w-28 opacity-50 cursor-not-allowed" disabled>
+                    <button type="submit" id="nextButton" class="button-exp-fill min-w-[7.5rem] opacity-50 cursor-not-allowed" disabled>
                         @isset($step1Page->button_label)
                             {{ $step1Page->button_label }}
                         @endisset
