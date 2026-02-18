@@ -358,20 +358,19 @@
         </div>
     </div>
 
-    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
-        <h1>
-            @isset($postRidePage->main_heading)
-                {{ $postRidePage->main_heading }}
-            @endisset
-
-        </h1>
+    <div class="flex justify-end md:items-center">
         <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
             @isset($postRidePage->post_arrived_again_label)
                 {{ $postRidePage->post_arrived_again_label }}
             @endisset
         </a>
     </div>
-    <div class="pt-1 flex justify-end mt-2 md:mt-0">
+    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
+        <h1>
+            @isset($postRidePage->main_heading)
+                {{ $postRidePage->main_heading }}
+            @endisset
+        </h1>
         <p>
             <span class="text-red-500">* {{ $postRideSubDetailPage->feilds_required_text??'Indicates required fields' }} </span>
         </p>

@@ -1482,44 +1482,31 @@
                 @endif
                 </div>
                 <!-- Confirmation Modal for Hiding Rides -->
-                <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center" id="hide-ride-confirm-modal">
-                    <div onclick="closeHideRideModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto flex items-center justify-center">
-                        <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                            <button onclick="closeHideRideModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div class="bg-white p-4 sm:p-6">
-                            <!-- <div class="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 mx-auto mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 text-primary">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                        </svg>
-                                    </div> -->
-                                <div class="flex items-center gap-2">
-                                    <h3 class="card-heading text-center w-full" id="modal-title"> {{ $findRidePage->hide_ride_popup_heading ??'Confirm Hide Ride' }} </h3>
-                                </div>
-                                <div class="sm:flex sm:items-start">
-                                    <div class="">
-                                        <div class="mt-3">
-                                            <p class="can-exp-p text-center">
-                                                {{ $findRidePage->hide_ride_popup_text ??'Do you want this ride to be hidden from your search results? You will not be able to see it anymore' }}
-                                            </p>
+                <div class="hidden relative z-50" id="hide-ride-confirm-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-backdrop"></div>
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
+                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                    <div class="flex justify-end">
+                                        <button type="button" onclick="closeHideRideModal()" class="p-1 rounded-full hover:bg-gray-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <h3 class="text-2xl font-FuturaMdCnBT leading-6 text-gray-900" id="modal-title">{{ $findRidePage->hide_ride_popup_heading ?? 'Confirm Hide Ride' }}</h3>
+                                        <div class="w-full mt-4">
+                                            <p class="can-exp-p text-center text-black">{{ $findRidePage->hide_ride_popup_text ?? 'Do you want this ride to be hidden from your search results? You will not be able to see it anymore.' }}</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-6 sm:flex sm:px-6 gap-2 justify-center">
-                                <button type="button" onclick="closeHideRideModal()" class="button-exp-no-fill">
-                                    {{ $findRidePage->hide_ride_popup_take_me_back_button ??'No, take me back' }}    
-                                </button>   
-                                <button type="button" id="confirm-hide-ride" class="button-exp-fill">
-                                    {{ $findRidePage->hide_ride_popup_confirm_button ??'Yes, hide it' }}
-
-                                </button>
+                                <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                    <button type="button" onclick="closeHideRideModal()" class="inline-flex justify-center w-36 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $findRidePage->hide_ride_popup_take_me_back_button ?? 'No, take me back' }}</button>
+                                    <button type="button" id="confirm-hide-ride" class="inline-flex justify-center w-28 rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">{{ $findRidePage->hide_ride_popup_confirm_button ?? 'Yes, hide it' }}</button>
+                                </div>
                             </div>
-                            </div>
-                            
                         </div>
                     </div>
                 </div>
