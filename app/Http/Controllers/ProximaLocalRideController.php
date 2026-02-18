@@ -36,98 +36,21 @@ class ProximaLocalRideController extends Controller
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
                 $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
+                
+                $findRidePage = $this->getFindRidePageWithSettingDetail();
 
-                if ($findRidePage) {
-                    $findRidePage->ride_features_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option5 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option6 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option6)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option7 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option7)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option8 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option8)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option9 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option9)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option10 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option10)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option11 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option11)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option12 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option12)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option13 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option13)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option14 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option14)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option15 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option15)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option16)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option5 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->smoking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->smoking_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->smoking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->smoking_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option3)->whereLanguageId($selectedLanguage->id)->first();
-                }
-
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                if ($postRidePage) {
-                    $postRidePage->features_option4 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option5 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option6 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option6)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option7 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option7)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->booking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->booking_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->booking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->booking_option2)->whereLanguageId($selectedLanguage->id)->first();
-                }
+                $postRidePage = $this->getPostRidePageWithSettingDetail();
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
                 $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                if ($findRidePage) {
-                    $findRidePage->ride_features_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option5 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option6 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option6)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option7 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option7)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option8 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option8)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option9 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option9)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option10 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option10)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option11 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option11)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option12 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option12)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option13 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option13)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option14 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option14)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option15 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option15)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->ride_features_option16 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->ride_features_option16)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->luggage_option5 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->luggage_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option3)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->payment_methods_option4 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->payment_methods_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->smoking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->smoking_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->smoking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->smoking_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option1 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option2 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option2)->whereLanguageId($selectedLanguage->id)->first();
-                    $findRidePage->pets_allowed_option3 = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->pets_allowed_option3)->whereLanguageId($selectedLanguage->id)->first();
-                }
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                if ($postRidePage) {
-                    $postRidePage->features_option4 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option4)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option5 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option5)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option6 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option6)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->features_option7 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option7)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->booking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->booking_option1)->whereLanguageId($selectedLanguage->id)->first();
-                    $postRidePage->booking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->booking_option2)->whereLanguageId($selectedLanguage->id)->first();
-                }
+                $findRidePage = $this->getFindRidePageWithSettingDetail();
+
+                $postRidePage = $this->getPostRidePageWithSettingDetail();
             }
         }
 

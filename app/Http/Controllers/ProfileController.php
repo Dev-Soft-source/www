@@ -35,28 +35,11 @@ class ProfileController extends Controller
         $editProfilePage = null;
         $ProfilePage = null;
         $ProfileSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
-                $editProfilePage = EditProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
-                $editProfilePage = EditProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-            }
-        }
+        $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
@@ -70,48 +53,6 @@ class ProfileController extends Controller
                 return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
             }
 
-
-            $ratings = Rating::where(function ($query) use ($user_id) {
-                // Ratings where type is 2 and user_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-                // OR Ratings where type is 1 and ride_id belongs to the user
-                $query->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          });
-                });
-            })
-            ->with(['from' => function ($query) {
-                $query->withTrashed(); // Include soft-deleted users
-            }])
-            ->where('status', 1)
-            ->orderBy('id', 'desc')
-            ->get();
-
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
-
             User::whereId($user_id)->update([
                 'step' => '5'
             ]);
@@ -122,7 +63,11 @@ class ProfileController extends Controller
             //     return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");//"Your profile is all set. Welcome to ProximaRide!");
             // }
 
-            return view('profile',['notificationPage'=>$notificationPage ,'successMessage'=>$successMessage,'user' => $user,'editProfilePage' => $editProfilePage,'reviewSetting' => $reviewSetting,'ProfileSetting' => $ProfileSetting,'ProfilePage' => $ProfilePage,'ratings' => $ratings,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+            return view('profile',[
+                'user' => $user,'editProfilePage' => $editProfilePage,
+                'reviewSetting' => $reviewSetting,
+                'ProfileSetting' => $ProfileSetting,
+                'ProfilePage' => $ProfilePage]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
         }

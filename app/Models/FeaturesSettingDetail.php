@@ -23,10 +23,18 @@ class FeaturesSettingDetail extends Model
     {
         return $this->belongsTo(FeaturesSetting::class,'features_setting_id');
     }
+    
 
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
+    }
+
+    public static function getByLanguageWithFallback($selectedLangId, $defaultLangId)
+    {
+        return self::whereIn('language_id', [$selectedLangId, $defaultLangId])
+            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
+            ->first();
     }
 
     /** @var self|null Cached default-language detail (language_id = 1) for this instance */

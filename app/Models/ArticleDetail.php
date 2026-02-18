@@ -20,4 +20,12 @@ class ArticleDetail extends Model
     {
         return $this->belongsTo(Language::class);
     }
+
+    public static function getByLanguageWithFallback($articleId, $selectedLangId, $defaultLangId)
+    {
+        return self::where('article_id', $articleId)
+            ->whereIn('language_id', [$selectedLangId, $defaultLangId])
+            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
+            ->first();
+    }
 }

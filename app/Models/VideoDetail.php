@@ -20,4 +20,23 @@ class VideoDetail extends Model
     {
         return $this->belongsTo(Language::class);
     }
+
+    public static function getByLanguageWithFallback($videoId, $selectedLangId, $defaultLangId)
+    {
+        // First try selected language with non-null link
+        $video = self::where('video_id', $videoId)
+            ->where('language_id', $selectedLangId)
+            ->whereNotNull('link')
+            ->first();
+
+        if ($video) {
+            return $video;
+        }
+
+        // Fallback to default language
+        return self::where('video_id', $videoId)
+            ->where('language_id', $defaultLangId)
+            ->whereNotNull('link')
+            ->first();
+    }
 }

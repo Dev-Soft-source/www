@@ -21,4 +21,12 @@ class PostRidePageSettingSubDetail extends Model
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
-    }}
+    }
+    
+    public static function getByLanguageWithFallback($selectedLangId, $defaultLangId)
+    {
+        return self::whereIn('language_id', [$selectedLangId, $defaultLangId])
+            ->orderByRaw("FIELD(language_id, ?, ?)", [$selectedLangId, $defaultLangId])
+            ->first();
+    }
+    }

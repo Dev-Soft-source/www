@@ -18,4 +18,5 @@ class FeaturesSetting extends Model
     {
         return $this->hasMany(FeaturesSettingDetail::class,'features_setting_id');
     }
+    
 }
