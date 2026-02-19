@@ -70,6 +70,34 @@
             left: 5.8rem;
         }
     }
+    /* Add more spots – collapsible header and smooth slide panel */
+    .add-more-spots-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+    }
+    .add-more-spots-header:hover {
+        opacity: 0.95;
+    }
+    .add-more-spots-chevron {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-left: 0.5rem;
+        transition: transform 0.35s ease-out;
+    }
+    .add-more-spots-header[aria-expanded="false"] .add-more-spots-chevron {
+        transform: rotate(-90deg);
+    }
+    .add-more-spots-panel {
+        overflow: hidden;
+        transition: height 0.35s ease-out;
+    }
 </style>
 @endsection
 
@@ -202,7 +230,7 @@
                     </h3>
 
                     <input type="hidden" value="{{$ride->defaultRideDetail[0]->id}}" name="default_ride_detail_id">
-                    <div class="bg-white p-4 space-y-3">
+                    <div class="bg-white p-4">
                         <div class="flex flex-col md:flex-row justify-between items-start">
                             <div class="w-full md:w-[45%] mb-4">
                                 <div>
@@ -285,47 +313,6 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <div class="text-2xl bg-primary text-white py-2 px-4">
-                                <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Add more spots" }}</h3>
-                            </div>
-                            <div class="bg-white p-4">
-
-                                @php
-                                    $count = 1;
-                                    if(null !== old('from_spot')){
-                                        $count = count(old('from_spot'));
-                                    }else if(!empty($ride->moreRideDetail)){
-                                        $count = !empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 ? count($ride->moreRideDetail) : 1;
-                                    }
-                                @endphp
-
-                                <input type="hidden" id="rowCount" value="{{ $count }}">
-                                <div class="appendNewRow">
-                                    @if(null !== old('from_spot'))
-                                            @foreach (old('from_spot') as $key => $item)
-                                            @php
-                                                $renderIndex = $key + 1;
-                                            @endphp
-                                                @include('post_ride_partial.add_more_from_to_partial', ['index' => $renderIndex, 'ride_detail' => null, 'type' => $routeType])
-                                            @endforeach
-                                        @elseif(!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0)
-                                        @foreach ($ride->moreRideDetail as $key =>  $moreRideDetail)
-                                            @include('post_ride_partial.add_more_from_to_partial', ['index' => $key + 1, 'ride_detail' => $moreRideDetail, 'type' => 'edit'])
-                                        @endforeach
-                                    @else
-                                        @include('post_ride_partial.add_more_from_to_partial', ['index' => '1', 'ride_detail' => null, 'type' => 'create'])
-                                    @endif
-
-                                </div>
-                                <div class="flex items-center mt-4">
-                                    <button type="button" onclick="addNewRow();" class="button-exp-fill">
-                                        Add
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="flex items-end flex-col md:flex-row justify-between">
                             <div class="w-full md:w-[45%] mb-4">
                                 <label for="pickup_location" class="block mb-2 text-gray-900">
@@ -378,6 +365,7 @@
                                 </iframe>
                             </div>
                         </div>
+
                         <div>
                             <label for="date_time" class="block text-gray-900">
                                 @isset($postRidePage->date_time_label)
@@ -438,74 +426,125 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center mb-4">
-                            <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                @if ($bookings_count > 0)
-                                    <input type="hidden" name="recurring" value="{{ $ride->recurring }}">
-                                @endif
-                            <label for="recurring_trip" class="ml-2 text-gray-900">
-                                @isset($postRidePage->recurring_label)
-                                    {{ $postRidePage->recurring_label }}
-                                @endisset
-                            </label>
-                        </div>
-                        <div id="recurringtripDetails">
-                            <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
-                                <div class="w-full md:w-[45%] mb-4">
-                                    <label for="recurring_type" class="block mb-2 text-gray-900">
-                                        Recurring type
-                                    </label>
-                                    <div class="relative mt-2">
-                                        <select id="type" name="recurring_type"
-                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                            <option value=""
-                                                {{ old('recurring_type') === '' ? 'selected' : '' }}>
-                                                Select
-                                            </option>
-                                            <option value="Daily"
-                                                {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
-                                                Daily
-                                            </option>
-                                            <option value="Weekly"
-                                                {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
-                                                Weekly
-                                            </option>
-                                        </select>
-                                    </div>
-                                    @error('recurring_type')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+
+                        <div class="mb-6">
+                            <div class="flex items-center mb-4">
+                                <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                    @if ($bookings_count > 0)
+                                        <input type="hidden" name="recurring" value="{{ $ride->recurring }}">
+                                    @endif
+                                <label for="recurring_trip" class="ml-2 text-gray-900">
+                                    @isset($postRidePage->recurring_label)
+                                        {{ $postRidePage->recurring_label }}
+                                    @endisset
+                                </label>
+                            </div>
+                        
+                            <div id="recurringtripDetails">
+                                <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
+                                    <div class="w-full md:w-[45%] mb-4">
+                                        <label for="recurring_type" class="block mb-2 text-gray-900">
+                                            Recurring type
+                                        </label>
+                                        <div class="relative mt-2">
+                                            <select id="type" name="recurring_type"
+                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                                <option value=""
+                                                    {{ old('recurring_type') === '' ? 'selected' : '' }}>
+                                                    Select
+                                                </option>
+                                                <option value="Daily"
+                                                    {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
+                                                    Daily
+                                                </option>
+                                                <option value="Weekly"
+                                                    {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
+                                                    Weekly
+                                                </option>
+                                            </select>
                                         </div>
-                                    </div>
-                                    @enderror
-                                </div>
-                                <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
-                                    <span class="text-center text-base lg:text-lg ">
-                                        or
-                                    </span>
-                                </div>
-                                <div class="w-full md:w-[45%] mb-4">
-                                    <label for="recurring_trips" class="block mb-2 text-gray-900">
-                                        Recurring trips
-                                    </label>
-                                    <div class="relative mt-2">
-                                        <input type="number" min="1" name="recurring_trips" value="{{ old('recurring_trips') }}"
-                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                    </div>
-                                    @error('recurring_trips')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        @error('recurring_type')
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            </div>
                                         </div>
+                                        @enderror
                                     </div>
-                                    @enderror
+                                    <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
+                                        <span class="text-center text-base lg:text-lg ">
+                                            or
+                                        </span>
+                                    </div>
+                                    <div class="w-full md:w-[45%] mb-4">
+                                        <label for="recurring_trips" class="block mb-2 text-gray-900">
+                                            Recurring trips
+                                        </label>
+                                        <div class="relative mt-2">
+                                            <input type="number" min="1" name="recurring_trips" value="{{ old('recurring_trips') }}"
+                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                        </div>
+                                        @error('recurring_trips')
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            </div>
+                                        </div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        
+
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                            <button type="button" id="add-more-spots-toggle" class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4" aria-expanded="false" aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
+                                <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Add more spots" }}</h3>
+                                <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="add-more-spots-panel" class="add-more-spots-panel" role="region" aria-labelledby="add-more-spots-toggle">
+                                <div class="add-more-spots-panel-inner bg-white p-4">
+
+                                @php
+                                    $count = 1;
+                                    if(null !== old('from_spot')){
+                                        $count = count(old('from_spot'));
+                                    }else if(!empty($ride->moreRideDetail)){
+                                        $count = !empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 ? count($ride->moreRideDetail) : 1;
+                                    }
+                                @endphp
+
+                                <input type="hidden" id="rowCount" value="{{ $count }}">
+                                <div class="appendNewRow">
+                                    @if(null !== old('from_spot'))
+                                            @foreach (old('from_spot') as $key => $item)
+                                            @php
+                                                $renderIndex = $key + 1;
+                                            @endphp
+                                                @include('post_ride_partial.add_more_from_to_partial', ['index' => $renderIndex, 'ride_detail' => null, 'type' => $routeType])
+                                            @endforeach
+                                        @elseif(!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0)
+                                        @foreach ($ride->moreRideDetail as $key =>  $moreRideDetail)
+                                            @include('post_ride_partial.add_more_from_to_partial', ['index' => $key + 1, 'ride_detail' => $moreRideDetail, 'type' => 'edit'])
+                                        @endforeach
+                                    @else
+                                        @include('post_ride_partial.add_more_from_to_partial', ['index' => '1', 'ride_detail' => null, 'type' => 'create'])
+                                    @endif
+
+                                </div>
+                                <div class="flex items-center mt-4">
+                                    <button type="button" onclick="addNewRow();" class="button-exp-fill">
+                                        Add
+                                    </button>
+                                </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <h3 class="bg-primary text-white py-2 px-4">
@@ -534,6 +573,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white py-2 px-4">
@@ -642,6 +682,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white py-2 px-4">
@@ -2053,6 +2094,28 @@ document.addEventListener('keydown', function(event) {
         closeModal();
     }
 });
+
+    function toggleAddMoreSpots(button) {
+        var panel = document.getElementById('add-more-spots-panel');
+        if (!panel) return;
+        var isOpen = button.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+            panel.style.height = panel.scrollHeight + 'px';
+            panel.offsetHeight;
+            panel.style.height = '0';
+            button.setAttribute('aria-expanded', 'false');
+        } else {
+            panel.style.height = panel.scrollHeight + 'px';
+            button.setAttribute('aria-expanded', 'true');
+            panel.addEventListener('transitionend', function onEnd() {
+                panel.removeEventListener('transitionend', onEnd);
+                if (button.getAttribute('aria-expanded') === 'true') {
+                    panel.style.height = 'auto';
+                }
+            }, { once: true });
+        }
+    }
+
     function swapLocations() {
         const fromEl = document.getElementById('from_spot_0');
         const toEl = document.getElementById('to_spot_0');
