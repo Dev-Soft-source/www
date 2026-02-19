@@ -352,10 +352,10 @@
                         {{ $logoutPage->confirmation_yes_label ?? 'Yes' }}
                     </a>
 
-                    <button type="button" onclick="toggleModal('logout-modal')"
+                    <a href="javascript:void(0)" onclick="toggleModal('logout-modal')"
                         class="button-exp-fill min-w-24">
                         {{ $logoutPage->confirmation_no_label ?? 'No, stay logged in' }}
-                    </button>
+                </a>
                 </div>
 
             </div>

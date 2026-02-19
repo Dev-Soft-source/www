@@ -3,11 +3,12 @@
     'name',
     'label' => null,
     'value' => null,
+    'required' => false,
 ])
 
 <div class="form-group">
     @if($label)
-        <label for="{{ $name }}">{{ $label }}</label>
+        <label for="{{ $name }}">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</label>
     @endif
 
     <div class="{{ $type === 'password' ? 'relative' : '' }}">

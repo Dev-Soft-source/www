@@ -34,9 +34,32 @@ class ProfileController extends Controller
             $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             
             $user = auth()->user();
+            $user_id = $user->id;
+
+            $ratings = Rating::where(function ($query) use ($user_id) {
+                // Ratings where type is 2 and user_id belongs to the user
+                $query->where('type', '2')
+                      ->whereHas('booking', function ($query) use ($user_id) {
+                          $query->where('user_id', $user_id);
+                      });
+                // OR Ratings where type is 1 and ride_id belongs to the user
+                $query->orWhere(function ($query) use ($user_id) {
+                    $query->where('type', '1')
+                          ->whereHas('ride', function ($query) use ($user_id) {
+                              $query->where('added_by', $user_id);
+                          });
+                });
+            })
+            ->with(['from' => function ($query) {
+                $query->withTrashed(); // Include soft-deleted users
+            }])
+            ->where('status', 1)
+            ->orderBy('id', 'desc')
+            ->get();
 
             return view('profile',[
                 'user' => $user,
+                'ratings' => $ratings,
                 'editProfilePage' => $editProfilePage,
                 'reviewSetting' => $reviewSetting,
                 'ProfileSetting' => $ProfileSetting,

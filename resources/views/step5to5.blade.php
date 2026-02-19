@@ -4,8 +4,6 @@
 <style>
     .verify-button-modern {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        font-size: 18px;
-        border: none;
         transition: all 0.3s ease;
     }
     .verify-button-modern:hover {
@@ -49,9 +47,9 @@
     <div class="bg-white rounded p-4 w-full col-span-12 md:col-span-9 mx-auto">
         <div class="bg-white border border-gray-100 pb-8 px-4 shadow rounded-md sm:px-10 my-4">
             <div class="pb-2 flex items-center justify-center">
-                <h1 class="font-FuturaMdCnBT mt-10 text-primary text-3xl md:text-4xl lg:text-5xl mb-4">@isset($step4Page->main_heading){{ $step4Page->main_heading }}@endisset</h1>
+                <h1 class="font-FuturaMdCnBT mt-10 text-primary text-3xl md:text-4xl lg:text-5xl mb-4">@isset($step5Page->main_heading){{ $step5Page->main_heading }}@endisset</h1>
             </div>
-            <p class="text-black">@isset($step4Page->main_label){!! $step4Page->main_label !!}@endisset</p>
+            <p class="text-black">@isset($step5Page->main_label){!! $step5Page->main_label !!}@endisset</p>
             <form method="POST" action="{{ route('step5to5.update', $user->id) }}">
                 @csrf
                 @method('PUT')
@@ -77,7 +75,7 @@
                                 @enderror
                             </div>
                             <div class="w-full lg:w-3/6">
-                                @isset($step4Page->phone_label)<label for="phone" class="text-gray-700 font-FuturaMdCnBT mb-2 block">{{ $step4Page->phone_label }}</label>@endisset
+                                @isset($step5Page->phone_label)<label for="phone" class="text-gray-700 font-FuturaMdCnBT mb-2 block">{{ $step5Page->phone_label }}</label>@endisset
                                 <div class="flex gap-2">
                                     <div class="w-2/6 hidden">
                                         <input type="tel" name="country_code" value="{{ old('country_code', '+1') }}" maxlength="5" readonly class="font-FuturaMdCnBT bg-gray-100 mt-1 border p-1.5 w-full rounded text-base  border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
@@ -104,15 +102,15 @@
                         @enderror
                     </div>
                     <div class="font-FuturaMdCnBT mt-4 flex flex-col  md:flex-row lg:flex-row items-center gap-2 justify-center md:col-span-2">
-                        <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn" class="verify-button-modern w-full md:w-36 text-white text-base rounded font-FuturaMdCnBT px-5 py-2.5 text-center shadow-md">@isset($step4Page->verify_button_label){{ $step4Page->verify_button_label }}@endisset</button>
+                        <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn" class="button-exp-fill verify-button-modern text-white rounded font-FuturaMdCnBT text-center shadow-md">@isset($step5Page->verify_button_label){{ $step5Page->verify_button_label }}@endisset</button>
                         <div id="whatsappButtonContainer" class="hidden">
-                            <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn" class="w-full bg-green-500 hover:bg-green-600 text-white text-base rounded font-FuturaMdCnBT px-5 py-2.5 text-center shadow-md flex items-center justify-center gap-2">
+                            <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn" class="button-exp-fill bg-green-500 hover:bg-green-600 text-white rounded font-FuturaMdCnBT text-center shadow-md flex items-center justify-center gap-2">
                                 Send code via WhatsApp
                             </button>
                         </div>
                         <div class="font-FuturaMdCnBT flex flex-col md:flex-row lg:flex-row items-center justify-center gap-2 w-full md:w-auto">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-full md:w-36">@isset($step4Page->skip_button_label){{ $step4Page->skip_button_label }}@endisset</button>
-                            <button type="button" onclick="showSaveUnverifiedConfirmation()" id="saveButton" class="font-FuturaMdCnBT button-exp-fill w-full md:w-36 opacity-50 cursor-not-allowed" disabled>@isset($step4Page->save_button_label){{ $step4Page->save_button_label }}@endisset</button>
+                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill ">@isset($step5Page->skip_button_label){{ $step5Page->skip_button_label }}@endisset</button>
+                            <button type="button" onclick="showSaveUnverifiedConfirmation()" id="saveButton" class="font-FuturaMdCnBT button-exp-fill opacity-50 cursor-not-allowed" disabled>@isset($step5Page->save_button_label){{ $step5Page->save_button_label }}@endisset</button>
                         </div>
                     </div>
                 </div>
@@ -128,19 +126,19 @@
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                @isset($step4Page->confirm_title){{ $step4Page->confirm_title }}@endisset
+                                @isset($step5Page->confirm_title){{ $step5Page->confirm_title }}@endisset
                             </h3>
                             <p class="text-gray-600">
-                                @isset($step4Page->confirm_text){{ $step4Page->confirm_text }}@endisset
+                                @isset($step5Page->confirm_text){{ $step5Page->confirm_text }}@endisset
                             </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                         <a href="{{ route('profile', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
-                            @isset($step4Page->confirm_skip){{ $step4Page->confirm_skip }}@endisset
+                            @isset($step5Page->confirm_skip){{ $step5Page->confirm_skip }}@endisset
                         </a>
                         <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
-                            @isset($step4Page->confirm_back){{ $step4Page->confirm_back }}@endisset
+                            @isset($step5Page->confirm_back){{ $step5Page->confirm_back }}@endisset
                         </button>
                     </div>
                 </div>
@@ -156,19 +154,19 @@
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                @isset($step4Page->skip_confirmation_heading){{ $step4Page->skip_confirmation_heading }}@endisset
+                                @isset($step5Page->skip_confirmation_heading){{ $step5Page->skip_confirmation_heading }}@endisset
                             </h3>
                             <p class="text-gray-600">
-                                @isset($step4Page->skip_confirmation_message){{ $step4Page->skip_confirmation_message }}@endisset
+                                @isset($step5Page->skip_confirmation_message){{ $step5Page->skip_confirmation_message }}@endisset
                             </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                         <button type="button" onclick="confirmSaveUnverified()" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
-                            @isset($step4Page->save_button_label_1){{ $step4Page->save_button_label_1 }}@endisset
+                            @isset($step5Page->save_button_label_1){{ $step5Page->save_button_label_1 }}@endisset
                         </button>
                         <button type="button" onclick="hideSaveUnverifiedConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
-                            @isset($step4Page->skip_button_label_1){{ $step4Page->skip_button_label_1 }}@endisset
+                            @isset($step5Page->skip_button_label_1){{ $step5Page->skip_button_label_1 }}@endisset
                         </button>
                     </div>
                 </div>
@@ -229,10 +227,10 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="mt-2">
                               <h3 class="text-left">
-                                @isset($step4Page->verify_code_heading){{ $step4Page->verify_code_heading }}@endisset
+                                @isset($step5Page->verify_code_heading){{ $step5Page->verify_code_heading }}@endisset
                               </h3>
                               <p class="text-center mt-4">
-                                @isset($step4Page->verify_code_label_1){{ $step4Page->verify_code_label_1 }}@endisset
+                                @isset($step5Page->verify_code_label_1){{ $step5Page->verify_code_label_1 }}@endisset
                               </p>
                               <div class="flex justify-center mt-4 space-x-2">
                                 <input type="text" name="code[]" maxlength="1" class="font-FuturaMdCnBT w-10 h-10 text-center block mt-1 border p-1.5 text-base rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
@@ -255,7 +253,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center">
                             <button type="submit" class="inline-flex w-42 justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
-                                @isset($step4Page->verify_button_label_1){{ $step4Page->verify_button_label_1 }}@endisset
+                                @isset($step5Page->verify_button_label_1){{ $step5Page->verify_button_label_1 }}@endisset
                             </button>
                         </div>
                     </div>

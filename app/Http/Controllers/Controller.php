@@ -28,7 +28,7 @@ class Controller extends BaseController
 
     public function __construct()
     {
-        
+
         // todo : If admin, ...
         // 
 
@@ -38,7 +38,10 @@ class Controller extends BaseController
         if ($lang) {
             session(['selectedLanguage' => $lang]);
         } else {
-            $lang = session('selectedLanguage', $this->defaultLang->abbreviation);
+            $lang = request()->query('lang'); 
+            if(!$lang){
+                $lang = session('selectedLanguage', $this->defaultLang->abbreviation);
+            }
             session(['selectedLanguage' => $lang]);
         }
         $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
@@ -56,7 +59,7 @@ class Controller extends BaseController
             if (auth()->check()) {
                 $user = auth()->user();
                 $user_id = $user->id;
-                
+
                 // Redirect users based on their profile completion step when they try to access certain routes
                 $routeName = request()->route()->getName();
                 if ($routeName === 'profile' || $routeName === 'welcomeRoute' || $routeName === 'my_chats' || $routeName === 'my_rides' || $routeName === 'ride_detail' || $routeName === 'post_ride') {
@@ -70,7 +73,7 @@ class Controller extends BaseController
                         return redirect()->route('step4to5', ['lang' => $lang]);
                     }
                 }
-                
+
                 $notifications = Notification::where('is_delete', '0');
                 $notifications = $notifications->where(function ($query) use ($user_id) {
                     $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
@@ -144,10 +147,10 @@ class Controller extends BaseController
                 $this->defaultLang->id
             );
         }
-        
+
         return $postRidePage;
     }
-    
+
     public function getFindRidePageWithSettingDetail()
     {
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -172,14 +175,14 @@ class Controller extends BaseController
                 $findRidePage->vehicle_type_truck_text,
                 $findRidePage->vehicle_type_van_text,
             ];
-            
+
             $vehicleTypeIds = array_filter($vehicleTypeIds);
             if (!empty($vehicleTypeIds)) {
                 $vehicleTypeDetails = FeaturesSettingDetail::whereIn('features_setting_id', $vehicleTypeIds)
                     ->where('language_id', $this->selectedLanguage->id)
                     ->get()
                     ->keyBy('features_setting_id');
-                
+
                 $findRidePage->vehicle_type_convertible_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_convertible_text)?->name;
                 $findRidePage->vehicle_type_hatchback_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_hatchback_text)?->name;
                 $findRidePage->vehicle_type_coupe_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_coupe_text)?->name;
