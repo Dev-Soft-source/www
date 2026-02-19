@@ -7,33 +7,28 @@ use App\Models\BookingPageSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class BookingPageSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
 
     public function collection(Collection $rows)
     {
-        Log::info('Starting Booking Page Settings Excel import for language ID: ' . $this->languageId);
-        Log::info('Total rows to process: ' . $rows->count());
-        
-        // Get or create booking page setting
         $bookingPageSetting = BookingPageSetting::first();
         if (!$bookingPageSetting) {
             $bookingPageSetting = BookingPageSetting::create([]);
         }
 
-        Log::info('Booking Page Setting ID: ' . $bookingPageSetting->id);
-
-        // Check format by looking at first row keys
         if ($rows->isEmpty()) {
             Log::warning('No rows found in Excel file');
             return;
@@ -41,26 +36,68 @@ class BookingPageSettingImport implements ToCollection, WithHeadingRow, WithVali
 
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
-        Log::info('Excel columns detected: ' . json_encode($keys));
 
-        // Single column format check: has 'field_name' and ('value' OR 'translation_value')
-        $isSingleColumn = isset($keys[0]) && 
-                          (in_array('field_name', $keys) && 
-                          (in_array('value', $keys) || in_array('translation_value', $keys)));
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
 
-        if ($isSingleColumn) {
-            Log::info('Detected SINGLE COLUMN format');
-            foreach ($rows as $index => $row) {
-                Log::info("Processing row {$index}: " . json_encode($row->toArray()));
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($bookingPageSetting, $rows);
+            Log::info('Booking Page Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
+        $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
+
+        if ($isSingleColumn && $this->languageId !== null) {
+            foreach ($rows as $row) {
                 $this->processSingleColumnFormat($bookingPageSetting, $row);
             }
         } else {
-            Log::info('Detected MULTI COLUMN format');
-            // Multi-column format - only process first data row
-            $this->processMultiColumnFormat($bookingPageSetting, $firstRow);
+            if ($this->languageId !== null) {
+                $this->processMultiColumnFormat($bookingPageSetting, $firstRow);
+            }
         }
-        
+
         Log::info('Booking Page Settings Excel import completed successfully');
+    }
+
+    protected function processAllLanguagesFormat(BookingPageSetting $bookingPageSetting, Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : 'field name';
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $validFields = array_keys(\App\Exports\BookingPageSettingTemplateExport::getTranslatableFieldsWithDefaults());
+
+        foreach ($rows as $row) {
+            $row = $row->toArray();
+            $fieldName = $row[$fieldNameKey] ?? null;
+            if (empty($fieldName) || !in_array($fieldName, $validFields, true)) {
+                continue;
+            }
+            foreach ($languageColumns as $col) {
+                $langKey = Str::lower(trim($col));
+                if (!isset($nameToId[$langKey])) {
+                    continue;
+                }
+                $languageId = $nameToId[$langKey];
+                $value = $row[$col] ?? null;
+                $detail = BookingPageSettingDetail::firstOrCreate(
+                    [
+                        'booking_page_setting_id' => $bookingPageSetting->id,
+                        'language_id' => $languageId,
+                    ],
+                    [$fieldName => $value]
+                );
+                if (!$detail->wasRecentlyCreated) {
+                    $detail->$fieldName = $value;
+                    $detail->save();
+                }
+            }
+        }
     }
 
     protected function processSingleColumnFormat($bookingPageSetting, $row)
@@ -162,8 +199,10 @@ class BookingPageSettingImport implements ToCollection, WithHeadingRow, WithVali
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        
         if (!$language) {
             return [];
         }
