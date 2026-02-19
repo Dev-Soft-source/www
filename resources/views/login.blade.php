@@ -55,7 +55,7 @@
                                             @endif
 
                                             <a onclick="closeModal('error-modal')"
-                                                class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">Close</a>
+                                                class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                                         </div>
                                     </div>
                                 </div>

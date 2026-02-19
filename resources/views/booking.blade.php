@@ -1095,7 +1095,7 @@
                                 <div class="flex justify-center items-center mt-4">
                                     <button id="submitButton" class="button-exp-fill" type="submit">
                                         <!-- {{ $ride->booking_method->name }} -->
-                                        Pay and Request to Book
+                                        {{ $siteText['pay_and_request_to_book_btn_text'] ?? 'Pay and Request to Book' }}
                                     </button>
                                 </div>
                                 @endisset
