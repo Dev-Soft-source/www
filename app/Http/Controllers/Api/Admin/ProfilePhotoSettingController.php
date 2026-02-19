@@ -64,59 +64,88 @@ class ProfilePhotoSettingController extends Controller
     }
 
     /**
-     * Upload Profile Photo settings via Excel (all-languages format: Field Name + one column per language).
+     * Upload profile photo settings via Excel file.
+     * All-languages mode: no language_id, Excel has Field Name + one column per language.
+     * Single-language mode: language_id required, Excel has one language column.
      */
     public function uploadExcel(Request $request)
     {
         try {
-            $request->validate([
-                'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
-            ], [
-                'excel_file.required' => 'Please upload an Excel file',
-                'excel_file.file' => 'The uploaded file is not valid',
-                'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
-                'excel_file.max' => 'The file size must not exceed 5MB',
-            ]);
+            $isAllLanguages = !$request->has('language_id') || $request->language_id === null || $request->language_id === '';
+
+            if ($isAllLanguages) {
+                $request->validate([
+                    'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+                ], [
+                    'excel_file.required' => 'Please upload an Excel file',
+                    'excel_file.file' => 'The uploaded file is not valid',
+                    'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
+                    'excel_file.max' => 'The file size must not exceed 5MB',
+                ]);
+            } else {
+                $request->validate([
+                    'language_id' => 'required|exists:languages,id',
+                    'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+                ]);
+            }
+
+            $language = $isAllLanguages ? null : Language::find($request->language_id);
+            if (!$isAllLanguages && !$language) {
+                return $this->errorResponse('Language not found', 404);
+            }
 
             try {
-                Excel::import(new ProfilePhotoSettingImport(null), $request->file('excel_file'));
-                return $this->successResponse(
-                    [],
-                    'Profile photo settings for all languages uploaded successfully from Excel.'
-                );
+                Excel::import(new ProfilePhotoSettingImport($isAllLanguages ? null : $request->language_id), $request->file('excel_file'));
+
+                if ($isAllLanguages) {
+                    return $this->successResponse([], 'Profile photo settings for all languages uploaded successfully from Excel.');
+                }
+                return $this->successResponse(['language' => $language->name], "Profile photo settings for {$language->name} uploaded successfully from Excel.");
             } catch (ValidationException $e) {
+                $failures = $e->failures();
+                $errors = [];
+                foreach ($failures as $failure) {
+                    $errors[] = [
+                        'row' => $failure->row(),
+                        'attribute' => $failure->attribute(),
+                        'errors' => $failure->errors(),
+                        'values' => $failure->values(),
+                    ];
+                }
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation errors in Excel file',
-                    'errors' => array_map(fn ($f) => [
-                        'row' => $f->row(),
-                        'attribute' => $f->attribute(),
-                        'errors' => $f->errors(),
-                    ], $e->failures()),
+                    'errors' => $errors,
                 ], 422);
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Profile Photo Excel upload error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to upload Excel file: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to upload Excel file'], 500);
         }
     }
 
     /**
-     * Download Excel template. format=all_languages (default): Field Name + one column per language.
+     * Download Excel template. format=all_languages: Field Name + one column per language (with current DB values). Other: single_column.
      */
     public function downloadTemplate(Request $request)
     {
         try {
             $format = $request->get('format', 'all_languages');
+
             $languages = null;
             $existingData = null;
             if ($format === 'all_languages') {
                 $languages = Language::orderBy('id')->get();
                 $existingData = ProfilePhotoSetting::with('profilePhotoSettingDetail')->first();
             }
+
+            $fileName = 'profile_photo_settings_template_' . date('Y-m-d') . '.xlsx';
+
             return Excel::download(
                 new ProfilePhotoSettingTemplateExport($format, $languages, $existingData),
-                'profile_photo_settings_template_' . date('Y-m-d') . '.xlsx'
+                $fileName
             );
         } catch (\Exception $e) {
             Log::error('Profile Photo template download error: ' . $e->getMessage());
