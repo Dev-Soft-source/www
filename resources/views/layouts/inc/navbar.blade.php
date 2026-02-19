@@ -18,7 +18,7 @@
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center font-FuturaMdCnBT">{{ $notificationPage->notification_delete_text ?? ' Are you sure you want to delete?'}}</p>
+                                <p class="can-exp-p text-center font-FuturaMdCnBT">{{ $siteText['notification_delete_text'] }}</p>
                             </div>
                         </div>
                     </div>

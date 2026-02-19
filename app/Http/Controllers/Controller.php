@@ -45,7 +45,7 @@ class Controller extends BaseController
 
         $languages = Language::all();
 
-        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        // $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
@@ -91,42 +91,42 @@ class Controller extends BaseController
                     ->get();
                 View::share('notifications', $notifications);
 
-                // ratings
-                $ratings = Rating::where(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and user_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    // OR Ratings where type is 1 and ride_id belongs to the user
-                    $query->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '1')
-                            ->whereHas('ride', function ($query) use ($user_id) {
-                                $query->where('added_by', $user_id);
-                            });
-                    });
-                })
-                    ->with(['from' => function ($query) {
-                        $query->withTrashed(); // Include soft-deleted users
-                    }])
-                    ->where('status', 1)
-                    ->orderBy('id', 'desc')
-                    ->get();
-                View::share('ratings', $ratings);
+                // // ratings
+                // $ratings = Rating::where(function ($query) use ($user_id) {
+                //     // Ratings where type is 2 and user_id belongs to the user
+                //     $query->where('type', '2')
+                //         ->whereHas('booking', function ($query) use ($user_id) {
+                //             $query->where('user_id', $user_id);
+                //         });
+                //     // OR Ratings where type is 1 and ride_id belongs to the user
+                //     $query->orWhere(function ($query) use ($user_id) {
+                //         $query->where('type', '1')
+                //             ->whereHas('ride', function ($query) use ($user_id) {
+                //                 $query->where('added_by', $user_id);
+                //             });
+                //     });
+                // })
+                //     ->with(['from' => function ($query) {
+                //         $query->withTrashed(); // Include soft-deleted users
+                //     }])
+                //     ->where('status', 1)
+                //     ->orderBy('id', 'desc')
+                //     ->get();
+                // View::share('ratings', $ratings);
             }
 
             return $next($request);
         });
 
-        $ratings = Rating::all();
+        // $ratings = Rating::all();
 
         View::share([
             'selectedLanguage' => $this->selectedLanguage,
             'languages' => $languages,
             'siteText' => $siteText,
-            'ratings' => $ratings,
-            'notificationPage' => $notificationPage,
             'successMessage' => $successMessage,
+            // 'ratings' => $ratings,
+            // 'notificationPage' => $notificationPage,
         ]);
     }
 

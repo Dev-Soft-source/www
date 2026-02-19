@@ -270,20 +270,22 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $driverAgeOptions = [20, 30, 40, 50, 60];
+                                                @endphp
                                                 <select id="driverAge" name=""
                                                     class="bg-gray-100 text-base md:text-lg border-0 text-black rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0"
-                                                        {{ $request->driver_age == 0 ? 'selected' : '' }}>
+                                                    <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_age_placeholder)
                                                             {{ $findRidePage->driver_age_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    <option {{ $request->driver_age == 20 ? 'selected' : '' }}>+20</option>
-                                                    <option {{ $request->driver_age == 30 ? 'selected' : '' }}>+30</option>
-                                                    <option {{ $request->driver_age == 40 ? 'selected' : '' }}>+40</option>
-                                                    <option {{ $request->driver_age == 50 ? 'selected' : '' }}>+50</option>
-                                                    <option {{ $request->driver_age == 60 ? 'selected' : '' }}>+60</option>
+                                                    @foreach ($driverAgeOptions as $age)
+                                                        <option value="{{ $age }}" {{ $request->driver_age == $age ? 'selected' : '' }}>
+                                                            +{{ $age }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -294,29 +296,28 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $driverRatingOptions = [
+                                                        4.5 => '5',
+                                                        4 => '4 and above',
+                                                        3 => '3 and above',
+                                                        2 => '2 and above',
+                                                        1 => '1 and above',
+                                                    ];
+                                                @endphp
                                                 <select id="driverRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0"
-                                                        {{ $request->driver_rating == 0 ? 'selected' : '' }}>
+                                                    <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_rating_placeholder)
                                                             {{ $findRidePage->driver_rating_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    <option value="4.5"
-                                                        {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5</option>
-                                                    <option value="4"
-                                                        {{ $request->driver_rating == 4 ? 'selected' : '' }}>4 and above
-                                                    </option>
-                                                    <option value="3"
-                                                        {{ $request->driver_rating == 3 ? 'selected' : '' }}>3 and above
-                                                    </option>
-                                                    <option value="2"
-                                                        {{ $request->driver_rating == 2 ? 'selected' : '' }}>2 and above
-                                                    </option>
-                                                    <option value="1"
-                                                        {{ $request->driver_rating == 1 ? 'selected' : '' }}>1 and above
-                                                    </option>
+                                                    @foreach ($driverRatingOptions as $value => $text)
+                                                        <option value="{{ $value }}" {{ $request->driver_rating == $value ? 'selected' : '' }}>
+                                                            {{ $text }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -358,55 +359,30 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $passengerRatingOptions = [13, 14, 15, 16];
+                                                @endphp
                                                 <select id="passengerRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 whitespace-pre-line pr-8"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value=""
-                                                        {{ $request->passenger_rating == '' ? 'selected' : '' }}>
+                                                    <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->passengers_rating_placeholder)
                                                             {{ $findRidePage->passengers_rating_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    @isset($findRidePage->ride_features_option13->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option13->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option13->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option14->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option14->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option14->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option15->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option15->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option15->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option16->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option16->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option16->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
+                                                    @foreach ($passengerRatingOptions as $optionNum)
+                                                        @php
+                                                            $optionProperty = 'ride_features_option' . $optionNum;
+                                                            $option = $findRidePage->$optionProperty ?? null;
+                                                            $isSelected = $option && $request->passenger_rating == $option->features_setting_id;
+                                                            $dynamicText = $option ? str_replace('passengers', 'co-passengers', $option->name) : '';
+                                                        @endphp
+                                                        @if ($option && isset($option->features_setting_id))
+                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                                {{ $dynamicText }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -425,36 +401,32 @@
                                             @endisset
                                         </label> --}}
                                             <div class="">
+                                                @php
+                                                    $paymentMethodOptions = [
+                                                        2 => 'payment_methods_option2',
+                                                        3 => 'payment_methods_option3',
+                                                        4 => 'payment_methods_option4',
+                                                    ];
+                                                @endphp
                                                 <select id="payment-method" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
                                                     @isset($findRidePage->payment_methods_option1)
-                                                        <option value=""
-                                                            {{ $request->payment_method == '' ? 'selected' : '' }}>
+                                                        <option value="" {{ $request->payment_method == '' ? 'selected' : '' }}>
                                                             {{ $findRidePage->payment_methods_option1 }}
                                                         </option>
                                                     @endisset
-                                                    @isset($findRidePage->payment_methods_option2->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option2->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option2->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option2->name }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->payment_methods_option3->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option3->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option3->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option3->name }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->payment_methods_option4->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option4->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option4->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option4->name }}
-                                                        </option>
-                                                    @endisset
+                                                    @foreach ($paymentMethodOptions as $optionNum => $optionProperty)
+                                                        @php
+                                                            $option = $findRidePage->$optionProperty ?? null;
+                                                            $isSelected = $option && $request->payment_method == $option->features_setting_id;
+                                                        @endphp
+                                                        @if ($option && isset($option->features_setting_id))
+                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                                {{ $option->name }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -473,59 +445,39 @@
                                             @endisset
                                         </label> --}}
                                             <div class="">
+                                                @php
+                                                    $vehicleTypes = [
+                                                        'convertible' => 'Convertable',
+                                                        'coupe' => 'Coupe',
+                                                        'hatchback' => 'Hatchback',
+                                                        'minivan' => 'Minivan',
+                                                        'sedan' => 'Sedan',
+                                                        'station_wagon' => 'Station wagon',
+                                                        'suv' => 'SUV',
+                                                        'truck' => 'Truck',
+                                                        'van' => 'Van',
+                                                    ];
+                                                @endphp
                                                 <select id="VehicleType" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option {{ $request->vehicle_type == '' ? 'selected' : '' }}
-                                                        value="">
+                                                    <option value="" {{ $request->vehicle_type == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->vehicle_type_placeholder)
                                                             {{ $findRidePage->vehicle_type_placeholder }}
                                                         @endisset
                                                     </option>
-
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_convertible_text ?? 'Convertable' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_coupe_text ?? 'Coupe' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_hatchback_value ?? 'Hatchback' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_hatchback_text ?? 'Hatchback' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_minivan_value ?? 'Minivan' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_minivan_text ?? 'Minivan' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_sedan_value ?? 'Sedan' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_sedan_text ?? 'Sedan' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_station_wagon_value }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_station_wagon_text ?? 'Station wagon' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_suv_value ?? 'SUV' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_suv_text ?? 'SUV' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_truck_value ?? 'Truck' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_truck_text ?? 'Truck' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_van_value ?? 'Van' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_van_text ?? 'Van' }}
-                                                    </option>
-
+                                                    @foreach ($vehicleTypes as $key => $default)
+                                                        @php
+                                                            $valueProperty = 'vehicle_type_' . $key . '_value';
+                                                            $textProperty = 'vehicle_type_' . $key . '_text';
+                                                            $value = $findRidePage->$valueProperty ?? $default;
+                                                            $text = $findRidePage->$textProperty ?? $default;
+                                                            $isSelected = $request->vehicle_type === $value;
+                                                        @endphp
+                                                        <option value="{{ $value }}" {{ $isSelected ? 'selected' : '' }}>
+                                                            {{ $text }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -909,7 +861,7 @@
                                             class="flex items-center gap-2 cursor-pointer select-none font-normal text-gray-900">
                                             <input type="checkbox" id="hide-full-rides"
                                                 class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer">
-                                            <span class="text-base font-medium">Hide Full Rides</span>
+                                            <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
                                         </label>
                                     </div>
 
