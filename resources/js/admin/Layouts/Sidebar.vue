@@ -402,6 +402,23 @@
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Success and error messages settings</span>
                     </router-link>
                 </li>
+                <li>
+                    <router-link :to="{ name: 'admin.site-text-setting.index' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.site-text-setting.index' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-white">
+                                <path fill-rule="evenodd"
+                                    d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM8.25 8.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zm4.875 0a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5zM4.5 13.125a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM8.25 15.375a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zm4.875 0a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Setting site text</span>
+                    </router-link>
+                </li>
             </ul>
             <li class="cursor-pointer flex items-center justify-between pr-2"
                 @click.prevent="subMenuName == 'submissions' ? updateSubMenuName(null) : updateSubMenuName('submissions')">
@@ -1952,7 +1969,7 @@ export default {
             // Settings
             else if ([
                 'admin.review-settings.index', 'admin.folk-ride-settings.index', 'admin.cancel-ride-settings.index',
-                'admin.pink-ride-settings.index', 'admin.referral-system-settings.index', 'admin.success-messages-setting.index',
+                'admin.pink-ride-settings.index', 'admin.referral-system-settings.index', 'admin.success-messages-setting.index', 'admin.site-text-setting.index',
                 'admin.error-messages-setting.index', 'admin.registration-reward-settings.index'
             ].includes(routeName)) {
                 this.updateSubMenuName('settings');

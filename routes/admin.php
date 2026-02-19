@@ -79,6 +79,7 @@ use App\Http\Controllers\Api\Admin\{
     ProfilePhotoSettingController,EditProfilePageSettingController,MyStudentCardSettingController,MyReviewSettingController,
     SuccessMessagesSettingController,ErrorController,BillingAdressSettingController, ClaimRewardsController, CoffeeWallPageSettingController, ExtraCareFaqController, FirmCancellationPolicyPageSettingController, ProfileSettingController,
     SecuredCashBookingController,
+    SiteTextSettingController,
     VerifyPhonesController,MyPassengerSettingController,
     NoShowController,
     PackageController,
@@ -120,6 +121,12 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-mobile-find-ride-page-setting', [MobileFindRideSettingController::class, 'show']);
     Route::post('/update-success-messages-setting', [SuccessMessagesSettingController::class, 'update']);
     Route::get('/get-success-messages-setting', [SuccessMessagesSettingController::class, 'show']);
+    Route::get('/get-site-text-setting', [SiteTextSettingController::class, 'index']);
+    Route::get('/export-site-text-setting', [SiteTextSettingController::class, 'export']);
+    Route::post('/import-site-text-setting', [SiteTextSettingController::class, 'import']);
+    Route::post('/store-site-text-setting', [SiteTextSettingController::class, 'store']);
+    Route::post('/update-site-text-setting/{id}', [SiteTextSettingController::class, 'update']);
+    Route::delete('/delete-site-text-setting/{id}', [SiteTextSettingController::class, 'destroy']);
     Route::post('/update-home-page-setting', [HomePageSettingController::class, 'update']);
     Route::get('/get-home-page-setting', [HomePageSettingController::class, 'show']);
     Route::post('/upload-home-page-setting-excel', [HomePageSettingController::class, 'uploadExcel']);

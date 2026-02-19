@@ -12,6 +12,13 @@ class SiteTextDetail extends Model
 
     public $table = "site_text_detail";
 
+    protected $fillable = [
+        'slug_id',
+        'language_id',
+        'name',
+        'icon',
+    ];
+
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);

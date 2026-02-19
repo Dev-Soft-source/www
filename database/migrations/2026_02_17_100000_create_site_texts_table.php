@@ -10,13 +10,9 @@ return new class extends Migration
     {
         Schema::create('site_texts', function (Blueprint $table) {
             $table->id();
-            $table->string('slug', 191)->index();
-            $table->unsignedBigInteger('language_id')->index();
+            $table->string('slug', 191)->unique();
             $table->text('text')->nullable();
             $table->timestamps();
-
-            $table->unique(['slug', 'language_id']);
-            $table->foreign('language_id')->references('id')->on('languages')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
