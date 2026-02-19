@@ -54,6 +54,7 @@
                         @php
                         $link = $item['link'] ?? '';
                         $name = $item['name'] ?? '';
+                        
                         $iconUrl = null;
                         if ($link === 'students' && isset($studentPage->page_image)) {
                         $iconUrl = asset('home_page_icons/' . $studentPage->page_image);

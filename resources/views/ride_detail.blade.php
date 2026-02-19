@@ -233,17 +233,16 @@
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                         <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
                             class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
-                            {{ $successMessage->popup_login_btn_text ?? 'Login' }}
-
+                            {{ $siteText['login_btn_text'] }}
                         </a>
                         <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}"
                             class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
-                            {{ $successMessage->popup_signup_btn_text ?? 'Signup' }}
+                            {{ $siteText['signup_btn_text'] }}
 
                         </a>
                         <button onclick="closePopupModal()"
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
-                            {{ $successMessage->popup_close_btn_text ?? 'Close' }}
+                            {{ $siteText['close_btn_text'] }}
                         </button>
                     </div>
                 </div>

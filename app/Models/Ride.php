@@ -76,7 +76,7 @@ class Ride extends Model
         return $query->avg('average_rating');
     }
 
-    public function getHasRatings($status = null, $type = null)
+    public function getHasRatings($status = null, $type = null, $booking_user_id = null)
     {
         $query = $this->ratings();
         
@@ -86,6 +86,12 @@ class Ride extends Model
         
         if ($type !== null) {
             $query->where('type', $type);
+        }
+
+        if($booking_user_id !== null){
+            $query->whereHas('booking', function($q) use ($booking_user_id) {
+                $q->where('user_id', $booking_user_id);
+            });
         }
         
         return $query->exists();

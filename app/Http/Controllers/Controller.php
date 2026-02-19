@@ -15,6 +15,7 @@ use App\Models\Rating;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
+use App\Models\SiteTextDetail;
 use App\Models\VideoDetail;
 
 class Controller extends BaseController
@@ -47,10 +48,11 @@ class Controller extends BaseController
         $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+
         // Share notifications with all views
         $this->middleware(function ($request, $next) use ($lang) {
-            $notifications = null;
             if (auth()->check()) {
                 $user = auth()->user();
                 $user_id = $user->id;
@@ -68,7 +70,7 @@ class Controller extends BaseController
                         return redirect()->route('step4to5', ['lang' => $lang]);
                     }
                 }
-
+                
                 $notifications = Notification::where('is_delete', '0');
                 $notifications = $notifications->where(function ($query) use ($user_id) {
                     $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
@@ -113,7 +115,6 @@ class Controller extends BaseController
                 View::share('ratings', $ratings);
             }
 
-
             return $next($request);
         });
 
@@ -122,6 +123,7 @@ class Controller extends BaseController
         View::share([
             'selectedLanguage' => $this->selectedLanguage,
             'languages' => $languages,
+            'siteText' => $siteText,
             'ratings' => $ratings,
             'notificationPage' => $notificationPage,
             'successMessage' => $successMessage,
