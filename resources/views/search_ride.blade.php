@@ -518,8 +518,8 @@
                                                         </span>
                                                     </label>
                                                     <input id="rating-passengers" type="checkbox"
-                                                        value="{{ $postRidePage->features_option4->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                        value="{{ $findRidePage->ride_features_option4->features_setting_id }}"
+                                                        {{ in_array($findRidePage->ride_features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                                 </div>
                                             @endisset
@@ -532,8 +532,8 @@
                                                         </span>
                                                     </label>
                                                     <input id="provide-babyseats" type="checkbox"
-                                                        value="{{ $postRidePage->features_option5->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                        value="{{ $findRidePage->ride_features_option5->features_setting_id }}"
+                                                        {{ in_array($findRidePage->ride_features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                                 </div>
                                             @endisset
@@ -546,8 +546,8 @@
                                                         </span>
                                                     </label>
                                                     <input id="passenger-provide" type="checkbox"
-                                                        value="{{ $postRidePage->features_option6->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                        value="{{ $findRidePage->ride_features_option6->features_setting_id }}"
+                                                        {{ in_array($findRidePage->ride_features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                                 </div>
                                             @endisset
@@ -560,8 +560,8 @@
                                                         </span>
                                                     </label>
                                                     <input id="take-children" type="checkbox"
-                                                        value="{{ $postRidePage->features_option7->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
+                                                        value="{{ $findRidePage->ride_features_option7->features_setting_id }}"
+                                                        {{ in_array($findRidePage->ride_features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                                 </div>
                                             @endisset
