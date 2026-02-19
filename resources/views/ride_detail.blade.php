@@ -976,7 +976,7 @@
                         </div>
                     </div> --}}
                     <div
-                        class="bg-white rounded-lg shadow-3xl {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
+                        class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
                             {{-- Cancellation policy --}}
                             @isset($rideDetailPage->cancellation_policy)
