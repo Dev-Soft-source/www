@@ -63,25 +63,32 @@ class MyWalletSettingController extends Controller
         return $this->errorResponse();
     }
 
+    /**
+     * Upload My Wallet settings via Excel (all-languages format: Field Name + one column per language).
+     */
     public function uploadExcel(Request $request)
     {
         try {
             $request->validate([
-                'language_id' => 'required|exists:languages,id',
                 'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+            ], [
+                'excel_file.required' => 'Please upload an Excel file',
+                'excel_file.file' => 'The uploaded file is not valid',
+                'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
+                'excel_file.max' => 'The file size must not exceed 5MB',
             ]);
 
-            $language = Language::find($request->language_id);
-            if (!$language) return $this->errorResponse('Language not found', 404);
-
             try {
-                Excel::import(new MyWalletSettingImport($request->language_id), $request->file('excel_file'));
-                return $this->successResponse(['language' => $language->name], "My Wallet settings for {$language->name} uploaded successfully from Excel.");
+                Excel::import(new MyWalletSettingImport(null), $request->file('excel_file'));
+                return $this->successResponse(
+                    [],
+                    'My Wallet settings for all languages uploaded successfully from Excel.'
+                );
             } catch (ValidationException $e) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation errors in Excel file',
-                    'errors' => array_map(fn($f) => [
+                    'errors' => array_map(fn ($f) => [
                         'row' => $f->row(),
                         'attribute' => $f->attribute(),
                         'errors' => $f->errors(),
@@ -90,15 +97,27 @@ class MyWalletSettingController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('My Wallet Excel upload error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to upload Excel file'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to upload Excel file: ' . $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Download Excel template. format=all_languages (default): Field Name + one column per language.
+     */
     public function downloadTemplate(Request $request)
     {
         try {
-            return Excel::download(new MyWalletSettingTemplateExport($request->get('format', 'single_column')),
-                'my_wallet_settings_template_' . date('Y-m-d') . '.xlsx');
+            $format = $request->get('format', 'all_languages');
+            $languages = null;
+            $existingData = null;
+            if ($format === 'all_languages') {
+                $languages = Language::orderBy('id')->get();
+                $existingData = MyWalletSetting::with('myWalletSettingDetail')->first();
+            }
+            return Excel::download(
+                new MyWalletSettingTemplateExport($format, $languages, $existingData),
+                'my_wallet_settings_template_' . date('Y-m-d') . '.xlsx'
+            );
         } catch (\Exception $e) {
             Log::error('My Wallet template download error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to download template'], 500);
