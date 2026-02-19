@@ -110,9 +110,9 @@ class Controller extends BaseController
                     ->where('status', 1)
                     ->orderBy('id', 'desc')
                     ->get();
+                View::share('ratings', $ratings);
             }
 
-            View::share('ratings', $ratings);
 
             return $next($request);
         });
