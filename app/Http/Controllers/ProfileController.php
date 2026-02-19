@@ -26,21 +26,12 @@ use Illuminate\Support\Facades\Validator;
 class ProfileController extends Controller
 {
     public function index($lang = null){
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $editProfilePage = null;
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         
         if (auth()->check()) {
+            $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             
             $user = auth()->user();
 
@@ -51,7 +42,7 @@ class ProfileController extends Controller
                 'ProfileSetting' => $ProfileSetting,
                 'ProfilePage' => $ProfilePage]);
         } else {
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
+            return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
         }
     }
 

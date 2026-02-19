@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\Concerns\HasOptionGroups;
 
 class Ride extends Model
 {
-    use HasFactory;
+    use HasFactory, HasOptionGroups;
 
     protected $fillable = ['random_id','departure','departure_lat','departure_lng','departure_place','departure_route','departure_zipcode','departure_city','departure_state','departure_state_short','departure_country',
         'destination','destination_lat','destination_lng','destination_place','destination_route','destination_zipcode','destination_city','destination_state','destination_state_short','destination_country',

@@ -132,13 +132,12 @@ class Controller extends BaseController
     {
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
-            $postRidePage->mapOptionColumnsToDetails('features', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('smoking', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('booking', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('payment_methods', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('animals', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('luggage', $this->selectedLanguage->id, $this->defaultLang->id);
-            $postRidePage->mapOptionColumnsToDetails('cancellation_policy', $this->selectedLanguage->id, $this->defaultLang->id);
+            // Optimized: Batch load all option groups in a single query instead of 7 separate queries
+            $postRidePage->mapMultipleOptionColumnsToDetails(
+                ['features', 'smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id
+            );
         }
         
         return $postRidePage;
@@ -148,24 +147,44 @@ class Controller extends BaseController
     {
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($findRidePage) {
-            $findRidePage->mapOptionColumnsToDetails('ride_features', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('smoking', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('pets_allowed', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('payment_methods', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('animals', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('luggage', $this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage->mapOptionColumnsToDetails('cancellation_policy', $this->selectedLanguage->id, $this->defaultLang->id);
+            // Optimized: Batch load all option groups in a single query instead of 7 separate queries
+            $findRidePage->mapMultipleOptionColumnsToDetails(
+                ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id
+            );
 
             // todo : there is not bellow fields in the table find_ride_page_setting_detail ???
-            $findRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_convertible_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_hatchback_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_coupe_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_minivan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_sedan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_station_wagon_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_suv_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_truck_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
-            $findRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($findRidePage->vehicle_type_van_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
+            // Optimize vehicle type fields loading - batch load in a single query
+            $vehicleTypeIds = [
+                $findRidePage->vehicle_type_convertible_text,
+                $findRidePage->vehicle_type_hatchback_text,
+                $findRidePage->vehicle_type_coupe_text,
+                $findRidePage->vehicle_type_minivan_text,
+                $findRidePage->vehicle_type_sedan_text,
+                $findRidePage->vehicle_type_station_wagon_text,
+                $findRidePage->vehicle_type_suv_text,
+                $findRidePage->vehicle_type_truck_text,
+                $findRidePage->vehicle_type_van_text,
+            ];
+            
+            $vehicleTypeIds = array_filter($vehicleTypeIds);
+            if (!empty($vehicleTypeIds)) {
+                $vehicleTypeDetails = FeaturesSettingDetail::whereIn('features_setting_id', $vehicleTypeIds)
+                    ->where('language_id', $this->selectedLanguage->id)
+                    ->get()
+                    ->keyBy('features_setting_id');
+                
+                $findRidePage->vehicle_type_convertible_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_convertible_text)?->name;
+                $findRidePage->vehicle_type_hatchback_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_hatchback_text)?->name;
+                $findRidePage->vehicle_type_coupe_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_coupe_text)?->name;
+                $findRidePage->vehicle_type_minivan_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_minivan_text)?->name;
+                $findRidePage->vehicle_type_sedan_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_sedan_text)?->name;
+                $findRidePage->vehicle_type_station_wagon_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_station_wagon_text)?->name;
+                $findRidePage->vehicle_type_suv_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_suv_text)?->name;
+                $findRidePage->vehicle_type_truck_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_truck_text)?->name;
+                $findRidePage->vehicle_type_van_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_van_text)?->name;
+            }
         }
 
         return $findRidePage;

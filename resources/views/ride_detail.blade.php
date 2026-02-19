@@ -459,7 +459,7 @@
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method }}</span>
+                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name ?? '' }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -577,70 +577,51 @@
                         @endif                        
                         @php
                             $features = !empty($ride->features) ? explode('=', $ride->features) : [];
+                            
+                            // Create a mapping of feature IDs to their option objects for efficient lookup
+                            $featureOptionsMap = [];
+                            $featureOptionKeys = [3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16];
+                            
+                            foreach ($featureOptionKeys as $key) {
+                                $optionKey = "features_option{$key}";
+                                if (isset($postRidePage->$optionKey) && isset($postRidePage->$optionKey->features_setting_id)) {
+                                    $featureOptionsMap[$postRidePage->$optionKey->features_setting_id] = $postRidePage->$optionKey;
+                                }
+                            }
+                            
+                            // Also handle intval comparison for option8
+                            if (isset($postRidePage->features_option8) && isset($postRidePage->features_option8->features_setting_id)) {
+                                $featureOptionsMap[intval($postRidePage->features_option8->features_setting_id)] = $postRidePage->features_option8;
+                            }
+                            
+                            // Excluded feature IDs
+                            $excludedFeatureIds = [
+                                $postRidePage->features_option11->features_setting_id ?? null,
+                                $postRidePage->features_option1->features_setting_id ?? null,
+                                $postRidePage->features_option2->features_setting_id ?? null,
+                            ];
                         @endphp
                         @foreach ($features as $feature)
-                            @if($feature === ($postRidePage->features_option11->name ?? null) || $feature === ($postRidePage->features_option1->name ?? null) || $feature === ($postRidePage->features_option2->name ?? null))
+                            @php
+                                $featureId = $feature;
+                                $featureIdInt = intval($feature);
+                                $isExcluded = in_array($featureId, $excludedFeatureIds, true) || in_array($featureIdInt, $excludedFeatureIds, true);
+                                $featureOption = $featureOptionsMap[$featureId] ?? $featureOptionsMap[$featureIdInt] ?? null;
+                            @endphp
+                            @if($isExcluded)
                                 @continue
                             @endif
                             <div class="flex items-start space-x-2">
-                                @if ($feature === $postRidePage->features_option9->name)
+                                @if($featureOption && isset($featureOption->icon))
                                     <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}"
+                                        src="{{ asset('home_page_icons/' . $featureOption->icon) }}"
                                         alt="">
-                                @elseif ($feature === $postRidePage->features_option8->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option8->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option10->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option10->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option3->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option3->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option12->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option12->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option4->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option5->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option6->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option7->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option13->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option13->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option14->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option14->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option15->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option15->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option16->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option16->icon) }}"
-                                        alt="">
+                                    <p class="font-semibold">{{ $featureOption->name }}</p>
                                 @else
                                     <input id="wi-fi" type="checkbox" name="features[]" value="" checked
                                         disabled
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 @endif
-                                <p class="font-semibold">{{ $feature }}</p>
                             </div>
                         @endforeach
                     </div>
@@ -964,10 +945,10 @@
                         </div>
                     @endif
 
-                    {{-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl {{isset($ride->booking_type) && $ride->booking_type=='Firm cancellation'?'border-4 border-red-500':'' }}">
+                    {{-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl {{isset($ride->booking_type->name) && $ride->booking_type->name=='Firm cancellation'?'border-4 border-red-500':'' }}">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
                             Cancellation policy
-                            @if (isset($ride->booking_type) && $ride->booking_type == 'Firm cancellation')
+                            @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
                             <div class="sups inline-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
                                     <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
@@ -990,18 +971,18 @@
                         </h3>
                         <div class=" p-4 w-full">
                             <p class="text-left">
-                                {{ $ride->booking_type }}
+                                {{ $ride->booking_type->name }}
                             </p>
                         </div>
                     </div> --}}
                     <div
-                        class="bg-white rounded-lg shadow-3xl {{ isset($ride->booking_type) && $ride->booking_type == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
+                        class="bg-white rounded-lg shadow-3xl {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
                             {{-- Cancellation policy --}}
                             @isset($rideDetailPage->cancellation_policy)
                                 {{ $rideDetailPage->cancellation_policy }}
                             @endisset
-                            @if (isset($ride->booking_type) && $ride->booking_type == 'Firm cancellation')
+                            @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
                                 <div class="relative inline-flex group">
                                     <!-- Info Icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -1043,18 +1024,18 @@
                         </h3>
                         <div class=" p-4 w-full">
                             <p class="text-left">
-                                @if (isset($ride->booking_type) && $ride->booking_type == 'Standard cancellation')
+                                @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Standard cancellation')
                                     <a href="{{ route('cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'standard']) }}"
                                         class="font-bold text-black no-underline hover:no-underline" target="_blank">
-                                        {{ $ride->booking_type }}
+                                        {{ $ride->booking_type->name }}
                                     </a>
-                                @elseif(isset($ride->booking_type) && $ride->booking_type == 'Firm cancellation')
+                                @elseif(isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
                                     <a href="{{ route('firm_cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'firm']) }}"
                                         class="font-bold text-black no-underline hover:no-underline" target="_blank">
-                                        {{ $ride->booking_type }}
+                                        {{ $ride->booking_type->name }}
                                     </a>
                                 @else
-                                    {{ $ride->booking_type ?? '' }}
+                                    {{ $ride->booking_type->name ?? '' }}
                                 @endif
                             </p>
                         </div>

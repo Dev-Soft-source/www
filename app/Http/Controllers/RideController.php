@@ -119,7 +119,7 @@ class RideController extends Controller
                 ->where('suspand', '!=', 1)
                 ->where('vehicle_id', '!=', null);
 
-            
+
             // ->where(function ($query) {
             //     $query->where(function ($query) {
             //         $query->whereDate('date', '>', now()->toDateString())
@@ -290,14 +290,16 @@ class RideController extends Controller
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
+        
         return view('search_ride', [
-            'pinkRideSetting' => $pinkRideSetting, 
-            'postRidePage' => $postRidePage, 
-            'findRidePage' => $findRidePage, 
-            'rides' => $rides, 
-            'recentSearches' => $recentSearches, 
-            'request' => $request, 
-            'firm_cancellation_discount' => $firm_cancellation_discount]);
+            'pinkRideSetting' => $pinkRideSetting,
+            'postRidePage' => $postRidePage,
+            'findRidePage' => $findRidePage,
+            'rides' => $rides,
+            'recentSearches' => $recentSearches,
+            'request' => $request,
+            'firm_cancellation_discount' => $firm_cancellation_discount
+        ]);
     }
 
     public function RideDetail(Request $request, $lang = null)
@@ -305,6 +307,7 @@ class RideController extends Controller
         $id = $request->id;
         $from = $request->departure;
         $to = $request->destination;
+        // $ride = RideDetail::get
         $ride = Ride::where('id', $request->id)
             ->with(['rideDetail' => function ($q) use ($from, $to, $id) {
                 $q->where('departure', 'like', '%' . $from . '%')
@@ -317,119 +320,49 @@ class RideController extends Controller
             return redirect(route('home', ['lang' => $lang]));
         }
 
+        
         $setting = ReviewSetting::first();
         $cancelSetting = CancelRideSetting::first();
         $ratings = Rating::all();
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
+        
+        
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        
+        if ($ride) {
+            // Optimized: Batch load all option groups in a single query instead of 5 separate queries
+            $ride->mapMultipleOptionColumnsToDetails(
+                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id,
+                false
+            );
         }
-        $selectedLanguage = session('selectedLanguage');
-        $rideDetailPage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-
-                // Retrieve the Page associated with the selected language
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-
-                $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('id', 'chats_page_setting_id', 'language_id', 'type_message_placeholder')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->booking_type = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_type)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $featureIds = array_filter(explode('=', $ride->features ?? ''));
-                $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
-                $ride->extra_care_ride = ($postRidePage->features_option11 && in_array((string) $postRidePage->features_option11->features_setting_id, $featureIds)) ? $postRidePage->features_option11 : null;
-                // Fetch data for each feature ID and concatenate with '='
-                $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                    return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                })->filter()->implode('='); // Filter out nulls and concatenate with '='
-                $ride->features = $featureNames;
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-
-                $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('id', 'chats_page_setting_id', 'language_id', 'type_message_placeholder')->first();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->booking_type = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_type)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $featureIds = array_filter(explode('=', $ride->features ?? ''));
-                $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
-                $ride->extra_care_ride = ($postRidePage->features_option11 && in_array((string) $postRidePage->features_option11->features_setting_id, $featureIds)) ? $postRidePage->features_option11 : null;
-
-                // Fetch data for each feature ID and concatenate with '='
-                $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                    return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                })->filter()->implode('='); // Filter out nulls and concatenate with '='
-                $ride->features = $featureNames;
-            }
-        }
-
         
 
+        $featureIds = array_filter(explode('=', $ride->features ?? ''));
+        $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
+        $ride->extra_care_ride = ($postRidePage->features_option11 && in_array((string) $postRidePage->features_option11->features_setting_id, $featureIds)) ? $postRidePage->features_option11 : null;
 
         $ride_cancelled = false;
         $completed_date_time = Carbon::parse($ride->completed_date . ' ' . $ride->completed_time);
         if (isset($ride_booking) && ($completed_date_time < Carbon::now() ||  $ride_booking->status == '3' ||  $ride_booking->status == '4')) {
             $ride_cancelled = true;
         }
-        return view('ride_detail', ['ride_cancelled' => $ride_cancelled,
-         'ride_cancelled' => $ride_cancelled, 
-         'rideDetailPage' => $rideDetailPage, 
-         'ride' => $ride, 'setting' => $setting,
-          'cancelSetting' => $cancelSetting, 
-          'languages' => $languages, 
-          'selectedLanguage' => $selectedLanguage, 
-          'postRidePage' => $postRidePage, 
-          'ratings' => $ratings, 'chatsPage' => $chatsPage]);
+        return view('ride_detail', [
+            'ride_cancelled' => $ride_cancelled,
+            'ride_cancelled' => $ride_cancelled,
+            'rideDetailPage' => $rideDetailPage,
+            'ride' => $ride,
+            'setting' => $setting,
+            'cancelSetting' => $cancelSetting,
+            'postRidePage' => $postRidePage,
+            'ratings' => $ratings,
+            'chatsPage' => $chatsPage
+        ]);
     }
 
     public function MyCoPassengers(Request $request, $lang = null)
@@ -584,21 +517,21 @@ class RideController extends Controller
         $user_id = $user->id;
         $rides = Ride::where('added_by', $user_id)->whereNotIn('id', [$ride_id])->get();
         $adminSetting = SiteSetting::first();
-        
+
         // Check if ride has any bookings - if so, price cannot be changed
         $hasBookings = Booking::where('ride_id', $ride_id)
             ->where('status', '<>', 3)
             ->where('status', '<>', 4)
-            ->whereHas('passenger', function($query) {
+            ->whereHas('passenger', function ($query) {
                 $query->whereNull('deleted_at');
             })
             ->exists();
-        
+
         // If bookings exist, check if price is being changed
         if ($hasBookings && $ride->defaultRideDetail && isset($ride->defaultRideDetail[0])) {
             $currentPrice = $ride->defaultRideDetail[0]->price;
             $newPrice = $request->price;
-            
+
             if ($currentPrice != $newPrice) {
                 return back()->with('error', 'You cannot change the price once passengers have booked this ride.')
                     ->with('heading', 'Price Change Not Allowed')
@@ -749,7 +682,7 @@ class RideController extends Controller
                         }
                     }
                 }
-                
+
                 // Check if driver's license is required and uploaded
                 if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                     if (empty($user->driver_license_upload)) {
@@ -941,19 +874,19 @@ class RideController extends Controller
         $to = $request->to;
         $fromArray = explode(',', $request->from);
         $toArray = explode(',', $request->to);
-        
+
         Log::info('Calculating distance for ride update', [
             'ride_id' => $ride->id,
             'from' => $from,
             'to' => $to,
             'user_id' => $user_id
         ]);
-        
+
         $googleApiData = $this->getDataFromGoogleApi($from, $to);
         if (isset($googleApiData) && !empty($googleApiData)) {
             // Check element status first before accessing distance/duration
             $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
-            
+
             if ($elementStatus === 'OK') {
                 $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
                 $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
@@ -976,7 +909,7 @@ class RideController extends Controller
         if ($distance != 0) {
             $distance = round(($distance / 1000), 2);
         }
-        
+
         Log::info('Distance calculation completed for ride update', [
             'ride_id' => $ride->id,
             'from' => $from,
@@ -998,7 +931,7 @@ class RideController extends Controller
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
-        
+
         Log::info('Saving ride detail with distance', [
             'ride_id' => $ride->id,
             'ride_detail_id' => $rideDetail->id ?? 'new',
@@ -1007,22 +940,22 @@ class RideController extends Controller
             'total_distance_km' => $distance,
             'total_duration_seconds' => $duration
         ]);
-        
+
         // Cost-sharing cap validation: Price per seat validation
         // Formula: (Distance × Cap) ÷ Seats = Max price per seat
         // Skip validation if user explicitly chose to bypass (after seeing warning)
         $bypassValidation = $request->has('bypass_price_validation') && $request->bypass_price_validation == '1';
-        
+
         if (!$bypassValidation && $distance > 0 && isset($request->price) && $request->price > 0 && isset($request->seats) && $request->seats > 0) {
             $seats = (int)$request->seats;
             $pricePerSeat = (float)$request->price;
-            
+
             // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
             $maxPricePerSeat = ($distance * 0.72) / $seats;
-            
+
             // Calculate soft warning price per seat: $0.66/km
             $softWarningPricePerSeat = ($distance * 0.66) / $seats;
-            
+
             Log::info('Price per seat calculation (UpdateRide)', [
                 'ride_id' => $ride->id,
                 'price_per_seat' => $pricePerSeat,
@@ -1033,7 +966,7 @@ class RideController extends Controller
                 'error_cap' => 0.72,
                 'warning_cap' => 0.66
             ]);
-            
+
             // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
             if ($pricePerSeat > $maxPricePerSeat) {
                 Log::warning('Price per seat exceeds error-triggering cap (UpdateRide)', [
@@ -1042,13 +975,13 @@ class RideController extends Controller
                     'max_allowed' => round($maxPricePerSeat, 2),
                     'cap' => 0.72
                 ]);
-                
+
                 return back()->with('error', 'The price per seat ($' . number_format($pricePerSeat, 2) . ') exceeds the maximum allowed for cost-sharing rides ($' . number_format($maxPricePerSeat, 2) . ' per seat). Please adjust your price.')
                     ->with('heading', 'Price Limit Exceeded')
                     ->with('max_price_per_seat', round($maxPricePerSeat, 2))
                     ->withInput();
             }
-            
+
             // Soft Warning Cap: $0.66 per km - WARN but ALLOW
             if ($pricePerSeat > $softWarningPricePerSeat) {
                 Log::info('Price per seat exceeds soft warning cap but within error cap (UpdateRide)', [
@@ -1057,7 +990,7 @@ class RideController extends Controller
                     'soft_warning_price' => round($softWarningPricePerSeat, 2),
                     'warning_cap' => 0.66
                 ]);
-                
+
                 // Return back to form with warning - user will see modal and can choose to proceed or adjust
                 return back()->with('price_warning', [
                     'message' => 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.',
@@ -1066,7 +999,7 @@ class RideController extends Controller
                 ])->withInput();
             }
         }
-        
+
         $rideDetail->price = $request->price;
         $rideDetail->time = $request->time;
         $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
@@ -1128,7 +1061,7 @@ class RideController extends Controller
                 if (isset($googleApiData) && !empty($googleApiData)) {
                     // Check element status first before accessing distance/duration
                     $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
-                    
+
                     if ($elementStatus === 'OK') {
                         $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
                         $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
@@ -1462,7 +1395,7 @@ class RideController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                
+
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
             }
         }
@@ -1522,7 +1455,7 @@ class RideController extends Controller
 
             // Clear the date (user must select a new date for return ride)
             $ride->date = null;
-            
+
             // Keep the time the same (already preserved from $ride->time)
         }
 
@@ -1621,7 +1554,6 @@ class RideController extends Controller
     {
         $user_id = auth()->user()->id;
 
-
         $user = User::whereId($user_id)->first();
         $pinkRideSetting = PinkRideSetting::first();
         $setting = FolkRideSetting::first();
@@ -1652,68 +1584,13 @@ class RideController extends Controller
             $overallRating = 5;
         }
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
-
-        if ($user->step === '1') {
-            return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '2') {
-            return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '3') {
-            return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '4') {
-            return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
-        }
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
+            return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
         }
-
-        $notifications = Notification::where('is_delete', '0');
-        $notifications = $notifications->where(function ($query) use ($user_id) {
-            $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                $query->where('added_by', $user_id);
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-        })
-            ->orderBy('id', 'desc')
-            ->get();
-
 
         $ride = new Ride();
         $isNewForm = true;
@@ -1733,7 +1610,22 @@ class RideController extends Controller
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
-        return view('post_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'totalRides' => $totalNoOfRides, 'noShowsCount' => $noShowsCount, 'cancellationCount' => $cancellationCount, 'postRidePage' => $postRidePage, 'postRideSubDetailPage' => $postRideSubDetailPage, 'isNewForm' => $isNewForm, 'noshows' => $noshows, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'create']);
+        return view('post_ride', [
+            'totalRides' => $totalNoOfRides,
+            'noShowsCount' => $noShowsCount,
+            'cancellationCount' => $cancellationCount,
+            'postRidePage' => $postRidePage,
+            'postRideSubDetailPage' => $postRideSubDetailPage,
+            'isNewForm' => $isNewForm,
+            'noshows' => $noshows,
+            'ride' => $ride,
+            'user' => $user,
+            'vehicles' => $vehicles,
+            'pinkRideSetting' => $pinkRideSetting,
+            'setting' => $setting,
+            'overallRating' => $overallRating,
+            'routeType' => 'create'
+        ]);
     }
 
     public function PostRideStore(Request $request)
@@ -1801,7 +1693,7 @@ class RideController extends Controller
                         }
                     }
                 }
-                
+
                 // Check if driver's license is required and uploaded
                 if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                     if (empty($user->driver_license_upload)) {
@@ -1827,31 +1719,31 @@ class RideController extends Controller
         $to_city = $toSpot ? trim(explode(',', $toSpot)[0]) : null;
 
 
-        if(!empty($fromSpot) && !empty($toSpot)){
+        if (!empty($fromSpot) && !empty($toSpot)) {
             $validator = Validator::make($request->all(), [
                 'from_spot' => 'required|exists:cities,name',
                 'to_spot' => 'required|exists:cities,name',
                 'price_spot' => 'required',
-    
+
             ], [
                 'from_spot.exists' => $cityErrorMessage->city_not_in_record,
                 'to_spot.exists' => $cityErrorMessage->city_not_in_record,
             ]);
             // dd($request->price_spot);
-    // dd(count(array_filter($request->price_spot, fn($value) => $value == null))>0);
+            // dd(count(array_filter($request->price_spot, fn($value) => $value == null))>0);
             $priceSpotHasNull = is_array($request->price_spot) && count(array_filter($request->price_spot, fn($value) => $value === null || $value === '')) > 0;
             $cityNotInRecord = $cityErrorMessage->city_not_in_record ?? 'City not found in records';
 
             if ((!$from_city || !DB::table('cities')->where('name', $from_city)->exists()) && (!$to_city || !DB::table('cities')->where('name', $to_city)->exists()) || $priceSpotHasNull) {
-                 $errors = [
-                     'from_spot' => $cityNotInRecord,
-                     'to_spot' => $cityNotInRecord,
+                $errors = [
+                    'from_spot' => $cityNotInRecord,
+                    'to_spot' => $cityNotInRecord,
+                ];
+                if ($priceSpotHasNull) {
+                    $errors = [
+                        'price' => __('validation.required', ['attribute' => 'price'])
                     ];
-                    if($priceSpotHasNull){
-                        $errors = [
-                            'price' => __('validation.required', ['attribute' => 'price'])
-                        ];
-                     }
+                }
                 return back()
                     ->with('custom_errors', $errors)
                     ->withInput();
@@ -2034,7 +1926,7 @@ class RideController extends Controller
         if (isset($googleApiData) && !empty($googleApiData)) {
             // Check element status first before accessing distance/duration
             $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
-            
+
             if ($elementStatus === 'OK') {
                 $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
                 $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
@@ -2056,7 +1948,7 @@ class RideController extends Controller
         if ($distance != 0) {
             $distance = round(($distance / 1000), 2);
         }
-        
+
         Log::info('Distance calculation completed for post ride', [
             'from' => $from,
             'to' => $to,
@@ -2065,23 +1957,23 @@ class RideController extends Controller
             'distance_meters' => $distance * 1000,
             'element_status' => $elementStatus ?? 'unknown'
         ]);
-        
+
         // Cost-sharing cap validation: Price per seat validation
         // Formula: (Distance × Cap) ÷ Seats = Max price per seat
         // Skip validation if user explicitly chose to bypass (after seeing warning)
         $bypassValidation = $request->has('bypass_price_validation') && $request->bypass_price_validation == '1';
-        
+
         $priceWarningData = null; // Initialize variable
         if (!$bypassValidation && $distance > 0 && isset($request->price) && $request->price > 0 && isset($request->seats) && $request->seats > 0) {
             $seats = (int)$request->seats;
             $pricePerSeat = (float)$request->price;
-            
+
             // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
             $maxPricePerSeat = ($distance * 0.72) / $seats;
-            
+
             // Calculate soft warning price per seat: $0.66/km
             $softWarningPricePerSeat = ($distance * 0.66) / $seats;
-            
+
             Log::info('Price per seat calculation (PostRideStore)', [
                 'price_per_seat' => $pricePerSeat,
                 'distance_km' => $distance,
@@ -2091,7 +1983,7 @@ class RideController extends Controller
                 'error_cap' => 0.72,
                 'warning_cap' => 0.66
             ]);
-            
+
             // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
             if ($pricePerSeat > $maxPricePerSeat) {
                 Log::warning('Price per seat exceeds error-triggering cap (PostRideStore)', [
@@ -2099,13 +1991,13 @@ class RideController extends Controller
                     'max_allowed' => round($maxPricePerSeat, 2),
                     'cap' => 0.72
                 ]);
-                
+
                 return back()->with('error', 'The price per seat ($' . number_format($pricePerSeat, 2) . ') exceeds the maximum allowed for cost-sharing rides ($' . number_format($maxPricePerSeat, 2) . ' per seat). Please adjust your price.')
                     ->with('heading', 'Price Limit Exceeded')
                     ->with('max_price_per_seat', round($maxPricePerSeat, 2))
                     ->withInput();
             }
-            
+
             // Soft Warning Cap: $0.66 per km - WARN but ALLOW
             if ($pricePerSeat > $softWarningPricePerSeat) {
                 Log::info('Price per seat exceeds soft warning cap but within error cap (PostRideStore)', [
@@ -2113,7 +2005,7 @@ class RideController extends Controller
                     'soft_warning_price' => round($softWarningPricePerSeat, 2),
                     'warning_cap' => 0.66
                 ]);
-                
+
                 // Return back to form with warning - user will see modal and can choose to proceed or adjust
                 return back()->with('price_warning', [
                     'message' => 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.',
@@ -2391,7 +2283,7 @@ class RideController extends Controller
                 if (isset($googleApiData) && !empty($googleApiData)) {
                     // Check element status first before accessing distance/duration
                     $elementStatus = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['status']) ? $googleApiData['rows'][0]['elements'][0]['status'] : null;
-                    
+
                     if ($elementStatus === 'OK') {
                         $duration = isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
                         $distance = isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
@@ -2746,14 +2638,14 @@ class RideController extends Controller
             'message' => $message->ride_post_message,
             'id' => $initialRide->id
         ];
-        
+
         // Include price_warning in redirect if it exists (soft warning cap)
         if ($priceWarningData !== null) {
             $redirectData['price_warning'] = $priceWarningData;
         } elseif (session()->has('price_warning')) {
             $redirectData['price_warning'] = session('price_warning');
         }
-        
+
         // return redirect()->route('post_ride', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $message->ride_post_message, 'id' => $initialRide->id]);
         return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation])->with($redirectData)->withInput();
     }
@@ -2872,7 +2764,7 @@ class RideController extends Controller
         $toEncoded = urlencode($to);
 
         $apiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $fromEncoded . "&destinations=" . $toEncoded . "&units=imperial&key=" . $apiKey . "";
-        
+
         Log::info('Google Maps API Request', [
             'from' => $from,
             'to' => $to,
@@ -2905,7 +2797,7 @@ class RideController extends Controller
             $distanceText = isset($data['rows'][0]['elements'][0]['distance']['text']) ? $data['rows'][0]['elements'][0]['distance']['text'] : 'N/A';
             $duration = isset($data['rows'][0]['elements'][0]['duration']['value']) ? $data['rows'][0]['elements'][0]['duration']['value'] : 0;
             $durationText = isset($data['rows'][0]['elements'][0]['duration']['text']) ? $data['rows'][0]['elements'][0]['duration']['text'] : 'N/A';
-            
+
             Log::info('Google Maps API Success', [
                 'from' => $from,
                 'to' => $to,
@@ -2981,7 +2873,7 @@ class RideController extends Controller
             }
 
             $ratings = Rating::where('type', 1)->where('status', 1)
-                ->whereHas('ride', fn ($q) => $q->where('added_by', $user->id))->get();
+                ->whereHas('ride', fn($q) => $q->where('added_by', $user->id))->get();
             $overallRating = $ratings->isEmpty() ? 0 : $ratings->avg('average_rating');
             $minRating = (float) ($setting->average_rating ?? 0);
             if ($overallRating < $minRating) {

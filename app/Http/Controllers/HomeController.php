@@ -283,61 +283,20 @@ class HomeController extends Controller
 
     public function coffeeOnWall($lang = null)
     {
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
         $coffeeWallPage = null;
         $paymentSettingDetail = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $coffeeWallPage = CoffeeWallPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $coffeeWallPage = CoffeeWallPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+                
+        $coffeeWallPage = CoffeeWallPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
+        $selectedLanguage = $this->selectedLanguage;
         $packages = Package::where('custom', 0)->with(['PackageDetail' => function ($query) use ($selectedLanguage) {
             $query->where('language_id', $selectedLanguage->id);
         }])
             ->get();
-        return view('coffee_wall', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'coffeeWallPage' => $coffeeWallPage, 'packages' => $packages, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);
+        return view('coffee_wall', [
+            'coffeeWallPage' => $coffeeWallPage, 'packages' => $packages, 
+            'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);
     }
 
     public function coffeeOnWallStore(Request $request)
