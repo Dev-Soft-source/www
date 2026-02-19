@@ -6,7 +6,8 @@
         <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full w-full">
+                <div
+                    class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full w-full">
                     <div
                         class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                         <button onclick="closeModal('message-modal')"
@@ -20,11 +21,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
+                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                    </svg>
+                                </div> -->
                             </div>
                             <div class="text-center w-full mt-4">
                                 <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -32,7 +33,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $messages->popup_close_btn_text ?? 'Close' }}</a>
+                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $successMessage->popup_close_btn_text ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -43,24 +44,28 @@
     @if (session('success'))
         <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
                     <div
                         class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                         <button onclick="closeModal('success-modal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                        <button onclick="closeModal('success-modal')"
+                            class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                class="mx-auto h-16 w-16">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                            </div> -->
+                                    class="mx-auto h-16 w-16">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div> -->
                             </div>
                             <div class="w-full mt-4">
                                 <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -68,7 +73,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $messages->popup_close_btn_text ?? 'Close' }}</a>
+                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $successMessage->popup_close_btn_text ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -85,10 +90,10 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                    </svg>
+                                </div> -->
                             </div>
                             <div class="text-center mt-4">
 
@@ -122,7 +127,7 @@
                 {{ $rideDetailPage->ride_canceller_by_driver ?? 'This ride was cancelled by the driver' }}
             </div>
         @endif
-        
+
         @if ($ride->status == '3')
             <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
                 {{ $rideDetailPage->ride_completed_text ?? 'This ride was completed' }}
@@ -131,9 +136,11 @@
         <h1>{{ $rideDetailPage->main_heading ?? 'My ride detail' }}</h1>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
-                @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                        @if (count($ride->bookings->where('status', 0)) > 0)
-                        <div class="bg-white rounded-xl overflow-hidden shadow-2xl mb-6 border-2 border-amber-400 booking-request-frame ring-2 ring-amber-300 ring-offset-2">
+                @if (strtotime($ride->date) > strtotime('today') ||
+                        (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                    @if (count($ride->bookings->where('status', 0)) > 0)
+                        <div
+                            class="bg-white rounded-xl overflow-hidden shadow-2xl mb-6 border-2 border-amber-400 booking-request-frame ring-2 ring-amber-300 ring-offset-2">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl ">
                                 {{ $rideDetailPage->booking_request_main_heading ?? 'You have the following booking requests' }}
                             </h3>
@@ -141,15 +148,19 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     @foreach ($ride->bookings->where('status', 0) as $booking)
                                         @if ($booking->passenger)
-                                            <div class="border-2 border-amber-200 rounded-xl shadow-lg bg-white booking-request-card animate__animated animate__fadeInUp overflow-hidden">
-                                                <div class="border-b border-slate-300 px-4 py-2 font-FuturaMdCnBT text-2xl">
-                                                    {{ $rideDetailPage->booking_request_heading ?? 'Booking request' }}</div>
+                                            <div
+                                                class="border-2 border-amber-200 rounded-xl shadow-lg bg-white booking-request-card animate__animated animate__fadeInUp overflow-hidden">
+                                                <div
+                                                    class="border-b border-slate-300 px-4 py-2 font-FuturaMdCnBT text-2xl">
+                                                    {{ $rideDetailPage->booking_request_heading ?? 'Booking request' }}
+                                                </div>
                                                 <div class="p-4">
                                                     <div class="flex items-center">
                                                         <img class="w-12 2xl:w-16 h-12 2xl:h-16 rounded-full object-cover mr-2 2xl:mr-3"
                                                             src="{{ $booking->passenger->profile_image }}" alt="">
                                                         <div>
-                                                            <p class="mb-0 font-medium">{{ $booking->passenger->first_name }}
+                                                            <p class="mb-0 font-medium">
+                                                                {{ $booking->passenger->first_name }}
                                                                 {{ $booking->passenger->last_name }}</p>
                                                             <div class="flex items-center 2xl:space-x-1">
                                                                 @for ($i = 1; $i <= $booking->seats; $i++)
@@ -167,18 +178,21 @@
                                                     </div>
                                                     <div class="flex items-center justify-center mt-4 gap-2">
                                                         @auth
-                                                        <button type="button"
-                                                            class="button-exp-fill w-36 booking-decline-btn"
-                                                            data-reject-url="{{ route('reject_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
-                                                            {{ $rideDetailPage->request_reject_label ?? 'Decline' }}
-                                                        </button>
-                                                        <button type="button"
-                                                            class="bg-greenXS hover:bg-greenXS button-exp-fill w-42 booking-approve-btn"
-                                                            data-accept-url="{{ route('accept_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
-                                                            {{ $rideDetailPage->request_accept_label ?? 'Approve Booking' }}
-                                                        </button>
+                                                            <button type="button"
+                                                                class="button-exp-fill w-36 booking-decline-btn"
+                                                                data-reject-url="{{ route('reject_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
+                                                                {{ $rideDetailPage->request_reject_label ?? 'Decline' }}
+                                                            </button>
+                                                            <button type="button"
+                                                                class="bg-greenXS hover:bg-greenXS button-exp-fill w-42 booking-approve-btn"
+                                                                data-accept-url="{{ route('accept_booking_request', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id, 'email' => auth()->user()->email]) }}">
+                                                                {{ $rideDetailPage->request_accept_label ?? 'Approve Booking' }}
+                                                            </button>
                                                         @else
-                                                        <span class="text-gray-500 text-sm">{{ $rideDetailPage->request_reject_label ?? 'Reject' }} / {{ $rideDetailPage->request_accept_label ?? 'Accept' }} ({{ __('Sign in to respond') }})</span>
+                                                            <span
+                                                                class="text-gray-500 text-sm">{{ $rideDetailPage->request_reject_label ?? 'Reject' }}
+                                                                / {{ $rideDetailPage->request_accept_label ?? 'Accept' }}
+                                                                ({{ __('Sign in to respond') }})</span>
                                                         @endauth
                                                     </div>
                                                 </div>
@@ -190,7 +204,7 @@
                         </div>
                     @endif
                 @endif
-                
+
                 @if (strtotime($ride->date) > strtotime('today') ||
                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                     @if (count($ride->bookings->where('status', 1)->where('secured_cash', 1)) > 0)
@@ -227,13 +241,19 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->driver_age_label ?? 'Age' }}:
-                                                            <span>{{ $age }}</span></p> 
-                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
+                                                            <span>{{ $age }}</span>
+                                                        </p>
+                                                        <p
+                                                            class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
+                                                            |</p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->web_gender_label ?? 'Gender' }}:
-                                                            <span>{{ $booking->passenger->gender }}</span></p>
-                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
+                                                            <span>{{ $booking->passenger->gender }}</span>
+                                                        </p>
+                                                        <p
+                                                            class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
+                                                            |</p>
                                                         @php
                                                             $user_id = $booking->passenger->id;
 
@@ -242,7 +262,8 @@
                                                                 ->where('status', 1)
                                                                 ->where('type', '2')
                                                                 ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking && $rating->booking->user_id === $user_id;
+                                                                    return $rating->booking &&
+                                                                        $rating->booking->user_id === $user_id;
                                                                 });
 
                                                             $totalAverage =
@@ -265,7 +286,9 @@
                                                 @if ($diffInMinutes <= 30)
                                                     <button
                                                         class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS send_code"
-                                                        data-booking-id="{{ $booking->id }}" data-booking-secured-cash-attempt="{{ $booking->secured_cash_attempt_count }}" data-setting-secured-cash-attempt="{{ $siteSetting->secured_cash_attempt }}">
+                                                        data-booking-id="{{ $booking->id }}"
+                                                        data-booking-secured-cash-attempt="{{ $booking->secured_cash_attempt_count }}"
+                                                        data-setting-secured-cash-attempt="{{ $siteSetting->secured_cash_attempt }}">
                                                         {{ $rideDetailPage->enter_code_label ?? 'Enter payment code' }}
                                                     </button>
                                                 @endif
@@ -290,7 +313,8 @@
                                                 <span
                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                                     <img class="w-5 h-5 object-contain"
-                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                        alt="">
                                                 </span>
                                             </div>
                                             <div class="ml-12 md:ml-20">
@@ -318,7 +342,8 @@
                                                 <span
                                                     class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
                                                     <img class="w-5 h-5 object-contain"
-                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                        alt="">
                                                 </span>
                                             </div>
                                             <div class="ml-12 md:ml-20">
@@ -371,7 +396,8 @@
                                 @else
                                     Payment method
                                 @endisset
-                                <span class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
+                                <span class="text-primary font-normal"
+                                    style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -396,17 +422,24 @@
                         <div class="p-4 flex items-center">
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 @php
-                                    $bookedSeatsCount = $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats');
+                                    $bookedSeatsCount = $ride
+                                        ->bookings()
+                                        ->where('status', '<>', 3)
+                                        ->where('status', '<>', 4)
+                                        ->whereHas('passenger', function ($query) {
+                                            $query->whereNull('deleted_at');
+                                        })
+                                        ->sum('seats');
                                 @endphp
                                 {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: </h4>
-                            <span
-                                class="text-primary font-normal ml-2">{{ $bookedSeatsCount }}
-                                {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}</span>
-                            
+                            <span class="text-primary font-normal ml-2">{{ $bookedSeatsCount }}
+                                {{ $bookedSeatsCount == 1 ? $rideDetailPage->seat_on_column_label ?? 'seat' : $rideDetailPage->ride_seat_label ?? 'seats' }}</span>
+
                         </div>
                         <div class="p-4">
                             <div class="flex items-center justify-between">
-                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">{{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </h4>
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </h4>
                                 <p class="">
                                     ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
                                 </p>
@@ -462,8 +495,7 @@
                         @endisset
                         @isset($ride->luggage->features_setting_id)
                             <div class="flex items-center space-x-2">
-                                <img class="w-7 h-7"
-                                    src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
+                                <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
                                     alt="">
                                 <p>{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}</p>
                             </div>
@@ -557,7 +589,6 @@
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($ride_cancelled)
-                                    
                                     {{ $rideDetailPage->review_passanger_label ?? 'Review my passengers' }}
                                 @else
                                     {{ $rideDetailPage->ride_co_passenger_heading ?? 'My passengers' }}
@@ -572,7 +603,7 @@
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
                                                     {{-- <img class="w-full h-full rounded-full object-cover"
                                                         src="{{ $booking->passenger->profile_image }}" alt=""> --}}
-                                                        
+
                                                     {{-- @if (count($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)) > 0)
                                                         <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">Review passenger</a>
                                                     @endif --}}
@@ -587,17 +618,20 @@
                                                     @endif
                                                     @isset($uuid)
                                                         {{-- {{ dd($booking->passenger->profile_image) }} --}}
-                                                        @if($ride->status == '3')
-                                                            <a href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
+                                                        @if ($ride->status == '3')
+                                                            <a
+                                                                href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
                                                                 @isset($booking->passenger->profile_image)
                                                                     <img class="w-full h-full object-cover"
-                                                                        src="{{ $booking->passenger->profile_image }}" alt="">
+                                                                        src="{{ $booking->passenger->profile_image }}"
+                                                                        alt="">
                                                                 @endisset
                                                             </a>
                                                         @else
                                                             <img class="w-full h-full object-cover"
-                                                                src="{{ $booking->passenger->profile_image }}" alt="">
-                                                        @endif    
+                                                                src="{{ $booking->passenger->profile_image }}"
+                                                                alt="">
+                                                        @endif
                                                     @endisset
                                                 </div>
                                                 <div
@@ -613,11 +647,13 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_age_label ?? 'Age' }}:
-                                                            <span>{{ $age }}</span></p>
+                                                            <span>{{ $age }}</span>
+                                                        </p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_gender_label ?? 'Gender' }}:
-                                                            <span>{{ $booking->passenger->gender }}</span></p>
+                                                            <span>{{ $booking->passenger->gender }}</span>
+                                                        </p>
                                                         @php
                                                             $user_id = $booking->passenger->id;
 
@@ -626,7 +662,8 @@
                                                                 ->where('status', 1)
                                                                 ->where('type', '2')
                                                                 ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking && $rating->booking->user_id === $user_id;
+                                                                    return $rating->booking &&
+                                                                        $rating->booking->user_id === $user_id;
                                                                 });
 
                                                             $totalAverage =
@@ -798,79 +835,122 @@
     </div>
 
     {{-- Decline booking request: confirmation modal --}}
-    <div id="declineConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+    <div id="declineConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true"
+        role="dialog">
         <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('declineConfirmModal')"></div>
-            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
-                <button type="button" onclick="closeBookingModal('declineConfirmModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                onclick="closeBookingModal('declineConfirmModal')"></div>
+            <div
+                class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('declineConfirmModal')"
+                    class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <p class="text-left text-gray-800">Are you sure you want to decline this booking request? This action cannot be undone.</p>
+                    <p class="text-left text-gray-800">Are you sure you want to decline this booking request? This action
+                        cannot be undone.</p>
                 </div>
                 <div class="px-4 pb-6 pt-4 flex flex-wrap justify-center gap-2 sm:gap-3">
-                    <button type="button" id="declineConfirmYes" class="inline-flex justify-center rounded bg-red-500 px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-red-400 sm:w-auto">Yes, decline</button>
-                    <button type="button" onclick="closeBookingModal('declineConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No, take me back</button>
+                    <button type="button" id="declineConfirmYes"
+                        class="inline-flex justify-center rounded bg-red-500 px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-red-400 sm:w-auto">Yes,
+                        decline</button>
+                    <button type="button" onclick="closeBookingModal('declineConfirmModal')"
+                        class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No,
+                        take me back</button>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Approve booking request: confirmation modal --}}
-    <div id="approveConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+    <div id="approveConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true"
+        role="dialog">
         <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('approveConfirmModal')"></div>
-            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
-                <button type="button" onclick="closeBookingModal('approveConfirmModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                onclick="closeBookingModal('approveConfirmModal')"></div>
+            <div
+                class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                <button type="button" onclick="closeBookingModal('approveConfirmModal')"
+                    class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <p class="text-left text-gray-800">Are you sure you want to approve this booking request?</p>
                 </div>
                 <div class="px-4 pb-6 pt-4 flex flex-wrap justify-center gap-2 sm:gap-3">
-                    <button type="button" id="approveConfirmYes" class="inline-flex justify-center rounded bg-greenXS px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 sm:w-auto">Yes, approve it!</button>
-                    <button type="button" onclick="closeBookingModal('approveConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No, take me back!</button>
+                    <button type="button" id="approveConfirmYes"
+                        class="inline-flex justify-center rounded bg-greenXS px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 sm:w-auto">Yes,
+                        approve it!</button>
+                    <button type="button" onclick="closeBookingModal('approveConfirmModal')"
+                        class="inline-flex justify-center rounded border border-gray-300 bg-white px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-gray-700 hover:bg-gray-50 sm:w-auto">No,
+                        take me back!</button>
                 </div>
             </div>
         </div>
     </div>
 
     @if (session('decline_success_message'))
-    <div id="declineSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
-        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('declineSuccessModal')"></div>
-            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
-                <button type="button" onclick="closeBookingModal('declineSuccessModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <p class="text-left text-gray-800">{{ session('decline_success_message') }}</p>
-                </div>
-                <div class="px-4 pb-6 pt-4">
-                    <button type="button" onclick="closeBookingModal('declineSuccessModal')" class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $messages->popup_close_btn_text ?? 'Close' }}</button>
+        <div id="declineSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true"
+            role="dialog">
+            <div
+                class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    onclick="closeBookingModal('declineSuccessModal')"></div>
+                <div
+                    class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                    <button type="button" onclick="closeBookingModal('declineSuccessModal')"
+                        class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <p class="text-left text-gray-800">{{ session('decline_success_message') }}</p>
+                    </div>
+                    <div class="px-4 pb-6 pt-4">
+                        <button type="button" onclick="closeBookingModal('declineSuccessModal')"
+                            class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $successMessage->popup_close_btn_text ?? 'Close' }}</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     @if (session('approve_success_message'))
-    <div id="approveSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
-        <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('approveSuccessModal')"></div>
-            <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
-                <button type="button" onclick="closeBookingModal('approveSuccessModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <p class="text-left text-gray-800">{{ session('approve_success_message') }}</p>
-                </div>
-                <div class="px-4 pb-6 pt-4">
-                    <button type="button" onclick="closeBookingModal('approveSuccessModal')" class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $messages->popup_close_btn_text ?? 'Close' }}</button>
+        <div id="approveSuccessModal" class="fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true"
+            role="dialog">
+            <div
+                class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    onclick="closeBookingModal('approveSuccessModal')"></div>
+                <div
+                    class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                    <button type="button" onclick="closeBookingModal('approveSuccessModal')"
+                        class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <p class="text-left text-gray-800">{{ session('approve_success_message') }}</p>
+                    </div>
+                    <div class="px-4 pb-6 pt-4">
+                        <button type="button" onclick="closeBookingModal('approveSuccessModal')"
+                            class="inline-flex justify-center rounded bg-primary px-4 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-blue-600 w-32">{{ $successMessage->popup_close_btn_text ?? 'Close' }}</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <div id="securedCashAttemptError" class="hidden fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -878,11 +958,12 @@
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
             <div
                 class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                 <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="w-full">
                         <p class="can-exp-p text-center">{{ $successMessage->too_many_secured_cash_attempt_message }}</p>
@@ -890,7 +971,7 @@
                 </div>
                 <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                     <a href=""
-                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $messages->popup_close_btn_text ?? 'Close' }}</a>
+                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $successMessage->popup_close_btn_text ?? 'Close' }}</a>
                 </div>
             </div>
         </div>
@@ -899,22 +980,32 @@
 @endsection
 
 @section('style')
-<style>
-    .booking-request-frame {
-        animation: booking-request-pulse 2.5s ease-in-out 2;
-    }
-    @keyframes booking-request-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
-        50% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
-    }
-    .booking-request-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .booking-request-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    }
-</style>
+    <style>
+        .booking-request-frame {
+            animation: booking-request-pulse 2.5s ease-in-out 2;
+        }
+
+        @keyframes booking-request-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(245, 158, 11, 0);
+            }
+        }
+
+        .booking-request-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .booking-request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 @endsection
 
 @section('script')
@@ -999,8 +1090,10 @@
             sendCodeButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const bookingId = this.getAttribute('data-booking-id');
-                    const bookingSecuredCashAttempt = this.getAttribute('data-booking-secured-cash-attempt');
-                    const settingSecuredCashAttempt = this.getAttribute('data-setting-secured-cash-attempt');
+                    const bookingSecuredCashAttempt = this.getAttribute(
+                        'data-booking-secured-cash-attempt');
+                    const settingSecuredCashAttempt = this.getAttribute(
+                        'data-setting-secured-cash-attempt');
                     if (bookingSecuredCashAttempt == settingSecuredCashAttempt) {
                         attemptModal.classList.remove('hidden');
                     } else {
@@ -1032,14 +1125,14 @@
 
             if (bookedSeats === 0) {
                 swal.fire({
-                    title: '{{ $rideDetailPage->cancel_ride_confirmation ?? "Are you sure you want to cancel this ride?" }}',
+                    title: '{{ $rideDetailPage->cancel_ride_confirmation ?? 'Are you sure you want to cancel this ride?' }}',
                     text: 'This action is irreversible!',
                     // icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#f87171',
                     cancelButtonColor: '#106BC7',
-                    confirmButtonText: '{{ $rideDetailPage->cancel_ride_yes_btn ?? "Yes, cancel it!" }}',
-                    cancelButtonText: '{{ $rideDetailPage->cancel_ride_no_btn ?? "No, take me back" }}',
+                    confirmButtonText: '{{ $rideDetailPage->cancel_ride_yes_btn ?? 'Yes, cancel it!' }}',
+                    cancelButtonText: '{{ $rideDetailPage->cancel_ride_no_btn ?? 'No, take me back' }}',
                     showCloseButton: true,
                 }).then((result) => {
                     if (result.isConfirmed) {
