@@ -113,7 +113,7 @@
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                         <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -183,7 +183,7 @@
     @endif
     <div class="flex justify-between items-center">
         <h1>
-            Edit ride
+            Edit Ride
         </h1>
     </div>
     @php
@@ -192,7 +192,7 @@
     <form method="POST" action="{{ route('update_ride', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}" enctype="multipart/form-data" id="edit-ride-form">
         @csrf
         @method('PUT')
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class=" grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div class="col-span-3">
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                     <h3 class="bg-primary text-white py-2 px-4">
@@ -203,293 +203,307 @@
 
                     <input type="hidden" value="{{$ride->defaultRideDetail[0]->id}}" name="default_ride_detail_id">
                     <div class="bg-white p-4 space-y-3">
-                      <div class="flex flex-col md:flex-row justify-between items-center">
-                        <div class="w-full md:w-[45%] mb-4">
-                            <div>
-                                <label for="from_spot_0"
-                                    class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->from_label)
-                                        {{ $postRidePage->from_label }}
-                                    @endisset
-                                </label>
-                                <div class="relative mt-2">
-                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
-                                    </div>
+                        <div class="flex flex-col md:flex-row justify-between items-start">
+                            <div class="w-full md:w-[45%] mb-4">
+                                <div>
+                                    <label for="from_spot_0"
+                                        class="block mb-2 text-gray-900">
+                                        @isset($postRidePage->from_label)
+                                            {{ $postRidePage->from_label }}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                        </div>
 
+                                        @php
+                                            $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
+                                            $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
+                                        @endphp
 
-                                    <input type="text" id="from_spot_0" name="from" value="{{ old('from', $ride->defaultRideDetail[0]->departure) }}" oninput="fromInput('0')"
-                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
-                                        @isset($postRidePage->from_placeholder)
-                                            placeholder="{{ $postRidePage->from_placeholder }}"
-                                        @endisset>
+                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
+                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
+                                            @isset($postRidePage->from_placeholder)
+                                                placeholder="{{ $postRidePage->from_placeholder }}"
+                                            @endisset>
 
                                         <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                    @error('from')
+                                    <div class="relative tooltip -bottom-4 flex mt-1" role="alert">
+                                        <div class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                    {{ optional($postRideSubDetailPage)->city_not_fount_contact_text ?? '' }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    @enderror
                                 </div>
-                                @error('from')
-                                  <div class="relative tooltip bottom-0 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
-                                @enderror
                             </div>
-                        </div>
-                        <div class="w-full md:w-[10%] mt-4 hidden md:flex justify-center items-start">
-                            <button type="button" onclick="swapLocations()">
-                                <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
-                            </button>
-                        </div>
-                        <div class="w-full md:w-[45%] mb-4">
-                            <div>
-                                <label for="to_spot_0"
-                                    class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->to_label)
-                                        {{ $postRidePage->to_label }}
-                                    @endisset
-                                </label>
-                                <div class="relative mt-2">
-                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
-                                    </div>
-                                    <input type="text" id="to_spot_0" name="to" value="{{ old('to', $ride->defaultRideDetail[0]->destination) }}"
-                                        class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                        @isset($postRidePage->to_placeholder)
-                                            placeholder="{{ $postRidePage->to_placeholder }}"
-                                        @endisset>
-
-                                        <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
-                                </div>
-                                @error('to')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Add more spots" }}</h3>
-                        </div>
-                        <div class="bg-white p-4">
-
-                            @php
-                                $count = 1;
-                                if(null !== old('from_spot')){
-                                    $count = count(old('from_spot'));
-                                }else if(!empty($ride->moreRideDetail)){
-                                    $count = !empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 ? count($ride->moreRideDetail) : 1;
-                                }
-                            @endphp
-
-                            <input type="hidden" id="rowCount" value="{{ $count }}">
-                            <div class="appendNewRow">
-                                @if(null !== old('from_spot'))
-                                        @foreach (old('from_spot') as $key => $item)
-                                        @php
-                                            $renderIndex = $key + 1;
-                                        @endphp
-                                            @include('post_ride_partial.add_more_from_to_partial', ['index' => $renderIndex, 'ride_detail' => null, 'type' => $routeType])
-                                        @endforeach
-                                    @elseif(!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0)
-                                    @foreach ($ride->moreRideDetail as $key =>  $moreRideDetail)
-                                        @include('post_ride_partial.add_more_from_to_partial', ['index' => '{{$key + 1}}', 'ride_detail' => $moreRideDetail, 'type' => 'edit'])
-                                    @endforeach
-                                @else
-                                    @include('post_ride_partial.add_more_from_to_partial', ['index' => '1', 'ride_detail' => null, 'type' => 'create'])
-                                @endif
-
-                            </div>
-                            <div class="flex items-center mt-4">
-                                <button type="button" onclick="addNewRow();" class="button-exp-fill">
-                                    Add
+                            <div class="w-full md:w-[10%] md:mt-10 flex justify-center items-start">
+                                <button type="button" onclick="swapLocations()">
+                                    <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
                                 </button>
                             </div>
-                        </div>
-                    </div>
+                            <div class="w-full md:w-[45%] mb-4">
+                                <div>
+                                    <label for="to_spot_0"
+                                        class="block mb-2 text-gray-900">
+                                        @isset($postRidePage->to_label)
+                                            {{ $postRidePage->to_label }}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6" alt="">
+                                        </div>
+                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')"
+                                            class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900 rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
+                                            @isset($postRidePage->to_placeholder)
+                                                placeholder="{{ $postRidePage->to_placeholder }}"
+                                            @endisset>
 
-                    <div class="flex items-end flex-col md:flex-row justify-between">
-                        <div class="w-full md:w-[45%] mb-4">
-                            <label for="pickup_location" class="block mb-2 text-gray-900">
-                                 @isset($postRidePage->pick_up_label)
-                                    {{ $postRidePage->pick_up_label }}
-                                @endisset
-                            </label>
-                            <textarea id="pickup_location" rows="5" name="pickup" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                              class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                              @isset($postRidePage->pick_up_placeholder)
-                                placeholder="{{ $postRidePage->pick_up_placeholder }}"
-                              @endisset
-                            >{{ old('pickup', $ride->pickup) }}</textarea>
-                            @error('pickup')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                              </div>
-                            @enderror
-                        </div>
-                        <div class="w-full md:w-[45%] mb-4">
-                            <label for="dropoff_location"class="block mb-2 text-gray-900">
-                                @isset($postRidePage->drop_off_label)
-                                    {{ $postRidePage->drop_off_label }}
-                                @endisset
-                            </label>
-                            <textarea id="dropoff_location" rows="5" name="dropoff" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                              class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                              @isset($postRidePage->drop_off_placeholder)
-                                placeholder="{{ $postRidePage->drop_off_placeholder }}"
-                              @endisset
-                            >{{ old('dropoff', $ride->dropoff) }}</textarea>
-                            @error('dropoff')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                              </div>
-                            @enderror
-                        </div>
-                        <div class="map-container w-full h-64 block md:hidden">
-                            <iframe
-                               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.452697041917!2d78.39076592375736!3d17.43803374982052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9144cdba8c47%3A0x937fe346f411a645!2sTutorials%20Point%20(India)%20Ltd.!5e0!3m2!1sen!2sin!4v1673629212535!5m2!1sen!2sin"
-                               width="100%"
-                               height="100%"
-                               style="border:0;"
-                               allowfullscreen="" loading="lazy"
-                               referrerpolicy="no-referrer-when-downgrade">
-                            </iframe>
-                         </div>
-                    </div>
-                    <div>
-                        <label for="date_time" class="block text-gray-900">
-                            @isset($postRidePage->date_time_label)
-                                {{ $postRidePage->date_time_label }}
-                            @endisset
-                        </label>
-                        <div class="flex items-start flex-row mb-4 justify-between">
-                            <div class="w-[45%] mb-4">
-                                <div class="relative mt-2">
-                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
-                                            <path
-                                                d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z" />
-                                            <path
-                                                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
-                                        </svg>
+                                        <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                     </div>
-                                    <input type="text" id="dateInput" name="date"
-                                        class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                        placeholder="">
-                                </div>
-                                @error('date')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                    @error('to')
+                                    <div class="relative tooltip -bottom-4 flex mt-1" role="alert">
+                                        <div class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                    {{ optional($postRideSubDetailPage)->city_not_fount_contact_text ?? '' }}
+                                                </a>
+                                            </p>
+                                        </div>
                                     </div>
-                                  </div>
-                                @enderror
+                                    @enderror
+                                </div>
                             </div>
-                            <div class="w-[10%] mt-4 text-center">
-                                <span class="text-center text-base lg:text-lg ">
-                                    @isset($postRidePage->at_label)
-                                        {{ $postRidePage->at_label }}
+                        </div>
+
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                            <div class="text-2xl bg-primary text-white py-2 px-4">
+                                <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Add more spots" }}</h3>
+                            </div>
+                            <div class="bg-white p-4">
+
+                                @php
+                                    $count = 1;
+                                    if(null !== old('from_spot')){
+                                        $count = count(old('from_spot'));
+                                    }else if(!empty($ride->moreRideDetail)){
+                                        $count = !empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 ? count($ride->moreRideDetail) : 1;
+                                    }
+                                @endphp
+
+                                <input type="hidden" id="rowCount" value="{{ $count }}">
+                                <div class="appendNewRow">
+                                    @if(null !== old('from_spot'))
+                                            @foreach (old('from_spot') as $key => $item)
+                                            @php
+                                                $renderIndex = $key + 1;
+                                            @endphp
+                                                @include('post_ride_partial.add_more_from_to_partial', ['index' => $renderIndex, 'ride_detail' => null, 'type' => $routeType])
+                                            @endforeach
+                                        @elseif(!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0)
+                                        @foreach ($ride->moreRideDetail as $key =>  $moreRideDetail)
+                                            @include('post_ride_partial.add_more_from_to_partial', ['index' => $key + 1, 'ride_detail' => $moreRideDetail, 'type' => 'edit'])
+                                        @endforeach
+                                    @else
+                                        @include('post_ride_partial.add_more_from_to_partial', ['index' => '1', 'ride_detail' => null, 'type' => 'create'])
+                                    @endif
+
+                                </div>
+                                <div class="flex items-center mt-4">
+                                    <button type="button" onclick="addNewRow();" class="button-exp-fill">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-end flex-col md:flex-row justify-between">
+                            <div class="w-full md:w-[45%] mb-4">
+                                <label for="pickup_location" class="block mb-2 text-gray-900">
+                                    @isset($postRidePage->pick_up_label)
+                                        {{ $postRidePage->pick_up_label }}
                                     @endisset
-                                </span>
-                            </div>
-                            <div class="w-[45%] mb-4">
-                                <div class="relative mt-2">
-                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" id="timeInput" name="time"
-                                        class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                        placeholder="">
-                                </div>
-                                @error('time')
+                                </label>
+                                <textarea id="pickup_location" rows="5" name="pickup" {{ $bookings_count > 0 ? 'readonly' : '' }}
+                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                @isset($postRidePage->pick_up_placeholder)
+                                    placeholder="{{ $postRidePage->pick_up_placeholder }}"
+                                @endisset
+                                >{{ old('pickup', $ride->pickup) }}</textarea>
+                                @error('pickup')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                         <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
-                                  </div>
+                                </div>
                                 @enderror
                             </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center mb-4">
-                        <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
-                            class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                            @if ($bookings_count > 0)
-                                <input type="hidden" name="recurring" value="{{ $ride->recurring }}">
-                            @endif
-                        <label for="recurring_trip" class="ml-2 text-gray-900">
-                            @isset($postRidePage->recurring_label)
-                                {{ $postRidePage->recurring_label }}
-                            @endisset
-                        </label>
-                    </div>
-                    <div id="recurringtripDetails">
-                        <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
                             <div class="w-full md:w-[45%] mb-4">
-                                <label for="recurring_type" class="block mb-2 text-gray-900">
-                                    Recurring type
+                                <label for="dropoff_location"class="block mb-2 text-gray-900">
+                                    @isset($postRidePage->drop_off_label)
+                                        {{ $postRidePage->drop_off_label }}
+                                    @endisset
                                 </label>
-                                <div class="relative mt-2">
-                                    <select id="type" name="recurring_type"
-                                        class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        <option value=""
-                                            {{ old('recurring_type') === '' ? 'selected' : '' }}>
-                                            Select
-                                        </option>
-                                        <option value="Daily"
-                                            {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
-                                            Daily
-                                        </option>
-                                        <option value="Weekly"
-                                            {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
-                                            Weekly
-                                        </option>
-                                    </select>
-                                </div>
-                                @error('recurring_type')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
+                                <textarea id="dropoff_location" rows="5" name="dropoff" {{ $bookings_count > 0 ? 'readonly' : '' }}
+                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                @isset($postRidePage->drop_off_placeholder)
+                                    placeholder="{{ $postRidePage->drop_off_placeholder }}"
+                                @endisset
+                                >{{ old('dropoff', $ride->dropoff) }}</textarea>
+                                @error('dropoff')
+                                <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                         <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
-                                  </div>
-                                @enderror
-                            </div>
-                            <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
-                                <span class="text-center text-base lg:text-lg ">
-                                    or
-                                </span>
-                            </div>
-                            <div class="w-full md:w-[45%] mb-4">
-                                <label for="recurring_trips" class="block mb-2 text-gray-900">
-                                    Recurring trips
-                                </label>
-                                <div class="relative mt-2">
-                                    <input type="number" min="1" name="recurring_trips" value="{{ old('recurring_trips') }}"
-                                        class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                 </div>
-                                @error('recurring_trips')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
                                 @enderror
+                            </div>
+                            <div class="map-container w-full h-64 block md:hidden">
+                                <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.452697041917!2d78.39076592375736!3d17.43803374982052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9144cdba8c47%3A0x937fe346f411a645!2sTutorials%20Point%20(India)%20Ltd.!5e0!3m2!1sen!2sin!4v1673629212535!5m2!1sen!2sin"
+                                width="100%"
+                                height="100%"
+                                style="border:0;"
+                                allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
                             </div>
                         </div>
-                    </div>
+                        <div>
+                            <label for="date_time" class="block text-gray-900">
+                                @isset($postRidePage->date_time_label)
+                                    {{ $postRidePage->date_time_label }}
+                                @endisset
+                            </label>
+                            <div class="flex items-start flex-row mb-4 justify-between">
+                                <div class="w-[45%] mb-4">
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z" />
+                                                <path
+                                                    d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="dateInput" name="date"
+                                            class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
+                                            placeholder="">
+                                    </div>
+                                    @error('date')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
+                                <div class="w-[10%] mt-4 text-center">
+                                    <span class="text-center text-base lg:text-lg ">
+                                        @isset($postRidePage->at_label)
+                                            {{ $postRidePage->at_label }}
+                                        @endisset
+                                    </span>
+                                </div>
+                                <div class="w-[45%] mb-4">
+                                    <div class="relative mt-2">
+                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="timeInput" name="time"
+                                            class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
+                                            placeholder="">
+                                    </div>
+                                    @error('time')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                @if ($bookings_count > 0)
+                                    <input type="hidden" name="recurring" value="{{ $ride->recurring }}">
+                                @endif
+                            <label for="recurring_trip" class="ml-2 text-gray-900">
+                                @isset($postRidePage->recurring_label)
+                                    {{ $postRidePage->recurring_label }}
+                                @endisset
+                            </label>
+                        </div>
+                        <div id="recurringtripDetails">
+                            <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
+                                <div class="w-full md:w-[45%] mb-4">
+                                    <label for="recurring_type" class="block mb-2 text-gray-900">
+                                        Recurring type
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <select id="type" name="recurring_type"
+                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                            <option value=""
+                                                {{ old('recurring_type') === '' ? 'selected' : '' }}>
+                                                Select
+                                            </option>
+                                            <option value="Daily"
+                                                {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
+                                                Daily
+                                            </option>
+                                            <option value="Weekly"
+                                                {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
+                                                Weekly
+                                            </option>
+                                        </select>
+                                    </div>
+                                    @error('recurring_type')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
+                                <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
+                                    <span class="text-center text-base lg:text-lg ">
+                                        or
+                                    </span>
+                                </div>
+                                <div class="w-full md:w-[45%] mb-4">
+                                    <label for="recurring_trips" class="block mb-2 text-gray-900">
+                                        Recurring trips
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <input type="number" min="1" name="recurring_trips" value="{{ old('recurring_trips') }}"
+                                            class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                    </div>
+                                    @error('recurring_trips')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-6">
@@ -2001,14 +2015,20 @@
 
 @section('script')
 
-<script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAadtOhXUj_mb2QWOD1mCPYPRujBiQO4nE&libraries=places&callback=initMap">
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
+    function debounce(func, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
     function closeModal() {
     // Hide all modals
     document.querySelectorAll('.relative.z-50').forEach(modal => {
@@ -2033,34 +2053,14 @@ document.addEventListener('keydown', function(event) {
         closeModal();
     }
 });
-    let autocomplete;
-    function initMap() {
-        autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('from'),
-            {
-                types: ['establishment'],
-                componentRestrictions: {'country' : ['AU']},
-                fields: ['place_id', 'geometry', 'name']
-            }
-        );
-        autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('from'),
-            {
-                types: ['establishment'],
-                componentRestrictions: {'country' : ['AU']},
-                fields: ['place_id', 'geometry', 'name']
-            }
-        );
-    }
-
     function swapLocations() {
-        // Get the values of the "From" and "To" input fields
-        const fromValue = document.getElementById('from').value;
-        const toValue = document.getElementById('to').value;
-
-        // Swap the values
-        document.getElementById('from').value = toValue;
-        document.getElementById('to').value = fromValue;
+        const fromEl = document.getElementById('from_spot_0');
+        const toEl = document.getElementById('to_spot_0');
+        if (!fromEl || !toEl) return;
+        const fromValue = fromEl.value;
+        const toValue = toEl.value;
+        fromEl.value = toValue;
+        toEl.value = fromValue;
     }
 
     const dateInput = document.getElementById('dateInput');
@@ -2365,29 +2365,49 @@ document.addEventListener('keydown', function(event) {
 
 
     function addNewRow() {
-        var oldIndex = parseInt($("#rowCount").val());
-        if($("#from_spot_"+oldIndex+"").val() == ""){
+        var oldIndex = parseInt($("#rowCount").val(), 10);
+        var fromVal = $("#from_spot_"+oldIndex).val();
+        var toVal = $("#to_spot_"+oldIndex).val();
+        var priceVal = $("#priceData"+oldIndex).val();
+        if (!fromVal || fromVal.trim() === ""){
             alert("Please select from spot");
             return;
-        }else if($("#to_spot_"+oldIndex+"").val() == ""){
+        }
+        if (!toVal || toVal.trim() === ""){
             alert("Please select to spot");
             return;
-        }else if($("#priceData"+oldIndex+"").val() == ""){
-            alert("Please select price spot");
+        }
+        if (priceVal === "" || priceVal == null){
+            alert("Please enter price");
             return;
         }
-        var index = parseInt($("#rowCount").val() + 1);
+        var index = oldIndex + 1;
         $.ajax({
             url: "{{ url('add-new-spots') }}",
             type: "POST",
             data: {
+                from_spot: fromVal,
+                to_spot: toVal,
+                price: priceVal,
                 index: index,
                 _token: '{{ csrf_token() }}'
             },
             dataType: 'json',
             success: function(result) {
-                $(".appendNewRow").append(result.spotHtml);
-                $("#rowCount").val(index);
+                if (result.status === 'error' && result.errors) {
+                    if (result.errors.from_spot) alert(result.errors.from_spot[0]);
+                    else if (result.errors.to_spot) alert(result.errors.to_spot[0]);
+                    else if (result.errors.price) alert(result.errors.price[0]);
+                    return;
+                }
+                if (result.spotHtml) {
+                    $(".appendNewRow").append(result.spotHtml);
+                    $("#rowCount").val(index);
+                }
+            },
+            error: function(xhr) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.errors) ? (xhr.responseJSON.errors.from_spot || xhr.responseJSON.errors.to_spot || xhr.responseJSON.errors.price || [])[0] : "Failed to add spot.";
+                if (msg) alert(msg);
             }
         });
     }

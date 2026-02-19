@@ -1036,6 +1036,7 @@ class RideController extends Controller
         }
         $selectedLanguage = session('selectedLanguage');
         $postRidePage = null;
+        $postRideSubDetailPage = null;
         if ($selectedLanguage) {
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
@@ -1045,6 +1046,7 @@ class RideController extends Controller
                 $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
                 if ($postRidePage) {
                     // Add features_option1_1 as an additional property
                     $postRidePage->features_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option1)
@@ -1171,6 +1173,7 @@ class RideController extends Controller
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
                 $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
                 if ($postRidePage) {
                     // Add features_option1_1 as an additional property
                     $postRidePage->features_option1 = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->features_option1)
@@ -1313,7 +1316,7 @@ class RideController extends Controller
             ->get();
 
 
-        return view('edit_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'postRidePage' => $postRidePage, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'edit']);
+        return view('edit_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'postRidePage' => $postRidePage, 'postRideSubDetailPage' => $postRideSubDetailPage, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'edit']);
     }
 
     public function UpdateRide($lang, $ride_id, Request $request)
@@ -1848,6 +1851,14 @@ class RideController extends Controller
         }
         $rideDetail->save();
 
+        // Remove extra ride details that were removed from the form (so DB matches submitted rows)
+        $submittedExtraIds = array_filter((array) $request->input('ride_detail_ids', []), function ($id) {
+            return isset($id) && $id !== '' && $id !== '0';
+        });
+        RideDetail::where('ride_id', $ride->id)
+            ->where('default_ride', 0)
+            ->whereNotIn('id', $submittedExtraIds)
+            ->delete();
 
         if (isset($request->from_spot) && !empty($request->from_spot)) {
             foreach ($request->from_spot as $key => $from_spot) {
@@ -4157,18 +4168,20 @@ class RideController extends Controller
     }
 
 
+    /**
+     * AJAX only: returns HTML for a new "add more spots" row. Does NOT save to the database.
+     * Extra spots are saved when the user submits the main form (UpdateRide or PostRideStore).
+     */
     public function addNewSpots(Request $request)
     {
-        // dd($request->all());
         $fromSpot = $request->input('from_spot');
-        $from_city = explode(',', $fromSpot)[0];
-        $from_city = trim($from_city);
-
         $toSpot = $request->input('to_spot');
-        $to_city = explode(',', $toSpot)[0];
-        $to_city = trim($to_city);
+        $from_city = $fromSpot ? trim(explode(',', $fromSpot)[0]) : '';
+        $to_city = $toSpot ? trim(explode(',', $toSpot)[0]) : '';
+
         $selectedLanguage = session('selectedLanguage');
         $postRidePage = null;
+        $postRideSubDetailPage = null;
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
@@ -4182,8 +4195,9 @@ class RideController extends Controller
                 $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
             }
         }
-        $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
-
+        $cityErrorMessage = $selectedLanguage
+            ? PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first()
+            : null;
 
         $validator = Validator::make($request->all(), [
             'from_spot' => 'required|exists:cities,name',
@@ -4191,8 +4205,8 @@ class RideController extends Controller
             'price' => 'required',
 
         ], [
-            'from_spot.exists' => $cityErrorMessage->city_not_in_record,
-            'to_spot.exists' => $cityErrorMessage->city_not_in_record,
+            'from_spot.exists' => $cityErrorMessage->city_not_in_record ?? 'City not in record',
+            'to_spot.exists' => $cityErrorMessage->city_not_in_record ?? 'City not in record',
         ]);
 
         if ((!$from_city || !DB::table('cities')->where('name', $from_city)->exists()) || (!$to_city || !DB::table('cities')->where('name', $to_city)->exists()) || is_null($request->price)) {
@@ -4212,16 +4226,19 @@ class RideController extends Controller
             return response()->json([
                 'status' => 'error',
                 'errors' => [
-                    'from_spot' => [$cityErrorMessage->city_not_in_record],
-                    'to_spot' =>  [$cityErrorMessage->city_not_in_record],
+                    'from_spot' => [$cityErrorMessage->city_not_in_record ?? 'City not in record'],
+                    'to_spot' =>  [$cityErrorMessage->city_not_in_record ?? 'City not in record'],
                 ],
             ]);
         }
 
-
-
-
-        $spotHtml = view('post_ride_partial.add_more_from_to_partial', ['postRideSubDetailPage' => $postRideSubDetailPage, 'index' => $request->index, 'postRidePage' => $postRidePage, 'ride_detail' => null, 'type' => 'create'])->render();
+        $spotHtml = view('post_ride_partial.add_more_from_to_partial', [
+            'postRideSubDetailPage' => $postRideSubDetailPage,
+            'index' => $request->index,
+            'postRidePage' => $postRidePage,
+            'ride_detail' => null,
+            'type' => 'create',
+        ])->render();
         return response()->json(['spotHtml' => $spotHtml]);
     }
 
