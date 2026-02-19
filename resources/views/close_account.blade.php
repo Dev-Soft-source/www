@@ -54,7 +54,7 @@
             <p class="text-red-600 font-medium">{{ $closeAccountPage->warning_text ?? $closeAccountPage->closing_account_label ?? "Closing your account will delete all of your data from our platform and this action is permanent"}}</p>
         </div>
         <p class="text-red-500 font-medium mt-4">{{ $closeAccountPage->mobile_indicate_required_field_label ?? "* Indicates required field"}}</p>
-        <div class="max-h-[48rem] overflow-y-auto pr-4">
+        <div class="pr-4">
         <div class="rounded-lg py-3">
             <p>
                 <span class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->apply_reason_label ?? "You are closing your account"}}</span>
