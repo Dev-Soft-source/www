@@ -81,48 +81,84 @@
                         </div>
                     </div>
 
-                    <!-- Table -->
-                    <div class="px-4 md:px-6 lg:px-8 overflow-x-auto">
-                        <div v-if="loading" class="text-center py-8 text-gray-500">Loading...</div>
-                        <table v-else class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-12">No</th>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">slug</th>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">display text</th>
-                                    <th
-                                        v-for="lang in languages"
-                                        :key="lang.id"
-                                        scope="col"
-                                        class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[120px]"
-                                    >
-                                        {{ lang.name }}
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-28">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="row in rows" :key="row.id || row.slug" class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{{ row.no }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{{ row.slug }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ row.display_text }}</td>
-                                    <td
-                                        v-for="lang in languages"
-                                        :key="lang.id"
-                                        class="px-4 py-3 text-sm text-gray-700"
-                                    >
-                                        {{ row.languages && row.languages[lang.id] != null ? row.languages[lang.id] : '—' }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm whitespace-nowrap">
-                                        <button type="button" @click="openEditModal(row)" class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">Edit</button>
-                                        <button type="button" @click="confirmDelete(row)" class="text-red-600 hover:text-red-800" title="Delete">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr v-if="rows.length === 0 && !loading">
-                                    <td :colspan="4 + (languages && languages.length)" class="px-4 py-8 text-center text-gray-500">No site texts found.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Language tabs + Search + Table -->
+                    <div class="px-4 md:px-6 lg:px-8">
+                        <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 mb-4">
+                            <ul class="flex flex-wrap mb-2 overflow-x-auto gap-1">
+                                <li v-for="language in languages" :key="language.id" class="mr-2">
+                                    <a
+                                        href="#"
+                                        @click.prevent="activeLanguageId = language.id"
+                                        :class="[
+                                            'inline-block rounded font-FuturaMdCnBT px-5 py-2 lg:text-lg md:text-base sm:text-base text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-600',
+                                            (activeLanguageId == null && (language.is_default == 1 || language.is_default == '1')) || activeLanguageId == language.id ? 'bg-primary text-white' : ''
+                                        ]"
+                                    >{{ language.name }}</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4 flex flex-wrap items-center gap-3">
+                            <label class="sr-only">Search</label>
+                            <input
+                                v-model="searchQuery"
+                                type="search"
+                                placeholder="Search by slug or display text..."
+                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-64 text-sm"
+                            />
+                            <span class="text-sm text-gray-500">Showing {{ paginatedRows.length }} of {{ filteredRows.length }} ({{ rows.length }} total)</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <div v-if="loading" class="text-center py-8 text-gray-500">Loading...</div>
+                            <table v-else class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-12">No</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">slug</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">display text</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[160px]">
+                                            {{ activeLanguageName }}
+                                        </th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap w-28">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="(row, index) in paginatedRows" :key="row.id || row.slug" class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{{ (currentPage - 1) * perPage + index + 1 }}</td>
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{{ row.slug }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-700">{{ row.display_text }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-700">
+                                            {{ row.languages && activeLanguageId && row.languages[activeLanguageId] != null ? row.languages[activeLanguageId] : '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-sm whitespace-nowrap">
+                                            <button type="button" @click="openEditModal(row)" class="text-blue-600 hover:text-blue-800 mr-3" title="Edit">Edit</button>
+                                            <button type="button" @click="confirmDelete(row)" class="text-red-600 hover:text-red-800" title="Delete">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="paginatedRows.length === 0 && !loading">
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No site texts found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <span>Page {{ currentPage }} of {{ totalPages }}</span>
+                                <select v-model.number="perPage" class="px-2 py-1 border border-gray-300 rounded text-sm">
+                                    <option :value="10">10 per page</option>
+                                    <option :value="25">25 per page</option>
+                                    <option :value="50">50 per page</option>
+                                    <option :value="100">100 per page</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-1">
+                                <button type="button" :disabled="currentPage <= 1" @click="currentPage = Math.max(1, currentPage - 1)" class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">Previous</button>
+                                <button type="button" :disabled="currentPage >= totalPages" @click="currentPage = Math.min(totalPages, currentPage + 1)" class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">Next</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -193,7 +229,48 @@ export default {
                 languages: {},
             },
             formErrors: {},
+            activeLanguageId: null,
+            searchQuery: "",
+            currentPage: 1,
+            perPage: 10,
         };
+    },
+    computed: {
+        activeLanguageName() {
+            if (!this.activeLanguageId || !this.languages.length) return "Language";
+            const lang = this.languages.find((l) => l.id == this.activeLanguageId);
+            return lang ? lang.name : "Language";
+        },
+        filteredRows() {
+            const q = (this.searchQuery || "").trim().toLowerCase();
+            if (!q) return this.rows;
+            return this.rows.filter((row) => {
+                const slug = (row.slug || "").toLowerCase();
+                const display = (row.display_text || "").toLowerCase();
+                const langVal = this.activeLanguageId && row.languages && row.languages[this.activeLanguageId];
+                const langStr = (langVal != null ? String(langVal) : "").toLowerCase();
+                return slug.includes(q) || display.includes(q) || langStr.includes(q);
+            });
+        },
+        totalPages() {
+            const n = this.filteredRows.length;
+            return this.perPage > 0 ? Math.max(1, Math.ceil(n / this.perPage)) : 1;
+        },
+        paginatedRows() {
+            const start = (this.currentPage - 1) * this.perPage;
+            return this.filteredRows.slice(start, start + this.perPage);
+        },
+    },
+    watch: {
+        searchQuery() {
+            this.currentPage = 1;
+        },
+        perPage() {
+            this.currentPage = 1;
+        },
+        activeLanguageId() {
+            this.currentPage = 1;
+        },
     },
     mounted() {
         this.fetchData();
@@ -207,6 +284,10 @@ export default {
                     if (res?.data?.status === "Success") {
                         this.languages = res?.data?.data?.languages || [];
                         this.rows = res?.data?.data?.rows || [];
+                        if (this.languages.length && this.activeLanguageId == null) {
+                            const defaultLang = this.languages.find((l) => l.is_default == 1 || l.is_default == "1");
+                            this.activeLanguageId = defaultLang ? defaultLang.id : this.languages[0].id;
+                        }
                     }
                 })
                 .catch(() => {
