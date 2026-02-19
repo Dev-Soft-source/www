@@ -425,9 +425,95 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>                        
+
+                        @php
+                            $originText = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : '';
+                            $destinationText = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : '';
+                            $stopsForDisplay = [];
+                            $segmentIdsForStops = [];
+                            if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
+                                $stopsForDisplay = old('stop_spot_display');
+                            } elseif (null !== old('to_spot') && is_array(old('to_spot')) && count(old('to_spot')) > 0) {
+                                $toSpots = old('to_spot');
+                                $n = count($toSpots) - 1;
+                                for ($i = 0; $i < $n; $i++) {
+                                    $stopsForDisplay[] = $toSpots[$i];
+                                }
+                            } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
+                                $details = $ride->moreRideDetail;
+                                $k = count($details);
+                                for ($i = 0; $i < $k - 1; $i++) {
+                                    $stopsForDisplay[] = $details[$i]->destination;
+                                }
+                                $segmentIdsForStops = $details->pluck('id')->values()->all();
+                            }
+                            if (empty($stopsForDisplay)) {
+                                $stopsForDisplay = [''];
+                            }
+                        @endphp
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl" id="stops-section-wrapper" data-segment-ids="{{ json_encode($segmentIdsForStops) }}">
+                            <button type="button" id="add-more-spots-toggle" class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4" aria-expanded="false" aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
+                                <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Stops Along the Way (Optional)" }}</h3>
+                                <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="add-more-spots-panel" class="add-more-spots-panel" role="region" aria-labelledby="add-more-spots-toggle" style="height: 0;">
+                                <div class="add-more-spots-panel-inner bg-white p-4">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-gray-900 text-xl font-medium ">From: </h4>
+                                        <p class="text-gray-900 text-base lg:text-lg ">{{ $originText }}</p>
+                                    </div>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way</h4>
+                                    <div class="space-y-3 mb-4" id="stops-rows-container">
+                                        @foreach ($stopsForDisplay as $idx => $stopValue)
+                                            @php $renderIndex = $idx + 1; @endphp
+                                            <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
+                                                <div class="relative flex-1 min-w-0">
+                                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                                    </div>
+                                                    <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
+                                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                        placeholder="">
+                                                    <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                                </div>
+                                                <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button type="button" onclick="addStopRow();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-gray-900 text-xl font-medium ">To: </h4>
+                                        <p class="text-gray-900 text-base lg:text-lg ">{{ $destinationText }}</p>
+                                    </div>
+                                    <div id="stops-segments-hidden" class="hidden"></div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-6">
+                        {{-- Delete Stop confirmation modal --}}
+                        <div id="delete-stop-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="delete-stop-modal-title" role="dialog" aria-modal="true">
+                            <div id="delete-stop-modal-backdrop" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                <div class="flex min-h-full items-center justify-center p-4">
+                                    <div class="relative bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+                                        <h3 id="delete-stop-modal-title" class="text-lg font-medium text-gray-900 mb-4">Delete Stop?</h3>
+                                        <div class="flex gap-3 justify-end">
+                                            <button type="button" id="delete-stop-no" class="button-exp-fill bg-gray-200 text-gray-800 hover:bg-gray-300">No</button>
+                                            <button type="button" id="delete-stop-yes" class="button-exp-fill bg-red-600 text-white hover:bg-red-700">Yes</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
                             <div class="flex items-center mb-4">
                                 <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
@@ -493,52 +579,6 @@
                                         </div>
                                         @enderror
                                     </div>
-                                </div>
-                            </div>
-                        </div>                        
-
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <button type="button" id="add-more-spots-toggle" class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4" aria-expanded="false" aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
-                                <h3 class="text-2xl">{{ $postRidePage->add_more_from_to ?? "Add more spots" }}</h3>
-                                <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <div id="add-more-spots-panel" class="add-more-spots-panel" role="region" aria-labelledby="add-more-spots-toggle">
-                                <div class="add-more-spots-panel-inner bg-white p-4">
-
-                                @php
-                                    $count = 1;
-                                    if(null !== old('from_spot')){
-                                        $count = count(old('from_spot'));
-                                    }else if(!empty($ride->moreRideDetail)){
-                                        $count = !empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 ? count($ride->moreRideDetail) : 1;
-                                    }
-                                @endphp
-
-                                <input type="hidden" id="rowCount" value="{{ $count }}">
-                                <div class="appendNewRow">
-                                    @if(null !== old('from_spot'))
-                                            @foreach (old('from_spot') as $key => $item)
-                                            @php
-                                                $renderIndex = $key + 1;
-                                            @endphp
-                                                @include('post_ride_partial.add_more_from_to_partial', ['index' => $renderIndex, 'ride_detail' => null, 'type' => $routeType])
-                                            @endforeach
-                                        @elseif(!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0)
-                                        @foreach ($ride->moreRideDetail as $key =>  $moreRideDetail)
-                                            @include('post_ride_partial.add_more_from_to_partial', ['index' => $key + 1, 'ride_detail' => $moreRideDetail, 'type' => 'edit'])
-                                        @endforeach
-                                    @else
-                                        @include('post_ride_partial.add_more_from_to_partial', ['index' => '1', 'ride_detail' => null, 'type' => 'create'])
-                                    @endif
-
-                                </div>
-                                <div class="flex items-center mt-4">
-                                    <button type="button" onclick="addNewRow();" class="button-exp-fill">
-                                        Add
-                                    </button>
-                                </div>
                                 </div>
                             </div>
                         </div>
@@ -2267,8 +2307,55 @@ document.addEventListener('keydown', function(event) {
         recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
     });
     
+    document.getElementById('delete-stop-yes').addEventListener('click', function() { deleteStopRowConfirmed(); });
+    document.getElementById('delete-stop-no').addEventListener('click', function() { closeDeleteStopModal(); });
+    var deleteStopBackdrop = document.getElementById('delete-stop-modal-backdrop');
+    if (deleteStopBackdrop) deleteStopBackdrop.addEventListener('click', closeDeleteStopModal);
+
+    function buildStopsSegmentsForSubmit() {
+        var container = document.getElementById('stops-rows-container');
+        var hiddenContainer = document.getElementById('stops-segments-hidden');
+        var wrapper = document.getElementById('stops-section-wrapper');
+        if (!container || !hiddenContainer) return;
+        var origin = (document.getElementById('from_spot_0') || document.querySelector('input[name="from"]')) ? (document.getElementById('from_spot_0') || document.querySelector('input[name="from"]')).value : '';
+        var destination = (document.getElementById('to_spot_0') || document.querySelector('input[name="to"]')) ? (document.getElementById('to_spot_0') || document.querySelector('input[name="to"]')).value : '';
+        var mainPrice = (document.getElementById('priceData0') || document.querySelector('input[name="price"]')) ? (document.getElementById('priceData0') || document.querySelector('input[name="price"]')).value : '0';
+        var stopInputs = container.querySelectorAll('input[name="stop_spot_display[]"]');
+        var stops = [];
+        stopInputs.forEach(function(inp) {
+            var v = inp.value ? inp.value.trim() : '';
+            if (v) stops.push(v);
+        });
+        var segmentIds = [];
+        try { segmentIds = wrapper ? JSON.parse(wrapper.getAttribute('data-segment-ids') || '[]') : []; } catch (e) {}
+        hiddenContainer.innerHTML = '';
+        if (stops.length === 0) {
+            return;
+        }
+        var n = stops.length;
+        for (var i = 0; i <= n; i++) {
+            var fromVal = (i === 0) ? origin : stops[i - 1];
+            var toVal = (i === n) ? destination : stops[i];
+            if (!fromVal || !toVal) continue;
+            var segId = (segmentIds[i] !== undefined && segmentIds[i] !== null) ? segmentIds[i] : '0';
+            var inpFrom = document.createElement('input');
+            inpFrom.type = 'hidden'; inpFrom.name = 'from_spot[]'; inpFrom.value = fromVal;
+            var inpTo = document.createElement('input');
+            inpTo.type = 'hidden'; inpTo.name = 'to_spot[]'; inpTo.value = toVal;
+            var inpPrice = document.createElement('input');
+            inpPrice.type = 'hidden'; inpPrice.name = 'price_spot[]'; inpPrice.value = mainPrice;
+            var inpId = document.createElement('input');
+            inpId.type = 'hidden'; inpId.name = 'ride_detail_ids[]'; inpId.value = segId;
+            hiddenContainer.appendChild(inpFrom);
+            hiddenContainer.appendChild(inpTo);
+            hiddenContainer.appendChild(inpPrice);
+            hiddenContainer.appendChild(inpId);
+        }
+    }
+
     // Ensure all form fields are submitted, especially disabled/readonly ones
     document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+        buildStopsSegmentsForSubmit();
         // Function to check if hidden input already exists for a field
         function hasHiddenInput(form, name) {
             return form.querySelector(`input[type="hidden"][name="${name}"]`) !== null;
@@ -2418,6 +2505,17 @@ document.addEventListener('keydown', function(event) {
         }, 500)();
     }
 
+    function stopInput(index) {
+        debounce(function() {
+            var searchTerm = $('#stop_spot_' + index).val();
+            if (searchTerm.length >= 2) {
+                if (typeof fetchCities !== 'undefined') {
+                    fetchCities(searchTerm, '', 'stop_spot', index);
+                }
+            }
+        }, 500)();
+    }
+
     function fromToInputChange(index){
         let searchTerm = $('#to_spot_'+index+'').val();
         let searchData = $('#from_spot_'+index+'').val();
@@ -2426,6 +2524,100 @@ document.addEventListener('keydown', function(event) {
         }
     }
 
+
+    var deleteStopTargetRow = null;
+
+    function addStopRow() {
+        var container = document.getElementById('stops-rows-container');
+        if (!container) return;
+        var rows = container.querySelectorAll('.stop-row');
+        var nextIndex = 1;
+        rows.forEach(function(r) {
+            var idx = parseInt(r.getAttribute('data-stop-index'), 10);
+            if (!isNaN(idx)) nextIndex = Math.max(nextIndex, idx + 1);
+        });
+        var row = document.createElement('div');
+        row.className = 'flex items-center gap-3 stop-row';
+        row.setAttribute('data-stop-index', nextIndex);
+        row.innerHTML = '<div class="relative flex-1 min-w-0">' +
+            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
+            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
+            '</div>' +
+            '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
+            '</button>';
+        container.appendChild(row);
+        var wrapper = document.getElementById('stops-section-wrapper');
+        if (wrapper) {
+            var segIds = [];
+            try { segIds = JSON.parse(wrapper.getAttribute('data-segment-ids') || '[]'); } catch (e) {}
+            var totalRows = container.querySelectorAll('.stop-row').length;
+            var neededSegments = totalRows + 1;
+            while (segIds.length < neededSegments) segIds.push(0);
+            wrapper.setAttribute('data-segment-ids', JSON.stringify(segIds));
+        }
+    }
+
+    function confirmDeleteStop(btn) {
+        var row = btn && btn.closest('.stop-row');
+        if (!row) return;
+        deleteStopTargetRow = row;
+        var modal = document.getElementById('delete-stop-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeDeleteStopModal() {
+        deleteStopTargetRow = null;
+        var modal = document.getElementById('delete-stop-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function deleteStopRowConfirmed() {
+        if (!deleteStopTargetRow) { closeDeleteStopModal(); return; }
+        var row = deleteStopTargetRow;
+        var container = row.parentNode;
+        var stopIndex = parseInt(row.getAttribute('data-stop-index'), 10);
+        if (isNaN(stopIndex)) stopIndex = 0;
+        var wrapper = document.getElementById('stops-section-wrapper');
+        var isFirst = container.querySelector('.stop-row') === row;
+        row.remove();
+        if (wrapper) {
+            var segIds = [];
+            try { segIds = JSON.parse(wrapper.getAttribute('data-segment-ids') || '[]'); } catch (e) {}
+            var remainingRows = container.querySelectorAll('.stop-row').length;
+            if (remainingRows === 0) {
+                wrapper.setAttribute('data-segment-ids', JSON.stringify([]));
+            } else if (segIds.length > 0 && stopIndex >= 1 && stopIndex < segIds.length) {
+                var newIds = segIds.slice(0, stopIndex - 1).concat(0).concat(segIds.slice(stopIndex + 1));
+                wrapper.setAttribute('data-segment-ids', JSON.stringify(newIds));
+            }
+        }
+        reindexStopRows();
+        var remaining = document.getElementById('stops-rows-container').querySelectorAll('.stop-row').length;
+        if (remaining === 0) {
+            addStopRow();
+        }
+        closeDeleteStopModal();
+    }
+
+    function reindexStopRows() {
+        var container = document.getElementById('stops-rows-container');
+        if (!container) return;
+        var rows = container.querySelectorAll('.stop-row');
+        rows.forEach(function(r, i) {
+            var idx = i + 1;
+            r.setAttribute('data-stop-index', idx);
+            var input = r.querySelector('input[name="stop_spot_display[]"]');
+            if (input) {
+                input.setAttribute('data-stop-index', idx);
+                input.id = 'stop_spot_' + idx;
+                input.setAttribute('oninput', 'stopInput("' + idx + '")');
+            }
+            var sug = r.querySelector('[id^="stop_spot_suggestions"]');
+            if (sug) sug.id = 'stop_spot_suggestions' + idx;
+        });
+    }
 
     function addNewRow() {
         var oldIndex = parseInt($("#rowCount").val(), 10);
