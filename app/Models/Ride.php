@@ -48,6 +48,49 @@ class Ride extends Model
         return $this->hasMany(Rating::class, 'ride_id');
     }
 
+    /**
+     * Get the average rating value from all ratings for this ride
+     * 
+     * @param int|null $status Filter by status (1 or 2)
+     * @param int|null $type Filter by type (1 or 2)
+     * @return float|null
+     */
+    public function getAverageRating($status = null, $type = null, $booking_user_id = null)
+    {
+        $query = $this->ratings();
+        
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+        
+        if ($type !== null) {
+            $query->where('type', $type);
+        }
+
+        if($booking_user_id !== null){
+            $query->whereHas('booking', function($q) use ($booking_user_id) {
+                $q->where('user_id', $booking_user_id);
+            });
+        }
+        
+        return $query->avg('average_rating');
+    }
+
+    public function getHasRatings($status = null, $type = null)
+    {
+        $query = $this->ratings();
+        
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+        
+        if ($type !== null) {
+            $query->where('type', $type);
+        }
+        
+        return $query->exists();
+    }
+
     function payouts(){
         return $this->hasMany(Payout::class, 'ride_id');
     }

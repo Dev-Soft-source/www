@@ -1053,17 +1053,7 @@
                                     @if (auth()->user())
                                         @php
                                             $user_id = auth()->user()->id;
-
-                                            // Assuming $ratings is a collection
-                                            $filteredRatings = $ratings
-                                                ->where('status', 1)
-                                                ->where('type', '2')
-                                                ->filter(function ($rating) use ($user_id) {
-                                                    // Check if booking exists and is not null before accessing user_id
-                                                    return $rating->booking && $rating->booking->user_id === $user_id;
-                                                });
-
-                                            $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                            $totalAverage = $ride->getAverageRating(1, 2, $user_id);
                                         @endphp
                                     @endif
                                     @php
@@ -1544,30 +1534,18 @@
                                                                     {{ $findRidePage->card_section_driven }}
                                                                 @endisset
                                                             </p>
-                                                            @php
-                                                                $filteredRatings = $ratings
-                                                                    ->where('status', 1)
-                                                                    ->where('type', '1')
-                                                                    ->filter(function ($rating) use ($ride) {
-                                                                        return $rating->ride &&
-                                                                            $rating->ride->added_by === $ride->added_by;
-                                                                    });
-
-                                                                $totalAverage =
-                                                                    $filteredRatings->avg('average_rating') ?? 0;
-                                                                $hasReviews = $filteredRatings->count() > 0;
-                                                            @endphp
+                                                            
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center gap-2">
                                                         <span class="font-semibold text-gray-800">
-                                                            @if ($hasReviews)
-                                                                {{ number_format($totalAverage, 1) }}
+                                                            @if ($ride->getHasRatings(1,1))
+                                                                {{ number_format($ride->getAverageRating(1,1), 1) }}
                                                             @else
                                                                 No Reviews @endif
                                                         </span>
 
-                                                        @if ($hasReviews)
+                                                        @if ($ride->getHasRatings(1,1))
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                 fill="currentColor"
                                                                 class="w-6 h-6 text-yellow-500 stroke-gray-600">

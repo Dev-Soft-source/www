@@ -117,9 +117,12 @@ class Controller extends BaseController
             return $next($request);
         });
 
+        $ratings = Rating::all();
+
         View::share([
             'selectedLanguage' => $this->selectedLanguage,
             'languages' => $languages,
+            'ratings' => $ratings,
             'notificationPage' => $notificationPage,
             'successMessage' => $successMessage,
         ]);
