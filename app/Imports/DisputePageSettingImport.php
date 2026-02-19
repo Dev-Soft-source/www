@@ -7,35 +7,93 @@ use App\Models\DisputePageSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class DisputePageSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
 
     public function collection(Collection $rows)
     {
-        Log::info('Starting Dispute Page Settings Excel import for language ID: ' . $this->languageId);
-
         $setting = DisputePageSetting::first();
-        if (!$setting) $setting = DisputePageSetting::create([]);
-        if ($rows->isEmpty()) return;
+        if (!$setting) {
+            $setting = DisputePageSetting::create([]);
+        }
+        if ($rows->isEmpty()) {
+            Log::warning('No rows found in Dispute Excel file');
+            return;
+        }
 
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
-        $isSingleColumn = isset($keys[0]) && (in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys)));
 
-        if ($isSingleColumn) {
-            foreach ($rows as $row) $this->processSingleColumnFormat($setting, $row);
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
+
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($setting, $rows);
+            Log::info('Dispute Page Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
+        $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
+
+        if ($isSingleColumn && $this->languageId !== null) {
+            foreach ($rows as $row) {
+                $this->processSingleColumnFormat($setting, $row);
+            }
         } else {
-            $this->processMultiColumnFormat($setting, $firstRow);
+            if ($this->languageId !== null) {
+                $this->processMultiColumnFormat($setting, $firstRow);
+            }
+        }
+    }
+
+    protected function processAllLanguagesFormat(DisputePageSetting $setting, Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : 'field name';
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $validFields = array_keys(\App\Exports\DisputePageSettingTemplateExport::getTranslatableFieldsWithDefaults());
+
+        foreach ($rows as $row) {
+            $row = $row->toArray();
+            $fieldName = $row[$fieldNameKey] ?? null;
+            if (empty($fieldName) || !in_array($fieldName, $validFields, true)) {
+                continue;
+            }
+            foreach ($languageColumns as $col) {
+                $langKey = Str::lower(trim($col));
+                if (!isset($nameToId[$langKey])) {
+                    continue;
+                }
+                $languageId = $nameToId[$langKey];
+                $value = $row[$col] ?? null;
+                $detail = DisputePageSettingDetail::firstOrCreate(
+                    [
+                        'dispute_page_id' => $setting->id,
+                        'language_id' => $languageId,
+                    ],
+                    [$fieldName => $value]
+                );
+                if (!$detail->wasRecentlyCreated) {
+                    $detail->$fieldName = $value;
+                    $detail->save();
+                }
+            }
         }
     }
 
@@ -84,8 +142,13 @@ class DisputePageSettingImport implements ToCollection, WithHeadingRow, WithVali
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'name' => 'required|string',
             'meta_keywords' => 'required|string',
