@@ -41,7 +41,7 @@
                             class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost ride</a>
                     @endif
                     <a href=""
-                        class="button-exp-fill">Close</a>
+                        class="button-exp-fill">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                 </div>
             </div>
         </div>

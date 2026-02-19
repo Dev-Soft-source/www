@@ -166,7 +166,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -505,8 +505,8 @@
                                     <div class="relative bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
                                         <h3 id="delete-stop-modal-title" class="text-lg font-medium text-gray-900 mb-4">Delete Stop?</h3>
                                         <div class="flex gap-3 justify-end">
-                                            <button type="button" id="delete-stop-no" class="button-exp-fill bg-gray-200 text-gray-800 hover:bg-gray-300">No</button>
-                                            <button type="button" id="delete-stop-yes" class="button-exp-fill bg-red-600 text-white hover:bg-red-700">Yes</button>
+                                            <button type="button" id="delete-stop-no" class="button-exp-fill bg-gray-200 text-gray-800 hover:bg-gray-300">{{ $siteText['no_btn_text'] ?? 'No' }}</button>
+                                            <button type="button" id="delete-stop-yes" class="button-exp-fill bg-red-600 text-white hover:bg-red-700">{{ $siteText['yes_btn_text'] ?? 'Yes' }}</button>
                                         </div>
                                     </div>
                                 </div>
