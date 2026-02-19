@@ -31,6 +31,7 @@ import ReferralSystemSettings from '../admin/General_Settings/ReferralSystemSett
 import RegistrationRewardSettings from '../admin/General_Settings/RegistrationRewardSettings.vue'
 import CreateSuccessMessagesSetting from '../admin/General_Settings/SuccessMessagesSettings.vue'
 import CreateErrorHandlingSetting from '../admin/General_Settings/ErrorHandlingSettings.vue'
+import SiteTextSetting from '../admin/General_Settings/SiteTextSettings.vue'
 import ContactMessages from '../admin/Form_Submissions/ContactMessages.vue'
 import ClosedAccountMessages from '../admin/Form_Submissions/ClosedAccountMessages.vue'
 import CreateLoginSetting from '../admin/Mobile_Screens/CreateLoginSetting.vue'
@@ -496,6 +497,14 @@ const routes = [
         component: CreateSuccessMessagesSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Home page setting', 'routeName': 'admin.success-messages-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/site-text-setting',
+        name: 'admin.site-text-setting.index',
+        component: SiteTextSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Setting site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {
