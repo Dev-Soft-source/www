@@ -7,17 +7,22 @@ use App\Models\BillingAddressSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Validation\Rule;
 
 class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When set, import is for a single language. When null, import is all_languages format. */
     protected $languageId;
+
     protected $errors = [];
 
-    public function __construct($languageId)
+    /**
+     * @param int|null $languageId - When null, Excel is expected in all_languages format (Field Name + one column per language). When set, single-language format.
+     */
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
@@ -27,14 +32,11 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
      */
     public function collection(Collection $rows)
     {
-        
-        // Get or create billing address setting
         $billingAddressSetting = BillingAddressSetting::first();
         if (!$billingAddressSetting) {
             $billingAddressSetting = BillingAddressSetting::create([]);
         }
 
-        // Check format by looking at first row keys
         if ($rows->isEmpty()) {
             Log::warning('No rows found in Excel file');
             return;
@@ -43,142 +45,154 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
 
-        // Single column format check: has 'field_name' and ('value' OR 'translation_value')
-        $isSingleColumn = isset($keys[0]) && 
-                          (in_array('field_name', $keys) && 
-                          (in_array('value', $keys) || in_array('translation_value', $keys)));
+        // All-languages format: first column is "field_name" (or "field name") and rest are language columns
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
 
-        if ($isSingleColumn) {
-            foreach ($rows as $index => $row) {
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($billingAddressSetting, $rows);
+            Log::info('Excel import (all languages) completed successfully');
+            return;
+        }
+
+        // Single column format: field_name + value / translation_value
+        $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
+
+        if ($isSingleColumn && $this->languageId !== null) {
+            foreach ($rows as $row) {
                 $this->processSingleColumnFormat($billingAddressSetting, $row);
             }
         } else {
-            Log::info('Detected MULTI COLUMN format');
-            // Multi-column format - only process first data row
-            $this->processMultiColumnFormat($billingAddressSetting, $firstRow);
+            // Multi-column format - one row of values, headers = field names
+            if ($this->languageId !== null) {
+                $this->processMultiColumnFormat($billingAddressSetting, $firstRow);
+            }
         }
-        
+
         Log::info('Excel import completed successfully');
+    }
+
+    /**
+     * Process all_languages format: each row = one field, columns = Field Name, then one per language (by header name).
+     */
+    protected function processAllLanguagesFormat(BillingAddressSetting $billingAddressSetting, Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : 'field name';
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(function ($lang) {
+            return [Str::lower($lang->name) => $lang->id];
+        })->toArray();
+
+        $validFields = array_keys(\App\Exports\BillingAddressSettingTemplateExport::getTranslatableFieldsWithDefaults());
+
+        foreach ($rows as $row) {
+            $row = $row->toArray();
+            $fieldName = $row[$fieldNameKey] ?? null;
+            if (empty($fieldName) || !in_array($fieldName, $validFields, true)) {
+                continue;
+            }
+
+            foreach ($languageColumns as $col) {
+                $langKey = Str::lower(trim($col));
+                if (!isset($nameToId[$langKey])) {
+                    continue;
+                }
+                $languageId = $nameToId[$langKey];
+                $value = $row[$col] ?? null;
+
+                $detail = BillingAddressSettingDetail::firstOrCreate(
+                    [
+                        'billing_add_setting_id' => $billingAddressSetting->id,
+                        'language_id' => $languageId,
+                    ],
+                    [$fieldName => $value]
+                );
+
+                if ($detail->wasRecentlyCreated === false) {
+                    $detail->$fieldName = $value;
+                    $detail->save();
+                }
+            }
+        }
     }
 
     protected function processSingleColumnFormat($billingAddressSetting, $row)
     {
-        // Get field name
         $fieldName = $row['field_name'] ?? null;
-        
-        // Get value - check both 'value' and 'translation_value' (Laravel Excel converts "Translation Value" to "translation_value")
         $value = $row['translation_value'] ?? $row['value'] ?? null;
 
-        // Skip if field name or value is empty
-        if (empty($fieldName) || empty($value)) {
-            Log::warning("Skipping row - Field: {$fieldName}, Value: {$value}");
+        if (empty($fieldName)) {
             return;
         }
 
-
-        // Get existing record or prepare for creation
         $detail = BillingAddressSettingDetail::where('billing_add_setting_id', $billingAddressSetting->id)
             ->where('language_id', $this->languageId)
             ->first();
 
         if ($detail) {
-            // Update existing record - update only this specific field
             $detail->$fieldName = $value;
             $detail->save();
-            Log::info("Updated existing record - Field: {$fieldName}");
         } else {
-            // Create new record with this field
             BillingAddressSettingDetail::create([
                 'billing_add_setting_id' => $billingAddressSetting->id,
                 'language_id' => $this->languageId,
                 $fieldName => $value,
             ]);
-            Log::info("Created new record with field: {$fieldName}");
         }
     }
 
     protected function processMultiColumnFormat($billingAddressSetting, $row)
     {
-        // Map all fields (exact order matching export template)
         $fields = [
             'billing_add_setting_id' => $billingAddressSetting->id,
             'language_id' => $this->languageId,
-            
-            // Main heading
             'main_heading' => $row['main_heading'] ?? null,
-            
-            // Required field indicators
             'mobile_indicate_required_field_label' => $row['mobile_indicate_required_field_label'] ?? null,
             'indicate_field_label' => $row['indicate_field_label'] ?? null,
-            
-            // Card name fields
             'name_on_card_label' => $row['name_on_card_label'] ?? null,
             'name_on_card_placeholder' => $row['name_on_card_placeholder'] ?? null,
             'card_name_placeholder' => $row['card_name_placeholder'] ?? null,
-            
-            // Card number fields
             'card_number_label' => $row['card_number_label'] ?? null,
             'card_number_placeholder' => $row['card_number_placeholder'] ?? null,
-            
-            // Card type fields
             'mobile_card_type_label' => $row['mobile_card_type_label'] ?? null,
             'mobile_card_type_placholder' => $row['mobile_card_type_placholder'] ?? null,
             'select_card_type_text' => $row['select_card_type_text'] ?? null,
-            
-            // Expiry date fields (Mobile)
             'mobile_expiry_date_label' => $row['mobile_expiry_date_label'] ?? null,
             'mobile_month_placeholder' => $row['mobile_month_placeholder'] ?? null,
             'mobile_year_placeholder' => $row['mobile_year_placeholder'] ?? null,
-            
-            // Expiry date fields (Web)
             'web_expiry_month_label' => $row['web_expiry_month_label'] ?? null,
             'web_expiry_month_placeholder' => $row['web_expiry_month_placeholder'] ?? null,
             'expiry_month_placeholder' => $row['expiry_month_placeholder'] ?? null,
-            
-            // Security code (CVV/CVC)
             'security_code_label' => $row['security_code_label'] ?? null,
             'security_code_palceholder' => $row['security_code_palceholder'] ?? null,
             'cvc_placeholder' => $row['cvc_placeholder'] ?? null,
-            
-            // Billing address section
             'mobile_billing_address_label' => $row['mobile_billing_address_label'] ?? null,
-            
-            // Street address fields
             'mobile_street_name_label' => $row['mobile_street_name_label'] ?? null,
             'mobile_street_name_placeholder' => $row['mobile_street_name_placeholder'] ?? null,
-            
-            // House/Apartment number
             'mobile_house_number_label' => $row['mobile_house_number_label'] ?? null,
             'mobile_house_number_placeholder' => $row['mobile_house_number_placeholder'] ?? null,
-            
-            // City fields
             'mobile_city_label' => $row['mobile_city_label'] ?? null,
             'mobile_city_placeholder' => $row['mobile_city_placeholder'] ?? null,
-            
-            // Province/State fields
             'mobile_province_label' => $row['mobile_province_label'] ?? null,
             'mobile_province_placeholder' => $row['mobile_province_placeholder'] ?? null,
-            
-            // Country fields
             'mobile_country_label' => $row['mobile_country_label'] ?? null,
             'mobile_country_placeholder' => $row['mobile_country_placeholder'] ?? null,
-            
-            // Postal code fields
             'mobile_postal_code_label' => $row['mobile_postal_code_label'] ?? null,
             'mobile_postal_code_placeholder' => $row['mobile_postal_code_placeholder'] ?? null,
-
             'delete_card_button_text' => $row['delete_card_button_text'] ?? null,
             'mobile_default_card_tab' => $row['mobile_default_card_tab'] ?? null,
             'set_primary_card_label' => $row['set_primary_card_label'] ?? null,
             'delete_card_message' => $row['delete_card_message'] ?? null,
-            // Primary card option
             'mobile_primary_card_placeholder' => $row['mobile_primary_card_placeholder'] ?? null,
-            
-            // Save button
             'save_button_text' => $row['save_button_text'] ?? null,
         ];
 
-        // Update or create the billing address setting detail
         BillingAddressSettingDetail::updateOrCreate(
             [
                 'billing_add_setting_id' => $billingAddressSetting->id,
@@ -188,20 +202,17 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
         );
     }
 
-    /**
-     * Validation rules for Excel data
-     */
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        
         if (!$language) {
             return [];
         }
 
-        // Required fields based on validation service
         $rules = [];
-        
         if ($language->is_default == '1') {
             $rules = [
                 'name_on_card_label' => 'required|string',
@@ -222,13 +233,9 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
                 'indicate_field_label' => 'required|string',
             ];
         }
-
         return $rules;
     }
 
-    /**
-     * Custom validation messages
-     */
     public function customValidationMessages()
     {
         return [
@@ -251,4 +258,3 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
         ];
     }
 }
-

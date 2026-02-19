@@ -20,37 +20,13 @@
                                 <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
-                                <h4 class="text-xl font-bold text-gray-800">📊 Excel Upload - Bulk Import Translations</h4>
+                                <h4 class="text-xl font-bold text-gray-800">📊 Excel Upload - Bulk Import All Languages</h4>
                             </div>
                             <p class="text-sm text-gray-600 mb-4">
-                                Upload an Excel file with all billing address setting translations for a specific language. This will save or update all fields at once.
+                                Download the template (Field Name + one column per language), fill in translations for each language, then upload. This will update the billing address settings for all languages at once.
                             </p>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <!-- Language Selector -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Select Language <span class="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        v-model="excelForm.selectedLanguageId"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        :class="{'border-red-500': excelValidationErrors.language_id}"
-                                    >
-                                        <option value="">Choose Language</option>
-                                        <option
-                                            v-for="lang in languages"
-                                            :key="lang.id"
-                                            :value="lang.id"
-                                        >
-                                            {{ lang.name }}
-                                        </option>
-                                    </select>
-                                    <p v-if="excelValidationErrors.language_id" class="text-red-500 text-xs mt-1">
-                                        {{ excelValidationErrors.language_id }}
-                                    </p>
-                                </div>
-
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- File Upload -->
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -103,7 +79,7 @@
                                         <span class="font-medium">Need help formatting your Excel file?</span>
                                     </div>
                                     <a
-                                        :href="`${mixAdminApiUrl}download-billing-address-setting-template?format=single_column`"
+                                        :href="`${mixAdminApiUrl}download-billing-address-setting-template?format=all_languages`"
                                         target="_blank"
                                         class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors duration-200"
                                     >
@@ -2068,7 +2044,6 @@ export default {
             loading: false,
             // Excel Upload Data
             excelForm: {
-                selectedLanguageId: '',
                 selectedFile: null
             },
             excelValidationErrors: {},
@@ -2458,11 +2433,6 @@ export default {
             this.excelErrors = [];
 
             // Client-side validation
-            if (!this.excelForm.selectedLanguageId) {
-                this.excelValidationErrors.language_id = 'Please select a language';
-                return;
-            }
-
             if (!this.excelForm.selectedFile) {
                 this.excelValidationErrors.excel_file = 'Please select an Excel file';
                 return;
@@ -2484,9 +2454,8 @@ export default {
                 return;
             }
 
-            // Prepare FormData
+            // Prepare FormData (all-languages format: no language_id)
             const formData = new FormData();
-            formData.append('language_id', this.excelForm.selectedLanguageId);
             formData.append('excel_file', this.excelForm.selectedFile);
 
             // Upload
@@ -2507,7 +2476,6 @@ export default {
                     helper.swalSuccessMessage(response.data.message);
                     
                     // Reset form
-                    this.excelForm.selectedLanguageId = '';
                     this.excelForm.selectedFile = null;
                     this.$refs.excelFile.value = '';
                     
