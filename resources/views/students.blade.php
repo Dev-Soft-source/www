@@ -6,7 +6,7 @@
     <div class="flex items-center space-x-2">
         <div>
             @isset($studentPage->page_image)
-                <img class="w-7 h-7 object-contain" src="{{ asset('home_page_icons/' . $studentPage->page_image)}}" alt="">
+                <img class="w-14 h-14 object-contain" src="{{ asset('home_page_icons/' . $studentPage->page_image)}}" alt="">
             @endisset
         </div>
         <h1 class="mb-0 font-FuturaMdCnBT">
