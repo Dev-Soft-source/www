@@ -84,8 +84,13 @@ class MyStudentCardSettingImport implements ToCollection, WithHeadingRow, WithVa
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'mobile_indicate_required_field_label' => 'required|string',
             'student_card_description_text' => 'required|string',
