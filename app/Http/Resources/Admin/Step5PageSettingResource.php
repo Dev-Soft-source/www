@@ -17,7 +17,7 @@ class Step5PageSettingResource extends JsonResource
         return [
             'id' => $this->id,
             'created_at' => $this->created_at,
-            'step4_page_setting_detail' => Step5PageSettingDetailResource::collection($this->whenLoaded('step5PageSettingDetail')),
+            'step5_page_setting_detail' => Step5PageSettingDetailResource::collection($this->whenLoaded('step5PageSettingDetail')),
         ];
     }
 }

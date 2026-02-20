@@ -33,7 +33,7 @@ class Step5PageSettingDetailResource extends JsonResource
             'skip_license' => $this->skip_license,
             'next_button_label' => $this->next_button_label,
             'liecense_section_heading' => $this->liecense_section_heading,
-            'step5_page_setting' => new Step5PageSettingResource($this->whenLoaded('step4PageSetting')),
+            'step5_page_setting' => new Step5PageSettingResource($this->whenLoaded('step5PageSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),
         ];
     }
