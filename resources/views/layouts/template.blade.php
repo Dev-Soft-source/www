@@ -578,7 +578,6 @@
                     // For tooltip errors, find the input field
                     const parent = element.parentElement;
                     targetField = parent ? parent.querySelector('input, select, textarea') : null;
-                    console.log(element, parent, targetField)
                 } else if (element.classList.contains('border-red-500') || element.classList.contains('is-invalid')) {
                     // The element itself is the field
                     targetField = element;
