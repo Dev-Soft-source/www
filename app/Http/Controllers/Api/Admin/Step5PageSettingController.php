@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\Step4PageSettingResource;
-use App\Models\Step4PageSetting;
-use App\Services\Step4PageSettingService;
+use App\Http\Resources\Admin\Step5PageSettingResource;
+use App\Models\Step5PageSetting;
+use App\Services\Step5PageSettingService;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 use App\Imports\Step5PageSettingImport;
@@ -21,12 +21,12 @@ class Step5PageSettingController extends Controller
 
     public function show()
     {
-        $step4PageSetting = Step4PageSetting::query();
+        $Step5PageSetting = Step5PageSetting::query();
         
-        $step4PageSetting = $step4PageSetting->with(['step4PageSettingDetail', 'step4PageSettingDetail.language:id,name']);
-        $step4PageSetting = $step4PageSetting->first();
+        $Step5PageSetting = $Step5PageSetting->with(['step5PageSettingDetail', 'step5PageSettingDetail.language:id,name']);
+        $Step5PageSetting = $Step5PageSetting->first();
 
-        return $this->successResponse($step4PageSetting ? new Step4PageSettingResource($step4PageSetting) : [], 'Data Get Successfully!');
+        return $this->successResponse($Step5PageSetting ? new Step5PageSettingResource($Step5PageSetting) : [], 'Data Get Successfully!');
     }
 
     public function update(Request $request)
@@ -35,7 +35,7 @@ class Step5PageSettingController extends Controller
         $errorMessages = [];
         $languages = getAllLanguages();
 
-        $pageSettingService = new Step4PageSettingService();
+        $pageSettingService = new Step5PageSettingService();
         $response = $pageSettingService->validation($languages, $validationRule, $errorMessages);
         $validationRule = $response['validation_rules'];
         $errorMessages = $response['error_messages'];
@@ -48,15 +48,15 @@ class Step5PageSettingController extends Controller
             $niceNames
         );
 
-        $step4PageSetting = Step4PageSetting::first();
-        if (!$step4PageSetting) {
-            $step4PageSetting = Step4PageSetting::create([]);
+        $Step5PageSetting = Step5PageSetting::first();
+        if (!$Step5PageSetting) {
+            $Step5PageSetting = Step5PageSetting::create([]);
         }
         foreach ($languages as $language) {
-            $pageSettingService->update($step4PageSetting, $language, $request);
+            $pageSettingService->update($Step5PageSetting, $language, $request);
         }
 
-        if ($step4PageSetting) {
+        if ($Step5PageSetting) {
             return $this->successResponse([], "Step 5 of 5 page setting updated successfully.");
         }
 
@@ -142,7 +142,7 @@ class Step5PageSettingController extends Controller
             $existingData = null;
             if ($format === 'all_languages') {
                 $languages = Language::orderBy('id')->get();
-                $existingData = Step4PageSetting::with('step4PageSettingDetail')->first();
+                $existingData = Step5PageSetting::with('step5PageSettingDetail')->first();
             }
 
             $fileName = 'step5_page_settings_template_' . date('Y-m-d') . '.xlsx';

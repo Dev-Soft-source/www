@@ -316,448 +316,224 @@
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`sub_main_label_${activeLanguageId}`"
-                                                        >Sub main label</label
-                                                    >
-                                                </div>
-                                                <editor
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :id="`sub_main_label_${activeLanguageId}`"
-                                                    v-model="form.sub_main_label[`sub_main_label_${activeLanguageId}`]"
-                                                    :init="editorConfig"
-                                                    placeholder=" "
-                                                    :name="`sub_main_label_${activeLanguageId}`"
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'sub_main_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event,
-                                                            language,
-                                                            'sub_main_label'
-                                                        )
-                                                    "
-                                                ></editor>
-                                            </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `sub_main_label.sub_main_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `sub_main_label.sub_main_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`required_label_${activeLanguageId}`"
-                                                        >Required label</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`country_code_label_${activeLanguageId}`">Country code label</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`required_label_${activeLanguageId}`"
-                                                    :id="`required_label_${activeLanguageId}`"
+                                                    :name="`country_code_label_${activeLanguageId}`"
+                                                    :id="`country_code_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'required_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'required_label'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('country_code_label')"
+                                                    @input="handleInput($event.target.value, language, 'country_code_label')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `required_label.required_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `required_label.required_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`country_code_label.country_code_label_${activeLanguageId}`)" v-text="validationErros.get(`country_code_label.country_code_label_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`driver_license_label_${activeLanguageId}`"
-                                                        >Driver license label</label
-                                                    >
-                                                </div>
-                                                <editor
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :id="`driver_license_label_${activeLanguageId}`"
-                                                    v-model="form.driver_license_label[`driver_license_label_${activeLanguageId}`]"
-                                                    :init="editorConfig"
-                                                    placeholder=" "
-                                                    :name="`driver_license_label_${activeLanguageId}`"
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'driver_license_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'driver_license_label'
-                                                        )
-                                                    "
-                                                    
-                                                ></editor>
-                                            </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `driver_license_label.driver_license_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `driver_license_label.driver_license_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`driver_license_sub_label_${activeLanguageId}`"
-                                                        >Driver license sub label</label
-                                                    >
-                                                </div>
-                                                <editor
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :id="`driver_license_sub_label_${activeLanguageId}`"
-                                                    v-model="form.driver_license_sub_label[`driver_license_sub_label_${activeLanguageId}`]"
-                                                    :init="editorConfig"
-                                                    placeholder=" "
-                                                    :name="`driver_license_sub_label_${activeLanguageId}`"
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'driver_license_sub_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'driver_license_sub_label'
-                                                        )
-                                                    "
-                                                    
-                                                ></editor>
-                                            </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `driver_license_sub_label.driver_license_sub_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `driver_license_sub_label.driver_license_sub_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`driver_license_error_${activeLanguageId}`"
-                                                        >Driver license error</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`country_code_error_${activeLanguageId}`">Country code error</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`driver_license_error_${activeLanguageId}`"
-                                                    :id="`driver_license_error_${activeLanguageId}`"
+                                                    :name="`country_code_error_${activeLanguageId}`"
+                                                    :id="`country_code_error_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'driver_license_error'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'driver_license_error'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('country_code_error')"
+                                                    @input="handleInput($event.target.value, language, 'country_code_error')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `driver_license_error.driver_license_error_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `driver_license_error.driver_license_error_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`country_code_error.country_code_error_${activeLanguageId}`)" v-text="validationErros.get(`country_code_error.country_code_error_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`photo_detail_label_${activeLanguageId}`"
-                                                        >Photo sub label</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`phone_label_${activeLanguageId}`">Phone label</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`photo_detail_label_${activeLanguageId}`"
-                                                    :id="`photo_detail_label_${activeLanguageId}`"
+                                                    :name="`phone_label_${activeLanguageId}`"
+                                                    :id="`phone_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'photo_detail_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'photo_detail_label'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('phone_label')"
+                                                    @input="handleInput($event.target.value, language, 'phone_label')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `photo_detail_label.photo_detail_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `photo_detail_label.photo_detail_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`phone_label.phone_label_${activeLanguageId}`)" v-text="validationErros.get(`phone_label.phone_label_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`mobile_photo_choose_file_label_${activeLanguageId}`"
-                                                        >Choose file label</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`phone_error_${activeLanguageId}`">Phone error</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`mobile_photo_choose_file_label_${activeLanguageId}`"
-                                                    :id="`mobile_photo_choose_file_label_${activeLanguageId}`"
+                                                    :name="`phone_error_${activeLanguageId}`"
+                                                    :id="`phone_error_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'mobile_photo_choose_file_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'mobile_photo_choose_file_label'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('phone_error')"
+                                                    @input="handleInput($event.target.value, language, 'phone_error')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `mobile_photo_choose_file_label.mobile_photo_choose_file_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `mobile_photo_choose_file_label.mobile_photo_choose_file_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`phone_error.phone_error_${activeLanguageId}`)" v-text="validationErros.get(`phone_error.phone_error_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`skip_license_${activeLanguageId}`"
-                                                        >Skip license button label</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`skip_button_label_${activeLanguageId}`">Skip button label</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`skip_license_${activeLanguageId}`"
-                                                    :id="`skip_license_${activeLanguageId}`"
+                                                    :name="`skip_button_label_${activeLanguageId}`"
+                                                    :id="`skip_button_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'skip_license'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'skip_license'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('skip_button_label')"
+                                                    @input="handleInput($event.target.value, language, 'skip_button_label')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `skip_license.skip_license_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `skip_license.skip_license_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`skip_button_label.skip_button_label_${activeLanguageId}`)" v-text="validationErros.get(`skip_button_label.skip_button_label_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`next_button_label_${activeLanguageId}`"
-                                                        >Next button label</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`verify_button_label_${activeLanguageId}`">Verify button label</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`next_button_label_${activeLanguageId}`"
-                                                    :id="`next_button_label_${activeLanguageId}`"
+                                                    :name="`verify_button_label_${activeLanguageId}`"
+                                                    :id="`verify_button_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'next_button_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'next_button_label'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('verify_button_label')"
+                                                    @input="handleInput($event.target.value, language, 'verify_button_label')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `next_button_label.next_button_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `next_button_label.next_button_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`verify_button_label.verify_button_label_${activeLanguageId}`)" v-text="validationErros.get(`verify_button_label.verify_button_label_${activeLanguageId}`)"></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`liecense_section_heading_${activeLanguageId}`"
-                                                        >License section heading</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`verify_code_label_${activeLanguageId}`">Verify code label</label>
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`liecense_section_heading_${activeLanguageId}`"
-                                                    :id="`liecense_section_heading_${activeLanguageId}`"
+                                                    :name="`verify_code_label_${activeLanguageId}`"
+                                                    :id="`verify_code_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'liecense_section_heading'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'liecense_section_heading'
-                                                        )
-                                                    "
+                                                    :value="getCurrentValue('verify_code_label')"
+                                                    @input="handleInput($event.target.value, language, 'verify_code_label')"
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `liecense_section_heading.liecense_section_heading_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `liecense_section_heading.liecense_section_heading_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`verify_code_label.verify_code_label_${activeLanguageId}`)" v-text="validationErros.get(`verify_code_label.verify_code_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`enter_code_label_${activeLanguageId}`">Enter code label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`enter_code_label_${activeLanguageId}`"
+                                                    :id="`enter_code_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('enter_code_label')"
+                                                    @input="handleInput($event.target.value, language, 'enter_code_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`enter_code_label.enter_code_label_${activeLanguageId}`)" v-text="validationErros.get(`enter_code_label.enter_code_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`request_code_label_${activeLanguageId}`">Request code label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`request_code_label_${activeLanguageId}`"
+                                                    :id="`request_code_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('request_code_label')"
+                                                    @input="handleInput($event.target.value, language, 'request_code_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`request_code_label.request_code_label_${activeLanguageId}`)" v-text="validationErros.get(`request_code_label.request_code_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`second_label_${activeLanguageId}`">Second label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`second_label_${activeLanguageId}`"
+                                                    :id="`second_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('second_label')"
+                                                    @input="handleInput($event.target.value, language, 'second_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`second_label.second_label_${activeLanguageId}`)" v-text="validationErros.get(`second_label.second_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`save_button_label_${activeLanguageId}`">Save button label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`save_button_label_${activeLanguageId}`"
+                                                    :id="`save_button_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('save_button_label')"
+                                                    @input="handleInput($event.target.value, language, 'save_button_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`save_button_label.save_button_label_${activeLanguageId}`)" v-text="validationErros.get(`save_button_label.save_button_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`send_button_label_${activeLanguageId}`">Send button label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`send_button_label_${activeLanguageId}`"
+                                                    :id="`send_button_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('send_button_label')"
+                                                    @input="handleInput($event.target.value, language, 'send_button_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`send_button_label.send_button_label_${activeLanguageId}`)" v-text="validationErros.get(`send_button_label.send_button_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`logout_button_label_${activeLanguageId}`">Logout button label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`logout_button_label_${activeLanguageId}`"
+                                                    :id="`logout_button_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('logout_button_label')"
+                                                    @input="handleInput($event.target.value, language, 'logout_button_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`logout_button_label.logout_button_label_${activeLanguageId}`)" v-text="validationErros.get(`logout_button_label.logout_button_label_${activeLanguageId}`)"></p>
                                         </div>
                                     </div>
                                 </div>
@@ -786,7 +562,7 @@ export default {
             languages: [],
             form: {},
             validationErros: new ErrorHandling(),
-            collapseStates: [true, false],
+            collapseStates: [true, true],
             loading: false,
             editorConfig: {
                 height: 250,
@@ -848,16 +624,19 @@ export default {
                             this.handleInput("", language, "meta_description");
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "main_label");
-                            this.handleInput("", language, "sub_main_label");
-                            this.handleInput("", language, "required_label");
-                            this.handleInput("", language, "driver_license_label");
-                            this.handleInput("", language, "driver_license_sub_label");
-                            this.handleInput("", language, "driver_license_error");
-                            this.handleInput("", language, "photo_detail_label");
-                            this.handleInput("", language, "mobile_photo_choose_file_label");
-                            this.handleInput("", language, "skip_license");
-                            this.handleInput("", language, "next_button_label");
-                            this.handleInput("", language, "liecense_section_heading");
+                            this.handleInput("", language, "country_code_label");
+                            this.handleInput("", language, "country_code_error");
+                            this.handleInput("", language, "phone_label");
+                            this.handleInput("", language, "phone_error");
+                            this.handleInput("", language, "skip_button_label");
+                            this.handleInput("", language, "verify_button_label");
+                            this.handleInput("", language, "verify_code_label");
+                            this.handleInput("", language, "enter_code_label");
+                            this.handleInput("", language, "request_code_label");
+                            this.handleInput("", language, "second_label");
+                            this.handleInput("", language, "save_button_label");
+                            this.handleInput("", language, "send_button_label");
+                            this.handleInput("", language, "logout_button_label");
                         });
                         this.fetchStep4PageSetting();
                     }
@@ -871,81 +650,25 @@ export default {
                         let step4_page_setting_detail =
                             res?.data?.data?.step4_page_setting_detail || [];
                         step4_page_setting_detail.map((setting) => {
-                            this.handleInput(
-                                setting?.name,
-                                setting?.language,
-                                "name"
-                            );
-                            this.handleInput(
-                                setting?.meta_keywords,
-                                setting?.language,
-                                "meta_keywords"
-                            );
-                            this.handleInput(
-                                setting?.meta_description,
-                                setting?.language,
-                                "meta_description"
-                            );
-                            this.handleInput(
-                                setting?.main_heading,
-                                setting?.language,
-                                "main_heading"
-                            );
-                            this.handleInput(
-                                setting?.main_label,
-                                setting?.language,
-                                "main_label"
-                            );
-                            this.handleInput(
-                                setting?.sub_main_label,
-                                setting?.language,
-                                "sub_main_label"
-                            );
-                            this.handleInput(
-                                setting?.required_label,
-                                setting?.language,
-                                "required_label"
-                            );
-                            this.handleInput(
-                                setting?.driver_license_label,
-                                setting?.language,
-                                "driver_license_label"
-                            );
-                            this.handleInput(
-                                setting?.driver_license_sub_label,
-                                setting?.language,
-                                "driver_license_sub_label"
-                            );
-                            this.handleInput(
-                                setting?.driver_license_error,
-                                setting?.language,
-                                "driver_license_error"
-                            );
-                            this.handleInput(
-                                setting?.photo_detail_label,
-                                setting?.language,
-                                "photo_detail_label"
-                            );
-                            this.handleInput(
-                                setting?.mobile_photo_choose_file_label,
-                                setting?.language,
-                                "mobile_photo_choose_file_label"
-                            );
-                            this.handleInput(
-                                setting?.skip_license,
-                                setting?.language,
-                                "skip_license"
-                            );
-                            this.handleInput(
-                                setting?.next_button_label,
-                                setting?.language,
-                                "next_button_label"
-                            );
-                            this.handleInput(
-                                setting?.liecense_section_heading,
-                                setting?.language,
-                                "liecense_section_heading"
-                            );
+                            const lang = setting?.language || { id: setting?.language_id };
+                            this.handleInput(setting?.name ?? "", lang, "name");
+                            this.handleInput(setting?.meta_keywords ?? "", lang, "meta_keywords");
+                            this.handleInput(setting?.meta_description ?? "", lang, "meta_description");
+                            this.handleInput(setting?.main_heading ?? "", lang, "main_heading");
+                            this.handleInput(setting?.main_label ?? "", lang, "main_label");
+                            this.handleInput(setting?.country_code_label ?? "", lang, "country_code_label");
+                            this.handleInput(setting?.country_code_error ?? "", lang, "country_code_error");
+                            this.handleInput(setting?.phone_label ?? "", lang, "phone_label");
+                            this.handleInput(setting?.phone_error ?? "", lang, "phone_error");
+                            this.handleInput(setting?.skip_button_label ?? "", lang, "skip_button_label");
+                            this.handleInput(setting?.verify_button_label ?? "", lang, "verify_button_label");
+                            this.handleInput(setting?.verify_code_label ?? "", lang, "verify_code_label");
+                            this.handleInput(setting?.enter_code_label ?? "", lang, "enter_code_label");
+                            this.handleInput(setting?.request_code_label ?? "", lang, "request_code_label");
+                            this.handleInput(setting?.second_label ?? "", lang, "second_label");
+                            this.handleInput(setting?.save_button_label ?? "", lang, "save_button_label");
+                            this.handleInput(setting?.send_button_label ?? "", lang, "send_button_label");
+                            this.handleInput(setting?.logout_button_label ?? "", lang, "logout_button_label");
                         });
                     }
                 });
@@ -979,48 +702,26 @@ export default {
                 .finally(() => (this.loading = false));
         },
         checkValidationError(validationErros, language) {
+            const id = language.id;
             return (
-                validationErros.has(`name.name_${language.id}`) ||
-                validationErros.has(
-                    `meta_keywords.meta_keywords_${language.id}`
-                ) ||
-                validationErros.has(
-                    `meta_description.meta_description_${language.id}`
-                ) ||
-                validationErros.has(
-                    `main_heading.main_heading_${language.id}`
-                ) ||
-                validationErros.has(`main_label.main_label_${language.id}`) ||
-                validationErros.has(
-                    `sub_main_label.sub_main_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `required_label.required_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `driver_license_label.driver_license_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `driver_license_sub_label.driver_license_sub_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `driver_license_error.driver_license_error_${language.id}`
-                ) ||
-                validationErros.has(
-                    `photo_detail_label.photo_detail_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `mobile_photo_choose_file_label.mobile_photo_choose_file_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `skip_license.skip_license_${language.id}`
-                ) ||
-                validationErros.has(
-                    `next_button_label.next_button_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `liecense_section_heading.liecense_section_heading_${language.id}`
-                )
+                validationErros.has(`name.name_${id}`) ||
+                validationErros.has(`meta_keywords.meta_keywords_${id}`) ||
+                validationErros.has(`meta_description.meta_description_${id}`) ||
+                validationErros.has(`main_heading.main_heading_${id}`) ||
+                validationErros.has(`main_label.main_label_${id}`) ||
+                validationErros.has(`country_code_label.country_code_label_${id}`) ||
+                validationErros.has(`country_code_error.country_code_error_${id}`) ||
+                validationErros.has(`phone_label.phone_label_${id}`) ||
+                validationErros.has(`phone_error.phone_error_${id}`) ||
+                validationErros.has(`skip_button_label.skip_button_label_${id}`) ||
+                validationErros.has(`verify_button_label.verify_button_label_${id}`) ||
+                validationErros.has(`verify_code_label.verify_code_label_${id}`) ||
+                validationErros.has(`enter_code_label.enter_code_label_${id}`) ||
+                validationErros.has(`request_code_label.request_code_label_${id}`) ||
+                validationErros.has(`second_label.second_label_${id}`) ||
+                validationErros.has(`save_button_label.save_button_label_${id}`) ||
+                validationErros.has(`send_button_label.send_button_label_${id}`) ||
+                validationErros.has(`logout_button_label.logout_button_label_${id}`)
             );
         },
     },

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Step4PageSetting;
+use App\Models\Step5PageSetting;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -16,13 +16,13 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
     /** @var \Illuminate\Support\Collection|null */
     protected $languages;
 
-    /** @var \App\Models\Step4PageSetting|null */
+    /** @var \App\Models\Step5PageSetting|null */
     protected $existingData;
 
     /**
      * @param string $format 'single_column', 'multi_column', or 'all_languages'
      * @param \Illuminate\Support\Collection|array|null $languages For all_languages format
-     * @param \App\Models\Step4PageSetting|null $existingData For all_languages (with step4PageSettingDetail loaded)
+     * @param \App\Models\Step5PageSetting|null $existingData For all_languages (with step5PageSettingDetail loaded)
      */
     public function __construct($format = 'single_column', $languages = null, $existingData = null)
     {
@@ -34,10 +34,10 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
     protected function fields(): array
     {
         return [
-            'name','meta_keywords','meta_description','main_heading','main_label',
-            'country_code_label','country_code_error','phone_label','phone_error',
-            'skip_button_label','verify_button_label','verify_code_label','enter_code_label',
-            'request_code_label','second_label','save_button_label','send_button_label','logout_button_label'
+            'name', 'meta_keywords', 'meta_description', 'main_heading', 'main_label',
+            'sub_main_label', 'required_label', 'driver_license_label', 'driver_license_error',
+            'driver_license_sub_label', 'photo_detail_label', 'mobile_photo_choose_file_label',
+            'skip_license', 'next_button_label', 'liecense_section_heading',
         ];
     }
 
@@ -49,8 +49,8 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
 
         $fields = $this->fields();
         $values = [];
-        if ($setting = Step4PageSetting::with('step4PageSettingDetail')->first()) {
-            $detail = optional($setting->step4PageSettingDetail)->first();
+        if ($setting = Step5PageSetting::with('step5PageSettingDetail')->first()) {
+            $detail = optional($setting->step5PageSettingDetail)->first();
             if ($detail) {
                 foreach ($fields as $f) { $values[$f] = $detail->{$f} ?? ''; }
             }
@@ -77,8 +77,8 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
         $languages = $this->languages ?? Language::orderBy('id')->get();
         $fields = $this->fields();
         $detailsByLang = [];
-        if ($this->existingData && $this->existingData->relationLoaded('step4PageSettingDetail')) {
-            foreach ($this->existingData->step4PageSettingDetail as $d) {
+        if ($this->existingData && $this->existingData->relationLoaded('step5PageSettingDetail')) {
+            foreach ($this->existingData->step5PageSettingDetail as $d) {
                 $detailsByLang[$d->language_id] = $d;
             }
         }
