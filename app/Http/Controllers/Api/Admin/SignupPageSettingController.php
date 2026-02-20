@@ -63,42 +63,82 @@ class SignupPageSettingController extends Controller
         return $this->errorResponse();
     }
 
+    /**
+     * Upload Signup page settings via Excel.
+     * All-languages: no language_id, Excel has Field Name + one column per language.
+     * Single-language: language_id required.
+     */
     public function uploadExcel(Request $request)
     {
         try {
-            $request->validate([
-                'language_id' => 'required|exists:languages,id',
-                'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
-            ]);
+            $isAllLanguages = !$request->has('language_id') || $request->language_id === null || $request->language_id === '';
 
-            $language = Language::find($request->language_id);
-            if (!$language) return $this->errorResponse('Language not found', 404);
+            if ($isAllLanguages) {
+                $request->validate([
+                    'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+                ], [
+                    'excel_file.required' => 'Please upload an Excel file',
+                    'excel_file.file' => 'The uploaded file is not valid',
+                    'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
+                    'excel_file.max' => 'The file size must not exceed 5MB',
+                ]);
+            } else {
+                $request->validate([
+                    'language_id' => 'required|exists:languages,id',
+                    'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+                ]);
+            }
+
+            $language = $isAllLanguages ? null : Language::find($request->language_id);
+            if (!$isAllLanguages && !$language) {
+                return $this->errorResponse('Language not found', 404);
+            }
 
             try {
-                Excel::import(new SignupPageSettingImport($request->language_id), $request->file('excel_file'));
+                Excel::import(new SignupPageSettingImport($isAllLanguages ? null : $request->language_id), $request->file('excel_file'));
+
+                if ($isAllLanguages) {
+                    return $this->successResponse([], 'Signup page settings for all languages uploaded successfully from Excel.');
+                }
                 return $this->successResponse(['language' => $language->name], "Signup page settings for {$language->name} uploaded successfully from Excel.");
             } catch (ValidationException $e) {
+                $errors = [];
+                foreach ($e->failures() as $failure) {
+                    $errors[] = [
+                        'row' => $failure->row(),
+                        'attribute' => $failure->attribute(),
+                        'errors' => $failure->errors(),
+                        'values' => $failure->values(),
+                    ];
+                }
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation errors in Excel file',
-                    'errors' => array_map(fn($f) => [
-                        'row' => $f->row(),
-                        'attribute' => $f->attribute(),
-                        'errors' => $f->errors(),
-                    ], $e->failures()),
+                    'errors' => $errors,
                 ], 422);
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Signup Page Excel upload error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to upload Excel file'], 500);
         }
     }
 
+    /**
+     * Download template. format=all_languages (default): Field Name + one column per language.
+     */
     public function downloadTemplate(Request $request)
     {
         try {
-            return Excel::download(new SignupPageSettingTemplateExport($request->get('format', 'single_column')),
-                'signup_page_settings_template_' . date('Y-m-d') . '.xlsx');
+            $format = $request->get('format', 'all_languages');
+            $languages = $format === 'all_languages' ? Language::orderBy('id')->get() : null;
+            $existingData = $format === 'all_languages' ? SignupPageSetting::with('signupPageSettingDetail')->first() : null;
+            $fileName = 'signup_page_settings_template_' . date('Y-m-d') . '.xlsx';
+            return Excel::download(
+                new SignupPageSettingTemplateExport($format, $languages, $existingData),
+                $fileName
+            );
         } catch (\Exception $e) {
             Log::error('Signup Page template download error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to download template'], 500);
