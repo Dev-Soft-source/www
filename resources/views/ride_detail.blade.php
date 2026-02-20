@@ -329,8 +329,7 @@
                         <div class="w-full md:w-2/3 order-2 md:order-1">
                             <div class="relative mt-5 text-left">
                                 <div class="flex items-center relative">
-                                    <div
-                                        class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                         <span
                                             class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                             <img class="w-5 h-5 object-contain"
@@ -437,8 +436,6 @@
                                         </div>
                                     @endif
                                 @endif
-
-
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4">
