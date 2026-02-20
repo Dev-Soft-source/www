@@ -10,15 +10,18 @@ use App\Models\FindRidePageSetting;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class PaymentMethodsSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
@@ -43,23 +46,64 @@ class PaymentMethodsSettingImport implements ToCollection, WithHeadingRow, WithV
 
     public function collection(Collection $rows)
     {
-        if ($rows->isEmpty()) return;
+        if ($rows->isEmpty()) {
+            Log::warning('No rows found in Payment Methods Excel file');
+            return;
+        }
+
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
-        $isSingleColumn = isset($keys[0]) && (in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys)));
+
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
+
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($rows);
+            Log::info('Payment Methods Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
+        $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
 
         $data = [];
-        if ($isSingleColumn) {
+        if ($isSingleColumn && $this->languageId !== null) {
             foreach ($rows as $row) {
                 $name = strtolower(trim($row['field_name'] ?? ''));
                 if (!$name || !in_array($name, $this->fieldsList())) continue;
                 $data[$name] = $row['translation_value'] ?? $row['value'] ?? null;
             }
-        } else {
+            $this->applyData($data);
+        } elseif ($this->languageId !== null) {
             $data = $firstRow->toArray();
+            $this->applyData($data);
         }
+    }
 
-        $this->applyData($data);
+    protected function processAllLanguagesFormat(Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : (in_array('field name', $headers) ? 'field name' : 'Field Name');
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $validFields = $this->fieldsList();
+
+        foreach ($languageColumns as $col) {
+            $langKey = Str::lower(trim($col));
+            if (!isset($nameToId[$langKey])) continue;
+            $languageId = $nameToId[$langKey];
+            $data = [];
+            foreach ($rows as $row) {
+                $row = $row->toArray();
+                $fieldName = isset($row[$fieldNameKey]) ? strtolower(trim((string) $row[$fieldNameKey])) : null;
+                if (empty($fieldName) || !in_array($fieldName, $validFields, true)) continue;
+                $data[$fieldName] = $row[$col] ?? null;
+            }
+            $this->languageId = $languageId;
+            $this->applyData($data);
+        }
     }
 
     protected function applyData(array $data): void
@@ -155,8 +199,13 @@ class PaymentMethodsSettingImport implements ToCollection, WithHeadingRow, WithV
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'booking_option1' => 'required|string',
             'booking_option2' => 'required|string',

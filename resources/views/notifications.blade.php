@@ -31,7 +31,7 @@
                           <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                       </div>
                       <div class="mt-2 w-full">
-                          <p class="can-exp-p text-center">{{ $notificationPage->notification_delete_text?? ' Are you sure you want to delete?'}}</p>
+                          <p class="can-exp-p text-center">{{ $siteText['notification_delete_text'] }}</p>
                       </div>
                   </div>
               </div>
@@ -48,7 +48,7 @@
 </div>
     <div class="container mx-auto p-4">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl md:text-3xl font-bold font-FuturaMdCnBT text-gray-900">{{ $notificationPage->all_notifications_heading ?? 'All Notifications' }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold font-FuturaMdCnBT text-gray-900">{{ $siteText['all_notifications_heading'] }}</h1>
             <div class="flex items-center gap-3">
                 @if ($notifications && $notifications->where('is_read', 0)->count() > 0)
                     <button type="button" onclick="markAllAsRead()" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1">

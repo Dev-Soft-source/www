@@ -93,31 +93,6 @@ class MyTripController extends Controller
         }
         $ratings = Rating::all();
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
-        }
-
-
         return view('my_trips',[
             'reviewSetting' => $reviewSetting,'messages' => $messages,'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'ratings' => $ratings,

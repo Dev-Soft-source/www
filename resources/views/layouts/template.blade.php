@@ -352,10 +352,10 @@
                         {{ $logoutPage->confirmation_yes_label ?? 'Yes' }}
                     </a>
 
-                    <button type="button" onclick="toggleModal('logout-modal')"
+                    <a href="javascript:void(0)" onclick="toggleModal('logout-modal')"
                         class="button-exp-fill min-w-24">
                         {{ $logoutPage->confirmation_no_label ?? 'No, stay logged in' }}
-                    </button>
+                </a>
                 </div>
 
             </div>
@@ -578,7 +578,6 @@
                     // For tooltip errors, find the input field
                     const parent = element.parentElement;
                     targetField = parent ? parent.querySelector('input, select, textarea') : null;
-                    console.log(element, parent, targetField)
                 } else if (element.classList.contains('border-red-500') || element.classList.contains('is-invalid')) {
                     // The element itself is the field
                     targetField = element;

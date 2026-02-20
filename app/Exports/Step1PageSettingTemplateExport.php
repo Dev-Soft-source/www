@@ -2,27 +2,81 @@
 
 namespace App\Exports;
 
+use App\Models\Language;
+use App\Models\Step1PageSetting;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class Step1PageSettingTemplateExport implements FromCollection, WithHeadings, ShouldAutoSize
+class Step1PageSettingTemplateExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithColumnWidths
 {
     protected $format;
 
-    public function __construct($format = 'single_column')
+    /** @var \Illuminate\Support\Collection|null */
+    protected $languages;
+
+    /** @var Step1PageSetting|null */
+    protected $existingData;
+
+    public static function getTranslatableFieldsWithDefaults(): array
+    {
+        return [
+            'name' => 'Step 1',
+            'meta_keywords' => 'step 1, profile',
+            'meta_description' => 'Step 1 of 5',
+            'main_heading' => 'Your details',
+            'required_label' => 'Required',
+            'first_name_label' => 'First name',
+            'last_name_label' => 'Last name',
+            'gender_label' => 'Gender',
+            'male_option_label' => 'Male',
+            'female_option_label' => 'Female',
+            'prefer_option_label' => 'Prefer not to say',
+            'dob_label' => 'Date of birth',
+            'country_label' => 'Country',
+            'state_label' => 'State',
+            'city_label' => 'City',
+            'zip_code_label' => 'ZIP code',
+            'bio_label' => 'Bio',
+            'button_label' => 'Continue',
+            'first_name_error' => 'Please enter first name',
+            'last_name_error' => 'Please enter last name',
+            'gender_error' => 'Please select gender',
+            'dob_error' => 'Please enter date of birth',
+            'country_error' => 'Please select country',
+            'state_error' => 'Please select state',
+            'city_error' => 'Please enter city',
+            'zip_code_error' => 'Please enter ZIP code',
+            'bio_error' => 'Please enter bio',
+            'logout_button_label' => 'Logout',
+            'bio_placeholder' => 'Tell us about yourself',
+        ];
+    }
+
+    public function __construct($format = 'single_column', $languages = null, $existingData = null)
     {
         $this->format = $format;
+        $this->languages = $languages ? collect($languages) : null;
+        $this->existingData = $existingData;
     }
 
     public function collection(): Collection
     {
-        $fields = $this->getFields();
+        $fields = array_keys(static::getTranslatableFieldsWithDefaults());
+        if ($this->format === 'all_languages') {
+            return $this->allLanguagesFormat();
+        }
         if ($this->format === 'single_column') {
+            $defaults = static::getTranslatableFieldsWithDefaults();
             $rows = [];
             foreach ($fields as $field) {
-                $rows[] = ['field_name' => $field, 'translation_value' => ''];
+                $rows[] = ['field_name' => $field, 'translation_value' => $defaults[$field] ?? ''];
             }
             return new Collection($rows);
         }
@@ -30,19 +84,68 @@ class Step1PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
         return new Collection([$row]);
     }
 
+    protected function allLanguagesFormat(): Collection
+    {
+        $languages = $this->languages ?? Language::orderBy('id')->get();
+        $fieldsWithDefaults = static::getTranslatableFieldsWithDefaults();
+        $detailsByLang = [];
+        if ($this->existingData && $this->existingData->relationLoaded('step1PageSettingDetail')) {
+            foreach ($this->existingData->step1PageSettingDetail as $d) {
+                $detailsByLang[$d->language_id] = $d;
+            }
+        }
+
+        $rows = [];
+        foreach ($fieldsWithDefaults as $fieldKey => $defaultValue) {
+            $row = [$fieldKey];
+            foreach ($languages as $lang) {
+                $detail = $detailsByLang[$lang->id] ?? null;
+                $value = $detail && isset($detail->$fieldKey) ? ($detail->$fieldKey ?? '') : $defaultValue;
+                $row[] = $value;
+            }
+            $rows[] = $row;
+        }
+        return collect($rows);
+    }
+
     public function headings(): array
     {
-        if ($this->format === 'single_column') return ['Field Name', 'Translation Value'];
-        return array_map(fn($f) => ucwords(str_replace('_', ' ', $f)), $this->getFields());
+        if ($this->format === 'single_column') {
+            return ['Field Name', 'Translation Value'];
+        }
+        if ($this->format === 'all_languages') {
+            $languages = $this->languages ?? Language::orderBy('id')->get();
+            return array_merge(['Field Name'], $languages->pluck('name')->toArray());
+        }
+        $fields = array_keys(static::getTranslatableFieldsWithDefaults());
+        return array_map(fn($f) => ucwords(str_replace('_', ' ', $f)), $fields);
     }
 
-    protected function getFields(): array
+    public function styles(Worksheet $sheet): array
     {
         return [
-            'name','meta_keywords','meta_description','main_heading','required_label','first_name_label','last_name_label','gender_label','male_option_label','female_option_label','prefer_option_label','dob_label','country_label','state_label','city_label','zip_code_label','bio_label','button_label',
-            'first_name_error','last_name_error','gender_error','dob_error','country_error','state_error','city_error','zip_code_error','bio_error','logout_button_label','bio_placeholder'
+            1 => [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 12],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ],
         ];
     }
+
+    public function columnWidths(): array
+    {
+        if ($this->format === 'single_column') {
+            return ['A' => 40, 'B' => 50];
+        }
+        if ($this->format === 'all_languages') {
+            $totalCols = ($this->languages ?? Language::orderBy('id')->get())->count() + 1;
+            $widths = [];
+            for ($colIndex = 1; $colIndex <= $totalCols; $colIndex++) {
+                $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+                $widths[$col] = $colIndex === 1 ? 40 : 30;
+            }
+            return $widths;
+        }
+        return ['A' => 25];
+    }
 }
-
-

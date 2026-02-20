@@ -6,12 +6,11 @@ import 'tippy.js/dist/tippy.css';
 function initTooltips() {
     document.querySelectorAll('[data-tippy-content]').forEach(element => {
         const theme = element.getAttribute('data-theme') || 'custom';
-        const isPaymentMethodTooltip = element.classList.contains('payment-method-tooltip');
+        
         tippy(element, {
             theme: theme,
             animation: 'fade',
             delay: [100, 50],
-            ...(isPaymentMethodTooltip && { maxWidth: 300 }),
         });
     });
 }

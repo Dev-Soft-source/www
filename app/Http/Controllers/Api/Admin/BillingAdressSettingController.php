@@ -78,39 +78,28 @@ class BillingAdressSettingController extends Controller
     }
 
     /**
-     * Upload billing address settings via Excel file
+     * Upload billing address settings via Excel file.
+     * Expects the all-languages template: Field Name column + one column per language. Updates billing_address_setting_detail for all languages.
      */
     public function uploadExcel(Request $request)
     {
         try {
-            // Validate request
             $request->validate([
-                'language_id' => 'required|exists:languages,id',
                 'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120', // 5MB max
             ], [
-                'language_id.required' => 'Please select a language',
-                'language_id.exists' => 'Selected language does not exist',
                 'excel_file.required' => 'Please upload an Excel file',
                 'excel_file.file' => 'The uploaded file is not valid',
                 'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
                 'excel_file.max' => 'The file size must not exceed 5MB',
             ]);
 
-            $languageId = $request->language_id;
-            $language = Language::find($languageId);
-
-            if (!$language) {
-                return $this->errorResponse('Language not found', 404);
-            }
-
-            // Import the Excel file
             try {
-                $import = new BillingAddressSettingImport($languageId);
+                $import = new BillingAddressSettingImport(null); // null = all-languages format
                 Excel::import($import, $request->file('excel_file'));
 
                 return $this->successResponse(
-                    ['language' => $language->name],
-                    "Billing address settings for {$language->name} uploaded successfully from Excel."
+                    [],
+                    'Billing address settings for all languages uploaded successfully from Excel.'
                 );
             } catch (ValidationException $e) {
                 $failures = $e->failures();
@@ -133,7 +122,7 @@ class BillingAdressSettingController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Excel upload error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to upload Excel file: ' . $e->getMessage(),
@@ -142,22 +131,30 @@ class BillingAdressSettingController extends Controller
     }
 
     /**
-     * Download Excel template for billing address settings
+     * Download Excel template for billing address settings.
+     * format=all_languages: Field Name + one column per language (with current DB values if any). Other: single_column, multi_column.
      */
     public function downloadTemplate(Request $request)
     {
         try {
-            $format = $request->get('format', 'single_column'); // Default to single column
-            
+            $format = $request->get('format', 'all_languages');
+
+            $languages = null;
+            $existingData = null;
+            if ($format === 'all_languages') {
+                $languages = Language::orderBy('id')->get();
+                $existingData = BillingAddressSetting::with('billingAddressSettingDetail')->first();
+            }
+
             $fileName = 'billing_address_settings_template_' . date('Y-m-d') . '.xlsx';
-            
+
             return Excel::download(
-                new BillingAddressSettingTemplateExport($format),
+                new BillingAddressSettingTemplateExport($format, $languages, $existingData),
                 $fileName
             );
         } catch (\Exception $e) {
             Log::error('Template download error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to download template: ' . $e->getMessage(),

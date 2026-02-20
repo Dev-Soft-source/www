@@ -68,20 +68,45 @@ class RideDetailPageSettingController extends Controller
         return $this->errorResponse();
     }
 
+    /**
+     * Upload Ride Detail (Trip details) page settings via Excel.
+     * When language_id is present: single-language format. When absent: all_languages format (Field Name + one column per language).
+     */
     public function uploadExcel(Request $request)
     {
         try {
-            $request->validate([
-                'language_id' => 'required|exists:languages,id',
+            $rules = [
                 'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
-            ]);
+            ];
+            $messages = [
+                'excel_file.required' => 'Please upload an Excel file',
+                'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
+                'excel_file.max' => 'The file size must not exceed 5MB',
+            ];
+            if ($request->has('language_id')) {
+                $rules['language_id'] = 'required|exists:languages,id';
+                $messages['language_id.required'] = 'Please select a language';
+                $messages['language_id.exists'] = 'Selected language does not exist';
+            }
+            $request->validate($rules, $messages);
 
-            $language = Language::find($request->language_id);
-            if (!$language) return $this->errorResponse('Language not found', 404);
+            $languageId = $request->input('language_id');
+            $import = new RideDetailPageSettingImport($languageId);
 
             try {
-                Excel::import(new RideDetailPageSettingImport($request->language_id), $request->file('excel_file'));
-                return $this->successResponse(['language' => $language->name], "Ride detail page settings for {$language->name} uploaded successfully from Excel.");
+                Excel::import($import, $request->file('excel_file'));
+
+                if ($languageId) {
+                    $language = Language::find($languageId);
+                    return $this->successResponse(
+                        ['language' => $language->name],
+                        "Ride detail page settings for {$language->name} uploaded successfully from Excel."
+                    );
+                }
+                return $this->successResponse(
+                    [],
+                    'Trip details page settings for all languages uploaded successfully from Excel.'
+                );
             } catch (ValidationException $e) {
                 return response()->json([
                     'success' => false,
@@ -90,18 +115,43 @@ class RideDetailPageSettingController extends Controller
                         'row' => $f->row(),
                         'attribute' => $f->attribute(),
                         'errors' => $f->errors(),
+                        'values' => $f->values(),
                     ], $e->failures()),
                 ], 422);
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Ride Detail Setting Excel upload error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to upload Excel file'], 500);
         }
     }
 
+    /**
+     * Download Excel template for Ride Detail page settings.
+     * format=all_languages: Field Name + one column per language (with current DB values if any).
+     */
     public function downloadTemplate(Request $request)
     {
-        $format = $request->get('format', 'single_column');
-        return Excel::download(new RideDetailPageSettingTemplateExport($format), 'ride_detail_page_setting_template.xlsx');
+        try {
+            $format = $request->get('format', 'all_languages');
+
+            $languages = null;
+            $existingData = null;
+            if ($format === 'all_languages') {
+                $languages = Language::orderBy('id')->get();
+                $existingData = RideDetailPageSetting::with('rideDetailPageSettingDetail')->first();
+            }
+
+            $fileName = 'ride_detail_page_setting_template_' . date('Y-m-d') . '.xlsx';
+
+            return Excel::download(
+                new RideDetailPageSettingTemplateExport($format, $languages, $existingData),
+                $fileName
+            );
+        } catch (\Exception $e) {
+            Log::error('Ride Detail template download error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to download template'], 500);
+        }
     }
 }

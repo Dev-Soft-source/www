@@ -87,7 +87,7 @@
                         </div>
                         {{-- <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href=""
-                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                             <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
@@ -139,7 +139,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="whitespace-nowrap inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="whitespace-nowrap inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -228,22 +228,21 @@
                     </div>
                     {{-- <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href=""
-                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                         <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
                             class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
-                            {{ $successMessage->popup_login_btn_text ?? 'Login' }}
-
+                            {{ $siteText['login_btn_text'] }}
                         </a>
                         <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}"
                             class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
-                            {{ $successMessage->popup_signup_btn_text ?? 'Signup' }}
+                            {{ $siteText['signup_btn_text'] }}
 
                         </a>
                         <button onclick="closePopupModal()"
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
-                            {{ $successMessage->popup_close_btn_text ?? 'Close' }}
+                            {{ $siteText['close_btn_text'] }}
                         </button>
                     </div>
                 </div>
@@ -329,7 +328,8 @@
                         <div class="w-full md:w-2/3 order-2 md:order-1">
                             <div class="relative mt-5 text-left">
                                 <div class="flex items-center relative">
-                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                    <div
+                                        class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                         <span
                                             class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                             <img class="w-5 h-5 object-contain"
@@ -436,6 +436,8 @@
                                         </div>
                                     @endif
                                 @endif
+
+
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4">
@@ -1613,7 +1615,7 @@
                         <div class="">
                             <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
                                 id="modal-title">
-                                {{ $rideDetailPage->firm_cancellation_confirm_poup_heading ?? 'Heading' }}</h3>
+                                {{ $rideDetailPage->firm_cancellation_confirm_poup_heading ?? $siteText['heading_text'] ?? 'Heading' }}</h3>
                         </div>
                         <div class="mt-2 w-full">
                             <p class="can-exp-p text-center">
@@ -1626,9 +1628,9 @@
                 </div>
                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                     <a id="delete-card-link" href="#"
-                        class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">{{ $rideDetailPage->firm_cancellation_confirm_poup_yes_label ?? 'Yes' }}</a>
+                        class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">{{ $rideDetailPage->firm_cancellation_confirm_poup_yes_label ?? $siteText['yes_btn_text'] ?? 'Yes' }}</a>
                     <button type="button" onclick="toggleModalCard('card-modal')"
-                        class="button-exp-fill sm:w-42">{{ $rideDetailPage->firm_cancellation_confirm_poup_no_label ?? 'No' }}</button>
+                        class="button-exp-fill sm:w-42">{{ $rideDetailPage->firm_cancellation_confirm_poup_no_label ?? $siteText['no_btn_text'] ?? 'No' }}</button>
                 </div>
             </div>
         </div>

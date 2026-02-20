@@ -11,15 +11,17 @@ use App\Models\PostRidePageSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class LuggageOptionsSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
@@ -41,7 +43,6 @@ class LuggageOptionsSettingImport implements ToCollection, WithHeadingRow, WithV
         $postRide = PostRidePageSetting::first() ?? PostRidePageSetting::create([]);
         $findRide = FindRidePageSetting::first() ?? FindRidePageSetting::create([]);
 
-        // ensure features settings exist
         $slugs = [
             1 => 'no_luggage',
             2 => 'small_luggage',
@@ -54,27 +55,87 @@ class LuggageOptionsSettingImport implements ToCollection, WithHeadingRow, WithV
             $features[$i] = FeaturesSetting::firstOrCreate(['slug' => $slug]);
         }
 
-        if ($rows->isEmpty()) return;
+        if ($rows->isEmpty()) {
+            Log::warning('No rows found in Luggage Options Excel file');
+            return;
+        }
+
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
+
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
+
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($features, $postRide, $findRide, $rows);
+            Log::info('Luggage Options Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
         $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
 
-        if ($isSingleColumn) {
+        if ($isSingleColumn && $this->languageId !== null) {
             $data = [];
             foreach ($rows as $row) {
                 $name = strtolower(trim($row['field_name'] ?? ''));
-                if (!$name || !in_array($name, $this->fieldsList())) continue;
+                if (!$name || !in_array($name, $this->fieldsList())) {
+                    continue;
+                }
                 $data[$name] = $row['translation_value'] ?? $row['value'] ?? null;
             }
-            $this->applyData($features, $postRide, $findRide, $data);
-        } else {
-            $this->applyData($features, $postRide, $findRide, $firstRow->toArray());
+            $this->applyData($features, $postRide, $findRide, $data, $this->languageId);
+        } elseif ($this->languageId !== null) {
+            $this->applyData($features, $postRide, $findRide, $firstRow->toArray(), $this->languageId);
         }
     }
 
-    protected function applyData(array $features, $postRide, $findRide, array $data): void
+    protected function processAllLanguagesFormat(array $features, $postRide, $findRide, Collection $rows): void
     {
-        $langId = $this->languageId;
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : 'field name';
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $validFields = $this->fieldsList();
+
+        foreach ($languages as $lang) {
+            $langKey = Str::lower($lang->name);
+            if (!isset($nameToId[$langKey])) {
+                continue;
+            }
+            $languageId = $nameToId[$langKey];
+            $data = [];
+            foreach ($rows as $row) {
+                $row = $row->toArray();
+                $fieldName = isset($row[$fieldNameKey]) ? strtolower(trim((string) $row[$fieldNameKey])) : null;
+                if (empty($fieldName) || !in_array($fieldName, $validFields, true)) {
+                    continue;
+                }
+                $colKey = null;
+                foreach ($languageColumns as $col) {
+                    if (Str::lower(trim($col)) === $langKey) {
+                        $colKey = $col;
+                        break;
+                    }
+                }
+                if ($colKey !== null) {
+                    $data[$fieldName] = $row[$colKey] ?? null;
+                }
+            }
+            if (!empty($data)) {
+                $this->applyData($features, $postRide, $findRide, $data, $languageId);
+            }
+        }
+    }
+
+    protected function applyData(array $features, $postRide, $findRide, array $data, ?int $langId = null): void
+    {
+        $langId = $langId ?? $this->languageId;
+        if ($langId === null) {
+            return;
+        }
         // Update feature names and icons per option
         for ($i = 1; $i <= 5; $i++) {
             $nameKey = "luggage_option{$i}";
@@ -124,8 +185,13 @@ class LuggageOptionsSettingImport implements ToCollection, WithHeadingRow, WithV
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'luggage_option1' => 'required|string',
             'luggage_option2' => 'required|string',

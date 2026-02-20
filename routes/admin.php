@@ -79,6 +79,7 @@ use App\Http\Controllers\Api\Admin\{
     ProfilePhotoSettingController,EditProfilePageSettingController,MyStudentCardSettingController,MyReviewSettingController,
     SuccessMessagesSettingController,ErrorController,BillingAdressSettingController, ClaimRewardsController, CoffeeWallPageSettingController, ExtraCareFaqController, FirmCancellationPolicyPageSettingController, ProfileSettingController,
     SecuredCashBookingController,
+    SiteTextSettingController,
     VerifyPhonesController,MyPassengerSettingController,
     NoShowController,
     PackageController,
@@ -120,6 +121,12 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-mobile-find-ride-page-setting', [MobileFindRideSettingController::class, 'show']);
     Route::post('/update-success-messages-setting', [SuccessMessagesSettingController::class, 'update']);
     Route::get('/get-success-messages-setting', [SuccessMessagesSettingController::class, 'show']);
+    Route::get('/get-site-text-setting', [SiteTextSettingController::class, 'index']);
+    Route::get('/export-site-text-setting', [SiteTextSettingController::class, 'export']);
+    Route::post('/import-site-text-setting', [SiteTextSettingController::class, 'import']);
+    Route::post('/store-site-text-setting', [SiteTextSettingController::class, 'store']);
+    Route::post('/update-site-text-setting/{id}', [SiteTextSettingController::class, 'update']);
+    Route::delete('/delete-site-text-setting/{id}', [SiteTextSettingController::class, 'destroy']);
     Route::post('/update-home-page-setting', [HomePageSettingController::class, 'update']);
     Route::get('/get-home-page-setting', [HomePageSettingController::class, 'show']);
     Route::post('/upload-home-page-setting-excel', [HomePageSettingController::class, 'uploadExcel']);
@@ -200,8 +207,12 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-step2-page-setting', [Step2PageSettingController::class, 'show']);
     Route::post('/update-step4-page-setting', [Step4PageSettingController::class, 'update']);
     Route::get('/get-step4-page-setting', [Step4PageSettingController::class, 'show']);
+    Route::get('/download-step4-page-setting-template', [Step4PageSettingController::class, 'downloadTemplate']);
+    Route::post('/upload-step4-page-setting-excel', [Step4PageSettingController::class, 'uploadExcel']);
     Route::post('/update-step5-page-setting', [Step5PageSettingController::class, 'update']);
     Route::get('/get-step5-page-setting', [Step5PageSettingController::class, 'show']);
+    Route::get('/download-step5-page-setting-template', [Step5PageSettingController::class, 'downloadTemplate']);
+    Route::post('/upload-step5-page-setting-excel', [Step5PageSettingController::class, 'uploadExcel']);
     Route::post('/update-contact-us-page-setting', [ContactUsPageSettingController::class, 'update']);
     Route::get('/get-contact-us-page-setting', [ContactUsPageSettingController::class, 'show']);
     Route::post('/update-terms-and-condition-page-setting', [TermsAndConditionPageSettingController::class, 'update']);

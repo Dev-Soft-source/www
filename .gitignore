@@ -39,3 +39,11 @@ CLAUDE.local.md
 public/css/front.css
 public/mix-manifest.json
 public/js/front.js
+
+public/car_images/
+public/driver_liscenses/
+public/flag_icons/
+public/home_page_icons/
+public/student_cards/
+public/users_government_ids/
+public/users_images/

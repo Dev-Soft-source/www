@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\Language;
 use App\Models\Notification;
 use App\Models\PhoneNumber;
+use App\Models\Step5PageSettingDetail;
 use App\Models\Step4PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
@@ -24,51 +25,16 @@ class Step5to5Controller extends Controller
     {
         $user = auth()->user();
         $countries = Country::where('status', '1')->orderBy('name')->get();
-        $languages = Language::all();
-
-        // Language selection
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $step4Page = null;
-
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        if ($selectedLanguage) {
-            $step4Page = Step4PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        }
-
-        $user_id = $user->id;
-
-        // Notifications
-        $notifications = Notification::where('is_delete', 0)
-            ->where(function ($q) use ($user_id) {
-                $q->where('type', '1')->whereHas('ride', fn($q) => $q->where('added_by', $user_id));
-            })
-            ->orWhere(function ($q) use ($user_id) {
-                $q->where('type', '2')->whereHas('booking', fn($q) => $q->where('user_id', $user_id));
-            })
-            ->orWhere(function ($q) use ($user_id) {
-                $q->whereNull('type')->whereHas('receiver', fn($q) => $q->where('id', $user_id));
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+        
+        $step5Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Update step
         $user->update(['step' => 5]);
 
         return view('step5to5', [
-            'step4Page' => $step4Page,
+            'step5Page' => $step5Page,
             'user' => $user,
             'countries' => $countries,
-            'notifications' => $notifications,
-            'languages' => $languages,
-            'selectedLanguage' => $selectedLanguage,
         ]);
     }
 

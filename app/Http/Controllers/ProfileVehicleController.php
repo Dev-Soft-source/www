@@ -26,145 +26,63 @@ class ProfileVehicleController extends Controller
 {
     public function index(Request $request, $lang = null)
     {
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $myVehiclePage = null;
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
+
+        $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+    
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $vehicles = Vehicle::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-
-            return view('profile_vehicle', ['vehicles' => $vehicles, 'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            return view('profile_vehicle', [
+                'vehicles' => $vehicles, 'reviewSetting' => $reviewSetting, 
+                'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 
+                'myVehiclePage' => $myVehiclePage
+                ]);
         } else {
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
+            return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
         }
     }
 
     public function create(Request $request, $lang = null)
     {
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $myVehiclePage = null;
-        $postRidePage = null;
-        $messages = null;
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $myVehiclePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-        $myVehiclePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-        $myVehiclePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-        $myVehiclePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-        $myVehiclePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-        $myVehiclePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-        $myVehiclePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-        $myVehiclePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-        $myVehiclePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-        $myVehiclePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
 
-        $notifications = null;
         $userVehicleCount = 0;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $userVehicleCount = Vehicle::where('user_id', $user_id)->count();
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
         }
 
-        return view('create_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage, 'messages' => $messages, 'userVehicleCount' => $userVehicleCount]);
+        return view('create_vehicle', [
+            'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
+            'ProfileSetting' => $ProfileSetting,
+            'myVehiclePage' => $myVehiclePage, 'userVehicleCount' => $userVehicleCount]);
     }
 
     public function store(Request $request)
@@ -210,17 +128,6 @@ class ProfileVehicleController extends Controller
             }
         }
 
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = $file->getClientOriginalName();
-            $destination_path = public_path('/car_images');
-            $file->move($destination_path, $filename);
-        } elseif ($request->has('existing_image')) {
-            $filename = $request->input('existing_image');
-        } else {
-            $filename = '';
-        }
-
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
@@ -230,7 +137,7 @@ class ProfileVehicleController extends Controller
             'year' => 'required|max:4',
             'car_type' => 'required',
             'primary_vehicle' => 'required',
-            'image' => $request->has('existing_image') ? 'nullable' : 'file|mimes:jpeg,png,jpg,gif|max:10240',
+            'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240',
         ], [], $niceNames);
 
         if ($validator->fails()) {
@@ -243,6 +150,17 @@ class ProfileVehicleController extends Controller
                     ->withInput()
                     ->with('uploaded_image', $filename ?? null);
             }
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = $file->getClientOriginalName();
+            $destination_path = public_path('/car_images');
+            $file->move($destination_path, $filename);
+        } elseif ($request->has('existing_image')) {
+            $filename = $request->input('existing_image');
+        } else {
+            $filename = '';
         }
 
         $remove_image = $request->filled('remove_image') ? $request->remove_image : 0;
@@ -317,91 +235,40 @@ class ProfileVehicleController extends Controller
     {
         session()->forget('message');
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        $selectedLanguage = session('selectedLanguage');
-        $myVehiclePage = null;
-        $postRidePage = null;
-        $messages = null;
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message', 'no_go_back_button_text', 'yes_remove_it_button_text')->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
+        $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         $myVehiclePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-        $myVehiclePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-        $myVehiclePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-        $myVehiclePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-        $myVehiclePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-        $myVehiclePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-        $myVehiclePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-        $myVehiclePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-        $myVehiclePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
         $myVehiclePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-        $myVehiclePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
+        $myVehiclePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($this->selectedLanguage->id)->value('name');
 
         $vehicle = Vehicle::whereId($id)->first();
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('edit_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'vehicle' => $vehicle, 'myVehiclePage' => $myVehiclePage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'myVehiclePage' => $myVehiclePage]);
+        return view('edit_vehicle', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
+        'ProfileSetting' => $ProfileSetting, 'vehicle' => $vehicle, 'myVehiclePage' => $myVehiclePage, 
+        'myVehiclePage' => $myVehiclePage]);
     }
 
     public function update($id, Request $request)
     {
-        // Debugging: Log request data and file size
-        if ($request->hasFile('image')) {
-            \Log::info('Uploaded file size: ' . ($request->file('image')->getSize() / 1024) . ' KB');
-        }
-
         $customMessages = [
             'mimes' => 'The :attribute must be a file of type: jpeg, png',
             'uploaded' => 'The image is not uploaded yet',
@@ -416,41 +283,6 @@ class ProfileVehicleController extends Controller
         // Store old filename for potential deletion
         $oldFilename = isset($attributes['image']) && !empty($attributes['image']) ? $attributes['image'] : null;
 
-        // Handle new image upload - check this FIRST before anything else
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $originalName = $file->getClientOriginalName();
-
-            // Generate new filename with timestamp to ensure uniqueness
-            $filename = time() . '_' . $originalName;
-            $destination_path = public_path('/car_images');
-
-            // Delete old file if it exists and is different from new filename
-            if ($oldFilename && $oldFilename !== $filename && file_exists($destination_path . '/' . $oldFilename)) {
-                @unlink($destination_path . '/' . $oldFilename);
-                \Log::info('Old image deleted: ' . $oldFilename);
-            }
-
-            // Move new file
-            $file->move($destination_path, $filename);
-            \Log::info('New image uploaded: ' . $filename);
-        } elseif ($request->filled('remove_image') && $request->remove_image == 1) {
-            // Handle image removal - delete the file
-            if ($oldFilename && file_exists(public_path('/car_images/' . $oldFilename))) {
-                @unlink(public_path('/car_images/' . $oldFilename));
-                \Log::info('Image file deleted: ' . $oldFilename);
-            }
-            $filename = null;
-            \Log::info('Image removed');
-        } elseif ($request->filled('existing_image')) {
-            // Only use existing_image if no new file was uploaded
-            // existing_image should be just the filename (not full URL)
-            $existingImage = $request->input('existing_image');
-            // Make sure it's just a filename, not a full path
-            $filename = basename($existingImage);
-            \Log::info('Using existing image: ' . $filename);
-        }
-
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
@@ -460,7 +292,8 @@ class ProfileVehicleController extends Controller
             'year' => 'required|max:4',
             'primary_vehicle' => 'required',
             'car_type' => 'required',
-            'image' => $vehicle->image || $request->filled('remove_image') ? 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240' : 'required|file|mimes:jpeg,png,jpg,gif|max:10240',
+            'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240'
+            // 'image' => $vehicle->image || $request->filled('remove_image') ? 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240' : 'required|file|mimes:jpeg,png,jpg,gif|max:10240',
         ], $customMessages);
 
         if ($validator->fails()) {
@@ -473,6 +306,36 @@ class ProfileVehicleController extends Controller
                     ->withInput()
                     ->with('uploaded_image', $filename ?? null);
             }
+        }
+
+        // Handle new image upload - check this FIRST before anything else
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $originalName = $file->getClientOriginalName();
+
+            // Generate new filename with timestamp to ensure uniqueness
+            $filename = time() . '_' . $originalName;
+            $destination_path = public_path('/car_images');
+
+            // Delete old file if it exists and is different from new filename
+            if ($oldFilename && $oldFilename !== $filename && file_exists($destination_path . '/' . $oldFilename)) {
+                @unlink($destination_path . '/' . $oldFilename);
+            }
+
+            // Move new file
+            $file->move($destination_path, $filename);
+        } elseif ($request->filled('remove_image') && $request->remove_image == 1) {
+            // Handle image removal - delete the file
+            if ($oldFilename && file_exists(public_path('/car_images/' . $oldFilename))) {
+                @unlink(public_path('/car_images/' . $oldFilename));
+            }
+            $filename = null;
+        } elseif ($request->filled('existing_image')) {
+            // Only use existing_image if no new file was uploaded
+            // existing_image should be just the filename (not full URL)
+            $existingImage = $request->input('existing_image');
+            // Make sure it's just a filename, not a full path
+            $filename = basename($existingImage);
         }
 
         $remove_image = $request->filled('remove_image') ? $request->remove_image : 0;

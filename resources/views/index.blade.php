@@ -38,7 +38,7 @@
                     </div>
                     <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href=""
-                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href=""
-                            class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</a>
+                            class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div>
                 </div>
             </div>
@@ -102,21 +102,21 @@
                             <a href="{{ route('step1to5', ['lang' => $selectedLanguage->abbreviation]) }}"
                                 class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">{!! session('create_my_profile_btn') !!}</a>
                             <a href="#"
-                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">Close</a>
+                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                         @if(auth()->check() && isset($token))
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center md:hidden">
                             <a href="{{ route('login_with_app', ['lang' => $selectedLanguage->abbreviation, 'token' => $token]) }}"
                                 class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">{!! session('continue_with_app_btn') !!}</a>
                             <a href="#"
-                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">Close</a>
+                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                         @else
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center md:hidden">
                             <a href="{{ route('login_with_app', ['lang' => $selectedLanguage->abbreviation]) }}"
                                 class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">{!! session('continue_with_app_btn') !!}</a>
                             <a href="#"
-                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">Close</a>
+                                class="button-exp-fill" onclick="handleSuccessModalClose(event)">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                         @endif
                     </div>
@@ -206,7 +206,7 @@
                     </div>
                     <div class="flex justify-center items-center">
                         <button onclick="navigateToSearchRoute()" class="bg-primary py-2 px-3 rounded button-exp-fill">
-                            <span class="block md:hidden">Search</span>
+                            <span class="block md:hidden">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
                             <div class="w-auto h-6 hidden md:block">
                                 @isset($homePage->search_field_icon)
                                     <img class="w-full h-full object-contain" src="{{asset('home_page_icons/' . $homePage->search_field_icon)}}" alt="">

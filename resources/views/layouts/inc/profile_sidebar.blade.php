@@ -26,7 +26,7 @@
         </button>
         <div
             class="profile-sidebar-menu bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-3 shadow">
-            <ul class="divide-y">
+            {{-- <ul class="divide-y">
                 <li class="py-2 group transition-all ease-in-out">
                     <a href="{{ Route::currentRouteName() === 'profile' ? '#' : route('profile', ['lang' => $selectedLanguage->abbreviation]) }}"
                         class="text-xl md:text-2xl flex items-center gap-2 text-black font-FuturaMdCnBT">
@@ -38,7 +38,7 @@
                         <span>{{ auth()->user()->first_name }} profile</span>
                     </a>
                 </li>
-            </ul>
+            </ul> --}}
 
             <ul class="">
                 <li class="flex items-center space-x-1 text-xl md:text-2xl mb-2 font-FuturaMdCnBT ">
@@ -196,9 +196,9 @@
             </ul>
 
             <ul class="">
-                <li class="py-1 group transition-all ease-in-out">
+                <li class="py-2 group transition-all ease-in-out">
                     <a href="{{ Route::currentRouteName() === 'passenger_wallet_rides' ? '#' : route('passenger_wallet_rides', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-FuturaMdCnBT flex items-center gap-2 text-black">
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
                         <svg class="{{ Route::currentRouteName() === 'passenger_wallet_rides' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
@@ -216,10 +216,10 @@
                 </li>
             </ul>
 
-            <ul class="md:py-0.5">
-                <li class="group transition-all ease-in-out">
+            <ul class="">
+                <li class="py-2 group transition-all ease-in-out">
                     <a href="{{ Route::currentRouteName() === 'my_cards' ? '#' : route('my_cards', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-FuturaMdCnBT flex items-center gap-2 text-black">
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
                         <svg class="{{ Route::currentRouteName() === 'my_cards' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
@@ -236,10 +236,10 @@
                     </a>
                 </li>
             </ul>
-            <ul class="md:py-0.5">
-                <li class="group transition-all ease-in-out">
+            <ul class="">
+                <li class="py-2 group transition-all ease-in-out">
                     <a href="{{ Route::currentRouteName() === 'payout' ? '#' : route('payout', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-FuturaMdCnBT flex items-center gap-2 text-black">
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
                         <svg class="hidden group-hover:block" xmlns="http://www.w3.org/2000/svg" width="9"
                             height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
@@ -255,7 +255,7 @@
             </ul>
 
             <ul class="">
-                <li class="flex space-x-1 items-center text-xl md:text-2xl mb-2 font-FuturaMdCnBT ">
+                <li class="flex space-x-1 items-center text-xl md:text-2xl mb-2 mt-6 font-FuturaMdCnBT ">
                     {{-- @isset($sitePage->menu_icon_my_reviews)
                         <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->menu_icon_my_reviews)}}" alt="">
                     @endisset --}}
@@ -296,64 +296,10 @@
             </ul>
 
            
-            {{-- <ul class="md:py-0.5">
-                <li class="group transition-all ease-in-out">
-                    <a href="{{ route('terms_conditions', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-medium font-FuturaMdCnBT flex items-center gap-2 text-black">
-                        <svg class="{{ Route::currentRouteName() === 'terms_conditions' ? 'block' : 'hidden group-hover:block' }}"
-                            xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
-                            <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
-                                d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
-                        </svg>
-                        <span>
-                            @isset($ProfilePage->terms_condition_label)
-                                {{ $ProfilePage->terms_condition_label }}
-                            @endisset
-                        </span>
-                    </a>
-                </li>
-            </ul> --}}
-
-            {{-- <ul class="md:py-0.5">
-                <li class="group transition-all ease-in-out">
-                    <a href="{{ route('privacy_policy', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-medium font-FuturaMdCnBT flex items-center gap-2 text-black">
-                        <svg class="{{ Route::currentRouteName() === 'privacy_policy' ? 'block' : 'hidden group-hover:block' }}"
-                            xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
-                            <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
-                                d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
-                        </svg>
-                        <span>
-                            @isset($ProfilePage->privacy_policy_label)
-                                {{ $ProfilePage->privacy_policy_label }}
-                            @endisset
-                        </span>
-                    </a>
-                </li>
-            </ul> --}}
-{{-- 
-            <ul class="md:py-0.5">
-                <li class="group transition-all ease-in-out">
-                    <a href="{{ route('contact_us', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-medium font-FuturaMdCnBT flex items-center gap-2 text-black">
-                        <svg class="{{ Route::currentRouteName() === 'contact_us' ? 'block' : 'hidden group-hover:block' }}"
-                            xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
-                            <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
-                                d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
-                        </svg>
-                        <span>
-                            @isset($ProfilePage->contact_proximaride_label)
-                                {{ $ProfilePage->contact_proximaride_label }}
-                            @endisset
-                        </span>
-                    </a>
-                </li>
-            </ul> --}}
-
-            <ul class="md:py-0.5 divide-y">
-                <li class="group transition-all ease-in-out">
-                    <button type="button" onclick="toggleModal('logout-modal')"
-                        class="text-xl md:text-2xl mb-2 font-FuturaMdCnBT flex items-center gap-2 text-black">
+            <ul class="divide-y">
+                <li class="py-2 group transition-all ease-in-out">
+                    <a href="javascript:void(0)" onclick="toggleModal('logout-modal')"
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
                         <svg class="hidden group-hover:block" xmlns="http://www.w3.org/2000/svg" width="9"
                             height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
@@ -367,14 +313,11 @@
                                 {{ $ProfilePage->logout_label }}
                             @endisset
                         </span>
-                    </button>
+                    </a>
                 </li>
-            </ul>
-
-            <ul class="md:py-0.5 divide-y">
-                <li class="group transition-all ease-in-out">
+                <li class="py-2 group transition-all ease-in-out">
                     <a href="{{ Route::currentRouteName() === 'close_account' ? '#' : route('close_account', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="text-xl md:text-2xl mb-2 font-FuturaMdCnBT flex items-center gap-2 text-black">
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
                         <svg class="{{ Route::currentRouteName() === 'close_account' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"

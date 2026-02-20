@@ -44,27 +44,10 @@ class LoginController extends Controller
         if (!session()->has('url.intended')) {
             session()->put('url.intended', url()->previous());
         }
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $loginPage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                // Retrieve the LoginPageSettingDetail associated with the selected language
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-        return view('login',['loginPage' => $loginPage,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        
+        $loginPage = LoginPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        return view('login',['loginPage' => $loginPage]);
     }
 
     public function store(Request $request)

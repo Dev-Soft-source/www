@@ -7,15 +7,18 @@ use App\Models\PostRidePageSettingDetail;
 use App\Models\PostRidePageSettingSubDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class PostRidePageSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
@@ -35,28 +38,94 @@ class PostRidePageSettingImport implements ToCollection, WithHeadingRow, WithVal
     public function collection(Collection $rows)
     {
         $setting = PostRidePageSetting::first() ?? PostRidePageSetting::create([]);
-        if ($rows->isEmpty()) return;
+        if ($rows->isEmpty()) {
+            Log::warning('No rows found in Post Ride Page Excel file');
+            return;
+        }
+
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
-        $isSingle = isset($keys[0]) && in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
+
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
+
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($setting, $rows);
+            Log::info('Post Ride Page Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
+        $isSingle = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
 
         $data = [];
-        if ($isSingle) {
+        if ($isSingle && $this->languageId !== null) {
             foreach ($rows as $row) {
                 $k = strtolower(trim($row['field_name'] ?? ''));
                 if (in_array($k, $this->detailFields()) || in_array($k, $this->subFields())) {
                     $data[$k] = $row['translation_value'] ?? $row['value'] ?? null;
                 }
             }
-        } else {
+            $this->applyData($setting, $data);
+        } elseif ($this->languageId !== null) {
             $data = $firstRow->toArray();
+            $this->applyData($setting, $data);
         }
+    }
 
+    protected function processAllLanguagesFormat(PostRidePageSetting $setting, Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : (in_array('field name', $headers) ? 'field name' : 'Field Name');
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $detailFields = $this->detailFields();
+        $subFields = $this->subFields();
+
+        foreach ($rows as $row) {
+            $row = $row->toArray();
+            $fieldName = isset($row[$fieldNameKey]) ? strtolower(trim((string) $row[$fieldNameKey])) : null;
+            if (empty($fieldName)) continue;
+            $isDetail = in_array($fieldName, $detailFields, true);
+            $isSub = in_array($fieldName, $subFields, true);
+            if (!$isDetail && !$isSub) continue;
+
+            foreach ($languageColumns as $col) {
+                $langKey = Str::lower(trim($col));
+                if (!isset($nameToId[$langKey])) continue;
+                $languageId = $nameToId[$langKey];
+                $value = $row[$col] ?? null;
+
+                if ($isDetail) {
+                    $detail = PostRidePageSettingDetail::firstOrCreate(
+                        ['post_ride_page_setting_id' => $setting->id, 'language_id' => $languageId],
+                        []
+                    );
+                    $detail->$fieldName = $value;
+                    $detail->save();
+                } else {
+                    $subDetail = PostRidePageSettingSubDetail::firstOrCreate(
+                        ['post_ride_page_id' => $setting->id, 'language_id' => $languageId],
+                        []
+                    );
+                    $subDetail->$fieldName = $value;
+                    $subDetail->save();
+                }
+            }
+        }
+    }
+
+    protected function applyData(PostRidePageSetting $setting, array $data): void
+    {
         $detailPayload = [
             'post_ride_page_setting_id' => $setting->id,
             'language_id' => $this->languageId,
         ];
-        foreach ($this->detailFields() as $f) { $detailPayload[$f] = $data[$f] ?? null; }
+        foreach ($this->detailFields() as $f) {
+            $detailPayload[$f] = $data[$f] ?? null;
+        }
         PostRidePageSettingDetail::updateOrCreate(
             ['post_ride_page_setting_id' => $setting->id, 'language_id' => $this->languageId],
             $detailPayload
@@ -66,7 +135,9 @@ class PostRidePageSettingImport implements ToCollection, WithHeadingRow, WithVal
             'post_ride_page_id' => $setting->id,
             'language_id' => $this->languageId,
         ];
-        foreach ($this->subFields() as $f) { $subPayload[$f] = $data[$f] ?? null; }
+        foreach ($this->subFields() as $f) {
+            $subPayload[$f] = $data[$f] ?? null;
+        }
         PostRidePageSettingSubDetail::updateOrCreate(
             ['post_ride_page_id' => $setting->id, 'language_id' => $this->languageId],
             $subPayload
@@ -75,8 +146,13 @@ class PostRidePageSettingImport implements ToCollection, WithHeadingRow, WithVal
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'name' => 'required|string',
             'meta_keywords' => 'required|string',

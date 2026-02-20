@@ -41,7 +41,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button onclick="closeModal()"
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">Close</button>
+                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">{{ $siteText['close_btn_text'] ?? 'Close' }}</button>
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
 
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
                             d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                     </svg>
                     <span class="text-xl">
-                        Search filters
+                        {{ $siteText['search_filters_btn_text'] ?? 'Search filters' }}
                     </span>
                 </button>
 
@@ -270,20 +270,22 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $driverAgeOptions = [20, 30, 40, 50, 60];
+                                                @endphp
                                                 <select id="driverAge" name=""
                                                     class="bg-gray-100 text-base md:text-lg border-0 text-black rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0"
-                                                        {{ $request->driver_age == 0 ? 'selected' : '' }}>
+                                                    <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_age_placeholder)
                                                             {{ $findRidePage->driver_age_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    <option {{ $request->driver_age == 20 ? 'selected' : '' }}>+20</option>
-                                                    <option {{ $request->driver_age == 30 ? 'selected' : '' }}>+30</option>
-                                                    <option {{ $request->driver_age == 40 ? 'selected' : '' }}>+40</option>
-                                                    <option {{ $request->driver_age == 50 ? 'selected' : '' }}>+50</option>
-                                                    <option {{ $request->driver_age == 60 ? 'selected' : '' }}>+60</option>
+                                                    @foreach ($driverAgeOptions as $age)
+                                                        <option value="{{ $age }}" {{ $request->driver_age == $age ? 'selected' : '' }}>
+                                                            +{{ $age }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -294,29 +296,28 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $driverRatingOptions = [
+                                                        4.5 => '5',
+                                                        4 => '4 and above',
+                                                        3 => '3 and above',
+                                                        2 => '2 and above',
+                                                        1 => '1 and above',
+                                                    ];
+                                                @endphp
                                                 <select id="driverRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0"
-                                                        {{ $request->driver_rating == 0 ? 'selected' : '' }}>
+                                                    <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_rating_placeholder)
                                                             {{ $findRidePage->driver_rating_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    <option value="4.5"
-                                                        {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5</option>
-                                                    <option value="4"
-                                                        {{ $request->driver_rating == 4 ? 'selected' : '' }}>4 and above
-                                                    </option>
-                                                    <option value="3"
-                                                        {{ $request->driver_rating == 3 ? 'selected' : '' }}>3 and above
-                                                    </option>
-                                                    <option value="2"
-                                                        {{ $request->driver_rating == 2 ? 'selected' : '' }}>2 and above
-                                                    </option>
-                                                    <option value="1"
-                                                        {{ $request->driver_rating == 1 ? 'selected' : '' }}>1 and above
-                                                    </option>
+                                                    @foreach ($driverRatingOptions as $value => $text)
+                                                        <option value="{{ $value }}" {{ $request->driver_rating == $value ? 'selected' : '' }}>
+                                                            {{ $text }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -358,55 +359,30 @@
                                                 @endisset
                                             </label>
                                             <div class="mt-2">
+                                                @php
+                                                    $passengerRatingOptions = [13, 14, 15, 16];
+                                                @endphp
                                                 <select id="passengerRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 whitespace-pre-line pr-8"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value=""
-                                                        {{ $request->passenger_rating == '' ? 'selected' : '' }}>
+                                                    <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->passengers_rating_placeholder)
                                                             {{ $findRidePage->passengers_rating_placeholder }}
                                                         @endisset
                                                     </option>
-                                                    @isset($findRidePage->ride_features_option13->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option13->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option13->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option14->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option14->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option14->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option15->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option15->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option15->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->ride_features_option16->features_setting_id)
-                                                        <?php
-                                                        $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option16->name);
-                                                        ?>
-                                                        <option
-                                                            value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
-                                                            {{ $request->passenger_rating == $findRidePage->ride_features_option16->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $dynamicText }}
-                                                        </option>
-                                                    @endisset
+                                                    @foreach ($passengerRatingOptions as $optionNum)
+                                                        @php
+                                                            $optionProperty = 'ride_features_option' . $optionNum;
+                                                            $option = $findRidePage->$optionProperty ?? null;
+                                                            $isSelected = $option && $request->passenger_rating == $option->features_setting_id;
+                                                            $dynamicText = $option ? str_replace('passengers', 'co-passengers', $option->name) : '';
+                                                        @endphp
+                                                        @if ($option && isset($option->features_setting_id))
+                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                                {{ $dynamicText }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -425,36 +401,32 @@
                                             @endisset
                                         </label> --}}
                                             <div class="">
+                                                @php
+                                                    $paymentMethodOptions = [
+                                                        2 => 'payment_methods_option2',
+                                                        3 => 'payment_methods_option3',
+                                                        4 => 'payment_methods_option4',
+                                                    ];
+                                                @endphp
                                                 <select id="payment-method" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
                                                     @isset($findRidePage->payment_methods_option1)
-                                                        <option value=""
-                                                            {{ $request->payment_method == '' ? 'selected' : '' }}>
+                                                        <option value="" {{ $request->payment_method == '' ? 'selected' : '' }}>
                                                             {{ $findRidePage->payment_methods_option1 }}
                                                         </option>
                                                     @endisset
-                                                    @isset($findRidePage->payment_methods_option2->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option2->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option2->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option2->name }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->payment_methods_option3->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option3->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option3->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option3->name }}
-                                                        </option>
-                                                    @endisset
-                                                    @isset($findRidePage->payment_methods_option4->features_setting_id)
-                                                        <option
-                                                            value="{{ $findRidePage->payment_methods_option4->features_setting_id }}"
-                                                            {{ $request->payment_method == $findRidePage->payment_methods_option4->features_setting_id ? 'selected' : '' }}>
-                                                            {{ $findRidePage->payment_methods_option4->name }}
-                                                        </option>
-                                                    @endisset
+                                                    @foreach ($paymentMethodOptions as $optionNum => $optionProperty)
+                                                        @php
+                                                            $option = $findRidePage->$optionProperty ?? null;
+                                                            $isSelected = $option && $request->payment_method == $option->features_setting_id;
+                                                        @endphp
+                                                        @if ($option && isset($option->features_setting_id))
+                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                                {{ $option->name }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -473,59 +445,39 @@
                                             @endisset
                                         </label> --}}
                                             <div class="">
+                                                @php
+                                                    $vehicleTypes = [
+                                                        'convertible' => 'Convertable',
+                                                        'coupe' => 'Coupe',
+                                                        'hatchback' => 'Hatchback',
+                                                        'minivan' => 'Minivan',
+                                                        'sedan' => 'Sedan',
+                                                        'station_wagon' => 'Station wagon',
+                                                        'suv' => 'SUV',
+                                                        'truck' => 'Truck',
+                                                        'van' => 'Van',
+                                                    ];
+                                                @endphp
                                                 <select id="VehicleType" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option {{ $request->vehicle_type == '' ? 'selected' : '' }}
-                                                        value="">
+                                                    <option value="" {{ $request->vehicle_type == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->vehicle_type_placeholder)
                                                             {{ $findRidePage->vehicle_type_placeholder }}
                                                         @endisset
                                                     </option>
-
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_convertible_text ?? 'Convertable' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_coupe_text ?? 'Coupe' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_hatchback_value ?? 'Hatchback' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_hatchback_text ?? 'Hatchback' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_minivan_value ?? 'Minivan' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_minivan_text ?? 'Minivan' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_sedan_value ?? 'Sedan' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_sedan_text ?? 'Sedan' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_station_wagon_value }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_station_wagon_text ?? 'Station wagon' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_suv_value ?? 'SUV' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_suv_text ?? 'SUV' }}
-                                                    </option>
-                                                    <option
-                                                        value="{{ $findRidePage->vehicle_type_truck_value ?? 'Truck' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_truck_text ?? 'Truck' }}
-                                                    </option>
-                                                    <option value="{{ $findRidePage->vehicle_type_van_value ?? 'Van' }}"
-                                                        {{ $request->vehicle_type === ($findRidePage->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
-                                                        {{ $findRidePage->vehicle_type_van_text ?? 'Van' }}
-                                                    </option>
-
+                                                    @foreach ($vehicleTypes as $key => $default)
+                                                        @php
+                                                            $valueProperty = 'vehicle_type_' . $key . '_value';
+                                                            $textProperty = 'vehicle_type_' . $key . '_text';
+                                                            $value = $findRidePage->$valueProperty ?? $default;
+                                                            $text = $findRidePage->$textProperty ?? $default;
+                                                            $isSelected = $request->vehicle_type === $value;
+                                                        @endphp
+                                                        <option value="{{ $value }}" {{ $isSelected ? 'selected' : '' }}>
+                                                            {{ $text }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>
@@ -542,145 +494,39 @@
                                                 $features_check = isset($_GET['features'])
                                                     ? explode(';', $_GET['features'])
                                                     : [];
+                                                
+                                                $featureOptions = [
+                                                    3 => 'wi-fi',
+                                                    4 => 'rating-passengers',
+                                                    5 => 'provide-babyseats',
+                                                    6 => 'passenger-provide',
+                                                    7 => 'take-children',
+                                                    8 => 'passenger-provide1',
+                                                    9 => 'bike-rack',
+                                                    10 => 'ski-rack',
+                                                    11 => 'winter-tires',
+                                                    12 => 'air-conditioning',
+                                                ];
                                             @endphp
-
-                                            @isset($findRidePage->ride_features_option3->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="wi-fi" class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option3->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="wi-fi" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option3->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option3->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option4->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="rating-passengers"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option4->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="rating-passengers" type="checkbox"
-                                                        value="{{ $postRidePage->features_option4->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option5->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="provide-babyseats"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option5->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="provide-babyseats" type="checkbox"
-                                                        value="{{ $postRidePage->features_option5->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option6->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="passenger-provide"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option6->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="passenger-provide" type="checkbox"
-                                                        value="{{ $postRidePage->features_option6->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option7->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="take-children"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option7->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="take-children" type="checkbox"
-                                                        value="{{ $postRidePage->features_option7->features_setting_id }}"
-                                                        {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option8->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="passenger-provide1"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option8->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="passenger-provide1" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option8->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option8->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option9->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="bike-rack" class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option9->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="bike-rack" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option9->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option9->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option10->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="ski-rack" class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option10->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="ski-rack" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option10->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option10->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option11->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="winter-tires"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option11->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="winter-tires" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option11->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option11->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
-                                            @isset($findRidePage->ride_features_option12->features_setting_id)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="air-conditioning"
-                                                        class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">
-                                                            {{ $findRidePage->ride_features_option12->name }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="air-conditioning" type="checkbox"
-                                                        value="{{ $findRidePage->ride_features_option12->features_setting_id }}"
-                                                        {{ in_array($findRidePage->ride_features_option12->features_setting_id, $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
-                                            @endisset
+                                            @foreach ($featureOptions as $optionNum => $inputId)
+                                                @php
+                                                    $optionProperty = 'ride_features_option' . $optionNum;
+                                                    $option = $findRidePage->$optionProperty ?? null;
+                                                    $hasFeatureId = $option && isset($option->features_setting_id);
+                                                    $isChecked = $hasFeatureId && in_array($option->features_setting_id, $features_check);
+                                                @endphp
+                                                @if ($hasFeatureId)
+                                                    <div class="flex items-start justify-between p-3">
+                                                        <label for="{{ $inputId }}" class="font-normal text-gray-900 flex space-x-1">
+                                                            <span class="text-base md:text-lg">{{ $option->name }}</span>
+                                                        </label>
+                                                        <input id="{{ $inputId }}" type="checkbox"
+                                                            value="{{ $option->features_setting_id }}"
+                                                            {{ $isChecked ? 'checked' : '' }}
+                                                            class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                    </div>
+                                                @endif
+                                            @endforeach
                                         </div>
                                     </div>
 
@@ -909,7 +755,7 @@
                                             class="flex items-center gap-2 cursor-pointer select-none font-normal text-gray-900">
                                             <input type="checkbox" id="hide-full-rides"
                                                 class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer">
-                                            <span class="text-base font-medium">Hide Full Rides</span>
+                                            <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
                                         </label>
                                     </div>
 
@@ -1000,7 +846,7 @@
                         <!-- Search Button -->
                         <button onclick="navigateToSearchRoute()"
                             class="font-FuturaMdCnBT bg-blue-500 h-[3.1rem] px-4 flex items-center justify-center text-white rounded-r-md hover:bg-blue-600 transition-colors">
-                            <span class="block md:hidden mr-2">Search</span>
+                            <span class="block md:hidden mr-2">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
                             <img src="{{ asset('home_page_icons/' . $findRidePage->search_field_icon) }}"
                                 class="w-auto h-6" alt="">
                         </button>
@@ -1053,17 +899,7 @@
                                     @if (auth()->user())
                                         @php
                                             $user_id = auth()->user()->id;
-
-                                            // Assuming $ratings is a collection
-                                            $filteredRatings = $ratings
-                                                ->where('status', 1)
-                                                ->where('type', '2')
-                                                ->filter(function ($rating) use ($user_id) {
-                                                    // Check if booking exists and is not null before accessing user_id
-                                                    return $rating->booking && $rating->booking->user_id === $user_id;
-                                                });
-
-                                            $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                            $totalAverage = $ride->getAverageRating(1, 2, $user_id);
                                         @endphp
                                     @endif
                                     @php
@@ -1300,13 +1136,13 @@
                                                                     class="w-8 h-8"
                                                                     src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
                                                                     alt="">
-                                                                Instant booking</a>
+                                                                {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}</a>
                                                         @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
                                                             <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                                                 class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
                                                                     class="w-8 h-8"
                                                                     src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                                    alt="">Request to book</a>
+                                                                    alt="">{{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}</a>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -1544,30 +1380,18 @@
                                                                     {{ $findRidePage->card_section_driven }}
                                                                 @endisset
                                                             </p>
-                                                            @php
-                                                                $filteredRatings = $ratings
-                                                                    ->where('status', 1)
-                                                                    ->where('type', '1')
-                                                                    ->filter(function ($rating) use ($ride) {
-                                                                        return $rating->ride &&
-                                                                            $rating->ride->added_by === $ride->added_by;
-                                                                    });
-
-                                                                $totalAverage =
-                                                                    $filteredRatings->avg('average_rating') ?? 0;
-                                                                $hasReviews = $filteredRatings->count() > 0;
-                                                            @endphp
+                                                            
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center gap-2">
                                                         <span class="font-semibold text-gray-800">
-                                                            @if ($hasReviews)
-                                                                {{ number_format($totalAverage, 1) }}
+                                                            @if ($ride->getHasRatings(1,1))
+                                                                {{ number_format($ride->getAverageRating(1,1), 1) }}
                                                             @else
                                                                 No Reviews @endif
                                                         </span>
 
-                                                        @if ($hasReviews)
+                                                        @if ($ride->getHasRatings(1,1))
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                 fill="currentColor"
                                                                 class="w-6 h-6 text-yellow-500 stroke-gray-600">
@@ -1639,7 +1463,7 @@
                         @isset($findRidePage->search_result_no_found_message)
                             {{ $findRidePage->search_result_no_found_message }}
                         @else
-                            No ride for this location exist
+                            {{ $siteText['no_ride_for_location_text'] ?? 'No ride for this location exist' }}
                         @endisset
                     </h1>
                 </div>
@@ -1797,7 +1621,7 @@
                             <button
                                 class="inline-flex w-full justinline-flex justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
                                 type="button" onclick="toggleModal1('modal-id1')">
-                                Close
+                                {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
                         </div>
                     </div>
@@ -1834,7 +1658,7 @@
                         <button
                             class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"
                             type="button" onclick="toggleModal1('modal-id2')">
-                            Close
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
                         </button>
                     </div>
                 </div>
@@ -1875,22 +1699,21 @@
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                    id="phone-verification-modal-title">Phone Verification Required</h3>
+                                    id="phone-verification-modal-title">{{ $siteText['phone_verification_required_text'] ?? 'Phone Verification Required' }}</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center">To maintain a safe and reliable community, you must have a
-                                    verified phone number before booking or posting a ride.</p>
+                                <p class="can-exp-p text-center">{{ $siteText['phone_verification_description_text'] ?? 'To maintain a safe and reliable community, you must have a verified phone number before booking or posting a ride.' }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                         <button type="button" onclick="goToPhoneVerification()"
                             class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
-                            Verify My Number
+                            {{ $siteText['verify_my_number_btn_text'] ?? 'Verify My Number' }}
                         </button>
                         <button type="button" onclick="closePhoneVerificationModal()"
                             class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
-                            Close
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
                         </button>
                     </div>
                 </div>
@@ -2028,125 +1851,68 @@
 
 
 
-        document.getElementById('driverName').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
+        // Handle Enter key on input fields
+        ['driverName', 'keyword'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        navigateToSearchRoute();
+                    }
+                });
             }
-        })
-
-        document.getElementById('keyword').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                navigateToSearchRoute();
-            }
-        })
-
-        // Initialize an array to store selected features
-        let getFeatures = '{{ isset($_GET['features']) ? $_GET['features'] : '' }}';
-        getFeatures = getFeatures ? getFeatures.split(";").filter(f => f.trim() !== "") : [];
-        let selectedFeatures = getFeatures;
-
-        // Initialize an array to store selected luggages
-        let getLuggages = '{{ isset($_GET['luggage']) ? $_GET['luggage'] : '' }}';
-        getLuggages = getLuggages.split(";");
-        let selectedLuggages = getLuggages;
-
-        // Initialize an array to store selected smoking options
-        let getSmoking = '{{ isset($_GET['smoking']) ? $_GET['smoking'] : '' }}';
-        getSmoking = getSmoking.split(";");
-        let selectedSmoking = getSmoking;
-
-        // Initialize an array to store selected pets
-        let getPets = '{{ isset($_GET['pets']) ? $_GET['pets'] : '' }}';
-        getPets = getPets.split(";");
-        let selectedPets = getPets;
-
-        // Add an event listener to each checkbox
-        document.querySelectorAll('input[type="checkbox"].ride-preferences').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                handleCheckboxChange(checkbox);
-            });
         });
 
-        // Add an event listener to each checkbox
-        document.querySelectorAll('input[type="checkbox"].luggage').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                handleLuggageCheckboxChange(checkbox);
-            });
-        });
+        // Initialize selected arrays from URL parameters
+        @php
+            $getFeatures = isset($_GET['features']) ? $_GET['features'] : '';
+            $getLuggages = isset($_GET['luggage']) ? $_GET['luggage'] : '';
+            $getSmoking = isset($_GET['smoking']) ? $_GET['smoking'] : '';
+            $getPets = isset($_GET['pets']) ? $_GET['pets'] : '';
+        @endphp
+        
+        const parseSelectedArray = (value, filterEmpty = false) => {
+            if (!value) return [];
+            const items = value.split(";");
+            return filterEmpty ? items.filter(f => f.trim() !== "") : items;
+        };
 
-        // Add an event listener to each checkbox
-        document.querySelectorAll('input[type="checkbox"].smoking').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                handleSmokingCheckboxChange(checkbox);
-            });
-        });
+        let selectedFeatures = parseSelectedArray('{{ $getFeatures }}', true);
+        let selectedLuggages = parseSelectedArray('{{ $getLuggages }}');
+        let selectedSmoking = parseSelectedArray('{{ $getSmoking }}');
+        let selectedPets = parseSelectedArray('{{ $getPets }}');
 
-        // Add an event listener to each checkbox
-        document.querySelectorAll('input[type="checkbox"].pet').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                handlePetCheckboxChange(checkbox);
-            });
-        });
-
-        function handleCheckboxChange(checkbox) {
-            const featureValue = checkbox.value;
-
-            // Check if the checkbox is checked
+        // Generic checkbox handler
+        const handleCheckboxChange = (checkbox, selectedArray, allowDuplicates = false) => {
+            const value = checkbox.value;
             if (checkbox.checked) {
-                if (!selectedFeatures.includes(featureValue)) {
-                    selectedFeatures.push(featureValue);
+                if (allowDuplicates || !selectedArray.includes(value)) {
+                    selectedArray.push(value);
                 }
             } else {
-                selectedFeatures = selectedFeatures.filter(item => item !== featureValue);
+                const index = selectedArray.indexOf(value);
+                if (index > -1) {
+                    selectedArray.splice(index, 1);
+                }
             }
+        };
 
-            // Call a function to update the URL with the selected features
-            // navigateToSearchRoute();
-        }
+        // Attach event listeners to all checkbox types
+        const checkboxConfigs = [
+            { selector: '.ride-preferences', array: selectedFeatures, allowDuplicates: false },
+            { selector: '.luggage', array: selectedLuggages, allowDuplicates: true },
+            { selector: '.smoking', array: selectedSmoking, allowDuplicates: true },
+            { selector: '.pet', array: selectedPets, allowDuplicates: true }
+        ];
 
-        function handleLuggageCheckboxChange(checkbox) {
-            const featureValue = checkbox.value;
-
-            // Check if the checkbox is checked
-            if (checkbox.checked) {
-                selectedLuggages.push(featureValue);
-            } else {
-                selectedLuggages = selectedLuggages.filter(item => item !== featureValue);
-            }
-
-            // Call a function to update the URL with the selected features
-            // navigateToSearchRoute();
-        }
-
-        function handleSmokingCheckboxChange(checkbox) {
-            const featureValue = checkbox.value;
-
-            // Check if the checkbox is checked
-            if (checkbox.checked) {
-                selectedSmoking.push(featureValue);
-            } else {
-                selectedSmoking = selectedSmoking.filter(item => item !== featureValue);
-            }
-
-            // Call a function to update the URL with the selected features
-            // navigateToSearchRoute();
-        }
-
-        function handlePetCheckboxChange(checkbox) {
-            const featureValue = checkbox.value;
-
-            // Check if the checkbox is checked
-            if (checkbox.checked) {
-                selectedPets.push(featureValue);
-            } else {
-                selectedPets = selectedPets.filter(item => item !== featureValue);
-            }
-
-            // Call a function to update the URL with the selected features
-            // navigateToSearchRoute();
-        }
+        checkboxConfigs.forEach(config => {
+            document.querySelectorAll(`input[type="checkbox"]${config.selector}`).forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    handleCheckboxChange(checkbox, config.array, config.allowDuplicates);
+                });
+            });
+        });
 
         function SearchRoute(SearchfromValue, SearchtoValue) {
             // Construct the URL with query parameters
@@ -2160,93 +1926,54 @@
         function navigateToSearchRoute() {
             localStorage.setItem('removedRideIds', JSON.stringify([]));
 
-            // Get the values of the input fields
-            const fromValue = document.getElementById('fromInput').value.trim();
-            const toValue = document.getElementById('toInput').value.trim();
-            const dateValue = document.getElementById('dateInput').value;
-            const driverAge = document.getElementById('driverAge').value;
-            const passengerRating = document.getElementById('passengerRating').value;
-            const paymentMethod = document.getElementById('payment-method').value;
-            const driverRating = document.getElementById('driverRating').value;
-            const driverPhone = document.getElementById('driverPhone').checked ? 1 : 0;
-            const driverName = document.getElementById('driverName').value;
-            const keyword = document.getElementById('keyword').value;
-            const VehicleType = document.getElementById('VehicleType').value;
+            // Get form values
+            const formData = {
+                from: document.getElementById('fromInput').value.trim(),
+                to: document.getElementById('toInput').value.trim(),
+                date: document.getElementById('dateInput').value,
+                driver_age: document.getElementById('driverAge').value,
+                driver_rating: document.getElementById('driverRating').value,
+                driver_phone: document.getElementById('driverPhone').checked ? 1 : 0,
+                driver_name: document.getElementById('driverName').value,
+                keyword: document.getElementById('keyword').value,
+                passenger_rating: document.getElementById('passengerRating').value,
+                payment_method: document.getElementById('payment-method').value,
+                vehicle_type: document.getElementById('VehicleType').value,
+                features: selectedFeatures.join(';'),
+                luggage: selectedLuggages.join(';'),
+                smoking: selectedSmoking.join(';'),
+                pets: selectedPets.join(';')
+            };
 
-            // Construct the URL with the selected features as a comma-separated list
-            const featuresParam = selectedFeatures.length > 0 ? selectedFeatures.join(';') : '';
-            // return;
-            const luggage = selectedLuggages.join(';');
-
-            const smokingValue = selectedSmoking.join(';');
-
-            const petsValue = selectedPets.join(';');
-
-            // Get the tooltip error element
+            // Validate Google Places selections
             const fromToError = document.getElementById('fromToError');
-
-            // // Check if "From" or "To" fields are empty
-            // if (fromValue === '' || toValue === '') {
-            //     // Show the tooltip
-            //     if (fromToError) {
-            //         fromToError.classList.remove('hidden');
-
-            //         // Hide the tooltip after 3 seconds
-            //         setTimeout(function() {
-            //             fromToError.classList.add('hidden');
-            //         }, 3000);
-            //     }
-            //     return; // Prevent navigation
-            // }
-
-            // Validate that both inputs contain valid selected places (if Google Places is available)
             if (typeof selectedFromPlace !== 'undefined' && typeof selectedToPlace !== 'undefined') {
-                let isValid = true;
-                let errorMessage = '';
-
-                // Check if "From" field has a valid selected place
-                if (!selectedFromPlace || fromValue !== selectedFromPlace.value) {
-                    isValid = false;
-                    errorMessage = 'Please select a valid location from the suggestions for "From" field.';
+                const errors = [];
+                if (!selectedFromPlace || formData.from !== selectedFromPlace.value) {
+                    errors.push('From');
+                }
+                if (!selectedToPlace || formData.to !== selectedToPlace.value) {
+                    errors.push('To');
                 }
 
-                // Check if "To" field has a valid selected place
-                if (!selectedToPlace || toValue !== selectedToPlace.value) {
-                    isValid = false;
-                    if (errorMessage) {
-                        errorMessage =
-                            'Please select valid locations from the suggestions for both "From" and "To" fields.';
-                    } else {
-                        errorMessage = 'Please select a valid location from the suggestions for "To" field.';
-                    }
-                }
-
-                // If validation fails, show error tooltip
-                if (!isValid) {
+                if (errors.length > 0) {
                     if (fromToError) {
-                        // Update error message if needed (you can customize this)
                         fromToError.classList.remove('hidden');
-
-                        // Hide the tooltip after 3 seconds
-                        setTimeout(function() {
-                            fromToError.classList.add('hidden');
-                        }, 3000);
+                        setTimeout(() => fromToError.classList.add('hidden'), 3000);
                     }
-                    return; // Prevent navigation
+                    return;
                 }
             }
 
-            // Both fields are filled and valid, hide error tooltip if it's showing
-            if (fromToError) {
-                fromToError.classList.add('hidden');
-            }
+            if (fromToError) fromToError.classList.add('hidden');
 
-            // Construct the URL with query parameters
-            let searchUrl =
-                `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${encodeURIComponent(dateValue)}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${encodeURIComponent(driverName)}&keyword=${encodeURIComponent(keyword)}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${encodeURIComponent(VehicleType)}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}`;
+            // Build URL with query parameters
+            const baseUrl = '{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}';
+            const queryParams = Object.entries(formData)
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
 
-            // Navigate to the constructed URL
-            window.location.href = searchUrl;
+            window.location.href = `${baseUrl}?${queryParams}`;
         }
 
         function resetFilters() {
@@ -2255,25 +1982,30 @@
                 checkbox.checked = false;
             });
 
-            // Reset selects
-            document.getElementById('driverAge').value = '0';
-            document.getElementById('passengerRating').value = '';
-            document.getElementById('payment-method').value = '';
-            document.getElementById('driverRating').value = '0';
-            document.getElementById('VehicleType').value = '';
+            // Reset form fields
+            const resetFields = {
+                'driverAge': '0',
+                'passengerRating': '',
+                'payment-method': '',
+                'driverRating': '0',
+                'VehicleType': '',
+                'driverName': '',
+                'keyword': ''
+            };
 
-            // Reset other inputs
+            Object.entries(resetFields).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) element.value = value;
+            });
+
             document.getElementById('driverPhone').checked = false;
-            document.getElementById('driverName').value = '';
-            document.getElementById('keyword').value = '';
 
-            // Clear any stored selections
+            // Clear stored selections
             selectedFeatures = [];
             selectedLuggages = [];
             selectedSmoking = [];
             selectedPets = [];
 
-            // Optionally refresh the page or navigate back
             window.location.href = "{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}";
         }
         // Google Places Autocomplete initialization - Define function before loading Google Maps API
@@ -2308,77 +2040,58 @@
                 }
             );
 
-            // Handle place selection for "From" input
-            fromAutocomplete.addListener('place_changed', function() {
-                const place = fromAutocomplete.getPlace();
+            // Generic handler for place selection
+            const handlePlaceSelection = (place, inputId) => {
                 if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
+                    isSettingPlaceValue = true;
                     const formattedAddress = formatPlaceAddress(place);
-                    selectedFromPlace = {
+                    const placeData = {
                         place_id: place.place_id,
                         formatted_address: formattedAddress,
                         value: formattedAddress
                     };
-                    // Set the formatted address in the input
-                    document.getElementById('fromInput').value = formattedAddress;
-                    // Hide error message if it was showing
+                    document.getElementById(inputId).value = formattedAddress;
                     const fromToError = document.getElementById('fromToError');
                     if (fromToError) fromToError.classList.add('hidden');
-                    // Reset flag after a short delay to allow input event to process
                     setTimeout(() => {
                         isSettingPlaceValue = false;
                     }, 100);
+                    return placeData;
                 }
+                return null;
+            };
+
+            // Handle place selection for "From" input
+            fromAutocomplete.addListener('place_changed', function() {
+                const placeData = handlePlaceSelection(fromAutocomplete.getPlace(), 'fromInput');
+                if (placeData) selectedFromPlace = placeData;
             });
 
             // Handle place selection for "To" input
             toAutocomplete.addListener('place_changed', function() {
-                const place = toAutocomplete.getPlace();
-                if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
-                    const formattedAddress = formatPlaceAddress(place);
-                    selectedToPlace = {
-                        place_id: place.place_id,
-                        formatted_address: formattedAddress,
-                        value: formattedAddress
-                    };
-                    // Set the formatted address in the input
-                    document.getElementById('toInput').value = formattedAddress;
-                    // Hide error message if it was showing
-                    const fromToError = document.getElementById('fromToError');
-                    if (fromToError) fromToError.classList.add('hidden');
-                    // Reset flag after a short delay to allow input event to process
-                    setTimeout(() => {
-                        isSettingPlaceValue = false;
-                    }, 100);
-                }
+                const placeData = handlePlaceSelection(toAutocomplete.getPlace(), 'toInput');
+                if (placeData) selectedToPlace = placeData;
             });
 
-            // Clear selected place when user manually types in "From" input
-            document.getElementById('fromInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
-                    selectedFromPlace = null;
-                }
-            });
+            // Clear selected place when user manually types in inputs
+            const handleInputChange = (inputId, placeStorage) => {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                input.addEventListener('input', function() {
+                    if (isSettingPlaceValue) return;
+                    const currentValue = this.value.trim();
+                    if (placeStorage && currentValue !== placeStorage.value) {
+                        if (inputId === 'fromInput') {
+                            selectedFromPlace = null;
+                        } else {
+                            selectedToPlace = null;
+                        }
+                    }
+                });
+            };
 
-            // Clear selected place when user manually types in "To" input
-            document.getElementById('toInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedToPlace && currentValue !== selectedToPlace.value) {
-                    selectedToPlace = null;
-                }
-            });
+            handleInputChange('fromInput', selectedFromPlace);
+            handleInputChange('toInput', selectedToPlace);
 
             // Initialize selectedFromPlace and selectedToPlace if inputs already have values
             initializeExistingAddresses();
@@ -2386,69 +2099,49 @@
 
         // Function to initialize selectedFromPlace and selectedToPlace from existing input values
         function initializeExistingAddresses() {
-            const fromInput = document.getElementById('fromInput');
-            const toInput = document.getElementById('toInput');
             const geocoder = new google.maps.Geocoder();
 
-            // Initialize "From" address if it has a value
-            if (fromInput && fromInput.value.trim()) {
-                const fromValue = fromInput.value.trim();
+            const initializeAddress = (input, placeStorage) => {
+                if (!input || !input.value.trim()) return;
+                const value = input.value.trim();
                 geocoder.geocode({
-                    address: fromValue + ', Canada',
+                    address: value + ', Canada',
                     componentRestrictions: { country: 'ca' }
                 }, function(results, status) {
                     if (status === 'OK' && results && results.length > 0) {
                         const place = results[0];
                         const formattedAddress = formatPlaceAddress(place);
-                        selectedFromPlace = {
+                        const placeData = {
                             place_id: place.place_id,
                             formatted_address: formattedAddress,
                             value: formattedAddress
                         };
-                        // Update input value to match formatted address
-                        if (fromInput.value !== formattedAddress) {
-                            fromInput.value = formattedAddress;
+                        if (input.id === 'fromInput') {
+                            selectedFromPlace = placeData;
+                        } else {
+                            selectedToPlace = placeData;
+                        }
+                        if (input.value !== formattedAddress) {
+                            input.value = formattedAddress;
                         }
                     } else {
-                        // If geocoding fails, still set a basic place object to allow validation
-                        selectedFromPlace = {
+                        // If geocoding fails, set a basic place object to allow validation
+                        const fallbackData = {
                             place_id: null,
-                            formatted_address: fromValue,
-                            value: fromValue
+                            formatted_address: value,
+                            value: value
                         };
+                        if (input.id === 'fromInput') {
+                            selectedFromPlace = fallbackData;
+                        } else {
+                            selectedToPlace = fallbackData;
+                        }
                     }
                 });
-            }
+            };
 
-            // Initialize "To" address if it has a value
-            if (toInput && toInput.value.trim()) {
-                const toValue = toInput.value.trim();
-                geocoder.geocode({
-                    address: toValue + ', Canada',
-                    componentRestrictions: { country: 'ca' }
-                }, function(results, status) {
-                    if (status === 'OK' && results && results.length > 0) {
-                        const place = results[0];
-                        const formattedAddress = formatPlaceAddress(place);
-                        selectedToPlace = {
-                            place_id: place.place_id,
-                            formatted_address: formattedAddress,
-                            value: formattedAddress
-                        };
-                        // Update input value to match formatted address
-                        if (toInput.value !== formattedAddress) {
-                            toInput.value = formattedAddress;
-                        }
-                    } else {
-                        // If geocoding fails, still set a basic place object to allow validation
-                        selectedToPlace = {
-                            place_id: null,
-                            formatted_address: toValue,
-                            value: toValue
-                        };
-                    }
-                });
-            }
+            initializeAddress(document.getElementById('fromInput'));
+            initializeAddress(document.getElementById('toInput'));
         }
 
         // Format place address to "City, Province, Canada" format
@@ -2533,21 +2226,17 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
+            // Auto-grow textareas
             const autoGrow = (textarea) => {
                 textarea.style.height = 'auto';
                 textarea.style.height = textarea.scrollHeight + 'px';
             };
 
             document.querySelectorAll('textarea').forEach(textarea => {
-                // Base styles (safe, non-breaking)
                 textarea.style.resize = 'none';
                 textarea.style.overflowY = 'hidden';
-
-                // Grow on typing
                 textarea.addEventListener('input', () => autoGrow(textarea));
-
-                // Grow to fit placeholder on load
+                
                 if (!textarea.value && textarea.placeholder) {
                     textarea.value = textarea.placeholder;
                     autoGrow(textarea);
@@ -2557,22 +2246,22 @@
                 }
             });
 
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
+            // Search filter toggle
             const toggle = document.getElementById('search-filter-toggle');
             const close = document.getElementById('search-filter-close');
             const searchFilters = document.getElementById('search-filter');
             const overlay = document.getElementById('search-filter-overlay');
 
-            const toggleSearchFilters = (show) => {
-                searchFilters.classList.toggle('translate-x-full', !show);
-                overlay.classList.toggle('hidden', !show);
-            };
+            if (toggle && close && searchFilters && overlay) {
+                const toggleSearchFilters = (show) => {
+                    searchFilters.classList.toggle('translate-x-full', !show);
+                    overlay.classList.toggle('hidden', !show);
+                };
 
-            toggle.addEventListener('click', () => toggleSearchFilters(true));
-            close.addEventListener('click', () => toggleSearchFilters(false));
-            overlay.addEventListener('click', () => toggleSearchFilters(false));
+                toggle.addEventListener('click', () => toggleSearchFilters(true));
+                close.addEventListener('click', () => toggleSearchFilters(false));
+                overlay.addEventListener('click', () => toggleSearchFilters(false));
+            }
         });
         // Function to show modal with transitions
         function showModal() {

@@ -6,15 +6,18 @@ use App\Models\MyEmailSetting;
 use App\Models\MyEmailSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
 class MyEmailSettingImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    /** @var int|null When null, import expects all_languages format (Field Name + one column per language). */
     protected $languageId;
 
-    public function __construct($languageId)
+    public function __construct($languageId = null)
     {
         $this->languageId = $languageId;
     }
@@ -29,16 +32,70 @@ class MyEmailSettingImport implements ToCollection, WithHeadingRow, WithValidati
     public function collection(Collection $rows)
     {
         $setting = MyEmailSetting::first() ?? MyEmailSetting::create([]);
-        if ($rows->isEmpty()) return;
+        if ($rows->isEmpty()) {
+            Log::warning('No rows found in My Email Excel file');
+            return;
+        }
 
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
-        $isSingleColumn = isset($keys[0]) && (in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys)));
 
-        if ($isSingleColumn) {
-            foreach ($rows as $row) $this->processSingleColumnFormat($setting, $row);
+        $isAllLanguages = $this->languageId === null
+            && (in_array('field_name', $keys) || in_array('field name', $keys))
+            && count($keys) > 1;
+
+        if ($isAllLanguages) {
+            $this->processAllLanguagesFormat($setting, $rows);
+            Log::info('My Email Settings Excel import (all languages) completed successfully');
+            return;
+        }
+
+        $isSingleColumn = in_array('field_name', $keys) && (in_array('value', $keys) || in_array('translation_value', $keys));
+
+        if ($isSingleColumn && $this->languageId !== null) {
+            foreach ($rows as $row) {
+                $this->processSingleColumnFormat($setting, $row);
+            }
         } else {
-            $this->processMultiColumnFormat($setting, $firstRow);
+            if ($this->languageId !== null) {
+                $this->processMultiColumnFormat($setting, $firstRow);
+            }
+        }
+    }
+
+    protected function processAllLanguagesFormat(MyEmailSetting $setting, Collection $rows): void
+    {
+        $firstRow = $rows->first();
+        $headers = array_keys($firstRow->toArray());
+        $fieldNameKey = in_array('field_name', $headers) ? 'field_name' : 'field name';
+        $languageColumns = array_diff($headers, [$fieldNameKey]);
+        $languages = Language::orderBy('id')->get();
+        $nameToId = $languages->mapWithKeys(fn ($lang) => [Str::lower($lang->name) => $lang->id])->toArray();
+        $validFields = $this->fieldsList();
+
+        foreach ($rows as $row) {
+            $row = $row->toArray();
+            $fieldName = isset($row[$fieldNameKey]) ? strtolower(trim((string) $row[$fieldNameKey])) : null;
+            if (empty($fieldName) || !in_array($fieldName, $validFields, true)) {
+                continue;
+            }
+            foreach ($languageColumns as $col) {
+                $langKey = Str::lower(trim($col));
+                if (!isset($nameToId[$langKey])) {
+                    continue;
+                }
+                $languageId = $nameToId[$langKey];
+                $value = $row[$col] ?? null;
+                $detail = MyEmailSettingDetail::firstOrCreate(
+                    [
+                        'email_address_setting_id' => $setting->id,
+                        'language_id' => $languageId,
+                    ],
+                    []
+                );
+                $detail->$fieldName = $value;
+                $detail->save();
+            }
         }
     }
 
@@ -84,8 +141,13 @@ class MyEmailSettingImport implements ToCollection, WithHeadingRow, WithValidati
 
     public function rules(): array
     {
+        if ($this->languageId === null) {
+            return [];
+        }
         $language = Language::find($this->languageId);
-        if (!$language || $language->is_default != '1') return [];
+        if (!$language || $language->is_default != '1') {
+            return [];
+        }
         return [
             'email_description_text' => 'required|string',
             'email_label' => 'required|string',

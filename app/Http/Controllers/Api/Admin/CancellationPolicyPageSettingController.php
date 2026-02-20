@@ -78,42 +78,31 @@ class CancellationPolicyPageSettingController extends Controller
     }
 
     /**
-     * Upload cancellation page settings via Excel file
+     * Upload cancellation page settings via Excel file (all-languages format: Field Name + one column per language).
      */
     public function uploadExcel(Request $request)
     {
         try {
             $request->validate([
-                'language_id' => 'required|exists:languages,id',
                 'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
             ], [
-                'language_id.required' => 'Please select a language',
-                'language_id.exists' => 'Selected language does not exist',
                 'excel_file.required' => 'Please upload an Excel file',
                 'excel_file.file' => 'The uploaded file is not valid',
                 'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
                 'excel_file.max' => 'The file size must not exceed 5MB',
             ]);
 
-            $languageId = $request->language_id;
-            $language = Language::find($languageId);
-
-            if (!$language) {
-                return $this->errorResponse('Language not found', 404);
-            }
-
             try {
-                $import = new CancellationPageSettingImport($languageId);
+                $import = new CancellationPageSettingImport(null);
                 Excel::import($import, $request->file('excel_file'));
 
                 return $this->successResponse(
-                    ['language' => $language->name],
-                    "Cancellation page settings for {$language->name} uploaded successfully from Excel."
+                    [],
+                    'Cancellation page settings for all languages uploaded successfully from Excel.'
                 );
             } catch (ValidationException $e) {
                 $failures = $e->failures();
                 $errors = [];
-
                 foreach ($failures as $failure) {
                     $errors[] = [
                         'row' => $failure->row(),
@@ -122,7 +111,6 @@ class CancellationPolicyPageSettingController extends Controller
                         'values' => $failure->values(),
                     ];
                 }
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation errors in Excel file',
@@ -131,7 +119,6 @@ class CancellationPolicyPageSettingController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Cancellation Page Settings Excel upload error: ' . $e->getMessage());
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to upload Excel file: ' . $e->getMessage(),
@@ -140,22 +127,25 @@ class CancellationPolicyPageSettingController extends Controller
     }
 
     /**
-     * Download Excel template for cancellation page settings
+     * Download Excel template. format=all_languages (default): Field Name + one column per language.
      */
     public function downloadTemplate(Request $request)
     {
         try {
-            $format = $request->get('format', 'single_column');
-            
+            $format = $request->get('format', 'all_languages');
+            $languages = null;
+            $existingData = null;
+            if ($format === 'all_languages') {
+                $languages = Language::orderBy('id')->get();
+                $existingData = CancellationPageSetting::with('cancellationPageSettingDetail')->first();
+            }
             $fileName = 'cancellation_page_settings_template_' . date('Y-m-d') . '.xlsx';
-            
             return Excel::download(
-                new CancellationPageSettingTemplateExport($format),
+                new CancellationPageSettingTemplateExport($format, $languages, $existingData),
                 $fileName
             );
         } catch (\Exception $e) {
             Log::error('Cancellation Page Settings template download error: ' . $e->getMessage());
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to download template: ' . $e->getMessage(),

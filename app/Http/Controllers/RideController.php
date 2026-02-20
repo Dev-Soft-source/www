@@ -290,8 +290,7 @@ class RideController extends Controller
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
-        $ratings = Rating::all();
-
+        
         return view('search_ride', [
             'pinkRideSetting' => $pinkRideSetting,
             'postRidePage' => $postRidePage,
@@ -299,8 +298,7 @@ class RideController extends Controller
             'rides' => $rides,
             'recentSearches' => $recentSearches,
             'request' => $request,
-            'firm_cancellation_discount' => $firm_cancellation_discount,
-            'ratings' => $ratings
+            'firm_cancellation_discount' => $firm_cancellation_discount
         ]);
     }
 
@@ -510,70 +508,6 @@ class RideController extends Controller
 
 
         return view('edit_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'postRidePage' => $postRidePage, 'postRideSubDetailPage' => $postRideSubDetailPage, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'edit']);
-    }
-
-    /**
-     * Create ride_detail rows for every segment pair (i,j) with i<j so the ride appears
-     * in all applicable search results (e.g. Montreal–Ottawa–Kingston–Toronto appears for
-     * Montreal→Ottawa, Montreal→Kingston, Montreal→Toronto, Ottawa→Kingston, Ottawa→Toronto, Kingston→Toronto).
-     * Consecutive legs (j-i==1) are assumed already saved; this adds only composite segments (j-i>1).
-     */
-    private function saveCompositeSegmentPairsForRide(Ride $ride, array $points, array $legPrices, array $legDistances, array $legDurations, string $rideDate, string $rideTime, $adminSetting = null): void
-    {
-        $n = count($points) - 1;
-        if ($n < 2) {
-            return;
-        }
-        $compositePairs = [];
-        for ($i = 0; $i <= $n; $i++) {
-            for ($j = $i + 2; $j <= $n; $j++) {
-                $compositePairs[] = ['dep' => $points[$i], 'dest' => $points[$j]];
-            }
-        }
-        foreach ($compositePairs as $pair) {
-            RideDetail::where('ride_id', $ride->id)
-                ->where('default_ride', 0)
-                ->where('departure', $pair['dep'])
-                ->where('destination', $pair['dest'])
-                ->delete();
-        }
-        for ($i = 0; $i <= $n; $i++) {
-            for ($j = $i + 2; $j <= $n; $j++) {
-                $segPrice = 0;
-                $segDistance = 0;
-                $segDuration = 0;
-                for ($k = $i; $k < $j; $k++) {
-                    $segPrice += (float)($legPrices[$k] ?? 0);
-                    $segDistance += (float)($legDistances[$k] ?? 0);
-                    $segDuration += (float)($legDurations[$k] ?? 0);
-                }
-                $rideDetail = new RideDetail();
-                $rideDetail->ride_id = $ride->id;
-                $rideDetail->departure = $points[$i];
-                $rideDetail->destination = $points[$j];
-                $rideDetail->default_ride = 0;
-                $rideDetail->total_distance = $segDistance;
-                $rideDetail->total_duration = $segDuration;
-                $rideDetail->price = $segPrice;
-                $rideDetail->time = $rideTime;
-                $rideDetail->date = $rideDate;
-                if ($adminSetting && $ride->date && $ride->time && $segDuration > 0) {
-                    $rideDateTime = Carbon::parse("$ride->date $ride->time");
-                    $cumulativeSeconds = 0;
-                    for ($k = 0; $k < $j; $k++) {
-                        $cumulativeSeconds += (float)($legDurations[$k] ?? 0);
-                    }
-                    $rideDateTime->addSeconds((int)$cumulativeSeconds);
-                    $rideDateTime->addHours($adminSetting->destination_hours ?? 0);
-                    $rideDetail->destination_time = $rideDateTime->toTimeString();
-                    $rideDetail->destination_date = $rideDateTime->toDateString();
-                    $rideDateTime->addHours($adminSetting->ride_completed_hours ?? 0);
-                    $rideDetail->completed_time = $rideDateTime->toTimeString();
-                    $rideDetail->completed_date = $rideDateTime->toDateString();
-                }
-                $rideDetail->save();
-            }
-        }
     }
 
     public function UpdateRide($lang, $ride_id, Request $request)
@@ -1117,11 +1051,6 @@ class RideController extends Controller
             ->whereNotIn('id', $submittedExtraIds)
             ->delete();
 
-        $pointsForComposite = [];
-        $legPricesForComposite = [];
-        $legDistancesForComposite = [];
-        $legDurationsForComposite = [];
-
         if (isset($request->from_spot) && !empty($request->from_spot)) {
             foreach ($request->from_spot as $key => $from_spot) {
                 $duration = 0;
@@ -1156,14 +1085,6 @@ class RideController extends Controller
                 if ($distance != 0) {
                     $distance = round(($distance / 1000), 2);
                 }
-
-                if ($key === 0) {
-                    $pointsForComposite[] = $request->from_spot[$key];
-                }
-                $pointsForComposite[] = $request->to_spot[$key];
-                $legPricesForComposite[] = $request->price_spot[$key] ?? 0;
-                $legDistancesForComposite[] = $distance;
-                $legDurationsForComposite[] = $duration;
 
                 if (isset($request->ride_detail_ids) && isset($request->ride_detail_ids[$key]) && $request->ride_detail_ids[$key] != "0") {
                     $rideDetail = RideDetail::where('id', $request->ride_detail_ids[$key])->first();
@@ -1212,18 +1133,6 @@ class RideController extends Controller
                 }
                 $rideDetail->save();
             }
-
-            $rideDateFormatted = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
-            $this->saveCompositeSegmentPairsForRide(
-                $ride,
-                $pointsForComposite,
-                $legPricesForComposite,
-                $legDistancesForComposite,
-                $legDurationsForComposite,
-                $rideDateFormatted,
-                $request->time,
-                $adminSetting
-            );
         }
 
         // Check if the ride is recurring
@@ -2356,11 +2265,6 @@ class RideController extends Controller
         }
         $rideDetail->save();
 
-        $pointsForComposite = [];
-        $legPricesForComposite = [];
-        $legDistancesForComposite = [];
-        $legDurationsForComposite = [];
-
         if (isset($request->from_spot) && !empty($request->from_spot)) {
             foreach ($request->from_spot as $key => $from_spot) {
                 if (
@@ -2402,14 +2306,6 @@ class RideController extends Controller
                 if ($distance != 0) {
                     $distance = round(($distance / 1000), 2);
                 }
-
-                if ($key === 0) {
-                    $pointsForComposite[] = $request->from_spot[$key];
-                }
-                $pointsForComposite[] = $request->to_spot[$key];
-                $legPricesForComposite[] = $request->price_spot[$key] ?? 0;
-                $legDistancesForComposite[] = $distance;
-                $legDurationsForComposite[] = $duration;
 
                 $rideDetail = new RideDetail();
                 $rideDetail->ride_id = $initialRide->id;
@@ -2455,18 +2351,6 @@ class RideController extends Controller
                 }
                 $rideDetail->save();
             }
-
-            $rideDateFormatted = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
-            $this->saveCompositeSegmentPairsForRide(
-                $initialRide,
-                $pointsForComposite,
-                $legPricesForComposite,
-                $legDistancesForComposite,
-                $legDurationsForComposite,
-                $rideDateFormatted,
-                $request->time,
-                $adminSetting
-            );
         }
 
 

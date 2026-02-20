@@ -50,8 +50,8 @@
                     <label for=""> @isset($myVehiclePage->vehicle_type_label)
                         {{ $myVehiclePage->vehicle_type_label }}
                     @endisset
-                     <span class="text-red-500">*</span></label>
-                    <select id="type" name="type" class="block mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                    <span class="text-red-500">*</span></label>
+                    <select id="type" name="type" class="block mt-1 border w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         <option value="" {{ old('type') === '' ? 'selected' : '' }}>
                             {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                         </option>
@@ -274,9 +274,9 @@
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <button id="remove-photo" class="button-exp-fill sm:w-24">
-                    {{ $messages->yes_remove_it_button_text ?? "Yes" }}
+                    {{ $successMessage->yes_remove_it_button_text ?? "Yes" }}
                 </button>
-                <button type="button" onclick="toggleModalCard('card-modal-1')" class="button-exp-fill sm:w-24">{{ $messages->no_go_back_button_text ?? "No" }}</button>
+                <button type="button" onclick="toggleModalCard('card-modal-1')" class="button-exp-fill sm:w-24">{{ $successMessage->no_go_back_button_text ?? "No" }}</button>
             </div>
         </div>
     </div>
@@ -297,7 +297,7 @@
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start justify-center">
                         <div class="text-3xl text-center font-FuturaMdCnBT text-black">
-                            {{ $messages->alert_label ?? "Alert"}}
+                            {{ $successMessage->alert_label ?? "Alert"}}
                         </div>
                     </div>
                     <div class="mt-2 w-full">
@@ -306,8 +306,8 @@
                 </div>
                 <!--footer-->
                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                    <a href="#" class="no-button inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">{{ $messages->no_go_back_button_text ?? "No, go back"}}</a>
-                    <a href="#" class="yes-button inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">{{ $messages->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
+                    <a href="#" class="no-button inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">{{ $successMessage->no_go_back_button_text ?? "No, go back"}}</a>
+                    <a href="#" class="yes-button inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">{{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SiteText extends Model
 {
@@ -11,12 +12,11 @@ class SiteText extends Model
 
     protected $fillable = [
         'slug',
-        'language_id',
         'text',
     ];
 
-    public function language()
+    public function details(): HasMany
     {
-        return $this->belongsTo(Language::class);
+        return $this->hasMany(SiteTextDetail::class, 'slug_id');
     }
 }
