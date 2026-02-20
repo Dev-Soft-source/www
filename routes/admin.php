@@ -211,6 +211,8 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/upload-step4-page-setting-excel', [Step4PageSettingController::class, 'uploadExcel']);
     Route::post('/update-step5-page-setting', [Step5PageSettingController::class, 'update']);
     Route::get('/get-step5-page-setting', [Step5PageSettingController::class, 'show']);
+    Route::get('/download-step5-page-setting-template', [Step5PageSettingController::class, 'downloadTemplate']);
+    Route::post('/upload-step5-page-setting-excel', [Step5PageSettingController::class, 'uploadExcel']);
     Route::post('/update-contact-us-page-setting', [ContactUsPageSettingController::class, 'update']);
     Route::get('/get-contact-us-page-setting', [ContactUsPageSettingController::class, 'show']);
     Route::post('/update-terms-and-condition-page-setting', [TermsAndConditionPageSettingController::class, 'update']);
