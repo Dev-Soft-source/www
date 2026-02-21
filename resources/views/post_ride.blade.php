@@ -1121,7 +1121,6 @@
                                         </div>
                                     @endif
                                 </div>
-                            @enderror
                         </div>
                         <div class="mt-6">
                             <label class="block mb-2 font-medium text-gray-900">
