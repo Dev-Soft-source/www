@@ -35,6 +35,7 @@
                             <x-form.input 
                                 label="{{ $step1Page->first_name_label }}"
                                 name="first_name" 
+                                :value="$user->first_name ?? ''"
                                 required=true
                                 type="text" 
                                 class=""
@@ -44,6 +45,7 @@
                             <x-form.input 
                                 label="{{ $step1Page->last_name_label }}"
                                 name="last_name" 
+                                :value="$user->last_name ?? ''"
                                 required=true
                                 type="text" 
                                 class=""

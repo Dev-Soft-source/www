@@ -129,7 +129,10 @@ class Step3to5Controller extends Controller
             $filename = '';
         }
 
-        // Create the vehicle record
+        // Set any existing vehicles as non-primary so the new one can be primary by default
+        Vehicle::where('user_id', auth()->user()->id)->update(['primary_vehicle' => 0]);
+
+        // Create the vehicle record (primary by default)
         Vehicle::create([
                 'user_id' => auth()->user()->id,
                 'make' => $request->make ?? '',
@@ -141,6 +144,7 @@ class Step3to5Controller extends Controller
                 'car_type' => $request->car_type ?? '',
                 'image' => $filename,
                 'original_image' => $filename,
+                'primary_vehicle' => 1,
             ]);
 
         // Move user to step 4 after vehicle is added
