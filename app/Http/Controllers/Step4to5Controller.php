@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Language;
 use App\Models\Notification;
-use App\Models\Step4PageSettingDetail;
+use App\Models\Step5PageSettingDetail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class Step4to5Controller extends Controller
     {
         $user = auth()->user();
 
-        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         User::whereId($user->id)->update([
             'step' => '4'
@@ -31,7 +31,7 @@ class Step4to5Controller extends Controller
     {
         $selectedLanguage = $this->selectedLanguage;
 
-        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $niceNames = [
             'driver_liscense' => isset($step4Page->driver_license_error) ? $step4Page->driver_license_error : '',
         ];

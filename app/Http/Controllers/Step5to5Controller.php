@@ -6,7 +6,6 @@ use App\Models\Country;
 use App\Models\Language;
 use App\Models\Notification;
 use App\Models\PhoneNumber;
-use App\Models\Step5PageSettingDetail;
 use App\Models\Step4PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
@@ -26,7 +25,7 @@ class Step5to5Controller extends Controller
         $user = auth()->user();
         $countries = Country::where('status', '1')->orderBy('name')->get();
         
-        $step5Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step5Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Update step
         $user->update(['step' => 5]);
