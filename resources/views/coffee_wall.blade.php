@@ -82,8 +82,7 @@
 
                                                     <div class="">
                                                         <div class="bg-white p-4">
-                                                            <ul id="packages-dropdown"
-                                                                class="my-8 grid grid-cols-2 md:grid-cols-6 gap-4">
+                                                            <ul id="packages-dropdown" class="my-8 grid grid-cols-2 md:grid-cols-6 gap-4">
                                                                 @foreach ($packages as $package)
                                                                     <li>
                                                                         <input type="radio"
