@@ -68,9 +68,9 @@
 <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
     <form method="POST"
         @isset($ride->booking_method->features_setting_id)
-            @if ($ride->booking_method->features_setting_id == $postRidePage->booking_option1)
+            @if ($ride->booking_method->features_setting_id == ($postRidePage->booking_option1->features_setting_id ?? null))
                 action="{{ route('update_instant_booking', $booking->id) }}"
-            @elseif ($ride->booking_method->features_setting_id == $postRidePage->booking_option2)
+            @elseif ($ride->booking_method->features_setting_id == ($postRidePage->booking_option2->features_setting_id ?? null))
                 action="{{ route('update_booking_request', $booking->id) }}"
             @endif
         @endisset

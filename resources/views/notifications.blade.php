@@ -37,10 +37,8 @@
               </div>
               <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <input type="hidden" id="notificationId">
-                  <a href="#" onclick="closeModal()"
-                      class="button-exp-fill">{{ $successMessage->cancel_button ??'Close'}} </a>
-                      <a href="#" onclick="delete_notification()"
-                      class="button-exp-fill">{{ $successMessage->delete_button?? 'Yes'}} </a>
+                  <a href="#" onclick="closeModal()" class="button-exp-fill">{{ $successMessage->cancel_button ??'Close'}} </a>
+                  <a href="#" onclick="delete_notification()" class="button-exp-fill">{{ $successMessage->delete_button?? 'Yes'}} </a>
               </div>
           </div>
       </div>
@@ -48,7 +46,7 @@
 </div>
     <div class="container mx-auto p-4">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl md:text-3xl font-bold font-FuturaMdCnBT text-gray-900">{{ $siteText['all_notifications_heading'] }}</h1>
+            <h1 class="text-2xl md:text-3xl font-bold font-FuturaMdCnBT text-gray-800 mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
             <div class="flex items-center gap-3">
                 @if ($notifications && $notifications->where('is_read', 0)->count() > 0)
                     <button type="button" onclick="markAllAsRead()" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1">
@@ -68,7 +66,7 @@
                     @foreach ($notifications as $notification)
                         @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
                             <li class="relative {{ $notification->is_read == 0 ? 'bg-blue-50 border-l-4 border-l-primary' : 'bg-white' }} hover:bg-gray-50 transition-colors">
-                                <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-1 px-3">
+                                <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-2 px-3">
                                     Delete
                                 </button>
                                 @php
