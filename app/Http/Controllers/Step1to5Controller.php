@@ -21,7 +21,7 @@ class Step1to5Controller extends Controller
 
         $step1Page = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $selectLocationSettingPage = SelectLocationSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
+        // Get location from IP address
         $ip = request()->ip();
         $location = geoip()->getLocation($ip);
         
