@@ -590,8 +590,8 @@
                                         @if ($booking->passenger)
                                             <div class="flex items-center space-x-2 w-full no-scrollbar overflow-x-auto">
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
-                                                    {{-- <img class="w-full h-full rounded-full object-cover"
-                                                        src="{{ $booking->passenger->profile_image }}" alt=""> --}}
+                                                    <img class="w-full h-full rounded-full object-cover"
+                                                        src="{{ $booking->passenger->profile_image }}" alt=""> 
                                                         
                                                     {{-- @if (count($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)) > 0)
                                                         <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">Review passenger</a>
@@ -634,10 +634,12 @@
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_age_label ?? 'Age' }}:
                                                             <span>{{ $age }}</span></p>
+                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_gender_label ?? 'Gender' }}:
                                                             <span>{{ $booking->passenger->gender }}</span></p>
+                                                        <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         @php
                                                             $user_id = $booking->passenger->id;
 

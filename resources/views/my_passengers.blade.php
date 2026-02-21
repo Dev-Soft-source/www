@@ -108,7 +108,7 @@
                                         // dd($exist);
                                     @endphp
                                 @endif
-                                @if (strtotime($ride->date) < strtotime('today') ||
+                                <!-- @if (strtotime($ride->date) < strtotime('today') ||
                                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
                                     @if (strtotime($ride->completed_date) > strtotime('today') ||
                                             (strtotime($ride->completed_date) == strtotime('today') && strtotime($ride->completed_time) > strtotime('now')))
@@ -130,13 +130,13 @@
                                             </div>
                                         @endif
                                     @endif
-                                @endif
+                                @endif -->
                                 @if (strtotime($ride->date) < strtotime('today') ||
                                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
                                     @php
                                         // Calculate the difference in days between today and the ride's date
-$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-// Add the leave review days to the ride's DateTime
+                                        $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+                                        // Add the leave review days to the ride's DateTime
                                         $reviewDateTime = clone $rideDateTime;
                                         $reviewDateTime->add(new DateInterval('P' . $setting->leave_review_days . 'D'));
 
@@ -198,12 +198,12 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
 
     <div id="bookingModal" class="hidden fixed z-50 inset-0 overflow-y-auto">
         <div class="relative z-50">
-            <div id="close-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div id="booking-modal-backdrop" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
-                        <button type="button" id="close-modal"
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        <button type="button" id="close-booking-modal-btn"
                             class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -230,7 +230,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="button" id="close-modal"
+                            <button type="button" id="close-booking-modal"
                                 class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
                                 {{ $successMessage->popup_close_btn_text ?? 'Close' }}
                             </button>
@@ -242,12 +242,12 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
     </div>
     <div id="revertModal" class="hidden fixed z-50 inset-0 overflow-y-auto">
         <div class="relative z-50">
-            <div id="close-revert-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div id="revert-modal-backdrop" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
-                        <button type="button" id="close-revert-modal"
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        <button type="button" id="close-revert-modal-btn"
                             class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -271,11 +271,11 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button type="button" id="take-me-back-modal"
-                                class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
+                                class="inline-flex w-42 justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3">
                                 {{ $successMessage->cancel_noshow_take_me_back ?? 'No take me back' }}
                             </button>
-                            <button type="button" id="close-revert-modal"
-                                class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
+                            <button type="button" id="confirm-revert-modal"
+                                class="inline-flex w-42 justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3">
                                 {{ $successMessage->confirm_cancel_noshow ?? 'Yes' }}
                             </button>
                         </div>
@@ -329,68 +329,77 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
         });
 
 
-        document.addEventListener('DOMContentLoaded', function() {
-            let selectedBookingId = null;
+        var selectedRevertBookingId = null;
 
+        document.addEventListener('DOMContentLoaded', function() {
             // Step 1: Listen for clicks on the revert button
             document.querySelectorAll('#revertNoShowDriverButton').forEach(button => {
                 button.addEventListener('click', function() {
-                    selectedBookingId = this.getAttribute('data-booking-id');
-                    console.log('Selected Booking ID:', selectedBookingId);
+                    selectedRevertBookingId = this.getAttribute('data-booking-id');
+                    console.log('Selected Booking ID:', selectedRevertBookingId);
 
                     // Show the modal
                     const modal = document.getElementById('revertModal');
-                    modal.classList.remove('hidden');
-                });
-            });
-
-            // Step 2: Handle the click on the "Yes" button in the modal
-            const confirmButton = document.getElementById('close-revert-modal');
-            confirmButton.addEventListener('click', function() {
-                if (!selectedBookingId) return;
-
-                $.ajax({
-                    url: '{{ route('revert_no_show_passenger') }}',
-                    type: 'POST',
-                    data: {
-                        booking_id: selectedBookingId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        console.log('Seats on hold:', response);
-
-                        // Update the modal message
-                        const modalMessageElement = document.querySelector(
-                            '#bookingModal .text-sm.text-gray-500');
-                        if (modalMessageElement) {
-                            modalMessageElement.textContent = response.message ||
-                                'Action completed.';
-                        }
-
-                        // Optionally hide the modal
-                        const modal = document.getElementById('revertModal');
-                        modal.classList.add('hidden');
-                        window.location.reload();
-
-                        // Clear stored ID
-                        selectedBookingId = null;
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
+                    if (modal) modal.classList.remove('hidden');
                 });
             });
         });
 
-        document.getElementById('close-modal').addEventListener('click', function() {
+        // Step 2: Handle click on "Yes" (confirm) button via delegation so it always works
+        document.addEventListener('click', function(e) {
+            var confirmBtn = e.target.id === 'confirm-revert-modal' ? e.target : (e.target.closest && e.target.closest('#confirm-revert-modal'));
+            if (!confirmBtn) return;
+            if (!selectedRevertBookingId) return;
+
+            $.ajax({
+                url: '{{ route('revert_no_show_passenger') }}',
+                type: 'POST',
+                data: {
+                    booking_id: selectedRevertBookingId,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    console.log('Revert response:', response);
+                    var modal = document.getElementById('revertModal');
+                    if (modal) modal.classList.add('hidden');
+                    selectedRevertBookingId = null;
+                    window.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Something went wrong. Please try again.');
+                }
+            });
+        });
+
+        function closeBookingModal() {
             const modal = document.getElementById('bookingModal');
+            if (modal) modal.classList.add('hidden');
             window.location.reload();
-            modal.classList.add('hidden');
+        }
+        var closeBookingEls = ['close-booking-modal', 'close-booking-modal-btn', 'booking-modal-backdrop'];
+        closeBookingEls.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('click', closeBookingModal);
         });
 
         document.getElementById('take-me-back-modal').addEventListener('click', function() {
             const modal = document.getElementById('revertModal');
             modal.classList.add('hidden');
         });
+
+        // Close revert modal when X button or backdrop is clicked
+        const closeRevertBtn = document.getElementById('close-revert-modal-btn');
+        if (closeRevertBtn) {
+            closeRevertBtn.addEventListener('click', function() {
+                document.getElementById('revertModal').classList.add('hidden');
+            });
+        }
+        const revertBackdrop = document.getElementById('revert-modal-backdrop');
+        if (revertBackdrop) {
+            revertBackdrop.addEventListener('click', function() {
+                document.getElementById('revertModal').classList.add('hidden');
+            });
+        }
     </script>
 @endsection
