@@ -797,9 +797,10 @@ class BookingController extends Controller
                 }
             }
             
-            // For passengers booking Pink Rides, require government ID
+            // For passengers booking Pink Rides, require government ID (check all possible ID fields)
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
-                if (empty($user->government_id) && empty($user->driver_license_upload)) {
+                $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
+                if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Pink Rides. Please upload your government ID or driver\'s license in your profile.']);
                 }
             }
@@ -807,9 +808,10 @@ class BookingController extends Controller
 
         // Check if ride has Extra Care feature (feature ID 2)
         if (in_array('2', $featuresArray)) {
-            // For passengers booking Extra Care Rides, require government ID
+            // For passengers booking Extra Care Rides, require government ID (check all possible ID fields)
             if ($folkRideSetting && $folkRideSetting->driver_license === '1') {
-                if (empty($user->government_id) && empty($user->driver_license_upload)) {
+                $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
+                if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Extra Care Rides. Please upload your government ID or driver\'s license in your profile.']);
                 }
             }
@@ -3695,9 +3697,10 @@ class BookingController extends Controller
                 }
             }
             
-            // For passengers booking Pink Rides, require government ID
+            // For passengers booking Pink Rides, require government ID (check all possible ID fields)
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
-                if (empty($user->government_id) && empty($user->driver_license_upload)) {
+                $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
+                if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Pink Rides. Please upload your government ID or driver\'s license in your profile.']);
                 }
             }
@@ -3705,9 +3708,10 @@ class BookingController extends Controller
 
         // Check if ride has Extra Care feature (feature ID 2)
         if (in_array('2', $featuresArray)) {
-            // For passengers booking Extra Care Rides, require government ID
+            // For passengers booking Extra Care Rides, require government ID (check all possible ID fields)
             if ($folkRideSetting && $folkRideSetting->driver_license === '1') {
-                if (empty($user->government_id) && empty($user->driver_license_upload)) {
+                $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
+                if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Extra Care Rides. Please upload your government ID or driver\'s license in your profile.']);
                 }
             }
