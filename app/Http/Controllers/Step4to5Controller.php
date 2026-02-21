@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Language;
 use App\Models\Notification;
-use App\Models\Step5PageSettingDetail;
+use App\Models\Step4PageSettingDetail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,7 +15,11 @@ class Step4to5Controller extends Controller
     {
         $user = auth()->user();
 
+<<<<<<< HEAD
+        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+=======
         $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+>>>>>>> b9da535cea7545494ed25a254bf4f97735206ad4
 
         User::whereId($user->id)->update([
             'step' => '4'

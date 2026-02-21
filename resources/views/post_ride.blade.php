@@ -99,61 +99,149 @@
         transition: height 0.35s ease-out;
     }
 </style>
+4
 @endsection
 
 @section('content')
-
-{{-- Early function definitions to prevent "not defined" errors on page load --}}
-<script>
-    // Placeholder functions that will be properly initialized after jQuery loads
-    function fromInput(index) {
-        // Will be overwritten when full script loads
-        if (typeof $ !== 'undefined' && typeof debounce !== 'undefined') {
-            debounce(function() {
-                let searchTerm = $('#from_spot_' + index).val();
-                if (searchTerm.length >= 2) {
-                    let searchData = $('#to_spot_' + index).val();
-                    if (typeof fetchCities !== 'undefined') {
-                        fetchCities(searchTerm, searchData, 'from_spot', index);
+    <div class="container px-4 mx-auto my-14 page-post_a_ride">
+        @if (session('error'))
+            <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                        <div
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                            <button type="button" onclick="closeModal()"
+                                class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <!-- <div
+                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                        </svg>
+                                    </div> -->
+                                </div>
+                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <div class="">
+                                        <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                            id="modal-title">{!! session('heading') !!}</h3>
+                                    </div>
+                                    <div class="mt-2 w-full">
+                                        <p class="can-exp-p text-center">{!! session('error') !!}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                                <button type="button" onclick="closeModal()"
+                                    class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">
+                                    Close
+                                </button>
+                                {{-- <a href=""
+                                class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a> --}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+        @if (session('price_warning'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const warning = @json(session('price_warning'));
+                    if (warning) {
+                        showPriceWarningModal(function() {
+                            // User clicked "Keep Current Price" - submit the form
+                            const formElement = document.getElementById('post-ride-form') || document.querySelector(
+                                'form');
+                            if (formElement) {
+                                // Create a hidden input to bypass validation on next submit
+                                const bypassInput = document.createElement('input');
+                                bypassInput.type = 'hidden';
+                                bypassInput.name = 'bypass_price_validation';
+                                bypassInput.value = '1';
+                                formElement.appendChild(bypassInput);
+                                // Remove the event listener to prevent re-validation
+                                const newForm = formElement.cloneNode(true);
+                                formElement.parentNode.replaceChild(newForm, formElement);
+                                // Submit the form
+                                newForm.submit();
+                            }
+                        });
                     }
-                }
-            }, 500)();
-        }
-    }
-
-    function toInput(index) {
-        // Will be overwritten when full script loads
-        if (typeof $ !== 'undefined' && typeof debounce !== 'undefined') {
-            debounce(function() {
-                let searchTerm = $('#to_spot_' + index).val();
-                if (searchTerm.length >= 2) {
-                    let searchData = $('#from_spot_' + index).val();
-                    if (typeof fetchCities !== 'undefined') {
-                        fetchCities(searchTerm, searchData, 'to_spot', index);
-                    }
-                }
-            }, 500)();
-        }
-    }
-</script>
-
-<div class="container px-4 mx-auto my-14 page-post_a_ride">
-    @if(session('error'))
-        <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                });
+            </script>
+        @endif
+        @if (session('message'))
+            <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                        <div
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                            <button type="button" onclick="closeModal()"
+                                class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <!-- <div
+                                        class="mx-auto h-16 w-16 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div> -->
+                                </div>
+                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <div class="">
+                                        <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                            id="modal-title">{!! session('heading') !!}</h3>
+                                    </div>
+                                    <div class="mt-2 w-full">
+                                        <p class="can-exp-p text-center">{!! session('message') !!}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                @if (session('id'))
+                                    <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
+                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Post
+                                        a Return Ride</a>
+                                @endif
+                                <a href="" class="button-exp-fill">Close</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+        <div id="myModal" class="hidden relative z-50" id="extra-care-ride-modal" aria-labelledby="modal-title"
+            role="dialog" aria-modal="true">
             <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
-                        <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closeExtraCareRideModal()"
+                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
                                         <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
                                     </svg>
@@ -161,250 +249,170 @@
                             </div>
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                        id="modal-title">{!! session('heading') !!}</h3>
                                 </div>
                                 <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">{!! session('error') !!}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-28">
-                                Close
-                            </button>
-                            {{-- <a href=""
-                                class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a> --}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-    @if(session('price_warning'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const warning = @json(session('price_warning'));
-                if (warning) {
-                    showPriceWarningModal(function() {
-                        // User clicked "Keep Current Price" - submit the form
-                        console.log('User chose to keep current price, submitting form');
-                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                        if (formElement) {
-                            // Create a hidden input to bypass validation on next submit
-                            const bypassInput = document.createElement('input');
-                            bypassInput.type = 'hidden';
-                            bypassInput.name = 'bypass_price_validation';
-                            bypassInput.value = '1';
-                            formElement.appendChild(bypassInput);
-                            // Remove the event listener to prevent re-validation
-                            const newForm = formElement.cloneNode(true);
-                            formElement.parentNode.replaceChild(newForm, formElement);
-                            // Submit the form
-                            newForm.submit();
-                        }
-                    });
-                }
-            });
-        </script>
-    @endif
-    @if(session('message'))
-        <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                    class="mx-auto h-16 w-16 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </div> -->
-                            </div>
-                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">{!! session('message') !!}</p>
+                                    {{-- <p class="can-exp-p text-center">{!! session('message') !!}</p> --}}
+                                    <p class="can-exp-p text-center">
+                                        {{ $postRideSubDetailPage->extra_care_popup_eligible_text ?? '' }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            @if(session('id'))
+                            @if (session('id'))
                                 <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Post a Return Ride</a>
+                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost
+                                    ride</a>
                             @endif
-                            <a href=""
-                                class="button-exp-fill">Close</a>
+                            <button type="button" onclick="closeExtraCareRideModal()"
+                                class="button-exp-fill">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    @endif
-    <div id="myModal" class="hidden relative z-50" id="extra-care-ride-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closeExtraCareRideModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start justify-center">
-                            <!-- <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
-                        </div>
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                {{-- <p class="can-exp-p text-center">{!! session('message') !!}</p> --}}
-                                <p class="can-exp-p text-center">{{ $postRideSubDetailPage->extra_care_popup_eligible_text??'' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        @if(session('id'))
-                            <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost ride</a>
-                        @endif
-                        <button type="button" onclick="closeExtraCareRideModal()"
-                            class="button-exp-fill">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal for 5+ seats warning -->
-    <div id="seatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="seats-modal-title" role="dialog" aria-modal="true">
-        <div onclick="closeSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closeSeatsWarningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="seats-modal-title">Heads up for 5+ seats</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center">Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">Got it</button>
-                        <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-no-fill">Learn more about limits</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
-    <div id="priceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-error-modal-title" role="dialog" aria-modal="true">
-        <div onclick="closePriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closePriceErrorModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="priceErrorHeading">Price Limit Exceeded</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center mb-3" id="priceErrorParagraph1"></p>
-                                <p class="can-exp-p text-center mb-3" id="priceErrorParagraph2"></p>
-                                <p class="can-exp-p text-center" id="priceErrorParagraph3"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" id="priceErrorAdjustBtn" onclick="adjustPriceFromError()" class="button-exp-fill">Adjust Price</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
-    <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title" role="dialog" aria-modal="true">
-        <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closePriceWarningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended Contribution Limit</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1"></p>
-                                <p class="can-exp-p text-center" id="priceWarningParagraph2"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" id="priceWarningAdjustBtn" onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">Adjust Price</button>
-                        <button type="button" id="priceWarningContinue" class="button-exp-fill">Keep Current Price</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="flex justify-end md:items-center">
-        <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
-            @isset($postRidePage->post_arrived_again_label)
-                {{ $postRidePage->post_arrived_again_label }}
-            @endisset
-        </a>
-    </div>
-    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
-        <h1>
-            @isset($postRidePage->main_heading)
-                {{ $postRidePage->main_heading }}
-            @endisset
-        </h1>
-        <p>
-            <span class="text-red-500">* {{ $postRideSubDetailPage->feilds_required_text??'Indicates required fields' }} </span>
-        </p>
-    </div>
-    <form method="POST" action="{{ route('post_ride.store') }}" enctype="multipart/form-data" id="post-ride-form">
-        @csrf
+        <!-- Modal for 5+ seats warning -->
+        <div id="seatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="seats-modal-title" role="dialog"
+            aria-modal="true">
+            <div onclick="closeSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+            </div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closeSeatsWarningModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                        id="seats-modal-title">Heads up for 5+ seats</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center">Please note that for large vehicles, your total trip
+                                        collection must stay within non-commercial limits. To keep this a standard carpool,
+                                        we suggest a lower price per seat. By law, total contributions cannot exceed the
+                                        standard reimbursement limit ($0.72/km).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">Got
+                                it</button>
+                            <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-no-fill">Learn
+                                more about limits</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
+        <div id="priceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-error-modal-title"
+            role="dialog" aria-modal="true">
+            <div onclick="closePriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+            </div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closePriceErrorModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                        id="priceErrorHeading">Price Limit Exceeded</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center mb-3" id="priceErrorParagraph1"></p>
+                                    <p class="can-exp-p text-center mb-3" id="priceErrorParagraph2"></p>
+                                    <p class="can-exp-p text-center" id="priceErrorParagraph3"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <button type="button" id="priceErrorAdjustBtn" onclick="adjustPriceFromError()"
+                                class="button-exp-fill">Adjust Price</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
+        <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title"
+            role="dialog" aria-modal="true">
+            <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+            </div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closePriceWarningModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended
+                                        Contribution Limit</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1"></p>
+                                    <p class="can-exp-p text-center" id="priceWarningParagraph2"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <button type="button" id="priceWarningAdjustBtn"
+                                onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">Adjust
+                                Price</button>
+                            <button type="button" id="priceWarningContinue" class="button-exp-fill">Keep Current
+                                Price</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end md:items-center">
+            <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                @isset($postRidePage->post_arrived_again_label)
+                    {{ $postRidePage->post_arrived_again_label }}
+                @endisset
+            </a>
+        </div>
+        <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
+            <h1>
+                @isset($postRidePage->main_heading)
+                    {{ $postRidePage->main_heading }}
+                @endisset
+            </h1>
+            <p>
+                <span class="text-red-500">*
+                    {{ $postRideSubDetailPage->feilds_required_text ?? 'Indicates required fields' }} </span>
+            </p>
+        </div>
+        <form method="POST" action="{{ route('post_ride.store') }}" enctype="multipart/form-data" id="post-ride-form">
+            @csrf
             <div class="">
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                     <h3 class="text-2xl bg-primary text-white py-2 px-4">
@@ -416,8 +424,7 @@
                         <div class="flex flex-col md:flex-row justify-between items-start">
                             <div class="w-full md:w-[45%] mb-4">
                                 <div>
-                                    <label for="from"
-                                        class="block mb-2 text-gray-900">
+                                    <label for="from_spot_0" class="block mb-2 text-gray-900">
                                         @isset($postRidePage->from_label)
                                             {{ $postRidePage->from_label }}
                                         @endisset
@@ -425,32 +432,40 @@
                                     </label>
                                     <div class="relative mt-2">
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6"
+                                                alt="">
                                         </div>
 
                                         @php
-                                        // Controller already swaps departure/destination for repost, so just use the ride properties as-is
-                                        $departure = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->departure : "";
-                                        $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
+                                            // Controller already swaps departure/destination for repost, so just use the ride properties as-is
+                                            $departure =
+                                                isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
+                                                    ? $ride->defaultRideDetail[0]->departure
+                                                    : '';
+                                            $destination =
+                                                isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
+                                                    ? $ride->defaultRideDetail[0]->destination
+                                                    : '';
                                         @endphp
 
-                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
+                                        <input type="text" id="from_spot_0" name="from"
+                                            value="{{ old('from', $departure) }}" 
                                             class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
                                             @isset($postRidePage->from_placeholder)
                                                 placeholder="{{ $postRidePage->from_placeholder }}"
                                             @endisset>
-
-                                        <!-- Suggestions Container for 'from' field -->
-                                        <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                     </div>
                                     @error('from')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }} <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a> </p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }} <a
+                                                        class="text-white leading-none text-sm lg:text-base"
+                                                        href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                        {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
+                                                    </a> </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                             </div>
@@ -461,8 +476,7 @@
                             </div>
                             <div class="w-full md:w-[45%] mb-4">
                                 <div>
-                                    <label for="to"
-                                        class="block mb-2 text-gray-900">
+                                    <label for="to_spot_0" class="block mb-2 text-gray-900">
                                         @isset($postRidePage->to_label)
                                             {{ $postRidePage->to_label }}
                                         @endisset
@@ -470,28 +484,31 @@
                                     </label>
                                     <div class="relative mt-2">
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6" alt="">
+                                            <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6"
+                                                alt="">
                                         </div>
-                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')"
+                                        <input type="text" id="to_spot_0" name="to"
+                                            value="{{ old('to', $destination) }}" 
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             @isset($postRidePage->to_placeholder)
                                                 placeholder="{{ $postRidePage->to_placeholder }}"
                                             @endisset>
 
-                                        <!-- Suggestions Container for 'to' field -->
-                                        <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                       
                                     </div>
                                     @error('to')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
 
-                                                <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                    {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                                </a>
-                                            </p>
+                                                    <a class="text-white leading-none text-sm lg:text-base"
+                                                        href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                        {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
+                                                    </a>
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                             </div>
@@ -533,21 +550,22 @@
                                     <span class="text-red-500">*</span>
                                 </label>
                                 <textarea id="pickup_location" rows="5" name="pickup"
-                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                                @isset($postRidePage->pick_up_placeholder)
+                                    class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                    @isset($postRidePage->pick_up_placeholder)
                                     placeholder="{{ $postRidePage->pick_up_placeholder }}"
-                                @endisset
-                                >{{ old('pickup', $ride->pickup) }}</textarea>
+                                @endisset>{{ old('pickup', $ride->pickup) }}</textarea>
                                 @error('pickup')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                            <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a>
-                                        </p>
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip"
+                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                <a class="text-white leading-none text-sm lg:text-base"
+                                                    href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                    {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
+                                                </a>
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
                                 @enderror
                             </div>
                             <div class="w-full md:w-[45%] mb-4">
@@ -558,21 +576,22 @@
                                     <span class="text-red-500">*</span>
                                 </label>
                                 <textarea id="dropoff_location" rows="5" name="dropoff"
-                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                                @isset($postRidePage->drop_off_placeholder)
+                                    class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                    @isset($postRidePage->drop_off_placeholder)
                                     placeholder="{{ $postRidePage->drop_off_placeholder }}"
-                                @endisset
-                                >{{ old('dropoff', $ride->dropoff) }}</textarea>
+                                @endisset>{{ old('dropoff', $ride->dropoff) }}</textarea>
                                 @error('dropoff')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                            <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a>
-                                        </p>
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip"
+                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                <a class="text-white leading-none text-sm lg:text-base"
+                                                    href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
+                                                    {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
+                                                </a>
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
                                 @enderror
                             </div>
                             {{-- <div class="map-container w-full h-64 block md:hidden">
@@ -586,15 +605,16 @@
                                 </iframe>
                             </div> --}}
                         </div>
-                        
+
                         <div>
-                            <label for="date_time" class="block text-gray-900">
+                            <label for="dateInput" class="block text-gray-900">
                                 @isset($postRidePage->date_time_label)
                                     {{ $postRidePage->date_time_label }}
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
-                            <div class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start mb-4 justify-between">
+                            <div
+                                class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start mb-4 justify-between">
                                 <div class="w-full md:w-[45%] mb-4">
                                     <div class="relative mt-2">
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
@@ -611,11 +631,13 @@
                                             placeholder="">
                                     </div>
                                     @error('date')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                                 <div class="w-full md:w-[10%] md:mt-4 text-center">
@@ -639,11 +661,13 @@
                                             placeholder="">
                                     </div>
                                     @error('time')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                             </div>
@@ -712,7 +736,8 @@
                         </div>
                         
                         <div class="flex items-center mb-4">
-                            <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }}
+                            <input id="recurring_trip" type="checkbox" name="recurring" value="1"
+                                {{ old('recurring') === '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                             <label for="recurring_trip" class="ml-2 text-gray-900">
                                 @isset($postRidePage->recurring_label)
@@ -720,7 +745,7 @@
                                 @endisset
                             </label>
                         </div>
-                        
+
                         <div id="recurringtripDetails">
                             <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
                                 <div class="w-full md:w-[45%] mb-4">
@@ -731,10 +756,9 @@
                                         <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative mt-2">
-                                        <select id="type" name="recurring_type"
+                                        <select id="recurring_type" name="recurring_type"
                                             class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                            <option value=""
-                                                {{ old('recurring_type') === '' ? 'selected' : '' }}>
+                                            <option value="" {{ old('recurring_type') === '' ? 'selected' : '' }}>
                                                 Select
                                             </option>
                                             <option value="Daily"
@@ -748,11 +772,13 @@
                                         </select>
                                     </div>
                                     @error('recurring_type')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                                 <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
@@ -768,18 +794,21 @@
                                         <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative mt-2">
-                                        <input type="number" min="1" max="10" name="recurring_trips" value="{{ old('recurring_trips') }}"
+                                        <input type="number" min="1" max="10" name="recurring_trips"
+                                            id="recurring_trips" value="{{ old('recurring_trips') }}"
                                             @isset($postRidePage->recurring_trips_placeholder)
                                                 placeholder="{{ $postRidePage->recurring_trips_placeholder }}"
                                             @endisset
                                             class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                     </div>
                                     @error('recurring_trips')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
                                     @enderror
                                 </div>
                             </div>
@@ -796,57 +825,67 @@
                         </h3>
                         <div class="bg-white p-4 space-y-3">
                             <textarea id="meeting" rows="5" name="details"
-                              class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 @isset($postRidePage->meeting_drop_off_description_placeholder)
                                     placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}"
                                 @endisset>{{ old('details', $ride->details) }}</textarea>
                             @error('details')
-                              <div class="relative tooltip -bottom-1 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                <div class="relative tooltip -bottom-1 group-hover:flex">
+                                    <div role="tooltip"
+                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                    </div>
                                 </div>
-                              </div>
                             @enderror
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <label for="no_of_seats" class="text-lg lg:text-3xl font-FuturaMdCnBT mb-2">
-                                <h3 class="text-2xl">
-                                    @isset($postRidePage->seats_label)
-                                        {{ $postRidePage->seats_label }}
-                                    @endisset
-                                    <span class="text-white">*</span>
-                                </h3>
-                            </label>
+                            <h3 class="text-2xl">
+                                @isset($postRidePage->seats_label)
+                                    {{ $postRidePage->seats_label }}
+                                @endisset
+                                <span class="text-white">*</span>
+                            </h3>
                         </div>
                         <div class="bg-white p-4">
                             <div class="flex items-center flex-wrap gap-2 mt-2">
                                 @for ($i = 1; $i <= 7; $i++)
-                                <div class="relative">
-                                    <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                            <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
-                                        </span>
-                                    </label>
-                                </div>
+                                    <div class="relative">
+                                        <label class="cursor-pointer inline-block"
+                                            for="number-of-seat-{{ $i }}">
+                                            <input id="number-of-seat-{{ $i }}" name="seats" type="radio"
+                                                value="{{ $i }}" class="hidden"
+                                                {{ old('seats', $ride->seats) == $i ? 'checked' : '' }}
+                                                onchange="seat_selected(this)" data-parsley-required="true"
+                                                data-parsley-trigger="blur focusout change"
+                                                data-parsley-required-message="Please select the available seats."
+                                                data-parsley-errors-container="#parsley-seats-error">
+                                            <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
+                                                    class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}"
+                                                    alt="">
+                                                <span
+                                                    class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 @endfor
                                 @error('seats')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip"
+                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
                                     </div>
-                                </div>
                                 @enderror
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-6 gap-4">
                                 <div>
-                                    <label for="pickup_location" class="text-gray-900 mb-2">
+                                    <label class="text-gray-900 mb-2">
                                         @isset($postRidePage->seats_middle_label)
                                             {{ $postRidePage->seats_middle_label }}
                                         @endisset
@@ -854,32 +893,38 @@
                                     </label>
                                     <ul class="grid gap-2 grid-cols-2 mt-2">
                                         <li>
-                                            <input type="radio" id="2-seats" name="middle_seats" value="2" class="hidden peer"
+                                            <input type="radio" id="2-seats" name="middle_seats" value="2"
+                                                class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '2' ? 'checked' : '' }}>
-                                            <label for="2-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <label for="2-seats"
+                                                class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">
                                                     2 seats
                                                 </span>
                                             </label>
                                         </li>
                                         <li>
-                                            <input type="radio" id="3-seats" name="middle_seats" value="3" class="hidden peer"
+                                            <input type="radio" id="3-seats" name="middle_seats" value="3"
+                                                class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '3' ? 'checked' : '' }}>
-                                            <label for="3-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <label for="3-seats"
+                                                class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">3 seats</span>
                                             </label>
                                         </li>
                                     </ul>
                                     @error('middle_seats')
-                                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                      </div>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label for="back_seats" class="text-gray-900 mb-2">
+                                    <label class="text-gray-900 mb-2">
                                         @isset($postRidePage->seats_back_label)
                                             {{ $postRidePage->seats_back_label }}
                                         @endisset
@@ -887,28 +932,34 @@
                                     </label>
                                     <ul class="grid gap-2 grid-cols-2 mt-2">
                                         <li>
-                                            <input type="radio" id="2-back_seats" name="back_seats" value="2" class="hidden peer"
+                                            <input type="radio" id="2-back_seats" name="back_seats" value="2"
+                                                class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '2' ? 'checked' : '' }}>
-                                            <label for="2-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <label for="2-back_seats"
+                                                class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">
                                                     2 seats
                                                 </span>
                                             </label>
                                         </li>
                                         <li>
-                                            <input type="radio" id="3-back_seats" name="back_seats" value="3" class="hidden peer"
+                                            <input type="radio" id="3-back_seats" name="back_seats" value="3"
+                                                class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '3' ? 'checked' : '' }}>
-                                            <label for="3-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <label for="3-back_seats"
+                                                class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">3 seats</span>
                                             </label>
                                         </li>
                                     </ul>
                                     @error('back_seats')
-                                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext after:left-6 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div role="tooltip"
+                                                class="relative tooltiptext after:left-6 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
+                                            </div>
                                         </div>
-                                      </div>
                                     @enderror
                                 </div>
                             </div>
@@ -1070,15 +1121,114 @@
                                         </div>
                                     @endif
                                 </div>
-                                @error('payment_method')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                            @enderror
+                        </div>
+                        <div class="mt-6">
+                            <label class="block mb-2 font-medium text-gray-900">
+                                @isset($postRidePage->payment_methods_label)
+                                    {{ $postRidePage->payment_methods_label }}
+                                @endisset
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <div class="space-y-2 mt-2">
+                                @if ($postRidePage->payment_methods_option1?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="cash" name="payment_method" type="radio"
+                                            value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="cash"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option1->icon)
+                                                <div class="w-8 h-6">
+                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon) }}"
+                                                        class="mx-auto w-full h-full object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option1->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help"
+                                                data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if ($postRidePage->payment_methods_option2?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="online" name="payment_method" type="radio"
+                                            value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="online"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option2->icon)
+                                                <div class="w-8 h-6">
+                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon) }}"
+                                                        class="h-full w-full mx-auto object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option2->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help"
+                                                data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if ($postRidePage->payment_methods_option3?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="secured" name="payment_method" type="radio"
+                                            value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="secured"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option3->icon)
+                                                <div class="w-8 h-6">
+                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon) }}"
+                                                        class="mx-auto h-full w-full object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option3->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help"
+                                                data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+                            @error('payment_method')
+                                <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip"
+                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                         <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
-                                  </div>
-                                @enderror
-                            </div>
+                                </div>
+                            @enderror
                         </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 ">
@@ -1094,35 +1244,53 @@
                             </div>
                             <div class="bg-white p-4">
                                 <ul class="grid w-full gap-6 md:grid-cols-2">
-                                    @if($postRidePage->booking_option1?->features_setting_id)
+                                    @if ($postRidePage->booking_option1?->features_setting_id)
                                         <li>
-                                            <input type="radio" id="instant-booking" name="booking_method" value="{{ $postRidePage->booking_option1->features_setting_id }}"
-                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }} class="hidden peer">
-                                            <label for="instant-booking" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <img class="w-12 h-12" src="{{asset('home_page_icons/' . $postRidePage->booking_option1->icon)}}" alt="">
+                                            <input type="radio" id="instant-booking" name="booking_method"
+                                                value="{{ $postRidePage->booking_option1->features_setting_id }}"
+                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }}
+                                                class="hidden peer">
+                                            <label for="instant-booking"
+                                                class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <img class="w-12 h-12"
+                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                    alt="">
                                                 <span class="font-medium text-xl">
                                                     {{ $postRidePage->booking_option1->name }}
                                                 </span>
-                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                <span class="inline-flex cursor-help"
+                                                    data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                     </svg>
                                                 </span>
                                             </label>
                                         </li>
                                     @endif
-                                    @if($postRidePage->booking_option2?->features_setting_id)
+                                    @if ($postRidePage->booking_option2?->features_setting_id)
                                         <li>
-                                            <input type="radio" id="manual-approval" name="booking_method" value="{{ $postRidePage->booking_option2->features_setting_id }}"
-                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }} class="hidden peer">
-                                            <label for="manual-approval" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <img class="w-12 h-12" src="{{asset('home_page_icons/' . $postRidePage->booking_option2->icon)}}" alt="">
+                                            <input type="radio" id="manual-approval" name="booking_method"
+                                                value="{{ $postRidePage->booking_option2->features_setting_id }}"
+                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }}
+                                                class="hidden peer">
+                                            <label for="manual-approval"
+                                                class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                                <img class="w-12 h-12"
+                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                    alt="">
                                                 <span class="font-medium text-xl">
                                                     {{ $postRidePage->booking_option2->name }}
                                                 </span>
-                                                <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                <span class="inline-flex cursor-help"
+                                                    data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                     </svg>
                                                 </span>
                                             </label>
@@ -1130,11 +1298,12 @@
                                     @endif
                                 </ul>
                                 @error('booking_method')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip"
+                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
                                     </div>
-                                  </div>
                                 @enderror
                             </div>
                         </div>
@@ -1174,7 +1343,10 @@
                                     </label>
                                 </div>
                                 @php
-                                    $defaultAddedVehicle = $ride->added_vehicle ?? $ride->add_vehicle ?? ($vehicles->firstWhere('primary_vehicle', '1') ? '1' : '0');
+                                    $defaultAddedVehicle =
+                                        $ride->added_vehicle ??
+                                        ($ride->add_vehicle ??
+                                            ($vehicles->firstWhere('primary_vehicle', '1') ? '1' : '0'));
                                 @endphp
                                 <div class="{{ $vehicles->count() > '0' ? '' : 'hidden' }}">
                                     <input id="added" type="checkbox" name="added_vehicle" value="1"
@@ -1189,7 +1361,8 @@
                             </div>
                             @error('vehicle_selection')
                                 <div class="relative tooltip bottom-0 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <div role="tooltip"
+                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                         <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
                                 </div>
@@ -1197,199 +1370,203 @@
                             <div id="skipVehicle">
                                 <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
                                     <div class="md:col-span-2">
-                                        <label for="make"
-                                            class="text-gray-900 mb-2">
+                                        <label for="make" class="text-gray-900 mb-2">
                                             @isset($postRidePage->make_label)
                                                 {{ $postRidePage->make_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="make" id=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('make', $ride->make) }}"
+                                            <input type="text" name="make" id="make"
+                                                @if ($errors->count() > 0) value="{{ old('make', $ride->make) }}"
                                                 @else
-                                                    value="{{ $ride->make }}"
-                                                @endif
+                                                    value="{{ $ride->make }}" @endif
                                                 @isset($postRidePage->make_placeholder)
                                                     placeholder="{{ $postRidePage->make_placeholder }}"
                                                 @endisset
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('make')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label for="modal"
-                                            class="text-gray-900 mb-2">
+                                        <label for="model" class="text-gray-900 mb-2">
                                             @isset($postRidePage->model_label)
                                                 {{ $postRidePage->model_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="model" id=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('model', $ride->model) }}"
+                                            <input type="text" name="model" id="model"
+                                                @if ($errors->count() > 0) value="{{ old('model', $ride->model) }}"
                                                 @else
-                                                    value="{{ $ride->model }}"
-                                                @endif
+                                                    value="{{ $ride->model }}" @endif
                                                 @isset($postRidePage->model_placeholder)
                                                     placeholder="{{ $postRidePage->model_placeholder }}"
                                                 @endisset
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('model')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label for="type" class="text-gray-900 mb-2">
+                                        <label for="vehicle_type" class="text-gray-900 mb-2">
                                             @isset($postRidePage->type_label)
                                                 {{ $postRidePage->type_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <select id="type" name="vehicle_type"
+                                            <select id="vehicle_type" name="vehicle_type"
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
 
-                                                <option {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }} value="">
+                                                <option
+                                                    {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }}
+                                                    value="">
                                                     @isset($postRidePage->vehicle_type_placeholder)
                                                         {{ $postRidePage->vehicle_type_placeholder }}
                                                     @endisset
                                                 </option>
 
-                                                <option value="{{ $postRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
+                                                <option
+                                                    value="{{ $postRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
                                                     {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_convertible_text ?? "Convertable"}}
+                                                    {{ $postRidePage->vehicle_type_convertible_text ?? 'Convertable' }}
                                                 </option>
                                                 <option value="{{ $postRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_coupe_value ??'Coupe') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_coupe_text ?? "Coupe"}}
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_coupe_text ?? 'Coupe' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_hatchback_value ??'Hatchback' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_hatchback_value ??'Hatchback') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_hatchback_text ?? "Hatchback"}}
+                                                <option
+                                                    value="{{ $postRidePage->vehicle_type_hatchback_value ?? 'Hatchback' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_hatchback_text ?? 'Hatchback' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_minivan_value ??'Minivan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_minivan_value ??'Minivan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_minivan_text ?? "Minivan"}}
+                                                <option
+                                                    value="{{ $postRidePage->vehicle_type_minivan_value ?? 'Minivan' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_minivan_text ?? 'Minivan' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_sedan_value ??'Sedan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_sedan_value ??'Sedan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_sedan_text ?? "Sedan"}}
+                                                <option value="{{ $postRidePage->vehicle_type_sedan_value ?? 'Sedan' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_sedan_text ?? 'Sedan' }}
                                                 </option>
                                                 <option value="{{ $postRidePage->vehicle_type_station_wagon_value }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_station_wagon_value ??'Station wagon') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_station_wagon_text ?? "Station wagon"}}
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_station_wagon_text ?? 'Station wagon' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_suv_value ??'SUV' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_suv_value ??'SUV') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_suv_text ?? "SUV"}}
+                                                <option value="{{ $postRidePage->vehicle_type_suv_value ?? 'SUV' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_suv_text ?? 'SUV' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_truck_value ??'Truck' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_truck_value ??'Truck') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_truck_text ?? "Truck"}}
+                                                <option value="{{ $postRidePage->vehicle_type_truck_value ?? 'Truck' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_truck_text ?? 'Truck' }}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_van_value ??'Van' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_van_value ??'Van') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_van_text ?? "Van"}}
+                                                <option value="{{ $postRidePage->vehicle_type_van_value ?? 'Van' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_van_text ?? 'Van' }}
                                                 </option>
                                             </select>
                                         </div>
                                         @error('vehicle_type')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="">
-                                        <label for="type" class="text-gray-900 mb-2">
+                                        <label for="year" class="text-gray-900 mb-2">
                                             @isset($postRidePage->year_label)
                                                 {{ $postRidePage->year_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="year" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('year', $ride->year) }}"
+                                            <input type="text" name="year" id="year" placeholder=""
+                                                @if ($errors->count() > 0) value="{{ old('year', $ride->year) }}"
                                                 @else
-                                                    value="{{ $ride->year }}"
-                                                @endif
+                                                    value="{{ $ride->year }}" @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('year')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="">
-                                        <label for="color"
-                                            class="text-gray-900 mb-2">
+                                        <label for="color" class="text-gray-900 mb-2">
                                             @isset($postRidePage->color_label)
                                                 {{ $postRidePage->color_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="color" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('color', $ride->color) }}"
+                                            <input type="text" name="color" id="color" placeholder=""
+                                                @if ($errors->count() > 0) value="{{ old('color', $ride->color) }}"
                                                 @else
-                                                    value="{{ $ride->color }}"
-                                                @endif
+                                                    value="{{ $ride->color }}" @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('color')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label for="modal" class="text-gray-900 mb-2">
+                                        <label for="license_no" class="text-gray-900 mb-2">
                                             @isset($postRidePage->liscense_label)
                                                 {{ $postRidePage->liscense_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="license_no" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('license_no', $ride->license_no) }}"
+                                            <input type="text" name="license_no" id="license_no" placeholder=""
+                                                @if ($errors->count() > 0) value="{{ old('license_no', $ride->license_no) }}"
                                                 @else
-                                                    value="{{ $ride->license_no }}"
-                                                @endif
+                                                    value="{{ $ride->license_no }}" @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('license_no')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
+                                                </div>
                                             </div>
-                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-4">
-                                        <label for="modal" class="text-gray-900 mb-2">
+                                        <label class="text-gray-900 mb-2">
                                             @isset($postRidePage->car_type_label)
                                                 {{ $postRidePage->car_type_label }}
                                             @endisset
@@ -1398,30 +1575,33 @@
                                         <div class=" flex items-center">
                                             @isset($postRidePage->electric_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->electric_car_label }}"
+                                                    <input id="car_type_electric" name="car_type" type="radio"
+                                                        value="{{ $postRidePage->electric_car_label }}"
                                                         {{ old('car_type', $ride->car_type) == $postRidePage->electric_car_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
+                                                    <label for="car_type_electric" class="block text-gray-900">
                                                         {{ $postRidePage->electric_car_label }}
                                                     </label>
                                                 </div>
                                             @endisset
                                             @isset($postRidePage->hybrid_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{  $postRidePage->hybrid_car_label }}"
-                                                    {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
+                                                    <input id="car_type_hybrid" name="car_type" type="radio"
+                                                        value="{{ $postRidePage->hybrid_car_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
+                                                    <label for="car_type_hybrid" class="block text-gray-900">
                                                         {{ $postRidePage->hybrid_car_label }}
                                                     </label>
                                                 </div>
                                             @endisset
                                             @isset($postRidePage->gas_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->gas_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label || ( empty(old('car_type'))) ? 'checked' : '' }}
+                                                    <input id="car_type_gas" name="car_type" type="radio"
+                                                        value="{{ $postRidePage->gas_car_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label || empty(old('car_type')) ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
+                                                    <label for="car_type_gas" class="block text-gray-900">
                                                         {{ $postRidePage->gas_car_label }}
                                                     </label>
                                                 </div>
@@ -1429,15 +1609,17 @@
                                         </div>
                                         @error('car_type')
                                             <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                <div role="tooltip"
+                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                    <p class="text-white leading-none text-sm lg:text-base">
+                                                        {{ $message }}</p>
                                                 </div>
                                             </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-4">
                                         <div id="">
-                                            <label for="car-photo" class="text-gray-900 mb-2">
+                                            <label for="dropzone-file" class="text-gray-900 mb-2">
                                                 Car Photo
                                             </label>
                                             <div class="md:col-span-2 mt-2">
@@ -1445,27 +1627,37 @@
                                                     class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
                                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                                         @if (session('uploaded_image'))
-                                                            <img id="profile-image" class="w-40 h-40 object-contain mb-4 cursor-pointer" src="{{ asset('car_images/' . session('uploaded_image')) }}" alt="Uploaded Image">
+                                                            <img id="profile-image"
+                                                                class="w-40 h-40 object-contain mb-4 cursor-pointer"
+                                                                src="{{ asset('car_images/' . session('uploaded_image')) }}"
+                                                                alt="Uploaded Image">
                                                         @elseif ($ride->car_image)
-                                                            <img id="profile-image" class="w-40 h-40 object-contain mb-4 cursor-pointer" src="{{ $ride->car_image }}">
+                                                            <img id="profile-image"
+                                                                class="w-40 h-40 object-contain mb-4 cursor-pointer"
+                                                                src="{{ $ride->car_image }}">
                                                         @else
-                                                            <img id="profile-image" class="w-12 h-12 object-contain mb-4 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
+                                                            <img id="profile-image"
+                                                                class="w-12 h-12 object-contain mb-4 cursor-pointer"
+                                                                src="{{ asset('assets/image-placeholder.png') }}">
                                                         @endif
                                                         <p class="text-sm lg:text-lg text-gray-900">Upload car photo.
                                                             <!-- <span class="font-semibold text-primary">Choose file</span> -->
                                                         </p>
                                                         <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                        JPEG, JPG, PNG, GIF - 10MB max.
+                                                            JPEG, JPG, PNG, GIF - 10MB max.
                                                         </p>
                                                     </div>
-                                                    <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
+                                                    <input id="dropzone-file" name="image" type="file"
+                                                        onchange="previewImage(this)" class="hidden" />
                                                     @if (session('uploaded_image'))
-                                                        <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
+                                                        <input type="hidden" name="existing_image"
+                                                            value="{{ session('uploaded_image') }}">
                                                     @elseif ($ride->car_image)
                                                         @php
                                                             $imageName = basename($ride->car_image);
                                                         @endphp
-                                                        <input type="hidden" name="existing_image" value="{{ $imageName }}">
+                                                        <input type="hidden" name="existing_image"
+                                                            value="{{ $imageName }}">
                                                     @endif
                                                     @error('image')
                                                         @if ($message !== 'The image is not uploaded yet')
@@ -1479,7 +1671,7 @@
                                 </div>
                             </div>
                             <div id="showVehicles" class="md:col-span-2 group">
-                                <label for="type" class="text-gray-900 mb-2">
+                                <label for="vehicle_id" class="text-gray-900 mb-2">
                                     Select vehicle <span class="text-red-500">*</span>
                                 </label>
                                 <div class="mt-2">
@@ -1492,7 +1684,7 @@
                                             }
                                         }
                                     @endphp
-                                    <select id="type" name="vehicle_id"
+                                    <select id="vehicle_id" name="vehicle_id"
                                         class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         <option value=""
                                             {{ $selectedVehicleId === '' || $selectedVehicleId === null ? 'selected' : '' }}>
@@ -1500,15 +1692,18 @@
                                         </option>
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
-                                                {{ (string)$selectedVehicleId === (string)$vehicle->id ? 'selected' : '' }}>
-                                                {{$vehicle->make}} / {{ $vehicle->model }} / {{ $vehicle->year }} / {{ $vehicle->type }}
+                                                {{ (string) $selectedVehicleId === (string) $vehicle->id ? 'selected' : '' }}>
+                                                {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }} /
+                                                {{ $vehicle->type }}
                                             </option>
                                         @endforeach
                                     </select>
                                     @error('vehicle_id')
                                         <div class="relative tooltip -bottom-4 flex mt-1">
-                                            <div role="alert" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            <div role="alert"
+                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
+                                                </p>
                                             </div>
                                         </div>
                                     @enderror
@@ -1529,99 +1724,154 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md divide-y">
-                            @if($postRidePage->luggage_option1?->features_setting_id)
+                            @if ($postRidePage->luggage_option1?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option1->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input id="{{ $postRidePage->luggage_option1->features_setting_id }}" type="radio" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="{{ $postRidePage->luggage_option1->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input id="{{ $postRidePage->luggage_option1->features_setting_id }}"
+                                            type="radio" name="luggage"
+                                            value="{{ $postRidePage->luggage_option1->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option1->icon)
-                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option1->icon)}}" alt="">
+                                            <img class="w-10 h-10"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
+                                                alt="">
                                         @endisset
                                         <span>
                                             {{ $postRidePage->luggage_option1->name }}
                                         </span>
-                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option1_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        <span class="inline-flex cursor-help"
+                                            data-tippy-content="{{ $postRidePage->luggage_option1_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                             </svg>
                                         </span>
                                     </label>
-                                    </div>
+                                </div>
                             @endif
-                            @if($postRidePage->luggage_option2?->features_setting_id)
+                            @if ($postRidePage->luggage_option2?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option2->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio" id="{{ $postRidePage->luggage_option2->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="{{ $postRidePage->luggage_option2->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input type="radio"
+                                            id="{{ $postRidePage->luggage_option2->features_setting_id }}"
+                                            name="luggage"
+                                            value="{{ $postRidePage->luggage_option2->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option2->icon)
-                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option2->icon)}}" alt="">
+                                            <img class="w-10 h-10"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
+                                                alt="">
                                         @endisset
                                         <span class="">
                                             {{ $postRidePage->luggage_option2->name }}
                                         </span>
-                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option2_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        <span class="inline-flex cursor-help"
+                                            data-tippy-content="{{ $postRidePage->luggage_option2_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                             </svg>
                                         </span>
                                     </label>
-                                    </div>
+                                </div>
                             @endif
-                            @if($postRidePage->luggage_option3?->features_setting_id)
-                            <div class="flex items-center gap-4 p-3">
-                                <label for="{{ $postRidePage->luggage_option3->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                    <input type="radio" id="{{ $postRidePage->luggage_option3->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                            @if ($postRidePage->luggage_option3?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->luggage_option3->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input type="radio"
+                                            id="{{ $postRidePage->luggage_option3->features_setting_id }}"
+                                            name="luggage"
+                                            value="{{ $postRidePage->luggage_option3->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option3->icon)
-                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option3->icon)}}" alt="">
+                                            <img class="w-10 h-10"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
+                                                alt="">
                                         @endisset
                                         <span>
                                             {{ $postRidePage->luggage_option3->name }}
                                         </span>
-                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option3_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        <span class="inline-flex cursor-help"
+                                            data-tippy-content="{{ $postRidePage->luggage_option3_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                             </svg>
                                         </span>
                                     </label>
                                 </div>
                             @endif
-                            @if($postRidePage->luggage_option4?->features_setting_id)
+                            @if ($postRidePage->luggage_option4?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option4->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio" id="{{ $postRidePage->luggage_option4->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="{{ $postRidePage->luggage_option4->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
+                                        <input type="radio"
+                                            id="{{ $postRidePage->luggage_option4->features_setting_id }}"
+                                            name="luggage"
+                                            value="{{ $postRidePage->luggage_option4->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option4->icon)
-                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option4->icon)}}" alt="">
+                                            <img class="w-10 h-10"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
+                                                alt="">
                                         @endisset
                                         <span>
                                             {{ $postRidePage->luggage_option4->name }}
                                         </span>
-                                        <span class="inline-flex cursor-help" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        <span class="inline-flex cursor-help"
+                                            data-tippy-content="{{ $postRidePage->luggage_option4_tooltip ?? '' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                             </svg>
                                         </span>
                                     </label>
                                 </div>
                             @endif
-                            @if($postRidePage->luggage_option5?->features_setting_id)
+                            @if ($postRidePage->luggage_option5?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option5->features_setting_id }}" class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
-                                        <input type="radio" id="{{ $postRidePage->luggage_option5->features_setting_id }}" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="{{ $postRidePage->luggage_option5->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
+                                        <input type="radio"
+                                            id="{{ $postRidePage->luggage_option5->features_setting_id }}"
+                                            name="luggage"
+                                            value="{{ $postRidePage->luggage_option5->features_setting_id }}"
+                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
+                                            class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option5->icon)
-                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option5->icon)}}" alt="">
+                                            <img class="w-10 h-10"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
+                                                alt="">
                                         @endisset
                                         <div>
                                             <p class="leading-normal mt-2">
                                                 {{ $postRidePage->luggage_option5->name }}
                                             </p>
-                                            <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
+                                            <div
+                                                class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
                                                 <small>{{ $postRidePage->luggage_option5_label }}</small>
-                                                <span class="inline-flex cursor-help items-center" data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                <span class="inline-flex cursor-help items-center"
+                                                    data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                     </svg>
                                                 </span>
                                             </div>
@@ -1629,29 +1879,29 @@
                                     </label>
                                 </div>
                             @endisset
-                        </div>
-                        @error('luggage')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                    </div>
+                    @error('luggage')
+                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip"
+                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                 <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                             </div>
-                            </div>
-                        @enderror
-                        <div class="mt-6 space-y-2">
-                            <div class="flex items-start">
-                                <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
-                                    {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
-                                    class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                <label for="heating"
-                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                    <span class="">
-                                        @isset($postRidePage->luggage_checkbox_label1)
-                                            {{ $postRidePage->luggage_checkbox_label1 }}
-                                        @endisset
-                                    </span>
-                                </label>
-                            </div>
-                            {{-- <div class="flex items-start">
+                        </div>
+                    @enderror
+                    <div class="mt-6 space-y-2">
+                        <div class="flex items-start">
+                            <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
+                                {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
+                                class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                            <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                <span class="">
+                                    @isset($postRidePage->luggage_checkbox_label1)
+                                        {{ $postRidePage->luggage_checkbox_label1 }}
+                                    @endisset
+                                </span>
+                            </label>
+                        </div>
+                        {{-- <div class="flex items-start">
                                 <input id="heating" type="checkbox" name="open_customized" value="1"
                                     {{ old('open_customized', $ride->open_customized) == '1' ? 'checked' : '' }}
                                     class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
@@ -1665,858 +1915,602 @@
                                     </span>
                                 </label>
                             </div> --}}
-                        </div>
-
                     </div>
+
                 </div>
-
-                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-                    <div class="text-2xl bg-primary text-white py-2 px-4">
-                        <h3 class="text-2xl">
-                            @isset($postRidePage->smoking_label)
-                                {{ $postRidePage->smoking_label }}
-                            @endisset
-                            <span class="text-white">*</span>
-                        </h3>
-                    </div>
-                    <div class="bg-white p-4">
-                        <div class="border rounded-md overflow-hidden divide-y">
-                            @if($postRidePage->smoking_option1?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3 w-full">
-                                    <label for="{{ $postRidePage->smoking_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->smoking_option1->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : ( 21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : "")) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
-                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-
-                                        <span class="">
-                                            {{ $postRidePage->smoking_option1->name }}
-                                        </span>
-                                    </label>
-
-                                </div>
-                            @endif
-                            @if($postRidePage->smoking_option2?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->smoking_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->smoking_option2->features_setting_id }}" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
-                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        {{ $postRidePage->smoking_option2->name }}
-                                    </label>
-                                </div>
-                            @endisset
-                        </div>
-                        @error('smoke')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                            </div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-                    <div class="text-2xl bg-primary text-white py-2 px-4">
-                        <h3 class="text-2xl">
-                            @isset($postRidePage->animals_label)
-                                {{ $postRidePage->animals_label }}
-                            @endisset
-                            <span class="text-white">*</span>
-                        </h3>
-                    </div>
-                    <div class="bg-white p-4">
-                        <div class="border rounded-md overflow-hidden divide-y">
-                            @if($postRidePage->animals_option1?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option1->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option1->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        {{ $postRidePage->animals_option1->name }}
-                                    </label>
-                                </div>
-                            @endif
-                            @if($postRidePage->animals_option2?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option2->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option2->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        {{ $postRidePage->animals_option2->name }}
-                                    </label>
-                                </div>
-                            @endif
-                            @if($postRidePage->animals_option3?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option3->features_setting_id }}" class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option3->features_setting_id }}" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                        {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        {{ $postRidePage->animals_option3->name }}
-                                    </label>
-                                </div>
-                            @endisset
-                        </div>
-                        @error('animal_friendly')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                            </div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <div class="bg-white rounded-lg shadow-3xl">
-                        <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->preferences_label)
-                                    {{ $postRidePage->preferences_label }}
-                                @endisset
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div class="space-y-2">
-                                @if($postRidePage->features_option1?->features_setting_id)
-                                    <div class="flex items-center">
-                                        <input id="pink-ride" type="checkbox" name="features[]"
-                                            @php $disabled = false; @endphp
-                                            @if ($user->pink_ride == '0')
-                                                @php $disabled = true; @endphp
-                                            @elseif ($user->pink_ride == '')
-                                                @if ($pinkRideSetting)
-                                                @if (($user->gender == 'female') && (empty($user->government_issued_id) || empty($user->address)))
-                                                @php $disabled = true; @endphp
-                                                 @elseif ($user->gender !== 'female')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->verfiy_phone === '1' && $user->phone_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->verify_email === '1' && $user->email_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->driver_license === '1' && $user->driver !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @endif
-                                                @endif
-                                            @endif
-                                            @if ($disabled)
-                                                {{ 'disabled' }}
-                                            @endif
-                                            value="{{ $postRidePage->features_option1->features_setting_id }}"
-                                            {{ $isNewForm
-                                                ? (in_array($postRidePage->features_option1->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (old('features')
-                                                    ? (in_array($postRidePage->features_option1->features_setting_id, old('features', []))
-                                                        ? 'checked'
-                                                        : '')
-                                                    : (in_array($postRidePage->features_option1->features_setting_id, explode('=', $ride->features))
-                                                        ? 'checked'
-                                                        : '')) }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="pink-ride"
-                                            class="ml-2 text-gray-900 flex space-x-1">
-                                            <span class="text-pink-500 font-medium
-                                                @php $disabled = false; @endphp
-                                                @if ($user->pink_ride == '0')
-                                                    @php $disabled = true; @endphp
-                                                @elseif ($user->pink_ride == '')
-                                                    @if ($pinkRideSetting)
-
-                                                        @if (($user->gender == 'female') && (empty($user->government_issued_id) || empty($user->address)))
-                                                         @php $disabled = true; @endphp
-                                                        @elseif ($user->gender !== 'female')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->verfiy_phone === '1' && $user->phone_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->verify_email === '1' && $user->email_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->driver_license === '1' && $user->driver !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @endif
-                                                    @endif
-                                                @endif
-                                                @if ($disabled)
-                                                    {{ 'line-through' }}
-                                                @endif">
-                                                {{ $postRidePage->features_option1->name }}
-                                            </span>
-                                            @php
-                                                $pinkRideTooltipText = '';
-                                                if ($user->pink_ride == '0') {
-                                                    $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_disable_text ?? '';
-                                                } elseif ($user->pink_ride == '1') {
-                                                    $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
-                                                } elseif ($pinkRideSetting) {
-                                                    $pinkRideTooltipText = ($postRidePage->pink_ride_tooltip_only_text ?? '') . ' ' . ($postRidePage->pink_ride_tooltip_female_text ?? '') . ' ' . ($postRidePage->pink_ride_tooltip_driver_text ?? '');
-                                                    if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1' || $pinkRideSetting->profile_complete === '1') {
-                                                        $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_with_text ?? '');
-                                                        if ($pinkRideSetting->profile_complete === '1') {
-                                                            $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_complete_profile_text ?? '');
-                                                        }
-                                                        if ($pinkRideSetting->verfiy_phone === '1' || $pinkRideSetting->verify_email === '1' || $pinkRideSetting->driver_license === '1') {
-                                                            if ($pinkRideSetting->verfiy_phone === '1') {
-                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_phone_number_text ?? '');
-                                                            }
-                                                            if ($pinkRideSetting->verify_email === '1') {
-                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_email_text ?? '');
-                                                            }
-                                                            if ($pinkRideSetting->driver_license === '1') {
-                                                                $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_driver_license_text ?? '');
-                                                            }
-                                                            $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_verified_text ?? '');
-                                                        }
-                                                    }
-                                                    $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_select_this_ride_text ?? '');
-                                                }
-                                            @endphp
-                                            <span class="inline-flex cursor-help" data-tippy-content="{{ $pinkRideTooltipText }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option2?->features_setting_id)
-                                    @php
-                                        // Calculate the age based on the driver's date of birth
-                                        $dob = \Carbon\Carbon::parse($user->dob);
-                                        $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                        $totalRidesCount=0;
-                                        $ride_limit=0;
-                                        if(isset($totalRides) && !empty($totalRides)){
-                                            $totalRidesCount=$totalRides;
-                                        };
-                                        
-                                        if(isset($setting->extra_rides_trip_limit) && !is_null($setting->extra_rides_trip_limit)){
-                                            $ride_limit=$setting->extra_rides_trip_limit;
-                                        };
-                                    @endphp
-                                    <div class="flex items-center">
-                                        <input id="extra-care" type="checkbox" name="features[]"
-                                            @php $disabled = false; @endphp
-                                            @if ($user->folks_ride == '0')
-                                                @php $disabled = true; @endphp
-                                            @elseif ($user->folks_ride == '')
-                                                @if ($setting)
-                                                    @if ($setting->verfiy_phone === '1' && !$user->phone_numbers->contains('verified', 1))
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($setting->verify_email === '1' && $user->email_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($setting->driver_license === '1' && $user->driver !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif (($overallRating < $setting->average_rating || $age < $setting->driver_age) || ($totalRidesCount < $ride_limit) || ($noShowsCount > 0) || ($cancellationCount > 0))
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($noshows > 0)
-                                                        @php $disabled = true; @endphp
-                                                        
-                                                    @elseif (empty($user->government_issued_id) || empty($user->address))
-                                                        @php $disabled = true; @endphp
-                                                    @endif
-                                                @endif
-                                            @endif
-                                            @if ($disabled)
-                                                {{ 'disabled' }}
-                                            @endif
-                                        value="{{ $postRidePage->features_option2->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option2->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option2->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="extra-care"
-                                            class="ml-2 text-gray-900 flex space-x-1">
-                                            <span class="text-green-500 font-medium
-                                                @php $disabled = false; @endphp
-                                                
-                                            @if ($user->folks_ride == '0')
-                                                    @php $disabled = true; @endphp
-                                                @elseif ($user->folks_ride == '')
-                                                    @if ($setting)
-                                                        @if ($setting->verfiy_phone === '1' && !$user->phone_numbers->contains('verified', 1))
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($setting->verify_email === '1' && $user->email_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($setting->driver_license === '1' && $user->driver !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif (($overallRating < $setting->average_rating || $age < $setting->driver_age) || ($totalRidesCount < $ride_limit) || ($noShowsCount > 0) || ($cancellationCount > 0))
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($noshows > 0)
-                                                            @php $disabled = true; @endphp
-                                                        @elseif (empty($user->government_issued_id) || empty($user->address))
-                                                        @php $disabled = true; @endphp
-                                                        @endif
-                                                    @endif
-                                                @endif
-                                                @if ($disabled)
-                                                    {{ 'line-through' }}
-                                                    @endif
-                                                    "
-                                                    @if ($disabled)
-                                                    onclick="extraCareRideModal()"
-
-                                                    @endif
-                                                    >
-                                                {{ $postRidePage->features_option2->name }}
-                                            </span>
-                                            @php
-                                                $extraCareTooltipText = '';
-                                                if ($user->folks_ride == '0') {
-                                                    $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_disable_text ?? '';
-                                                } elseif ($user->folks_ride == '1') {
-                                                    $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
-                                                } else {
-                                                    $extraCareTooltipText = ($postRidePage->extra_care_tooltip_driver_review_text ?? '') . ' ' . (isset($setting) ? $setting->average_rating : '0') . ' ' . ($postRidePage->extra_care_tooltip_greater_age_text ?? '') . ' ' . (isset($setting) ? $setting->driver_age : '0') . ' ' . ($postRidePage->extra_care_tooltip_greater_text ?? '');
-                                                    if ($setting && ($setting->verfiy_phone === '1' || $setting->verify_email === '1' || $setting->driver_license === '1' || $setting->profile_complete === '1')) {
-                                                        if (isset($pinkRideSetting) && $pinkRideSetting->profile_complete === '1') {
-                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_complete_profile_text ?? '');
-                                                        }
-                                                        $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_and_his_text ?? '');
-                                                        if ($setting->verfiy_phone === '1') {
-                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_phone_number_text ?? '');
-                                                        }
-                                                        if ($setting->verify_email === '1') {
-                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_email_text ?? '');
-                                                        }
-                                                        if ($setting->driver_license === '1') {
-                                                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_driver_license_text ?? '');
-                                                        }
-                                                        $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_verified_text ?? '');
-                                                    }
-                                                    $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_eligible_text ?? '');
-                                                }
-                                            @endphp
-                                            <span class="inline-flex cursor-help" data-tippy-content="{{ $extraCareTooltipText }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option3?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="wi-fi" type="checkbox" name="features[]" value="{{ $postRidePage->features_option3->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option3->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option3->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="wi-fi"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span>
-                                                {{ $postRidePage->features_option3->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option4?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="rating-passengers" type="checkbox" name="features[]" value="{{ $postRidePage->features_option4->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option4->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option4->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="rating-passengers"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span>
-                                                {{ $postRidePage->features_option4->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option5?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="provide-babyseats" type="checkbox" name="features[]" value="{{ $postRidePage->features_option5->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option5->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option5->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="provide-babyseats"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option5->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option6?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="passenger-provide" type="checkbox" name="features[]" value="{{ $postRidePage->features_option6->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option6->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option6->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="passenger-provide"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option6->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option7?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="take-children" type="checkbox" name="features[]" value="{{ $postRidePage->features_option7->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option7->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option7->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="take-children"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option7->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option8?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="passenger-provide1" type="checkbox" name="features[]" value="{{ $postRidePage->features_option8->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option8->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option8->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="passenger-provide1"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option8->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option9?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="bike-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option9->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option9->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option9->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="bike-rack"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option9->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option10?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="ski-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option10->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option10->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option10->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="ski-rack"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option10->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option11?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="winter-tires" type="checkbox" name="features[]" value="{{ $postRidePage->features_option11->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option11->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option11->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="winter-tires"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option11->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option12?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="air-conditioning" type="checkbox" name="features[]" value="{{ $postRidePage->features_option12->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option12->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option12->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="air-conditioning"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option12->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option13?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option13->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option13->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option13->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="heating"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option13->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option14?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option14->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option14->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option14->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="heating"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option14->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option15?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option15->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option15->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option15->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="heating"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option15->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option16?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option16->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option16->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option16->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="heating"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option16->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if($postRidePage->features_option18?->features_setting_id)
-                                    <div class="flex items-start">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option18->features_setting_id }}"
-                                        {{ $isNewForm
-                                            ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
-                                                ? 'checked'
-                                                : '')
-                                            : (old('features')
-                                                ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
-                                                    ? 'checked'
-                                                    : '')
-                                                : (in_array($postRidePage->features_option18->features_setting_id, explode('=', $ride->features))
-                                                    ? 'checked'
-                                                    : '')) }}
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="heating"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->features_option18->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-            <div class="">
-                <div class="mt-6">
 
-                <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->cancellation_policy_label)
-                                    {{ $postRidePage->cancellation_policy_label }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div>
-                                <div class="space-y-2 mt-2">
-                                    @if($postRidePage->cancellation_policy_label1?->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="standard" name="booking_type" type="radio" value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
-                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id || (empty(old('booking_type'))) ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="standard"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                <span class="">
-                                                        {{ $postRidePage->cancellation_policy_label1->name }}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if($postRidePage->cancellation_policy_label2?->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="firm" name="booking_type" type="radio" value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
-                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="firm"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                <span class="">
-                                                        {{ $postRidePage->cancellation_policy_label2->name }}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                </div>
-                                @error('booking_type')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                  </div>
-                                @enderror
-                            </div>
-                        </div>
+            <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+                <div class="text-2xl bg-primary text-white py-2 px-4">
+                    <h3 class="text-2xl">
+                        @isset($postRidePage->smoking_label)
+                            {{ $postRidePage->smoking_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
                 </div>
+                <div class="bg-white p-4">
+                    <div class="border rounded-md overflow-hidden divide-y">
+                        @if ($postRidePage->smoking_option1?->features_setting_id)
+                            <div class="flex items-center gap-4 p-3 w-full">
+                                <label for="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                    class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                    <input id="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                        name="smoke" type="radio"
+                                        value="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : (21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '')) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
+                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
 
-                <div class=" mt-6">
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                          <label for="more" class="">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->anything_to_add_label)
-                                  {{ $postRidePage->anything_to_add_label }}
-                                @endisset
-                            </h3>
-                          </label>
-                        </div>
-                        <div class="bg-white p-4">
-                            <textarea id="more" rows="5" name="notes"
-                              class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                                @isset($postRidePage->anything_to_add_placeholder)
-                                    placeholder="{{ $postRidePage->anything_to_add_placeholder }}"
-                                @endisset>{{ old('notes', $ride->notes) }}</textarea>
-                            @error('notes')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                              </div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+                                    <span class="">
+                                        {{ $postRidePage->smoking_option1->name }}
+                                    </span>
+                                </label>
 
-                <div class="mt-6">
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->disclaimers_label)
-                                    {{ $postRidePage->disclaimers_label }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            @isset($postRidePage->disclaimers_description)
-                                {!! str_replace('<ol>', '<ol class="list-decimal list-inside">', str_replace('<li>', '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">', $postRidePage->disclaimers_description)) !!}
-                            @endisset
-                        </div>
-                        @if($postRidePage->features_option1?->features_setting_id)
-                            @php
-                                $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
-                                $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
-                                $pinkRideChecked = is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
-                            @endphp
-                            <div id="pink-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
-                                <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                                    <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
-                                    5. I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.
-                                </p>
                             </div>
                         @endif
-                        @if($postRidePage->features_option2?->features_setting_id)
-                            @php
-                                $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
-                                $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
-                                $extraCareRideChecked = is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
-                            @endphp
-                            <div id="extra-care-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
-                                <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                                    <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra-Care Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                                    6. I understand that this is an Extra-Care Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
-                                </p>
+                        @if ($postRidePage->smoking_option2?->features_setting_id)
+                            <div class="flex items-center gap-4 p-3">
+                                <label for="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                    class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                    <input id="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                        name="smoke" type="radio"
+                                        value="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
+                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    {{ $postRidePage->smoking_option2->name }}
+                                </label>
                             </div>
                         @endisset
-                    </div>
                 </div>
-
-                <div class="mt-4">
-
-                <div class="flex items-start my-4">
-                    <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
-                        {{ old('agree_terms') == '1' ? 'checked' : '' }}
-                        class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                        <label for="agree_terms" class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
-                            @isset($postRidePage->agree_terms_label)
-                                {!! $postRidePage->agree_terms_label !!}
-                            @endisset
-                            <span class="text-red-500">*</span>
-                        </label>
-                    </div>
-                    @error('agree_terms')
+                @error('smoke')
                     <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                        <div role="tooltip"
+                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                         </div>
                     </div>
-                    @enderror
-                    <div class="hidden lg:flex justify-center items-center mt-8">
-                        <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
-                            @isset($postRidePage->submit_button_label)
-                                {{ $postRidePage->submit_button_label }}
-                            @endisset
-                        </button>
+                @enderror
+            </div>
+        </div>
+
+        <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+            <div class="text-2xl bg-primary text-white py-2 px-4">
+                <h3 class="text-2xl">
+                    @isset($postRidePage->animals_label)
+                        {{ $postRidePage->animals_label }}
+                    @endisset
+                    <span class="text-white">*</span>
+                </h3>
+            </div>
+            <div class="bg-white p-4">
+                <div class="border rounded-md overflow-hidden divide-y">
+                    @if ($postRidePage->animals_option1?->features_setting_id)
+                        <div class="flex items-center gap-4 p-3">
+                            <label for="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                <input id="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                    name="animal_friendly" type="radio"
+                                    value="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                {{ $postRidePage->animals_option1->name }}
+                            </label>
+                        </div>
+                    @endif
+                    @if ($postRidePage->animals_option2?->features_setting_id)
+                        <div class="flex items-center gap-4 p-3">
+                            <label for="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                <input id="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                    name="animal_friendly" type="radio"
+                                    value="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                {{ $postRidePage->animals_option2->name }}
+                            </label>
+                        </div>
+                    @endif
+                    @if ($postRidePage->animals_option3?->features_setting_id)
+                        <div class="flex items-center gap-4 p-3">
+                            <label for="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                <input id="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                    name="animal_friendly" type="radio"
+                                    value="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                {{ $postRidePage->animals_option3->name }}
+                            </label>
+                        </div>
+                    @endisset
+            </div>
+            @error('animal_friendly')
+                <div class="relative tooltip -bottom-4 group-hover:flex">
+                    <div role="tooltip"
+                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                     </div>
                 </div>
+            @enderror
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <div class="bg-white rounded-lg shadow-3xl">
+            <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
+                <h3 class="text-2xl">
+                    @isset($postRidePage->preferences_label)
+                        {{ $postRidePage->preferences_label }}
+                    @endisset
+                </h3>
             </div>
-        <div class="flex lg:hidden justify-center items-center mt-8">
-            <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
+            <div class="bg-white p-4">
+                @php
+                    // Helper function to check if a feature is selected
+                    function isFeatureChecked($featureId, $isNewForm, $oldFeatures, $rideFeatures)
+                    {
+                        if ($isNewForm) {
+                            return in_array($featureId, $oldFeatures ?? []);
+                        }
+                        if (!empty($oldFeatures)) {
+                            return in_array($featureId, $oldFeatures);
+                        }
+                        return isset($rideFeatures) && in_array($featureId, explode('=', $rideFeatures));
+                    }
+
+                    // Get current features array
+                    $currentFeatures = $isNewForm
+                        ? old('features', [])
+                        : (old('features') ?:
+                        (isset($ride->features)
+                            ? explode('=', $ride->features)
+                            : []));
+                @endphp
+                <div class="space-y-2">
+                    @if ($postRidePage->features_option1?->features_setting_id)
+                        @php
+                            // Pink Ride disabled logic
+                            $pinkRideDisabled = false;
+                            if ($user->pink_ride == '0') {
+                                $pinkRideDisabled = true;
+                            } elseif ($user->pink_ride == '' && $pinkRideSetting) {
+                                if (
+                                    ($user->gender == 'female' &&
+                                        (empty($user->government_issued_id) || empty($user->address))) ||
+                                    $user->gender !== 'female' ||
+                                    ($pinkRideSetting->verfiy_phone === '1' && $user->phone_verified !== '1') ||
+                                    ($pinkRideSetting->verify_email === '1' && $user->email_verified !== '1') ||
+                                    ($pinkRideSetting->driver_license === '1' && $user->driver !== '1')
+                                ) {
+                                    $pinkRideDisabled = true;
+                                }
+                            }
+
+                            // Pink Ride tooltip text
+                            $pinkRideTooltipText = '';
+                            if ($user->pink_ride == '0') {
+                                $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_disable_text ?? '';
+                            } elseif ($user->pink_ride == '1') {
+                                $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
+                            } elseif ($pinkRideSetting) {
+                                $pinkRideTooltipText =
+                                    ($postRidePage->pink_ride_tooltip_only_text ?? '') .
+                                    ' ' .
+                                    ($postRidePage->pink_ride_tooltip_female_text ?? '') .
+                                    ' ' .
+                                    ($postRidePage->pink_ride_tooltip_driver_text ?? '');
+                                if (
+                                    $pinkRideSetting->verfiy_phone === '1' ||
+                                    $pinkRideSetting->verify_email === '1' ||
+                                    $pinkRideSetting->driver_license === '1' ||
+                                    $pinkRideSetting->profile_complete === '1'
+                                ) {
+                                    $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_with_text ?? '');
+                                    if ($pinkRideSetting->profile_complete === '1') {
+                                        $pinkRideTooltipText .=
+                                            ' ' . ($postRidePage->pink_ride_tooltip_complete_profile_text ?? '');
+                                    }
+                                    if (
+                                        $pinkRideSetting->verfiy_phone === '1' ||
+                                        $pinkRideSetting->verify_email === '1' ||
+                                        $pinkRideSetting->driver_license === '1'
+                                    ) {
+                                        if ($pinkRideSetting->verfiy_phone === '1') {
+                                            $pinkRideTooltipText .=
+                                                ' ' . ($postRidePage->pink_ride_tooltip_phone_number_text ?? '');
+                                        }
+                                        if ($pinkRideSetting->verify_email === '1') {
+                                            $pinkRideTooltipText .=
+                                                ' ' . ($postRidePage->pink_ride_tooltip_email_text ?? '');
+                                        }
+                                        if ($pinkRideSetting->driver_license === '1') {
+                                            $pinkRideTooltipText .=
+                                                ' ' . ($postRidePage->pink_ride_tooltip_driver_license_text ?? '');
+                                        }
+                                        $pinkRideTooltipText .=
+                                            ' ' . ($postRidePage->pink_ride_tooltip_verified_text ?? '');
+                                    }
+                                }
+                                $pinkRideTooltipText .=
+                                    ' ' . ($postRidePage->pink_ride_tooltip_select_this_ride_text ?? '');
+                            }
+
+                            $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
+                            $pinkChecked = isFeatureChecked(
+                                $pinkFeatureId,
+                                $isNewForm,
+                                old('features', []),
+                                $ride->features ?? '',
+                            );
+                        @endphp
+                        <div class="flex items-center">
+                            <input id="pink-ride" type="checkbox" name="features[]"
+                                value="{{ $pinkFeatureId }}" {{ $pinkChecked ? 'checked' : '' }}
+                                {{ $pinkRideDisabled ? 'disabled' : '' }}
+                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                            <label for="pink-ride" class="ml-2 text-gray-900 flex space-x-1">
+                                <span
+                                    class="text-pink-500 font-medium {{ $pinkRideDisabled ? 'line-through' : '' }}">
+                                    {{ $postRidePage->features_option1->name }}
+                                </span>
+                                <span class="inline-flex cursor-help"
+                                    data-tippy-content="{{ $pinkRideTooltipText }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                        viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                    </svg>
+                                </span>
+                            </label>
+                        </div>
+                    @endif
+                    @if ($postRidePage->features_option2?->features_setting_id)
+                        @php
+                            // Calculate the age based on the driver's date of birth
+                            $dob = \Carbon\Carbon::parse($user->dob);
+                            $age = $dob->diffInYears(\Carbon\Carbon::now());
+                            $totalRidesCount = isset($totalRides) && !empty($totalRides) ? $totalRides : 0;
+                            $ride_limit =
+                                isset($setting->extra_rides_trip_limit) && !is_null($setting->extra_rides_trip_limit)
+                                    ? $setting->extra_rides_trip_limit
+                                    : 0;
+
+                            // Extra Care disabled logic
+                            $extraCareDisabled = false;
+                            if ($user->folks_ride == '0') {
+                                $extraCareDisabled = true;
+                            } elseif ($user->folks_ride == '' && $setting) {
+                                if (
+                                    ($setting->verfiy_phone === '1' &&
+                                        !$user->phone_numbers->contains('verified', 1)) ||
+                                    ($setting->verify_email === '1' && $user->email_verified !== '1') ||
+                                    ($setting->driver_license === '1' && $user->driver !== '1') ||
+                                    ($overallRating < $setting->average_rating || $age < $setting->driver_age) ||
+                                    $totalRidesCount < $ride_limit ||
+                                    $noShowsCount > 0 ||
+                                    $cancellationCount > 0 ||
+                                    $noshows > 0 ||
+                                    (empty($user->government_issued_id) || empty($user->address))
+                                ) {
+                                    $extraCareDisabled = true;
+                                }
+                            }
+
+                            // Extra Care tooltip text
+                            $extraCareTooltipText = '';
+                            if ($user->folks_ride == '0') {
+                                $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_disable_text ?? '';
+                            } elseif ($user->folks_ride == '1') {
+                                $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
+                            } else {
+                                $extraCareTooltipText =
+                                    ($postRidePage->extra_care_tooltip_driver_review_text ?? '') .
+                                    ' ' .
+                                    (isset($setting) ? $setting->average_rating : '0') .
+                                    ' ' .
+                                    ($postRidePage->extra_care_tooltip_greater_age_text ?? '') .
+                                    ' ' .
+                                    (isset($setting) ? $setting->driver_age : '0') .
+                                    ' ' .
+                                    ($postRidePage->extra_care_tooltip_greater_text ?? '');
+                                if (
+                                    $setting &&
+                                    ($setting->verfiy_phone === '1' ||
+                                        $setting->verify_email === '1' ||
+                                        $setting->driver_license === '1' ||
+                                        $setting->profile_complete === '1')
+                                ) {
+                                    if (isset($pinkRideSetting) && $pinkRideSetting->profile_complete === '1') {
+                                        $extraCareTooltipText .=
+                                            ' ' . ($postRidePage->extra_care_tooltip_complete_profile_text ?? '');
+                                    }
+                                    $extraCareTooltipText .=
+                                        ' ' . ($postRidePage->extra_care_tooltip_and_his_text ?? '');
+                                    if ($setting->verfiy_phone === '1') {
+                                        $extraCareTooltipText .=
+                                            ' ' . ($postRidePage->extra_care_tooltip_phone_number_text ?? '');
+                                    }
+                                    if ($setting->verify_email === '1') {
+                                        $extraCareTooltipText .=
+                                            ' ' . ($postRidePage->extra_care_tooltip_email_text ?? '');
+                                    }
+                                    if ($setting->driver_license === '1') {
+                                        $extraCareTooltipText .=
+                                            ' ' . ($postRidePage->extra_care_tooltip_driver_license_text ?? '');
+                                    }
+                                    $extraCareTooltipText .=
+                                        ' ' . ($postRidePage->extra_care_tooltip_verified_text ?? '');
+                                }
+                                $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_eligible_text ?? '');
+                            }
+
+                            $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
+                            $extraCareChecked = isFeatureChecked(
+                                $extraCareFeatureId,
+                                $isNewForm,
+                                old('features', []),
+                                $ride->features ?? '',
+                            );
+                        @endphp
+                        <div class="flex items-center">
+                            <input id="extra-care" type="checkbox" name="features[]"
+                                value="{{ $extraCareFeatureId }}" {{ $extraCareChecked ? 'checked' : '' }}
+                                {{ $extraCareDisabled ? 'disabled' : '' }}
+                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                            <label for="extra-care" class="ml-2 text-gray-900 flex space-x-1">
+                                <span
+                                    class="text-green-500 font-medium {{ $extraCareDisabled ? 'line-through' : '' }}"
+                                    {{ $extraCareDisabled ? 'onclick="extraCareRideModal()"' : '' }}>
+                                    {{ $postRidePage->features_option2->name }}
+                                </span>
+                                <span class="inline-flex cursor-help"
+                                    data-tippy-content="{{ $extraCareTooltipText }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                        viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                    </svg>
+                                </span>
+                            </label>
+                        </div>
+                    @endif
+                    @php
+                        // Loop through features_option3 to features_option18 (skipping 17)
+                        $featureOptions = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18];
+                    @endphp
+                    @foreach ($featureOptions as $optionNum)
+                        @php
+                            $featureOption = 'features_option' . $optionNum;
+                            $feature = $postRidePage->$featureOption ?? null;
+                        @endphp
+                        @if ($feature?->features_setting_id)
+                            @php
+                                $featureId = $feature->features_setting_id;
+                                $isChecked = isFeatureChecked(
+                                    $featureId,
+                                    $isNewForm,
+                                    old('features', []),
+                                    $ride->features ?? '',
+                                );
+                            @endphp
+                            <div class="flex items-start">
+                                <input id="feature-{{ $featureId }}" type="checkbox" name="features[]"
+                                    value="{{ $featureId }}" {{ $isChecked ? 'checked' : '' }}
+                                    class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                <label for="feature-{{ $featureId }}"
+                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                    <span>{{ $feature->name }}</span>
+                                </label>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="">
+    <div class="mt-6">
+
+        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+            <div class="text-2xl bg-primary text-white py-2 px-4">
+                <h3 class="text-2xl">
+                    @isset($postRidePage->cancellation_policy_label)
+                        {{ $postRidePage->cancellation_policy_label }}
+                    @endisset
+                    <span class="text-white">*</span>
+                </h3>
+            </div>
+            <div class="bg-white p-4">
+                <div>
+                    <div class="space-y-2 mt-2">
+                        @if ($postRidePage->cancellation_policy_label1?->features_setting_id)
+                            <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                <input id="standard" name="booking_type" type="radio"
+                                    value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
+                                    {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id || empty(old('booking_type')) ? 'checked' : '' }}
+                                    class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                <label for="standard"
+                                    class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                    <span class="">
+                                        {{ $postRidePage->cancellation_policy_label1->name }}
+                                    </span>
+                                </label>
+                            </div>
+                        @endif
+                        @if ($postRidePage->cancellation_policy_label2?->features_setting_id)
+                            <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                <input id="firm" name="booking_type" type="radio"
+                                    value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
+                                    {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
+                                    class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                <label for="firm"
+                                    class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                    <span class="">
+                                        {{ $postRidePage->cancellation_policy_label2->name }}
+                                    </span>
+                                </label>
+                            </div>
+                        @endif
+                    </div>
+                    @error('booking_type')
+                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip"
+                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                        </div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class=" mt-6">
+            <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                <div class="text-2xl bg-primary text-white py-2 px-4">
+                    <label for="more" class="">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->anything_to_add_label)
+                                {{ $postRidePage->anything_to_add_label }}
+                            @endisset
+                        </h3>
+                    </label>
+                </div>
+                <div class="bg-white p-4">
+                    <textarea id="more" rows="5" name="notes"
+                        class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                        @isset($postRidePage->anything_to_add_placeholder)
+                                    placeholder="{{ $postRidePage->anything_to_add_placeholder }}"
+                                @endisset>{{ old('notes', $ride->notes) }}</textarea>
+                    @error('notes')
+                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div role="tooltip"
+                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                        </div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                <div class="text-2xl bg-primary text-white py-2 px-4">
+                    <h3 class="text-2xl">
+                        @isset($postRidePage->disclaimers_label)
+                            {{ $postRidePage->disclaimers_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                </div>
+                <div class="bg-white p-4">
+                    @isset($postRidePage->disclaimers_description)
+                        {!! str_replace(
+                            '<ol>',
+                            '<ol class="list-decimal list-inside">',
+                            str_replace(
+                                '<li>',
+                                '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">',
+                                $postRidePage->disclaimers_description,
+                            ),
+                        ) !!}
+                    @endisset
+                </div>
+                @if ($postRidePage->features_option1?->features_setting_id)
+                    @php
+                        $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
+                        $featuresArray = $isNewForm
+                            ? old('features', [])
+                            : (old('features') ?:
+                            (isset($ride->features)
+                                ? explode('=', $ride->features)
+                                : []));
+                        $pinkRideChecked = is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
+                    @endphp
+                    <div id="pink-ride-disclaimer"
+                        class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+                        <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                            <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
+                            5. I understand that this is a Pink Ride, exclusive to female members. I will not
+                            send a male driver in my place and will not accept any male passengers over 12 years
+                            old, even if the booking is made by a female.
+                        </p>
+                    </div>
+                @endif
+                @if ($postRidePage->features_option2?->features_setting_id)
+                    @php
+                        $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
+                        $featuresArray = $isNewForm
+                            ? old('features', [])
+                            : (old('features') ?:
+                            (isset($ride->features)
+                                ? explode('=', $ride->features)
+                                : []));
+                        $extraCareRideChecked =
+                            is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
+                    @endphp
+                    <div id="extra-care-ride-disclaimer"
+                        class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+                        <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                            <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra-Care Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
+                            6. I understand that this is an Extra-Care Ride, exclusively for members with
+                            top-tier review ratings. I commit to upholding the exceptional professionalism and
+                            courtesy that earned me this rating, keeping my vehicle immaculate, driving safely
+                            and smoothly as always, and ensuring a calm, respectful environment by preventing
+                            any passenger disputes.
+                        </p>
+                    </div>
+                @endisset
+        </div>
+    </div>
+
+    <div class="mt-4">
+
+        <div class="flex items-start my-4">
+            <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
+                {{ old('agree_terms') == '1' ? 'checked' : '' }}
+                class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+            <label for="agree_terms"
+                class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
+                @isset($postRidePage->agree_terms_label)
+                    {!! $postRidePage->agree_terms_label !!}
+                @endisset
+                <span class="text-red-500">*</span>
+            </label>
+        </div>
+        @error('agree_terms')
+            <div class="relative tooltip -bottom-4 group-hover:flex">
+                <div role="tooltip"
+                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                </div>
+            </div>
+        @enderror
+        <div class="hidden lg:flex justify-center items-center mt-8">
+            <button
+                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS"
+                type="submit">
                 @isset($postRidePage->submit_button_label)
                     {{ $postRidePage->submit_button_label }}
                 @endisset
             </button>
         </div>
-    </form>
+    </div>
+</div>
+<div class="flex lg:hidden justify-center items-center mt-8">
+    <button
+        class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS"
+        type="submit">
+        @isset($postRidePage->submit_button_label)
+            {{ $postRidePage->submit_button_label }}
+        @endisset
+    </button>
+</div>
+</form>
 </div>
 
 @php
@@ -2528,52 +2522,27 @@
 
 @section('script')
 
-{{-- <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAadtOhXUj_mb2QWOD1mCPYPRujBiQO4nE&libraries=places&callback=initMap">
-</script> --}}
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    // let autocomplete;
-    // function initMap() {
-    //     autocomplete = new google.maps.places.Autocomplete(
-    //         document.getElementById('from'),
-    //         {
-    //             types: ['establishment'],
-    //             componentRestrictions: {'country' : ['AU']},
-    //             fields: ['place_id', 'geometry', 'name']
-    //         }
-    //     );
-    //     autocomplete = new google.maps.places.Autocomplete(
-    //         document.getElementById('from'),
-    //         {
-    //             types: ['establishment'],
-    //             componentRestrictions: {'country' : ['AU']},
-    //             fields: ['place_id', 'geometry', 'name']
-    //         }
-    //     );
-    // }
-
 
     // Define the handler function
     function extraCareRideModal(parms) {
         document.getElementById('extra-care-ride-modal').classList.remove('hidden');
     }
+
     function closeExtraCareRideModal(parms) {
         document.getElementById('extra-care-ride-modal').classList.add('hidden');
     }
-    
-    
+
+
     function hideTooltip(parms) {
         if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
             $(this).parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
+        } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
             $(this).parent().parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
+        } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
             $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
         }
     }
@@ -2585,173 +2554,168 @@
 
     const labels = document.querySelectorAll('label');
     labels.forEach(input => {
-        input.addEventListener('click', function (e) {
+        input.addEventListener('click', function(e) {
             hideTooltip.call(this, 'label'); // pass 'testing' on label click
         });
     });
-    
+
     function closeModal() {
-    // Hide all modals
-    document.querySelectorAll('.relative.z-50').forEach(modal => {
-        modal.style.display = 'none';
-    });
-
-    // Also remove any session messages from the URL
-    if (window.history.replaceState) {
-        const cleanUrl = window.location.href.split('?')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
-}
-document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('fixed') && event.target.classList.contains('inset-0')) {
-        closeModal();
-    }
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-    }
-});
-function scrollToFirstError() {
-    // Find all error elements
-    const errorElements = document.querySelectorAll('.tooltip, .tooltiptext');
-
-    // Find the first visible error element
-    let firstVisibleError = null;
-
-    errorElements.forEach(element => {
-        // Check if element is visible (basic check - you might need more robust visibility detection)
-        if (!firstVisibleError &&
-            element.offsetParent !== null &&
-            element.getBoundingClientRect().width > 0 &&
-            element.getBoundingClientRect().height > 0) {
-            firstVisibleError = element;
-        }
-    });
-
-    if (firstVisibleError) {
-        // Scroll to the error with smooth behavior
-        firstVisibleError.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
+        // Hide all modals
+        document.querySelectorAll('.relative.z-50').forEach(modal => {
+            modal.style.display = 'none';
         });
 
-        // Also focus on the related input field if possible
-        const relatedInput = firstVisibleError.closest('.relative')?.previousElementSibling?.querySelector('input, select, textarea');
-        if (relatedInput) {
-            relatedInput.focus();
+        // Also remove any session messages from the URL
+        if (window.history.replaceState) {
+            const cleanUrl = window.location.href.split('?')[0];
+            window.history.replaceState({}, document.title, cleanUrl);
         }
     }
-}
 
-// Add a small delay to ensure dynamic content is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    @if($errors->any() || session('error'))
-        setTimeout(scrollToFirstError, 300);
-    @endif
-});
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('fixed') && event.target.classList.contains('inset-0')) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    function scrollToFirstError() {
+        // Find all error elements
+        const errorElements = document.querySelectorAll('.tooltip, .tooltiptext');
+
+        // Find the first visible error element
+        let firstVisibleError = null;
+
+        errorElements.forEach(element => {
+            // Check if element is visible (basic check - you might need more robust visibility detection)
+            if (!firstVisibleError &&
+                element.offsetParent !== null &&
+                element.getBoundingClientRect().width > 0 &&
+                element.getBoundingClientRect().height > 0) {
+                firstVisibleError = element;
+            }
+        });
+
+        if (firstVisibleError) {
+            // Scroll to the error with smooth behavior
+            firstVisibleError.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            // Also focus on the related input field if possible
+            const relatedInput = firstVisibleError.closest('.relative')?.previousElementSibling?.querySelector(
+                'input, select, textarea');
+            if (relatedInput) {
+                relatedInput.focus();
+            }
+        }
+    }
+
+    // Add a small delay to ensure dynamic content is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        @if ($errors->any() || session('error'))
+            setTimeout(scrollToFirstError, 300);
+        @endif
+    });
 
     // Cost-sharing cap validation constants
     const ERROR_TRIGGERING_CAP = 0.72; // $0.72 per km - BLOCK if exceeded
     const SOFT_WARNING_CAP = 0.66; // $0.66 per km - WARN but ALLOW
-    
+
     // Store distance globally when fetched
     window.rideDistance = null;
-    
+
     // Function to validate price per seat
     // Formula: (Distance × Cap) ÷ Seats = Max price per seat
     function validatePricePerSeat(price, distance, seats) {
         if (!price || !distance || !seats || distance <= 0 || price <= 0 || seats <= 0) {
-            console.log('Validation skipped - missing data:', { price, distance, seats });
-            return { valid: true, type: null };
+            return {
+                valid: true,
+                type: null
+            };
         }
-        
+
         const pricePerSeat = parseFloat(price);
         const distanceKm = parseFloat(distance);
         const numSeats = parseInt(seats);
-        
+
         // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
         const maxPricePerSeat = (distanceKm * ERROR_TRIGGERING_CAP) / numSeats;
-        
+
         // Calculate soft warning price per seat: $0.66/km
         const softWarningPricePerSeat = (distanceKm * SOFT_WARNING_CAP) / numSeats;
-        
-        console.log('Price validation calculations:', {
-            pricePerSeat: pricePerSeat,
-            distanceKm: distanceKm,
-            numSeats: numSeats,
-            maxPricePerSeat: maxPricePerSeat,
-            softWarningPricePerSeat: softWarningPricePerSeat,
-            exceedsMax: pricePerSeat > maxPricePerSeat,
-            exceedsSoftWarning: pricePerSeat > softWarningPricePerSeat
-        });
-        
+
         // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
         if (pricePerSeat > maxPricePerSeat) {
-            console.log('ERROR CAP TRIGGERED');
             return {
                 valid: false,
                 type: 'error',
                 maxPricePerSeat: maxPricePerSeat.toFixed(2)
             };
         }
-        
+
         // Soft Warning Cap: $0.66 per km - WARN but ALLOW
         // Check if price is ABOVE (greater than) the soft warning cap
         // Note: If price equals soft warning, no warning is shown (user requirement: "above")
         if (pricePerSeat > softWarningPricePerSeat) {
-            console.log('SOFT WARNING CAP TRIGGERED - Price exceeds soft warning');
-            console.log('Price per seat:', pricePerSeat, '> Soft warning:', softWarningPricePerSeat);
             return {
                 valid: true,
                 type: 'warning',
                 softWarningPrice: softWarningPricePerSeat.toFixed(2)
             };
         }
-        
-        console.log('No warning or error - price is within limits');
-        return { valid: true, type: null };
+
+        return {
+            valid: true,
+            type: null
+        };
     }
-    
+
     // Function to show error modal (Price Limit Exceeded)
     function showPriceErrorModal(maxPricePerSeat) {
         const modal = document.getElementById('priceErrorModal');
         if (modal) {
             // Set the three paragraphs as specified
-            document.getElementById('priceErrorParagraph1').textContent = 
+            document.getElementById('priceErrorParagraph1').textContent =
                 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.';
-            document.getElementById('priceErrorParagraph2').textContent = 
+            document.getElementById('priceErrorParagraph2').textContent =
                 'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.';
-            document.getElementById('priceErrorParagraph3').textContent = 
+            document.getElementById('priceErrorParagraph3').textContent =
                 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
-            
+
             modal.classList.remove('hidden');
             modal.style.display = 'block';
         }
     }
-    
+
     // Function to show warning modal (Recommended Contribution Limit)
     function showPriceWarningModal(callback) {
-        console.log('showPriceWarningModal called');
         const modal = document.getElementById('priceWarningModal');
         if (!modal) {
             console.error('Price warning modal not found!');
             return;
         }
-        
+
         // Set the two paragraphs as specified
         const para1 = document.getElementById('priceWarningParagraph1');
         const para2 = document.getElementById('priceWarningParagraph2');
-        
+
         if (para1) {
-            para1.textContent = 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+            para1.textContent =
+                'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
         }
         if (para2) {
-            para2.textContent = 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+            para2.textContent =
+                'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
         }
-        
+
         // Show the modal - ensure it's visible
         // Remove hidden class and set display with !important to override Tailwind CSS
         modal.classList.remove('hidden');
@@ -2759,25 +2723,17 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.setProperty('visibility', 'visible', 'important');
         modal.style.setProperty('opacity', '1', 'important');
         modal.style.setProperty('z-index', '50', 'important');
-        
-        console.log('Modal should be visible now', {
-            hasClassHidden: modal.classList.contains('hidden'),
-            display: modal.style.display,
-            computedDisplay: window.getComputedStyle(modal).display,
-            visibility: window.getComputedStyle(modal).visibility
-        });
-        
+
         // Store callback for continue button (Keep Current Price)
         const continueBtn = document.getElementById('priceWarningContinue');
         if (continueBtn) {
             // Remove any existing event listeners by cloning
             const newContinueBtn = continueBtn.cloneNode(true);
             continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
-            
+
             newContinueBtn.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Keep Current Price clicked');
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
                 if (callback) {
@@ -2788,7 +2744,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Continue button not found!');
         }
     }
-    
+
     // Function to adjust price (focus on price input field)
     function adjustPriceFromError() {
         const modal = document.getElementById('priceErrorModal');
@@ -2799,18 +2755,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Focus on price input field
         const priceInput = document.getElementById('priceData0');
         if (priceInput) {
-            priceInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            priceInput.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
             setTimeout(() => {
                 priceInput.focus();
                 priceInput.select();
             }, 300);
         }
     }
-    
+
     // Function to adjust price from warning (focus on price input field)
     // This should NOT submit the form - just close popup and focus on price field
     function adjustPriceFromWarning() {
-        console.log('Adjust Price clicked - closing modal and focusing on price field (NOT submitting form)');
         const modal = document.getElementById('priceWarningModal');
         if (modal) {
             modal.classList.add('hidden');
@@ -2820,7 +2778,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const priceInput = document.getElementById('priceData0');
         if (priceInput) {
             // Scroll to the price input field
-            priceInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            priceInput.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
             // Focus and select the field after a short delay to ensure modal is closed
             setTimeout(() => {
                 priceInput.focus();
@@ -2831,7 +2792,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Return false to prevent any default behavior
         return false;
     }
-    
+
     function closePriceErrorModal() {
         const modal = document.getElementById('priceErrorModal');
         if (modal) {
@@ -2839,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'none';
         }
     }
-    
+
     function closePriceWarningModal() {
         const modal = document.getElementById('priceWarningModal');
         if (modal) {
@@ -2851,12 +2812,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle form submission errors
     // Wait for DOM to be ready
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('post-ride-form') || document.querySelector('form[method="POST"]') || document.querySelector('form');
+        const form = document.getElementById('post-ride-form') || document.querySelector(
+            'form[method="POST"]') || document.querySelector('form');
         if (!form) {
             console.error('Form not found!');
             return;
         }
-        
+
         // Add our submit handler with capture phase to run first
         // Use capture phase and make sure we run before other handlers
         form.addEventListener('submit', function(e) {
@@ -2951,184 +2913,217 @@ document.addEventListener('DOMContentLoaded', function() {
             if (distanceInput && distanceInput.value) {
                 distance = parseFloat(distanceInput.value);
             }
-        }
-        
-        // Get number of seats
-        let seats = null;
-        const seatsInput = document.querySelector('input[name="seats"]:checked');
-        if (seatsInput) {
-            seats = parseInt(seatsInput.value);
-        }
-        
-        // Debug logging
-        console.log('Form submission validation:', {
-            price: price,
-            distance: distance,
-            seats: seats,
-            hasPriceInput: !!priceInput,
-            hasSeatsInput: !!seatsInput,
-            windowRideDistance: window.rideDistance
-        });
-        
-        // If we have price, distance, and seats, validate
-        if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
-            const validation = validatePricePerSeat(price, distance, seats);
-            
-            console.log('Price validation result:', validation);
-            
-            if (!validation.valid) {
+
+            // First check HTML5 validation
+            const firstInvalid = this.querySelector(':invalid');
+            if (firstInvalid) {
                 e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                showPriceErrorModal(validation.maxPricePerSeat);
-                return false;
-            }
-            
-            if (validation.type === 'warning') {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                console.log('Showing soft warning modal - validation type is warning');
-                showPriceWarningModal(function() {
-                    // User clicked "Keep Current Price" - submit the form
-                    console.log('User chose to keep current price, submitting form');
-                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                    if (formElement) {
-                        // Create a hidden input to bypass validation on next submit
-                        const bypassInput = document.createElement('input');
-                        bypassInput.type = 'hidden';
-                        bypassInput.name = 'bypass_price_validation';
-                        bypassInput.value = '1';
-                        formElement.appendChild(bypassInput);
-                        // Remove the event listener to prevent re-validation
-                        const newForm = formElement.cloneNode(true);
-                        formElement.parentNode.replaceChild(newForm, formElement);
-                        // Submit the form
-                        newForm.submit();
-                    }
+                firstInvalid.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
                 });
-                return false;
+                firstInvalid.focus();
+                return;
             }
-        } else {
-            console.warn('Skipping price validation - missing required data:', {
-                hasPrice: !!price && price > 0,
-                hasDistance: !!distance && distance > 0,
-                hasSeats: !!seats && seats > 0,
-                priceValue: price,
-                distanceValue: distance,
-                seatsValue: seats
-            });
-            
-            // If we have price and seats but no distance, we need to fetch it before allowing submission
-            if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
-                const fromInput = document.getElementById('from_spot_0') || document.querySelector('input[name="from"]');
-                const toInput = document.getElementById('to_spot_0') || document.querySelector('input[name="to"]');
-                
-                if (fromInput && toInput && fromInput.value && toInput.value) {
-                    console.log('Distance missing - attempting to fetch before validation');
-                    // Prevent form submission and fetch distance
+
+            // Validate price per seat before submission
+            const priceInput = document.getElementById('priceData0');
+            const price = priceInput ? parseFloat(priceInput.value) : null;
+
+            // Get distance - try from data attribute first, then global variable
+            let distance = null;
+            if (priceInput && typeof $ !== 'undefined') {
+                distance = $(priceInput).data('distance') || window.rideDistance;
+            } else {
+                distance = window.rideDistance;
+            }
+
+            // If distance is not available, try to get it from hidden input or calculate it
+            if (!distance || distance <= 0) {
+                // Try to get from hidden input if available
+                const distanceInput = document.querySelector(
+                    'input[name="distance"], input[id*="distance"]');
+                if (distanceInput && distanceInput.value) {
+                    distance = parseFloat(distanceInput.value);
+                }
+            }
+
+            // Get number of seats
+            let seats = null;
+            const seatsInput = document.querySelector('input[name="seats"]:checked');
+            if (seatsInput) {
+                seats = parseInt(seatsInput.value);
+            }
+
+            // If we have price, distance, and seats, validate
+            if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
+                const validation = validatePricePerSeat(price, distance, seats);
+
+                if (!validation.valid) {
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    // Fetch distance asynchronously
-                    if (typeof $ !== 'undefined') {
-                        $.ajax({
-                            url: "{{ url('get-cities-distance') }}",
-                            type: "POST",
-                            data: {
-                                search: fromInput.value,
-                                searchData: toInput.value,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            dataType: 'json',
-                            success: function(result) {
-                                console.log('Distance fetch response:', result);
-                                // Check if distance exists in response (could be result.distance or result.data.distance)
-                                const distanceValue = result.distance || (result.data && result.data.distance) || null;
-                                
-                                if (distanceValue) {
-                                    const distanceKm = parseFloat(distanceValue);
-                                    if (!isNaN(distanceKm) && distanceKm > 0) {
-                                        window.rideDistance = distanceKm;
-                                        // Store in price input data attribute as well
-                                        if (priceInput && typeof $ !== 'undefined') {
-                                            $(priceInput).data('distance', distanceKm);
-                                        }
-                                        console.log('Distance fetched successfully:', distanceKm, 'km');
-                                        
-                                        // Now validate with the fetched distance
-                                        const validation = validatePricePerSeat(price, distanceKm, seats);
-                                        console.log('Price validation result after fetching distance:', validation);
-                                        
-                                        if (!validation.valid) {
-                                            showPriceErrorModal(validation.maxPricePerSeat);
-                                            return;
-                                        }
-                                        
-                                        if (validation.type === 'warning') {
-                                            showPriceWarningModal(function() {
-                                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                                if (formElement) {
-                                                    const bypassInput = document.createElement('input');
-                                                    bypassInput.type = 'hidden';
-                                                    bypassInput.name = 'bypass_price_validation';
-                                                    bypassInput.value = '1';
-                                                    formElement.appendChild(bypassInput);
-                                                    formElement.submit();
-                                                }
-                                            });
-                                            return;
-                                        }
-                                        
-                                        // No warning/error - submit form
-                                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                        if (formElement) {
-                                            formElement.submit();
+                    e.stopImmediatePropagation();
+                    showPriceErrorModal(validation.maxPricePerSeat);
+                    return false;
+                }
+
+                if (validation.type === 'warning') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    showPriceWarningModal(function() {
+                        // User clicked "Keep Current Price" - submit the form
+                        const formElement = document.getElementById('post-ride-form') ||
+                            document.querySelector('form');
+                        if (formElement) {
+                            // Create a hidden input to bypass validation on next submit
+                            const bypassInput = document.createElement('input');
+                            bypassInput.type = 'hidden';
+                            bypassInput.name = 'bypass_price_validation';
+                            bypassInput.value = '1';
+                            formElement.appendChild(bypassInput);
+                            // Remove the event listener to prevent re-validation
+                            const newForm = formElement.cloneNode(true);
+                            formElement.parentNode.replaceChild(newForm, formElement);
+                            // Submit the form
+                            newForm.submit();
+                        }
+                    });
+                    return false;
+                }
+            } else {
+                // If we have price and seats but no distance, we need to fetch it before allowing submission
+                if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
+                    const fromInput = document.getElementById('from_spot_0') || document.querySelector(
+                        'input[name="from"]');
+                    const toInput = document.getElementById('to_spot_0') || document.querySelector(
+                        'input[name="to"]');
+
+                    if (fromInput && toInput && fromInput.value && toInput.value) {
+                        // Prevent form submission and fetch distance
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Fetch distance asynchronously
+                        if (typeof $ !== 'undefined') {
+                            $.ajax({
+                                url: "{{ url('get-cities-distance') }}",
+                                type: "POST",
+                                data: {
+                                    search: fromInput.value,
+                                    searchData: toInput.value,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                dataType: 'json',
+                                success: function(result) {
+                                    // Check if distance exists in response (could be result.distance or result.data.distance)
+                                    const distanceValue = result.distance || (result.data &&
+                                        result.data.distance) || null;
+
+                                    if (distanceValue) {
+                                        const distanceKm = parseFloat(distanceValue);
+                                        if (!isNaN(distanceKm) && distanceKm > 0) {
+                                            window.rideDistance = distanceKm;
+                                            // Store in price input data attribute as well
+                                            if (priceInput && typeof $ !== 'undefined') {
+                                                $(priceInput).data('distance', distanceKm);
+                                            }
+
+                                            // Now validate with the fetched distance
+                                            const validation = validatePricePerSeat(price,
+                                                distanceKm, seats);
+
+                                            if (!validation.valid) {
+                                                showPriceErrorModal(validation
+                                                    .maxPricePerSeat);
+                                                return;
+                                            }
+
+                                            if (validation.type === 'warning') {
+                                                showPriceWarningModal(function() {
+                                                    const formElement = document
+                                                        .getElementById(
+                                                            'post-ride-form') ||
+                                                        document.querySelector(
+                                                            'form');
+                                                    if (formElement) {
+                                                        const bypassInput = document
+                                                            .createElement('input');
+                                                        bypassInput.type = 'hidden';
+                                                        bypassInput.name =
+                                                            'bypass_price_validation';
+                                                        bypassInput.value = '1';
+                                                        formElement.appendChild(
+                                                            bypassInput);
+                                                        formElement.submit();
+                                                    }
+                                                });
+                                                return;
+                                            }
+
+                                            // No warning/error - submit form
+                                            const formElement = document.getElementById(
+                                                    'post-ride-form') || document
+                                                .querySelector('form');
+                                            if (formElement) {
+                                                formElement.submit();
+                                            }
+                                        } else {
+                                            console.error(
+                                                'Invalid distance value received:',
+                                                distanceValue);
+                                            // If distance is invalid, let backend handle it
+                                            const formElement = document.getElementById(
+                                                    'post-ride-form') || document
+                                                .querySelector('form');
+                                            if (formElement) {
+                                                formElement.submit();
+                                            }
                                         }
                                     } else {
-                                        console.error('Invalid distance value received:', distanceValue);
-                                        // If distance is invalid, let backend handle it
-                                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                        // Distance might be 0 or missing - check the actual value
+                                        const distanceValue = result.distance || (result
+                                            .data && result.data.distance);
+                                        if (distanceValue === 0 || distanceValue === null ||
+                                            distanceValue === undefined) {
+                                            // Distance is 0 or missing - might indicate invalid locations or API error
+                                        } else {
+                                            // Distance fetch failed - unexpected response structure
+                                        }
+                                        // If we can't get valid distance, let backend handle validation
+                                        const formElement = document.getElementById(
+                                            'post-ride-form') || document.querySelector(
+                                            'form');
                                         if (formElement) {
                                             formElement.submit();
                                         }
                                     }
-                                } else {
-                                    // Distance might be 0 or missing - check the actual value
-                                    const distanceValue = result.distance || (result.data && result.data.distance);
-                                    if (distanceValue === 0 || distanceValue === null || distanceValue === undefined) {
-                                        console.warn('Distance is 0 or missing in API response. This might indicate invalid locations or API error.');
-                                        console.log('Full API response:', result);
-                                    } else {
-                                        console.error('Distance fetch failed - unexpected response structure. Response:', result);
-                                    }
-                                    // If we can't get valid distance, let backend handle validation
-                                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Error fetching distance:', error);
+                                    // On error, let backend handle validation
+                                    const formElement = document.getElementById(
+                                        'post-ride-form') || document.querySelector(
+                                        'form');
                                     if (formElement) {
                                         formElement.submit();
                                     }
                                 }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error fetching distance:', error);
-                                // On error, let backend handle validation
-                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                if (formElement) {
-                                    formElement.submit();
-                                }
-                            }
-                        });
-                    } else {
-                        console.error('jQuery not available - cannot fetch distance. Allowing backend validation.');
-                        // If jQuery is not available, let backend handle it
+                            });
+                        } else {
+                            console.error(
+                                'jQuery not available - cannot fetch distance. Allowing backend validation.'
+                                );
+                            // If jQuery is not available, let backend handle it
+                        }
+                        return false;
                     }
-                    return false;
                 }
             }
-        }
 
         }, true); // Use capture phase to run before other handlers
     });
+
     function swapLocations() {
         // Get the values of the "From" and "To" input fields
         const fromValue = document.getElementById('from_spot_0').value;
@@ -3137,6 +3132,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Swap the values
         document.getElementById('from_spot_0').value = toValue;
         document.getElementById('to_spot_0').value = fromValue;
+
+        // Swap the selected place data as well (if using Google Places)
+        if (typeof selectedFromSpotPlace !== 'undefined' && typeof selectedToSpotPlace !== 'undefined') {
+            const tempPlace = selectedFromSpotPlace;
+            selectedFromSpotPlace = selectedToSpotPlace;
+            selectedToSpotPlace = tempPlace;
+        }
+
+        // Trigger distance fetch after swap
+        if (fromValue && toValue) {
+            setTimeout(() => {
+                // fetchAndStoreDistance(0);
+                fromToInputChange(0);
+            }, 200);
+        }
     }
 
     const dateInput = document.getElementById('dateInput');
@@ -3165,7 +3175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Retrieve old values from Laravel's old() function
 
     var rideTime = "";
-    if('{{$routeType}}' == "repost"){
+    if ('{{ $routeType }}' == "repost") {
         rideTime = '{{ $ride->time }}';
     }
     const oldDate = '{{ old('date') }}';
@@ -3174,12 +3184,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the date picker
     flatpickr(dateInput, {
         dateFormat: 'F d, Y',
-        minDate: 'today',   // Restrict to future dates only
+        minDate: 'today', // Restrict to future dates only
         defaultDate: oldDate || 'today', // Set default date to today
         disableMobile: true,
         onChange: function(selectedDates, dateStr, instance) {
             // Update minTime based on whether the selected date is today or a future date
-            const isToday = instance.latestSelectedDateObj ? instance.latestSelectedDateObj.toDateString() === new Date().toDateString() : false;
+            const isToday = instance.latestSelectedDateObj ? instance.latestSelectedDateObj
+            .toDateString() === new Date().toDateString() : false;
 
             const minTime = isToday ? getCurrentProjectTime() : '00:00';
 
@@ -3232,7 +3243,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (i = 1; i <= seat; i++) {
             // Change the image source for selected seats
-            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
+            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
             $(".seat-number.seat-number-" + i).addClass('text-green-300');
             $("#number-of-seat-cross-" + i).hide();
         }
@@ -3240,7 +3251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for (i = parseInt(seat) + 1; i <= 7; i++) {
             if (seat == 7) continue;
             // Change the image source back to unselected for remaining seats
-            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset("assets/seat.png") }}');
+            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset('assets/seat.png') }}');
             $(".seat-number.seat-number-" + i).removeClass('text-green-300');
             $("#number-of-seat-cross-" + i).show();
         }
@@ -3279,7 +3290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         // Get the checkbox element
         var skipCheckbox = document.getElementById('skip');
         var addCheckbox = document.getElementById('add');
@@ -3296,7 +3307,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Function to uncheck other checkboxes when one is checked
         function handleCheckboxChange(checkedCheckbox) {
-            checkboxes.forEach(function (checkbox) {
+            checkboxes.forEach(function(checkbox) {
                 if (checkbox !== checkedCheckbox) {
                     checkbox.checked = false; // Uncheck all other checkboxes
                 }
@@ -3304,20 +3315,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Add an event listener to the checkbox
-        skipCheckbox.addEventListener('change', function () {
+        skipCheckbox.addEventListener('change', function() {
             handleCheckboxChange(skipCheckbox);
             // If the checkbox is checked, show the disclaimer; otherwise, hide it
             skipVehicle.style.display = 'none';
             showVehicles.style.display = 'none';
         });
-        addCheckbox.addEventListener('change', function () {
+        addCheckbox.addEventListener('change', function() {
             handleCheckboxChange(addCheckbox);
             // If the checkbox is checked, show the disclaimer; otherwise, hide it
             skipVehicle.style.display = this.checked ? 'block' : 'none';
             showVehicles.style.display = 'none';
-            
+
             // Enable vehicle fields and set required when add checkbox is checked
-            const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+            const vehicleFields = skipVehicle.querySelectorAll(
+                'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
+                );
             vehicleFields.forEach(function(field) {
                 if (this.checked) {
                     field.removeAttribute('disabled');
@@ -3327,19 +3340,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }.bind(this));
         });
-        addedCheckbox.addEventListener('change', function () {
+        addedCheckbox.addEventListener('change', function() {
             handleCheckboxChange(addedCheckbox);
             // If the checkbox is checked, show the disclaimer; otherwise, hide it
             showVehicles.style.display = this.checked ? 'block' : 'none';
             skipVehicle.style.display = 'none';
-            
+
             // Remove required from vehicle fields when using existing vehicle
-            const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+            const vehicleFields = skipVehicle.querySelectorAll(
+                'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
+                );
             vehicleFields.forEach(function(field) {
                 field.removeAttribute('required');
             });
         });
-        recurringTripCheckbox.addEventListener('change', function () {
+        recurringTripCheckbox.addEventListener('change', function() {
             // If the checkbox is checked, show the recurring details; otherwise, hide it
             recurringtripDetails.style.display = this.checked ? 'block' : 'none';
         });
@@ -3348,9 +3363,11 @@ document.addEventListener('DOMContentLoaded', function() {
         skipVehicle.style.display = addCheckbox.checked ? 'block' : 'none';
         showVehicles.style.display = addedCheckbox.checked ? 'block' : 'none';
         recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
-        
+
         // Set initial required state for vehicle fields
-        const vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+        const vehicleFields = skipVehicle.querySelectorAll(
+            'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
+            );
         vehicleFields.forEach(function(field) {
             if (addCheckbox.checked) {
                 field.removeAttribute('disabled');
@@ -3417,6 +3434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to fetch recommended price based on search input
     function fetchRecommendedPrice(searchTerm, searchData, index) {
+        
         let stateId = 0;
         let url = '{{ url('get-cities-distance') }}';
         let params = {
@@ -3434,16 +3452,14 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             dataType: 'json',
             success: function(result) {
-                debugger;
-                $("#priceData"+index+"").val(result.pricePerKm);
+                $("#priceData" + index + "").val(result.pricePerKm);
                 // Store distance for price validation (globally and on input)
                 // Check both result.distance and result.data.distance for compatibility
                 const distanceValue = result.distance || (result.data && result.data.distance) || null;
                 if (distanceValue && parseFloat(distanceValue) > 0) {
                     const distanceKm = parseFloat(distanceValue);
-                    $("#priceData"+index+"").data('distance', distanceKm);
+                    $("#priceData" + index + "").data('distance', distanceKm);
                     window.rideDistance = distanceKm; // Store globally for validation
-                    console.log('Distance stored for validation:', distanceKm, 'km');
                 } else {
                     const distanceValue = result.distance || (result.data && result.data.distance);
                     if (distanceValue === 0) {
@@ -3461,7 +3477,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const closeModalBtn = document.getElementById('close-modal');
     if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function () {
+        closeModalBtn.addEventListener('click', function() {
             const modal = document.querySelector('.relative.z-50');
             if (modal) {
                 modal.style.display = 'none'; // Hide the modal
@@ -3469,29 +3485,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function fromInput(index){
-        debounce(function() {
-            let searchTerm = $('#from_spot_' + index).val();
-            if (searchTerm.length >= 2) {
-                let searchData = $('#to_spot_' + index).val();
-                fetchCities(searchTerm, searchData, 'from_spot', index);
-            }
-        }, 500)();
-    }
-
-    function toInput(index){
-        debounce(function() {
-            let searchTerm = $('#to_spot_' + index).val();
-            if (searchTerm.length >= 2) {
-                let searchData = $('#from_spot_' + index).val();
-                fetchCities(searchTerm, searchData, 'to_spot', index);
-            }
-        }, 500)();
-    }
-
-    function fromToInputChange(index){
-        let searchTerm = $('#to_spot_'+index+'').val();
-        let searchData = $('#from_spot_'+index+'').val();
+    function fromToInputChange(index) {
+        let searchTerm = $('#to_spot_' + index + '').val();
+        let searchData = $('#from_spot_' + index + '').val();
+        
         if (searchTerm != "" && searchData != "") {
             fetchRecommendedPrice(searchTerm, searchData, index);
         }
@@ -3790,7 +3787,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function fetchAndStoreDistance(index) {
         const fromInput = $('#from_spot_' + index);
         const toInput = $('#to_spot_' + index);
-        
+
         if (fromInput.length && toInput.length && fromInput.val() && toInput.val()) {
             if (typeof $ !== 'undefined') {
                 $.ajax({
@@ -3803,7 +3800,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     dataType: 'json',
                     success: function(result) {
-                        const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                        const distanceValue = result.distance || (result.data && result.data.distance) ||
+                            null;
                         if (distanceValue && parseFloat(distanceValue) > 0) {
                             const distanceKm = parseFloat(distanceValue);
                             window.rideDistance = distanceKm;
@@ -3812,7 +3810,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (priceInput.length) {
                                 priceInput.data('distance', distanceKm);
                             }
-                            console.log('Distance fetched and stored:', distanceKm, 'km');
                         } else {
                             console.warn('No valid distance returned. Response:', result);
                         }
@@ -3824,18 +3821,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Add event listeners to fetch distance when from/to fields change
     document.addEventListener('DOMContentLoaded', function() {
         // Listen for changes on from_spot_0 and to_spot_0
         const fromInput0 = document.getElementById('from_spot_0');
         const toInput0 = document.getElementById('to_spot_0');
-        
+
         if (fromInput0) {
             fromInput0.addEventListener('blur', function() {
                 setTimeout(() => {
                     if (toInput0 && toInput0.value) {
-                        fetchAndStoreDistance(0);
+                        // fetchAndStoreDistance(0);
                     }
                 }, 500);
             });
@@ -3843,12 +3840,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
             });
         }
-        
+
         if (toInput0) {
             toInput0.addEventListener('blur', function() {
                 setTimeout(() => {
                     if (fromInput0 && fromInput0.value) {
-                        fetchAndStoreDistance(0);
+                        // fetchAndStoreDistance(0);
                     }
                 }, 500);
             });
@@ -3888,329 +3885,284 @@ document.addEventListener('DOMContentLoaded', function() {
                     var clientErr = document.getElementById('price-client-error');
                     if (clientErr) clientErr.classList.add('hidden');
                 }
-            });
-        }
-    });
+handlePlaceSelection = (place, inputId) => {
+            if (place.address_components && place.place_id) {
+                isSettingPlaceValue = true;
+                const formattedAddress = formatPlaceAddress(place);
+                const placeData = {
+                    place_id: place.place_id,
+                    formatted_address: formattedAddress,
+                    value: formattedAddress
+                };
+                document.getElementById(inputId).value = formattedAddress;
 
+                setTimeout(() => {
+                    isSettingPlaceValue = false;
+                }, 100);
 
-    function addNewRow() {
-        var oldIndex = parseInt($("#rowCount").val());
-        if($("#from_spot_"+oldIndex+"").val() == ""){
-            alert("Please select from spot");
-            return;
-        }else if($("#to_spot_"+oldIndex+"").val() == ""){
-            alert("Please select to spot");
-            return;
-        }
-        // else if($("#priceData"+oldIndex+"").val() == ""){
-        //     alert("Please select price spot");
-        //     return;
-        // }
-        var from_city=$("#from_spot_"+oldIndex+"").val()
-        var to_city=$("#to_spot_"+oldIndex+"").val()
-        var price=$("#price_"+oldIndex+"").val()
-        var index = parseInt($("#rowCount").val() + 1);
-        $.ajax({
-            url: "{{ url('add-new-spots') }}",
-            type: "POST",
-            data: {
-                from_spot:from_city,
-                to_spot:to_city,
-                price:price,
-                index: index,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                console.log(result);
-                if (result.status === 'error') {
-                    console.log(result);
-                    if (result.errors.from_spot) {
-                        console.log(result);
-                        // $('#from_spot_' + index + '_error').text(result.errors.from_spot[0]).show();
-                    $('.to_spot_error_'+oldIndex).removeClass('hidden');
-                    $('.to_spot_error_message').text(result.errors.to_spot[0]);
-
-                }
-                if (result.errors.to_spot) {
-                    // Display error for to_spot
-                    $('.from_spot_error_'+oldIndex).removeClass('hidden');
-                    $('.from_spot_error_message').text(result.errors.from_spot[0]);
-                }
                 
-                if (result.errors.price) {
-                    console.log(result.errors.price[0]);
-                    // Display error for to_spot
-                    $('.price_'+oldIndex).removeClass('hidden');
-                    $('.price_message').text(result.errors.price[0]);
+                
+                // Trigger distance fetch if both fields are filled
+                if (inputId === 'from_spot_0' && selectedToSpotPlace) {
+                    setTimeout(() => {
+                        // fetchAndStoreDistance(0);
+                        fromToInputChange(0);
+                    }, 200);
+                } else if (inputId === 'to_spot_0' && selectedFromSpotPlace) {
+                    setTimeout(() => {
+                        // fetchAndStoreDistance(0);
+                        fromToInputChange(0);
+                    }, 200);
                 }
-            }else{
-                $('.from_spot_error_'+oldIndex).addClass('hidden');
-                $('.to_spot_error_'+oldIndex).addClass('hidden');
 
-                $(".appendNewRow").append(result.spotHtml);
-                $("#rowCount").val(index);
+                return placeData;
             }
+            return null;
+        };
 
-            }
-        });
-    }
-
-    function removeRow(index, rideDetailId) {
-        if(index != 1){
-            $(".remove-row"+index+"").remove();
-        }
-
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('myModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // Helper function to show tooltip on a field
-    function showFieldTooltip(field, message) {
-        if (!field) return;
-
-        // Remove existing tooltip if any
-        removeFieldTooltip(field);
-
-        // Add error styling
-        field.classList.add('validation-error-border', 'border-red-500', 'ring-red-500');
-
-        // Create tooltip element
-        const tooltip = document.createElement('div');
-        tooltip.className = 'validation-tooltip';
-        tooltip.innerHTML = `
-            <div class="validation-tooltip-arrow"></div>
-            <div class="validation-tooltip-content">${message}</div>
-        `;
-
-        // Insert tooltip after the field
-        field.parentNode.insertBefore(tooltip, field.nextSibling);
-    }
-
-    // Helper function to remove tooltip from a field
-    function removeFieldTooltip(field) {
-        if (!field) return;
-        field.classList.remove('validation-error-border', 'border-red-500', 'ring-red-500');
-        const existingTooltip = field.parentNode.querySelector('.validation-tooltip');
-        if (existingTooltip) {
-            existingTooltip.remove();
-        }
-    }
-
-    // Clear tooltip when user focuses, starts typing or changes value
-    function setupTooltipClearOnInput() {
-        document.querySelectorAll('input, select, textarea').forEach(field => {
-            field.addEventListener('focus', function() {
-                removeFieldTooltip(this);
-            });
-            field.addEventListener('input', function() {
-                removeFieldTooltip(this);
-            });
-            field.addEventListener('change', function() {
-                removeFieldTooltip(this);
-            });
-        });
-    }
-
-    // Initialize tooltip clear listeners
-    document.addEventListener('DOMContentLoaded', setupTooltipClearOnInput);
-
-    // Form validation before submission
-    function validatePostRideForm() {
-        let isValid = true;
-        let firstErrorField = null;
-
-        // Get required field values
-        const fromSpot = document.getElementById('from_spot_0');
-        const toSpot = document.getElementById('to_spot_0');
-        const dateInput = document.querySelector('input[name="departure_date"]');
-        const timeInput = document.querySelector('input[name="departure_time"]');
-        const seatsInput = document.querySelector('select[name="max_passengers"], input[name="max_passengers"]');
-        const priceInput = document.getElementById('priceData0');
-        const makeInput = document.querySelector('input[name="make"]');
-        const modelInput = document.querySelector('input[name="model"]');
-        const typeInput = document.querySelector('select[name="vehicle_type"]');
-
-        // Clear all previous tooltips
-        document.querySelectorAll('.validation-tooltip').forEach(el => el.remove());
-        document.querySelectorAll('.validation-error-border').forEach(el => {
-            el.classList.remove('validation-error-border', 'border-red-500', 'ring-red-500');
+        // Handle place selection for "From" input
+        fromSpotAutocomplete.addListener('place_changed', function() {
+            const placeData = handlePlaceSelection(fromSpotAutocomplete.getPlace(), 'from_spot_0');
+            if (placeData) selectedFromSpotPlace = placeData;
         });
 
-        // Validate From location
-        if (!fromSpot || !fromSpot.value.trim()) {
-            isValid = false;
-            showFieldTooltip(fromSpot, 'From location is required');
-            if (!firstErrorField) firstErrorField = fromSpot;
+        // Handle place selection for "To" input
+        toSpotAutocomplete.addListener('place_changed', function() {
+            const placeData = handlePlaceSelection(toSpotAutocomplete.getPlace(), 'to_spot_0');
+            if (placeData) selectedToSpotPlace = placeData;
+        });
+
+        // Clear selected place when user manually types in inputs
+        const handleInputChange = (inputId, placeStorage) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.addEventListener('input', function() {
+                if (isSettingPlaceValue) return;
+                const currentValue = this.value.trim();
+                if (placeStorage && currentValue !== placeStorage.value) {
+                    if (inputId === 'from_spot_0') {
+                        selectedFromSpotPlace = null;
+                    } else {
+                        selectedToSpotPlace = null;
+                    }
+                }
+            });
+        };
+
+        handleInputChange('from_spot_0', selectedFromSpotPlace);
+        handleInputChange('to_spot_0', selectedToSpotPlace);
+
+        // Prevent form submission when Enter key is pressed on autocomplete inputs
+        const preventFormSubmitOnEnter = (inputId) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            
+            input.addEventListener('keydown', function(e) {
+                // If Enter key is pressed
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    // Check if Google Places dropdown is visible
+                    const pacContainer = document.querySelector('.pac-container');
+                    const isDropdownVisible = pacContainer && 
+                        pacContainer.style.display !== 'none' && 
+                        pacContainer.offsetParent !== null;
+                    
+                    // Always prevent form submission on Enter for autocomplete inputs
+                    // Google Places will handle the selection, or if no dropdown is visible,
+                    // we still prevent accidental form submission
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // If dropdown is visible, let Google Places handle it naturally
+                    // The place_changed event will fire when user selects with Enter
+                    if (isDropdownVisible) {
+                        // Find the selected or first pac-item and trigger click
+                        const selectedItem = document.querySelector('.pac-item-selected') || 
+                                           document.querySelector('.pac-item');
+                        if (selectedItem) {
+                            selectedItem.click();
+                        }
+                    }
+                    
+                    return false;
+                }
+            });
+        };
+
+        preventFormSubmitOnEnter('from_spot_0');
+        preventFormSubmitOnEnter('to_spot_0');
+
+        // Initialize selectedFromSpotPlace and selectedToSpotPlace if inputs already have values
+        initializeExistingAddresses();
+    };
+
+    // Function to initialize selectedFromSpotPlace and selectedToSpotPlace from existing input values
+    function initializeExistingAddresses() {
+        if (typeof google === 'undefined' || typeof google.maps === 'undefined' || typeof google.maps.Geocoder ===
+            'undefined') {
+            return;
         }
 
-        // Validate To location
-        if (!toSpot || !toSpot.value.trim()) {
-            isValid = false;
-            showFieldTooltip(toSpot, 'To location is required');
-            if (!firstErrorField) firstErrorField = toSpot;
-        }
+        const geocoder = new google.maps.Geocoder();
 
-        // Validate Date
-        if (!dateInput || !dateInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(dateInput, 'Departure date is required');
-            if (!firstErrorField) firstErrorField = dateInput;
-        }
+        const initializeAddress = (input, placeStorage) => {
+            if (!input || !input.value.trim()) return;
+            const value = input.value.trim();
+            geocoder.geocode({
+                address: value + ', Canada',
+                componentRestrictions: {
+                    country: 'ca'
+                }
+            }, function(results, status) {
+                if (status === 'OK' && results && results.length > 0) {
+                    const place = results[0];
+                    const formattedAddress = formatPlaceAddress(place);
+                    const placeData = {
+                        place_id: place.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
+                    if (input.id === 'from_spot_0') {
+                        selectedFromSpotPlace = placeData;
+                    } else {
+                        selectedToSpotPlace = placeData;
+                    }
+                    if (input.value !== formattedAddress) {
+                        input.value = formattedAddress;
+                    }
+                } else {
+                    // If geocoding fails, set a basic place object to allow validation
+                    const fallbackData = {
+                        place_id: null,
+                        formatted_address: value,
+                        value: value
+                    };
+                    if (input.id === 'from_spot_0') {
+                        selectedFromSpotPlace = fallbackData;
+                    } else {
+                        selectedToSpotPlace = fallbackData;
+                    }
+                }
+            });
+        };
 
-        // Validate Time
-        if (!timeInput || !timeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(timeInput, 'Departure time is required');
-            if (!firstErrorField) firstErrorField = timeInput;
-        }
+        initializeAddress(document.getElementById('from_spot_0'));
+        initializeAddress(document.getElementById('to_spot_0'));
+    }
 
-        // Validate Seats
-        if (!seatsInput || !seatsInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(seatsInput, 'Number of seats is required');
-            if (!firstErrorField) firstErrorField = seatsInput;
-        }
+    // Format place address to "City, Province, Canada" format
+    function formatPlaceAddress(place) {
+        let city = '';
+        let province = '';
+        let country = 'Canada'; // Default to Canada since we're restricting to CA
 
-        // Validate Price
-        if (!priceInput || !priceInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(priceInput, 'Price is required');
-            if (!firstErrorField) firstErrorField = priceInput;
-        }
+        // First, try to extract from address components
+        if (place.address_components && place.address_components.length > 0) {
+            for (const component of place.address_components) {
+                const types = component.types;
 
-        // Validate Make
-        if (!makeInput || !makeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(makeInput, 'Vehicle make is required');
-            if (!firstErrorField) firstErrorField = makeInput;
-        }
+                // Prioritize locality for city (this is the most reliable for cities)
+                if (!city && types.includes('locality')) {
+                    city = component.long_name;
+                }
+                // Fallback to administrative_area_level_2 if no locality found
+                else if (!city && types.includes('administrative_area_level_2')) {
+                    city = component.long_name;
+                }
 
-        // Validate Model
-        if (!modelInput || !modelInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(modelInput, 'Vehicle model is required');
-            if (!firstErrorField) firstErrorField = modelInput;
-        }
+                // Get province/state (administrative_area_level_1)
+                if (!province && types.includes('administrative_area_level_1')) {
+                    province = component.short_name; // Use short name for province code (e.g., ON, BC)
+                }
 
-        // Validate Vehicle Type
-        if (!typeInput || !typeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(typeInput, 'Vehicle type is required');
-            if (!firstErrorField) firstErrorField = typeInput;
-        }
-
-        // Validate Terms & Conditions checkbox
-        const agreeTermsCheckbox = document.getElementById('agree_terms');
-        if (agreeTermsCheckbox && !agreeTermsCheckbox.checked) {
-            isValid = false;
-            // Just highlight the checkbox, no tooltip
-            agreeTermsCheckbox.classList.add('validation-error-border', 'ring-2', 'ring-red-500');
-            if (!firstErrorField) firstErrorField = agreeTermsCheckbox;
-        }
-
-        // Scroll to first error field
-        if (!isValid && firstErrorField) {
-            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            if (firstErrorField.type !== 'checkbox') {
-                firstErrorField.focus();
+                // Get country
+                if (types.includes('country')) {
+                    country = component.long_name;
+                }
             }
         }
 
-        return isValid;
-    }
-
-    // Helper function to show tooltip on checkbox
-    function showCheckboxTooltip(checkbox, message) {
-        if (!checkbox) return;
-
-        // Remove existing tooltip if any
-        removeCheckboxTooltip(checkbox);
-
-        // Add error styling to checkbox
-        checkbox.classList.add('validation-error-border', 'ring-2', 'ring-red-500');
-
-        // Create tooltip element
-        const tooltip = document.createElement('div');
-        tooltip.className = 'validation-tooltip checkbox-tooltip';
-        tooltip.innerHTML = `
-            <div class="validation-tooltip-arrow"></div>
-            <div class="validation-tooltip-content">${message}</div>
-        `;
-
-        // Insert tooltip after the checkbox's parent container
-        const container = checkbox.closest('.flex') || checkbox.parentNode;
-        container.parentNode.insertBefore(tooltip, container.nextSibling);
-    }
-
-    // Helper function to remove tooltip from checkbox
-    function removeCheckboxTooltip(checkbox) {
-        if (!checkbox) return;
-        checkbox.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
-        const container = checkbox.closest('.flex') || checkbox.parentNode;
-        if (!container) return;
-        // Look for the tooltip as the next sibling of the container
-        let nextEl = container.nextElementSibling;
-        if (nextEl && nextEl.classList.contains('checkbox-tooltip')) {
-            nextEl.remove();
-        }
-    }
-
-    // Add focus/change listener to agree_terms checkbox
-    document.addEventListener('DOMContentLoaded', function() {
-        const agreeTermsCheckbox = document.getElementById('agree_terms');
-        if (agreeTermsCheckbox) {
-            agreeTermsCheckbox.addEventListener('change', function() {
-                // Remove highlight when checkbox is checked
-                this.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
-            });
+        // If we still don't have a city, try parsing from place name (for autocomplete)
+        // The place.name is what's shown in the autocomplete dropdown
+        if (!city && place.name) {
+            // Parse "City, Province" or "City, Province, Country" format
+            const nameParts = place.name.split(',').map(part => part.trim());
+            if (nameParts.length >= 1) {
+                city = nameParts[0];
+            }
+            if (nameParts.length >= 2 && !province) {
+                // Check if second part is a province code (2-3 letters) or full name
+                const secondPart = nameParts[1];
+                if (secondPart.length <= 3) {
+                    province = secondPart.toUpperCase();
+                }
+            }
         }
 
-        // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
-        const pinkRideCheckbox = document.getElementById('pink-ride');
-        const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
-        if (pinkRideCheckbox && pinkRideDisclaimer) {
-            pinkRideCheckbox.addEventListener('change', function() {
-                pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
-            });
+        // If still no city, try formatted_address as last resort
+        if (!city && place.formatted_address) {
+            const addrParts = place.formatted_address.split(',').map(part => part.trim());
+            if (addrParts.length >= 1) {
+                city = addrParts[0];
+            }
+            // Try to extract province from formatted_address if not found yet
+            if (!province && addrParts.length >= 2) {
+                const secondPart = addrParts[1].trim();
+                // Check if it looks like a province code (2-3 uppercase letters)
+                if (secondPart.length <= 3 && /^[A-Z]+$/.test(secondPart)) {
+                    province = secondPart;
+                }
+            }
         }
-    });
+
+        // Format: "City, Province, Canada"
+        let formattedAddress = city || '';
+        if (province) {
+            formattedAddress += (formattedAddress ? ', ' : '') + province;
+        }
+        if (country && formattedAddress) {
+            formattedAddress += ', ' + country;
+        }
+
+        return formattedAddress || place.name || place.formatted_address || '';
+    }
 </script>
 
 <style>
-    .validation-tooltip {
-        position: relative;
-        margin-top: 4px;
-    }
-    .validation-tooltip-arrow {
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 8px solid #ef4444;
-        margin-left: 10px;
-    }
-    .validation-tooltip-content {
-        background-color: #ef4444;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 14px;
-        display: inline-block;
-    }
-    .validation-error-border {
-        border-color: #ef4444 !important;
-    }
+.validation-tooltip {
+position: relative;
+margin-top: 4px;
+}
+
+.validation-tooltip-arrow {
+width: 0;
+height: 0;
+border-left: 8px solid transparent;
+border-right: 8px solid transparent;
+border-bottom: 8px solid #ef4444;
+margin-left: 10px;
+}
+
+.validation-tooltip-content {
+background-color: #ef4444;
+color: white;
+padding: 6px 12px;
+border-radius: 4px;
+font-size: 14px;
+display: inline-block;
+}
+
+.validation-error-border {
+border-color: #ef4444 !important;
+}
 </style>
 
+<!-- Google Places Autocomplete API -->
+<script
+    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initGooglePlacesPostRide"
+    async defer></script>
 @endsection
 <style>
-    .flatpickr-time input {
-        font-size:18px !important;
-    }
+.flatpickr-time input {
+font-size: 18px !important;
+}
 </style>
