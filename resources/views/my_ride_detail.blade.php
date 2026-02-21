@@ -303,70 +303,85 @@
                 @endif
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4">
+                        @php
+                            $defaultDetail = $ride->rideDetail->where('default_ride', 1)->first();
+                            $moreDetails = $ride->rideDetail->where('default_ride', 0)->sortBy('id');
+                            $origin = $defaultDetail && $defaultDetail->departure ? $defaultDetail->departure : ($ride->rideDetail->first() ? $ride->rideDetail->first()->departure : '');
+                            $destination = $defaultDetail && $defaultDetail->destination ? $defaultDetail->destination : ($ride->rideDetail->last() ? $ride->rideDetail->last()->destination : '');
+                            $stops = $moreDetails->isEmpty() ? collect() : (
+                                $moreDetails->last()->destination == $destination
+                                    ? $moreDetails->slice(0, -1)->pluck('destination')->values()
+                                    : $moreDetails->pluck('destination')->values()
+                            );
+                        @endphp
                         <div class="w-full md:w-2/3 order-2 md:order-1">
-                            @foreach ($ride->rideDetail as $detail)
-                                @if ($detail->departure && $detail->destination)
-                                    <div class="relative mt-5 text-left">
-                                        <div class="flex items-center relative">
-                                            <div
-                                                class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                <span
-                                                    class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                    <img class="w-5 h-5 object-contain"
-                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}"
-                                                        alt="">
-                                                </span>
-                                            </div>
-                                            <div class="ml-12 md:ml-20">
-                                                <p class="font-bold text-xl text-black">
-                                                    @isset($rideDetailPage->from_label)
-                                                        {{ $rideDetailPage->from_label }}
-                                                    @else
-                                                        From
-                                                    @endisset
-                                                </p>
-                                                <div class="flex gap-2">
-                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                        {{ $detail->departure }}.
-                                                    </h3>
-                                                    <p class="text-sm mt-2">
-                                                        Pick-up at: {{ $ride->pickup }}
+                            @if ($origin || $destination)
+                                <div class="relative mt-5 text-left rounded-lg bg-white p-4">
+                                    <div class="space-y-0">
+                                        @if ($origin)
+                                            <div class="flex items-center relative">
+                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                    <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center ml-12 md:ml-20">
+                                                    <p class="font-bold text-xl text-black">
+                                                        @isset($rideDetailPage->from_label)
+                                                            {{ $rideDetailPage->from_label }}:
+                                                        @else
+                                                            From:
+                                                        @endisset
                                                     </p>
+                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2">
+                                                        {{ $origin }}
+                                                    </h4>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div class="flex items-center relative">
-                                            <div
-                                                class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                <span
-                                                    class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                    <img class="w-5 h-5 object-contain"
-                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}"
-                                                        alt="">
-                                                </span>
-                                            </div>
-                                            <div class="ml-12 md:ml-20">
-                                                <p class="font-bold text-xl text-black">
-                                                    @isset($rideDetailPage->to_label)
-                                                        {{ $rideDetailPage->to_label }}
-                                                    @else
-                                                        To
-                                                    @endisset
-                                                </p>
-                                                <div class="flex gap-2">
-                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                        {{ $detail->destination }}.
-                                                    </h3>
-                                                    <p class="text-sm mt-2">
-                                                        Drop-off at: {{ $ride->dropoff }}
+                                        @endif
+                                        @if ($stops->isNotEmpty())
+                                            <div class="flex items-center relative">
+                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10"></div>
+                                                <div class="ml-12 md:ml-20 py-2">
+                                                    <p class="font-bold text-xl text-black mb-2">
+                                                        @isset($rideDetailPage->stops_label)
+                                                            {{ $rideDetailPage->stops_label }}
+                                                        @else
+                                                            Stops:
+                                                        @endisset
                                                     </p>
+                                                    <ul class="list-disc list-inside space-y-1 ml-6 text-gray-900 text-base md:text-lg">
+                                                        @foreach ($stops as $stop)
+                                                            <li class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">{{ $stop }}</li>
+                                                        @endforeach
+                                                    </ul>
                                                 </div>
                                             </div>
-                                        </div>
+                                        @endif
+                                        @if ($destination)
+                                            <div class="flex items-center relative">
+                                                <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                    <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center ml-12 md:ml-20">
+                                                    <p class="font-bold text-xl text-black">
+                                                        @isset($rideDetailPage->to_label)
+                                                            {{ $rideDetailPage->to_label }}:
+                                                        @else
+                                                            To:
+                                                        @endisset
+                                                    </p>
+                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2">
+                                                        {{ $destination }}
+                                                    </h4>
+                                                </div>
+                                            </div>
+                                        @endif  
                                     </div>
-                                @endif
-                            @endforeach
+                                </div>
+                            @endif
                         </div>
                         <div class="mt-4 order-1 md:order-2">
                             <p class="whitespace-nowrap font-semibold">
@@ -377,13 +392,15 @@
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="p-4">
-                            <p class="text-left font-semibold">
+                            <h4 class="text-left font-FuturaMdCnBT text-primary text-2xl">
+                                @isset($rideDetailPage->seats_left_label)
+                                    {{ $rideDetailPage->seats_left_label }}:
+                                @endisset
                                 {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
-                                {{ $rideDetailPage->seats_left_label ?? 'seats left' }}
-                            </p>
+                            </h4>
                         </div>
                         <div class="p-4">
-                            <p class="font-semibold text-left text-primary">${{ $ride->rideDetail[0]->price }}
+                            <p class="font-semibold text-left text-primary text-lg">${{ $ride->rideDetail[0]->price }}
                                 {{ $rideDetailPage->per_seat_label ?? 'per seat' }}</p>
                         </div>
                     </div>
@@ -394,10 +411,9 @@
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @else
-                                    Payment method
+                                    Payment method:
                                 @endisset
-                                <span class="text-primary font-normal"
-                                    style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
+                                <span class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -406,11 +422,11 @@
                                     Booking method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @else
-                                    <div class="text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">
                                         {{ is_object($ride->booking_method) ? $ride->booking_method->name : $ride->booking_method }}
                                     </div>
                                 @endisset
@@ -431,10 +447,12 @@
                                         })
                                         ->sum('seats');
                                 @endphp
-                                {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: </h4>
-                            <span class="text-primary font-normal ml-2">{{ $bookedSeatsCount }}
-                                {{ $bookedSeatsCount == 1 ? $rideDetailPage->seat_on_column_label ?? 'seat' : $rideDetailPage->ride_seat_label ?? 'seats' }}</span>
-
+                                {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: 
+                            </h4>
+                            <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">{{ $bookedSeatsCount }}
+                                {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}
+                            </h4>
+                            
                         </div>
                         <div class="p-4">
                             <div class="flex items-center justify-between">
@@ -953,6 +971,56 @@
         </div>
     @endif
 
+    {{-- Cancel ride: confirmation modal (same style as message popup) --}}
+    <div id="cancelRideConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('cancelRideConfirmModal')"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                    <button type="button" onclick="closeBookingModal('cancelRideConfirmModal')" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full mt-4">
+                            <p class="can-exp-p text-center">{{ $rideDetailPage->cancel_ride_confirmation ?? 'Are you sure you want to cancel this ride?' }}</p>
+                            <p class="can-exp-p text-center mt-2">This action is irreversible!</p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
+                        <button type="button" id="cancelRideConfirmYes" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:bg-red-400 shadow-sm w-36">{{ $rideDetailPage->cancel_ride_yes_btn ?? 'Yes, cancel it!' }}</button>
+                        <button type="button" onclick="closeBookingModal('cancelRideConfirmModal')" class="inline-flex justify-center rounded bg-[#106BC7] px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 w-36">{{ $rideDetailPage->cancel_ride_no_btn ?? 'No, take me back' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Cancel ride: result modal (success / error message + Close) --}}
+    <div id="cancelRideResultModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeCancelRideResultModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closeCancelRideResultModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full mt-4">
+                            <p class="can-exp-p text-center" id="cancelRideResultMessage"></p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                        <button type="button" id="cancelRideResultClose" class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $messages->popup_close_btn_text ?? 'Close' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="securedCashAttemptError" class="hidden fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -1114,103 +1182,84 @@
             });
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        const cancelRideBtn = document.getElementById('cancelRideBtn');
-        cancelRideBtn.addEventListener('click', function(event) {
-            event.preventDefault();
-            const bookedSeats =
-                {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }};
+        const cancelRideMyRidesUrl = "{{ route('my_rides', ['lang' => $selectedLanguage->abbreviation]) }}";
 
-            if (bookedSeats === 0) {
-                swal.fire({
-                    title: '{{ $rideDetailPage->cancel_ride_confirmation ?? 'Are you sure you want to cancel this ride?' }}',
-                    text: 'This action is irreversible!',
-                    // icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#f87171',
-                    cancelButtonColor: '#106BC7',
-                    confirmButtonText: '{{ $rideDetailPage->cancel_ride_yes_btn ?? 'Yes, cancel it!' }}',
-                    cancelButtonText: '{{ $rideDetailPage->cancel_ride_no_btn ?? 'No, take me back' }}',
-                    showCloseButton: true,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch("{{ route('update_cancel_ride', $ride->id) }}", {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json',
-                                    'X-HTTP-Method-Override': 'PUT'
-                                },
-                                body: JSON.stringify({})
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data);
-                                if (data.success) {
-                                    swal.fire({
-                                        title: 'This ride has been cancelled',
-                                        // icon: 'success',
-                                        // showCancelButton: true,
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'Close',
-                                        confirmButtonColor: '#f87171'
-                                    }).then(() => {
-                                        window.location.href =
-                                            "{{ route('my_rides', ['lang' => $selectedLanguage->abbreviation]) }}";
-                                    });
-                                } else if (data.error) {
-                                    swal.fire({
-                                        title: data.message,
-                                        // icon: 'warning',
-                                        showCancelButton: true,
-                                        showConfirmButton: true,
-                                        confirmButtonText: 'Close',
-                                        confirmButtonColor: '#f87171'
-                                    });
-                                } else {
-                                    swal.fire({
-                                        title: 'Error',
-                                        text: 'Failed to cancel the ride.',
-                                        // icon: 'error',
-                                        showCancelButton: true,
-                                        confirmButtonText: 'Close',
-                                        confirmButtonColor: '#f87171'
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                swal.fire({
-                                    title: 'Error',
-                                    text: 'An error occurred while cancelling the ride.',
-                                    // icon: 'error',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Close',
-                                    confirmButtonColor: '#f87171'
-                                });
-                            });
+        function closeCancelRideResultModal(redirect) {
+            closeBookingModal('cancelRideResultModal');
+            if (redirect) {
+                window.location.href = cancelRideMyRidesUrl;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const cancelRideBtn = document.getElementById('cancelRideBtn');
+            if (!cancelRideBtn) return;
+
+            cancelRideBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                const bookedSeats =
+                    {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }};
+
+                if (bookedSeats === 0) {
+                    const confirmModal = document.getElementById('cancelRideConfirmModal');
+                    if (confirmModal) {
+                        confirmModal.classList.remove('hidden');
+                        confirmModal.style.display = 'block';
                     }
+                } else {
+                    window.location.href =
+                        "{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}";
+                }
+            });
+
+            const cancelRideConfirmYes = document.getElementById('cancelRideConfirmYes');
+            if (cancelRideConfirmYes) {
+                cancelRideConfirmYes.addEventListener('click', function() {
+                    closeBookingModal('cancelRideConfirmModal');
+
+                    fetch("{{ route('update_cancel_ride', $ride->id) }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'X-HTTP-Method-Override': 'PUT'
+                            },
+                            body: JSON.stringify({})
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            const resultModal = document.getElementById('cancelRideResultModal');
+                            const resultMessage = document.getElementById('cancelRideResultMessage');
+                            const resultCloseBtn = document.getElementById('cancelRideResultClose');
+                            if (!resultModal || !resultMessage) return;
+
+                            if (data.success) {
+                                resultMessage.textContent = 'This ride has been cancelled';
+                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(true); };
+                            } else if (data.error && data.message) {
+                                resultMessage.textContent = data.message;
+                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                            } else {
+                                resultMessage.textContent = 'Failed to cancel the ride.';
+                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                            }
+                            resultModal.classList.remove('hidden');
+                            resultModal.style.display = 'block';
+                        })
+                        .catch(function() {
+                            const resultModal = document.getElementById('cancelRideResultModal');
+                            const resultMessage = document.getElementById('cancelRideResultMessage');
+                            const resultCloseBtn = document.getElementById('cancelRideResultClose');
+                            if (resultModal && resultMessage) {
+                                resultMessage.textContent = 'An error occurred while cancelling the ride.';
+                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                                resultModal.classList.remove('hidden');
+                                resultModal.style.display = 'block';
+                            }
+                        });
                 });
-            } else {
-                window.location.href =
-                    "{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}";
             }
         });
     </script>
-    <style>
-        .swal2-confirm {
-            background-color: #f87171 !important;
-            /* Red background for "Yes, cancel it!" and "Close" */
-            border-color: #f87171 !important;
-            /* Red border */
-        }
-
-        .swal2-cancel {
-            background-color: #106BC7 !important;
-            /* Blue background for "No, take me back" */
-            border-color: #106BC7 !important;
-            /* Blue border */
-        }
-    </style>
 @endsection

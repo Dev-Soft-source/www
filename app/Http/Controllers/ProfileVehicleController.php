@@ -272,7 +272,10 @@ class ProfileVehicleController extends Controller
         $customMessages = [
             'mimes' => 'The :attribute must be a file of type: jpeg, png',
             'uploaded' => 'The image is not uploaded yet',
-            'max' => 'Can not upload image size greater than 10MB',
+            'image.max' => 'Can not upload image size greater than 10MB',
+            'liscense_no.max' => 'License plate number cannot exceed 8 characters.',
+            'color.max' => 'Color cannot exceed 15 characters.',
+            'year.max' => 'Year cannot exceed 4 characters.',
         ];
 
         $vehicle = Vehicle::findOrFail($id);

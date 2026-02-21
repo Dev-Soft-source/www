@@ -139,7 +139,7 @@
                                         @endisset
                                         </a>
                                         <button type="button" onclick="toggleModalCard('card-modal', {{ $vehicle->id }}, '{{$selectedLanguage->abbreviation}}')"
-                                            class="button-exp-red-fill whitespace-nowrap">
+                                            class="button-exp-fill whitespace-nowrap">
                                             @isset($myVehiclePage->remove_vehicle_button_text)
                                                 {{ $myVehiclePage->remove_vehicle_button_text }}
                                             @endisset

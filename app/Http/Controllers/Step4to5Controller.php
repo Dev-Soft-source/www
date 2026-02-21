@@ -15,7 +15,11 @@ class Step4to5Controller extends Controller
     {
         $user = auth()->user();
 
+<<<<<<< HEAD
         $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+=======
+        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+>>>>>>> b9da535cea7545494ed25a254bf4f97735206ad4
 
         User::whereId($user->id)->update([
             'step' => '4'
@@ -31,7 +35,7 @@ class Step4to5Controller extends Controller
     {
         $selectedLanguage = $this->selectedLanguage;
 
-        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $niceNames = [
             'driver_liscense' => isset($step4Page->driver_license_error) ? $step4Page->driver_license_error : '',
         ];

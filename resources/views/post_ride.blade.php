@@ -1,8 +1,105 @@
 @extends('layouts.template')
 
 @section('style')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .features_tooltiptext::after {
+        content: "";
+        border-width: 10px;
+        border-style: solid;
+        border-color: #ef4444 transparent transparent transparent;
+        position: absolute;
+        bottom: -20px;
+        /* left: 4rem; */
+    }
+    .luggage_tooltiptext::after {
+        content: "";
+        border-width: 10px;
+        border-style: solid;
+        border-color: #ef4444 transparent transparent transparent;
+        position: absolute;
+        bottom: -20px;
+        /* left: 4rem; */
+    }
+    .payment_tooltiptext::after {
+        content: "";
+        border-width: 10px;
+        border-style: solid;
+        border-color: #ef4444 transparent transparent transparent;
+        position: absolute;
+        bottom: -20px;
+        /* left: 4rem; */
+    }
+    /* Extra small devices */
+    @media only screen and (max-width: 375px) {
+        .tooltip_width{
+            width: 16.5rem;
+        }
+        .tooltip_position{
+            right: 13rem;
+            top: -7.5rem;
+        }
+        .luggage_tooltiptext::after{
+            right: 3.3rem;
+        }
+        .payment_tooltiptext_position{
+            top: -6.3rem;
+        }
+    }
+    @media only screen and (min-width:376px) and (max-width: 639px) {
+        .tooltip_width{
+            width: 20rem;
+        }
+        .tooltip_position{
+            right: 16.5rem;
+            top: -6.5rem;
+        }
+        .luggage_tooltiptext::after{
+            right: 3.3rem;
+        }
+    }
+    @media only screen and (max-width: 767px) {
+        .features_tooltiptext::after {
+            content: "";
+            border-width: 10px;
+            border-style: solid;
+            border-color: transparent transparent #ef4444 transparent;
+            position: absolute;
+            top: -20px;
+            bottom: auto;
+            left: 5.8rem;
+        }
+    }
+    /* Stops Along the Way – collapsible header and smooth slide panel (same as edit_ride) */
+    .add-more-spots-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+    }
+    .add-more-spots-header:hover {
+        opacity: 0.95;
+    }
+    .add-more-spots-chevron {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-left: 0.5rem;
+        transition: transform 0.35s ease-out;
+    }
+    .add-more-spots-header[aria-expanded="false"] .add-more-spots-chevron {
+        transform: rotate(-90deg);
+    }
+    .add-more-spots-panel {
+        overflow: hidden;
+        transition: height 0.35s ease-out;
+    }
+</style>
+4
 @endsection
 
 @section('content')
@@ -417,6 +514,33 @@
                             </div>
                         </div>
 
+                        {{-- Delete Stop confirmation modal --}}
+                        <div id="delete-stop-modal-post" class="relative z-50 hidden" aria-labelledby="delete-stop-modal-title-post" role="dialog" aria-modal="true">
+                            <div id="delete-stop-modal-backdrop-post" onclick="closeDeleteStopModalPostRide()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                                        <button type="button" onclick="closeDeleteStopModalPostRide()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <div class="mt-2 w-full">
+                                                    <p id="delete-stop-modal-title-post" class="can-exp-p text-center text-xl">Delete Stop?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                            <button type="button" id="delete-stop-no-post" class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">No</button>
+                                            <button type="button" id="delete-stop-yes-post" class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">Yes</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-end flex-col md:flex-row justify-between mt-4">
                             <div class="w-full md:w-[45%] mb-4">
                                 <label for="pickup_location" class="block mb-2 text-gray-900">
@@ -549,6 +673,68 @@
                             </div>
                         </div>
 
+                        {{-- Stops Along the Way (Optional) – repopulate from old() so segment price UI shows after validation redirect --}}
+                        @php
+                            $stopsForDisplayPost = [];
+                            if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
+                                $stopsForDisplayPost = old('stop_spot_display');
+                            } elseif (null !== old('to_spot') && is_array(old('to_spot')) && count(old('to_spot')) > 0) {
+                                $toSpotsPost = old('to_spot');
+                                $nPost = count($toSpotsPost) - 1;
+                                for ($i = 0; $i < $nPost; $i++) {
+                                    $stopsForDisplayPost[] = $toSpotsPost[$i];
+                                }
+                            }
+                            $realStopsPost = array_values(array_filter($stopsForDisplayPost, function ($s) { return trim((string)$s) !== ''; }));
+                            $hasStopsPost = count($realStopsPost) > 0;
+                        @endphp
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4" id="stops-section-wrapper" data-segment-ids="[]">
+                            <button type="button" id="add-more-spots-toggle" class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4 w-full" aria-expanded="{{ $hasStopsPost ? 'true' : 'false' }}" aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
+                                <h3 class="text-2xl">@isset($postRidePage->add_more_from_to){{ $postRidePage->add_more_from_to }}@else Stops Along the Way (Optional) @endisset</h3>
+                                <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="add-more-spots-panel" class="add-more-spots-panel" role="region" aria-labelledby="add-more-spots-toggle" style="{{ $hasStopsPost ? 'height: auto;' : 'height: 0;' }}">
+                                <div class="add-more-spots-panel-inner bg-white p-4">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-gray-900 text-xl font-medium">From: </h4>
+                                        <span id="stops-origin-label" class="text-gray-900 text-primary lg:text-lg"></span>
+                                    </div>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way:</h4>
+                                    <div class="space-y-3 mb-4" id="stops-rows-container">
+                                        @if ($hasStopsPost)
+                                        @foreach ($stopsForDisplayPost as $idx => $stopValue)
+                                            @php $renderIndex = $idx + 1; @endphp
+                                            <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
+                                                <div class="relative flex-1 min-w-0">
+                                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                                    </div>
+                                                    <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
+                                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                        placeholder="">
+                                                    <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                                </div>
+                                                <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                        @endif
+                                    </div>
+                                    <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-gray-900 text-xl font-medium">To: </h4>
+                                        <span id="stops-destination-label" class="text-gray-900 text-primary lg:text-lg"></span>
+                                    </div>
+                                    <div id="stops-segments-hidden" class="hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="flex items-center mb-4">
                             <input id="recurring_trip" type="checkbox" name="recurring" value="1"
                                 {{ old('recurring') === '1' ? 'checked' : '' }}
@@ -780,48 +966,160 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="mt-6 bg-white rounded-lg shadow-3xl">
-                    <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
-                        <h3 class="text-2xl">
-                            @isset($postRidePage->price_payment_heading)
-                                {{ $postRidePage->price_payment_heading }}
-                            @endisset
-                            <span class="text-white">*</span>
-                        </h3>
-                    </div>
-                    <div class="bg-white p-4">
-                        <div>
-                            <label for="priceData0" class=" text-gray-700 font-medium">
-                                @isset($postRidePage->price_per_seat_label)
-                                    {{ $postRidePage->price_per_seat_label }}
+                
+                <div class="mt-6 bg-white rounded-lg overflow-visible shadow-3xl">
+                        <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
+                            <h3 class="text-2xl">
+                                @isset($postRidePage->price_payment_heading)
+                                    {{ $postRidePage->price_payment_heading }}
                                 @endisset
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative mt-2">
-                                <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                    <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32"
-                                        class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z" />
-                                    </svg>
-                                </span>
-                                @php
-                                    $defaultPrice =
-                                        isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                            ? $ride->defaultRideDetail[0]->price
-                                            : '';
-                                @endphp
-                                <input type="number" step="any" name="price" id="priceData0" placeholder=""
-                                    value="{{ old('price', $defaultPrice) }}"
-                                    class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
-                            </div>
+                                <span class="text-white">*</span>
+                            </h3>
+                        </div>
+                        <div id="post-ride-price-section" class="bg-white p-4 rounded-b-lg">
                             @error('price')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <div id="price-error-message" class="relative tooltip -bottom-4 group-hover:flex mb-2">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                         <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
+                                </div>
+                            @enderror
+                            <div id="price-client-error" class="hidden mb-2">
+                                <div class="relative tooltiptext -top-2 z-10 shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                    <p class="text-white leading-none text-sm lg:text-base">Please enter the full route price.</p>
+                                </div>
+                            </div>
+                            <div id="single-price-block">
+                                <div>
+                                    <label for="" class=" text-gray-700 font-medium">
+                                        @isset($postRidePage->price_per_seat_label)
+                                            {{ $postRidePage->price_per_seat_label }}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative mt-2">
+                                        <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
+                                            </svg>
+                                        </span>
+                                        @php
+                                            $defaultPrice = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->price : "";
+                                        @endphp
+                                        <input type="number" step="any" name="price" id="priceData0" placeholder=""
+                                            value="{{ old('price', $defaultPrice) }}"
+                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
+                                <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
+                                <div class="relative">
+                                    <div class="relative mt-2 mb-2">
+                                        <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                            <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
+                                            </svg>
+                                        </span>
+                                        <input type="number" step="any" id="priceData0DynamicInput" placeholder="" value="{{ old('price', '') }}"
+                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
+                                    </div>
+                                    <div id="full-route-tooltip-container-dynamic" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
+                                        <div class="tooltip-error">
+                                            The full-route price can't be higher than the total of all route sections.<br>
+                                            You can lower the full-route price or adjust section prices.
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
+                                <div class="relative mt-2 mb-4">
+                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none text-gray-500 font-medium">
+                                        <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="segment-total-price-input-dynamic" readonly placeholder="0.00" value="0.00"
+                                        class="bg-gray-200 border border-gray-300 pl-7 text-gray-700 text-base lg:text-lg rounded block w-full p-2.5 mt-2 cursor-default"/>
+                                </div>
+                                <div id="segment-price-rows-dynamic"></div>
+                            </div>
+                            <div class="mt-6">
+                                <label for="" class="block mb-2 font-medium text-gray-900">
+                                    @isset($postRidePage->payment_methods_label)
+                                        {{ $postRidePage->payment_methods_label }}
+                                    @endisset
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <div class="space-y-2 mt-2">
+                                    @if($postRidePage->payment_methods_option1?->features_setting_id)
+                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                            <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
+                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="cash"
+                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                                @isset($postRidePage->payment_methods_option1->icon)
+                                                    <div class="w-8 h-6">
+                                                            <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon)}}" class="mx-auto w-full h-full object-contain" alt="">
+                                                    </div>
+                                                @endisset
+                                                <span class="">
+                                                    {{ $postRidePage->payment_methods_option1->name }}
+                                                </span>
+                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    @endif
+                                    @if($postRidePage->payment_methods_option2?->features_setting_id)
+                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                            <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
+                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
+                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="online"
+                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                                @isset($postRidePage->payment_methods_option2->icon)
+                                                    <div class="w-8 h-6">
+                                                            <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon)}}" class="h-full w-full mx-auto object-contain" alt="">
+                                                    </div>
+                                                @endisset
+                                                <span class="">
+                                                    {{ $postRidePage->payment_methods_option2->name }}
+                                                </span>
+                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    @endif
+                                    @if($postRidePage->payment_methods_option3?->features_setting_id)
+                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                            <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
+                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
+                                                class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="secured"
+                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                                @isset($postRidePage->payment_methods_option3->icon)
+                                                    <div class="w-8 h-6">
+                                                        <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon)}}" class="mx-auto h-full w-full object-contain" alt="">
+                                                    </div>
+                                                @endisset
+                                                <span class="">
+                                                    {{ $postRidePage->payment_methods_option3->name }}
+                                                </span>
+                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    @endif
                                 </div>
                             @enderror
                         </div>
@@ -2524,11 +2822,96 @@
         // Add our submit handler with capture phase to run first
         // Use capture phase and make sure we run before other handlers
         form.addEventListener('submit', function(e) {
-
-            // Check if validation should be bypassed (user clicked "Keep Current Price")
-            const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
-            if (bypassInput && bypassInput.value === '1') {
-                return; // Allow form to submit normally
+        console.log('Form submit event triggered - starting validation');
+        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+        var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
+        if (tooltipDyn) tooltipDyn.classList.add('hidden');
+        if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
+            if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
+        }
+        if (typeof buildStopsSegmentsForSubmitPostRide === 'function') {
+            buildStopsSegmentsForSubmitPostRide();
+        }
+        var priceClientErr = document.getElementById('price-client-error');
+        if (priceClientErr) priceClientErr.classList.add('hidden');
+        var singleBlock = document.getElementById('single-price-block');
+        if (singleBlock && singleBlock.style.display !== 'none' && singleBlock.offsetParent !== null) {
+            var singlePriceInput = singleBlock.querySelector('input[type="number"]');
+            if (singlePriceInput && (!singlePriceInput.value || singlePriceInput.value.trim() === '' || parseFloat(singlePriceInput.value) <= 0)) {
+                e.preventDefault();
+                if (priceClientErr) {
+                    priceClientErr.querySelector('p').textContent = 'Please enter the price per seat.';
+                    priceClientErr.classList.remove('hidden');
+                }
+                var priceSection = document.getElementById('post-ride-price-section');
+                if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (singlePriceInput) singlePriceInput.focus();
+                return;
+            }
+        }
+        if (priceClientErr && priceClientErr.querySelector('p')) priceClientErr.querySelector('p').textContent = 'Please enter the full route price.';
+        if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
+            var fullRouteInput = dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input');
+            var totalInput = dynamicBlock.querySelector('#segment-total-price-input-dynamic');
+            if (!fullRouteInput || !fullRouteInput.value || fullRouteInput.value.trim() === '' || parseFloat(fullRouteInput.value) <= 0) {
+                e.preventDefault();
+                if (priceClientErr) priceClientErr.classList.remove('hidden');
+                var priceSection = document.getElementById('post-ride-price-section');
+                if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (fullRouteInput) fullRouteInput.focus();
+                return;
+            }
+            if (fullRouteInput && totalInput) {
+                var fullVal = parseFloat(fullRouteInput.value);
+                var totalVal = parseFloat(totalInput.value);
+                if (isNaN(fullVal)) fullVal = 0;
+                if (isNaN(totalVal)) totalVal = 0;
+                if (fullVal > totalVal) {
+                    e.preventDefault();
+                    if (tooltipDyn) tooltipDyn.classList.remove('hidden');
+                    var priceSection = document.getElementById('post-ride-price-section');
+                    if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+            }
+        }
+        // Check if validation should be bypassed (user clicked "Keep Current Price")
+        const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
+        if (bypassInput && bypassInput.value === '1') {
+            console.log('Bypassing price validation - user chose to keep current price');
+            return; // Allow form to submit normally
+        }
+        
+        // First check HTML5 validation
+        const firstInvalid = this.querySelector(':invalid');
+        if (firstInvalid) {
+            e.preventDefault();
+            firstInvalid.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            firstInvalid.focus();
+            return;
+        }
+        
+        // Validate price per seat before submission
+        const priceInput = document.getElementById('priceData0');
+        const price = priceInput ? parseFloat(priceInput.value) : null;
+        
+        // Get distance - try from data attribute first, then global variable
+        let distance = null;
+        if (priceInput && typeof $ !== 'undefined') {
+            distance = $(priceInput).data('distance') || window.rideDistance;
+        } else {
+            distance = window.rideDistance;
+        }
+        
+        // If distance is not available, try to get it from hidden input or calculate it
+        if (!distance || distance <= 0) {
+            // Try to get from hidden input if available
+            const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
+            if (distanceInput && distanceInput.value) {
+                distance = parseFloat(distanceInput.value);
             }
 
             // First check HTML5 validation
@@ -2995,6 +3378,60 @@
         });
     });
 
+    function debounce(func, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    // Function to fetch cities based on search input
+    function fetchCities(searchTerm, searchData, fieldId, fieldIndex) {
+        // Get the state_id (if required) or set it to null or default
+        let stateId = 0;  // You can adjust this if you need to pass state_id
+        let url = '{{ url('get-cities-by-state') }}';
+        let params = {
+            state_id: stateId,
+            search: searchTerm,
+            searchData: searchData
+        };
+
+        $.ajax({
+            url: "{{ url('get-cities-by-state') }}",
+            type: "POST",
+            data: {
+                search: searchTerm,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function(result) {
+                let suggestionsContainer = $('#' + fieldId + '_suggestions'+fieldIndex+'');
+                suggestionsContainer.empty();  // Clear previous suggestions
+
+                $.each(result.cities, function(key, value) {
+                    // Create a list item for each city
+                    let displayText = `${value.name}, ${value.state.abrv}, ${value.state.country.name}`;
+
+                    let suggestionItem = $('<div class="suggestion-item p-2 hover:bg-gray-200 cursor-pointer"></div>')
+                        .text(displayText)
+                        .on('click', function() {
+                            $('#'+fieldId+'_'+fieldIndex+'').val(displayText);
+                            if (fieldId !== 'stop_spot') {
+                                fromToInputChange(fieldIndex);
+                            }
+                            suggestionsContainer.empty();
+                        });
+
+                    suggestionsContainer.append(suggestionItem);
+                });
+            }
+        });
+    }
+
+
     // Function to fetch recommended price based on search input
     function fetchRecommendedPrice(searchTerm, searchData, index) {
         
@@ -3057,6 +3494,295 @@
         }
     }
 
+    function stopInput(index) {
+        debounce(function() {
+            let searchTerm = $('#stop_spot_' + index).val();
+            if (searchTerm.length >= 2 && typeof fetchCities !== 'undefined') {
+                fetchCities(searchTerm, '', 'stop_spot', index);
+            }
+        }, 500)();
+    }
+
+    function toggleAddMoreSpots(button) {
+        var panel = document.getElementById('add-more-spots-panel');
+        if (!panel) return;
+        var isOpen = button.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+            panel.style.height = panel.scrollHeight + 'px';
+            panel.offsetHeight;
+            panel.style.height = '0';
+            button.setAttribute('aria-expanded', 'false');
+        } else {
+            panel.style.height = panel.scrollHeight + 'px';
+            button.setAttribute('aria-expanded', 'true');
+            panel.addEventListener('transitionend', function onEnd() {
+                panel.removeEventListener('transitionend', onEnd);
+                if (button.getAttribute('aria-expanded') === 'true') {
+                    panel.style.height = 'auto';
+                }
+            }, { once: true });
+        }
+    }
+
+    var deleteStopTargetRowPost = null;
+
+    function addStopRowPostRide() {
+        var container = document.getElementById('stops-rows-container');
+        if (!container) return;
+        var rows = container.querySelectorAll('.stop-row');
+        var nextIndex = 1;
+        rows.forEach(function(r) {
+            var idx = parseInt(r.getAttribute('data-stop-index'), 10);
+            if (!isNaN(idx)) nextIndex = Math.max(nextIndex, idx + 1);
+        });
+        var row = document.createElement('div');
+        row.className = 'flex items-center gap-3 stop-row';
+        row.setAttribute('data-stop-index', nextIndex);
+        row.innerHTML = '<div class="relative flex-1 min-w-0">' +
+            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
+            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
+            '</div>' +
+            '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
+            '</button>';
+        container.appendChild(row);
+        updateStopsOriginDestinationLabelsPostRide();
+        if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+    }
+
+    function confirmDeleteStopPostRide(btn) {
+        var row = btn && btn.closest('.stop-row');
+        if (!row) return;
+        deleteStopTargetRowPost = row;
+        var modal = document.getElementById('delete-stop-modal-post');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.style.display = 'block';
+        }
+    }
+
+    function closeDeleteStopModalPostRide() {
+        var modal = document.getElementById('delete-stop-modal-post');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        deleteStopTargetRowPost = null;
+    }
+
+    function deleteStopRowConfirmedPostRide() {
+        if (deleteStopTargetRowPost && deleteStopTargetRowPost.parentNode) {
+            deleteStopTargetRowPost.remove();
+            updateStopsOriginDestinationLabelsPostRide();
+            if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+        }
+        closeDeleteStopModalPostRide();
+    }
+
+    function updateStopsOriginDestinationLabelsPostRide() {
+        var fromEl = document.getElementById('from_spot_0');
+        var toEl = document.getElementById('to_spot_0');
+        var originLabel = document.getElementById('stops-origin-label');
+        var destLabel = document.getElementById('stops-destination-label');
+        if (originLabel) originLabel.textContent = (fromEl && fromEl.value) ? fromEl.value.trim() : '';
+        if (destLabel) destLabel.textContent = (toEl && toEl.value) ? toEl.value.trim() : '';
+    }
+
+    function updateSegmentTotalPricePostRide() {
+        var container = document.getElementById('stops-segment-prices-dynamic');
+        var totalInput = document.getElementById('segment-total-price-input-dynamic');
+        if (!container || !totalInput) return;
+        var inputs = container.querySelectorAll('input[name="price_spot_display[]"]');
+        var sum = 0;
+        inputs.forEach(function(inp) {
+            var v = parseFloat(inp.value);
+            if (!isNaN(v)) sum += v;
+        });
+        totalInput.value = sum.toFixed(2);
+        var priceEl = document.querySelector('input[name="price"]');
+        if (priceEl && priceEl.value && parseFloat(priceEl.value) > 0) {
+            var errDiv = document.getElementById('price-error-message');
+            if (errDiv) errDiv.style.display = 'none';
+        }
+        checkFullRouteVsTotalPostRide();
+    }
+
+    function checkFullRouteVsTotalPostRide() {
+        var container = document.getElementById('stops-segment-prices-dynamic');
+        if (!container) return;
+        var fullRouteInput = container.querySelector('input[name="price"]') || container.querySelector('.full-route-price-input');
+        var totalInput = container.querySelector('#segment-total-price-input-dynamic');
+        var tooltip = container.querySelector('#full-route-tooltip-container-dynamic');
+        if (!fullRouteInput || !totalInput || !tooltip) return;
+        if (container.style.display === 'none' || !container.offsetParent) return;
+        var fullVal = parseFloat(fullRouteInput.value);
+        var totalVal = parseFloat(totalInput.value);
+        if (isNaN(fullVal)) fullVal = 0;
+        if (isNaN(totalVal)) totalVal = 0;
+        if (fullVal > totalVal) {
+            tooltip.classList.remove('hidden');
+        } else {
+            tooltip.classList.add('hidden');
+        }
+    }
+
+    function syncSegmentPricesUIPostRide() {
+        var singleBlock = document.getElementById('single-price-block');
+        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+        if (!dynamicBlock) return;
+        var stopsContainer = document.getElementById('stops-rows-container');
+        if (!stopsContainer) return;
+        var stopInputs = stopsContainer.querySelectorAll('input[name="stop_spot_display[]"]');
+        var stops = [];
+        stopInputs.forEach(function(inp) {
+            var v = (inp.value && inp.value.trim) ? inp.value.trim() : '';
+            if (v) stops.push(v);
+        });
+        var origin = '';
+        var destination = '';
+        var originEl = document.getElementById('from_spot_0');
+        var destEl = document.getElementById('to_spot_0');
+        if (originEl) origin = originEl.value ? originEl.value.trim() : '';
+        if (destEl) destination = destEl.value ? destEl.value.trim() : '';
+        var mainPrice = '0';
+        var singlePriceInput = singleBlock ? singleBlock.querySelector('input[type="number"]') : null;
+        var dynFullRouteInput = dynamicBlock.querySelector('.full-route-price-input');
+        var priceInputWithName = document.querySelector('#post-ride-price-section input[name="price"]');
+        if (priceInputWithName && priceInputWithName.value !== '') mainPrice = priceInputWithName.value;
+        else if (singlePriceInput && singlePriceInput.value !== '') mainPrice = singlePriceInput.value;
+        else if (dynFullRouteInput && dynFullRouteInput.value !== '') mainPrice = dynFullRouteInput.value;
+        else if (singlePriceInput) mainPrice = singlePriceInput.value !== '' ? singlePriceInput.value : '0';
+        if (stops.length === 0) {
+            if (singleBlock) singleBlock.style.display = '';
+            dynamicBlock.style.display = 'none';
+            if (dynFullRouteInput) {
+                dynFullRouteInput.removeAttribute('name');
+                dynFullRouteInput.id = 'priceData0DynamicInput';
+            }
+            if (singlePriceInput) { singlePriceInput.setAttribute('name', 'price'); singlePriceInput.id = 'priceData0'; }
+            var rowsDyn = document.getElementById('segment-price-rows-dynamic');
+            if (rowsDyn) rowsDyn.innerHTML = '';
+            var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
+            if (tooltipDyn) tooltipDyn.classList.add('hidden');
+            return;
+        }
+        if (singleBlock) singleBlock.style.display = 'none';
+        if (singlePriceInput) { singlePriceInput.removeAttribute('name'); singlePriceInput.id = 'priceData0Backup'; }
+        if (dynFullRouteInput) {
+            dynFullRouteInput.setAttribute('name', 'price');
+            dynFullRouteInput.value = mainPrice;
+            dynFullRouteInput.id = 'priceData0';
+        }
+        dynamicBlock.style.display = '';
+        var segments = [];
+        for (var i = 0; i <= stops.length; i++) {
+            segments.push({
+                from: i === 0 ? origin : stops[i - 1],
+                to: i === stops.length ? destination : stops[i]
+            });
+        }
+        var rowsEl = document.getElementById('segment-price-rows-dynamic');
+        if (!rowsEl) return;
+        var existingInputs = rowsEl.querySelectorAll('input[name="price_spot_display[]"]');
+        var existingValues = [];
+        existingInputs.forEach(function(inp) { existingValues.push(inp.value); });
+        rowsEl.innerHTML = '';
+        var svgPath = 'M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z';
+        for (var j = 0; j < segments.length; j++) {
+            var seg = segments[j];
+            var row = document.createElement('div');
+            row.className = 'mt-4 segment-price-row-dynamic';
+            row.innerHTML = '<p class="text-gray-700 font-medium mb-1 segment-label">' + (seg.from + ' \u2192 ' + seg.to) + '</p>' +
+                '<div class="relative mt-2">' +
+                '<span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
+                '<svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"><path d="' + svgPath + '"/></svg></span>' +
+                '<input type="number" step="any" name="price_spot_display[]" placeholder="" value="' + (existingValues[j] !== undefined ? existingValues[j] : mainPrice) + '" ' +
+                'class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>' +
+                '</div>';
+            rowsEl.appendChild(row);
+        }
+        updateSegmentTotalPricePostRide();
+        checkFullRouteVsTotalPostRide();
+    }
+
+    (function() {
+        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+        if (dynamicBlock) {
+            dynamicBlock.addEventListener('input', function(e) {
+                if (e.target && e.target.name === 'price_spot_display[]') {
+                    if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
+                }
+                if (e.target && (e.target.name === 'price' || e.target.id === 'priceData0DynamicInput' || e.target.classList.contains('full-route-price-input'))) {
+                    if (typeof checkFullRouteVsTotalPostRide === 'function') checkFullRouteVsTotalPostRide();
+                    if (e.target.value && parseFloat(e.target.value) > 0) {
+                        var errDiv = document.getElementById('price-error-message');
+                        if (errDiv) errDiv.style.display = 'none';
+                        var clientErr = document.getElementById('price-client-error');
+                        if (clientErr) clientErr.classList.add('hidden');
+                    }
+                }
+            });
+            dynamicBlock.addEventListener('change', function(e) {
+                if (e.target && e.target.name === 'price_spot_display[]') {
+                    if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
+                }
+                if (e.target && (e.target.name === 'price' || e.target.id === 'priceData0DynamicInput' || e.target.classList.contains('full-route-price-input'))) {
+                    if (typeof checkFullRouteVsTotalPostRide === 'function') checkFullRouteVsTotalPostRide();
+                    if (e.target.value && parseFloat(e.target.value) > 0) {
+                        var errDiv = document.getElementById('price-error-message');
+                        if (errDiv) errDiv.style.display = 'none';
+                        var clientErr = document.getElementById('price-client-error');
+                        if (clientErr) clientErr.classList.add('hidden');
+                    }
+                }
+            });
+        }
+    })();
+
+    function buildStopsSegmentsForSubmitPostRide() {
+        var form = document.getElementById('post-ride-form');
+        var container = document.getElementById('stops-rows-container');
+        var hiddenContainer = document.getElementById('stops-segments-hidden');
+        if (!form || !container || !hiddenContainer) return;
+        var origin = (document.getElementById('from_spot_0') || form.querySelector('input[name="from"]')) ? (document.getElementById('from_spot_0') || form.querySelector('input[name="from"]')).value : '';
+        var destination = (document.getElementById('to_spot_0') || form.querySelector('input[name="to"]')) ? (document.getElementById('to_spot_0') || form.querySelector('input[name="to"]')).value : '';
+        var mainPrice = '0';
+        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+        var priceInput = (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null)
+            ? (dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input'))
+            : (document.getElementById('priceData0') || form.querySelector('input[name="price"]'));
+        if (priceInput) mainPrice = priceInput.value !== '' ? priceInput.value : '0';
+        var segmentPriceInputs = form.querySelectorAll('input[name="price_spot_display[]"]');
+        var stopInputs = container.querySelectorAll('input[name="stop_spot_display[]"]');
+        var stops = [];
+        stopInputs.forEach(function(inp) {
+            var v = inp.value ? inp.value.trim() : '';
+            if (v) stops.push(v);
+        });
+        hiddenContainer.innerHTML = '';
+        if (stops.length === 0) return;
+        var n = stops.length;
+        for (var i = 0; i <= n; i++) {
+            var fromVal = (i === 0) ? origin : stops[i - 1];
+            var toVal = (i === n) ? destination : stops[i];
+            if (!fromVal || !toVal) continue;
+            var segPrice = mainPrice;
+            if (segmentPriceInputs.length > i && segmentPriceInputs[i].value !== '') {
+                segPrice = segmentPriceInputs[i].value;
+            }
+            var inpFrom = document.createElement('input');
+            inpFrom.type = 'hidden'; inpFrom.name = 'from_spot[]'; inpFrom.value = fromVal;
+            var inpTo = document.createElement('input');
+            inpTo.type = 'hidden'; inpTo.name = 'to_spot[]'; inpTo.value = toVal;
+            var inpPrice = document.createElement('input');
+            inpPrice.type = 'hidden'; inpPrice.name = 'price_spot[]'; inpPrice.value = segPrice;
+            hiddenContainer.appendChild(inpFrom);
+            hiddenContainer.appendChild(inpTo);
+            hiddenContainer.appendChild(inpPrice);
+        }
+    }
+    
     // Function to fetch and store distance when both from and to are available
     function fetchAndStoreDistance(index) {
         const fromInput = $('#from_spot_' + index);
@@ -3104,186 +3830,62 @@
 
         if (fromInput0) {
             fromInput0.addEventListener('blur', function() {
-                // When from field loses focus, check if both are filled and fetch distance
                 setTimeout(() => {
                     if (toInput0 && toInput0.value) {
                         // fetchAndStoreDistance(0);
                     }
                 }, 500);
             });
+            fromInput0.addEventListener('input', function() {
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+            });
         }
 
         if (toInput0) {
             toInput0.addEventListener('blur', function() {
-                // When to field loses focus, check if both are filled and fetch distance
                 setTimeout(() => {
                     if (fromInput0 && fromInput0.value) {
                         // fetchAndStoreDistance(0);
                     }
                 }, 500);
             });
+            toInput0.addEventListener('input', function() {
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+            });
         }
-    });
-
-
-    function addNewRow() {
-        var oldIndex = parseInt($("#rowCount").val());
-        if ($("#from_spot_" + oldIndex + "").val() == "") {
-            alert("Please select from spot");
-            return;
-        } else if ($("#to_spot_" + oldIndex + "").val() == "") {
-            alert("Please select to spot");
-            return;
+        if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+        if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+        var deleteStopYes = document.getElementById('delete-stop-yes-post');
+        var deleteStopNo = document.getElementById('delete-stop-no-post');
+        if (deleteStopYes) deleteStopYes.addEventListener('click', deleteStopRowConfirmedPostRide);
+        if (deleteStopNo) deleteStopNo.addEventListener('click', closeDeleteStopModalPostRide);
+        var deleteStopBackdrop = document.getElementById('delete-stop-modal-backdrop-post');
+        if (deleteStopBackdrop) deleteStopBackdrop.addEventListener('click', closeDeleteStopModalPostRide);
+        var stopsContainerPost = document.getElementById('stops-rows-container');
+        if (stopsContainerPost) {
+            stopsContainerPost.addEventListener('input', function(e) {
+                if (e.target && e.target.name === 'stop_spot_display[]' && typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+            });
+            stopsContainerPost.addEventListener('change', function(e) {
+                if (e.target && e.target.name === 'stop_spot_display[]' && typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+            });
         }
-        // else if($("#priceData"+oldIndex+"").val() == ""){
-        //     alert("Please select price spot");
-        //     return;
-        // }
-        var from_city = $("#from_spot_" + oldIndex + "").val()
-        var to_city = $("#to_spot_" + oldIndex + "").val()
-        var price = $("#price_" + oldIndex + "").val()
-        var index = parseInt($("#rowCount").val() + 1);
-        $.ajax({
-            url: "{{ url('add-new-spots') }}",
-            type: "POST",
-            data: {
-                from_spot: from_city,
-                to_spot: to_city,
-                price: price,
-                index: index,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                if (result.status === 'error') {
-                    if (result.errors.from_spot) {
-                        // $('#from_spot_' + index + '_error').text(result.errors.from_spot[0]).show();
-                        $('.to_spot_error_' + oldIndex).removeClass('hidden');
-                        $('.to_spot_error_message').text(result.errors.to_spot[0]);
-
-                    }
-                    if (result.errors.to_spot) {
-                        // Display error for to_spot
-                        $('.from_spot_error_' + oldIndex).removeClass('hidden');
-                        $('.from_spot_error_message').text(result.errors.from_spot[0]);
-                    }
-
-                    if (result.errors.price) {
-                        // Display error for to_spot
-                        $('.price_' + oldIndex).removeClass('hidden');
-                        $('.price_message').text(result.errors.price[0]);
-                    }
-                } else {
-                    $('.from_spot_error_' + oldIndex).addClass('hidden');
-                    $('.to_spot_error_' + oldIndex).addClass('hidden');
-
-                    $(".appendNewRow").append(result.spotHtml);
-                    $("#rowCount").val(index);
+        var priceSectionPost = document.getElementById('post-ride-price-section');
+        if (priceSectionPost) {
+            priceSectionPost.addEventListener('input', function(e) {
+                if (e.target && e.target.classList && e.target.classList.contains('full-route-price-input') && typeof checkFullRouteVsTotalPostRide === 'function') checkFullRouteVsTotalPostRide();
+                if (e.target && (e.target.name === 'price' || e.target.classList.contains('full-route-price-input') || e.target.name === 'price_spot_display[]')) {
+                    var clientErr = document.getElementById('price-client-error');
+                    if (clientErr) clientErr.classList.add('hidden');
                 }
-
-            }
-        });
-    }
-
-    function removeRow(index, rideDetailId) {
-        if (index != 1) {
-            $(".remove-row" + index + "").remove();
-        }
-
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('myModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    
-
-    // Helper function to remove tooltip from a field
-    function removeFieldTooltip(field) {
-        if (!field) return;
-        field.classList.remove('validation-error-border', 'border-red-500', 'ring-red-500');
-        const existingTooltip = field.parentNode.querySelector('.validation-tooltip');
-        if (existingTooltip) {
-            existingTooltip.remove();
-        }
-    }
-
-    // Clear tooltip when user focuses, starts typing or changes value
-    function setupTooltipClearOnInput() {
-        document.querySelectorAll('input, select, textarea').forEach(field => {
-            field.addEventListener('focus', function() {
-                removeFieldTooltip(this);
             });
-            field.addEventListener('input', function() {
-                removeFieldTooltip(this);
-            });
-            field.addEventListener('change', function() {
-                removeFieldTooltip(this);
-            });
-        });
-    }
-
-    // Initialize tooltip clear listeners
-    document.addEventListener('DOMContentLoaded', setupTooltipClearOnInput);
-
-
-    // Add focus/change listener to agree_terms checkbox
-    document.addEventListener('DOMContentLoaded', function() {
-        const agreeTermsCheckbox = document.getElementById('agree_terms');
-        if (agreeTermsCheckbox) {
-            agreeTermsCheckbox.addEventListener('change', function() {
-                // Remove highlight when checkbox is checked
-                this.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
-            });
-        }
-
-        // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
-        const pinkRideCheckbox = document.getElementById('pink-ride');
-        const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
-        if (pinkRideCheckbox && pinkRideDisclaimer) {
-            pinkRideCheckbox.addEventListener('change', function() {
-                pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
-            });
-        }
-    });
-
-    // Google Places Autocomplete initialization for from_spot_0 and to_spot_0
-    let fromSpotAutocomplete, toSpotAutocomplete;
-    // Store selected place data for validation
-    let selectedFromSpotPlace = null;
-    let selectedToSpotPlace = null;
-    // Flag to prevent input event from interfering with place selection
-    let isSettingPlaceValue = false;
-
-    // This function will be called by Google Maps API when it loads
-    window.initGooglePlacesPostRide = function() {
-        // Initialize autocomplete for "From" input - Canada only
-        fromSpotAutocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('from_spot_0'), {
-                componentRestrictions: {
-                    country: 'ca'
-                }, // Restrict to Canada
-                types: ['(cities)'], // Focus on cities
-                fields: ['address_components', 'formatted_address', 'name', 'place_id']
-            }
-        );
-
-        // Initialize autocomplete for "To" input - Canada only
-        toSpotAutocomplete = new google.maps.places.Autocomplete(
-            document.getElementById('to_spot_0'), {
-                componentRestrictions: {
-                    country: 'ca'
-                }, // Restrict to Canada
-                types: ['(cities)'], // Focus on cities
-                fields: ['address_components', 'formatted_address', 'name', 'place_id']
-            }
-        );
-
-        // Generic handler for place selection
-        const handlePlaceSelection = (place, inputId) => {
+            priceSectionPost.addEventListener('change', function(e) {
+                if (e.target && e.target.classList && e.target.classList.contains('full-route-price-input') && typeof checkFullRouteVsTotalPostRide === 'function') checkFullRouteVsTotalPostRide();
+                if (e.target && (e.target.name === 'price' || e.target.classList.contains('full-route-price-input') || e.target.name === 'price_spot_display[]')) {
+                    var clientErr = document.getElementById('price-client-error');
+                    if (clientErr) clientErr.classList.add('hidden');
+                }
+handlePlaceSelection = (place, inputId) => {
             if (place.address_components && place.place_id) {
                 isSettingPlaceValue = true;
                 const formattedAddress = formatPlaceAddress(place);

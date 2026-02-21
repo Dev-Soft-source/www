@@ -96,10 +96,16 @@
                 <div class="w-32 h-28 bg-gray-50 border">
                     <img class="w-full h-full object-contain" src="{{ $ride->car_image }}" alt="">
                 </div>
-                <div>
-                    <h4 class="mb-0">{{ $ride->year }} {{ $ride->model }} {{ $ride->vehicle_type }}</h4>
-                    <p class="mb-0">{{ $ride->license_no }}</p>
-                    <p class="mb-0">{{ $ride->car_type }}</p>
+                <div class="w-[70%]">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h6 class="text-xl md:text-2xl text-blue-500 leading-7">
+                            {{ $ride->year }} {{ $ride->make }} {{ $ride->model }}
+                        </h6>
+                    </div>
+                    <p class="text-gray-900">
+                        {{ $ride->license_no }}
+                    </p>
+                    <p>{{ $ride->car_type_label ?: $ride->car_type }}</p>
                 </div>
             </div>
         </div>

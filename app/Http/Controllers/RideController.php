@@ -775,6 +775,21 @@ class RideController extends Controller
             }
         }
 
+        // When no vehicle option is selected (all 0), keep existing ride vehicle data
+        if ($skip_vehicle == 0 && $add_vehicle == 0 && $added_vehicle == 0) {
+            $vehicle_id = $ride->vehicle_id;
+            $make = $ride->make ?? '';
+            $model = $ride->model ?? '';
+            $vehicle_type = $ride->vehicle_type ?? '';
+            $year = $ride->year ?? '';
+            $color = $ride->color ?? '';
+            $license_no = $ride->license_no ?? '';
+            $car_type = $ride->car_type ?? '';
+            if (!isset($filename)) {
+                $filename = $ride->getRawOriginal('car_image') ?? $ride->getRawOriginal('car_image_original') ?? '';
+            }
+        }
+
         if ($recurring == '1') {
             $recurring_type = $request->recurring_type;
             $recurring_trips = $request->recurring_trips;

@@ -76,35 +76,41 @@
                                 {{ $selectedType === '' || $selectedType === null ? 'selected' : '' }}>
                                 {{ $myVehiclePage->vehicle_type_placeholder ?? 'Select' }}
                             </option>
-                            <option value="Convertable"
-                                {{ (string) ($selectedType ?? '') === 'Convertable' ? 'selected' : '' }}>
-                                Convertable
+                            <option value="{{ $myVehiclePage->vehicle_type_convertible_value ?? 'Convertable' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_convertible_text ?? 'Convertable' }}
                             </option>
-                            <option value="Coupe" {{ (string) ($selectedType ?? '') === 'Coupe' ? 'selected' : '' }}>
-                                Coupe
+                            <option value="{{ $myVehiclePage->vehicle_type_coupe_value ?? 'Coupe' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_coupe_text ?? 'Coupe' }}
                             </option>
-                            <option value="Hatchback"
-                                {{ (string) ($selectedType ?? '') === 'Hatchback' ? 'selected' : '' }}>
-                                Hatchback
+                            <option value="{{ $myVehiclePage->vehicle_type_hatchback_value ?? 'Hatchback' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_hatchback_text ?? 'Hatchback' }}
                             </option>
-                            <option value="Minivan" {{ (string) ($selectedType ?? '') === 'Minivan' ? 'selected' : '' }}>
-                                Minivan
+                            <option value="{{ $myVehiclePage->vehicle_type_minivan_value ?? 'Minivan' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_minivan_text ?? 'Minivan' }}
                             </option>
-                            <option value="Sedan" {{ (string) ($selectedType ?? '') === 'Sedan' ? 'selected' : '' }}>
-                                Sedan
+                            <option value="{{ $myVehiclePage->vehicle_type_sedan_value ?? 'Sedan' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_sedan_text ?? 'Sedan' }}
                             </option>
-                            <option value="Station wagon"
-                                {{ (string) ($selectedType ?? '') === 'Station wagon' ? 'selected' : '' }}>
-                                Station wagon
+                            <option value="{{ $myVehiclePage->vehicle_type_station_wagon_value ?? 'Station wagon' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_station_wagon_text ?? 'Station wagon' }}
                             </option>
-                            <option value="SUV" {{ (string) ($selectedType ?? '') === 'SUV' ? 'selected' : '' }}>
-                                SUV
+                            <option value="{{ $myVehiclePage->vehicle_type_suv_value ?? 'SUV' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_suv_text ?? 'SUV' }}
                             </option>
-                            <option value="Truck" {{ (string) ($selectedType ?? '') === 'Truck' ? 'selected' : '' }}>
-                                Truck
+                            <option value="{{ $myVehiclePage->vehicle_type_truck_value ?? 'Truck' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_truck_text ?? 'Truck' }}
                             </option>
-                            <option value="Van" {{ (string) ($selectedType ?? '') === 'Van' ? 'selected' : '' }}>
-                                Van
+                            <option value="{{ $myVehiclePage->vehicle_type_van_value ?? 'Van' }}"
+                                {{ (string)($selectedType ?? '') === (string)($myVehiclePage->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_van_text ?? 'Van' }}
                             </option>
                         </select>
                         @error('type')
@@ -378,7 +384,7 @@
                         </svg>
                     </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start justify-center">
+                        <div class="sm:flex sm:items-start justify-center"> 
                             <div class="text-3xl text-center font-FuturaMdCnBT text-black">
                                 {{ $successMessage->alert_label ?? 'Alert' }}
                             </div>
