@@ -618,6 +618,10 @@ class ReviewController extends Controller
 
         $user = auth()->user();
 
+        if (!$user) {
+            return $this->apiErrorResponse($message?->replied_message ?? 'Unauthorized.', 401);
+        }
+
         if ($user->block_review_rating == '1') {
             return $this->apiErrorResponse($message->block_review_rating_message ?? null, 200);
         }

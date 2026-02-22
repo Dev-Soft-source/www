@@ -291,7 +291,7 @@
                 {{-- <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center" id="card-modal">
                 <div class="relative h-screen my-6 mx-auto flex items-center justify-center w-full">
                     <!-- content -->
-                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <button type="button" id="hide-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,7 +329,7 @@
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                             <div
-                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500">
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -343,8 +343,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-2 w-full">
-                                        <p class="text-center can-exp-p">Are you sure you want to remove this
-                                            phone number from your profile? </p>
+                                        <p class="text-center can-exp-p">Are you sure you want to remove this phone number from your profile? </p>
                                     </div>
                                 </div>
                                 <!--footer-->
