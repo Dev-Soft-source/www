@@ -434,7 +434,7 @@
                                         $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
                                         @endphp
 
-                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')"
+                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')" autocomplete="off"
                                             class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
                                             @isset($postRidePage->from_placeholder)
                                                 placeholder="{{ $postRidePage->from_placeholder }}"
@@ -472,7 +472,7 @@
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                             <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6" alt="">
                                         </div>
-                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')"
+                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')" autocomplete="off"
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             @isset($postRidePage->to_placeholder)
                                                 placeholder="{{ $postRidePage->to_placeholder }}"
@@ -683,14 +683,18 @@
                                         @foreach ($stopsForDisplayPost as $idx => $stopValue)
                                             @php $renderIndex = $idx + 1; @endphp
                                             <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
-                                                <div class="relative flex-1 min-w-0">
-                                                    <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                                <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
+                                                    <div class="relative flex-1 min-w-0">
+                                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                                        </div>
+                                                        <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
+                                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                            placeholder="">
+                                                        <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                                     </div>
-                                                    <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
-                                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                        placeholder="">
-                                                    <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                                    <!-- <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea> -->
                                                 </div>
                                                 <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -2536,10 +2540,6 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    // If Google Maps API is loaded with callback=initGooglePlacesPostRide or callback=initMap, define no-op to avoid InvalidValueError
-    window.initGooglePlacesPostRide = window.initGooglePlacesPostRide || function() {};
-    window.initMap = window.initMap || function() {};
-
     // let autocomplete;
     // function initMap() {
     //     autocomplete = new google.maps.places.Autocomplete(
@@ -3166,12 +3166,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${hours}:${minutes}`;
     }
 
-    // Retrieve old values (JSON-encoded to avoid syntax errors from quotes in values)
-    var rideTime = {!! json_encode(($routeType ?? '') === 'repost' ? optional($ride)->time : null) !!} || '';
-    const oldDate = {!! json_encode(old('date')) !!} || '';
-    const oldTime = rideTime || {!! json_encode(old('time')) !!} || '';
+    // Retrieve old values from Laravel's old() function
 
-    if (dateInput && timeInput) {
+    var rideTime = "";
+    if('{{$routeType}}' == "repost"){
+        rideTime = '{{ $ride->time }}';
+    }
+    const oldDate = '{{ old('date') }}';
+    const oldTime = rideTime == "" ? '{{ old('time') }}' : rideTime;
+
     // Initialize the date picker
     flatpickr(dateInput, {
         dateFormat: 'F d, Y',
@@ -3227,7 +3230,6 @@ document.addEventListener('DOMContentLoaded', function() {
             timeInput._flatpickr.setDate(date, true);
         }
     });
-    }
 
     function seat_selected(th) {
         var seat = parseInt($(th).val());
@@ -3543,10 +3545,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var row = document.createElement('div');
         row.className = 'flex items-center gap-3 stop-row';
         row.setAttribute('data-stop-index', nextIndex);
-        row.innerHTML = '<div class="relative flex-1 min-w-0">' +
+        row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">' +
+            '<div class="relative flex-1 min-w-0">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
             '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
             '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
+            '</div>' +
+            // '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '</div>' +
             '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
