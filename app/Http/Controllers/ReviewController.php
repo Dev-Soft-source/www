@@ -73,7 +73,10 @@ class ReviewController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         }
-        return view('review',[]);
+        if (!$rating) {
+            abort(404, 'Review not found');
+        }
+        return view('review', ['rating' => $rating]);
     }
 
     public function passengerReviewIndex($lang, $id){
