@@ -1,5 +1,4 @@
 <div class="hideheader ">
-
     <div class="relative z-50 hidden" id="delete_message_confirmation" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
