@@ -496,7 +496,9 @@
             <div class="space-y-4">
                 @if (!empty($rides))
                     @foreach ($rides->take(2) as $ride)
-
+                        @if(!$ride)
+                            @continue
+                        @endif
                         @php
                             // Check if defaultRideDetail has elements before accessing
                             $defaultRideDetail = $ride->defaultRideDetail->first();
@@ -558,8 +560,7 @@
                                                         </div>
                                                         <div class="ml-12 md:ml-20">
                                                             <div class="font-bold text-black">From</div>
-                                                            <div class="text-primary md:mb-4">{{ $ride->pickup }},
-                                                                {{ $from }}</div>
+                                                            <div class="text-primary md:mb-4">{{ optional($ride)->pickup ?? '' }}{{ optional($ride)->pickup ? ', ' : '' }}{{ $from }}</div>
                                                         </div>
                                                     </div>
 
@@ -573,8 +574,7 @@
                                                         </div>
                                                         <div class="ml-12 md:ml-20">
                                                             <div class="font-bold text-black">To</div>
-                                                            <div class="text-primary md:mb-4">{{ $ride->dropoff }},
-                                                                {{ $to }}</div>
+                                                            <div class="text-primary md:mb-4">{{ optional($ride)->dropoff ?? '' }}{{ optional($ride)->dropoff ? ', ' : '' }}{{ $to }}</div>
                                                         </div>
                                                     </div>
                                                 </div>

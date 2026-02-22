@@ -28,6 +28,8 @@ return new class extends Migration
             $table->decimal('price', 18,2)->nullable();
             $table->time('time')->nullable();
             $table->date('date')->nullable();
+            $table->string('pickup')->nullable();
+            $table->string('dropoff')->nullable();
             $table->time('destination_time')->nullable();
             $table->date('destination_date')->nullable();
             $table->time('completed_time')->nullable();

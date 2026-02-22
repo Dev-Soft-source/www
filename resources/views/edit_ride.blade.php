@@ -445,12 +445,25 @@
                                 }
                                 $segmentIdsForStops = $details->pluck('id')->values()->all();
                             }
+                            $stopPickupDropoffForDisplay = [];
+                            if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
+                                $stopPickupDropoffForDisplay = old('stop_pickup_dropoff');
+                            } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
+                                $details = $ride->moreRideDetail;
+                                $k = count($details);
+                                for ($i = 0; $i < $k - 1; $i++) {
+                                    $stopPickupDropoffForDisplay[] = $details[$i]->dropoff ?? '';
+                                }
+                            }
                             if (empty($stopsForDisplay)) {
                                 $stopsForDisplay = [''];
                                 $pricesForDisplay = [''];
                             }
                             if (count($pricesForDisplay) !== count($stopsForDisplay)) {
                                 $pricesForDisplay = array_pad($pricesForDisplay, count($stopsForDisplay), '');
+                            }
+                            if (count($stopPickupDropoffForDisplay) !== count($stopsForDisplay)) {
+                                $stopPickupDropoffForDisplay = array_pad($stopPickupDropoffForDisplay, count($stopsForDisplay), '');
                             }
                             $segmentsForPrice = [];
                             $realStops = array_values(array_filter($stopsForDisplay, function ($s) { return trim((string)$s) !== ''; }));
@@ -513,7 +526,10 @@
                                                         class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                         placeholder="">
                                                     <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                                    
                                                 </div>
+                                                <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
                                                 <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -3054,6 +3070,7 @@ document.addEventListener('keydown', function(event) {
             '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
             '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
             '</div>' +
+            '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
             '</button>';

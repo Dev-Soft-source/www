@@ -537,7 +537,7 @@
                                 @isset($postRidePage->pick_up_placeholder)
                                     placeholder="{{ $postRidePage->pick_up_placeholder }}"
                                 @endisset
-                                >{{ old('pickup', $ride->pickup) }}</textarea>
+                                >{{ old('pickup', optional($ride)->pickup) }}</textarea>
                                 @error('pickup')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -562,7 +562,7 @@
                                 @isset($postRidePage->drop_off_placeholder)
                                     placeholder="{{ $postRidePage->drop_off_placeholder }}"
                                 @endisset
-                                >{{ old('dropoff', $ride->dropoff) }}</textarea>
+                                >{{ old('dropoff', optional($ride)->dropoff) }}</textarea>
                                 @error('dropoff')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -693,8 +693,8 @@
                                                             placeholder="">
                                                         <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                                     </div>
-                                                    <!-- <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
-                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea> -->
+                                                    <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>
                                                 </div>
                                                 <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -803,7 +803,7 @@
                               class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 @isset($postRidePage->meeting_drop_off_description_placeholder)
                                     placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}"
-                                @endisset>{{ old('details', $ride->details) }}</textarea>
+                                @endisset>{{ old('details', optional($ride)->details) }}</textarea>
                             @error('details')
                               <div class="relative tooltip -bottom-1 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -832,10 +832,10 @@
                                 @for ($i = 1; $i <= 7; $i++)
                                 <div class="relative">
                                     <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
+                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
                                         <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                            <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                            <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
                                         </span>
                                     </label>
                                 </div>
@@ -3551,7 +3551,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
             '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
             '</div>' +
-            // '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '</div>' +
             '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +

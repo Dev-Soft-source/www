@@ -1108,9 +1108,12 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->rideDetail[0]->departure }}.
                                                                     </h3>
-                                                                    <p class="text-sm mt-2">
-                                                                        Pick-up at: {{ $ride->pickup }}
-                                                                    </p>
+                                                                    @php $segmentPickup = $ride->rideDetail[0]?->pickup ?? $ride->pickup; @endphp
+                                                                    @if(!empty($segmentPickup))
+                                                                        <p class="text-sm mt-2">
+                                                                            Pick-up at: {{ $segmentPickup }}
+                                                                        </p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1134,9 +1137,12 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->rideDetail[0]->destination }}.
                                                                     </h3>
-                                                                    <p class="text-sm mt-2">
-                                                                        Drop-off at: {{ $ride->dropoff }}
-                                                                    </p>
+                                                                    @php $segmentDropoff = $ride->rideDetail[0]?->dropoff ?? $ride->dropoff; @endphp
+                                                                    @if(!empty($segmentDropoff))
+                                                                        <p class="text-sm mt-2">
+                                                                            Drop-off at: {{ $segmentDropoff }}
+                                                                        </p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>

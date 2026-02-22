@@ -943,6 +943,8 @@ class RideController extends Controller
         $rideDetail->ride_id = $ride->id;
         $rideDetail->departure = $request->from;
         $rideDetail->destination = $request->to;
+        $rideDetail->pickup = $request->pickup ?? null;
+        $rideDetail->dropoff = $request->dropoff ?? null;
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
@@ -1109,6 +1111,14 @@ class RideController extends Controller
                 $rideDetail->ride_id = $ride->id;
                 $rideDetail->departure = $request->from_spot[$key];
                 $rideDetail->destination = $request->to_spot[$key];
+                $pickupNote = $key === 0
+                    ? ($request->pickup ?? null)
+                    : (isset($request->stop_pickup_dropoff[$key - 1]) ? trim((string) $request->stop_pickup_dropoff[$key - 1]) : null);
+                $dropoffNote = ($key === count($request->from_spot) - 1)
+                    ? ($request->dropoff ?? null)
+                    : (isset($request->stop_pickup_dropoff[$key]) ? trim((string) $request->stop_pickup_dropoff[$key]) : null);
+                $rideDetail->pickup = ($pickupNote !== '' && $pickupNote !== null) ? $pickupNote : ($request->pickup ?? null);
+                $rideDetail->dropoff = ($dropoffNote !== '' && $dropoffNote !== null) ? $dropoffNote : ($request->dropoff ?? null);
                 $rideDetail->default_ride = 0;
                 $rideDetail->total_distance = $distance;
                 $rideDetail->total_duration = $duration;
@@ -1325,6 +1335,8 @@ class RideController extends Controller
                     $rideDetail->ride_id = $initialRide->id;
                     $rideDetail->departure = $getRideDetail->departure;
                     $rideDetail->destination = $getRideDetail->destination;
+                    $rideDetail->pickup = $getRideDetail->pickup ?? null;
+                    $rideDetail->dropoff = $getRideDetail->dropoff ?? null;
                     $rideDetail->default_ride = $getRideDetail->default_ride;
                     $rideDetail->total_distance = $getRideDetail->total_distance;
                     $rideDetail->total_duration = $getRideDetail->total_duration;
@@ -2235,6 +2247,8 @@ class RideController extends Controller
         $rideDetail->ride_id = $initialRide->id;
         $rideDetail->departure = $request->from;
         $rideDetail->destination = $request->to;
+        $rideDetail->pickup = $request->pickup ?? null;
+        $rideDetail->dropoff = $request->dropoff ?? null;
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
@@ -2326,6 +2340,14 @@ class RideController extends Controller
                 $rideDetail->ride_id = $initialRide->id;
                 $rideDetail->departure = $request->from_spot[$key];
                 $rideDetail->destination = $request->to_spot[$key];
+                $pickupNote = $key === 0
+                    ? ($request->pickup ?? null)
+                    : (isset($request->stop_pickup_dropoff[$key - 1]) ? trim((string) $request->stop_pickup_dropoff[$key - 1]) : null);
+                $dropoffNote = ($key === count($request->from_spot) - 1)
+                    ? ($request->dropoff ?? null)
+                    : (isset($request->stop_pickup_dropoff[$key]) ? trim((string) $request->stop_pickup_dropoff[$key]) : null);
+                $rideDetail->pickup = ($pickupNote !== '' && $pickupNote !== null) ? $pickupNote : ($request->pickup ?? null);
+                $rideDetail->dropoff = ($dropoffNote !== '' && $dropoffNote !== null) ? $dropoffNote : ($request->dropoff ?? null);
                 $rideDetail->default_ride = 0;
                 $rideDetail->total_distance = $distance;
                 $rideDetail->total_duration = $duration;
@@ -2481,6 +2503,8 @@ class RideController extends Controller
                     $rideDetail->ride_id = $initialRide->id;
                     $rideDetail->departure = $getRideDetail->departure;
                     $rideDetail->destination = $getRideDetail->destination;
+                    $rideDetail->pickup = $getRideDetail->pickup ?? null;
+                    $rideDetail->dropoff = $getRideDetail->dropoff ?? null;
                     $rideDetail->default_ride = $getRideDetail->default_ride;
                     $rideDetail->total_distance = $getRideDetail->total_distance;
                     $rideDetail->total_duration = $getRideDetail->total_duration;
