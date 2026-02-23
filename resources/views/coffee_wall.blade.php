@@ -26,7 +26,7 @@
             <div class="px-4 pb-5 flex-auto">
                 <div class="tab-content tab-space">
                     <div class="block" id="tab-profile">
-                        <form id="payment-form" method="POST"
+                        <form id="payment-form" method="POST" novalidate
                             action="{{ url((isset($selectedLanguage) ? $selectedLanguage->abbreviation : 'en') . '/coffee-on-the-wall') }}"
                             enctype="multipart/form-data">
                             @csrf
@@ -392,13 +392,12 @@
                                             @enderror
                                         </div>
                                         <!-- Single row for Card Number, Expiry Date, and CVV -->
-                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4">
                                             <!-- Card Number - takes more space -->
                                             <div class="md:col-span-6">
                                                 <label
-                                                    for="card_number">{{ $paymentSettingDetail->card_number_label ?? 'Card number' }}</label>
-                                                <div id="card-number-element"
-                                                    class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
+                                                    for="card_number" class="font-normal text-gray-700">{{ $paymentSettingDetail->card_number_label ?? 'Card number' }}</label>
+                                                <div id="card-number-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('card_number')
                                                     <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -413,11 +412,9 @@
 
                                             <!-- Expiry Date -->
                                             <div class="md:col-span-3">
-                                                <label
-                                                    for="exp_month">{{ $paymentSettingDetail->mobile_expiry_date_label ?? 'Expiry date' }}
+                                                <label for="exp_month" class="font-normal text-gray-700">{{ $paymentSettingDetail->mobile_expiry_date_label ?? 'Expiry date' }}
                                                     (MM / YY)</label>
-                                                <div id="card-expiry-element"
-                                                    class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
+                                                <div id="card-expiry-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('expiry_date')
                                                     <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -432,16 +429,14 @@
                                                     class="hidden relative tooltip -bottom-4 group-hover:flex">
                                                     <div role="tooltip"
                                                         class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p id="expiry-error"
-                                                            class="text-white leading-none text-sm lg:text-base"></p>
+                                                        <p id="expiry-error" class="text-white leading-none text-sm lg:text-base"></p>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- CVV -->
                                             <div class="md:col-span-3">
-                                                <label
-                                                    for="cvv_code">{{ $paymentSettingDetail->security_code_label ?? 'Security code (CVV / CVC)' }}</label>
+                                                <label for="cvv_code" class="font-normal text-gray-700">{{ $paymentSettingDetail->security_code_label ?? 'Security code (CVV / CVC)' }}</label>
                                                 <div id="card-cvc-element"
                                                     class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
@@ -469,7 +464,7 @@
                                 <!-- Disclaimer Checkboxes -->
                                 <div class="grid grid-cols-1 gap-4 mt-6">
                                     <!-- First Disclaimer -->
-                                    <div class="disclaimer-container">
+                                    <div class="disclaimer-container group">
                                         <div class="flex items-start gap-2">
                                             <input id="donation_acknowledgment" type="checkbox"
                                                 name="donation_acknowledgment" value="1"
@@ -480,46 +475,46 @@
                                                 non-refundable.</span>
                                         </div>
                                         @error('donation_acknowledgment')
-                                            <div class="relative tooltip mt-1 ml-7">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 rounded inline-block">
-                                                    <p class="text-white leading-none text-sm lg:text-base">This field is required</p>
+                                            <div class="mt-2 w-full relative" id="donation-acknowledgment-error-wrap">
+                                                <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
+                                                <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded ">
+                                                    <p class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
                                                 </div>
                                             </div>
                                         @enderror
-                                        <!-- Error div for JavaScript validation - positioned next to checkbox -->
-                                        <div id="donation-acknowledgment-div" class="hidden relative tooltip mt-1 ml-7">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 rounded inline-block">
-                                                <p id="donation-acknowledgment-error" class="text-white leading-none text-sm lg:text-base">This field is required</p>
+                                        <!-- Error div for JavaScript validation - arrow points to checkbox -->
+                                        <div id="donation-acknowledgment-div" class="hidden mt-4 w-full relative">
+                                            <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
+                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded">
+                                                <p id="donation-acknowledgment-error" class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Second Disclaimer -->
-                                    <div class="disclaimer-container">
+                                    <div class="disclaimer-container group">
                                         <div class="flex items-start gap-2">
                                             <input id="terms_privacy" type="checkbox" name="terms_privacy" value="1"
                                                 {{ old('terms_privacy') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
                                             <span class="text-base md:text-lg">By clicking "Make Someone's Day", you agree to
-                                                our <a href="#" class="text-blue-600 hover:underline">Terms and
-                                                    Conditions</a> and <a href="#"
+                                                our <a href="{{ route('terms_conditions', ['lang' => app()->getLocale()]) }}" class="text-blue-600 hover:underline">Terms and
+                                                    Conditions</a> and <a href="{{ route('privacy_policy', app()->getLocale()) }}"
                                                     class="text-blue-600 hover:underline">Privacy Policy</a></span>
                                         </div>
                                         @error('terms_privacy')
-                                            <div class="relative tooltip mt-1 ml-7">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 rounded inline-block">
-                                                    <p class="text-white leading-none text-sm lg:text-base">This field is required</p>
+                                        <div class="mt-2 w-full relative" id="terms-privacy-error-wrap">
+                                                <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
+                                                <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded ">
+                                                    <p class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
                                                 </div>
                                             </div>
                                         @enderror
-                                        <!-- Error div for JavaScript validation - positioned next to checkbox -->
-                                        <div id="terms-privacy-div" class="hidden relative tooltip mt-1 ml-7">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 rounded inline-block">
-                                                <p id="terms-privacy-error" class="text-white leading-none text-sm lg:text-base">This field is required</p>
+                                        <!-- Error div for JavaScript validation - arrow points to checkbox -->
+                                        <div id="terms-privacy-div" class="hidden mt-4 w-full relative">
+                                            <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
+                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded">
+                                                <p id="terms-privacy-error" class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1149,17 +1144,32 @@
                         elements = stripe.elements();
 
                         cardNumberElement = elements.create('cardNumber', {
-                            placeholder: "{{ $paymentSettingDetail->card_number_placeholder ?? '' }}"
+                            placeholder: "{{ $paymentSettingDetail->card_number_placeholder ?? '' }}",
+                            style: {
+                                base: {
+                                    fontStyle: 'italic'
+                                }
+                            }
                         });
                         cardNumberElement.mount('#card-number-element');
 
                         cardExpiryElement = elements.create('cardExpiry', {
-                            placeholder: "MM / YY"
+                            placeholder: "MM / YY",
+                            style: {
+                                base: {
+                                    fontStyle: 'italic'
+                                }
+                            }
                         });
                         cardExpiryElement.mount('#card-expiry-element');
                         
                         cardCvcElement = elements.create('cardCvc', {
-                            placeholder: "{{ $paymentSettingDetail->cvc_placeholder ?? '' }}"
+                            placeholder: "{{ $paymentSettingDetail->cvc_placeholder ?? '' }}",
+                            style: {
+                                base: {
+                                    fontStyle: 'italic'
+                                }
+                            }
                         });
                         cardCvcElement.mount('#card-cvc-element');
                         
@@ -1238,7 +1248,7 @@
                             donationAckDiv.classList.remove('hidden');
 
                             var donationAckError = document.getElementById('donation-acknowledgment-error');
-                            donationAckError.textContent = 'This field is required';
+                            donationAckError.textContent = 'Please check this box if you want to proceed';
                         }
                         // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
 
@@ -1250,7 +1260,7 @@
                             termsPrivacyDiv.classList.remove('hidden');
 
                             var termsPrivacyError = document.getElementById('terms-privacy-error');
-                            termsPrivacyError.textContent = 'This field is required';
+                            termsPrivacyError.textContent = 'Please check this box if you want to proceed';
                         }
                         // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
 
@@ -1372,7 +1382,7 @@
                         donationAckDiv.classList.remove('hidden');
 
                         var donationAckError = document.getElementById('donation-acknowledgment-error');
-                        donationAckError.textContent = 'This field is required';
+                        donationAckError.textContent = 'Please check this box if you want to proceed';
                     }
                     // Note: Tooltip is only hidden when its specific checkbox is checked (handled in separate event listener)
 
@@ -1385,7 +1395,7 @@
                         termsPrivacyDiv.classList.remove('hidden');
 
                         var termsPrivacyError = document.getElementById('terms-privacy-error');
-                        termsPrivacyError.textContent = 'This field is required';
+                        termsPrivacyError.textContent = 'Please check this box if you want to proceed';
                     }
                     // Note: Tooltip is only hidden when its specific checkbox is checked (handled in separate event listener)
 
