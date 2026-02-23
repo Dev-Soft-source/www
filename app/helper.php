@@ -139,7 +139,7 @@ if (!function_exists('getFooterSetting')) {
                 'menuItems' => $menuItems,
             ];
         }
-
+        
         $footerSetting->footerSettingDetail = $footerSettingDetail;
         return $footerSetting;
     }

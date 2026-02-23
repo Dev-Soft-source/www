@@ -84,7 +84,7 @@
                             <span class="text-red-500">*</span>
                         </label>
                         <select id="type" name="type"
-                            class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full italic rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                            class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
 
                             <option value=""
                                 {{ old('type') === '' ? 'selected' : '' }}>
@@ -351,29 +351,17 @@
     </div>
 </div>
 
-<!-- Enhance Profile Modal (No Photo) -->
-<div id="enhanceProfileModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<!-- Enhance Profile Modal (No Car Photo) - shown when user clicks Save & Continue without a car photo -->
+<div id="enhanceProfileModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="enhance-profile-modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
             <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="text-center w-full">
-                        <h6 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
-                            @isset($step3Page->enhance_profile_heading)
-                                {{ $step3Page->enhance_profile_heading }}
-                            @endisset
-                        </h6>
+                        <h2 id="enhance-profile-modal-title" class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">Enhance your profile?</h2>
                         <div class="text-left space-y-3">
-                            <p class="text-gray-700">
-                                @isset($step3Page->enhance_profile_message)
-                                    {{ $step3Page->enhance_profile_message }}
-                                @endisset
-                            </p>
-                            <p class="text-gray-700">
-                                @isset($step3Page->enhance_profile_message_2)
-                                    {{ $step3Page->enhance_profile_message_2 }}
-                                @endisset
-                            </p>
+                            <p class="text-gray-700">Profiles with car photos get booked 3x more often!</p>
+                            <p class="text-gray-700">Passengers feel more comfortable when they know what car to look for. Would you like to add one now?</p>
                         </div>
                     </div>
                 </div>
@@ -445,15 +433,23 @@
 
     // Form validation for Step 3
     function validateStep3Form() {
-        const make = document.querySelector('input[name="make"]').value.trim();
-        const model = document.querySelector('input[name="model"]').value.trim();
-        const type = document.querySelector('select[name="type"]').value;
-        const color = document.querySelector('input[name="color"]').value.trim();
-        const licenseNo = document.querySelector('input[name="liscense_no"]').value.trim();
-        const year = document.querySelector('input[name="year"]').value.trim();
+        const nextButton = document.getElementById('nextButton');
+        if (!nextButton) return;
+        
+        const makeEl = document.querySelector('input[name="make"]');
+        const modelEl = document.querySelector('input[name="model"]');
+        const typeEl = document.querySelector('select[name="type"]');
+        const colorEl = document.querySelector('input[name="color"]');
+        const licenseEl = document.querySelector('input[name="liscense_no"]');
+        const yearEl = document.querySelector('input[name="year"]');
         const carType = document.querySelector('input[name="car_type"]:checked');
         
-        const nextButton = document.getElementById('nextButton');
+        const make = makeEl ? makeEl.value.trim() : '';
+        const model = modelEl ? modelEl.value.trim() : '';
+        const type = typeEl ? typeEl.value : '';
+        const color = colorEl ? colorEl.value.trim() : '';
+        const licenseNo = licenseEl ? licenseEl.value.trim() : '';
+        const year = yearEl ? yearEl.value.trim() : '';
         
         // Check if all required fields are filled (vehicle photo is optional for button enablement)
         const isValid = make && model && type && color && licenseNo && year && carType;
@@ -489,8 +485,8 @@
         document.getElementById('step3Form').submit();
     }
 
-    // Add event listeners to all form inputs for real-time validation
-    document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners and run initial validation when DOM is ready
+    function initStep3Form() {
         const formInputs = [
             'input[name="make"]',
             'input[name="model"]',
@@ -511,12 +507,12 @@
         
         // Check if user already has a vehicle photo
         const fileInput = document.getElementById('dropzone-file');
-        const profileImage = document.getElementById('profile-image');
+        const profileImageEl = document.getElementById('profile-image');
         
         // Check if image is not the placeholder (user has uploaded an image)
-        if (profileImage && profileImage.src && !profileImage.src.includes('image-placeholder.png')) {
+        if (profileImageEl && profileImageEl.src && !profileImageEl.src.includes('image-placeholder.png')) {
             // Check if it's a data URL (newly uploaded) or an existing image
-            if (profileImage.src.startsWith('data:') || profileImage.src.includes('car_images/')) {
+            if (profileImageEl.src.startsWith('data:') || profileImageEl.src.includes('car_images/')) {
                 hasVehiclePhoto = true;
             }
         }
@@ -547,9 +543,15 @@
             }
         });
         
-        // Initial validation check
+        // Initial validation check (enables Save & Continue when all required fields are filled)
         validateStep3Form();
-    });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStep3Form);
+    } else {
+        initStep3Form();
+    }
 </script>
 
 @endsection
