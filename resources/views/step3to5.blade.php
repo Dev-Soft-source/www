@@ -343,7 +343,7 @@
                     </div>
                 </div>
                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
-                    <a href="{{ route('step4to5', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes, skip it!</a>
+                    <a href="{{ route('step4to5', ['lang' => $selectedLanguage->abbreviation, 'skip' => 1]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes, skip it!</a>
                     <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No, take me back</button>
                 </div>
             </div>

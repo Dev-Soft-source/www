@@ -28,7 +28,12 @@ class Step5to5Controller extends Controller
         $step5Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Update step
-        $user->update(['step' => 5]);
+        if (request()->has('skip')) {
+            User::whereId($user->id)->update([
+                'step4' => 1
+            ]);
+        }
+
 
         return view('step5to5', [
             'step5Page' => $step5Page,
@@ -105,7 +110,7 @@ class Step5to5Controller extends Controller
             return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation]);
         }
 
-        User::whereId($user_id)->update(['step' => 5]);
+        User::whereId($user_id)->update(['step5' => 1]);
         return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation]);
     }
 

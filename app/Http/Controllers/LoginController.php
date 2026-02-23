@@ -195,14 +195,14 @@ class LoginController extends Controller
 
             // Redirect logic (user is already authenticated from attempt above)
             // Use authenticated user for redirect logic
-            if ($authenticatedUser->step === '1') {
+            if ($authenticatedUser->step1 == 0) {
                 $redirectUrl = route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step === '2') {
+            } elseif ($authenticatedUser->step2 == 0) {
                 $redirectUrl = route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step === '3') {
+            } elseif ($authenticatedUser->step3 == 0) {
                 $redirectUrl = route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step === '4') {
-                $redirectUrl = route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
+            } elseif ($authenticatedUser->step4 == 0) {
+                $redirectUrl = route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
             } else {
                 // Use route helper instead of manual URL construction
                 $redirectUrl = route('home', ['lang' => $selectedLanguage->abbreviation]);
@@ -334,14 +334,14 @@ class LoginController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if ($user->step === '1') {
+        if ($user->step1 == 0) {
             return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '2') {
+        } elseif ($user->step2 == 0) {
             return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '3') {
+        } elseif ($user->step3 == 0) {
             return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '4') {
-            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
+        } elseif ($user->step4 == 0) {
+            return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
         }
 
         return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation]);

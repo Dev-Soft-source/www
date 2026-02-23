@@ -106,6 +106,7 @@
                                 label="{{ $step1Page->dob_label }}"
                                 name="dob" 
                                 required=true
+                                value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('F d, Y') : '' }}"
                                 type="text" 
                                 class=""
                             />
@@ -140,7 +141,7 @@
                         </div>
 
                         <div>
-                            <label for="">
+                            <label for="state-dropdown">
                                 @isset($step1Page->state_label)
                                     {{ $step1Page->state_label }}
                                 @endisset
@@ -186,6 +187,7 @@
                                 label="{{ $step1Page->zip_code_label }}"
                                 name="zipcode" 
                                 required=true
+                                value="{{ old('zipcode', $user->zipcode) }}"
                                 type="text" 
                                 class=""
                             />
@@ -293,221 +295,223 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- Load jQuery UI only if jQuery is available and jQuery UI is not already loaded -->
     <script>
+        // Load jQuery and jQuery UI if not already loaded
         if (typeof jQuery === 'undefined') {
             document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><\/script>');
         }
-    </script>
-    <script>
         if (typeof jQuery !== 'undefined' && typeof jQuery.ui === 'undefined') {
             document.write('<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"><\/script>');
         }
     </script>
 
     <script>
-
-        flatpickr("#dob", {
-            dateFormat: "Y-m-d"
-        });
-
-        function closeModal() {
-            document.getElementById('my-modal').style.display = 'none';
-        }
-
-        window.addEventListener("pageshow", function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        });
-
-        function loadStatesByCountry(countryId, selectedState) {
-            $.ajax({
-                url: "{{ url('get-states-by-country') }}",
-                type: "POST",
-                data: {
-                    country_id: countryId,
-                    _token: '{{ csrf_token() }}'
+        (function() {
+            // Configuration constants
+            const CONFIG = {
+                selectedState: "{{ old('state', $user->state) }}",
+                selectedCity: "{{ old('city', $user->city) }}",
+                urls: {
+                    statesByCountry: "{{ url('get-states-by-country') }}",
+                    citiesByState: "{{ url('get-cities-by-state') }}"
                 },
-                dataType: 'json',
-                success: function(result) {
-                    var selectState = "{{ $selectLocationSettingPage->select_state_label ?? '' }}";
-                    var selectCity = "{{ $selectLocationSettingPage->select_city_label ?? '' }}";
-                    var selectStateFirst = "{{ $selectLocationSettingPage->select_state_first_label ?? '' }}";
-                    $('#state-dropdown').html('<option value="">' + selectState + '</option>');
-                    $.each(result.states, function(key, value) {
-                        var option = $('<option value="' + value.id + '">' + value.name + '</option>');
-                        if (value.id == selectedState) {
-                            option.prop('selected', true);
-                            $('#city-dropdown').html('<option value="">' + selectCity + '</option>');
-                        } else {
-                            $('#city-dropdown').html('<option value="">' + selectStateFirst +
-                                '</option>');
-                        }
-                        $("#state-dropdown").append(option);
-                    });
-                    // loadCitiesByState(selectedState, selectedCity);
+                labels: {
+                    selectState: "{{ $selectLocationSettingPage->select_state_label ?? '' }}",
+                    selectCity: "{{ $selectLocationSettingPage->select_city_label ?? '' }}",
+                    selectStateFirst: "{{ $selectLocationSettingPage->select_state_first_label ?? '' }}"
+                },
+                csrfToken: '{{ csrf_token() }}'
+            };
+
+            // Initialize Flatpickr
+            flatpickr("#dob", {
+                dateFormat: 'F d, Y',
+            });
+
+            // Modal functions
+            function closeModal() {
+                const modal = document.getElementById('my-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }
+            window.closeModal = closeModal;
+
+            // Handle browser back/forward cache
+            window.addEventListener("pageshow", function(event) {
+                if (event.persisted) {
+                    window.location.reload();
                 }
             });
-        }
 
-        function loadCitiesByState(selectedState, selectedCity) {
-            $.ajax({
-                url: "{{ url('get-cities-by-state') }}",
-                type: "POST",
-                data: {
-                    state_id: selectedState,
-                    _token: '{{ csrf_token() }}'
-                },
-                dataType: 'json',
-                success: function(result) {
-                    var selectCity = "{{ $selectLocationSettingPage->select_city_label ?? '' }}";
-                    $('#city-dropdown').html('<option value="">' + selectCity + '</option>');
-                    $.each(result.cities, function(key, value) {
-                        var displayText = value.name;
-                        if (value.state && value.state.abrv && value.state.country && value.state
-                            .country.name) {
-                            displayText = value.name + ', ' + value.state.abrv + ', ' + value.state
-                                .country.name;
-                        }
-                        var option = $('<option value="' + value.id + '">' + displayText + '</option>');
-                        if (value.id == selectedCity) {
-                            option.prop('selected', true);
-                        }
-                        $("#city-dropdown").append(option);
-                    });
+            // Helper function to format city display text
+            function formatCityDisplay(city) {
+                if (city.state && city.state.abrv && city.state.country && city.state.country.name) {
+                    return `${city.name}, ${city.state.abrv}, ${city.state.country.name}`;
                 }
-            });
-        }
-
-        $(document).ready(function() {
-            var countryId = $('#country-dropdown').val();
-            // If no country is selected and user has no country, default to Canada (ID: 39)
-            if (!countryId && !{{ $user->country ?? 'null' }}) {
-                $('#country-dropdown').val(39);
-                countryId = 39;
-            }
-            if (countryId) {
-                var selectedState = "{{ old('state', $user->state) }}";
-                loadStatesByCountry(countryId, selectedState);
-                if (selectedState) {
-                    var selectedCity = "{{ old('city', $user->city) }}";
-                    loadCitiesByState(selectedState, selectedCity);
-                }
+                return city.name;
             }
 
-            $('#country-dropdown').on('change', function() {
-                var country_id = this.value;
-                $("#state-dropdown").html('');
+            // Load states by country
+            function loadStatesByCountry(countryId, preselectedState = null, resetCity = true) {
+                if (!countryId) {
+                    $('#state-dropdown').html(`<option value="">${CONFIG.labels.selectState}</option>`);
+                    if (resetCity) {
+                        $('#city-dropdown').html(`<option value="">${CONFIG.labels.selectStateFirst}</option>`);
+                    }
+                    return;
+                }
+
                 $.ajax({
-                    url: "{{ url('get-states-by-country') }}",
+                    url: CONFIG.urls.statesByCountry,
                     type: "POST",
                     data: {
-                        country_id: country_id,
-                        _token: '{{ csrf_token() }}'
+                        country_id: countryId,
+                        _token: CONFIG.csrfToken
                     },
                     dataType: 'json',
                     success: function(result) {
-                        var selectState =
-                            "{{ $selectLocationSettingPage->select_state_label ?? '' }}";
-                        var selectCity =
-                            "{{ $selectLocationSettingPage->select_city_label ?? '' }}";
-                        $('#state-dropdown').html('<option value="">' + selectState +
-                            '</option>');
+                        let stateOptions = `<option value="">${CONFIG.labels.selectState}</option>`;
+                        
                         $.each(result.states, function(key, value) {
-                            $("#state-dropdown").append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
+                            const selected = preselectedState && value.id == preselectedState ? 'selected' : '';
+                            stateOptions += `<option value="${value.id}" ${selected}>${value.name}</option>`;
                         });
-                        $('#city-dropdown').html('<option value="">' + selectCity +
-                        '</option>');
+                        
+                        $('#state-dropdown').html(stateOptions);
+                        
+                        if (resetCity) {
+                            const cityLabel = preselectedState ? CONFIG.labels.selectCity : CONFIG.labels.selectStateFirst;
+                            $('#city-dropdown').html(`<option value="">${cityLabel}</option>`);
+                        }
+                        
+                        // Auto-load cities if state is preselected
+                        if (preselectedState) {
+                            loadCitiesByState(preselectedState, CONFIG.selectedCity);
+                        }
+                    },
+                    error: function() {
+                        $('#state-dropdown').html(`<option value="">${CONFIG.labels.selectState}</option>`);
+                        if (resetCity) {
+                            $('#city-dropdown').html(`<option value="">${CONFIG.labels.selectStateFirst}</option>`);
+                        }
                     }
                 });
-            });
+            }
 
-            $('#state-dropdown').on('change', function() {
-                var state_id = this.value;
-                $("#city-dropdown").html('');
+            // Load cities by state
+            function loadCitiesByState(stateId, preselectedCity = null) {
+                if (!stateId) {
+                    $('#city-dropdown').html(`<option value="">${CONFIG.labels.selectStateFirst}</option>`);
+                    return;
+                }
+
                 $.ajax({
-                    url: "{{ url('get-cities-by-state') }}",
+                    url: CONFIG.urls.citiesByState,
                     type: "POST",
                     data: {
-                        state_id: state_id,
-                        _token: '{{ csrf_token() }}'
+                        state_id: stateId,
+                        _token: CONFIG.csrfToken
                     },
                     dataType: 'json',
                     success: function(result) {
-                        var selectCity =
-                            "{{ $selectLocationSettingPage->select_city_label ?? '' }}";
-                        $('#city-dropdown').html('<option value="">' + selectCity +
-                        '</option>');
+                        let cityOptions = `<option value="">${CONFIG.labels.selectCity}</option>`;
+                        
                         $.each(result.cities, function(key, value) {
-                            var displayText = value.name;
-                            if (value.state && value.state.abrv && value.state
-                                .country && value.state.country.name) {
-                                displayText = value.name + ', ' + value.state.abrv +
-                                    ', ' + value.state.country.name;
-                            }
-                            $("#city-dropdown").append('<option value="' + value.id +
-                                '">' + displayText + '</option>');
+                            const displayText = formatCityDisplay(value);
+                            const selected = preselectedCity && value.id == preselectedCity ? 'selected' : '';
+                            cityOptions += `<option value="${value.id}" ${selected}>${displayText}</option>`;
                         });
+                        
+                        $('#city-dropdown').html(cityOptions);
+
+                        validateStep1Form();
+                    },
+                    error: function() {
+                        $('#city-dropdown').html(`<option value="">${CONFIG.labels.selectCity}</option>`);
                     }
                 });
-            });
-        });
-
-        // Form validation for Step 1
-        function validateStep1Form() {
-            const firstName = document.querySelector('input[name="first_name"]').value.trim();
-            const lastName = document.querySelector('input[name="last_name"]').value.trim();
-            const gender = document.querySelector('input[name="gender"]:checked');
-            const dob = document.querySelector('input[name="dob"]').value.trim();
-            const country = document.querySelector('select[name="country"]').value;
-            const state = document.querySelector('select[name="state"]').value;
-            const city = document.querySelector('select[name="city"]').value;
-            const zipcode = document.querySelector('input[name="zipcode"]').value.trim();
-            const bio = document.querySelector('textarea[name="bio"]').value.trim();
-
-            const nextButton = document.getElementById('nextButton');
-
-            // Check if all required fields are filled
-            const isValid = firstName && lastName && gender && dob && country &&
-                (state && state !== '0') && (city && city !== '0') && zipcode && bio;
-
-            if (isValid) {
-                nextButton.disabled = false;
-                nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                nextButton.classList.add('opacity-100');
-            } else {
-                nextButton.disabled = true;
-                nextButton.classList.add('opacity-50', 'cursor-not-allowed');
-                nextButton.classList.remove('opacity-100');
             }
-        }
 
-        // Add event listeners to all form inputs for real-time validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const formInputs = [
-                'input[name="first_name"]',
-                'input[name="last_name"]',
-                'input[name="gender"]',
-                'input[name="dob"]',
-                'select[name="country"]',
-                'select[name="state"]',
-                'select[name="city"]',
-                'input[name="zipcode"]',
-                'textarea[name="bio"]'
-            ];
+            // Form validation
+            function validateStep1Form() {
+                const formData = {
+                    firstName: $('input[name="first_name"]').val().trim(),
+                    lastName: $('input[name="last_name"]').val().trim(),
+                    gender: $('input[name="gender"]:checked').length > 0,
+                    dob: $('input[name="dob"]').val().trim(),
+                    country: $('select[name="country"]').val(),
+                    state: $('select[name="state"]').val(),
+                    city: $('select[name="city"]').val(),
+                    zipcode: $('input[name="zipcode"]').val().trim(),
+                    bio: $('textarea[name="bio"]').val().trim()
+                };
 
-            formInputs.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    element.addEventListener('input', validateStep1Form);
-                    element.addEventListener('change', validateStep1Form);
+                const isValid = formData.firstName && 
+                    formData.lastName && 
+                    formData.gender && 
+                    formData.dob && 
+                    formData.country && 
+                    formData.state && 
+                    formData.city && 
+                    formData.zipcode && 
+                    formData.bio;
+
+                const $nextButton = $('#nextButton');
+                
+                if (isValid) {
+                    $nextButton.prop('disabled', false)
+                        .removeClass('opacity-50 cursor-not-allowed')
+                        .addClass('opacity-100');
+                } else {
+                    $nextButton.prop('disabled', true)
+                        .addClass('opacity-50 cursor-not-allowed')
+                        .removeClass('opacity-100');
+                }
+            }
+
+            // Initialize when DOM is ready
+            $(document).ready(function() {
+                // Initialize location dropdowns
+                const countryId = $('#country-dropdown').val();
+                if (countryId) {
+                    loadStatesByCountry(countryId, CONFIG.selectedState, false);
+                }
+
+                // Country dropdown change handler
+                $('#country-dropdown').on('change', function() {
+                    const countryId = $(this).val();
+                    loadStatesByCountry(countryId, null, true);
+                    validateStep1Form();
                 });
-            });
 
-            // Initial validation check
-            validateStep1Form();
-        });
+                // State dropdown change handler
+                $('#state-dropdown').on('change', function() {
+                    const stateId = $(this).val();
+                    loadCitiesByState(stateId);
+                    validateStep1Form();
+                });
+
+                // City dropdown change handler
+                $('#city-dropdown').on('change', function() {
+                    validateStep1Form();
+                });
+
+                // Form validation event listeners
+                const formInputs = [
+                    'input[name="first_name"]',
+                    'input[name="last_name"]',
+                    'input[name="gender"]',
+                    'input[name="dob"]',
+                    'input[name="zipcode"]',
+                    'textarea[name="bio"]'
+                ];
+
+                $(formInputs.join(',')).on('input change', validateStep1Form);
+
+                // Initial validation
+                validateStep1Form();
+            });
+        })();
     </script>
 @endsection

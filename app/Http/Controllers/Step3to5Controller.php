@@ -43,11 +43,13 @@ class Step3to5Controller extends Controller
         $step3Page->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
 
         $user_id = auth()->user()->id;
-        
 
-        User::whereId($user_id)->update([
-            'step' => '3'
-        ]);
+        // from step2 with skip -> update step2 to 1 and stay on step3 page (no validations)
+        if (request()->has('skip')) {
+            User::whereId($user_id)->update([
+                'step2' => 1
+            ]);
+        }
 
         return view('step3to5', ['step3Page' => $step3Page, 'user' => $user]);
     }
@@ -91,11 +93,11 @@ class Step3to5Controller extends Controller
         }
 
         // If user clicks Skip Vehicle Info -> go to Step 4 directly (no validations)
-        if ($request->input('action') === 'skip_vehicle_info') {
-            User::whereId($id)->update(['step' => '4']);
-            session()->forget('uploaded_profile_image');
-            return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
-        }
+        // if ($request->input('action') === 'skip_vehicle_info') {
+        //     User::whereId($id)->update(['step' => '4']);
+        //     session()->forget('uploaded_profile_image');
+        //     return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
+        // }
 
         // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
         if ($request->hasFile('image')) {
@@ -147,8 +149,8 @@ class Step3to5Controller extends Controller
                 'primary_vehicle' => 1,
             ]);
 
-        // Move user to step 4 after vehicle is added
-        User::whereId($id)->update(['step' => '4']);
+
+        User::whereId($id)->update(['step3' => 1]);
 
         
 

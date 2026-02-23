@@ -134,9 +134,8 @@
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
-                        <a href="{{ route('profile', ['lang' => $selectedLanguage->abbreviation]) }}" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
-                            @isset($step5Page->confirm_skip){{ $step5Page->confirm_skip }}@endisset
-                        </a>
+                        <a href="{{ route('home', ['lang' => $selectedLanguage->abbreviation, 'skip' => 1]) }}"
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">{{ $step5Page->confirm_skip }}</a>
                         <button type="button" onclick="hideSkipConfirmation()" class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
                             @isset($step5Page->confirm_back){{ $step5Page->confirm_back }}@endisset
                         </button>

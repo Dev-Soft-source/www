@@ -63,6 +63,13 @@ class HomeController extends Controller
         if(auth()->user()){
             // $token = FCMToken::where('user_id', auth()->user()->id)->pluck('token')->first();
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
+            
+            // from step5 with skip -> update step5 to 1 (no validations)
+            if (request()->has('skip')) {
+                User::whereId(auth()->user()->id)->update([
+                    'step5' => 1
+                ]);
+            }
         }
 
 
@@ -73,6 +80,8 @@ class HomeController extends Controller
         $articles = Article::whereHas('articleDetail', function ($query) use ($langId) {
             $query->where('language_id', $langId);
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
+
+        
 
         return view(
             'index',

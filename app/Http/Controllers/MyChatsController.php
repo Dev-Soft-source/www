@@ -33,16 +33,6 @@ class MyChatsController extends Controller
             $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button','cancel_button')->first();
         }
 
-        $user = auth()->user();
-        if ($user->step === '1') {
-            return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '2') {
-            return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '3') {
-            return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step === '4') {
-            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
-        }
 
         $notifications = null;
         $user_id = auth()->user()->id;

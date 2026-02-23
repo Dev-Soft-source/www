@@ -36,6 +36,7 @@ class ProfileController extends Controller
             $user = auth()->user();
             $user_id = $user->id;
 
+
             $ratings = Rating::where(function ($query) use ($user_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')

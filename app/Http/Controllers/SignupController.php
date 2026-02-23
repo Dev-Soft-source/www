@@ -26,7 +26,7 @@ class SignupController extends Controller
 {
     public function create($lang = null)
     {
-        
+
         $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         return view('signup', ['signupPage' => $signupPage]);
@@ -66,22 +66,22 @@ class SignupController extends Controller
                         $query->where('added_by', $user_id);
                     });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
         return view('signup', ['signupPage' => $signupPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'uuid' => $uuid]);
     }
@@ -177,7 +177,7 @@ class SignupController extends Controller
         $existingClosedUser = User::where('email', $request->email)->where('closed', '1')->whereNull('deleted_at')->first();
 
         $ip = request()->ip();
-        
+
         if ($existingClosedUser) {
             // Update the closed account to reactivate it
             $existingClosedUser->update([
@@ -186,13 +186,13 @@ class SignupController extends Controller
                 'password' => Hash::make($request->password),
                 'closed' => '0', // Reactivate the account
                 'email_verified' => '0', // Require email verification again
-                ]);
-                $user = $existingClosedUser;
-                } else {
+            ]);
+            $user = $existingClosedUser;
+        } else {
             $location = geoip()->getLocation($ip);
             $country = Country::where('iso_code', $location['iso_code'])->first();
             // Create new user
-            
+
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -210,9 +210,9 @@ class SignupController extends Controller
             'created_at' => Carbon::now()
         ]);
 
-        if(isset($request->uuid) && $request->uuid != 0){
+        if (isset($request->uuid) && $request->uuid != 0) {
             $getUserId = User::where('referral_uuid', $request->uuid)->value('id');
-            if(isset($getUserId) && !is_null($getUserId)){
+            if (isset($getUserId) && !is_null($getUserId)) {
                 $referralDetail = ReferralDetail::create([
                     'referral_user_id' => $getUserId,
                     'user_id' => $user->id,
@@ -249,7 +249,7 @@ class SignupController extends Controller
                 'error_class' => get_class($e),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             // Try fallback to log mailer
             try {
                 Mail::mailer('log')->to($request->email)->send(new UserEmailVerification($data));
@@ -263,7 +263,7 @@ class SignupController extends Controller
                 ]);
             }
         }
-        
+
         // Log final status
         if (!$emailSent) {
             Log::critical('Email verification NOT sent - all methods failed', [
@@ -295,7 +295,7 @@ class SignupController extends Controller
                 'emailSent' => $emailSent,
                 'messages' => [
                     'welcome_message' => $messages->welcome_message ?? 'Welcome',
-                    'email_sent_message' => $emailSent 
+                    'email_sent_message' => $emailSent
                         ? ($messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.')
                         : ($messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox and follow the link to verify your email.') . ' <strong>Note: There was an issue sending the email. Please use the "Request a new verification email" option if you don\'t receive it.</strong>',
                     'registration_successful_title' => $messages->registration_successful_title ?? 'Registration Successful!',
@@ -306,10 +306,10 @@ class SignupController extends Controller
                 ]
             ]);
         }
-        
+
         return redirect()->back()->with([
-            'showModal' => true, 
-            'messages' => $messages, 
+            'showModal' => true,
+            'messages' => $messages,
             'user' => $user,
             'emailSent' => $emailSent
         ]);
@@ -318,7 +318,7 @@ class SignupController extends Controller
     public function sendEmailVerify($email, Request $request)
     {
         $user = User::where('email', $email)->first();
-        
+
         if (!$user) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -328,7 +328,7 @@ class SignupController extends Controller
             }
             return redirect()->back()->with(['error' => 'User not found']);
         }
-        
+
         $token = Str::random(64);
 
         $existingRecord = DB::table('password_resets')
@@ -376,19 +376,19 @@ class SignupController extends Controller
                 ]);
             }
         }
-        
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => $emailSent,
-                'message' => $emailSent 
-                    ? 'Verification email has been sent! Please check your inbox.' 
+                'message' => $emailSent
+                    ? 'Verification email has been sent! Please check your inbox.'
                     : 'There was an issue sending the email. Please try again later.'
             ]);
         }
 
         return redirect()->back()->with([
-            'success' => $emailSent 
-                ? 'We\'ve sent you a verification email. Check your inbox' 
+            'success' => $emailSent
+                ? 'We\'ve sent you a verification email. Check your inbox'
                 : 'There was an issue sending the email. Please try again later.'
         ]);
     }
@@ -396,7 +396,7 @@ class SignupController extends Controller
     public function redirectToProvider($lang, $provider)
     {
         return Socialite::driver($provider)
-        ->redirect();
+            ->redirect();
     }
 
     public function handleProviderCallback($lang, $provider)
@@ -407,7 +407,7 @@ class SignupController extends Controller
                 $error = request()->get('error');
                 $errorDescription = request()->get('error_description', '');
                 $errorReason = request()->get('error_reason', '');
-                
+
                 $selectedLanguage = session('selectedLanguage');
                 if ($selectedLanguage) {
                     // Find the language by abbreviation
@@ -418,20 +418,22 @@ class SignupController extends Controller
                         $selectedLanguage = Language::where('is_default', 1)->first();
                     }
                 }
-                
+
                 // Handle specific Facebook errors
                 if ($error === 'access_denied' || $errorReason === 'user_denied') {
                     Session::flash('error', 'Facebook login was cancelled. Please try again or use another login method.');
-                } elseif (str_contains(strtolower($errorDescription), 'app not active') || 
-                          str_contains(strtolower($errorDescription), 'app is not accessible')) {
+                } elseif (
+                    str_contains(strtolower($errorDescription), 'app not active') ||
+                    str_contains(strtolower($errorDescription), 'app is not accessible')
+                ) {
                     Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
                 } else {
                     Session::flash('error', 'Unable to login using Facebook. ' . ($errorDescription ?: 'Please try again or use another login method.'));
                 }
-                
+
                 return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
             }
-            
+
             $user = Socialite::driver($provider)->user();
 
             Log::info("social login attempt", [
@@ -463,6 +465,10 @@ class SignupController extends Controller
             $firstName = $nameParts[0];
             $lastName = isset($nameParts[1]) ? $nameParts[1] : ''; // Set to empty string if no last name
 
+            $ip = request()->ip();
+            $location = geoip()->getLocation($ip);
+            $country = Country::where('iso_code', $location['iso_code'])->first();
+
             // If the user is not registered, create a new user
             $newUser = User::create([
                 'first_name' => $firstName,
@@ -473,7 +479,7 @@ class SignupController extends Controller
                 'profile_image' => $user->avatar,
                 'provider' => $provider,
                 'provider_id' => $user->id,
-                'country' => 39,
+                'country' => $country->id ?? 38,
                 'referral_uuid' => bin2hex(random_bytes(16))
             ]);
 
@@ -484,7 +490,7 @@ class SignupController extends Controller
                 'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
                 'platform' => 'Web - ' . ucfirst($provider) . ' Login'
             ];
-            
+
             // Send email with error handling similar to regular signup
             try {
                 Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
@@ -533,9 +539,9 @@ class SignupController extends Controller
 
             // Check if it's a Facebook-specific error
             $errorMessage = $e->getMessage();
-            Log::info("social login error:". $errorMessage);
-            if ($provider === 'facebook' && (str_contains(strtolower($errorMessage), 'app not active') || 
-                                              str_contains(strtolower($errorMessage), 'app is not accessible'))) {
+            Log::info("social login error:" . $errorMessage);
+            if ($provider === 'facebook' && (str_contains(strtolower($errorMessage), 'app not active') ||
+                str_contains(strtolower($errorMessage), 'app is not accessible'))) {
                 Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
             } else {
                 Session::flash('error', "Unable to login using " . $provider . ". Please try again or use another login method.");
