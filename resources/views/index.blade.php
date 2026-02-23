@@ -134,7 +134,7 @@
                     @endisset
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
+            <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
                     <div>
                         <div class="relative">
