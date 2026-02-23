@@ -66,6 +66,21 @@
     border-style: solid;
     border-color: transparent transparent #c75b5b transparent;
 }
+@media (min-width: 768px){
+    #fromToError .tooltip-error::before {
+        left: 20%;
+    }
+    #fromToError .tooltip-error::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        /* At the top of the tooltip */
+        left: 80%;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent #c75b5b transparent;
+    }
+}
 
 
 

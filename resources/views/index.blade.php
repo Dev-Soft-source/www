@@ -134,7 +134,7 @@
                     @endisset
                 </div>
             </div>
-            <div class="flex flex-col sm:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
+            <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
                     <div>
                         <div class="relative">
@@ -189,7 +189,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="w-44 mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
+                <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
                     <div class="relative w-full">
                         <div class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
                             <div class="w-6 h-6">
@@ -1782,6 +1782,8 @@
     let selectedToPlace = null;
     // Flag to prevent input event from interfering with place selection
     let isSettingPlaceValue = false;
+    // Flag to prevent blur from clearing when user is selecting from dropdown
+    let isSelectingFromDropdown = false;
 
     // This function will be called by Google Maps API when it loads
     window.initGooglePlaces = function() {
@@ -1810,6 +1812,7 @@
             const place = fromAutocomplete.getPlace();
             if (place.address_components && place.place_id) {
                 isSettingPlaceValue = true; // Set flag to prevent input event interference
+                isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
                 const formattedAddress = formatPlaceAddress(place);
                 selectedFromPlace = {
                     place_id: place.place_id,
@@ -1821,9 +1824,10 @@
                 // Hide error message if it was showing
                 const fromError = document.getElementById('fromError');
                 if (fromError) fromError.classList.add('hidden');
-                // Reset flag after a short delay to allow input event to process
+                // Reset flags after a short delay to allow input event to process
                 setTimeout(() => {
                     isSettingPlaceValue = false;
+                    isSelectingFromDropdown = false;
                 }, 100);
             }
         });
@@ -1833,6 +1837,7 @@
             const place = toAutocomplete.getPlace();
             if (place.address_components && place.place_id) {
                 isSettingPlaceValue = true; // Set flag to prevent input event interference
+                isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
                 const formattedAddress = formatPlaceAddress(place);
                 selectedToPlace = {
                     place_id: place.place_id,
@@ -1844,9 +1849,10 @@
                 // Hide error message if it was showing
                 const toError = document.getElementById('toError');
                 if (toError) toError.classList.add('hidden');
-                // Reset flag after a short delay to allow input event to process
+                // Reset flags after a short delay to allow input event to process
                 setTimeout(() => {
                     isSettingPlaceValue = false;
+                    isSelectingFromDropdown = false;
                 }, 100);
             }
         });
@@ -1874,6 +1880,76 @@
             // If user manually edits and it doesn't match the selected place, clear the selection
             if (selectedToPlace && currentValue !== selectedToPlace.value) {
                 selectedToPlace = null;
+            }
+        });
+
+        // Detect clicks on autocomplete dropdown to prevent blur from clearing
+        document.addEventListener('mousedown', function(e) {
+            // Check if click is on Google's autocomplete dropdown (pac-container)
+            if (e.target.closest('.pac-container')) {
+                isSelectingFromDropdown = true;
+            } else {
+                // If clicking outside dropdown, reset flag after a short delay
+                setTimeout(() => {
+                    isSelectingFromDropdown = false;
+                }, 50);
+            }
+        });
+
+        // Clear input on blur if no valid place was selected
+        document.getElementById('fromInput').addEventListener('blur', function() {
+            // Don't clear if we're programmatically setting the value or selecting from dropdown
+            if (isSettingPlaceValue || isSelectingFromDropdown) {
+                return;
+            }
+            // Add a small delay to allow place_changed event to fire if user selected from dropdown
+            setTimeout(() => {
+                // Check again if we're setting a place value or selecting from dropdown
+                if (isSettingPlaceValue || isSelectingFromDropdown) {
+                    return;
+                }
+                const currentValue = this.value.trim();
+                // If no valid place is selected or the value doesn't match the selected place, clear it
+                if (!selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                    this.value = '';
+                    selectedFromPlace = null;
+                }
+            }, 200);
+        });
+
+        // Clear input on blur if no valid place was selected
+        document.getElementById('toInput').addEventListener('blur', function() {
+            // Don't clear if we're programmatically setting the value or selecting from dropdown
+            if (isSettingPlaceValue || isSelectingFromDropdown) {
+                return;
+            }
+            // Add a small delay to allow place_changed event to fire if user selected from dropdown
+            setTimeout(() => {
+                // Check again if we're setting a place value or selecting from dropdown
+                if (isSettingPlaceValue || isSelectingFromDropdown) {
+                    return;
+                }
+                const currentValue = this.value.trim();
+                // If no valid place is selected or the value doesn't match the selected place, clear it
+                if (!selectedToPlace || currentValue !== selectedToPlace.value) {
+                    this.value = '';
+                    selectedToPlace = null;
+                }
+            }, 200);
+        });
+
+        // Hide error tooltip when inputs get focus
+        document.getElementById('fromInput').addEventListener('focus', function() {
+            const fromToError = document.getElementById('fromToError');
+            if (fromToError) {
+                fromToError.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('toInput').addEventListener('focus', function() {
+            const fromToError = document.getElementById('fromToError');
+            if (fromToError) {
+                fromToError.classList.add('hidden');
             }
         });
     };
@@ -2125,43 +2201,30 @@
                 fromToError.classList.remove('hidden');
                 
                 // Hide the tooltip after 3 seconds
-                setTimeout(function() {
-                    fromToError.classList.add('hidden');
-                }, 3000);
+                // setTimeout(function() {
+                //     fromToError.classList.add('hidden');
+                // }, 3000);
             }
             return; // Prevent navigation
         }
 
         // Validate that both inputs contain valid selected places (not just any string)
         let isValid = true;
-        let errorMessage = '';
 
         // Check if "From" field has a valid selected place
         if (!selectedFromPlace || fromValue !== selectedFromPlace.value) {
             isValid = false;
-            errorMessage = 'Please select a valid location from the suggestions for "From" field.';
         }
 
         // Check if "To" field has a valid selected place
         if (!selectedToPlace || toValue !== selectedToPlace.value) {
             isValid = false;
-            if (errorMessage) {
-                errorMessage = 'Please select valid locations from the suggestions for both "From" and "To" fields.';
-            } else {
-                errorMessage = 'Please select a valid location from the suggestions for "To" field.';
-            }
         }
 
         // If validation fails, show error tooltip
         if (!isValid) {
             if (fromToError) {
-                // Update error message if needed (you can customize this)
                 fromToError.classList.remove('hidden');
-                
-                // Hide the tooltip after 3 seconds
-                setTimeout(function() {
-                    fromToError.classList.add('hidden');
-                }, 3000);
             }
             return; // Prevent navigation
         }
