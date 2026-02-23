@@ -172,7 +172,7 @@
                                                             $notification->category == 'system' &&
                                                             $notification->notification_type == 'welcome'
                                                         ) {
-                                                            $targetUrl = route('notifications', [
+                                                            $targetUrl = route('welcome_message', [
                                                                 'lang' => optional($selectedLanguage)->abbreviation,
                                                             ]);
                                                         } else {

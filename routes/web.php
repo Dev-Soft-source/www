@@ -272,6 +272,7 @@ Route::get('{lang?}/reset-password/{token}', [ResetPasswordController::class, 'c
 Route::get('email-verify/{token}/{email}', [LoginController::class, 'emailVerify'])->name('emailVerify');
 Route::get('email-verified', [LoginController::class, 'emailVerified'])->name('emailVerified');
 Route::get('welcome-route/{email}', [LoginController::class, 'welcomeRoute'])->name('welcomeRoute');
+Route::get('{lang?}/welcome-message', [LoginController::class, 'showWelcomeMessage'])->name('welcome_message')->middleware('auth');
 
 // Test routes for email verification (remove in production)
 Route::get('test/email-verification', [TestEmailController::class, 'sendTestEmailVerification'])->name('test.emailVerification');

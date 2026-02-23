@@ -347,6 +347,32 @@ class LoginController extends Controller
         return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation]);
     }
 
+    /**
+     * Show the welcome message page (e.g. when user clicks "Welcome to ProximaRide" notification).
+     */
+    public function showWelcomeMessage($lang = null)
+    {
+        $selectedLanguage = $lang
+            ? Language::where('abbreviation', $lang)->first()
+            : (session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : null);
+        if (! $selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        if ($selectedLanguage && $lang !== $selectedLanguage->abbreviation) {
+            session(['selectedLanguage' => $selectedLanguage->abbreviation]);
+        }
+
+        $user = auth()->user();
+        $data = [
+            'first_name' => $user->first_name ?? '',
+            'email' => $user->email ?? '',
+        ];
+        $greeting_message = 'Hi';
+        $languages = Language::all();
+
+        return view('welcome_message', compact('data', 'greeting_message', 'selectedLanguage', 'languages'));
+    }
+
     public function emailVerify($token, $email, Request $request){
         $selectedLanguage = session('selectedLanguage');
         $message = null;

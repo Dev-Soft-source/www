@@ -70,9 +70,9 @@
                                     Delete
                                 </button>
                                 @php
-                                    // Check if it's a welcome/system notification
+                                    // Check if it's a welcome/system notification – take user to welcome message page
                                     if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
-                                        $targetUrl = route('notifications', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                        $targetUrl = route('welcome_message', ['lang' => optional($selectedLanguage)->abbreviation]);
                                     } else {
                                         $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
                                         $targetUrl = $hasChatTarget
