@@ -373,7 +373,7 @@ Route::get('{lang?}/media', [NewsController::class, 'index'])->name('news');
 Route::get('{lang?}/news-detail/{id}', [NewsController::class, 'newsDetail'])->name('news_detail');
 Route::get('{lang?}/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy_policy');
 Route::get('{lang?}/terms-of-use', [TermsOfUseController::class, 'index'])->name('terms_use');
-Route::get('{lang?}/proximaride-profile-photo-community-guidelines', [ProfilePhotoGuidelinesController::class, 'index'])->name('profile_photo_guidelines');
+Route::get('{lang?}/profile-photo-guidelines', [ProfilePhotoGuidelinesController::class, 'index'])->name('profile_photo_guidelines');
 Route::get('{lang?}/refund-policy', [RefundPolicyController::class, 'index'])->name('refund_policy');
 Route::get('{lang?}/cancellation-policy', [CancellationPolicyController::class, 'index'])->name('cancellation_policy');
 Route::get('{lang?}/firm-cancellation-policy', [CancellationPolicyController::class, 'firmCancellation'])->name('firm_cancellation_policy');
