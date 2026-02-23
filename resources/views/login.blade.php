@@ -151,10 +151,10 @@
                         <x-form.input 
                             label="{{ $loginPage->email_label }}"
                             name="email" 
-                            type="email" 
+                            type="text" 
                             placeholder="{{ $loginPage->email_placeholder }}"
                             class=""
-                            autofocus
+                            title="Please enter a valid email address, such as name@example.com"
                         />
                     </div>
 

@@ -88,7 +88,9 @@ class LoginController extends Controller
             $validatedData = $request->validate([
                 'email'    => 'required|string|max:255|email',
                 'password' => 'required',
-            ], [],$niceNames);
+            ], [
+                'email.email' => 'Please enter a valid email address, such as name@example.com',
+            ], $niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([

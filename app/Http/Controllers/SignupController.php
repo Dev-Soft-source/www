@@ -142,13 +142,14 @@ class SignupController extends Controller
                 'last_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
                 'email' => $emailRule,
                 'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-                'remember-me' => 'required',
+                'remember_me' => 'required|accepted',
                 'password_confirmation' => 'required|same:password',
                 'rideshare_disclaimer' => 'required|accepted',
             ], [
-                'remember-me.required' => isset($signupPage->agree_terms_error) ? $signupPage->agree_terms_error : 'You must agree to the terms',
+                'remember_me.required' => 'Please confirm you agree to the cost-sharing rule.',
                 'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password field is required',
                 'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
+                'remember_me.accepted' => 'Please confirm you agree to the cost-sharing rule.',
                 'rideshare_disclaimer.required' => $signupPage->rideshare_require,
                 'rideshare_disclaimer.accepted' => $signupPage->rideshare_require,
             ], $niceNames);
