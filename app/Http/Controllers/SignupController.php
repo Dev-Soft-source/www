@@ -10,6 +10,7 @@ use App\Models\SignupPageSettingDetail;
 use App\Models\User;
 use App\Models\ReferralDetail;
 use App\Models\SuccessMessagesSettingDetail;
+use App\Models\Country;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -174,6 +175,8 @@ class SignupController extends Controller
 
         // Check if user exists with closed account - update instead of create
         $existingClosedUser = User::where('email', $request->email)->where('closed', '1')->whereNull('deleted_at')->first();
+
+        $ip = request()->ip();
         
         if ($existingClosedUser) {
             // Update the closed account to reactivate it
@@ -183,36 +186,25 @@ class SignupController extends Controller
                 'password' => Hash::make($request->password),
                 'closed' => '0', // Reactivate the account
                 'email_verified' => '0', // Require email verification again
-            ]);
-            $user = $existingClosedUser;
-        } else {
+                ]);
+                $user = $existingClosedUser;
+                } else {
+            $location = geoip()->getLocation($ip);
+            $country = Country::where('iso_code', $location['iso_code'])->first();
             // Create new user
+            
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'country' => 39,
+                'country' => $country->id ?? 38,
                 'referral_uuid' => bin2hex(random_bytes(16))
             ]);
         }
 
-        $ipAddress = null;
-        foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
-            if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
-                    $ip = trim($ip); // just to be safe
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                        $ipAddress = $ip;
-                        break 2;
-                    }
-                }
-            }
-        }
-        $ipAddress = $ipAddress ?? 'UNKNOWN';
-
         DB::table('user_details')->insert([
-            'ip_address' => $ipAddress,
+            'ip_address' => $ip,
             'type' => 'web',
             'user_id' => $user->id,
             'created_at' => Carbon::now()
@@ -234,12 +226,12 @@ class SignupController extends Controller
         // Log mail configuration for debugging
         $mailDriver = config('mail.default');
         $mailHost = config('mail.mailers.smtp.host');
-        Log::info('Attempting to send email verification', [
-            'email' => $request->email,
-            'mail_driver' => $mailDriver,
-            'mail_host' => $mailHost,
-            'token' => substr($token, 0, 10) . '...'
-        ]);
+        // Log::info('Attempting to send email verification', [
+        //     'email' => $request->email,
+        //     'mail_driver' => $mailDriver,
+        //     'mail_host' => $mailHost,
+        //     'token' => substr($token, 0, 10) . '...'
+        // ]);
 
         // Send email verification immediately; fallback to log mailer if SMTP fails
         $emailSent = false;
