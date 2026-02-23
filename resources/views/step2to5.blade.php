@@ -20,7 +20,16 @@
             <div>
                 <div class="flex flex-col items-center justify-center w-full md:w-1/2 mx-auto">
                     <div class="mb-2 text-left w-full">
-                        <span>{!! $step2Page->sub_heading_text ?? "If you are signing up as a driver, then please note that to be eligible to post ProximaRide and Extra-Care Rides, you must upload your profile photo" !!}</span>
+                        <span>
+                            @isset($step2Page->sub_heading_text)
+                                @php
+                                    $profile_photo_guidelines_url = route('profile_photo_guidelines', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+                                    $new_sub_heading_text = preg_replace('/\{\{\s*route\s*\(\s*[\'"]profile_photo_guidelines[\'"].*?\}\}\s*/s', $profile_photo_guidelines_url, $step2Page->sub_heading_text);
+                                @endphp
+                                {!! $new_sub_heading_text !!}
+                            @endisset
+                        </span>
+                        
                     </div>
                     <label for="dropzone-file"
                         class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100">

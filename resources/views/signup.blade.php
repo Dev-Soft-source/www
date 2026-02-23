@@ -188,29 +188,30 @@
                             </div>
                         </div>
 
-                        <div>
-                            <div class="mt-2">
-                                <label for="email" class="font-FuturaMdCnBT">
-                                    @isset($signupPage->email_label)
-                                        {{ $signupPage->email_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
+                        <div class="mt-2" id="email-wrap">
+                            <label for="email" class="font-FuturaMdCnBT">
+                                @isset($signupPage->email_label)
+                                    {{ $signupPage->email_label }}
+                                @endisset
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-2 relative">
                                 <input
                                     @isset($signupPage->email_placeholder)
-                            placeholder="{{ $signupPage->email_placeholder }}"
-                        @endisset
+                                        placeholder="{{ $signupPage->email_placeholder }}"
+                                    @endisset
                                     id="email"
-                                    class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                                    class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 {{ $errors->has('email') && !$errors->has('remember-me') ? 'ring-red-500' : '' }}"
                                     type="text" name="email" value="{{ old('email') }}" autofocus />
-                                @error('email')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                @if(!$errors->has('remember-me'))
+                                    @error('email')
+                                        <div class="mt-2 w-full">
+                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-md rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                @enderror
+                                    @enderror
+                                @endif
                             </div>
                         </div>
 
@@ -306,12 +307,9 @@
 
                         <div class="">
                             <div class="mt-2 relative">
-                                <label for="remember-me" class="relative flex text-sm text-gray-900 font-FuturaMdCnBT">
-
-                                    <input id="remember-me" name="remember-me" type="checkbox"
-                                        class="mt-2 mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
-
-                                    <div class="text_base relative">
+                                <label for="remember-me" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
+                                    <input id="remember-me" name="remember_me" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
+                                    <div class="text_base -mt-2">
                                         @isset($signupPage->agree_terms_label)
                                             {!! preg_replace_callback(
                                                 '/<a\s+([^>]+)>/i',
@@ -325,21 +323,18 @@
                                                 $signupPage->agree_terms_label,
                                             ) !!}
                                         @endisset
-
-                                        @error('remember-me')
-                                            <div role="tooltip"
-                                                class="absolute left-0 top-full mt-2 z-10
-                                transition duration-200 ease-out
-                                shadow-lg p-2 bg-red-500 rounded
-                                w-full md:w-1/2">
-                                                <p class="text-white text-sm lg:text-base">
-                                                    {{ $message }}
-                                                </p>
-                                            </div>
-                                        @enderror
                                     </div>
-
                                 </label>
+
+                                @error('remember_me')
+                                    <div class="">
+                                        <div class="relative tooltip group-hover:flex">
+                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                                <p class="text-white leading-none text-sm lg:text-base"> {{ $message }}</p>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                @enderror
                             </div>
                         </div>
 
@@ -358,8 +353,7 @@
                             @error('rideshare_disclaimer')
                                 <div class="mt-2">
                                     <div class="relative tooltip group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
                                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                         </div>
                                     </div>
@@ -373,13 +367,6 @@
                                     {{ $signupPage->button_label }}
                                 @endisset
                             </button>
-
-                            <!-- <p class="mt-3 text-center">
-                        @isset($signupPage->after_button_label)
-        {{ $signupPage->after_button_label }}
-    @endisset
-                    </p> -->
-
                         </div>
                     </form>
                 </div>
@@ -509,9 +496,9 @@
                             @endphp
                             <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">
                                 @if ($successMessage && $successMessage->registration_successful_title)
-                                    {{ $successMessage->registration_successful_title }}!
+                                    {{ $successMessage->registration_successful_title }}
                                 @else
-                                    Registration Successful!
+                                    Registration Successful
                                 @endif
                             </h3>
                             <div class="mt-2 w-full">

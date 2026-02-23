@@ -55,17 +55,13 @@
                             <div class="space-y-4 mb-4">
                                 <div class="mt-6">
                                     <label for="meeting" class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->cancel_ride_label ?? 'Tell us why' }}</label>
-                                    {{-- <textarea id="meeting" rows="4" name="message"
-                                        class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                                        placeholder={{ $tripsPage->cancel_ride_placeholder ?? "Provide as many details as you want as to why you want to cancel this ride &#10;Your passengers will receive a copy of this message &#10;ProximaRide will investigate each cancellation &#10;@if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->count() > 0)Your passenger will receive a copy of this message @endif"}}
-                                        >{{ old('message') }}</textarea> --}}
+                                   
                                     <textarea id="meeting" rows="6" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2">{{ old('message') }}</textarea>
 
-                                    {{-- <textarea id="meeting" rows="6" name="message" placeholder="Tell us why.&#10;Canceling a ride with passengers causes significant inconvenience to them, making the ridesharing experience unpleasant and affecting ProximaRide's reliability. Moreover, this may leave your passengers stranded, disrupting their travel plans.&#10;Please explain why you are canceling this ride. Provide as much detail as possible. Your passengers will not see this message.&#10;Tell your passengers why.&#10;Please inform your passengers why you are canceling this ride. A kind word of apology goes a long way.&#10;I confirm that I want to cancel this ride. I understand the inconvenience this will cause my passengers and that this action is irreversible." class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"></textarea> --}}
 
                                     @error('message')
-                                        <p class="p-2 rounded-md px-4 bg-red-500 text-white mt-t w-fit">{{ $message }}</p>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="mt-6">
@@ -74,21 +70,20 @@
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2">{{ old('reason') }}</textarea>
 
                                     @error('reason')
-                                        <p class="p-2 rounded-md px-4 bg-red-500 text-white mt-t w-fit">{{ $message }}</p>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                
+                            </div>
+                            <div class="flex items-center mt-4">
+                                <input type="checkbox" id="confirmCancel" class="display ml-4">
+                                <label for="confirmCancel">&nbsp;&nbsp; {{ $tripsPage->Confirm_cancel_ride ?? 'I confirm that I want to cancel this ride' }}</label>
                             </div>
                             <div class="flex justify-center items-center mt-4">
-                                {{-- <button class="button-exp-fill" type="submit">
-                                    {{ $tripsPage->booking_cancel_btn_label ?? "Cancel ride"}}
-                                </button> --}}
                                 <button id="cancelRideBtn" class="button-exp-fill" type="submit">
                                     {{ $tripsPage->booking_cancel_btn_label ?? 'Cancel ride' }}
                                 </button>
-
-                                <input type="checkbox" id="confirmCancel" class="display ml-4">
-                                <label for="confirmCancel">&nbsp;&nbsp; {{ $tripsPage->Confirm_cancel_ride ?? 'I confirm that I want to cancel this ride' }}</label>
-
                             </div>
                         </div>
                     </div>
@@ -187,11 +182,7 @@
         });
     </script>
     <style>
-        .button-exp-fill {
-            background-color: #f87171 !important;
-            color: white !important;
-        }
-
+        /* Cancel ride button uses default .button-exp-fill (primary blue) */
         .swal2-confirm {
             background-color: #f87171 !important;
             border-color: #f87171 !important;

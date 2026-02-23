@@ -73,7 +73,10 @@ class ReviewController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         }
-        return view('review',[]);
+        if (!$rating) {
+            abort(404, 'Review not found');
+        }
+        return view('review', ['rating' => $rating]);
     }
 
     public function passengerReviewIndex($lang, $id){
@@ -617,6 +620,10 @@ class ReviewController extends Controller
         }
 
         $user = auth()->user();
+
+        if (!$user) {
+            return $this->apiErrorResponse($message?->replied_message ?? 'Unauthorized.', 401);
+        }
 
         if ($user->block_review_rating == '1') {
             return $this->apiErrorResponse($message->block_review_rating_message ?? null, 200);

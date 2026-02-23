@@ -311,6 +311,11 @@ class MyRideController extends Controller
                     ->whereLanguageId($selectedLanguage->id)
                     ->first();
 
+                $vehicleTypeName = $ride->vehicle_type ? FeaturesSettingDetail::whereFeaturesSettingId($ride->vehicle_type)
+                    ->whereLanguageId($selectedLanguage->id)
+                    ->value('name') : null;
+                $ride->vehicle_type = $vehicleTypeName ?? $ride->vehicle_type;
+
                 $featureIds = explode('=', $ride->features);
                 // Fetch data for each feature ID and concatenate with '='
                 $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
@@ -346,6 +351,11 @@ class MyRideController extends Controller
                 $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
                     ->whereLanguageId($selectedLanguage->id)
                     ->first();
+
+                $vehicleTypeName = $ride->vehicle_type ? FeaturesSettingDetail::whereFeaturesSettingId($ride->vehicle_type)
+                    ->whereLanguageId($selectedLanguage->id)
+                    ->value('name') : null;
+                $ride->vehicle_type = $vehicleTypeName ?? $ride->vehicle_type;
 
                 $featureIds = explode('=', $ride->features);
                 // Fetch data for each feature ID and concatenate with '='

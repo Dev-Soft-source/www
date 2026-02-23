@@ -90,7 +90,7 @@
                                                     @endphp
                                                     <div class="relative even:bg-gray-100 odd:bg-white">
 
-                                                        @if (strtotime($booking->ride->date) < strtotime('today') ||
+                                                        <!-- @if (strtotime($booking->ride->date) < strtotime('today') ||
                                                                 (strtotime($booking->ride->date) == strtotime('today') && strtotime($booking->ride->time) < strtotime('now')))
                                                             @if (!isset($exist))
                                                                 <div class="absolute right-4 top-32 md:top-28">
@@ -112,7 +112,7 @@
                                                                     </a>
                                                                 </div>
                                                             @endif
-                                                        @endif
+                                                        @endif -->
                                                         <a
                                                             href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]) }}">
                                                             <div style="cursor:pointer;" onclick="window.location=''"

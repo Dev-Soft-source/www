@@ -202,7 +202,7 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-lg bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md modal-border">
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-lg bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md modal-border1">
                             <button id="hide-modal-btn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none">
                                 <span class="sr-only">Close</span>
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +212,7 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="mt-4 text-center sm:ml-4 sm:mt-0 sm:text-left">
                                     <div class="mt-2">
-                                        <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{{ $closeAccountPage->web_irreversible_label ?? "This action is irreversible"}}</h3>
+                                        <h3 class="text-2xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{{ $closeAccountPage->web_irreversible_label ?? "This action is irreversible"}}</h3>
                                     </div>
                                     <div class="mt-2 w-full">
                                         <p class="text-lg text-center text-black">{{ $closeAccountPage->close_account_sure_message_text ?? "Are you sure to you want to close your account?"}}</p>

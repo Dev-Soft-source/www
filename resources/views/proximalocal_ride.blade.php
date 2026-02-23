@@ -557,6 +557,7 @@
                                 </div>
                                 @endisset
                                 @isset($findRidePage->ride_features_option4->features_setting_id)
+                                @isset($postRidePage->features_option4)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="rating-passengers" class="font-normal text-gray-900 flex space-x-1">
                                         <span class="text-lg">
@@ -569,7 +570,9 @@
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                                 @endisset
+                                @endisset
                                 @isset($findRidePage->ride_features_option5->features_setting_id)
+                                @isset($postRidePage->features_option5)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="provide-babyseats" class="font-normal text-gray-900 flex space-x-1">
                                         <span class="text-lg">
@@ -582,7 +585,9 @@
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                                 @endisset
+                                @endisset
                                 @isset($findRidePage->ride_features_option6->features_setting_id)
+                                @isset($postRidePage->features_option6)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="passenger-provide" class="font-normal text-gray-900 flex space-x-1">
                                         <span class="text-lg">
@@ -595,7 +600,9 @@
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                                 @endisset
+                                @endisset
                                 @isset($findRidePage->ride_features_option7->features_setting_id)
+                                @isset($postRidePage->features_option7)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="take-children" class="font-normal text-gray-900 flex space-x-1">
                                         <span class="text-lg">
@@ -606,6 +613,7 @@
                                         {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
+                                @endisset
                                 @endisset
                                 @isset($findRidePage->ride_features_option8->features_setting_id)
                                 <div class="flex items-start justify-between p-3">
@@ -1101,9 +1109,12 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $from }}.
                                                                     </h3>
-                                                                    <p class="text-sm mt-2">
-                                                                        Pick-up at: {{ $ride->pickup }}
-                                                                    </p>
+                                                                    @php $segmentPickup = $ride->rideDetail[0]?->pickup ?? $ride->pickup; @endphp
+                                                                    @if(!empty($segmentPickup))
+                                                                        <p class="text-sm mt-2">
+                                                                            Pick-up at: {{ $segmentPickup }}
+                                                                        </p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1127,9 +1138,12 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $to }}.
                                                                     </h3>
-                                                                    <p class="text-sm mt-2">
-                                                                        Drop-off at: {{ $ride->dropoff }}
-                                                                    </p>
+                                                                    @php $segmentDropoff = $ride->rideDetail[0]?->dropoff ?? $ride->dropoff; @endphp
+                                                                    @if(!empty($segmentDropoff))
+                                                                        <p class="text-sm mt-2">
+                                                                            Drop-off at: {{ $segmentDropoff }}
+                                                                        </p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>

@@ -1,12 +1,11 @@
 <div class="hideheader ">
-
     <div class="relative z-50 hidden" id="delete_message_confirmation" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
                     <button type="button" onclick="closeNotificationModal()"
                         class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,7 +22,7 @@
                                     {!! session('heading') !!}</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center font-FuturaMdCnBT">
+                                <p class="text-gray-800 text-xl text-center">
                                     {{ $siteText['notification_delete_text'] }}</p>
                             </div>
                         </div>
@@ -144,10 +143,8 @@
                                             <button onclick="openModal('{{ $notification->id }}')"
                                                 class="text-gray-400 hover:text-gray-500 transition-colors bg-primary h-5 w-5 rounded-full flex items-center justify-center absolute top-3 right-2 z-10"
                                                 aria-label="Delete notification">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
                                             @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
