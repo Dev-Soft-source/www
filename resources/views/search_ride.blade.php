@@ -1165,19 +1165,41 @@
                                                         @endisset
                                                     </p>
                                                     <div class="my-4">
+                                                        @php
+                                                            $pinkRideShowModal = $isPink && auth()->user() && (auth()->user()->gender !== 'female' || ($pinkRideSetting->verfiy_phone_passenger == 1 ? !auth()->user()->phone_numbers->contains('verified', 1) : false));
+                                                            $pinkRideModalMessage = 'Only female passengers' . ($pinkRideSetting->verfiy_phone_passenger == 1 ? ' with verified number' : '') . ' can select this ride';
+                                                            $pinkRideModalMessageEscaped = addslashes($pinkRideModalMessage);
+                                                        @endphp
                                                         @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
-                                                            <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
-                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                                    alt="">
-                                                                {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}</a>
+                                                            @if ($pinkRideShowModal)
+                                                                <a href="javascript:void(0);" onclick="toggleModal1('modal-id1', '{{ $pinkRideModalMessageEscaped }}'); return false;"
+                                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                        class="w-8 h-8"
+                                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                                        alt="">
+                                                                    {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}</a>
+                                                            @else
+                                                                <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
+                                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                        class="w-8 h-8"
+                                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                                        alt="">
+                                                                    {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}</a>
+                                                            @endif
                                                         @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
-                                                            <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
-                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                                    alt="">{{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}</a>
+                                                            @if ($pinkRideShowModal)
+                                                                <a href="javascript:void(0);" onclick="toggleModal1('modal-id1', '{{ $pinkRideModalMessageEscaped }}'); return false;"
+                                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                        class="w-8 h-8"
+                                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                                        alt="">{{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}</a>
+                                                            @else
+                                                                <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
+                                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                        class="w-8 h-8"
+                                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                                        alt="">{{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}</a>
+                                                            @endif
                                                         @endif
                                                     </div>
                                                 </div>

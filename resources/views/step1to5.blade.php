@@ -19,7 +19,7 @@
                         @endisset
                     </h1>
                 </div>
-                <div class=" flex items-center justify-start">
+                <div class=" flex items-center justify-end">
                     <p class="text-red-500">
                         @isset($step1Page->required_label)
                             {{ $step1Page->required_label }}
