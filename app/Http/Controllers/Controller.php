@@ -83,17 +83,20 @@ class Controller extends BaseController
                 if ($routeName === 'my_rides' || $routeName === 'post_ride') { // || $routeName === 'ride_detail' 
                     if ($user->step3 !== 1) {
                         // vehicle information
-                        return redirect()->route('step3to5', ['lang' => $lang]);
+                        return redirect()->route('profile.vehicle', ['lang' => $lang]);
+                    } elseif ($user->step4 !== 1) {
+                        // driver license information
+                        return redirect()->route('driver.verify', ['lang' => $lang]);
                     } elseif ($user->step5 !== 1) {
                         // phone number verification
-                        return redirect()->route('step5to5', ['lang' => $lang]);
+                        return redirect()->route('phone', ['lang' => $lang]);
                     }
                 }
 
                 if ($routeName === 'my_chats') {
                     if ($user->step1 !== 1) {
                         // personal information
-                        return redirect()->route('step1to5', ['lang' => $lang]);
+                        return redirect()->route('profile.edit', ['lang' => $lang]);
                     }
                 }
 
