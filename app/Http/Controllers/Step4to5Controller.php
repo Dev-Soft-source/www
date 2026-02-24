@@ -20,7 +20,7 @@ class Step4to5Controller extends Controller
         // from step3 with skip -> update step3 to 1 and stay on step4 page (no validations)
         if (request()->has('skip')) {
             User::whereId($user->id)->update([
-                'step3' => 1
+                'step3' => 2
             ]);
         }
 

@@ -53,7 +53,7 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     display: inline-block;
     animation: fadeIn 0.25s ease-in-out;
-    min-width: max-content;
+    /* min-width: max-content; */
 }
 
 .tooltip-error::before {

@@ -67,7 +67,7 @@ class HomeController extends Controller
             // from step5 with skip -> update step5 to 1 (no validations)
             if (request()->has('skip')) {
                 User::whereId(auth()->user()->id)->update([
-                    'step5' => 1
+                    'step5' => 2
                 ]);
             }
         }
