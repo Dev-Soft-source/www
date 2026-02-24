@@ -814,7 +814,7 @@
                                     @endisset>
                                 <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                                 <div id="fromInvalidCityTooltip" class="absolute left-0 right-0 top-full mt-1 z-[100] hidden" role="alert">
-                                    <div class="tooltip-error">We don't have this city name in our records. Please check the spelling.</div>
+                                    <div class="tooltip-error">We could not find this city name in our records, please double-check the spelling</div>
                                 </div>
                                 <div id="fromError" class="absolute left-0 w-36 right-0 top-full mt-1 z-10 hidden">
                                     <div class="tooltip-error shadow-lg"></div>
@@ -846,7 +846,7 @@
                                     @endisset>
                                 <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                                 <div id="toInvalidCityTooltip" class="absolute left-0 right-0 top-full mt-1 z-[100] hidden" role="alert">
-                                    <div class="tooltip-error">We don't have this city name in our records. Please check the spelling.</div>
+                                    <div class="tooltip-error">We could not find this city name in our records, please double-check the spelling</div>
                                 </div>
                                 <div id="toError" class="absolute left-0 right-0 w-36 top-full mt-1 z-10 hidden">
                                     <div class="tooltip-error shadow-lg"></div>
