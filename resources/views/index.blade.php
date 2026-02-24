@@ -136,7 +136,7 @@
             </div>
             <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
-                    <div>
+                    <div class="w-72 relative">
                         <div class="relative">
                             <div class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
                                 <div class="w-6 h-6">
@@ -153,6 +153,11 @@
                                 autocomplete="off">
                            
                         </div>
+                        <div class="absolute hidden" id="fromInputError">
+                            <div class="tooltip-error">
+                                {{ $homePage->slider_required_error }}
+                            </div>
+                        </div>
                     </div>
                     <div class="relative">
                         <div class="flex justify-center items-center">
@@ -165,14 +170,14 @@
                             </button>
                         </div>
                     </div>
-                    <div>
+                    <div class="w-72 relative">
                         <div class="relative">
                             <div class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                            <div class="w-6 h-6">
-                                @isset($homePage->to_field_icon)
-                                    <img class="w-full h-full object-contain" src="{{asset('home_page_icons/' . $homePage->to_field_icon)}}" alt="">
-                                @endisset
-                            </div>
+                                <div class="w-6 h-6">
+                                    @isset($homePage->to_field_icon)
+                                        <img class="w-full h-full object-contain" src="{{asset('home_page_icons/' . $homePage->to_field_icon)}}" alt="">
+                                    @endisset
+                                </div>
                             </div>
                             <input id="toInput" type="text"
                                 @isset($homePage->slider_to_placeholder)
@@ -181,13 +186,13 @@
                                 class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
                                 autocomplete="off">
                         </div>
-                    </div>
-                    {{-- error tooltip --}}
-                    <div id="fromToError" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
-                        <div  class="tooltip-error">
-                            {{ $homePage->slider_required_error }}
+                        <div class="absolute hidden" id="toInputError">
+                            <div class="tooltip-error">
+                                {{ $homePage->slider_required_error }}
+                            </div>
                         </div>
                     </div>
+
                 </div>
                 <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
                     <div class="relative w-full">
@@ -1911,7 +1916,7 @@
                 const currentValue = this.value.trim();
                 // If no valid place is selected or the value doesn't match the selected place, clear it
                 if (!selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                    this.value = '';
+                    // this.value = '';
                     selectedFromPlace = null;
                 }
             }, 200);
@@ -1932,7 +1937,7 @@
                 const currentValue = this.value.trim();
                 // If no valid place is selected or the value doesn't match the selected place, clear it
                 if (!selectedToPlace || currentValue !== selectedToPlace.value) {
-                    this.value = '';
+                    // this.value = '';
                     selectedToPlace = null;
                 }
             }, 200);
@@ -1940,16 +1945,16 @@
 
         // Hide error tooltip when inputs get focus
         document.getElementById('fromInput').addEventListener('focus', function() {
-            const fromToError = document.getElementById('fromToError');
-            if (fromToError) {
-                fromToError.classList.add('hidden');
+            const fromInputError = document.getElementById('fromInputError');
+            if (fromInputError) {
+                fromInputError.classList.add('hidden');
             }
         });
 
         document.getElementById('toInput').addEventListener('focus', function() {
-            const fromToError = document.getElementById('fromToError');
-            if (fromToError) {
-                fromToError.classList.add('hidden');
+            const toInputError = document.getElementById('toInputError');
+            if (toInputError) {
+                toInputError.classList.add('hidden');
             }
         });
     };
@@ -2163,27 +2168,6 @@
         });
     });
 
-    // Add an event listener to the input fields
-    // document.getElementById('fromInput').addEventListener('keypress', function (event) {
-    //     if (event.key === 'Enter') {
-    //         event.preventDefault();
-    //         navigateToSearchRoute();
-    //     }
-    // });
-
-    // document.getElementById('toInput').addEventListener('keypress', function (event) {
-    //     if (event.key === 'Enter') {
-    //         event.preventDefault();
-    //         navigateToSearchRoute();
-    //     }
-    // });
-
-    // document.getElementById('dateInput').addEventListener('keypress', function (event) {
-    //     if (event.key === 'Enter') {
-    //         event.preventDefault();
-    //         navigateToSearchRoute();
-    //     }
-    // })
 
     function navigateToSearchRoute() {
         // Get the values of the "From," "To," and "Date" input fields
@@ -2192,46 +2176,39 @@
         const dateValue = document.getElementById('dateInput').value;
 
         // Get the tooltip error element
-        const fromToError = document.getElementById('fromToError');
-
-        // Check if "From" or "To" fields are empty
-        if (fromValue === '' || toValue === '') {
-            // Show the tooltip
-            if (fromToError) {
-                fromToError.classList.remove('hidden');
-                
-                // Hide the tooltip after 3 seconds
-                // setTimeout(function() {
-                //     fromToError.classList.add('hidden');
-                // }, 3000);
-            }
-            return; // Prevent navigation
-        }
+        const fromInputError = document.getElementById('fromInputError');
+        const toInputError = document.getElementById('toInputError');
 
         // Validate that both inputs contain valid selected places (not just any string)
         let isValid = true;
 
-        // Check if "From" field has a valid selected place
-        if (!selectedFromPlace || fromValue !== selectedFromPlace.value) {
-            isValid = false;
-        }
-
-        // Check if "To" field has a valid selected place
-        if (!selectedToPlace || toValue !== selectedToPlace.value) {
-            isValid = false;
-        }
-
-        // If validation fails, show error tooltip
-        if (!isValid) {
-            if (fromToError) {
-                fromToError.classList.remove('hidden');
+        // Check if "From" or "To" fields are empty
+        if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
+            // Show the tooltip
+            if (fromInputError) {
+                fromInputError.classList.remove('hidden');
             }
-            return; // Prevent navigation
+            isValid = false;
+        }
+
+        if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
+            // Show the tooltip
+            if (toInputError) {
+                toInputError.classList.remove('hidden');
+            }
+            isValid = false;
+        }
+
+        if(!isValid) {
+            return; // If not valid, do not proceed with navigation
         }
 
         // Both fields are filled and valid, hide error tooltip if it's showing
-        if (fromToError) {
-            fromToError.classList.add('hidden');
+        if (fromInputError) {
+            fromInputError.classList.add('hidden');
+        }
+        if (toInputError) {
+            toInputError.classList.add('hidden');
         }
 
         // Construct the URL with query parameters
