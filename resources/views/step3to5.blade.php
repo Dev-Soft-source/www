@@ -253,30 +253,30 @@
                         </label>
                         <div class="gap-4 md:gap-6 flex items-center mt-4">
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
-                                <input id="" name="car_type" type="radio" value="Electric"
+                                <input id="car_type_electric" name="car_type" type="radio" value="Electric"
                                     {{ old('car_type') == 'Electric' ? 'checked' : '' }}
                                     class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="" class="block text-gray-900">
+                                <label for="car_type_electric" class="block text-gray-900">
                                     @isset($step3Page->electric_option_label)
                                         {{ $step3Page->electric_option_label }}
                                     @endisset
                                 </label>
                             </div>
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
-                                <input id="" name="car_type" type="radio" value="Hybrid"
+                                <input id="car_type_hybrid" name="car_type" type="radio" value="Hybrid"
                                     {{ old('car_type') == 'Hybrid' ? 'checked' : '' }}
                                     class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="" class="block text-gray-900">
+                                <label for="car_type_hybrid" class="block text-gray-900">
                                     @isset($step3Page->hybrid_option_label)
                                         {{ $step3Page->hybrid_option_label }}
                                     @endisset
                                 </label>
                             </div>
                             <div class="flex items-center space-x-1.5 lg:space-x-2 mb-2">
-                                <input id="" name="car_type" type="radio" value="Gas" checked
+                                <input id="car_type_gas" name="car_type" type="radio" value="Gas" checked
                                     {{ old('car_type') == 'Gas' ? 'checked' : '' }}
                                     class="h-4 w-4 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="" class="block text-gray-900">
+                                <label for="car_type_gas" class="block text-gray-900">
                                     @isset($step3Page->gas_option_label)
                                         {{ $step3Page->gas_option_label }}
                                     @endisset
