@@ -20,6 +20,7 @@
             {{ $attributes->merge([
                 'class' => 'form-control can-exp-input rounded border border-gray-300 ' . ($errors->has($name) ? 'is-invalid' : '')
             ]) }}
+            autocomplete="off"
         >
 
         @if($type === 'password')

@@ -38,8 +38,8 @@ class Controller extends BaseController
         if ($lang) {
             session(['selectedLanguage' => $lang]);
         } else {
-            $lang = request()->query('lang'); 
-            if(!$lang){
+            $lang = request()->query('lang');
+            if (!$lang) {
                 $lang = session('selectedLanguage', $this->defaultLang->abbreviation);
             }
             session(['selectedLanguage' => $lang]);
@@ -59,29 +59,39 @@ class Controller extends BaseController
             if (auth()->check()) {
                 $user = auth()->user();
                 $user_id = $user->id;
-
                 // Redirect users based on their profile completion step when they try to access certain routes
                 $routeName = request()->route()->getName();
-                if ($routeName === 'profile' || $routeName === 'welcomeRoute' || $routeName === 'my_rides' || $routeName === 'ride_detail' || $routeName === 'post_ride') {
-                    if ($user->step1 === 0) {
+                if ($routeName === 'profile' || $routeName === 'welcomeRoute') {
+                    if ($user->step1 == 0) {
                         // personal information
                         return redirect()->route('step1to5', ['lang' => $lang]);
-                    } elseif ($user->step2 === 0) {
+                    } elseif ($user->step2 == 0) {
                         // profile image
                         return redirect()->route('step2to5', ['lang' => $lang]);
-                    } elseif ($user->step3 === 0) {
+                    } elseif ($user->step3 == 0) {
                         // my vehicle information
                         return redirect()->route('step3to5', ['lang' => $lang]);
-                    } elseif ($user->step4 === 0) {
+                    } elseif ($user->step4 == 0) {
                         // driver license information
                         return redirect()->route('step4to5', ['lang' => $lang]);
-                    } elseif ($user->step5 === 0) {
+                    } elseif ($user->step5 == 0) {
                         // phone number verification
                         return redirect()->route('step5to5', ['lang' => $lang]);
                     }
                 }
-                if($routeName === 'my_chats'){
-                    if ($user->step1 === 0) {
+
+                if ($routeName === 'my_rides' || $routeName === 'post_ride') { // || $routeName === 'ride_detail' 
+                    if ($user->step3 !== 1) {
+                        // vehicle information
+                        return redirect()->route('step3to5', ['lang' => $lang]);
+                    } elseif ($user->step5 !== 1) {
+                        // phone number verification
+                        return redirect()->route('step5to5', ['lang' => $lang]);
+                    }
+                }
+
+                if ($routeName === 'my_chats') {
+                    if ($user->step1 !== 1) {
                         // personal information
                         return redirect()->route('step1to5', ['lang' => $lang]);
                     }
