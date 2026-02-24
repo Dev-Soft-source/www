@@ -428,85 +428,27 @@ class PhoneController extends Controller
         return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_delete_message);
     }
 
+    /**
+     * Send verification code for a phone number (same logic as Step5to5Controller).
+     * GET {lang?}/send-verification-code/{id} — used when user clicks "Send code" on an existing number.
+     */
     public function sendVerificationCode($lang = null, $id = null)
     {
-        // Handle case where route is called without language parameter
-        // In that case, $lang will contain the ID
+        // Handle case where route is called without language parameter (id in first segment)
         if ($id === null && is_numeric($lang)) {
             $id = $lang;
             $lang = null;
         }
 
         $phoneNumber = PhoneNumber::find($id);
-
         if (!$phoneNumber) {
-            if (request()->ajax() || request()->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Phone number not found'
-                ], 404);
-            }
-            return redirect()->back()->with(['error' => 'Phone number not found']);
+            return response()->json(['success' => false, 'message' => 'Phone number not found'], 404);
+        }
+        if ($phoneNumber->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $existingRecord = DB::table('phone_verifications')
-            ->where('phone_number_id', $phoneNumber->id)
-            ->first();
-
-        if ($existingRecord) {
-            DB::table('phone_verifications')
-                ->where('phone_number_id', $phoneNumber->id)
-                ->delete();
-        }
-
-        $verificationCode = rand(1000, 9999);
-
-        $verificationId = DB::table('phone_verifications')->insertGetId([
-            'phone_number_id' => $phoneNumber->id,
-            'verification_code' => $verificationCode,
-            'expires_at' => Carbon::now()->addMinutes(30),
-        ]);
-
-        $randomStr = strtoupper(Str::random(4));
-        $randomId = $randomStr . '-' . $verificationId;
-
-        DB::table('phone_verifications')
-            ->where('id', $verificationId)
-            ->update(['random_id' => $randomId]);
-
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $from = env('TWILIO_PHONE_NUMBER');
-
-        $twilio = new Client($sid, $token);
-        $to = $phoneNumber->phone;
-        $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
-
-        try {
-            if (env('APP_ENV') != 'local') {
-                $twilio->messages->create($to, ['from' => $from, 'body' => $message]);
-            }
-        } catch (\Exception  $e) {
-            Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
-            // Continue anyway - don't block the user from entering code manually
-        }
-
-        // Check if this is an AJAX request
-        if (request()->ajax() || request()->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Verification code sent successfully'
-            ]);
-        }
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-        return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
+        return $this->sendVerificationCodeForPhoneNumber($phoneNumber, 'sms');
     }
 
     public function phoneCode($lang = null)
@@ -867,36 +809,160 @@ class PhoneController extends Controller
             'country_id' => $request->country,
         ]);
 
-        $verificationCode = rand(1000, 9999);
+        return $this->sendVerificationCodeForPhoneNumber($phone, 'sms');
+    }
 
-        DB::table('phone_verifications')->insert([
-            'phone_number_id' => $phone->id,
-            'verification_code' => $verificationCode,
-            'expires_at' => Carbon::now()->addMinutes(30),
-        ]);
+    /**
+     * Send verification code for a given phone (same behavior as Step5to5Controller).
+     * Rate limit: 3 attempts per number per 24h. International = Twilio Verify (WhatsApp). North American = SMS.
+     */
+    private function sendVerificationCodeForPhoneNumber(PhoneNumber $phone, string $channel = 'sms')
+    {
+        $attemptsIn24h = DB::table('phone_verifications')
+            ->where('phone_number_id', $phone->id)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->count();
+
+        if ($attemptsIn24h >= 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Maximum verification attempts (3) reached for this number. Try again after 24 hours.',
+            ], 429);
+        }
 
         $sid = env('TWILIO_ACCOUNT_SID');
         $token = env('TWILIO_AUTH_TOKEN');
-        $from = env('TWILIO_PHONE_NUMBER');
+        $verifyServiceSid = env('TWILIO_VERIFY_SERVICE_SID');
+        $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
+        $smsFrom = env('TWILIO_SMS_FROM') ?: env('TWILIO_PHONE_NUMBER');
+        $whatsappFrom = env('TWILIO_WHATSAPP_FROM');
 
-        if ($sid) {
-            $twilio = new Client($sid, $token);
-            $to = $phone->phone;
-            $smsMessage = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
+        if (!$sid || !$token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification by text or WhatsApp is temporarily unavailable. Please try again later.',
+            ], 500);
+        }
 
-            try {
-                if (env('APP_ENV') != 'local') {
-                    $twilio->messages->create($to, ['from' => $from, 'body' => $smsMessage]);
-                }
-            } catch (\Exception $e) {
-                Log::info('Cannot send text to ' . $to . ' because ' . $e->getMessage());
-                // Continue anyway - don't block the user from entering code manually
+        $isNorthAmerican = isNorthAmericanNumber($phone->phone);
+
+        // International: Twilio Verify API (WhatsApp)
+        if (!$isNorthAmerican) {
+            if (!$verifyServiceSid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Verification for international numbers is not configured. Please use a North American number or contact support.',
+                ], 500);
             }
+            $verifyChannel = 'whatsapp';
+            try {
+                $twilio = new Client($sid, $token);
+                $verification = $twilio->verify->v2->services($verifyServiceSid)
+                    ->verifications->create($phone->phone, $verifyChannel);
+                DB::table('phone_verifications')->insert([
+                    'phone_number_id' => $phone->id,
+                    'verification_code' => '',
+                    'channel' => $verifyChannel,
+                    'twilio_verify_sid' => $verification->sid,
+                    'expires_at' => now()->addMinutes(10),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                Log::info('International verification sent via Twilio Verify (Phone page)', ['phone' => $phone->phone, 'channel' => $verifyChannel]);
+            } catch (\Exception $e) {
+                Log::error('Twilio Verify send failed (Phone page)', ['phone_id' => $phone->id, 'phone' => $phone->phone, 'error' => $e->getMessage()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $this->twilioErrorMessageForUser($e->getMessage(), $verifyChannel),
+                ], 500);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification code sent successfully',
+                'is_north_american' => false,
+                'channel' => $verifyChannel,
+                'remaining_attempts' => max(0, 3 - ($attemptsIn24h + 1)),
+            ]);
+        }
+
+        // North American (+1): 4-digit OTP via SMS (same as Step5)
+        $otp = random_int(1000, 9999);
+        DB::table('phone_verifications')->insert([
+            'phone_number_id' => $phone->id,
+            'verification_code' => (string) $otp,
+            'channel' => $channel,
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $canSendSms = $smsFrom || $messagingServiceSid;
+        if (!$canSendSms) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Verification by text or WhatsApp is temporarily unavailable. Please try again later.',
+            ], 500);
+        }
+
+        $twilio = new Client($sid, $token);
+        try {
+            $smsParams = $this->buildSmsParams($otp, $smsFrom, $messagingServiceSid);
+            try {
+                $message = $twilio->messages->create($phone->phone, $smsParams);
+                Log::info('SMS sent (Phone page)', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
+            } catch (\Exception $smsEx) {
+                if ($smsFrom && (str_contains($smsEx->getMessage(), '21704') || str_contains($smsEx->getMessage(), 'no phone numbers'))) {
+                    Log::warning('Messaging Service has no numbers, retrying with From number', ['phone' => $phone->phone]);
+                    $smsParams = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes.", 'from' => $smsFrom];
+                    $message = $twilio->messages->create($phone->phone, $smsParams);
+                    Log::info('SMS sent (Phone page)', ['phone' => $phone->phone, 'sid' => $message->sid, 'status' => $message->status]);
+                } else {
+                    throw $smsEx;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Send verification code failed (Phone page)', ['phone_id' => $phone->id, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $this->twilioErrorMessageForUser($e->getMessage(), 'sms'),
+            ], 500);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Verification code sent successfully'
+            'message' => 'Verification code sent successfully',
+            'is_north_american' => true,
+            'channel' => $channel,
+            'remaining_attempts' => max(0, 3 - ($attemptsIn24h + 1)),
         ]);
+    }
+
+    private function buildSmsParams(int $otp, ?string $smsFrom, ?string $messagingServiceSid): array
+    {
+        $params = ['body' => "ProximaRide code: {$otp}. Expires in 10 minutes."];
+        if ($smsFrom) {
+            $params['from'] = $smsFrom;
+        } elseif ($messagingServiceSid) {
+            $params['messagingServiceSid'] = $messagingServiceSid;
+        }
+        return $params;
+    }
+
+    private function twilioErrorMessageForUser(string $twilioError, string $context = 'sms'): string
+    {
+        $lower = strtolower($twilioError);
+        if (str_contains($lower, 'permission to send') && (str_contains($lower, 'region') || str_contains($lower, 'country'))) {
+            return 'Verification by SMS or WhatsApp is not available for your country/region. Please try WhatsApp if you chose SMS, or use a phone number from a supported region.';
+        }
+        if (str_contains($lower, 'geographic') || str_contains($lower, 'geo permissions')) {
+            return 'Verification is not available for your region. Please try WhatsApp or use a number from a supported country.';
+        }
+        if (str_contains($lower, 'whatsapp') && str_contains($lower, 'disabled')) {
+            return 'WhatsApp is not available for this number. Please try sending the code via SMS instead.';
+        }
+        if ($context === 'whatsapp_sms_fallback') {
+            return 'We couldn\'t send the code via WhatsApp or SMS. Please check your phone number and try again in a few minutes.';
+        }
+        return 'We couldn\'t send the SMS. Please check your phone number and try again.';
     }
 }

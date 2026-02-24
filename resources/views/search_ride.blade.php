@@ -2,6 +2,23 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Invalid city and required-field tooltips: align with and point at the search input */
+        #fromInvalidCityTooltip .tooltip-error,
+        #toInvalidCityTooltip .tooltip-error,
+        #fromError .tooltip-error,
+        #toError .tooltip-error {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #fromInvalidCityTooltip .tooltip-error::before,
+        #toInvalidCityTooltip .tooltip-error::before,
+        #fromError .tooltip-error::before,
+        #toError .tooltip-error::before {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -781,8 +798,8 @@
                         </h1>
                     </div>
                     <div class="flex items-end flex-col md:flex-row justify-between gap-4 md:gap-0 rounded-lg">
-                        <div class="w-full md:w-[30%]">
-                            <div class="relative">
+                        <div class="w-full md:w-[30%] overflow-visible">
+                            <div class="relative overflow-visible">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->from_field_icon)
                                         <img src="{{ asset('home_page_icons/' . $findRidePage->from_field_icon) }}" class="w-auto h-6" alt="">
@@ -796,8 +813,13 @@
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
                                     @endisset>
                                 <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
+                                <div id="fromInvalidCityTooltip" class="absolute left-0 right-0 top-full mt-1 z-[100] hidden" role="alert">
+                                    <div class="tooltip-error">We don't have this city name in our records. Please check the spelling.</div>
+                                </div>
+                                <div id="fromError" class="absolute left-0 w-36 right-0 top-full mt-1 z-10 hidden">
+                                    <div class="tooltip-error shadow-lg"></div>
+                                </div>
                             </div>
-                            <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
                             <button type="button" onclick="swapLocations()">
@@ -808,8 +830,8 @@
                                 @endisset
                             </button>
                         </div>
-                        <div class="w-full md:w-[30%]">
-                            <div class="relative">
+                        <div class="w-full md:w-[30%] overflow-visible">
+                            <div class="relative overflow-visible">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->to_field_icon)
                                         <img src="{{ asset('home_page_icons/' . $findRidePage->to_field_icon) }}" class="w-4 h-6" alt="">
@@ -823,8 +845,13 @@
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
                                     @endisset>
                                 <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
+                                <div id="toInvalidCityTooltip" class="absolute left-0 right-0 top-full mt-1 z-[100] hidden" role="alert">
+                                    <div class="tooltip-error">We don't have this city name in our records. Please check the spelling.</div>
+                                </div>
+                                <div id="toError" class="absolute left-0 right-0 w-36 top-full mt-1 z-10 hidden">
+                                    <div class="tooltip-error shadow-lg"></div>
+                                </div>
                             </div>
-                            <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
                         </div>
                         <div class="w-48 mx-auto md:mx-0 md:w-[30%]">
                             <div class="relative">
@@ -1838,6 +1865,48 @@
             };
         }
 
+        let fromInvalidCity = false;
+        let toInvalidCity = false;
+        let invalidCityTooltipHideTimers = { from: null, to: null };
+        const INVALID_CITY_TOOLTIP_HIDE_MS = 2000;
+
+        function showInvalidCityTooltip(field, hideAfterMs) {
+            var isInvalid = field === 'from' ? fromInvalidCity : toInvalidCity;
+            if (!isInvalid) return;
+            var el = document.getElementById(field === 'from' ? 'fromInvalidCityTooltip' : 'toInvalidCityTooltip');
+            if (!el) return;
+            if (invalidCityTooltipHideTimers[field]) {
+                clearTimeout(invalidCityTooltipHideTimers[field]);
+                invalidCityTooltipHideTimers[field] = null;
+            }
+            el.classList.remove('hidden');
+            if (hideAfterMs && hideAfterMs > 0) {
+                invalidCityTooltipHideTimers[field] = setTimeout(function() {
+                    el.classList.add('hidden');
+                    invalidCityTooltipHideTimers[field] = null;
+                }, hideAfterMs);
+            }
+        }
+
+        function hideInvalidCityTooltip(field) {
+            var el = document.getElementById(field === 'from' ? 'fromInvalidCityTooltip' : 'toInvalidCityTooltip');
+            if (el) el.classList.add('hidden');
+            if (invalidCityTooltipHideTimers[field]) {
+                clearTimeout(invalidCityTooltipHideTimers[field]);
+                invalidCityTooltipHideTimers[field] = null;
+            }
+        }
+
+        function setInvalidCityState(field, invalid) {
+            if (field === 'from') {
+                fromInvalidCity = invalid;
+                if (!invalid) hideInvalidCityTooltip('from');
+            } else {
+                toInvalidCity = invalid;
+                if (!invalid) hideInvalidCityTooltip('to');
+            }
+        }
+
         function fetchCities(searchTerm, fieldId, fieldIndex) {
             const container = document.getElementById(fieldId + '_suggestions' + fieldIndex);
             if (!container) return;
@@ -1865,6 +1934,20 @@
             .then(result => {
                 container.innerHTML = '';
                 const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object.values(result.cities)) : [];
+                const field = fieldId === 'from_spot' ? 'from' : 'to';
+                const input = document.getElementById(fieldId + '_' + fieldIndex);
+                const currentValue = input ? input.value.trim() : '';
+                const searchTrim = (typeof searchTerm === 'string' ? searchTerm : '').trim();
+
+                if (cities.length === 0 && searchTrim.length >= 2) {
+                    if (currentValue === searchTrim) {
+                        setInvalidCityState(field, true);
+                        showInvalidCityTooltip(field, false);
+                    }
+                } else {
+                    setInvalidCityState(field, false);
+                }
+
                 cities.forEach(value => {
                     const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
                     const countryName = value.state && value.state.country && value.state.country.name ? value.state.country.name : '';
@@ -1873,9 +1956,9 @@
                     div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
                     div.textContent = displayText;
                     div.addEventListener('click', function() {
-                        const input = document.getElementById(fieldId + '_' + fieldIndex);
                         if (input) input.value = displayText;
                         container.innerHTML = '';
+                        setInvalidCityState(field, false);
                     });
                     container.appendChild(div);
                 });
@@ -1884,16 +1967,24 @@
         }
 
         const debouncedFromFetch = debounce(function() {
-            const searchTerm = (document.getElementById('from_spot_0') || {}).value || '';
+            const raw = (document.getElementById('from_spot_0') || {}).value || '';
+            const searchTerm = typeof raw === 'string' ? raw.trim() : '';
             fetchCities(searchTerm, 'from_spot', '0');
         }, 500);
         const debouncedToFetch = debounce(function() {
-            const searchTerm = (document.getElementById('to_spot_0') || {}).value || '';
+            const raw = (document.getElementById('to_spot_0') || {}).value || '';
+            const searchTerm = typeof raw === 'string' ? raw.trim() : '';
             fetchCities(searchTerm, 'to_spot', '0');
         }, 500);
 
         function fromInput(index) {
             const el = document.getElementById('from_spot_' + index);
+            setInvalidCityState('from', false);
+            hideInvalidCityTooltip('from');
+            if (el && el.value.trim().length > 0) {
+                const fromErrorEl = document.getElementById('fromError');
+                if (fromErrorEl) fromErrorEl.classList.add('hidden');
+            }
             if (el && el.value.length < 2) {
                 const container = document.getElementById('from_spot_suggestions' + index);
                 if (container) container.innerHTML = '';
@@ -1903,6 +1994,12 @@
 
         function toInput(index) {
             const el = document.getElementById('to_spot_' + index);
+            setInvalidCityState('to', false);
+            hideInvalidCityTooltip('to');
+            if (el && el.value.trim().length > 0) {
+                const toErrorEl = document.getElementById('toError');
+                if (toErrorEl) toErrorEl.classList.add('hidden');
+            }
             if (el && el.value.length < 2) {
                 const container = document.getElementById('to_spot_suggestions' + index);
                 if (container) container.innerHTML = '';
@@ -1916,6 +2013,25 @@
             if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
             if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
         });
+
+        const fromInputEl = document.getElementById('from_spot_0');
+        const toInputEl = document.getElementById('to_spot_0');
+        if (fromInputEl) {
+            fromInputEl.addEventListener('blur', function() {
+                if (fromInvalidCity) showInvalidCityTooltip('from', INVALID_CITY_TOOLTIP_HIDE_MS);
+            });
+            fromInputEl.addEventListener('focus', function() {
+                if (fromInvalidCity) showInvalidCityTooltip('from', false);
+            });
+        }
+        if (toInputEl) {
+            toInputEl.addEventListener('blur', function() {
+                if (toInvalidCity) showInvalidCityTooltip('to', INVALID_CITY_TOOLTIP_HIDE_MS);
+            });
+            toInputEl.addEventListener('focus', function() {
+                if (toInvalidCity) showInvalidCityTooltip('to', false);
+            });
+        }
 
         const dateInput = document.getElementById('dateInput');
 
@@ -2007,6 +2123,64 @@
             window.location.href = searchUrl;
         }
 
+        function cityDisplayText(value) {
+            const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
+            const countryName = value.state && value.state.country && value.state.country.name ? value.state.country.name : '';
+            return [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
+        }
+
+        function valueMatchesCity(val, cities) {
+            const v = val.trim().toLowerCase();
+            return cities.some(function(c) { return cityDisplayText(c).trim().toLowerCase() === v; });
+        }
+
+        function fetchCitiesForValidation(searchTerm) {
+            if (!searchTerm || searchTerm.trim().length < 2) return Promise.resolve([]);
+            const body = new URLSearchParams({ search: searchTerm.trim(), _token: '{{ csrf_token() }}' });
+            return fetch('{{ url('get-cities-by-state') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: body.toString()
+            }).then(function(r) {
+                if (!r.ok) throw new Error('Request failed');
+                return r.json();
+            }).then(function(result) {
+                return result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object.values(result.cities)) : [];
+            }).catch(function() { return []; });
+        }
+
+        function validateCitiesOnSubmit(fromVal, toVal) {
+            const fromPromise = fromVal.length >= 2 ? fetchCitiesForValidation(fromVal) : Promise.resolve([]);
+            const toPromise = toVal.length >= 2 ? fetchCitiesForValidation(toVal) : Promise.resolve([]);
+            return Promise.all([fromPromise, toPromise]).then(function(results) {
+                const fromCities = results[0];
+                const toCities = results[1];
+                if (fromVal.length >= 2) {
+                    if (fromCities.length === 0) {
+                        setInvalidCityState('from', true);
+                        showInvalidCityTooltip('from', INVALID_CITY_TOOLTIP_HIDE_MS);
+                    }
+                    if (!valueMatchesCity(fromVal, fromCities)) {
+                        setInvalidCityState('from', true);
+                        showInvalidCityTooltip('from', INVALID_CITY_TOOLTIP_HIDE_MS);
+                        return false;
+                    }
+                }
+                if (toVal.length >= 2) {
+                    if (toCities.length === 0) {
+                        setInvalidCityState('to', true);
+                        showInvalidCityTooltip('to', INVALID_CITY_TOOLTIP_HIDE_MS);
+                    }
+                    if (!valueMatchesCity(toVal, toCities)) {
+                        setInvalidCityState('to', true);
+                        showInvalidCityTooltip('to', INVALID_CITY_TOOLTIP_HIDE_MS);
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
         function navigateToSearchRoute() {
             localStorage.setItem('removedRideIds', JSON.stringify([]));
 
@@ -2016,46 +2190,58 @@
             const toError = document.getElementById('toError');
 
             if (fromValue === '') {
-                @isset($findRidePage->search_section_required_error)
-                    if (fromError) { fromError.textContent = '{{ $findRidePage->search_section_required_error }}'; fromError.classList.remove('hidden'); }
-                @endisset
-                if (toError) toError.classList.add('hidden');
-                return;
+                if (fromError) {
+                    var fromMsg = fromError.querySelector('.tooltip-error');
+                    if (fromMsg) fromMsg.textContent = 'This field is required.';
+                    fromError.classList.remove('hidden');
+                }
+                hideInvalidCityTooltip('from');
             }
             if (toValue === '') {
-                @isset($findRidePage->search_section_required_error)
-                    if (toError) { toError.textContent = '{{ $findRidePage->search_section_required_error }}'; toError.classList.remove('hidden'); }
-                @endisset
-                if (fromError) fromError.classList.add('hidden');
+                if (toError) {
+                    var toMsg = toError.querySelector('.tooltip-error');
+                    if (toMsg) toMsg.textContent = 'This field is required.';
+                    toError.classList.remove('hidden');
+                }
+                hideInvalidCityTooltip('to');
                 return;
             }
             if (fromError) fromError.classList.add('hidden');
             if (toError) toError.classList.add('hidden');
 
-            const formData = {
-                from: fromValue,
-                to: toValue,
-                date: document.getElementById('dateInput').value,
-                driver_age: document.getElementById('driverAge').value,
-                driver_rating: document.getElementById('driverRating').value,
-                driver_phone: document.getElementById('driverPhone').checked ? 1 : 0,
-                driver_name: document.getElementById('driverName').value,
-                keyword: document.getElementById('keyword').value,
-                passenger_rating: document.getElementById('passengerRating').value,
-                payment_method: document.getElementById('payment-method').value,
-                vehicle_type: document.getElementById('VehicleType').value,
-                features: selectedFeatures.join(';'),
-                luggage: selectedLuggages.join(';'),
-                smoking: selectedSmoking.join(';'),
-                pets: selectedPets.join(';')
-            };
+            if (fromInvalidCity) {
+                showInvalidCityTooltip('from', INVALID_CITY_TOOLTIP_HIDE_MS);
+            }
+            if (toInvalidCity) {
+                showInvalidCityTooltip('to', INVALID_CITY_TOOLTIP_HIDE_MS);
+                return;
+            }
 
-            const baseUrl = '{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}';
-            const queryParams = Object.entries(formData)
-                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-                .join('&');
-
-            window.location.href = `${baseUrl}?${queryParams}`;
+            validateCitiesOnSubmit(fromValue, toValue).then(function(valid) {
+                if (!valid) return;
+                const formData = {
+                    from: fromValue,
+                    to: toValue,
+                    date: document.getElementById('dateInput').value,
+                    driver_age: document.getElementById('driverAge').value,
+                    driver_rating: document.getElementById('driverRating').value,
+                    driver_phone: document.getElementById('driverPhone').checked ? 1 : 0,
+                    driver_name: document.getElementById('driverName').value,
+                    keyword: document.getElementById('keyword').value,
+                    passenger_rating: document.getElementById('passengerRating').value,
+                    payment_method: document.getElementById('payment-method').value,
+                    vehicle_type: document.getElementById('VehicleType').value,
+                    features: selectedFeatures.join(';'),
+                    luggage: selectedLuggages.join(';'),
+                    smoking: selectedSmoking.join(';'),
+                    pets: selectedPets.join(';')
+                };
+                const baseUrl = '{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}';
+                const queryParams = Object.entries(formData)
+                    .map(function(entry) { return entry[0] + '=' + encodeURIComponent(entry[1]); })
+                    .join('&');
+                window.location.href = baseUrl + '?' + queryParams;
+            });
         }
 
         function resetFilters() {
