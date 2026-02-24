@@ -140,7 +140,7 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div class="mb-5">
                             <label for="state-dropdown">
                                 @isset($step1Page->state_label)
                                     {{ $step1Page->state_label }}
@@ -160,7 +160,7 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div class="mb-5">
                             <label for="">
                                 @isset($step1Page->city_label)
                                     {{ $step1Page->city_label }}
