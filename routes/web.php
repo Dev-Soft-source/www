@@ -9,6 +9,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\CloseAccountController;
 use App\Http\Controllers\ContactUsController;
+use App\Http\Controllers\CostSharingCompliancePolicyController;
 use App\Http\Controllers\CountryStateCityController;
 use App\Http\Controllers\DisputePolicyController;
 use App\Http\Controllers\DriverController;
@@ -379,6 +380,7 @@ Route::get('{lang?}/refund-policy', [RefundPolicyController::class, 'index'])->n
 Route::get('{lang?}/cancellation-policy', [CancellationPolicyController::class, 'index'])->name('cancellation_policy');
 Route::get('{lang?}/firm-cancellation-policy', [CancellationPolicyController::class, 'firmCancellation'])->name('firm_cancellation_policy');
 Route::get('{lang?}/dispute-policy', [DisputePolicyController::class, 'index'])->name('dispute_policy');
+Route::get('{lang?}/cost-sharing-compliance-policy', [CostSharingCompliancePolicyController::class, 'index'])->name('cost_sharing_compliance_policy');
 Route::get('{lang?}/contact-us', [ContactUsController::class, 'index'])->name('contact_us');
 Route::get('{lang?}/chat/{departure}/to/{destination}/{id}/{passenger}', [ChatsController::class, 'index'])->name('chat');
 Route::get('{lang?}/chat-detail/{id}/{passenger}', [ChatsController::class, 'chatDetail'])->name('chat_detail');
