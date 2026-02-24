@@ -155,7 +155,6 @@
                         </div>
                         <div class="absolute hidden" id="fromInputError">
                             <div class="tooltip-error">
-                                {{ $homePage->slider_required_error }}
                             </div>
                         </div>
                     </div>
@@ -188,7 +187,6 @@
                         </div>
                         <div class="absolute hidden" id="toInputError">
                             <div class="tooltip-error">
-                                {{ $homePage->slider_required_error }}
                             </div>
                         </div>
                     </div>
@@ -1780,6 +1778,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This field is required";
+    var errorCityMissing = "{{ $homePage->slider_required_error }}" ?? "Please select a valid city from the dropdown";
+
     // Google Places Autocomplete initialization - Define function before loading Google Maps API
     let fromAutocomplete, toAutocomplete;
     // Store selected place data for validation
@@ -2186,6 +2187,10 @@
         if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
             // Show the tooltip
             if (fromInputError) {
+                const tooltipError = fromInputError.querySelector('.tooltip-error');
+                if (tooltipError) {
+                    tooltipError.textContent = fromValue === '' ? errorCityRequrired : errorCityMissing; // Show required error if empty, otherwise show invalid error
+                }
                 fromInputError.classList.remove('hidden');
             }
             isValid = false;
@@ -2194,6 +2199,10 @@
         if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
             // Show the tooltip
             if (toInputError) {
+                const tooltipError = toInputError.querySelector('.tooltip-error');
+                if (tooltipError) {
+                    tooltipError.textContent = toValue === '' ? errorCityRequrired : errorCityMissing; // Show required error if empty, otherwise show invalid error
+                }
                 toInputError.classList.remove('hidden');
             }
             isValid = false;
@@ -2206,9 +2215,17 @@
         // Both fields are filled and valid, hide error tooltip if it's showing
         if (fromInputError) {
             fromInputError.classList.add('hidden');
+            const tooltipError = fromInputError.querySelector('.tooltip-error');
+            if (tooltipError) {
+                tooltipError.textContent = ''; // Clear any previous error message
+            }
         }
         if (toInputError) {
             toInputError.classList.add('hidden');
+            const tooltipError = toInputError.querySelector('.tooltip-error');
+            if (tooltipError) {
+                tooltipError.textContent = ''; // Clear any previous error message
+            }
         }
 
         // Construct the URL with query parameters
