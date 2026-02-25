@@ -26,6 +26,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PassengerController;
 use App\Http\Controllers\PassengerWalletController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PhoneController;
@@ -357,7 +358,15 @@ Route::get('{lang?}/all-transactions', [TransactionController::class, 'index'])-
 Route::get('{lang?}/all-transactions', [TransactionController::class, 'index'])->name('transactions');
 Route::get('{lang?}/user-booking-credits', [BookingCreditController::class, 'index'])->name('booking.credits');
 Route::get('{lang?}/payout-options', [PayoutController::class, 'index'])->name('payout');
-Route::get('{lang?}/payment-options', [CardController::class, 'index'])->middleware('auth')->name('my_cards');
+
+Route::get('{lang?}/payment-options', [PaymentMethodController::class, 'index'])->middleware('auth')->name('my_cards');
+Route::middleware('auth')->group(function () {
+    Route::post('/payment-methods/stripe', [PaymentMethodController::class, 'storeStripe'])->name('payment.methods.stripe.store');
+    Route::post('/payment-methods/paypal', [PaymentMethodController::class, 'storePaypal'])->name('payment.methods.paypal.store');
+    Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy'])->name('payment.methods.delete');
+    Route::post('/payment-methods/{id}/default', [PaymentMethodController::class, 'setDefault'])->name('payment.methods.default');
+});
+
 Route::get('{lang?}/my-cards/add', [CardController::class, 'create'])->name('my_cards.create');
 Route::post('/my-cards/session-data', [CardController::class, 'sessionData'])->name('my_cards.sessionData');
 // Route::get('{lang?}/my-cards/add/{param?}', [CardController::class, 'create'])->name('my_cards.create');

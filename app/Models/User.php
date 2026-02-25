@@ -20,6 +20,11 @@ class User extends Authenticatable
      */
     protected $guarded = [];
 
+    public function paymentMethods()
+    {
+        return $this->hasMany(PaymentMethod::class, 'user_id');
+    }
+
     public function getProfileImageAttribute($value)
     {
         // You can perform any transformation you need here

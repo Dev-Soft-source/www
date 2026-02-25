@@ -28,7 +28,7 @@ class PackageController extends Controller
         $packages = $this->loadRelations($packages);
         $packages = $this->sortingAndLimit($packages);
 
-        return $this->apiSuccessResponse(PackageResource::collection($packages), 'Data Get Successfully!');
+        return $this->apiSuccessResponse(PackageResource::collection($packages), 'Data Get Successfully!!');
     }
 
     public function show(Package $package)
@@ -37,7 +37,7 @@ class PackageController extends Controller
             $package = $package->loadMissing('packageDetail');
         }
 
-        return $this->apiSuccessResponse(new PackageResource($package), 'Data Get Successfully!');
+        return $this->apiSuccessResponse(new PackageResource($package), 'Data Get Successfully!.');
     }
 
     public function store(Request $request)
@@ -233,6 +233,7 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
+
         $validationRule = [];
         $errorMessages = [];
         $languages = getAllLanguages();
@@ -242,7 +243,7 @@ class PackageController extends Controller
                 $errorMessages = array_merge($errorMessages, ['name.name_' . $language->id . '.required' => 'Name in ' . $language->name . ' is required']);
                 // $validationRule = array_merge($validationRule, ['short_description.short_description_' . $language->id => ['required', 'string']]);
                 // $errorMessages = array_merge($errorMessages, ['short_description.short_description_' . $language->id . '.required' => 'Short description in ' . $language->name . ' is required']);
-                $validationRule = array_merge($validationRule, ['price' => ['required', 'string']]);
+                $validationRule = array_merge($validationRule, ['price' => ['required', 'numeric']]);
                 $errorMessages = array_merge($errorMessages, ['price' . '.required' => 'Price is required']);
             }
         }
@@ -258,18 +259,14 @@ class PackageController extends Controller
             return $this->errorResponse("Package has been already created.");
         }
         
-        $is_default = 0;
         if ($request->is_default == true) {
-            $packages = Package::get();
-            foreach ($packages as $item) {
-                $item->update([
-                    'is_default' => 0,
-                ]);
-            }
+            Package::where('custom', '0')->update(['is_default' => 0]);
             $is_default = 1;
+        } else {
+            $is_default = 0;
         }
 
-        $package->update([
+        $package->update([  
             'is_default' => $is_default,
         ]);
 
@@ -448,7 +445,7 @@ class PackageController extends Controller
     protected function sortingAndLimit($packages)
     {
         $sortType = ['ASC', 'asc', 'DESC', 'desc'];
-        $sortBy = ['id', 'name'];
+        $sortBy = ['id', 'name', 'price', 'created_at', 'updated_at'];
         if (isset($_GET['sortBy']) && $_GET['sortBy'] != '' && isset($_GET['sortType']) && $_GET['sortType'] != '' && in_array($_GET['sortBy'], $sortBy) && in_array($_GET['sortType'], $sortType)) {
             if ($_GET['sortBy'] == 'name') {
                 $packages = $packages->orderBy(function ($q) {
@@ -460,6 +457,8 @@ class PackageController extends Controller
             } else {
                 $packages = $packages->OrderBy($_GET['sortBy'], $_GET['sortType']);
             }
+        } else {
+            $packages = $packages->OrderBy('price', 'ASC');
         }
 
         if (isset($_GET['limit']) && $_GET['limit'] != '') {

@@ -192,9 +192,9 @@
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <a id="delete-card-link" href="#"
-                    class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Remove</a>
+                    class="button-exp-red-fill sm:ml-3">Remove</a>
                 <button type="button" onclick="toggleModalCard('card-modal')"
-                    class="button-exp-fill sm:w-24">Cancel</button>
+                    class="button-exp-fill">Cancel</button>
             </div>
         </div>
     </div>

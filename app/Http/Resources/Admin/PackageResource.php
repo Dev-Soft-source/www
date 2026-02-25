@@ -12,6 +12,7 @@ class PackageResource extends JsonResource
             'id' => $this->id,
             'frequency' => $this->frequency,
             'price' => $this->price,
+            'is_default' => $this->is_default,
             'package_detail' => PackageDetailResource::collection($this->whenLoaded('packageDetail')),
         ];
     }

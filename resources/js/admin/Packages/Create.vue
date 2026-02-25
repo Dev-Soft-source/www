@@ -190,7 +190,7 @@ export default {
         }),
         is_default: {
             get: function () {
-                return this.$store.state.languages.form.is_default;
+                return this.$store.state.packages.form.is_default;
             },
             set: function (val) {
                 this.$store.commit("packages/setForm", {
@@ -236,6 +236,7 @@ export default {
                     .then((res) => {
                         let keys = [
                             "price",
+                            "is_default",
                         ];
                         this.$store.commit("packages/setState", {
                             key: "id",
