@@ -53,7 +53,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="">
+                            <label >
                                 @isset($step1Page->gender_label)
                                     {{ $step1Page->gender_label }}
                                 @endisset
@@ -64,27 +64,27 @@
                                     <input id="bordered-radio-1" type="radio" value="male" name="gender"
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none"
                                         {{ old('gender', $user->gender) === 'male' ? 'checked' : '' }}>
-                                    <label for="">
+                                    <label for="bordered-radio-1">
                                         @isset($step1Page->male_option_label)
                                             {{ $step1Page->male_option_label }}
                                         @endisset
                                     </label>
                                 </div>
                                 <div>
-                                    <input id="bordered-radio-1" type="radio" value="female" name="gender"
+                                    <input id="bordered-radio-2" type="radio" value="female" name="gender"
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none"
                                         {{ old('gender', $user->gender) === 'female' ? 'checked' : '' }}>
-                                    <label for="">
+                                    <label for="bordered-radio-2">
                                         @isset($step1Page->female_option_label)
                                             {{ $step1Page->female_option_label }}
                                         @endisset
                                     </label>
                                 </div>
                                 <div>
-                                    <input id="bordered-radio-1" type="radio" value="prefer not to say" name="gender"
+                                    <input id="bordered-radio-3" type="radio" value="prefer not to say" name="gender"
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none"
                                         {{ old('gender', $user->gender) === 'prefer not to say' ? 'checked' : '' }}>
-                                    <label for="">
+                                    <label for="bordered-radio-3">
                                         @isset($step1Page->prefer_option_label)
                                             {{ $step1Page->prefer_option_label }}
                                         @endisset
@@ -114,13 +114,13 @@
                         </div>
 
                         <div class="">
-                            <label for="">
+                            <label >
                                 @isset($step1Page->country_label)
                                     {{ $step1Page->country_label }}
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
-                            <select name="country" id="country-dropdown"
+                            <select name="country" id="country-dropdown" autocomplete="off"
                                 class="font-FuturaMdCnBT bg-white block border w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                                 <option value="">Select your country</option>
                                 @foreach ($countries as $country)
@@ -161,7 +161,7 @@
                         </div>
 
                         <div class="mb-5">
-                            <label for="">
+                            <label >
                                 @isset($step1Page->city_label)
                                     {{ $step1Page->city_label }}
                                 @endisset
@@ -194,7 +194,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="">
+                            <label >
                                 @isset($step1Page->bio_label)
                                     {{ $step1Page->bio_label }}
                                 @endisset

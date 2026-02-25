@@ -53,7 +53,7 @@
                 @endif
             </div>
         @endif
-            <p class="text-base md:text-lg font-medium text-red-500">(*) Indicates required fields</p>
+            <p class="text-base md:text-lg font-medium text-red-500">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
         <form method="POST" action="{{ route('profile.update',$user->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -104,15 +104,15 @@
                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                         <div>
                             <input id="bordered-radio-1" type="radio" value="male" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'male' ? 'checked' : '' }}>
-                            <label for="">{{ $editProfilePage->male_label ?? 'Male' }}</label>
+                            <label for="bordered-radio-1">{{ $editProfilePage->male_label ?? 'Male' }}</label>
                         </div>
                         <div>
-                            <input id="bordered-radio-1" type="radio" value="female" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'female' ? 'checked' : '' }}>
-                            <label for="">{{ $editProfilePage->female_label ?? 'Female' }}</label>
+                            <input id="bordered-radio-2" type="radio" value="female" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'female' ? 'checked' : '' }}>
+                            <label for="bordered-radio-2">{{ $editProfilePage->female_label ?? 'Female' }}</label>
                         </div>
                         <div>
-                            <input id="bordered-radio-1" type="radio" value="prefer not to say" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'prefer not to say' ? 'checked' : '' }}>
-                            <label for="">{{ $editProfilePage->prefer_no_to_say_label ?? 'Prefer not to say' }}</label>
+                            <input id="bordered-radio-3" type="radio" value="prefer not to say" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'prefer not to say' ? 'checked' : '' }}>
+                            <label for="bordered-radio-3">{{ $editProfilePage->prefer_no_to_say_label ?? 'Prefer not to say' }}</label>
                         </div>
                     </div>
                     @error('gender')

@@ -17,6 +17,7 @@ use App\Models\ProfilePageSettingDetail;
 use App\Models\ProfileSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\Vehicle;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -199,6 +200,10 @@ class ProfileVehicleController extends Controller
             ];
             Mail::to($user->email)->queue(new NewVehicleAddedMail($emailData));
         }
+
+        User::whereId($user->id)->update([
+            'step3' => 1
+        ]);
 
         $notification = Notification::create([
             'type' => null,
@@ -393,6 +398,10 @@ class ProfileVehicleController extends Controller
 
     public function destroy($lang = null, $id)
     {
+        // todo: if the vehicle is used in any upcoming ride, prevent deletion and show message "You can't delete this vehicle because this vehicle is used in an upcoming ride"
+        // todo: if the vehicle is primary and there are other vehicles, set the first remaining vehicle as primary after deletion
+        // todo: if there is no vehicle left after deletion, do step3 = 0 for the user
+        
         // $user_id = auth()->user()->id;
         $user = auth()->user();
         $user_id = $user->id;
