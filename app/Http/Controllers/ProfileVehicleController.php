@@ -398,14 +398,12 @@ class ProfileVehicleController extends Controller
 
     public function destroy($lang = null, $id)
     {
-        // todo: if the vehicle is used in any upcoming ride, prevent deletion and show message "You can't delete this vehicle because this vehicle is used in an upcoming ride"
         // todo: if the vehicle is primary and there are other vehicles, set the first remaining vehicle as primary after deletion
         // todo: if there is no vehicle left after deletion, do step3 = 0 for the user
         
         // $user_id = auth()->user()->id;
         $user = auth()->user();
         $user_id = $user->id;
-        $rides = Ride::where('added_by', $user_id)->where('vehicle_id', $id)->get();
 
         $message = null;
         $languages = Language::all();
@@ -427,13 +425,22 @@ class ProfileVehicleController extends Controller
             }
         }
 
-        // Check if any there is an upcoming ride has the same vehicle
-        foreach ($rides as $existingRide) {
-            if ($existingRide->date > now()->toDateString() || $existingRide->date == now()->toDateString() && $existingRide->time > now()->toTimeString()) {
-                if ($existingRide->status !== '2') {
-                    return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', "You can't delete this vehicle because this vehicle is used in an upcoming ride");
-                }
-            }
+        $today = now()->toDateString();
+        $currentTime = now()->toTimeString();
+        $hasUpcomingRide = Ride::where('added_by', $user_id)
+            ->where('vehicle_id', $id)
+            ->where('status', '!=', '2')
+            ->where(function ($query) use ($today, $currentTime) {
+                $query->where('date', '>', $today)
+                    ->orWhere(function ($subQuery) use ($today, $currentTime) {
+                        $subQuery->where('date', $today)
+                            ->where('time', '>', $currentTime);
+                    });
+            })
+            ->exists();
+
+        if ($hasUpcomingRide) {
+            return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', "You can't delete this vehicle because this vehicle is used in an upcoming ride");
         }
 
         // Check if we're deleting the primary vehicle
