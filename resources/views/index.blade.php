@@ -1902,9 +1902,9 @@
             }
         });
 
-        // Clear input on blur if no valid place was selected
+        // Validate and show tooltip on blur if no valid place was selected
         document.getElementById('fromInput').addEventListener('blur', function() {
-            // Don't clear if we're programmatically setting the value or selecting from dropdown
+            // Don't validate if we're programmatically setting the value or selecting from dropdown
             if (isSettingPlaceValue || isSelectingFromDropdown) {
                 return;
             }
@@ -1915,17 +1915,36 @@
                     return;
                 }
                 const currentValue = this.value.trim();
-                // If no valid place is selected or the value doesn't match the selected place, clear it
-                if (!selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                    // this.value = '';
+                const fromInputError = document.getElementById('fromInputError');
+                
+                // Validate: check if input has value but no valid place is selected
+                if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                    // Clear the selection if invalid
                     selectedFromPlace = null;
+                    
+                    // Show error tooltip if there's a value (user typed something)
+                    if (currentValue !== '' && fromInputError) {
+                        const tooltipError = fromInputError.querySelector('.tooltip-error');
+                        if (tooltipError) {
+                            tooltipError.textContent = currentValue === '' ? errorCityRequrired : errorCityMissing;
+                        }
+                        fromInputError.classList.remove('hidden');
+                    } else if (currentValue === '' && fromInputError) {
+                        // Hide error if field is empty (optional: you can show required error here too)
+                        fromInputError.classList.add('hidden');
+                    }
+                } else {
+                    // Valid place selected, hide error if showing
+                    if (fromInputError) {
+                        fromInputError.classList.add('hidden');
+                    }
                 }
             }, 200);
         });
 
-        // Clear input on blur if no valid place was selected
+        // Validate and show tooltip on blur if no valid place was selected
         document.getElementById('toInput').addEventListener('blur', function() {
-            // Don't clear if we're programmatically setting the value or selecting from dropdown
+            // Don't validate if we're programmatically setting the value or selecting from dropdown
             if (isSettingPlaceValue || isSelectingFromDropdown) {
                 return;
             }
@@ -1936,10 +1955,29 @@
                     return;
                 }
                 const currentValue = this.value.trim();
-                // If no valid place is selected or the value doesn't match the selected place, clear it
-                if (!selectedToPlace || currentValue !== selectedToPlace.value) {
-                    // this.value = '';
+                const toInputError = document.getElementById('toInputError');
+                
+                // Validate: check if input has value but no valid place is selected
+                if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                    // Clear the selection if invalid
                     selectedToPlace = null;
+                    
+                    // Show error tooltip if there's a value (user typed something)
+                    if (currentValue !== '' && toInputError) {
+                        const tooltipError = toInputError.querySelector('.tooltip-error');
+                        if (tooltipError) {
+                            tooltipError.textContent = currentValue === '' ? errorCityRequrired : errorCityMissing;
+                        }
+                        toInputError.classList.remove('hidden');
+                    } else if (currentValue === '' && toInputError) {
+                        // Hide error if field is empty (optional: you can show required error here too)
+                        toInputError.classList.add('hidden');
+                    }
+                } else {
+                    // Valid place selected, hide error if showing
+                    if (toInputError) {
+                        toInputError.classList.add('hidden');
+                    }
                 }
             }, 200);
         });

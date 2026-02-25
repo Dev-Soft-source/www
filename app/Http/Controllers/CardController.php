@@ -53,7 +53,7 @@ class CardController extends Controller
             $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
             $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
         }
-        Log::info($paymentSettingDetail);
+
         $notifications = null;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
