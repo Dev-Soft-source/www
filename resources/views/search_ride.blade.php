@@ -1140,14 +1140,16 @@
                                                     <div class="my-4">
                                                         @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
                                                             <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
-                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"
+                                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip}}"><img
                                                                     class="w-8 h-8"
                                                                     src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
                                                                     alt="">
                                                                 {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}</a>
                                                         @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
                                                             <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
-                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"><img
+                                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"
+                                                                data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}"><img
                                                                     class="w-8 h-8"
                                                                     src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
                                                                     alt="">{{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}</a>

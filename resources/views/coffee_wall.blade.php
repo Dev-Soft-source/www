@@ -331,8 +331,7 @@
                                             <h3 class=" text-2xl">Select Your Payment Method</h3>
                                         </div>
                                         <div>
-                                            <div
-                                                class="flex flex-col md:flex-row gap-4 md:justify-normal justify-between md:gap-x-8 items-start md:items-center mt-2 p-1.5">
+                                            <div class="flex flex-col md:flex-row gap-4 md:justify-normal justify-between md:gap-x-8 items-start md:items-center mt-2 p-1.5">
                                                 <div class="flex items-center gap-2">
                                                     <input id="credit-card" type="radio" value="stripe"
                                                         name="payment_method"
@@ -340,19 +339,13 @@
                                                         checked>
                                                     <label for="credit-card" class="text-base md:text-lg cursor-pointer">Debit or Credit Card</label>
                                                 </div>
+
                                                 <div class="flex items-center gap-2">
                                                     <input id="paypal" type="radio" value="paypal"
                                                         name="payment_method"
                                                         class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
                                                         {{ old('payment_method') === 'paypal' ? 'checked' : '' }}>
                                                     <label for="paypal" class="text-base md:text-lg cursor-pointer">PayPal</label>
-                                                </div>
-                                                <div class="flex items-center gap-2" id="gpay-container">
-                                                    <input id="gpay" type="radio" value="gpay"
-                                                        name="payment_method"
-                                                        class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
-                                                        {{ old('payment_method') === 'gpay' ? 'checked' : '' }}>
-                                                    <label for="gpay" class="text-base md:text-lg cursor-pointer" id="gpay-label">GPay / Apple Pay</label>
                                                 </div>
                                             </div>
                                             @error('payment_method')
@@ -1071,28 +1064,6 @@
                 }
             });
 
-            // ============================================
-            // PLATFORM-SPECIFIC PAYMENT OPTION
-            // ============================================
-            const gpayContainer = document.getElementById('gpay-container');
-            const gpayLabel = document.getElementById('gpay-label');
-
-            // Detect if user is on iOS/macOS (Apple devices)
-            const isAppleDevice = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) &&
-                                  !window.MSStream;
-
-            // Detect if user is on Android
-            const isAndroid = /Android/.test(navigator.userAgent);
-
-            if (gpayLabel) {
-                if (isAppleDevice) {
-                    gpayLabel.textContent = 'Apple Pay';
-                } else if (isAndroid) {
-                    gpayLabel.textContent = 'Google Pay';
-                } else {
-                    gpayLabel.textContent = 'GPay / Apple Pay';
-                }
-            }
         });
 
         function updatePayoutFields() {
@@ -1129,7 +1100,6 @@
         $(document).ready(function() {
             const creditCardCheckbox = document.getElementById('credit-card');
             const paypalCheckbox = document.getElementById('paypal');
-            const gPayCheckbox = document.getElementById('gpay');
             const CreditCardDiv = document.getElementById('credit-card-div');
 
             // Stripe variables to prevent re-initialization
@@ -1336,210 +1306,6 @@
                         form.appendChild(hiddenInput);
                         form.submit();
                     }
-                } else if (gPayCheckbox.checked) {
-
-                    // Hide card section and clear all card-related tooltip errors (same as PayPal)
-                    var cardErrorsDiv = document.getElementById('card-errors-div');
-                    if (cardErrorsDiv) {
-                        cardErrorsDiv.classList.add('hidden');
-                        var cardErrors = document.getElementById('card-errors');
-                        if (cardErrors) cardErrors.textContent = '';
-                    }
-                    var expiryErrorDiv = document.getElementById('expiry-error-div');
-                    if (expiryErrorDiv) {
-                        expiryErrorDiv.classList.add('hidden');
-                        var expiryError = document.getElementById('expiry-error');
-                        if (expiryError) expiryError.textContent = '';
-                    }
-                    var cvvErrorDiv = document.getElementById('cvv-error-div');
-                    if (cvvErrorDiv) {
-                        cvvErrorDiv.classList.add('hidden');
-                        var cvvError = document.getElementById('cvv-error');
-                        if (cvvError) cvvError.textContent = '';
-                    }
-                    var cardTooltips = CreditCardDiv.querySelectorAll('.tooltip');
-                    cardTooltips.forEach(function(el) { el.classList.add('hidden'); });
-
-                    CreditCardDiv.classList.add('hidden');
-                    $("#paymentSectionGPay").removeClass('hidden');
-
-                    var gpayUnavailableMsg = document.getElementById('gpay-unavailable-message');
-                    if (gpayUnavailableMsg) gpayUnavailableMsg.classList.add('hidden');
-                    var gpaySubmitHint = document.getElementById('gpay-submit-hint');
-                    if (gpaySubmitHint) gpaySubmitHint.classList.add('hidden');
-
-                    let isValid = true;
-
-                    var packageDropdown = $("input[name='package']:checked").val();
-                    var amountValue = $("input[name='custom_amount']").val();
-                    if (!packageDropdown && !amountValue) {
-                        isValid = false;
-
-                        var errorElementDiv = document.getElementById('package-errors-div');
-                        errorElementDiv.classList.remove('hidden');
-
-                        var errorElement = document.getElementById('package-errors');
-                        errorElement.textContent = 'Please select at least one package';
-                    }
-
-                    // Check if anonymous donation
-                    var isAnonymous = $('#anonymous').is(':checked');
-
-                    if (!isAnonymous) {
-                        var nameValue = $("input[name='name']").val();
-                        if (!nameValue) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('name-errors-div');
-                            errorElementDiv.classList.remove('hidden');
-
-                            var errorElement = document.getElementById('name-errors');
-                            errorElement.textContent = 'Please enter your name';
-                        } else {
-                            var errorElementDiv = document.getElementById('name-errors-div');
-                            if (!errorElementDiv.classList.contains('hidden')) {
-                                errorElementDiv.classList.add('hidden');
-                            }
-                        }
-
-                        var emailValue = $("input[name='email']").val();
-                        if (!emailValue) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            errorElementDiv.classList.remove('hidden');
-
-                            var errorElement = document.getElementById('email-errors');
-                            errorElement.textContent = 'Please enter your email';
-                        } else if (!isValidEmail(emailValue)) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            errorElementDiv.classList.remove('hidden');
-
-                            var errorElement = document.getElementById('email-errors');
-                            errorElement.textContent = 'Please use a valid email';
-                        } else {
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            if (!errorElementDiv.classList.contains('hidden')) {
-                                errorElementDiv.classList.add('hidden');
-                            }
-                        }
-                    }
-
-                    // Check donation acknowledgment checkbox
-                    var donationAckCheckbox = document.getElementById('donation_acknowledgment');
-                    if (!donationAckCheckbox.checked) {
-                        isValid = false;
-
-                        var donationAckDiv = document.getElementById('donation-acknowledgment-div');
-                        donationAckDiv.classList.remove('hidden');
-
-                        var donationAckError = document.getElementById('donation-acknowledgment-error');
-                        donationAckError.textContent = 'Please check this box if you want to proceed';
-                    }
-                    // Note: Tooltip is only hidden when its specific checkbox is checked (handled in separate event listener)
-
-                    // Check terms and privacy checkbox
-                    var termsPrivacyCheckbox = document.getElementById('terms_privacy');
-                    if (!termsPrivacyCheckbox.checked) {
-                        isValid = false;
-
-                        var termsPrivacyDiv = document.getElementById('terms-privacy-div');
-                        termsPrivacyDiv.classList.remove('hidden');
-
-                        var termsPrivacyError = document.getElementById('terms-privacy-error');
-                        termsPrivacyError.textContent = 'Please check this box if you want to proceed';
-                    }
-                    // Note: Tooltip is only hidden when its specific checkbox is checked (handled in separate event listener)
-
-                    if (!isValid) {
-                        // Keep GPay selected and section visible so user can see the button
-                        // Validation errors are already shown; validate again when they click the button
-                    }
-
-                    const packages = @json($packages);
-                    let selectedPackagePrice = 0;
-                    if (packageDropdown) {
-                        const selectedPackage = packages.find(pkg => pkg.id == packageDropdown);
-                        if (selectedPackage) {
-                            selectedPackagePrice = parseFloat(selectedPackage.price);
-                        }
-                    } else {
-                        selectedPackagePrice = parseFloat(amountValue) || 0;
-                    }
-                    if (selectedPackagePrice <= 0) selectedPackagePrice = 1;
-
-                    if (!stripe) {
-                        stripe = Stripe('{{ $stripeKey }}');
-                    }
-                    const paymentRequest = stripe.paymentRequest({
-                        country: 'US',
-                        currency: 'usd',
-                        total: {
-                            label: 'Total',
-                            amount: Math.round(selectedPackagePrice * 100),
-                        },
-                        requestPayerName: true,
-                        requestPayerEmail: true,
-                        paymentMethodTypes: ['card'],
-                    });
-
-                    // Mount Payment Request button - supports Apple Pay, Google Pay, and Chrome saved cards on desktop
-                    var prButtonContainer = document.getElementById('payment-request-button');
-                    if (prButtonContainer) prButtonContainer.innerHTML = '';
-                    paymentRequest.canMakePayment().then(function(result) {
-                        if (result) {
-                            const elements = stripe.elements();
-                            const prButton = elements.create('paymentRequestButton', {
-                                paymentRequest: paymentRequest,
-                            });
-                            prButton.mount('#payment-request-button');
-                        } else {
-                            var msgEl = document.getElementById('gpay-unavailable-message');
-                            if (msgEl) msgEl.classList.remove('hidden');
-                        }
-                    }).catch(function(error) {
-                        console.error('Error checking payment method availability:', error);
-                        var msgEl = document.getElementById('gpay-unavailable-message');
-                        if (msgEl) msgEl.classList.remove('hidden');
-                    });
-
-
-                    paymentRequest.on('paymentmethod', async (ev) => {
-                        if (!isValid) {
-                            ev.complete('fail');
-                            return;
-                        }
-                        try {
-                            const response = await fetch('/create-subscription', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')
-                                        .value
-                                },
-                                body: JSON.stringify({
-                                    payment_method: ev.paymentMethod.id,
-                                    email: emailValue ?? null,
-                                    package_id: packageDropdown ? packageDropdown : null,
-                                    custom_amount: amountValue ? amountValue : null
-                                }),
-                            });
-
-                            const data = await response.json();
-                            const subscriptionId = data && data.subscriptionId;
-
-                            if (response.ok && subscriptionId) {
-                                ev.complete('success');
-                                document.querySelector('[name="gPayApplePayId"]').value = subscriptionId;
-                                document.querySelector('[name="payment_method"][value="stripe"]').checked = true;
-                                document.getElementById('payment-form').submit();
-                            } else {
-                                ev.complete('fail');
-                            }
-                        } catch (err) {
-                            console.error('GPay / Apple Pay error:', err);
-                            ev.complete('fail');
-                        }
-                    });
                 } else {
                     // PayPal: same flow as GPay - hide card section, clear card errors, then run same validation
                     var cardErrorsDiv = document.getElementById('card-errors-div');
@@ -1669,7 +1435,6 @@
 
             creditCardCheckbox.addEventListener('change', checkCheckboxes);
             paypalCheckbox.addEventListener('change', checkCheckboxes);
-            gPayCheckbox.addEventListener('change', checkCheckboxes);
 
             // Initial check
             checkCheckboxes();

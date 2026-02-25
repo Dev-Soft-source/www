@@ -2559,12 +2559,18 @@ class RideController extends Controller
 
         $features = explode('=', $initialRide->features);
 
+        $hasVehicle = !empty($initialRide->vehicle_id);
+        $liveMessage = $hasVehicle ? 'Your ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $pinkLiveMessage = $hasVehicle ? 'Your Pink Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $extraCareLiveMessage = $hasVehicle ? 'Your Extra-Care Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $pinkExtraCareLiveMessage = $hasVehicle ? 'Your Pink and Extra-Care ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+
         if (in_array('1', $features) && in_array('2', $features)) {
             // Both Pink and Extra-Care
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,
-                'message' =>  'Your Pink and Extra-Care ride is now live on ProximaRide',
+                'message' =>  $pinkExtraCareLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $initialRide->rideDetail[0]->id,
@@ -2585,7 +2591,7 @@ class RideController extends Controller
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,
-                'message' =>  'Your Pink Ride is now live on ProximaRide',
+                'message' =>  $pinkLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $initialRide->rideDetail[0]->id,
@@ -2606,7 +2612,7 @@ class RideController extends Controller
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,
-                'message' =>  'Your Extra-Care Ride is now live on ProximaRide',
+                'message' =>  $extraCareLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $initialRide->rideDetail[0]->id,
@@ -2627,7 +2633,7 @@ class RideController extends Controller
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,
-                'message' =>  'Your ride is now live on ProximaRide',
+                'message' =>  $liveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $initialRide->rideDetail[0]->id,
