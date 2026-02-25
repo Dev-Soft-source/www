@@ -368,8 +368,10 @@
                                     </div>
                                 </div>
 
-                                <div id="paymentSectionGPay" class="hidden">
-                                    <div id="payment-request-button"></div>
+                                <div id="paymentSectionGPay" class="hidden min-h-[60px]">
+                                    <div id="payment-request-button" class="min-h-[48px]"></div>
+                                    <p id="gpay-unavailable-message" class="hidden mt-3 p-3 text-base text-amber-700 bg-amber-50 rounded border border-amber-200">Apple Pay / Google Pay is not available on this device or browser. Please use a supported device (e.g. iPhone with Safari, or Android with Chrome) or choose another payment method.</p>
+                                    <p id="gpay-submit-hint" class="hidden mt-2 text-sm text-amber-600">Use the Apple Pay / Google Pay button above to complete your payment.</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
@@ -412,8 +414,7 @@
 
                                             <!-- Expiry Date -->
                                             <div class="md:col-span-3">
-                                                <label for="exp_month" class="font-normal text-gray-700">{{ $paymentSettingDetail->mobile_expiry_date_label ?? 'Expiry date' }}
-                                                    (MM / YY)</label>
+                                                <label for="exp_month" class="font-normal text-gray-700">{{ $paymentSettingDetail->mobile_expiry_date_label ?? 'Expiry date' }} (MM / YY)</label>
                                                 <div id="card-expiry-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('expiry_date')
@@ -453,6 +454,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                                     <div id="card-errors-div" class="hidden relative tooltip -bottom-4 group-hover:flex">
                                         <div role="tooltip"
@@ -896,16 +898,21 @@
                 });
             });
 
-            // For custom amount field specifically
+            // For custom amount field specifically - hide errors as soon as user types
             const customAmountField = document.querySelector('input[name="custom_amount"]');
             if (customAmountField) {
-                customAmountField.addEventListener('input', function() {
-                    document.getElementById('amount-errors-div').classList.add('hidden');
-                    // Also uncheck any selected package radio
+                function hideCustomAmountErrors() {
+                    var amountDiv = document.getElementById('amount-errors-div');
+                    var packageDiv = document.getElementById('package-errors-div');
+                    if (amountDiv) amountDiv.classList.add('hidden');
+                    if (packageDiv) packageDiv.classList.add('hidden');
                     document.querySelectorAll('input[name="package"]').forEach(radio => {
                         radio.checked = false;
                     });
-                });
+                }
+                customAmountField.addEventListener('input', hideCustomAmountErrors);
+                customAmountField.addEventListener('change', hideCustomAmountErrors);
+                customAmountField.addEventListener('keyup', hideCustomAmountErrors);
             }
 
             // For frequency selection
@@ -1176,8 +1183,6 @@
                         stripeInitialized = true;
                     }
 
-
-
                     // Add form submit listener only once
                     if (!window.formSubmitListenerAdded) {
                         var form = document.getElementById('payment-form');
@@ -1266,35 +1271,57 @@
 
                         // Stop form submission if there are validation errors
                         if (hasValidationErrors) {
+                            var errorTargets = [
+                                'package-errors-div', 'amount-errors-div',
+                                'name-errors-div', 'email-errors-div',
+                                'donation-acknowledgment-div', 'terms-privacy-div'
+                            ];
+                            for (var i = 0; i < errorTargets.length; i++) {
+                                var el = document.getElementById(errorTargets[i]);
+                                if (el && !el.classList.contains('hidden')) {
+                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    break;
+                                }
+                            }
                             return;
                         }
 
-                        stripe.createToken(cardNumberElement, {
-                            name: document.getElementById('name_on_card').value
-                        }).then(function(result) {
+                        var selectedPaymentMethod = $("input[name='payment_method']:checked").val();
+                        if (selectedPaymentMethod === 'paypal') {
+                            form.submit();
+                            return;
+                        }
+                        if (selectedPaymentMethod === 'gpay') {
+                            var gpayHint = document.getElementById('gpay-submit-hint');
+                            var gpaySection = document.getElementById('paymentSectionGPay');
+                            if (gpayHint) gpayHint.classList.remove('hidden');
+                            if (gpaySection) {
+                                gpaySection.classList.remove('hidden');
+                                gpaySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            return;
+                        }
+
+                        stripe.createToken(cardNumberElement, {name: document.getElementById('name_on_card').value}).then(function(result) {
                             if (result.error) {
                                 if (creditCardCheckbox.checked) {
+                                    var errorElementDiv = document.getElementById('card-errors-div');
                                     var nameOnCardValue = $("input[name='name_on_card']").val();
                                     if (!nameOnCardValue) {
-                                        var errorElementDiv = document.getElementById(
-                                            'card-errors-div');
                                         errorElementDiv.classList.remove('hidden');
-
                                         var errorElement = document.getElementById('card-errors');
-                                        errorElement.textContent = "Please enter cardholder's name";
+                                        if (errorElement) errorElement.textContent = "Please enter cardholder's name";
                                     } else {
-                                        var errorElementDiv = document.getElementById(
-                                            'card-errors-div');
                                         errorElementDiv.classList.remove('hidden');
-
                                         var errorElement = document.getElementById('card-errors');
-                                        errorElement.textContent = result.error.message;
+                                        if (errorElement) errorElement.textContent = result.error.message;
                                     }
+                                    errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 }
                             } else {
                                 stripeTokenHandler(result.token);
                             }
-                        });
+                            });
                         });
                         
                         window.formSubmitListenerAdded = true;
@@ -1307,13 +1334,39 @@
                         hiddenInput.setAttribute('name', 'stripeToken');
                         hiddenInput.setAttribute('value', token.id);
                         form.appendChild(hiddenInput);
-
                         form.submit();
                     }
                 } else if (gPayCheckbox.checked) {
 
+                    // Hide card section and clear all card-related tooltip errors (same as PayPal)
+                    var cardErrorsDiv = document.getElementById('card-errors-div');
+                    if (cardErrorsDiv) {
+                        cardErrorsDiv.classList.add('hidden');
+                        var cardErrors = document.getElementById('card-errors');
+                        if (cardErrors) cardErrors.textContent = '';
+                    }
+                    var expiryErrorDiv = document.getElementById('expiry-error-div');
+                    if (expiryErrorDiv) {
+                        expiryErrorDiv.classList.add('hidden');
+                        var expiryError = document.getElementById('expiry-error');
+                        if (expiryError) expiryError.textContent = '';
+                    }
+                    var cvvErrorDiv = document.getElementById('cvv-error-div');
+                    if (cvvErrorDiv) {
+                        cvvErrorDiv.classList.add('hidden');
+                        var cvvError = document.getElementById('cvv-error');
+                        if (cvvError) cvvError.textContent = '';
+                    }
+                    var cardTooltips = CreditCardDiv.querySelectorAll('.tooltip');
+                    cardTooltips.forEach(function(el) { el.classList.add('hidden'); });
+
                     CreditCardDiv.classList.add('hidden');
                     $("#paymentSectionGPay").removeClass('hidden');
+
+                    var gpayUnavailableMsg = document.getElementById('gpay-unavailable-message');
+                    if (gpayUnavailableMsg) gpayUnavailableMsg.classList.add('hidden');
+                    var gpaySubmitHint = document.getElementById('gpay-submit-hint');
+                    if (gpaySubmitHint) gpaySubmitHint.classList.add('hidden');
 
                     let isValid = true;
 
@@ -1329,14 +1382,13 @@
                         errorElement.textContent = 'Please select at least one package';
                     }
 
+                    // Check if anonymous donation
                     var isAnonymous = $('#anonymous').is(':checked');
-                    var nameValue = $("input[name='name']").val();
-                    var emailValue = $("input[name='email']").val();
 
                     if (!isAnonymous) {
+                        var nameValue = $("input[name='name']").val();
                         if (!nameValue) {
                             isValid = false;
-
                             var errorElementDiv = document.getElementById('name-errors-div');
                             errorElementDiv.classList.remove('hidden');
 
@@ -1349,9 +1401,9 @@
                             }
                         }
 
+                        var emailValue = $("input[name='email']").val();
                         if (!emailValue) {
                             isValid = false;
-
                             var errorElementDiv = document.getElementById('email-errors-div');
                             errorElementDiv.classList.remove('hidden');
 
@@ -1359,7 +1411,6 @@
                             errorElement.textContent = 'Please enter your email';
                         } else if (!isValidEmail(emailValue)) {
                             isValid = false;
-
                             var errorElementDiv = document.getElementById('email-errors-div');
                             errorElementDiv.classList.remove('hidden');
 
@@ -1400,12 +1451,8 @@
                     // Note: Tooltip is only hidden when its specific checkbox is checked (handled in separate event listener)
 
                     if (!isValid) {
-                        // Uncheck the Google Pay checkbox
-                        gPayCheckbox.checked = false;
-
-                        $("#paymentSectionGPay").addClass('hidden');
-
-                        return; // Stop further execution (don't show GPay button)
+                        // Keep GPay selected and section visible so user can see the button
+                        // Validation errors are already shown; validate again when they click the button
                     }
 
                     const packages = @json($packages);
@@ -1416,8 +1463,9 @@
                             selectedPackagePrice = parseFloat(selectedPackage.price);
                         }
                     } else {
-                        selectedPackagePrice = parseFloat(amountValue);
+                        selectedPackagePrice = parseFloat(amountValue) || 0;
                     }
+                    if (selectedPackagePrice <= 0) selectedPackagePrice = 1;
 
                     if (!stripe) {
                         stripe = Stripe('{{ $stripeKey }}');
@@ -1434,78 +1482,171 @@
                         paymentMethodTypes: ['card'],
                     });
 
-                    // Check if the device/browser supports Apple Pay or Google Pay
+                    // Mount Payment Request button - supports Apple Pay, Google Pay, and Chrome saved cards on desktop
+                    var prButtonContainer = document.getElementById('payment-request-button');
+                    if (prButtonContainer) prButtonContainer.innerHTML = '';
                     paymentRequest.canMakePayment().then(function(result) {
-                        console.log(result); // Log the result to understand what's being returned
-
-                        if (result && result.googlePay) {
-                            // Google Pay is available, enable the button
+                        if (result) {
                             const elements = stripe.elements();
                             const prButton = elements.create('paymentRequestButton', {
                                 paymentRequest: paymentRequest,
                             });
-
-
-                            prButton.mount('#payment-request-button');
-
-                            //validateBookingAndShowGPay();
-
-                        } else if (result && result.applePay) {
-                            // Apple Pay is available (on Safari for Apple devices), enable the button
-                            const elements = stripe.elements();
-                            const prButton = elements.create('paymentRequestButton', {
-                                paymentRequest: paymentRequest,
-                            });
-
                             prButton.mount('#payment-request-button');
                         } else {
-                            // If neither is available, log a message
-                            console.log("Neither Apple Pay nor Google Pay is available on this device.");
+                            var msgEl = document.getElementById('gpay-unavailable-message');
+                            if (msgEl) msgEl.classList.remove('hidden');
                         }
                     }).catch(function(error) {
-                        // Handle errors
                         console.error('Error checking payment method availability:', error);
+                        var msgEl = document.getElementById('gpay-unavailable-message');
+                        if (msgEl) msgEl.classList.remove('hidden');
                     });
 
 
                     paymentRequest.on('paymentmethod', async (ev) => {
-                        const response = await fetch('/create-subscription', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')
-                                    .value
-                            },
-                            body: JSON.stringify({
-                                payment_method: ev.paymentMethod.id,
-                                email: emailValue ?? null,
-                                package_id: packageDropdown ? packageDropdown : null,
-                                custom_amount: amountValue ? amountValue : null
-                            }),
-                        });
+                        if (!isValid) {
+                            ev.complete('fail');
+                            return;
+                        }
+                        try {
+                            const response = await fetch('/create-subscription', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')
+                                        .value
+                                },
+                                body: JSON.stringify({
+                                    payment_method: ev.paymentMethod.id,
+                                    email: emailValue ?? null,
+                                    package_id: packageDropdown ? packageDropdown : null,
+                                    custom_amount: amountValue ? amountValue : null
+                                }),
+                            });
 
-                        const {
-                            clientSecret,
-                            subscriptionId
-                        } = await response.json();
+                            const data = await response.json();
+                            const subscriptionId = data && data.subscriptionId;
 
-                        if (subscriptionId) {
-                            ev.complete('success');
-
-
-                            document.querySelector('[name="gPayApplePayId"]').value = subscriptionId;
-                            document.querySelector('[name="payment_method"][value="stripe"]').checked =
-                                true;
-
-                            document.getElementById('payment-form').submit();
-                            // Handle post-payment success (e.g., show a confirmation page)
-                            console.log('Payment Successful!');
+                            if (response.ok && subscriptionId) {
+                                ev.complete('success');
+                                document.querySelector('[name="gPayApplePayId"]').value = subscriptionId;
+                                document.querySelector('[name="payment_method"][value="stripe"]').checked = true;
+                                document.getElementById('payment-form').submit();
+                            } else {
+                                ev.complete('fail');
+                            }
+                        } catch (err) {
+                            console.error('GPay / Apple Pay error:', err);
+                            ev.complete('fail');
                         }
                     });
                 } else {
+                    // PayPal: same flow as GPay - hide card section, clear card errors, then run same validation
+                    var cardErrorsDiv = document.getElementById('card-errors-div');
+                    if (cardErrorsDiv) {
+                        cardErrorsDiv.classList.add('hidden');
+                        var cardErrors = document.getElementById('card-errors');
+                        if (cardErrors) cardErrors.textContent = '';
+                    }
+                    var expiryErrorDiv = document.getElementById('expiry-error-div');
+                    if (expiryErrorDiv) {
+                        expiryErrorDiv.classList.add('hidden');
+                        var expiryError = document.getElementById('expiry-error');
+                        if (expiryError) expiryError.textContent = '';
+                    }
+                    var cvvErrorDiv = document.getElementById('cvv-error-div');
+                    if (cvvErrorDiv) {
+                        cvvErrorDiv.classList.add('hidden');
+                        var cvvError = document.getElementById('cvv-error');
+                        if (cvvError) cvvError.textContent = '';
+                    }
+                    var cardTooltips = CreditCardDiv.querySelectorAll('.tooltip');
+                    cardTooltips.forEach(function(el) { el.classList.add('hidden'); });
+
                     CreditCardDiv.classList.add('hidden');
-                    var errorElementDiv = document.getElementById('card-errors-div');
-                    errorElementDiv.classList.add('hidden');
+
+                    // Same validation as GPay: package, name, email, donation ack, terms
+                    var isValid = true;
+                    var packageDropdown = $("input[name='package']:checked").val();
+                    var amountValue = $("input[name='custom_amount']").val();
+                    if (!packageDropdown && !amountValue) {
+                        isValid = false;
+                        var errorElementDiv = document.getElementById('package-errors-div');
+                        if (errorElementDiv) {
+                            errorElementDiv.classList.remove('hidden');
+                            var errorElement = document.getElementById('package-errors');
+                            if (errorElement) errorElement.textContent = 'Please select at least one package';
+                        }
+                    }
+
+                    var isAnonymous = $('#anonymous').is(':checked');
+                    if (!isAnonymous) {
+                        var nameValue = $("input[name='name']").val();
+                        if (!nameValue) {
+                            isValid = false;
+                            var errorElementDiv = document.getElementById('name-errors-div');
+                            if (errorElementDiv) {
+                                errorElementDiv.classList.remove('hidden');
+                                var errorElement = document.getElementById('name-errors');
+                                if (errorElement) errorElement.textContent = 'Please enter your name';
+                            }
+                        } else {
+                            var errorElementDiv = document.getElementById('name-errors-div');
+                            if (errorElementDiv && !errorElementDiv.classList.contains('hidden')) {
+                                errorElementDiv.classList.add('hidden');
+                            }
+                        }
+
+                        var emailValue = $("input[name='email']").val();
+                        if (!emailValue) {
+                            isValid = false;
+                            var errorElementDiv = document.getElementById('email-errors-div');
+                            if (errorElementDiv) {
+                                errorElementDiv.classList.remove('hidden');
+                                var errorElement = document.getElementById('email-errors');
+                                if (errorElement) errorElement.textContent = 'Please enter your email';
+                            }
+                        } else if (!isValidEmail(emailValue)) {
+                            isValid = false;
+                            var errorElementDiv = document.getElementById('email-errors-div');
+                            if (errorElementDiv) {
+                                errorElementDiv.classList.remove('hidden');
+                                var errorElement = document.getElementById('email-errors');
+                                if (errorElement) errorElement.textContent = 'Please use a valid email';
+                            }
+                        } else {
+                            var errorElementDiv = document.getElementById('email-errors-div');
+                            if (errorElementDiv && !errorElementDiv.classList.contains('hidden')) {
+                                errorElementDiv.classList.add('hidden');
+                            }
+                        }
+                    }
+
+                    var donationAckCheckbox = document.getElementById('donation_acknowledgment');
+                    if (donationAckCheckbox && !donationAckCheckbox.checked) {
+                        isValid = false;
+                        var donationAckDiv = document.getElementById('donation-acknowledgment-div');
+                        if (donationAckDiv) {
+                            donationAckDiv.classList.remove('hidden');
+                            var donationAckError = document.getElementById('donation-acknowledgment-error');
+                            if (donationAckError) donationAckError.textContent = 'Please check this box if you want to proceed';
+                        }
+                    }
+
+                    var termsPrivacyCheckbox = document.getElementById('terms_privacy');
+                    if (termsPrivacyCheckbox && !termsPrivacyCheckbox.checked) {
+                        isValid = false;
+                        var termsPrivacyDiv = document.getElementById('terms-privacy-div');
+                        if (termsPrivacyDiv) {
+                            termsPrivacyDiv.classList.remove('hidden');
+                            var termsPrivacyError = document.getElementById('terms-privacy-error');
+                            if (termsPrivacyError) termsPrivacyError.textContent = 'Please check this box if you want to proceed';
+                        }
+                    }
+
+                    if (!isValid) {
+                        paypalCheckbox.checked = false;
+                    }
                 }
             }
 

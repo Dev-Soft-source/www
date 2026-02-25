@@ -51,7 +51,7 @@ class PackageController extends Controller
                 $errorMessages = array_merge($errorMessages, ['name.name_' . $language->id . '.required' => 'Name in ' . $language->name . ' is required']);
                 // $validationRule = array_merge($validationRule, ['short_description.short_description_' . $language->id => ['required', 'string']]);
                 // $errorMessages = array_merge($errorMessages, ['short_description.short_description_' . $language->id . '.required' => 'Short description in ' . $language->name . ' is required']);
-                $validationRule = array_merge($validationRule, ['price' => ['required', 'string']]);
+                $validationRule = array_merge($validationRule, ['price' => ['required', 'numeric']]);
                 $errorMessages = array_merge($errorMessages, ['price' . '.required' => 'Price is required']);
             }
         }
@@ -62,15 +62,15 @@ class PackageController extends Controller
             $errorMessages
         );
 
-        $isPackageExists = Package::where('price', $request->price)->where('custom', '0')->exists();
+            $isPackageExists = Package::where('price', $request->price)->where('custom', '0')->exists();
         if ($isPackageExists) {
             return $this->errorResponse("Package has been already created.");
         }
-        
+
         DB::beginTransaction();
         try {
             $is_default = 0;
-            if ($request->is_default == true) {
+            if ($request->boolean('is_default')) {
                 $packages = Package::get();
                 foreach ($packages as $item) {
                     $item->update([
@@ -91,8 +91,8 @@ class PackageController extends Controller
                 $packageData = [
                     'package_id' => $package['id'],
                     'language_id' => $language->id,
-                    'name' => $request['name']['name_' . $language->id] ?? null,
-                    'short_description' => $request['short_description']['short_description_' . $language->id] ?? null,
+                    'name' => $request['name']['name_' . $language->id] ?? '',
+                    'short_description' => $request['short_description']['short_description_' . $language->id] ?? '',
                 ];
 
                 if ($packageDetail) {
@@ -242,7 +242,7 @@ class PackageController extends Controller
                 $errorMessages = array_merge($errorMessages, ['name.name_' . $language->id . '.required' => 'Name in ' . $language->name . ' is required']);
                 // $validationRule = array_merge($validationRule, ['short_description.short_description_' . $language->id => ['required', 'string']]);
                 // $errorMessages = array_merge($errorMessages, ['short_description.short_description_' . $language->id . '.required' => 'Short description in ' . $language->name . ' is required']);
-                $validationRule = array_merge($validationRule, ['price' => ['required', 'string']]);
+                $validationRule = array_merge($validationRule, ['price' => ['required', 'numeric']]);
                 $errorMessages = array_merge($errorMessages, ['price' . '.required' => 'Price is required']);
             }
         }
@@ -257,9 +257,9 @@ class PackageController extends Controller
         if ($isPackageExists) {
             return $this->errorResponse("Package has been already created.");
         }
-        
+
         $is_default = 0;
-        if ($request->is_default == true) {
+        if ($request->boolean('is_default')) {
             $packages = Package::get();
             foreach ($packages as $item) {
                 $item->update([
@@ -279,8 +279,8 @@ class PackageController extends Controller
             $packageData = [
                 'package_id' => $package->id,
                 'language_id' => $language->id,
-                'name' => $request['name']['name_' . $language->id] ?? null,
-                'short_description' => $request['short_description']['short_description_' . $language->id] ?? null,
+                'name' => $request['name']['name_' . $language->id] ?? '',
+                'short_description' => $request['short_description']['short_description_' . $language->id] ?? '',
             ];
 
             if ($packageDetail) {

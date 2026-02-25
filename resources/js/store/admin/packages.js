@@ -121,7 +121,6 @@ const packages = {
                 ? `${process.env.MIX_ADMIN_API_URL}packages/${state.form.id}`
                 : `${process.env.MIX_ADMIN_API_URL}packages`;
             commit("setLoading");
-            console.log(state.form);
             return new Promise(function (resolve, reject) {
                 axios[method](url, state.form)
                     .then((res) => {
@@ -131,6 +130,7 @@ const packages = {
                             resolve(res);
                         } else {
                             helper.swalErrorMessage(res.data.message);
+                            reject(new Error(res.data.message || "Request failed"));
                         }
                     })
                     .catch((error) => {
