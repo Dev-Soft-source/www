@@ -256,7 +256,7 @@ class BookingController extends Controller
             $isOnlinePaymentRide = $ride->payment_method->features_setting_id !== $postRidePage->payment_methods_option1->features_setting_id;
             $hasPrimaryCard = $cards->contains(fn($c) => $c->primary_card == 1 || $c->primary_card === '1');
             if ($isOnlinePaymentRide && $cards->isNotEmpty() && !$hasPrimaryCard) {
-                return redirect()->route('my_cards', ['lang' => $selectedLanguage->abbreviation])
+                return redirect()->route('payment.methods', ['lang' => $selectedLanguage->abbreviation])
                     ->with('message', 'Please set a primary card to continue with your booking.');
             }
 

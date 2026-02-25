@@ -322,8 +322,8 @@ $admin = Admin::first();
         $selectedLanguage = $this->selectedLanguage;
         $packages = Package::where('custom', 0)->with(['PackageDetail' => function ($query) use ($selectedLanguage) {
             $query->where('language_id', $selectedLanguage->id);
-        }])
-            ->get();
+        }])->get();
+        
         return view('coffee_wall', [
             'coffeeWallPage' => $coffeeWallPage, 'packages' => $packages, 
             'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);

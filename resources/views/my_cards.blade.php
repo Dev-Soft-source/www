@@ -1024,7 +1024,7 @@
                     } = await stripe.confirmSetup({
                         elements,
                         confirmParams: {
-                            return_url: "{{ route('my_cards') }}"
+                            return_url: "{{ route('payment.methods') }}"
                         },
                         redirect: "if_required"
                     });
@@ -1049,7 +1049,7 @@
                                 payment_method_id: setupIntent.payment_method
                             })
                         }).then(() => {
-                            window.location.href = "{{ route('my_cards') }}";
+                            window.location.href = "{{ route('payment.methods') }}";
                         });
                     }
                 });
@@ -1152,7 +1152,7 @@
                                 .then(data => {
                                     if (data.success) {
                                         console.log('PayPal payment method saved:', data);
-                                        window.location.href = "{{ route('my_cards') }}";
+                                        window.location.href = "{{ route('payment.methods') }}";
                                     }
                                 })
                                 .catch(error => {

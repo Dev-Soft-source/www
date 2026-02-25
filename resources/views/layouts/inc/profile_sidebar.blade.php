@@ -218,9 +218,9 @@
 
             <ul class="">
                 <li class="py-2 group transition-all ease-in-out">
-                    <a href="{{ Route::currentRouteName() === 'my_cards' ? '#' : route('my_cards', ['lang' => $selectedLanguage->abbreviation]) }}"
+                    <a href="{{ Route::currentRouteName() === 'payment.methods' ? '#' : route('payment.methods', ['lang' => $selectedLanguage->abbreviation]) }}"
                         class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
-                        <svg class="{{ Route::currentRouteName() === 'my_cards' ? 'block' : 'hidden group-hover:block' }}"
+                        <svg class="{{ Route::currentRouteName() === 'payment.methods' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
