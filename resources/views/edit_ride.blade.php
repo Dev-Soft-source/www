@@ -1519,56 +1519,58 @@
                     <div class="bg-white p-4">
                         <div class="border rounded-md divide-y">
                             @isset($postRidePage->luggage_option1)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="no-luggage" class="font-normal text-gray-900 flex items-center space-x-1">
+                                <div class="flex items-center justify-start p-3">
+                                    <input type="radio" id="no-luggage" name="luggage" value="0" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('luggage', $ride->luggage) == 0 ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="no-luggage" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/noluggage.png') }}" alt="">
                                         <span>
                                             {{ $postRidePage->luggage_option1->name }}
                                         </span>
-                                    </label>
-                                    <input type="radio" id="no-luggage" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    </label>                                    
                                 </div>
                             @endisset
                             @isset($postRidePage->luggage_option2)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="small" class="font-normal text-gray-900 flex items-center space-x-1">
+                                <div class="flex items-center justify-start p-3">
+                                    <input type="radio" id="small" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="small" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/luggage.png') }}" alt="">
-                                        <span class="">
+                                        <span>
                                             {{ $postRidePage->luggage_option2->name }}
                                         </span>
                                     </label>
-                                    <input type="radio" id="small" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                             @endisset
                             @isset($postRidePage->luggage_option3)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="medium" class="font-normal text-gray-900 flex items-center space-x-1">
+                                <div class="flex items-center justify-start p-3">
+                                    <input type="radio" id="medium" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="medium" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/mediumluggage.png') }}" alt="">
                                         <span>
                                             {{ $postRidePage->luggage_option3->name }}
                                         </span>
                                     </label>
-                                    <input type="radio" id="medium" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                             @endisset
                             @isset($postRidePage->luggage_option4)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="large" class="font-normal text-gray-900 flex items-center space-x-1">
+                                <div class="flex items-center justify-start p-3">
+                                    <input type="radio" id="large" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="large" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/largeluggage.png') }}" alt="">
                                         <span>
                                             {{ $postRidePage->luggage_option4->name }}
                                         </span>
                                     </label>
-                                    <input type="radio" id="large" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                             @endisset
                             @isset($postRidePage->luggage_option5)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="xl-multiple" class="font-normal text-gray-900 flex items-start space-x-1">
+                                <div class="flex items-center justify-start p-3">
+                                    <input type="radio" id="xl-multiple" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="xl-multiple" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/extralargeluggage.png') }}" alt="">
                                         <div>
                                             <p class="leading-normal mt-2">
@@ -1584,8 +1586,6 @@
                                             </div>
                                         </div>
                                     </label>
-                                    <input type="radio" id="xl-multiple" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                             @endisset
                         </div>
@@ -1594,9 +1594,9 @@
                         @endif
                         @error('luggage')
                             <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                </div>
                             </div>
                         @enderror
                         <div class="mt-6 space-y-2">
@@ -1616,25 +1616,7 @@
                                     </span>
                                 </label>
                             </div>
-                            {{-- <div class="flex items-start">
-                                <input id="heating" type="checkbox" name="open_customized" value="1" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                    {{ old('open_customized', $ride->open_customized) == '1' ? 'checked' : '' }}
-                                    class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                @if ($bookings_count > 0)
-                                    <input type="hidden" name="open_customized" value="{{ $ride->open_customized }}">
-                                @endif
-                                <label for="heating"
-                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                    <span class="">
-                                        @isset($postRidePage->luggage_checkbox_label2)
-                                            {{ $postRidePage->luggage_checkbox_label2 }}
-                                        @endisset
-                                        <sup class="text-red-500">*</sup>
-                                    </span>
-                                </label>
-                            </div> --}}
                         </div>
-
                     </div>
                 </div>
 
@@ -1649,25 +1631,27 @@
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
                             @isset($postRidePage->smoking_option1->features_setting_id)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="smoke-1" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="">
+                                <div class="flex items-center justify-start p-3">
+                                    <input id="smoke-1" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '' }}
+                                        class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="smoke-1" class="font-normal text-gray-900 flex space-x-1 ml-4">
+                                        <span>
                                             {{ $postRidePage->smoking_option1->name }}
                                         </span>
                                     </label>
-                                    <input id="smoke-1" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '' }}
-                                        class="h-4 w-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
                             @endisset
                             @isset($postRidePage->smoking_option2->features_setting_id)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="smoke-2" class="font-normal text-gray-900 flex space-x-1">
-                                        {{ $postRidePage->smoking_option2->name }}
-                                    </label>
+                                <div class="flex items-center justify-start p-3">
                                     <input id="smoke-2" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
                                         {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '' }}
-                                        class="h-4 w-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="smoke-2" class="font-normal text-gray-900 flex space-x-1 ml-4">
+                                        <span>
+                                            {{ $postRidePage->smoking_option2->name }}
+                                        </span>
+                                    </label>
                                 </div>
                             @endisset
                         </div>
@@ -1695,33 +1679,39 @@
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
                             @isset($postRidePage->animals_option1->features_setting_id)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="animal-1" class="font-normal text-gray-900 flex space-x-1">
-                                        {{ $postRidePage->animals_option1->name }}
-                                    </label>
+                                <div class="flex items-center justify-start p-3">
                                     <input id="animal-1" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '' }}
-                                        class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="animal-1" class="font-normal text-gray-900 flex space-x-1 ml-4">
+                                        <span>
+                                            {{ $postRidePage->animals_option1->name }}
+                                        </span>
+                                    </label>
                                 </div>
                             @endisset
                             @isset($postRidePage->animals_option2->features_setting_id)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="animal-2" class="font-normal text-gray-900 flex space-x-1">
-                                        {{ $postRidePage->animals_option2->name }}
-                                    </label>
+                                <div class="flex items-center justify-start p-3">
                                     <input id="animal-2" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '' }}
-                                        class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="animal-2" class="font-normal text-gray-900 flex space-x-1 ml-4">
+                                        <span>
+                                            {{ $postRidePage->animals_option2->name }}
+                                        </span>
+                                    </label>
                                 </div>
                             @endisset
                             @isset($postRidePage->animals_option3->features_setting_id)
-                                <div class="flex items-center justify-between p-3">
-                                    <label for="animal-3" class="font-normal text-gray-900 flex space-x-1">
-                                        {{ $postRidePage->animals_option3->name }}
-                                    </label>
+                                <div class="flex items-center justify-start p-3">
                                     <input id="animal-3" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '' }}
-                                        class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="animal-3" class="font-normal text-gray-900 flex space-x-1 ml-4">
+                                        <span>
+                                            {{ $postRidePage->animals_option3->name }}
+                                        </span>
+                                    </label>
                                 </div>
                             @endisset
                         </div>
@@ -1730,9 +1720,9 @@
                         @endif
                         @error('animal_friendly')
                             <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                </div>
                             </div>
                         @enderror
                     </div>

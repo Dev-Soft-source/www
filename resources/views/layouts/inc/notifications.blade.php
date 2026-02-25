@@ -60,7 +60,7 @@
               @endif
             >
               <li class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100">
-                <img class="w-10 h-10 rounded-full" src="{{ $notification->from->profile_image }}" alt="">
+                <img class="w-10 h-10 rounded-full object-cover" src="{{ $notification->from->profile_image ?? asset('assets/favicon.png') }}" alt="" onerror="this.onerror=null; this.src='{{ asset('assets/favicon.png') }}';">
                 <div>
                   <p class="{{ $notification->is_read == 0 ? 'font-semibold text-primary' : 'font-medium text-gray-800' }}">{{ $notification->message }}</p>
                   <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($notification->added_on)->format('M d, Y h:i A') }}</p>

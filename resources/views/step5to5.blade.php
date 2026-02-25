@@ -81,7 +81,7 @@
                                         <input type="tel" name="country_code" value="{{ old('country_code', '+1') }}" maxlength="5" readonly class="font-FuturaMdCnBT bg-gray-100 mt-1 border p-1.5 w-full rounded text-base  border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                     </div>
                                     <div class="w-full">
-                                        <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}" placeholder="Numbers only. With area code" maxlength="15" inputmode="numeric" pattern="[0-9]+">
+                                        <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}" placeholder="@isset($step5Page->phone_placeholder){{ $step5Page->phone_placeholder }}@endisset" maxlength="15" inputmode="numeric" pattern="[0-9]+">
                                         @error('phone')
                                             <div class="relative tooltip -bottom-4 group-hover:flex">
                                                 <div role="tooltip" class="absolute tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
@@ -105,7 +105,7 @@
                         <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn" class="button-exp-fill verify-button-modern text-white rounded font-FuturaMdCnBT text-center shadow-md">@isset($step5Page->verify_button_label){{ $step5Page->verify_button_label }}@endisset</button>
                         <div id="whatsappButtonContainer" class="hidden">
                             <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn" class="button-exp-fill bg-green-500 hover:bg-green-600 text-white rounded font-FuturaMdCnBT text-center shadow-md flex items-center justify-center gap-2">
-                                Send code via WhatsApp
+                                @isset($step5Page->verify_button_label_2){{ $step5Page->verify_button_label_2 }}@endisset
                             </button>
                         </div>
                         <div class="font-FuturaMdCnBT flex flex-col md:flex-row lg:flex-row items-center justify-center gap-2 w-full md:w-auto">
@@ -444,7 +444,7 @@ function sendVerificationCode(channel = 'sms') {
 
     // Validate inputs
     if (!country || !countryCode || !phone) {
-        alert('Please fill in all fields');
+        showWhatsAppUnavailableModal('Please fill in all fields', 'Validation Required');
         return;
     }
 

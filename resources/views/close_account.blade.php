@@ -122,7 +122,7 @@
                             </div>
                         </li>
                         @error('reasons')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                            <div class="relative tooltip -bottom-4 flex mt-2">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                     <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                 </div>
@@ -164,7 +164,21 @@
                         <span class="text-primary text-base md:text-lg">{{ $closeAccountPage->why_closing_account_label ?? "In your own words, please tell us why you’d like to close your account."}}</span>
                         <span class="text-gray-900 text-base md:text-lg"> {{ $closeAccountPage->why_closing_account_placeholder ?? "This is optional, but your feedback would be greatly appreciated."}}</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
                     </p>
-                    <textarea rows="5" name="close_account_reason" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('close_account_reason') }}</textarea>
+                    <textarea rows="5" name="close_account_reason" id="close_account_reason" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 @error('close_account_reason') border-red-500 @enderror">{{ old('close_account_reason') }}</textarea>
+                    @error('close_account_reason')
+                        <div class="relative tooltip -bottom-4 flex mt-2">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                        </div>
+                    @enderror
+                    <div id="close_account_reason_error_client" class="hidden mt-2">
+                        <div class="relative tooltip -bottom-4 flex">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="error-text text-white leading-none text-sm lg:text-base"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="md:col-span-2 mt-5">
@@ -172,14 +186,28 @@
                         <span class="text-primary text-base md:text-lg">{{ $closeAccountPage->improve_label ?? "We’d love to hear how we can improve."}}</span>
                         <span class="text-gray-900 text-base md:text-lg"> {{ $closeAccountPage->why_closing_account_placeholder ?? "Sharing is optional, but your input would mean a lot."}}</span><span class="text-red-500 text-xl md:text-2xl font-bold">*</span>
                     </p>
-                    <textarea rows="5" name="improve_message" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('improve_message') }}</textarea>
+                    <textarea rows="5" name="improve_message" id="improve_message" class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 @error('improve_message') border-red-500 @enderror">{{ old('improve_message') }}</textarea>
+                    @error('improve_message')
+                        <div class="relative tooltip -bottom-4 flex mt-2">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                            </div>
+                        </div>
+                    @enderror
+                    <div id="improve_message_error_client" class="hidden mt-2">
+                        <div class="relative tooltip -bottom-4 flex">
+                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                <p class="error-text text-white leading-none text-sm lg:text-base"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="md:col-span-2">
                     <input type="checkbox" value="1" name="close_account" id="close_account_checkbox" {{ old('close_account') === '1' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 ml-2 focus:ring-none">
                     <label for="close_account_checkbox" class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->close_my_account_checkbox ?? "Close my account"}}</label><span class="text-red-500 font-bold">*</span>
                     @error('close_account')
-                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                        <div class="relative tooltip -bottom-4 flex mt-2">
                             <div role="tooltip" class="relative tooltiptext z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                 <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                             </div>
@@ -236,6 +264,7 @@
 
 @php
     $messageData = $closeAccountPage->check_box_validation_message ?? "Check the box";
+    $requiredFieldMessage = "This field is required.";
 @endphp
 
 @section('script')
@@ -244,20 +273,55 @@
 <script>
     document.getElementById('show-modal').addEventListener('click', function() {
         var checkbox = $("input[name='close_account']:checked").val();
-        if (checkbox) {
-            var errorElementDiv = document.getElementById('package-errors-div');
-            if (!errorElementDiv.classList.contains('hidden')) {
-                errorElementDiv.classList.add('hidden');
-            }
-            document.getElementById('modal').style.display = 'block';
-        } else {
+        var closeAccountReason = document.getElementById('close_account_reason').value.trim();
+        var improveMessage = document.getElementById('improve_message').value.trim();
+        var requiredMessage = "{{ $requiredFieldMessage }}";
+
+        // Hide client-side error divs first
+        var reasonErrorDiv = document.getElementById('close_account_reason_error_client');
+        var improveErrorDiv = document.getElementById('improve_message_error_client');
+        if (reasonErrorDiv) reasonErrorDiv.classList.add('hidden');
+        if (improveErrorDiv) improveErrorDiv.classList.add('hidden');
+        document.getElementById('close_account_reason').classList.remove('border-red-500');
+        document.getElementById('improve_message').classList.remove('border-red-500');
+
+        if (!checkbox) {
             var errorElementDiv = document.getElementById('package-errors-div');
             errorElementDiv.classList.remove('hidden');
-
-            var messageData = "{{ $messageData }}";
             var errorElement = document.getElementById('package-errors');
-            errorElement.textContent = messageData;
+            errorElement.textContent = "{{ $messageData }}";
+            errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
+        var hasError = false;
+        if (!closeAccountReason) {
+            if (reasonErrorDiv) {
+                reasonErrorDiv.querySelector('.error-text').textContent = requiredMessage;
+                reasonErrorDiv.classList.remove('hidden');
+            }
+            document.getElementById('close_account_reason').classList.add('border-red-500');
+            hasError = true;
+        }
+        if (!improveMessage) {
+            if (improveErrorDiv) {
+                improveErrorDiv.querySelector('.error-text').textContent = requiredMessage;
+                improveErrorDiv.classList.remove('hidden');
+            }
+            document.getElementById('improve_message').classList.add('border-red-500');
+            hasError = true;
+        }
+
+        if (hasError) {
+            var firstError = document.querySelector('.border-red-500');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        var errorElementDiv = document.getElementById('package-errors-div');
+        if (!errorElementDiv.classList.contains('hidden')) {
+            errorElementDiv.classList.add('hidden');
+        }
+        document.getElementById('modal').style.display = 'block';
     });
 
     // Hide tooltip when checkbox is checked
@@ -283,6 +347,26 @@
                 if (event.target === this) {
                     document.getElementById('modal').style.display = 'none';
                 }
+            });
+        }
+
+        // Scroll to first validation error when page loads with server-side errors
+        @if($errors->any())
+        var firstErrorElement = document.querySelector('.tooltip');
+        if (firstErrorElement) {
+            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        @endif
+    });
+
+    // Clear client-side errors when user types in textareas
+    ['close_account_reason', 'improve_message'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                this.classList.remove('border-red-500');
+                var errorDiv = document.getElementById(id + '_error_client');
+                if (errorDiv) errorDiv.classList.add('hidden');
             });
         }
     });

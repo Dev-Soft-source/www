@@ -83,9 +83,20 @@
                                 <a href="javascript:void(0);" onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, '{{ $targetUrl }}')" class="block">
                                     <div class="flex gap-3 items-start px-4 py-4 pr-24">
                                         <div class="flex-shrink-0 relative">
+                                            @php
+                                                $defaultImage = asset('assets/image-placeholder.png');
+                                                if ($notification->category == 'system') {
+                                                    $imageSrc = asset('assets/favicon.png');
+                                                } elseif ($notification->from && !empty(trim($notification->from->profile_image ?? ''))) {
+                                                    $imageSrc = $notification->from->profile_image;
+                                                } else {
+                                                    $imageSrc = $defaultImage;
+                                                }
+                                            @endphp
                                             <img class="w-12 h-12 rounded-full object-cover"
-                                                src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : ($notification->from ? $notification->from->profile_image : asset('assets/favicon.png')) }}"
-                                                alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}">
+                                                src="{{ $imageSrc }}"
+                                                alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}"
+                                                onerror="this.onerror=null; this.src='{{ $defaultImage }}';">
                                             @if ($notification->is_read == 0)
                                                 <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
                                             @endif

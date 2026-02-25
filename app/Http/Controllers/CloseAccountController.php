@@ -17,6 +17,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CloseAccountController extends Controller
 {
@@ -58,10 +59,22 @@ class CloseAccountController extends Controller
             ];
         }
         
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'reasons' => 'array|required',
+            'improve_message' => 'required',
+            'close_account_reason' => 'required',
             'close_account' => 'required'
-        ], [], $niceNames);
+        ], [], array_merge($niceNames, [
+            'close_account_reason' => $closeAccountPage->why_closing_account_label ?? 'Reason for closing account',
+            'improve_message' => $closeAccountPage->improve_label ?? 'How we can improve',
+        ]));
+
+        if ($validator->fails()) {
+            $lang = $selectedLanguage->abbreviation ?? null;
+            return redirect()->route('close_account', array_filter(['lang' => $lang]))
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // Join the selected checkboxes with semicolons.
         $reasons = implode(';', $request->input('reasons', []));

@@ -218,7 +218,8 @@ export default {
         addUpdateForm() {
             this.$store
                 .dispatch("packages/addUpdateForm")
-                .then(() => this.$router.push({ name: "admin.packages.index" }));
+                .then(() => this.$router.push({ name: "admin.packages.index" }))
+                .catch(() => {});
         },
         changeLanguageTab(language) {
             this.activeTab = language.id;
@@ -234,27 +235,22 @@ export default {
                         url: `${process.env.MIX_ADMIN_API_URL}packages/${id}?withPackageDetail=1`,
                     })
                     .then((res) => {
-                        let keys = [
-                            "price",
-                            "is_default",
-                        ];
+                        let keys = ["price", "is_default"];
                         this.$store.commit("packages/setState", {
                             key: "id",
                             value: id,
                         });
                         for (var i = 0; i < keys.length; i++) {
+                            let value = res.data.data[keys[i]];
+                            if (keys[i] === "is_default") {
+                                value = value == 1 || value === "1" || value === true;
+                            }
                             this.$store.commit("packages/setState", {
                                 key: keys[i],
-                                value: res.data.data[keys[i]],
+                                value: value,
                             });
                         }
 
-                        if (res.data.data.image) {
-                            this.convertImgUrlToBase64(
-                                res.data.data.image.full_path,
-                                `image/${res.data.data.image.extension}`
-                            );
-                        }
                         let data =
                             res.data.data && res.data.data.package_detail
                                 ? res.data.data.package_detail
