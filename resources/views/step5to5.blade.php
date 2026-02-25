@@ -57,7 +57,7 @@
                     <div class="us_number mt-2">
                         <div class="flex flex-col lg:flex-row items-start items-end gap-4 mt-1">
                             <div class="w-full lg:w-3/6">
-                                <label class="text-gray-700 font-FuturaMdCnBT mb-2 block">Select Your Country</label>
+                                <label class="text-gray-700 font-FuturaMdCnBT mb-2 block">@isset($step5Page->select_country_label){{ $step5Page->select_country_label }}@endisset</label>
                                 <select name="country" id="country-dropdown" class="font-FuturaMdCnBT bg-white text-base block mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                                     {{-- <option value="">Select your country</option> --}}
                                     @foreach ($countries as $country)

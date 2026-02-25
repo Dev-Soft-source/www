@@ -1434,7 +1434,7 @@
             });
 
             creditCardCheckbox.addEventListener('change', checkCheckboxes);
-            paypalCheckbox.addEventListener('change', checkCheckboxes);
+ //           paypalCheckbox.addEventListener('change', checkCheckboxes);
 
             // Initial check
             checkCheckboxes();
