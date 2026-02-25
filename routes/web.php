@@ -368,8 +368,8 @@ Route::middleware('auth')->group(function () {
 });
 
 // Route::get('{lang?}/my-cards', [CardController::class, 'index'])->middleware('auth')->name('my_cards');
-// Route::get('{lang?}/my-cards/add', [CardController::class, 'create'])->name('my_cards.create');
-// Route::post('/my-cards/session-data', [CardController::class, 'sessionData'])->name('my_cards.sessionData');
+Route::get('{lang?}/my-cards/add', [CardController::class, 'create'])->name('my_cards.create')->middleware('auth');
+Route::post('/my-cards/session-data', [CardController::class, 'sessionData'])->name('my_cards.sessionData')->middleware('auth');
 // Route::get('{lang?}/my-cards/add/{param?}', [CardController::class, 'create'])->name('my_cards.create');
 Route::get('{lang?}/phone', [PhoneController::class, 'index'])->name('phone');
 Route::get('{lang?}/add-phone', [PhoneController::class, 'index'])->name('add-phone');
