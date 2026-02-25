@@ -1648,7 +1648,15 @@ class MyRideController extends Controller
             Mail::to($booking->passenger->email)->queue(new CancelPassengerMail($data));
         }
         $admin = Admin::first();
-        $data = ['admin_username' => $admin->username, 'driver_name' => $booking->ride->driver->first_name, 'passenger_name' => $booking->passenger->first_name, 'departure' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'message' => $request->admin_message];
+        $data = [
+            'admin_username' => $admin->username, 
+            'driver_name' => $booking->ride->driver->first_name, 
+            'passenger_name' => $booking->passenger->first_name, 
+            'departure' => $booking->departure, 
+            'destination' => $booking->destination, 
+            'date' => $ride->date, 
+            'message' => $request->admin_message
+        ];
         // Send email to admin
         Mail::to($admin->admin_email)->queue(new CancelPassengerAdminMail($data));
         $notification = Notification::create([

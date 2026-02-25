@@ -53,10 +53,11 @@
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                             @if(session('id'))
                                 <a href="{{ route('student.verify', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost ride</a>
+                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">
+                                    Repost ride</a>
                             @endif
                             <a href=""
-                                class="button-exp-fill w-28">Close</a>
+                                class="button-exp-fill w-28">{{ $siteText['close_btn_text'] }}</a>
                         </div>
                     </div>
                 </div>

@@ -79,7 +79,9 @@
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Price</label> -->
-                                            <div class="">{{ pack?.price }}</div>
+                                            <div >
+                                                <span class="font-medium" :class="{ 'p-2 rounded  bg-green-200': pack?.is_default }">{{ pack?.price }}</span>
+                                            </div>
                                         </td>
                                         <td class="p-2 md:p-3 gap-2 justify-center items-center hidden md:flex">
                                             <!-- <router-link
@@ -289,7 +291,7 @@ export default {
     },
     created() {
         this.$store.commit("packages/setLimit", 100);
-        this.$store.commit("packages/setSortBy", "name");
+        this.$store.commit("packages/setSortBy", "price");
         this.$store.commit("packages/setSortType", "asc");
         this.$store.commit("packages/setSearchParam", '');
         this.$store.dispatch("packages/fetchPackages");

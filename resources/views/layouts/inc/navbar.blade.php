@@ -451,7 +451,7 @@
                             @endphp
                             @if ($link === 'login' && !Auth::check() && \Illuminate\Support\Facades\Route::has($link))
                                 <a href="{{ route($link, ['lang' => $langAbbr]) }}"
-                                    class="button-exp-no-fill flex items-center justify-center gap-2">
+                                    class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center !text-base xl:!text-lg">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -460,7 +460,7 @@
                                     <span>{{ $name }}</span>
                                 </a>
                             @elseif ($link && $link !== 'login' && \Illuminate\Support\Facades\Route::has($link))
-                                <a href="{{ route($link, ['lang' => $langAbbr]) }}" class="button-exp-no-fill">
+                                <a href="{{ route($link, ['lang' => $langAbbr]) }}" class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center !text-base xl:!text-lg">
                                     <span>{{ $name }}</span>
                                 </a>
                             @endif
@@ -481,7 +481,7 @@
                     <li>
                         @if ($link === 'logout')
                             <a type="button" onclick="toggleModal('logout-modal')"
-                                class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100">
+                                class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center !text-base xl:!text-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"

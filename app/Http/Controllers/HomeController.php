@@ -44,6 +44,27 @@ class HomeController extends Controller
 {
     public function index($lang = null)
     {
+
+$admin = Admin::first();
+            if ($admin && $admin->admin_email) {
+                $adminData = [
+                    'donor_name' => 'Anonymous Donor',
+                    'donor_email' => null,
+                    'amount' => 555,
+                    'transaction_id' => 123,
+                    'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
+                    'payment_method' => 'ss',
+                    'frequency' => null,
+                ];
+
+                
+
+                Mail::to($admin->admin_email)->queue(new AdminCoffeeOnWallDonationMail($adminData));
+            }
+
+
+
+
         $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->where('status', '!=', 2)->where('suspand', '!=', 1)->take(4)->get();
         
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
