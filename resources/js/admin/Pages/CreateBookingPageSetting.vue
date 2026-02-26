@@ -272,6 +272,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -316,6 +317,232 @@
                                                 "
                                             ></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`seats_available_tooltip_${activeLanguageId}`"
+                                                        >Seats available tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`seats_available_tooltip_${activeLanguageId}`"
+                                                    :id="`seats_available_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'seats_available_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'seats_available_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `seats_available_tooltip.seats_available_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `seats_available_tooltip.seats_available_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`chat_with_driver_tooltip_${activeLanguageId}`"
+                                                        >chat with driver tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`chat_with_driver_tooltip_${activeLanguageId}`"
+                                                    :id="`chat_with_driver_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'chat_with_driver_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'chat_with_driver_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `chat_with_driver_tooltip.chat_with_driver_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `chat_with_driver_tooltip.chat_with_driver_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`aggreement_tooltip_${activeLanguageId}`"
+                                                        >Eligibility & Agreement tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`aggreement_tooltip_${activeLanguageId}`"
+                                                    :id="`aggreement_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'aggreement_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'aggreement_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `aggreement_tooltip.aggreement_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `aggreement_tooltip.aggreement_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`pink_ride_tooltip_${activeLanguageId}`"
+                                                        >Pink ride error tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`pink_ride_tooltip_${activeLanguageId}`"
+                                                    :id="`pink_ride_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'pink_ride_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pink_ride_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `pink_ride_tooltip.pink_ride_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `pink_ride_tooltip.pink_ride_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`extra_care_ride_tooltip_${activeLanguageId}`"
+                                                        >Extra+ ride error tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`extra_care_ride_tooltip_${activeLanguageId}`"
+                                                    :id="`extra_care_ride_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'extra_care_ride_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'extra_care_ride_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `extra_care_ride_tooltip.extra_care_ride_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `extra_care_ride_tooltip.extra_care_ride_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -360,6 +587,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -404,6 +632,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -448,6 +677,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -492,6 +722,7 @@
                                                 "
                                             ></p>
                                         </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -536,6 +767,7 @@
                                                 "
                                             ></p>
                                         </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -580,6 +812,7 @@
                                                 "
                                             ></p>
                                         </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -624,6 +857,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -668,6 +902,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -712,6 +947,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -756,6 +992,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -800,6 +1037,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -844,6 +1082,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -888,6 +1127,7 @@
                                                 "
                                             ></p>
                                         </div>
+   
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -932,6 +1172,7 @@
                                                 "
                                             ></p>
                                         </div>
+  
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -976,6 +1217,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1020,6 +1262,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1064,6 +1307,7 @@
                                                 "
                                             ></p>
                                         </div>
+  
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1108,6 +1352,7 @@
                                                 "
                                             ></p>
                                         </div>
+  
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1152,6 +1397,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1196,6 +1442,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1285,6 +1532,7 @@
                                                 "
                                             ></p>
                                         </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1393,9 +1641,7 @@
                                                 "
                                             ></p>
                                         </div>
-                                        
-                                        
-                                        
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1440,6 +1686,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1529,6 +1776,7 @@
                                                 "
                                             ></p>
                                         </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1573,6 +1821,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1617,6 +1866,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1661,6 +1911,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1705,6 +1956,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1749,6 +2001,7 @@
                                                 "
                                             ></p>
                                         </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -1928,9 +2181,7 @@
                                                 "
                                             ></p>
                                         </div>
-                                        
-                                        
-                                        
+                                         
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -2076,6 +2327,11 @@ export default {
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "seats_available_label");
                             this.handleInput("", language, "seats_available_info_text");
+                            this.handleInput("", language, "seats_available_tooltip");
+                            this.handleInput("", language, "chat_with_driver_tooltip");
+                            this.handleInput("", language, "aggreement_tooltip");
+                            this.handleInput("", language, "pink_ride_tooltip");
+                            this.handleInput("", language, "extra_care_ride_tooltip");
                             this.handleInput("", language, "cancellation_policy_label");
                             this.handleInput("", language, "pricing_label");
                             this.handleInput("", language, "seat_label");
@@ -2155,6 +2411,31 @@ export default {
                                 setting?.seats_available_info_text,
                                 setting?.language,
                                 "seats_available_info_text"
+                            );
+                            this.handleInput(
+                                setting?.seats_available_tooltip,
+                                setting?.language,
+                                "seats_available_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.chat_with_driver_tooltip,
+                                setting?.language,
+                                "chat_with_driver_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.aggreement_tooltip,
+                                setting?.language,
+                                "aggreement_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.pink_ride_tooltip,
+                                setting?.language,
+                                "pink_ride_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.extra_care_ride_tooltip,
+                                setting?.language,
+                                "extra_care_ride_tooltip"
                             );
                             this.handleInput(
                                 setting?.cancellation_policy_label,
@@ -2501,7 +2782,23 @@ export default {
                 )||
                 validationErros.has(
                     `seats_available_info_text.seats_available_info_text_${language.id}`
+                ) ||
+                validationErros.has(
+                    `seats_available_tooltip.seats_available_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `chat_with_driver_tooltip.chat_with_driver_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `aggreement_tooltip.aggreement_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `pink_ride_tooltip.pink_ride_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `extra_care_ride_tooltip.extra_care_ride_tooltip_${language.id}`
                 )
+                
             );
         },
 

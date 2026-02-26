@@ -77,7 +77,7 @@
         $firm = false;
         $topUpBalance = $balance;
     @endphp
-    @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+    @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
         @php
             $hidePaymentSection = true;
         @endphp
@@ -390,7 +390,7 @@
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option3_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option4_tooltip ?? '' }}"
-                                    @endif>{{ $ride->payment_method->name }}</span>
+                                    @endif>{{ $ride->payment_method?->name ?? '' }}</span>
                             </h4>
                         </div>
                         <div class="p-4 items-baseline">
@@ -644,7 +644,7 @@
                                     </div>
                                 </div>
 
-                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && (optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                     <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p class="text-yellow-800 text-sm">
                                             <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
@@ -665,7 +665,7 @@
                                 @error('seats')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please select at least one seat to continue.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->seats_available_tooltip) {{ $bookingPage->seats_available_tooltip }} @endisset</p>
                                     </div>
                                   </div>
                                 @enderror
@@ -842,9 +842,9 @@
                                 </div>
                             @endif
 
-                            <input type="hidden" value="{{ $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id ? "cash" : "online" }}" id="check_payment_method">
+                            <input type="hidden" value="{{ (optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) ? "cash" : "online" }}" id="check_payment_method">
 
-                            @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                            @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                 <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total online payment</p>
                                     <p class="totalAmount text-black"></p> --}}
@@ -899,7 +899,7 @@
                                 @error('driver_message')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please include a brief message for the driver with your booking.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->chat_with_driver_tooltip) {{ $bookingPage->chat_with_driver_tooltip }} @endisset</p>
                                     </div>
                                 </div>
                                 @enderror
@@ -925,18 +925,18 @@
                             </ul>
                             <div class="flex items-start my-4">
                                 <input id="" type="checkbox" name="agree_terms" value="1"
-                                    {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                    <label for="" class="ml-2 font-normal text-gray-900">
-                                        @isset($bookingPage->booking_term_agree_text)
-                                         {!! $bookingPage->booking_term_agree_text !!}
-                                        @endisset
-                                    </label>
-                                </div>
+                                {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                <label for="" class="ml-2 font-normal text-gray-900">
+                                    @isset($bookingPage->booking_term_agree_text)
+                                        {!! $bookingPage->booking_term_agree_text !!}
+                                    @endisset
+                                </label>
+                            </div>
                                 @error('agree_terms')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please read and accept our Disclaimers and Policies before proceeding.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->aggreement_tooltip) {{ $bookingPage->aggreement_tooltip }} @endisset</p>
                                     </div>
                                 </div>
                                 @enderror
@@ -1009,7 +1009,7 @@
                                     @error('pink_ride_agree_terms')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->pink_ride_tooltip) {{ $bookingPage->pink_ride_tooltip }} @endisset</p>
                                             </div>
                                         </div>
                                     @enderror
@@ -1035,7 +1035,7 @@
                                     @error('extra_care_ride_agree_terms')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->extra_care_ride_tooltip) {{ $bookingPage->extra_care_ride_tooltip }} @endisset</p>
                                             </div>
                                         </div>
                                     @enderror
@@ -1048,7 +1048,7 @@
                                 @endif
 
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
 
                                 @else
                                     <div id="paymentSection" class="space-y-4 mb-4">
@@ -1137,7 +1137,7 @@
 
                                 @isset($ride->booking_method->features_setting_id)
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
 
                                 @else
                                     <div id="paymentSectionGPay">
