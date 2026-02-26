@@ -414,14 +414,15 @@
                                     @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
                                         @if (strtotime($ride->date) > strtotime('today') ||
                                                 (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                            <a
+                                            <div class="flex items-baseline">
+                                                <a class="text-black text-xl xl:text-2xl items"
                                                 href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
                                                 @isset($rideDetailPage->seats_left_label)
                                                     {{ $rideDetailPage->seats_left_label }}:
                                                 @endisset
-                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
-                                            </a>
-                                            </td>
+                                                </a>
+                                                <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
+                                            </div>
                                         @endif
                                     @endif
                                 @elseif (
@@ -431,14 +432,14 @@
                                             })->sum('seats') !=
                                         0)
                                     @if ($ride->status !== '2')
-                                        <div class="flex ">
+                                        <div class="flex items-baseline">
                                             <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="text-xl xl:text-2xl">
+                                                class="text-black text-xl xl:text-2xl">
                                                 @isset($rideDetailPage->seats_left_label)
                                                     {{ $rideDetailPage->seats_left_label }}:
-                                                @endisset
-                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                                @endisset                                                
                                             </a>
+                                            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                                         </div>
                                     @endif
                                 @endif
@@ -446,11 +447,11 @@
 
                             </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 p-4">
+                        <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="text-lg font-normal text-left text-primary" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail->first()?->price }}
+                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail->first()?->price }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -460,7 +461,7 @@
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
-                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT items-baseline">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
@@ -469,11 +470,16 @@
                         </div>
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT items-baseline">
                                     Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
+                                        @if ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option1)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option2)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option2_tooltip ?? '' }}"
+                                        @endif>
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -527,34 +533,32 @@
                     </h3>
                     <div class="bg-white p-4 space-y-3">
                         <div class="flex items-center space-x-2">
-                            {{-- @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                @isset($postRidePage->smoking_option1->icon)
+                            @if ($ride->smoke == (optional($postRidePage->smoking_option1)->features_setting_id ?? null))
+                                @isset(optional($postRidePage->smoking_option1)->icon)
                                     <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->smoking_option1->icon) }}"
+                                        src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option1)->icon) }}"
                                         alt="">
                                 @endisset
-                                <p>Smoking: {{ $postRidePage->smoking_option1->name }}</p> --}}
-                            @if ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                @isset($postRidePage->smoking_option2->icon)
+                                <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }} {{ optional($postRidePage->smoking_option1)->name }}</p>
+                            @elseif ($ride->smoke == (optional($postRidePage->smoking_option2)->features_setting_id ?? null))
+                                @isset(optional($postRidePage->smoking_option2)->icon)
                                     <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
+                                        src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option2)->icon) }}"
                                         alt="">
                                 @endisset
-                                <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }} {{ optional($postRidePage->smoking_option2)->name }}</p>
                             @endif
                         </div>
                         @isset($ride->animal_friendly->features_setting_id)
-                            @if ($ride->animal_friendly->features_setting_id !== $postRidePage->animals_option1->features_setting_id)
-                                <div class="flex items-center space-x-2">
-                                    <img class="w-7 h-7"
-                                        @if ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option1->features_setting_id) src="{{ asset('home_page_icons/' . $postRidePage->animals_option1->icon) }}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option2->features_setting_id) src="{{ asset('home_page_icons/' . $postRidePage->animals_option2->icon) }}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
-                                        src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}" @endif
-                                        alt="">
-                                    <p class="font-semibold" >{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
-                                </div>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                <img class="w-7 h-7"
+                                    @if ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option1)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option2)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}"
+                                    @endif
+                                    alt="">
+                                <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }} {{ $ride->animal_friendly->name }}</p>
+                            </div>
                         @endisset
                         @isset($ride->luggage->features_setting_id)
                             <div class="flex items-center space-x-2">

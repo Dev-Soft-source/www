@@ -391,22 +391,28 @@
                         </div>
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
-                        <div class="p-4">
-                            <h4 class="text-left font-FuturaMdCnBT text-primary text-2xl">
+                        <div class="flex items-baseline p-4">
+                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->seats_left_label)
                                     {{ $rideDetailPage->seats_left_label }}:
-                                @endisset
-                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                @endisset                                
                             </h4>
+                            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                         </div>
-                        <div class="p-4">
-                            <p class="font-semibold text-left text-primary text-lg">${{ $ride->rideDetail[0]->price }}
-                                {{ $rideDetailPage->per_seat_label ?? 'per seat' }}</p>
+                        <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
+                            <h4 class="text-black text-xl xl:text-2xl">
+                                Booking Price:
+                            </h4>
+                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail[0]->price }}
+                                @isset($rideDetailPage->per_seat_label)
+                                    {{ $rideDetailPage->per_seat_label }}
+                                @endisset
+                            </p>
                         </div>
                     </div>
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
+                        <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
@@ -416,7 +422,7 @@
                                 <span class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
                             </h4>
                         </div>
-                        <div class="p-4">
+                        <div class="p-4 items-baseline">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     Booking method:
@@ -435,7 +441,7 @@
                     </div>
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4 flex items-center">
+                        <div class="p-4 flex items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 @php
                                     $bookedSeatsCount = $ride

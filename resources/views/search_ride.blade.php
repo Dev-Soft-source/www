@@ -1395,13 +1395,13 @@
                                                     </div>
                                                     <div class="flex items-center gap-2">
                                                         <span class="font-semibold text-gray-800">
-                                                            @if ($ride->getHasRatings(1,1))
-                                                                {{ number_format($ride->getAverageRating(1,1), 1) }}
+                                                            @if ($ride->getDriverHasRatings())
+                                                                {{ number_format($ride->getDriverAverageRating(), 1) }}
                                                             @else
                                                                 No Reviews @endif
                                                         </span>
 
-                                                        @if ($ride->getHasRatings(1,1))
+                                                        @if ($ride->getDriverHasRatings())
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                 fill="currentColor"
                                                                 class="w-6 h-6 text-yellow-500 stroke-gray-600">
@@ -1585,7 +1585,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                             <button type="button" onclick="closeHideRideModal()"
-                                class="inline-flex justify-center w-36 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $findRidePage->hide_ride_popup_take_me_back_button ?? 'No, take me back' }}</button>
+                                class="inline-flex justify-center w-42 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $findRidePage->hide_ride_popup_take_me_back_button ?? 'No, take me back' }}</button>
                             <button type="button" id="confirm-hide-ride"
                                 class="inline-flex justify-center w-28 rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">{{ $findRidePage->hide_ride_popup_confirm_button ?? 'Yes, hide it' }}</button>
                         </div>

@@ -333,13 +333,15 @@
                                     @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
                                         @if (strtotime($ride->date) > strtotime('today') ||
                                                 (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                            <a class="text-xl xl:text-2xl"
-                                                href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
-                                                @isset($bookingPage->seats_left_label)
-                                                    {{ $bookingPage->seats_left_label }}:
-                                                @endisset
-                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
-                                            </a>
+                                                <div class="flex items-baseline">
+                                                    <a class="text-xl xl:text-2xl text-black"
+                                                        href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
+                                                        @isset($bookingPage->seats_left_label)
+                                                            {{ $bookingPage->seats_left_label }}:
+                                                        @endisset
+                                                    </a>
+                                                    <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
+                                                </div>
                                         @endif
                                     @endif
                                 @elseif (
@@ -349,14 +351,14 @@
                                             })->sum('seats') !=
                                         0)
                                     @if ($ride->status !== '2')
-                                        <div class="flex">
+                                        <div class="flex items-baseline">
                                             <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="font-FuturaMdCnBT text-xl xl:text-2xl">
+                                                class="font-FuturaMdCnBT text-xl xl:text-2xl text-black">
                                                 @isset($bookingPage->seats_left_label)
                                                     {{ $bookingPage->seats_left_label }}
                                                 @endisset
-                                                {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                             </a>
+                                            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                                         </div>
                                     @endif
                                 @endif
@@ -364,7 +366,7 @@
 
                             </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 p-4">
+                        <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 Booking Price:
                             </h4>
@@ -378,7 +380,7 @@
                     </div>
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
+                        <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($bookingPage->payment_method_label)
                                     {{ $bookingPage->payment_method_label }}
@@ -386,7 +388,7 @@
                                 <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
                             </h4>
                         </div>
-                        <div class="p-4">
+                        <div class="p-4 items-baseline">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     Booking Method:
@@ -453,15 +455,28 @@
                                 <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
                             @endif
                         </div>
-                        @isset ($ride->animal_friendly->features_setting_id)
+                        @isset($ride->animal_friendly->features_setting_id)
                             <div class="flex items-center gap-2">
                                 <img class="w-7 h-7"
-                                    @if ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option1->features_setting_id) src="{{asset('home_page_icons/' . $postRidePage->animals_option1->icon)}}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option2->features_setting_id) src="{{asset('home_page_icons/' . $postRidePage->animals_option2->icon)}}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
-                                        src="{{asset('home_page_icons/' . $postRidePage->animals_option3->icon)}}" @endif
+                                    @if ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option1)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option2)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}"
+                                    @endif
                                     alt="">
-                                <p class="font-semibold">{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
+                                <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }} {{ $ride->animal_friendly->name }}</p>
+                            </div>
+                        @endisset
+                        @isset($ride->luggage->features_setting_id)
+                            <div class="flex items-center gap-2">
+                                <img class="w-7 h-7"
+                                    @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option1)->icon) }}"
+                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option2)->icon) }}"
+                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option3)->icon) }}"
+                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option4)->icon) }}"
+                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option5)->icon) }}"
+                                    @endif
+                                    alt="">
+                                <p class="font-semibold">{{ $rideDetailPage->luggage_label ?? '' }} {{ $ride->luggage->name }}</p>
                             </div>
                         @endisset
                         @php

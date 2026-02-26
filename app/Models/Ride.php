@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Concerns\HasOptionGroups;
+use App\Models\Rating;
 
 class Ride extends Model
 {
@@ -95,6 +96,37 @@ class Ride extends Model
         }
         
         return $query->exists();
+    }
+
+    /**
+     * Get the driver's overall average rating (across all rides by this driver).
+     * Type 1 = driver ratings, Status 1 = approved.
+     *
+     * @return float|null
+     */
+    public function getDriverAverageRating()
+    {
+        return Rating::where('type', 1)
+            ->where('status', 1)
+            ->whereHas('ride', function ($q) {
+                $q->where('added_by', $this->added_by);
+            })
+            ->avg('average_rating');
+    }
+
+    /**
+     * Check if the driver has any ratings (across all their rides).
+     *
+     * @return bool
+     */
+    public function getDriverHasRatings()
+    {
+        return Rating::where('type', 1)
+            ->where('status', 1)
+            ->whereHas('ride', function ($q) {
+                $q->where('added_by', $this->added_by);
+            })
+            ->exists();
     }
 
     function payouts(){

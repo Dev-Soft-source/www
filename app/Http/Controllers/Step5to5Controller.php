@@ -85,7 +85,7 @@ class Step5to5Controller extends Controller
         // Validate phone
         $country = optional(Country::find($request->country))->iso_code ?: 'US';
         if (!validatePhoneNumber($request->phone, $country)) {
-            return back()->withErrors(['phone' => 'Please enter a valid phone number.'])->withInput();
+            return back()->withErrors(['phone' => $step4Page->phone_error_label])->withInput();
         }
 
         $request->validate([
@@ -107,11 +107,11 @@ class Step5to5Controller extends Controller
             if ($response) {
                 return $response;
             }
-            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation]);
+            return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation]);
         }
 
         User::whereId($user_id)->update(['step5' => 1]);
-        return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation]);
+        return redirect()->route('profile', ['lang' => $this->selectedLanguage->abbreviation]);
     }
 
     /**
@@ -170,10 +170,7 @@ class Step5to5Controller extends Controller
                 Log::error('Twilio Verify send failed', ['phone_id' => $phone->id, 'phone' => $phone->phone, 'error' => $e->getMessage()]);
                 return back()->withErrors(['phone' => $this->twilioErrorMessageForUser($e->getMessage(), 'sms')])->withInput();
             }
-            $selectedLanguage = session('selectedLanguage')
-                ? Language::where('abbreviation', session('selectedLanguage'))->first() ?? Language::where('is_default', 1)->first()
-                : Language::where('is_default', 1)->first();
-            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
+            return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation ?? 'en']);
         }
 
         // North American (+1): Messages API with our own OTP (SMS only)
@@ -233,11 +230,13 @@ class Step5to5Controller extends Controller
             : $request->country_code;
         $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode);
 
+        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         $country = $request->country
             ? optional(Country::find($request->country))->iso_code
             : 'US';
         if (!validatePhoneNumber($request->phone, $country)) {
-            return response()->json(['success' => false, 'message' => 'Please enter a valid phone number.'], 422);
+            return response()->json(['success' => false, 'message' => $step4Page->phone_error_label], 422);
         }
 
         $existingPhone = PhoneNumber::where('phone', $normalizedPhone)->first();
