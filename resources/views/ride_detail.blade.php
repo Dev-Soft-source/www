@@ -842,7 +842,7 @@
                                             @if ($ride->driver?->email_verified == '1')
                                                 <span>|</span>
                                                 <span class="inline-block cursor-pointer"
-                                                    data-tippy-content="{{ $rideDetailPage->verified_email ?? 'Email is verified' }}">
+                                                    data-tippy-content="{{ $rideDetailPage->verified_email_tooltip ?? optional($rideDetailPage)->verified_email_tooltip ?? '' }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="h-5">
@@ -855,7 +855,7 @@
                                             @if ($hasVerifiedPhone)
                                                 <span>|</span>
                                                 <span class="inline-block cursor-pointer"
-                                                    data-tippy-content="{{ $rideDetailPage->verified_phone ?? 'Phone number is verified' }}">
+                                                    data-tippy-content="{{ $rideDetailPage->verified_phone_tooltip ?? optional($rideDetailPage)->verified_phone_tooltip ?? '' }}">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                         class="h-5 ">
