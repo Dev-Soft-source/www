@@ -46,7 +46,7 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hi {{ $data['username'] }},</h1>
-                        <p style="font-weight: 400;color: #000;">Your Extra-care Ride is now live on ProximaRide.</p>
+                        <p style="font-weight: 400;color: #000;">Your Extra+ Ride is now live on ProximaRide.</p>
                         <p style="font-weight: 700;color: #000;">Ride details:</p>
                         <p style="font-weight: 400;color:#000;"><span style="font-weight: 700">From:</span> {{ $data['from'] }}</p>
                         <p style="font-weight: 400;color:#000;"><span style="font-weight: 700">To:</span> {{ $data['to'] }}</p>
@@ -56,7 +56,7 @@
                         <p style="font-weight: 400;color:#000;"><span style="font-weight: 700">Booking price per seat:</span> ${{ $data['price'] }}</p>
 
                         <p style="font-weight: 400;color: #000; margin-top: 16px;">
-                            Remember that <span  style="color: #000; font-weight: 700;margin-top:12px;font-style: italic;"> this is an Extra-care Ride</span>, and you are eligible because of your good ratings, safe driving and overall attitude. Keep up the good work to maintain your eligibility. It is our pleasure to have good drivers like you on our platform.
+                            Remember that <span  style="color: #000; font-weight: 700;margin-top:12px;font-style: italic;"> this is an Extra+ Ride</span>, and you are eligible because of your good ratings, safe driving and overall attitude. Keep up the good work to maintain your eligibility. It is our pleasure to have good drivers like you on our platform.
                         </p>
                     </td>
                 </tr>

@@ -641,7 +641,7 @@
                             <ul class="">
                                 <li><p class="text-left">{{ $bookingPage->booking_disclaimer_on_time ?? "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded" }}</p></li>
                                 <li><p class="text-left">{{ $bookingPage->booking_disclaimer_pink_ride ?? "I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}}</p></li>
-                                <li><p class="text-left">{{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards" }}</p></li>
+                                <li><p class="text-left">{{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards" }}</p></li>
                             </ul>
 
                             <div class="flex items-start my-4">

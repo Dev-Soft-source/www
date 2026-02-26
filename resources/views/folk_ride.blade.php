@@ -55,7 +55,7 @@
             margin: 0;
         }
 
-        /* FAQ - Extra-Care Rides: themed bar (blue) and smooth expand/collapse */
+        /* FAQ - Extra+ Rides: themed bar (blue) and smooth expand/collapse */
         .folk-ride-faq {
             border: 1px solid rgba(3, 105, 161, 0.3);
             border-radius: 0.75rem;
@@ -203,7 +203,7 @@
                     <img class="" src="{{asset('/images/heart.png')}}" alt="">
                 </div>
                 <h1 class="">
-                    {{ $findRidePage->extra_care_ride_page_label ?? 'Search for Extra-Care Rides' }}
+                    {{ $findRidePage->extra_care_ride_page_label ?? 'Search for Extra+ Rides' }}
                 </h1>
             </div>
         </div>
@@ -214,7 +214,7 @@
         </p> -->
         <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
             <p class="text-gray-900 font-medium">
-                {{ $findRidePage->extra_ride_description ?? 'I understand that Extra-Care Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.' }}
+                {{ $findRidePage->extra_ride_description ?? 'I understand that Extra+ Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.' }}
             </p>
         </div>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
@@ -287,7 +287,7 @@
                                 @endisset
                                 @isset($findRidePage->ride_features_option2->features_setting_id)
                                 <div class="flex items-start justify-between p-3">
-                                    <label for="extra-care" class="text-gray-900 flex space-x-1">
+                                    <label for="Extra+" class="text-gray-900 flex space-x-1">
                                         <span class="text-green-500 text-lg">
                                             {{ $findRidePage->ride_features_option2->name }}
                                         </span>
@@ -300,7 +300,7 @@
                                             </svg>
                                         </div> -->
                                     </label>
-                                    <input id="extra-care" type="checkbox"
+                                    <input id="Extra+" type="checkbox"
                                         value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
                                         checked disabled
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
@@ -2003,7 +2003,7 @@
                     <div class="folk-ride-faq">
                         <div class="flex flex-col items-center justify-center folk-ride-faq__header">
                             <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                                {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra-Care Rides' }}
+                                {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra+ Rides' }}
                             </h3>
                             <!-- <h4 class="text-sm font-FuturaMdCnBT text-center text-black mb-0 mt-1 opacity-90">
                                 (for your peace of mind)

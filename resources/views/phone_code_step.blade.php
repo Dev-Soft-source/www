@@ -9,7 +9,7 @@
         </div>
 
         <div class="pb-2 flex items-center justify-center">
-            <p class="text-gray-400">(Optional. Do it to be eligible for the "ProximaRide" and "Extra-Care Rides")</p>
+            <p class="text-gray-400">(Optional. Do it to be eligible for the "ProximaRide" and "Extra+ Rides")</p>
         </div>
 
         <form method="POST" action="{{ route('step5to5.update',$user->id) }}">

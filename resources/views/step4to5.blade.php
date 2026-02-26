@@ -13,7 +13,7 @@
                 </div>
                 <p for="" class=" text-black mt-2">
                     {!! $step4Page->main_label ??
-                        'If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra-Care Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license ' !!}
+                        'If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra+ Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license ' !!}
                 </p>
                 <p for="" class=" text-black mt-4">
                     {!! $step4Page->sub_main_label ??

@@ -217,7 +217,7 @@
                                         @endisset
                                         @isset($findRidePage->ride_features_option2->features_setting_id)
                                             <div class="flex items-start justify-between p-3">
-                                                <label for="extra-care" class="text-gray-900 flex space-x-1">
+                                                <label for="Extra+" class="text-gray-900 flex space-x-1">
                                                     <span class="text-green-500 text-base md:text-lg">
                                                         {{ $findRidePage->ride_features_option2->name }}
                                                     </span>
@@ -230,7 +230,7 @@
                                                                     </svg>
                                                                 </div> -->
                                                 </label>
-                                                <input id="extra-care" type="checkbox"
+                                                <input id="Extra+" type="checkbox"
                                                     value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
                                                     {{ in_array($findRidePage->ride_features_option2->features_setting_id, $features_check) ? 'checked' : '' }}
                                                     class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">

@@ -1826,7 +1826,7 @@
                                         $age = $dob->diffInYears(\Carbon\Carbon::now());
                                     @endphp
                                     <div class="flex items-center">
-                                        <input id="extra-care" type="checkbox" name="features[]" {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        <input id="Extra+" type="checkbox" name="features[]" {{ $bookings_count > 0 ? 'disabled' : '' }}
                                             @php $disabled = false; @endphp
                                             @if ($user->folks_ride == '0')
                                                 @php $disabled = true; @endphp
@@ -1849,7 +1849,7 @@
                                             value="{{ $postRidePage->features_option2->features_setting_id }}"
                                             {{ in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="extra-care"
+                                        <label for="Extra+"
                                             class="ml-2 text-gray-900 flex space-x-1">
                                             <span class="text-green-500 font-medium
                                                 @php $disabled = false; @endphp

@@ -1033,7 +1033,7 @@
                                                 >
                                                     <label
                                                         :for="`section1_folks_rides_label_${activeLanguageId}`"
-                                                        >Extra-Care Rides label</label
+                                                        >Extra+ Rides label</label
                                                     >
                                                 </div>
                                                 <input
@@ -1076,7 +1076,7 @@
                                                     <div class="flex justify-between w-full">
                                                         <label
                                                             :for="`section1_folks_rides_image_${activeLanguageId}`"
-                                                            >Extra-Care Rides icon</label
+                                                            >Extra+ Rides icon</label
                                                         >
                                                     </div>
                                                     <input
@@ -1136,7 +1136,7 @@
                                                 >
                                                     <label
                                                         :for="`section1_folks_rides_description_${activeLanguageId}`"
-                                                        >Extra-Care Rides
+                                                        >Extra+ Rides
                                                         description</label
                                                     >
                                                 </div>

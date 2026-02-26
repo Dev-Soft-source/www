@@ -70,7 +70,7 @@ class ExtraCareFaqController extends Controller
         }
 
         if ($extraCareFaq) {
-            return $this->apiSuccessResponse(new ExtraCareFaqResource($extraCareFaq), 'Extra-care FAQ has been added successfully.');
+            return $this->apiSuccessResponse(new ExtraCareFaqResource($extraCareFaq), 'Extra+ FAQ has been added successfully.');
         }
         return $this->errorResponse();
     }
@@ -115,7 +115,7 @@ class ExtraCareFaqController extends Controller
         }
 
         if ($result) {
-            return $this->apiSuccessResponse(new ExtraCareFaqResource($extraCareFaq), 'Extra-care FAQ has been updated successfully.');
+            return $this->apiSuccessResponse(new ExtraCareFaqResource($extraCareFaq), 'Extra+ FAQ has been updated successfully.');
         }
         return $this->errorResponse();
     }
@@ -125,7 +125,7 @@ class ExtraCareFaqController extends Controller
         $extraCareFaq = ExtraCareFaq::whereId($id)->delete();
         if ($extraCareFaq) {
             $extraCareFaqs = ExtraCareFaq::query()->orderBy('id', 'asc')->get();
-            return $this->apiSuccessResponse(ExtraCareFaqResource::collection($extraCareFaqs), 'Extra-care FAQ has been deleted successfully.');
+            return $this->apiSuccessResponse(ExtraCareFaqResource::collection($extraCareFaqs), 'Extra+ FAQ has been deleted successfully.');
         }
         return $this->errorResponse();
     }

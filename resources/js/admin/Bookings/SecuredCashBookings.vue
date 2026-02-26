@@ -295,7 +295,7 @@ export default {
                 rideLabels.push('Pink Ride');
             }
             if (features.includes('2')) {
-                rideLabels.push('Extra-Care Ride');
+                rideLabels.push('Extra+ Ride');
             }
 
             return rideLabels.join(', ');

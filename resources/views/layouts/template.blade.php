@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Travel your way with ProximaRide: women-only Pink Rides, Extra-Care rides with verified drivers, customizable options, fair prices—and no booking fee for students.">
+    <meta name="description" content="Travel your way with ProximaRide: women-only Pink Rides, Extra+ rides with verified drivers, customizable options, fair prices—and no booking fee for students.">
     <meta name="keywords" content="ridesharing, rideshare, women-only rides, pink rides, extra care rides, safe rides, affordable rides, student rides, no booking fee, carpool, ProximaRide">
     <meta name="author" content="ProximaRide">
     <meta name="robots" content="index, follow">
@@ -147,7 +147,7 @@
         {
           "@type": "SiteNavigationElement",
           "position": 6,
-          "name": "Extra-Care Rides",
+          "name": "Extra+ Rides",
           "url": "{{ url(route('folk_ride', ['lang' => optional($selectedLanguage)->abbreviation], false)) }}"
         },
         {

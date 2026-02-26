@@ -25,7 +25,7 @@
   </style>
 </head>
 <body style="margin: 0; width: 100%; background-color: #fff; padding: 0; -webkit-font-smoothing: antialiased; word-break: break-word;">
-  <div role="article" aria-roledescription="email" aria-label="Extra-Care Eligibility Email" lang="en">
+  <div role="article" aria-roledescription="email" aria-label="Extra+ Eligibility Email" lang="en">
     <div class="sm-px-4" style="background-color: #fff; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;">
       <table align="center" cellpadding="0" cellspacing="0" role="none">
         <tr>
@@ -46,7 +46,7 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hi {{ $data['first_name'] }},</h1>
-                        <p style="font-weight: 400;color: #000;">We are pleased to confirm that you are now eligible to start posting Extra-Care Rides. Your eligibility is a result of your high reviews, safe driving style, and courtesy and respect to your passengers and to the rules of the road. Keep up the good work. We are pleased to have you as a member of our community.</p>
+                        <p style="font-weight: 400;color: #000;">We are pleased to confirm that you are now eligible to start posting Extra+ Rides. Your eligibility is a result of your high reviews, safe driving style, and courtesy and respect to your passengers and to the rules of the road. Keep up the good work. We are pleased to have you as a member of our community.</p>
                     </td>
                 </tr>
                 <tr>

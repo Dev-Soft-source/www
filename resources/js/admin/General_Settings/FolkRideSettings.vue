@@ -5,7 +5,7 @@
                 <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between">
                         <h3 class="can-exp-h2 text-primary">
-                            Extra-Care settings
+                            Extra+ settings
                         </h3>
                     </div>
                 </div>

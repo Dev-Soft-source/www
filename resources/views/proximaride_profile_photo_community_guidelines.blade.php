@@ -5,7 +5,7 @@
         <div class="pb-2">
             <h1 class="text-primary font-FuturaMdCnBT mb-4 text-center">ProximaRide Profile Photo Guidelines</h1>
 
-            <p class="mb-4">To participate in Pink Rides or Extra-Care Rides as a driver or passenger, you must upload a profile photo that adheres to the following guidelines to ensure trust and safety within the ProximaRide community:</p>
+            <p class="mb-4">To participate in Pink Rides or Extra+ Rides as a driver or passenger, you must upload a profile photo that adheres to the following guidelines to ensure trust and safety within the ProximaRide community:</p>
 
             <ul class="list-disc pl-6 space-y-3 mb-6">
                 <li><strong>Clear and Visible Face:</strong> The photo must clearly show your full face, with no obstructions (e.g., sunglasses, hats, or masks) to allow for easy identification.</li>

@@ -252,7 +252,7 @@ class StudentVerificationController extends Controller
             'type' => null,
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' => ' You are now eligible to post Extra-Care Rides',
+            'message' => ' You are now eligible to post Extra+ Rides',
             'status' => 'completed',
             'notification_type' => 'upcoming'
         ]);

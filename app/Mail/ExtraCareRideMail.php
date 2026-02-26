@@ -29,7 +29,7 @@ class ExtraCareRideMail extends Mailable
     public function build()
     {
         return $this->markdown('mails/extra_care_ride')
-            ->subject("Your Extra-Care Ride is now live on ProximaRide")
+            ->subject("Your Extra+ Ride is now live on ProximaRide")
             ->with("data", $this->data);
     }
 }

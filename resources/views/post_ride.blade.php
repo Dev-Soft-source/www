@@ -251,7 +251,7 @@
             </div>
         </div>
     @endif
-    <div id="myModal" class="hidden relative z-50" id="extra-care-ride-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="myModal" class="hidden relative z-50" id="Extra+-ride-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
@@ -1900,7 +1900,7 @@
                                         };
                                     @endphp
                                     <div class="flex items-center">
-                                        <input id="extra-care" type="checkbox" name="features[]"
+                                        <input id="Extra+" type="checkbox" name="features[]"
                                             @php $disabled = false; @endphp
                                             @if ($user->folks_ride == '0')
                                                 @php $disabled = true; @endphp
@@ -1938,7 +1938,7 @@
                                                     ? 'checked'
                                                     : '')) }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="extra-care"
+                                        <label for="Extra+"
                                             class="ml-2 text-gray-900 flex space-x-1">
                                             <span class="text-green-500 font-medium
                                                 @php $disabled = false; @endphp
@@ -2474,10 +2474,10 @@
                                 $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
                                 $extraCareRideChecked = is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
                             @endphp
-                            <div id="extra-care-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+                            <div id="Extra+-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
                                 <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                                    <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra-Care Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                                    6. I understand that this is an Extra-Care Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
+                                    <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
+                                    6. I understand that this is an Extra+ Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
                                 </p>
                             </div>
                         @endisset
@@ -2563,10 +2563,10 @@
 
     // Define the handler function
     function extraCareRideModal(parms) {
-        document.getElementById('extra-care-ride-modal').classList.remove('hidden');
+        document.getElementById('Extra+-ride-modal').classList.remove('hidden');
     }
     function closeExtraCareRideModal(parms) {
-        document.getElementById('extra-care-ride-modal').classList.add('hidden');
+        document.getElementById('Extra+-ride-modal').classList.add('hidden');
     }
     
     

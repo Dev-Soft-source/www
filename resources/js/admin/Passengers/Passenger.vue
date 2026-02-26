@@ -151,7 +151,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td><b>Extra-Care Rides:</b></td>
+                                <td><b>Extra+ Rides:</b></td>
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>

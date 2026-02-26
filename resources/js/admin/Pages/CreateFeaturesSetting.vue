@@ -227,7 +227,7 @@
                                             >
                                                 <label
                                                     :for="`features_option2_${activeLanguageId}`"
-                                                    >Extra-Care Rides</label
+                                                    >Extra+ Rides</label
                                                 >
                                             </div>
                                             <input
@@ -271,7 +271,7 @@
                                             >
                                                 <label
                                                     :for="`features_option2_tooltip_${activeLanguageId}`"
-                                                    >Extra-Care Rides tooltip</label
+                                                    >Extra+ Rides tooltip</label
                                                 >
                                             </div>
                                             <input
@@ -314,7 +314,7 @@
                                                 <div class="flex justify-between">
                                                     <label
                                                         :for="`features_option2_icon_${activeLanguageId}`"
-                                                        >Extra-Care Rides icon</label
+                                                        >Extra+ Rides icon</label
                                                     >
                                                 </div>
                                                 <input

@@ -25,7 +25,7 @@ class BookingResource extends JsonResource
                     $pinkRide = "Pink ride";
                 }
                 if(in_array(2, $explodeFeatures)){
-                    $extraCareRide = "Extra-Care Ride";
+                    $extraCareRide = "Extra+ Ride";
                 }
             }
         }

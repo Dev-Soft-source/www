@@ -311,7 +311,7 @@
 
             <!-- @if(!empty($ride->extra_care_ride))
                 <p class="text-gray-600 font-semibold text-lg mb-0">
-                    (This is an Extra-Care Ride)
+                    (This is an Extra+ Ride)
                 </p>
             @endif
 

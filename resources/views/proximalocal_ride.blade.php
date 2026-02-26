@@ -57,7 +57,7 @@
             margin: 0;
         }
 
-        /* FAQ - Extra-Care Rides: themed bar (blue) and smooth expand/collapse */
+        /* FAQ - Extra+ Rides: themed bar (blue) and smooth expand/collapse */
         .proximalocal-ride-faq {
             border: 1px solid rgba(3, 105, 161, 0.3);
             border-radius: 0.75rem;

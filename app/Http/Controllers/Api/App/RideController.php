@@ -2543,13 +2543,13 @@ class RideController extends Controller
 
             ];
             if (in_array('1', $features) && in_array('2', $features)) {
-                // Both Pink and Extra-Care
+                // Both Pink and Extra+
                 Mail::to($user->email)->queue(new PinkExtraCareRideMail($data));
             } elseif (in_array('1', $features)) {
                 // Only Pink Ride
                 Mail::to($user->email)->queue(new PinkRideMail($data));
             } elseif (in_array('2', $features)) {
-                // Only Extra-Care Ride
+                // Only Extra+ Ride
                 Mail::to($user->email)->queue(new ExtraCareRideMail($data));
             } else {
                 // Regular ride (existing email)
@@ -2562,11 +2562,11 @@ class RideController extends Controller
         $hasVehicle = !empty($initialRide->vehicle_id);
         $liveMessage = $hasVehicle ? 'Your ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
         $pinkLiveMessage = $hasVehicle ? 'Your Pink Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
-        $extraCareLiveMessage = $hasVehicle ? 'Your Extra-Care Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
-        $pinkExtraCareLiveMessage = $hasVehicle ? 'Your Pink and Extra-Care ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $extraCareLiveMessage = $hasVehicle ? 'Your Extra+ Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $pinkExtraCareLiveMessage = $hasVehicle ? 'Your Pink and Extra+ ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
 
         if (in_array('1', $features) && in_array('2', $features)) {
-            // Both Pink and Extra-Care
+            // Both Pink and Extra+
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,
@@ -2608,7 +2608,7 @@ class RideController extends Controller
                 $fcmService->sendNotification($fcmToken, $body);
             }
         } elseif (in_array('2', $features)) {
-            // Only Extra-Care Ride
+            // Only Extra+ Ride
             $notification = Notification::create([
                 'ride_id' => $initialRide->id,
                 'posted_by' => $user_id,

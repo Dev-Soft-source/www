@@ -44,7 +44,7 @@
         <div class="border-b pb-2">
             <h1 class="mb-0">My phone number</h1>
             <p class="text-gray-900">
-                To be eligible to post "ProximaRide" and "Extra-Care Rides", you must verify your phone number
+                To be eligible to post "ProximaRide" and "Extra+ Rides", you must verify your phone number
             </p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 w-full md:w-1/2 gap-4 mt-4">

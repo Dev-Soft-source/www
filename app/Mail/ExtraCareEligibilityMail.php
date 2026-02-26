@@ -29,7 +29,7 @@ class ExtraCareEligibilityMail extends Mailable
     public function build()
     {
         return $this->markdown('mails/extra_care_eligibility')
-            ->subject("You are now eligible to post Extra-Care Rides")
+            ->subject("You are now eligible to post Extra+ Rides")
             ->with("data", $this->data);
     }
 }

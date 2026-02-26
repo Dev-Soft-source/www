@@ -46,7 +46,7 @@
                 <tr>
                     <td>
                         <h1 style="font-weight: 700;color: #000;">Hi {{ $data['username'] }},</h1>
-                        <p style="font-weight: 400;color: #000;">Your Pink and Extra-Care ride is now live on ProximaRide.</p>
+                        <p style="font-weight: 400;color: #000;">Your Pink and Extra+ ride is now live on ProximaRide.</p>
                         <p style="font-weight: 700;color: #000;">Ride details:</p>
                         <p style="font-weight: 400;color: #000;"><span style="font-weight: 700">From:</span> {{ $data['from'] }}</p>
                         <p style="font-weight: 400;color: #000;"><span style="font-weight: 700">To:</span> {{ $data['to'] }}</p>
@@ -59,7 +59,7 @@
                             Remember that <span  style="color: #000; font-weight: 700;margin-top:12px;font-style: italic;">only female members</span> are allowed on ProximaRide. Male passengers are allowed only if they are under 12 years of age. If a male passenger, who is above 12 years of age, shows up, you are obliged to refuse taking him, and you will get the full payment. If you do take him, and there are other passengers on the ride, your account will be suspended.
                         </p>
                         <p style="font-weight: 400;color: #000; margin-top: 16px;">
-                            <span  style="color: #000; font-weight: 700;margin-top:12px;font-style: italic;">This is also an Extra-care Ride,</span> and you are eligible because of your good ratings, safe driving and overall attitude. Keep up the good work to maintain your eligibility.
+                            <span  style="color: #000; font-weight: 700;margin-top:12px;font-style: italic;">This is also an Extra+ Ride,</span> and you are eligible because of your good ratings, safe driving and overall attitude. Keep up the good work to maintain your eligibility.
                         </p>
                     </td>
                 </tr>

@@ -121,7 +121,7 @@
                                 );
                             @endphp
                             <span>{!! $new_sub_heading_text ??
-                                'If you are signing up as a driver, then please note that to be eligible to post ProximaRide and Extra-Care Rides, you must upload your profile photo' !!}</span>
+                                'If you are signing up as a driver, then please note that to be eligible to post ProximaRide and Extra+ Rides, you must upload your profile photo' !!}</span>
                         </div>
                         <label for="dropzone-file"
                             class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">

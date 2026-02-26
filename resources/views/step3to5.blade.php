@@ -16,7 +16,7 @@
                 {{ $step3Page->sub_heading ?? "Don’t forget your driver’s license below" }}
             </h4> --}}
             <p for="" class=" text-black mt-2">
-                {!! $step3Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra-Care Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license. " !!}
+                {!! $step3Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra+ Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license. " !!}
             </p>
             <p for="" class=" text-black mt-8">
                 {!! $step3Page->sub_main_label ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it" !!}

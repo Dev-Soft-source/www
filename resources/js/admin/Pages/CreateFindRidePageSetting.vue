@@ -187,7 +187,7 @@
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label :for="`extra_care_ride_page_label_${activeLanguageId}`">
-                                                        Search extra-care ride only page label
+                                                        Search Extra+ ride only page label
                                                     </label>
                                                 </div>
                                                 <input type="text" :name="`extra_care_ride_page_label_${activeLanguageId}`"

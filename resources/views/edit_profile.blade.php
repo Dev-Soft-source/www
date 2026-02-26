@@ -23,7 +23,7 @@
             $user->government_issued_id !== null && $user->government_issued_id !== '')
             <div class="pt-1">
                 <p class="text-gray-900">
-                    {{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra-Care Rides" , you must complete all fields below' }}
+                    {{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}
                 </p>
             </div>
         @else
@@ -32,7 +32,7 @@
             </div>
             <div class="pb-4">
                 @if ($user->gender == 'female' && in_array('Extra care rides', explode(';', $user->features)) && in_array('Pink rides', explode(';', $user->features)))
-                    <p class="text-gray-900">You have selected the "ProximaRide" and the "My Extra-Care Rides"</p>
+                    <p class="text-gray-900">You have selected the "ProximaRide" and the "My Extra+ Rides"</p>
                     <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
                         a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
                         yourself</p>
@@ -43,13 +43,13 @@
                         ID*, and you must fill in a small bio about yourself</p>
                     <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
                 @elseif (in_array('Extra care rides', explode(';', $user->features)))
-                    <p class="text-gray-900">You have selected the "My Extra-Care Rides"</p>
+                    <p class="text-gray-900">You have selected the "My Extra+ Rides"</p>
                     <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
                         a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
                         yourself</p>
                     <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
                 @else
-                    <p class="text-gray-900">{{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra-Care Rides" , you must complete all fields below' }}</p>
+                    <p class="text-gray-900">{{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}</p>
                 @endif
             </div>
         @endif
