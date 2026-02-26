@@ -486,7 +486,7 @@ Route::post('verify-number', [PhoneController::class, 'verifyPhoneNumber'])->nam
 Route::post('resend-code', [PhoneController::class, 'resendCode'])->name('resend_code');
 Route::post('my-cards/store', [CardController::class, 'store'])->name('my_cards.store');
 Route::post('my-cards/create-setup-intent', [CardController::class, 'createSetupIntent'])->name('my_cards.create_setup_intent');
-Route::get('primary-card/{id}', [CardController::class, 'primary'])->name('my_cards.set_primary');
+Route::post('primary-card/{id}', [CardController::class, 'primary'])->name('my_cards.set_primary');
 Route::get('delete-card/{id}', [CardController::class, 'destroy'])->name('my_cards.destroy');
 Route::put('booking-credits/update/{id}', [BookingCreditController::class, 'update'])->name('booking.credits.update');
 Route::put('profile/vehicle/update/{id}', [ProfileVehicleController::class, 'update'])->name('profile.vehicle.update');

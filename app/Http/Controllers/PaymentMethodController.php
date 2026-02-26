@@ -59,7 +59,7 @@ class PaymentMethodController extends Controller
         ]);
         $clientSecret = $setupIntent->client_secret;
 
-        return view('my_cards', compact('methods','user', 'paymentSettingDetail', 'ProfilePage', 'ProfileSetting', 'reviewSetting', 'clientSecret'));
+        return view('payment_methods', compact('methods','user', 'paymentSettingDetail', 'ProfilePage', 'ProfileSetting', 'reviewSetting', 'clientSecret'));
     }
 
     /**
