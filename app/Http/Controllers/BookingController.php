@@ -198,7 +198,7 @@ class BookingController extends Controller
 
                 $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
                     ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
+                    ->first();
 
                 $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
                     ->whereLanguageId($selectedLanguage->id)
