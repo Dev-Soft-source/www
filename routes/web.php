@@ -367,7 +367,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/payment-methods/{id}/default', [PaymentMethodController::class, 'setDefault'])->name('payment.methods.default');
 });
 
-// Route::get('{lang?}/my-cards', [CardController::class, 'index'])->middleware('auth')->name('my_cards');
+Route::get('{lang?}/my-cards', [CardController::class, 'index'])->middleware('auth')->name('my_cards');
 Route::get('{lang?}/my-cards/add', [CardController::class, 'create'])->name('my_cards.create')->middleware('auth');
 Route::post('/my-cards/session-data', [CardController::class, 'sessionData'])->name('my_cards.sessionData')->middleware('auth');
 // Route::get('{lang?}/my-cards/add/{param?}', [CardController::class, 'create'])->name('my_cards.create');
@@ -484,10 +484,10 @@ Route::get('{lang?}/send-verification-code/{id}', [PhoneController::class, 'send
 Route::get('send-verification-code-booking/{id}', [BookingController::class, 'sendVerificationCodeBooking'])->name('send_verification_code_booking');
 Route::post('verify-number', [PhoneController::class, 'verifyPhoneNumber'])->name('verify_number');
 Route::post('resend-code', [PhoneController::class, 'resendCode'])->name('resend_code');
-// Route::post('my-cards/store', [CardController::class, 'store'])->name('my_cards.store');
-// Route::post('my-cards/create-setup-intent', [CardController::class, 'createSetupIntent'])->name('my_cards.create_setup_intent');
-// Route::get('primary-card/{id}', [CardController::class, 'primary'])->name('my_cards.set_primary');
-// Route::get('delete-card/{id}', [CardController::class, 'destroy'])->name('my_cards.destroy');
+Route::post('my-cards/store', [CardController::class, 'store'])->name('my_cards.store');
+Route::post('my-cards/create-setup-intent', [CardController::class, 'createSetupIntent'])->name('my_cards.create_setup_intent');
+Route::get('primary-card/{id}', [CardController::class, 'primary'])->name('my_cards.set_primary');
+Route::get('delete-card/{id}', [CardController::class, 'destroy'])->name('my_cards.destroy');
 Route::put('booking-credits/update/{id}', [BookingCreditController::class, 'update'])->name('booking.credits.update');
 Route::put('profile/vehicle/update/{id}', [ProfileVehicleController::class, 'update'])->name('profile.vehicle.update');
 Route::put('profile/preferences/update/{id}', [ProfilePreferencesController::class, 'update'])->name('profile.preferences.update');
