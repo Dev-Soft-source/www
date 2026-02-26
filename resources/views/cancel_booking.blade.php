@@ -37,6 +37,36 @@
     </div>
 </div>
 @endif
+{{-- Confirmation modal for cancel booking --}}
+<div id="cancelConfirmModal" class="relative z-50 hidden" aria-labelledby="cancel-confirm-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                <button type="button" onclick="closeCancelConfirmModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                    <div class="text-center">
+                        <div class="w-full">
+                            <p class="text-xl text-center text-black mb-4" id="cancel-confirm-title">{{ $sureMessage ?? "Are you sure you want to cancel booking?" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                    <button type="button" onclick="closeCancelConfirmModal()" class="whitespace-nowrap inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm w-auto" style="background-color: #106BC7;">
+                        {{ $tripsPage->booking_cancel_btn_no_label ?? "No, take me back" }}
+                    </button>
+                    <button type="button" onclick="confirmCancelBooking()" class="whitespace-nowrap inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm w-auto" style="background-color: #f87171;">
+                        {{ $tripsPage->booking_cancel_btn_yes_label ?? "Yes, cancel it!" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container mx-auto my-4">
     <div class="w-full md:w-2/3 mx-auto px-4 md:px-0 ">
     <form method="POST" action="{{ route('update_cancel_booking', $booking->id) }}"
@@ -242,23 +272,8 @@
             return;
         }
 
-        // 2. Only after validation passes, show confirmation popup
-        swal.fire({
-        title: '{{ $sureMessage ?? "Are you sure you want to cancel booking?"}}',
-        showCloseButton: true,
-        showCancelButton: true,
-        confirmButtonColor: '#f87171',
-        cancelButtonColor: '#106BC7',
-        confirmButtonText: '{{ $tripsPage->booking_cancel_btn_yes_label ?? "Yes, cancel it!"}}',
-        cancelButtonText: '{{ $tripsPage->booking_cancel_btn_no_label ?? "No, take me back"}}',
-        customClass: {
-            popup: 'modal-border1'
-        }
-        }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('formCancelRide').submit();
-        }
-        });
+        // 2. Only after validation passes, show confirmation modal
+        document.getElementById('cancelConfirmModal').classList.remove('hidden');
     });
 
     // Clear message error when user types
@@ -273,11 +288,19 @@
     }
 
     function closeModalcancel() {
-    const modal = document.getElementById('myModal');
-    if (modal) {
-        modal.style.display = 'none';
+        const modal = document.getElementById('myModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
-}
+
+    function closeCancelConfirmModal() {
+        document.getElementById('cancelConfirmModal').classList.add('hidden');
+    }
+
+    function confirmCancelBooking() {
+        document.getElementById('formCancelRide').submit();
+    }
   </script>
 <style>
 

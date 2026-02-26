@@ -43,6 +43,39 @@
     </div>
 </div>
 @endif
+    {{-- Confirmation modal for cancel ride --}}
+    <div id="cancelConfirmModal" class="relative z-50 hidden" aria-labelledby="cancel-confirm-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                    <button type="button" onclick="closeCancelConfirmModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="cancel-confirm-title">Are you sure?</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">Canceling a ride may inconvenience your passengers.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="closeCancelConfirmModal()" class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto" style="background-color: #3085d6;">
+                            No, take me back
+                        </button>
+                        <button type="button" onclick="confirmCancelRide()" class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto" style="background-color: #d33;">
+                            Yes, cancel it
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container mx-auto my-4">
         <div class="w-full md:w-2/3 mx-auto px-4 md:px-0 ">
             <form method="POST" action="{{ route('update_cancel_ride', $ride->id) }}" enctype="multipart/form-data">
@@ -129,57 +162,22 @@
 
             if (!checkbox.checked) {
                 Swal.fire({
-                    // icon: 'error',
                     title: 'Please confirm your decision',
                     confirmButtonText: 'OK'
-                    showCancelButton: true,
                 });
                 return;
             }
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Canceling a ride may inconvenience your passengers.",
-                // icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, cancel it',
-                cancelButtonText: 'No, take me back'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let form = document.querySelector('form');
-                    console.log(form);
-                    form.submit();
-
-                    // fetch(form.action, {
-                    //     method: 'POST',
-                    //     body: formData,
-
-                    // }).then(data => {
-                    //     console.log('data', data)
-                    //     if (data.success) {
-                    //         Swal.fire({
-                    //             title: 'This ride has been cancelled',
-                    //             icon: 'success',
-                    //             confirmButtonText: 'Close',
-                    //             confirmButtonColor: '#f87171'
-                    //         }).then(() => {
-                    //             window.location.href =
-                    //                 "{{ route('my_rides', ['lang' => $selectedLanguage->abbreviation]) }}";
-                    //         });
-                    //     } else if (data.error) {
-                    //         Swal.fire({
-                    //             title: data.message,
-                    //             icon: 'warning',
-                    //             confirmButtonText: 'Close',
-                    //             confirmButtonColor: '#f87171'
-                    //         })
-                    //     }
-                    // });
-                }
-            });
+            document.getElementById('cancelConfirmModal').classList.remove('hidden');
         });
+
+        function closeCancelConfirmModal() {
+            document.getElementById('cancelConfirmModal').classList.add('hidden');
+        }
+
+        function confirmCancelRide() {
+            document.querySelector('form').submit();
+        }
     </script>
     <style>
         /* Cancel ride button uses default .button-exp-fill (primary blue) */

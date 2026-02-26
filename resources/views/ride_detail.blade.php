@@ -695,7 +695,9 @@
                                         <p class="text-md font-semibold">{{ $ride->color }}</p>
                                     @endif
                                 </div>
-                                <!-- <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p> -->
+                                @if ($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->exists())
+                                    <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
+                                @endif
                                 <!-- @if ($ride->vehicle_type)
                                     <p class="text-sm text-left text-black">{{ $ride->vehicle_type }}</p>
                                 @endif -->
@@ -1086,148 +1088,41 @@
                                             @if (strtotime($ride->date) > strtotime('today') ||
                                                     (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                                                 @if ($ride->seats - $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) { $query->whereNull('deleted_at'); })->sum('seats') != 0)
-                                                <td class="border border-slate-300 px-4 py-2 text-center">
-                                                    <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}"
-                                                        class="button-exp-fill whitespace-nowrap me-1">
-                                                        @isset($rideDetailPage->edit_button_actions_label)
-                                                            {{ $rideDetailPage->edit_button_actions_label }}
-                                                        @endisset
-                                                    </a>
-                                                </td>
+                                                <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}"
+                                                    class="button-exp-fill whitespace-nowrap me-1 text-xl">
+                                                    @isset($rideDetailPage->edit_button_actions_label)
+                                                        {{ $rideDetailPage->edit_button_actions_label }}
+                                                    @endisset
+                                                </a>
                                                 @endif
                                             @endif
                                         @endif
                                     </div>
                                 @endforeach
-                                {{-- <div class="col-span-2 bg-white rounded-lg overflow-hidden shadow-3xl mt-4"> --}}
-
-                                {{-- <h3 class="w-full">
-                                        @isset($rideDetailPage->booking_table_heading)
-                                            {{ $rideDetailPage->booking_table_heading }}
-                                        @endisset
-                                    </h3> --}}
-
-                                {{--  <div class="bg-white p-4 space-y-3">
-                                        <table class="border-collapse border border-slate-400 w-full">
-                                            <thead>
-                                                <tr>
-                                                    <th class="border border-slate-300 px-4 py-2">
-                                                        @isset($rideDetailPage->passenger_column_label)
-                                                            {{ $rideDetailPage->passenger_column_label }}
-                                                        @endisset
-                                                    </th>
-                                                    <th class="border border-slate-300 px-4 py-2">
-                                                        @isset($rideDetailPage->seat_booked_column_label)
-                                                            {{ $rideDetailPage->seat_booked_column_label }}
-                                                        @endisset
-                                                    </th>
-                                                    <th class="border border-slate-300 px-4 py-2">
-                                                        @isset($rideDetailPage->total_cost_column_label)
-                                                            {{ $rideDetailPage->total_cost_column_label }}
-                                                        @endisset
-                                                    </th>
-                                                    <th class="border border-slate-300 px-4 py-2">
-                                                        @isset($rideDetailPage->booked_on_column_label)
-                                                            {{ $rideDetailPage->booked_on_column_label }}
-                                                        @endisset
-                                                    </th>
-                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                        <th class="border border-slate-300 px-4 py-2">
-                                                            @isset($rideDetailPage->status_column_label)
-                                                                {{ $rideDetailPage->status_column_label }}
-                                                            @endisset
-                                                        </th>
-                                                    @endif
-                                                    @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                                        <th class="border border-slate-300 px-4 py-2">
-                                                            @isset($rideDetailPage->actions_column_label)
-                                                                {{ $rideDetailPage->actions_column_label }}
-                                                            @endisset
-                                                        </th>
-                                                    @endif
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($ride->bookings->where('user_id', auth()->user()->id)->where('status', '!=', '4') as $booking)
-                                                    @if ($booking->passenger)
-                                                        <tr>
-                                                            <td class="border border-slate-300 px-4 py-2 text-center">{{ $booking->passenger->first_name }}
-                                                                {{ $booking->passenger->last_name }}</td>
-                                                            <td class="border border-slate-300 px-4 py-2 text-center flex items-center space-x-3">
-                                                                @for ($i = 1; $i <= $booking->seats; $i++)
-                                                                    <div class="relative">
-                                                                        <img src="{{ asset('assets/seat-hover-1.png') }}"
-                                                                            class="w-10 h-10 mt-0.5 cursor-pointer" alt="">
-                                                                        <span
-                                                                            class="absolute left-4 top-3 text-green-300">{{ $i }}</span>
-                                                                    </div>
-                                                                @endfor
-                                                            </td>
-                                                            <td class="border border-slate-300 px-4 py-2 text-center">
-                                                                {{ $booking->seats * $booking->ride->price + $booking->booking_credit }}</td>
-                                                            <td class="border border-slate-300 px-4 py-2 text-center">{{ $booking->booked_on }}</td>
-                                                            @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                                @if ($booking->status === '0')
-                                                                    <td class="border border-slate-300 px-4 py-2 text-center">
-                                                                        @isset($rideDetailPage->booking_requested_status_label)
-                                                                            {{ $rideDetailPage->booking_requested_status_label }}
-                                                                        @endisset
-                                                                    </td>
-                                                                @elseif ($booking->status === '1')
-                                                                    <td class="border border-slate-300 px-4 py-2 text-center">
-                                                                        @isset($rideDetailPage->seat_booked_status_label)
-                                                                            {{ $rideDetailPage->seat_booked_status_label }}
-                                                                        @endisset
-                                                                    </td>
-                                                                @elseif ($booking->status === '3')
-                                                                    <td class="border border-slate-300 px-4 py-2 text-center">
-                                                                        @isset($rideDetailPage->booking_denied_status_label)
-                                                                            {{ $rideDetailPage->booking_denied_status_label }}
-                                                                        @endisset
-                                                                    </td>
-                                                                @endif
-                                                            @endif
-
-                                                        </tr>
-                                                    @endif
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>  --}}
-                                {{-- </div> --}}
                             </div>
-                            @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id) as $booking)
-                                @if ($booking->status !== '3')
-                                    @if (strtotime($ride->date) > strtotime('today') ||
-                                            (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                        {{-- @php
-                                            if ($cancelSetting) {
-                                                // Calculate the cancellation deadline
-                                                $cancellationDeadline = strtotime('+' . $cancelSetting->passenger_cancel_hours . ' hours', strtotime($booking->booked_on));
-                                            }
-                                        @endphp --}}
-                                        <div class="flex justify-end">
-                                            <a @if ($postRidePage->cancellation_policy_label2 == $booking->type) href="javascript:void(0);" onclick="toggleModalCard('card-modal', '{{ $booking->id }}', '{{ $selectedLanguage->abbreviation }}')"
-                                                @else
-                                                    href="{{ route('booking.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}" @endif
-                                                class="">
-                                                <label for="instant-booking"
-                                                    class="inline-flex items-center justify-center space-x-3 w-fit button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                    <h4 class="text-2xl">
-                                                        @isset($rideDetailPage->cancel_booking_btn_label)
-                                                            {{ $rideDetailPage->cancel_booking_btn_label }}
-                                                        @endisset
-                                                    </h4>
-                                                </label>
-                                            </a>
-                                        </div>
-                                        {{-- @if (isset($cancelSetting) && $cancelSetting && isset($cancellationDeadline))
-                                            @if (strtotime('now') < $cancellationDeadline)
+                            @php
+                                $userBooking = $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first();
+                            @endphp
+                            @if ($userBooking && $userBooking->status !== '3')
+                                @if (strtotime($ride->date) > strtotime('today') ||
+                                        (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                    <div class="flex justify-end">
+                                        <a 
+                                            @if ($postRidePage->cancellation_policy_label2 == $userBooking->type)
+                                                href="javascript:void(0);" 
+                                                onclick="toggleModalCard('card-modal', '{{ $userBooking->id }}', '{{ $selectedLanguage->abbreviation }}')"
+                                            @else
+                                                href="{{ route('booking.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $userBooking->id]) }}"
                                             @endif
-                                        @endif --}}
-                                    @endif
+                                            class="button-exp-fill text-xl">     
+
+                                            @isset($rideDetailPage->cancel_booking_btn_label)
+                                                {{ $rideDetailPage->cancel_booking_btn_label }}
+                                            @endisset
+                                        </a>
+                                    </div>
                                 @endif
-                            @endforeach
+                            @endif
                         @elseif (
                             $ride->seats -
                                 $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
@@ -1261,193 +1156,6 @@
                             @endif
                         @endif
                     </div>
-                    {{-- @if (auth()->check() && count($ride->bookings->where('status', 1)->where('user_id', '!=', auth()->user()->id)) > 0)
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">My co-passengers</h3>
-                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->departure, 'destination' => $ride->destination, 'id' => $ride->id]) }}">
-                                <div class="space-y-4 p-4">
-                                    @foreach ($ride->bookings->where('status', 1)->where('user_id', '!=', auth()->user()->id) as $booking)
-                                        @if ($booking->passenger)
-                                            <div class="flex items-center space-x-2 w-full">
-                                                <img class="w-12 h-12 rounded-full object-cover" src="{{ $booking->passenger->profile_image }}" alt="">
-                                                <div class="text-center">
-                                                    <p class="font-semibold leading-4 text-base mb-0 ">{{ $booking->passenger->first_name }} {{ $booking->passenger->last_name }}</p>
-                                                    <div class="flex items-center space-x-2">
-                                                        @php
-                                                            // Calculate the age based on the driver's date of birth
-                                                            $dob = \Carbon\Carbon::parse($booking->passenger->dob);
-                                                            $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                                        @endphp
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Age: <span>{{ $age }}</span></p>
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Gender: <span>{{ $booking->passenger->gender }}</span></p>
-                                                        @php
-                                                            $user_id = $booking->passenger->id;
-
-                                                            // Assuming $ratings is a collection
-                                                            $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                                return $rating->booking->user_id === $user_id;
-                                                            });
-
-                                                            // Filter out non-numeric values for the columns and then calculates the average
-                                                            $VehicleRatings = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->vehicle_condition);
-                                                            });
-                                                            $VehicleCondition = $VehicleRatings->avg('vehicle_condition');
-                                                            $ConsciousRatings = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->conscious);
-                                                            });
-                                                            $conscious = $ConsciousRatings->avg('conscious');
-                                                            $Comfort = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->comfort);
-                                                            });
-                                                            $comfort = $Comfort->avg('comfort');
-                                                            $Communication = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->communication);
-                                                            });
-                                                            $communication = $Communication->avg('communication');
-                                                            $Attitude = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->attitude);
-                                                            });
-                                                            $attitude = $Attitude->avg('attitude');
-                                                            $Hygiene = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->hygiene);
-                                                            });
-                                                            $hygiene = $Hygiene->avg('hygiene');
-                                                            $Respect = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->respect);
-                                                            });
-                                                            $respect = $Respect->avg('respect');
-                                                            $Safety = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->safety);
-                                                            });
-                                                            $safety = $Safety->avg('safety');
-                                                            $Timeliness = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->timeliness);
-                                                            });
-                                                            $timeliness = $Timeliness->avg('timeliness');
-
-                                                            // Calculate averages for each rating category
-                                                            $validAverages = [];
-                                                            $validAverages[] = $conscious;
-                                                            $validAverages[] = $comfort;
-                                                            $validAverages[] = $communication;
-                                                            $validAverages[] = $attitude;
-                                                            $validAverages[] = $hygiene;
-                                                            $validAverages[] = $respect;
-                                                            $validAverages[] = $safety;
-                                                            $validAverages[] = $timeliness;
-
-                                                            // Filter out non-empty averages
-                                                            $validAverages = array_filter($validAverages, function ($average) {
-                                                                return !is_null($average);
-                                                            });
-
-                                                            // Calculate total average
-                                                            $totalAverage = count($validAverages) > 0 ? array_sum($validAverages) / count($validAverages) : null;
-                                                        @endphp
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Review: <span>{{ number_format($totalAverage, 1) }}</span></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </a>
-                        </div>
-                    @elseif (count($ride->bookings->where('status', 1)) > 0)
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">My co-passengers</h3>
-                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->departure, 'destination' => $ride->destination, 'id' => $ride->id]) }}">
-                                <div class="space-y-4 p-4">
-                                    @foreach ($ride->bookings->where('status', 1) as $booking)
-                                        @if ($booking->passenger)
-                                            <div class="flex items-center space-x-2 w-full">
-                                                <img class="w-12 h-12 rounded-full object-cover" src="{{ $booking->passenger->profile_image }}" alt="">
-                                                <div class="text-center">
-                                                    <p class="font-semibold leading-4 text-base mb-0 ">{{ $booking->passenger->first_name }} {{ $booking->passenger->last_name }}</p>
-                                                    <div class="flex items-center space-x-2">
-                                                        @php
-                                                            // Calculate the age based on the driver's date of birth
-                                                            $dob = \Carbon\Carbon::parse($booking->passenger->dob);
-                                                            $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                                        @endphp
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Age: <span>{{ $age }}</span></p>
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Gender: <span>{{ $booking->passenger->gender }}</span></p>
-                                                        @php
-                                                            $user_id = $booking->passenger->id;
-
-                                                            // Assuming $ratings is a collection
-                                                            $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                                return $rating->booking->user_id === $user_id;
-                                                            });
-
-                                                            // Filter out non-numeric values for the columns and then calculates the average
-                                                            $VehicleRatings = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->vehicle_condition);
-                                                            });
-                                                            $VehicleCondition = $VehicleRatings->avg('vehicle_condition');
-                                                            $ConsciousRatings = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->conscious);
-                                                            });
-                                                            $conscious = $ConsciousRatings->avg('conscious');
-                                                            $Comfort = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->comfort);
-                                                            });
-                                                            $comfort = $Comfort->avg('comfort');
-                                                            $Communication = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->communication);
-                                                            });
-                                                            $communication = $Communication->avg('communication');
-                                                            $Attitude = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->attitude);
-                                                            });
-                                                            $attitude = $Attitude->avg('attitude');
-                                                            $Hygiene = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->hygiene);
-                                                            });
-                                                            $hygiene = $Hygiene->avg('hygiene');
-                                                            $Respect = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->respect);
-                                                            });
-                                                            $respect = $Respect->avg('respect');
-                                                            $Safety = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->safety);
-                                                            });
-                                                            $safety = $Safety->avg('safety');
-                                                            $Timeliness = $filteredRatings->filter(function ($rating) {
-                                                                return is_numeric($rating->timeliness);
-                                                            });
-                                                            $timeliness = $Timeliness->avg('timeliness');
-
-                                                            // Calculate averages for each rating category
-                                                            $validAverages = [];
-                                                            $validAverages[] = $conscious;
-                                                            $validAverages[] = $comfort;
-                                                            $validAverages[] = $communication;
-                                                            $validAverages[] = $attitude;
-                                                            $validAverages[] = $hygiene;
-                                                            $validAverages[] = $respect;
-                                                            $validAverages[] = $safety;
-                                                            $validAverages[] = $timeliness;
-
-                                                            // Filter out non-empty averages
-                                                            $validAverages = array_filter($validAverages, function ($average) {
-                                                                return !is_null($average);
-                                                            });
-
-                                                            // Calculate total average
-                                                            $totalAverage = count($validAverages) > 0 ? array_sum($validAverages) / count($validAverages) : null;
-                                                        @endphp
-                                                        <p class="text-gray-700 leading-4 mt-2 text-base">Review: <span>{{ number_format($totalAverage, 1) }}</span></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </a>
-                        </div>
-                    @endif --}}
                 </div>
             </div>
         </div>

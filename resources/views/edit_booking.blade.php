@@ -169,13 +169,15 @@
                                     @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
                                         @if (strtotime($ride->date) > strtotime('today') ||
                                                 (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                            <a
-                                                href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
-                                                @isset($rideDetailPage->seats_left_label)
-                                                    {{ $rideDetailPage->seats_left_label }}:
-                                                @endisset
-                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
-                                            </a>
+                                            <div class="flex items-baseline">
+                                                <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                    class="font-FuturaMdCnBT text-xl xl:text-2xl text-black">
+                                                    @isset($bookingPage->seats_left_label)
+                                                        {{ $bookingPage->seats_left_label }}
+                                                    @endisset
+                                                </a>
+                                                <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
+                                            </div>                                            
                                         @endif
                                     @endif
                                 @elseif (
@@ -186,13 +188,12 @@
                                         0)
                                     @if ($ride->status !== '2')
                                         <div class="flex ">
-                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="text-xl xl:text-2xl">
-                                                @isset($rideDetailPage->seats_left_label)
-                                                    {{ $rideDetailPage->seats_left_label }}:
+                                            <a class="font-FuturaMdCnBT text-xl xl:text-2xl text-black"    class="text-xl xl:text-2xl" href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                @isset($bookingPage->seats_left_label)
+                                                    {{ $bookingPage->seats_left_label }}
                                                 @endisset
-                                                {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                             </a>
+                                            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>                                            
                                         </div>
                                     @endif
                                 @endif
@@ -200,7 +201,7 @@
 
                             </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 p-4">
+                        <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
@@ -213,7 +214,7 @@
                     </div>
                     <div
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4">
+                        <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
@@ -222,7 +223,7 @@
                             </h4>
                         </div>
                         <div class="p-4">
-                            <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-3 items-baseline">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     Booking Method:
                                 </h4>

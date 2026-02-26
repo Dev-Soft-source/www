@@ -26,13 +26,7 @@
                                             {{ $myPassengerPage->age ?? 'Age' }}: <span>{{ $age }}</span></p>
                                         <p class="text-white leading-4 mt-2 ml-4 text-base">
                                             {{ $myPassengerPage->gender ?? 'Gender' }}: <span>
-                                                @if ($booking->passenger->gender == 'male')
-                                                    M
-                                                @elseif($booking->passenger->gender == 'female')
-                                                    F
-                                                @else
-                                                    {{ $booking->passenger->gender }}
-                                                @endif
+                                                {{ ucfirst($booking->passenger->gender) }}
                                             </span></p>
                                     </div>
                                 </div>

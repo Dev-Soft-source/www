@@ -249,7 +249,7 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->web_gender_label ?? 'Gender' }}:
-                                                            <span>{{ $booking->passenger->gender }}</span>
+                                                            <span>{{ ucfirst($booking->passenger->gender) }}</span>
                                                         </p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
@@ -676,7 +676,7 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_gender_label ?? 'Gender' }}:
-                                                            <span>{{ $booking->passenger->gender }}</span></p>
+                                                            <span>{{ ucfirst($booking->passenger->gender) }}</span></p>
                                                         <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         @php
                                                             $user_id = $booking->passenger->id;
