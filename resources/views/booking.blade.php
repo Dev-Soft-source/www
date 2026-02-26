@@ -1045,7 +1045,10 @@
                                                             </span>
                                                         </label>
                                                     </div>
-                                                    @php $primaryCardId = $cards->firstWhere(fn($c) => $c->primary_card == 1 || $c->primary_card === '1')?->id ?? ''; @endphp
+                                                    @php 
+                                                    $primaryCardId = $cards->firstWhere(fn($c) => $c->primary_card == 1 || $c->primary_card === '1')?->id ?? ''; 
+                                                    $cards = $cards->filter(fn($c) => $c->paymentMethod)->values();
+                                                    @endphp
                                                     <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
                                                         @foreach ($cards as $card)
                                                             @if ($card->paymentMethod)
