@@ -2046,5 +2046,16 @@ $(document).ready(function () {
         }
     });
 </script>
+<script>
+window.addEventListener("pageshow", function () {
 
+    const navEntries = performance.getEntriesByType("navigation");
+
+    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+        // User came using browser back/forward
+        window.location.reload();
+    }
+
+});
+</script>
 @endsection
