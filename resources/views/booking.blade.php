@@ -651,14 +651,29 @@
                                         </p>
                                     </div>
                                 @endif
-                                <div class="flex">
-                                    @foreach ($ride->pendingSeatDetail as $detail)
-                                        <div class="relative">
-                                            <label for="number-of-seat-{{ $detail->id }}">
-                                                <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden" {{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                                <img src="{{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
-                                                <span class="absolute left-4 top-3 seat-number seat-number-{{ $detail->id }} {{ old('seats') == $detail->id ? 'text-green-300' : '' }}"></span>
-                                            </label>
+                                <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
+                                    @foreach ($ride->seatDetail as $detail)
+                                        @php
+                                            $isBooked = $detail->status === 'booked';
+                                            $isSelectedByMe = !$isBooked && ($detail->user_id == auth()->user()->id || in_array($detail->id, old('seats_id', [])));
+                                        @endphp
+                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isBooked ? '1' : '0' }}">
+                                            @if ($isBooked)
+                                                <div class="opacity-50 cursor-not-allowed pointer-events-none">
+                                                    <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                        <img src="{{ asset('assets/seat.png') }}" class="w-8 h-8 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                        <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }}">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <label class="cursor-pointer inline-block seat-clickable" for="number-of-seat-{{ $detail->id }}" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" onclick="seat_selected(event, {{ $detail->id }}, {{ $detail->seat_number ?? $loop->iteration }})">
+                                                    <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden seat-checkbox" {{ $isSelectedByMe ? 'checked' : '' }} data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}">
+                                                    <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                        <img src="{{ $isSelectedByMe ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                        <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }} {{ $isSelectedByMe ? 'text-green-300' : '' }}">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                    </span>
+                                                </label>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -924,30 +939,32 @@
                                     <p class="text-left mt-4"><strong>● Extra-Care Rides: </strong> {{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards" }}</p></li>
                             </ul>
                             <div class="flex items-start my-4">
-                                <input id="" type="checkbox" name="agree_terms" value="1"
-                                {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                <label for="" class="ml-2 font-normal text-gray-900">
-                                    @isset($bookingPage->booking_term_agree_text)
-                                        {!! $bookingPage->booking_term_agree_text !!}
-                                    @endisset
+                                <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                    <input id="" type="checkbox" name="agree_terms" value="1"
+                                    {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                    <span class="ml-2"> 
+                                        @isset($bookingPage->booking_term_agree_text)
+                                            {!! $bookingPage->booking_term_agree_text !!}
+                                        @endisset
+                                    </span>
                                 </label>
                             </div>
-                                @error('agree_terms')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->aggreement_tooltip) {{ $bookingPage->aggreement_tooltip }} @endisset</p>
-                                    </div>
+                            @error('agree_terms')
+                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->aggreement_tooltip) {{ $bookingPage->aggreement_tooltip }} @endisset</p>
                                 </div>
-                                @enderror
+                            </div>
+                            @enderror
 
-                                <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base"></p>
-                                    </div>
+                            <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base"></p>
                                 </div>
+                            </div>
 
-                                @if ($ride->booking_type == "37")
+                            @if ($ride->booking_type == "37")
                                 @php
                                     if ($setting){
                                         $settingFirmDiscount = $setting->frim_discount;
@@ -956,203 +973,210 @@
                                     $firmText = str_replace(":discount", $settingFirmDiscount, $bookingPage->booking_disclaimer_firm);
                                 @endphp
                                 <div class="flex items-start my-4">
-                                    <input id="" type="checkbox" name="firm_agree_terms" value="1"
-                                        {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
-                                        <strong>Cancellation Policy (Firm): </strong> {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
-                                        </label>
+                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                        <input id="" type="checkbox" name="firm_agree_terms" value="1"
+                                            {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                        <span class="ml-2">
+                                            <strong>Cancellation Policy (Firm): </strong> {{ isset($firmText) && $firmText != "" ? $firmText : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time" }}
+                                        </span>
+                                    </label>
+                                </div>
+                                @error('firm_agree_terms')
+                                <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base">Before proceeding, please confirm that you are aware of and agree to the Firm Cancellation Policy for this ride.</p>
                                     </div>
-                                    @error('firm_agree_terms')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">Before proceeding, please confirm that you are aware of and agree to the Firm Cancellation Policy for this ride.</p>
-                                        </div>
-                                    </div>
-                                    @enderror
+                                </div>
+                                @enderror
 
-                                    <div id ="firm_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
+                                <div id ="firm_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
                                     </div>
+                                </div>
 
-                                    {{-- Second checkbox for Firm Cancellation Policy --}}
-                                    <div class="flex items-start my-4">
+                                {{-- Second checkbox for Firm Cancellation Policy --}}
+                                <div class="flex items-start my-4">
+                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
                                         <input id="firm_cancellation_understand" type="checkbox" name="firm_cancellation_understand" value="1"
                                             {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                        <label for="firm_cancellation_understand" class="ml-2 font-normal text-gray-900">
+                                        <span class="ml-2">
                                             I understand that this booking is under the Firm Cancellation Policy and is non-refundable.
-                                        </label>
+                                        </span>
+                                    </label>
+                                </div>
+                                @error('firm_cancellation_understand')
+                                <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
-                                    @error('firm_cancellation_understand')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
-                                    @enderror
-                                @endif
+                                </div>
+                                @enderror
+                            @endif
 
-                                @if (in_array($postRidePage->features_option1->name, $features))
-                                    <div class="flex items-start my-4">
+                            @if (in_array($postRidePage->features_option1->name, $features))
+                                <div class="flex items-start my-4">
+                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
                                         <input id="" type="checkbox" name="pink_ride_agree_terms" value="1"
                                             {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
+                                           class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                        <span class="ml-2">
                                             @isset($bookingPage->booking_pink_ride_term_agree_text)
                                                 {!! $bookingPage->booking_pink_ride_term_agree_text !!}
                                             @endisset
-                                        </label>
-                                    </div>
-                                    @error('pink_ride_agree_terms')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->pink_ride_tooltip) {{ $bookingPage->pink_ride_tooltip }} @endisset</p>
-                                            </div>
-                                        </div>
-                                    @enderror
-
-                                    <div id ="pink_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
+                                        </span>
+                                    </label>
+                                </div>
+                                @error('pink_ride_agree_terms')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->pink_ride_tooltip) {{ $bookingPage->pink_ride_tooltip }} @endisset</p>
                                         </div>
                                     </div>
-                                @endif
+                                @enderror
 
-                                @if (in_array($postRidePage->features_option2->name, $features))
-                                    <div class="flex items-start my-4">
+                                <div id ="pink_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if (in_array($postRidePage->features_option2->name, $features))
+                                <div class="flex items-start my-4">
+                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
                                         <input id="" type="checkbox" name="extra_care_ride_agree_terms" value="1"
                                             {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
+                                        <span class="ml-2">
                                             @isset($bookingPage->booking_extra_care_ride_term_agree_text)
                                                 {!! $bookingPage->booking_extra_care_ride_term_agree_text !!}
                                             @endisset
-                                        </label>
+                                        </span>
+                                    </label>
+                                </div>
+                                @error('extra_care_ride_agree_terms')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->extra_care_ride_tooltip) {{ $bookingPage->extra_care_ride_tooltip }} @endisset</p>
+                                        </div>
                                     </div>
-                                    @error('extra_care_ride_agree_terms')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->extra_care_ride_tooltip) {{ $bookingPage->extra_care_ride_tooltip }} @endisset</p>
+                                @enderror
+
+                                <div id ="extra_care_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                </div>
+                            @endif
+
+
+                            @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
+
+                            @else
+                                <div id="paymentSection" class="space-y-4 mb-4">
+                                    <h3 class="text-primary text-2xl xl:text-3xl">
+                                        @isset($bookingPage->like_to_pay_label)
+                                            {{ $bookingPage->like_to_pay_label }}
+                                        @endisset
+                                    </h3>
+                                    <div class="bg-white md:p-4">
+                                        <div class="border rounded-md overflow-hidden divide-y">
+                                            <div class="flex items-center justify-between p-3">
+                                                <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer">
+                                                <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                                    <span class="font-medium text-xl">
+                                                        @isset($bookingPage->paypal_label)
+                                                        {{ $bookingPage->paypal_label }}
+                                                    @endisset
+                                                    </span>
+                                                </label>
                                             </div>
-                                        </div>
-                                    @enderror
-
-                                    <div id ="extra_care_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
-                                    </div>
-                                @endif
-
-
-                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
-
-                                @else
-                                    <div id="paymentSection" class="space-y-4 mb-4">
-                                        <h3 class="text-primary text-2xl xl:text-3xl">
-                                            @isset($bookingPage->like_to_pay_label)
-                                                {{ $bookingPage->like_to_pay_label }}
-                                            @endisset
-                                        </h3>
-                                        <div class="bg-white md:p-4">
-                                            <div class="border rounded-md overflow-hidden divide-y">
+                                            <div>
                                                 <div class="flex items-center justify-between p-3">
-                                                    <input type="radio" id="paypal" name="payment_method" value="paypal" class="hidden peer">
-                                                    <label for="paypal" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                                    <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
+                                                    <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
                                                         <span class="font-medium text-xl">
-                                                            @isset($bookingPage->paypal_label)
-                                                            {{ $bookingPage->paypal_label }}
-                                                        @endisset
+                                                            @isset($bookingPage->credit_card_label)
+                                                                {{ $bookingPage->credit_card_label }}
+                                                            @endisset
                                                         </span>
                                                     </label>
                                                 </div>
-                                                <div>
-                                                    <div class="flex items-center justify-between p-3">
-                                                        <input type="radio" id="credit_card" name="payment_method" value="credit_card" class="hidden peer" {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
-                                                        <label for="credit_card" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                            <span class="font-medium text-xl">
-                                                                @isset($bookingPage->credit_card_label)
-                                                                    {{ $bookingPage->credit_card_label }}
-                                                                @endisset
-                                                            </span>
-                                                        </label>
-                                                    </div>
-                                                    @php 
-                                                    $primaryCardId = $cards->firstWhere(fn($c) => $c->primary_card == 1 || $c->primary_card === '1')?->id ?? ''; 
-                                                    $cards = $cards->filter(fn($c) => $c->paymentMethod)->values();
-                                                    @endphp
-                                                    <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
-                                                        @foreach ($cards as $card)
-                                                            @if ($card->paymentMethod)
-                                                                <div class="flex items-start justify-between p-3">
-                                                                    <label for="card_id_{{ $card->id }}" class="font-normal text-gray-900 flex items-start space-x-1">
-                                                                        <div>
-                                                                            <p class="leading-normal mt-2">
-                                                                                **** **** **** {{ $card->paymentMethod->card->last4 }}
-                                                                            </p>
-                                                                            <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                                                <small>{{ ucfirst($card->paymentMethod->card->brand) }}</small>
-                                                                            </div>
+                                                @php 
+                                                $primaryCardId = $cards->firstWhere(fn($c) => $c->primary_card == 1 || $c->primary_card === '1')?->id ?? ''; 
+                                                $cards = $cards->filter(fn($c) => $c->paymentMethod)->values();
+                                                @endphp
+                                                <div class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
+                                                    @foreach ($cards as $card)
+                                                        @if ($card->paymentMethod)
+                                                            <div class="flex items-start justify-between p-3">
+                                                                <label for="card_id_{{ $card->id }}" class="font-normal text-gray-900 flex items-start space-x-1">
+                                                                    <div>
+                                                                        <p class="leading-normal mt-2">
+                                                                            **** **** **** {{ $card->paymentMethod->card->last4 }}
+                                                                        </p>
+                                                                        <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
+                                                                            <small>{{ ucfirst($card->paymentMethod->card->brand) }}</small>
                                                                         </div>
-                                                                    </label>
-                                                                    <input type="radio" id="card_id_{{ $card->id }}" name="card_id" value="{{ $card->id }}"
-                                                                        {{ old('card_id', $primaryCardId) == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                        @error('card_id')
-                                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                                    </div>
+                                                                </label>
+                                                                <input type="radio" id="card_id_{{ $card->id }}" name="card_id" value="{{ $card->id }}"
+                                                                    {{ old('card_id', $primaryCardId) == $card->id ? 'checked' : '' }} class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                                                             </div>
-                                                            </div>
-                                                        @enderror
-                                                        @if($cards->isEmpty())
-                                                        <div class="flex justify-center items-center mt-4">
-                                                            <button onclick="storeDataAndRedirect()" class="button-exp-fill">
-                                                                @isset($bookingPage->add_card_label)
-                                                                    {{ $bookingPage->add_card_label }}
-                                                                @endisset
-                                                            </button>
-                                                        </div>
                                                         @endif
-
+                                                    @endforeach
+                                                    @error('card_id')
+                                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                        </div>
+                                                        </div>
+                                                    @enderror
+                                                    @if($cards->isEmpty())
+                                                    <div class="flex justify-center items-center mt-4">
+                                                        <button onclick="storeDataAndRedirect()" class="button-exp-fill">
+                                                            @isset($bookingPage->add_card_label)
+                                                                {{ $bookingPage->add_card_label }}
+                                                            @endisset
+                                                        </button>
                                                     </div>
+                                                    @endif
+
                                                 </div>
                                             </div>
-                                            @error('payment_method')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                                    </div>
-                                                </div>
-                                            @enderror
                                         </div>
+                                        @error('payment_method')
+                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                </div>
+                                            </div>
+                                        @enderror
                                     </div>
-                                @endif
-
-
-                                @isset($ride->booking_method->features_setting_id)
-
-                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
-
-                                @else
-                                    <div id="paymentSectionGPay">
-                                        <div id="payment-request-button"></div>
-                                    </div>
-                                @endif
-
-                                <div class="flex justify-center items-center mt-4">
-                                    <button id="submitButton" class="button-exp-fill" type="submit">
-                                        <!-- {{ $ride->booking_method->name }} -->
-                                        {{ $siteText['pay_and_request_to_book_btn_text'] ?? 'Pay and Request to Book' }}
-                                    </button>
                                 </div>
-                                @endisset
+                            @endif
+
+
+                            @isset($ride->booking_method->features_setting_id)
+
+                            @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
+
+                            @else
+                                <div id="paymentSectionGPay">
+                                    <div id="payment-request-button"></div>
+                                </div>
+                            @endif
+
+                            <div class="flex justify-center items-center mt-4">
+                                <button id="submitButton" class="button-exp-fill" type="submit">
+                                    <!-- {{ $ride->booking_method->name }} -->
+                                    {{ $siteText['pay_and_request_to_book_btn_text'] ?? 'Pay and Request to Book' }}
+                                </button>
                             </div>
+                            @endisset
                         </div>
                     </div>
                 </div>
@@ -1877,78 +1901,115 @@ $(document).ready(function () {
     window.showStudentSeatLimitModal = showStudentSeatLimitModal;
     window.closeStudentSeatLimitModal = closeStudentSeatLimitModal;
 
-    function seat_selected(th) {
-        // Get the count of selected seats
-        var selectedSeats = $("input[name='seats_id[]']:checked").length;
-        console.log('Number of selected seats:', selectedSeats);
+    function seat_selected(event, clickedSeatId, clickedSeatNumber) {
+        event.preventDefault();
+        event.stopPropagation();
 
-        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
         var isStudent = {{ (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2')) ? 'true' : 'false' }};
-        var paymentMethod = $('#check_payment_method').val(); // "cash" or "online"
+        var paymentMethod = $('#check_payment_method').val();
         var isCashPayment = (paymentMethod === 'cash');
-        
-        // If user is a student and payment is Cash, limit to 2 seats
-        if (isStudent && isCashPayment) {
-            // If trying to select more than 2 seats, prevent it
-            if ($(th).is(':checked') && selectedSeats > 2) {
-                $(th).prop('checked', false);
-                showStudentSeatLimitModal();
-                return;
-            }
+        var maxSeatsForStudent = 2;
+
+        // Build list of available seats (not booked) in order
+        var availableSeats = [];
+        $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
+            var seatId = $(this).data('seat-id');
+            var seatNum = parseInt($(this).data('seat-number'), 10);
+            availableSeats.push({ id: seatId, seatNumber: seatNum });
+        });
+        availableSeats.sort(function(a, b) { return a.seatNumber - b.seatNumber; });
+
+        // Get seats to select: all available seats with seat_number <= clicked seat_number
+        var seatsToSelect = availableSeats.filter(function(s) { return s.seatNumber <= clickedSeatNumber; });
+
+        // Student limit: cap at 2 seats for Cash payment
+        if (isStudent && isCashPayment && seatsToSelect.length > maxSeatsForStudent) {
+            seatsToSelect = seatsToSelect.slice(0, maxSeatsForStudent);
+            showStudentSeatLimitModal();
         }
 
-        var seat = $(th).val();
+        // Check if this is a toggle-off: clicked seat was the rightmost selected
+        var currentlyChecked = [];
+        $("input.seat-checkbox:checked").each(function() { currentlyChecked.push(parseInt($(this).val(), 10)); });
+        var currentlySelectedIds = currentlyChecked;
+        var rightmostSelected = currentlySelectedIds.length > 0 ? Math.max.apply(null, currentlySelectedIds.map(function(id) {
+            var s = availableSeats.find(function(s) { return s.id == id; });
+            return s ? s.seatNumber : 0;
+        })) : 0;
 
-        $.ajax({
-            url: '{{ route("seat_on_hold") }}', // Laravel route for the seat_on_hold
-            type: 'POST',
-            data: {
-                seat_id: seat,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function(response) {
-                console.log('Seats on hold:', response);
+        var newSelectionIds = [];
+        if (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0) {
+            // Toggle off: deselect all
+            newSelectionIds = [];
+        } else {
+            newSelectionIds = seatsToSelect.map(function(s) { return s.id; });
+        }
 
-                if (response.message !== 'Seat on hold successfully') {
-                    th.checked = false;
-                }
-
-                updateTotalAmount();
-
-                // Change the image source for selected seats
-                if ($(th).is(':checked')) {
-                    // Change the image source for selected seats
-                    $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
-                    $(".seat-number.seat-number-" + seat).addClass('text-green-300');
-                } else {
-                    // Revert the image source for unselected seats
-                    $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat.png") }}');
-                    $(".seat-number.seat-number-" + seat).removeClass('text-green-300');
-                }
-
-                // Persist seat selection for refresh
-                try {
-                    var ids = [];
-                    $("input[name='seats_id[]']:checked").each(function() { ids.push($(this).val()); });
-                    sessionStorage.setItem(bookingSeatsStorageKey, JSON.stringify(ids));
-                } catch (e) { /* ignore */ }
-
-                if(response.message != "Seat on hold successfully"){
-                    const modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
-                    if (modalMessageElement) {
-                    modalMessageElement.textContent = response.message; // Assuming 'message' is part of the response
-                    }
-                    const modal = document.getElementById('bookingModal');
-                    modal.classList.remove('hidden');
-                }
-
-
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                // Handle error response
-            }
+        // Update UI immediately
+        $("input.seat-checkbox").prop('checked', false);
+        newSelectionIds.forEach(function(id) {
+            $("#number-of-seat-" + id).prop('checked', true);
         });
+
+        $(".seat-image").attr('src', '{{ asset("assets/seat.png") }}');
+        $(".seat-number").removeClass('text-green-300');
+        newSelectionIds.forEach(function(id) {
+            $(".seat-image.seat-unselect-" + id).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
+            $(".seat-number.seat-number-" + id).addClass('text-green-300');
+        });
+
+        // Determine which seats to hold vs release
+        var toHold = newSelectionIds.filter(function(id) { return currentlySelectedIds.indexOf(id) < 0; });
+        var toRelease = currentlySelectedIds.filter(function(id) { return newSelectionIds.indexOf(id) < 0; });
+
+        // Process seats: release first, then hold
+        var apiCalls = [];
+        toRelease.forEach(function(seatId) {
+            apiCalls.push($.ajax({ url: '{{ route("seat_on_hold") }}', type: 'POST', data: { seat_id: seatId, _token: '{{ csrf_token() }}' } }));
+        });
+        toHold.forEach(function(seatId) {
+            apiCalls.push($.ajax({ url: '{{ route("seat_on_hold") }}', type: 'POST', data: { seat_id: seatId, _token: '{{ csrf_token() }}' } }));
+        });
+
+        if (apiCalls.length === 0) {
+            updateTotalAmount();
+            persistSeatSelection();
+            return;
+        }
+
+        $.when.apply($, apiCalls).done(function() {
+            var responses = arguments.length === 1 ? [arguments[0]] : Array.prototype.slice.call(arguments);
+            var hasError = responses.some(function(r) { return r[0] && r[0].message && r[0].message !== 'Seat on hold successfully'; });
+            if (hasError) {
+                var errMsg = (responses.find(function(r) { return r[0] && r[0].message && r[0].message !== 'Seat on hold successfully'; }) || [{}])[0].message;
+                var modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
+                if (modalMessageElement) modalMessageElement.textContent = errMsg || 'Seat could not be held.';
+                document.getElementById('bookingModal').classList.remove('hidden');
+            }
+            updateTotalAmount();
+            persistSeatSelection();
+        }).fail(function() {
+            // Revert on error
+            $("input.seat-checkbox").prop('checked', false);
+            currentlySelectedIds.forEach(function(id) {
+                $("#number-of-seat-" + id).prop('checked', true);
+            });
+            $(".seat-image").attr('src', '{{ asset("assets/seat.png") }}');
+            $(".seat-number").removeClass('text-green-300');
+            currentlySelectedIds.forEach(function(id) {
+                $(".seat-image.seat-unselect-" + id).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
+                $(".seat-number.seat-number-" + id).addClass('text-green-300');
+            });
+            updateTotalAmount();
+        });
+    }
+
+    function persistSeatSelection() {
+        try {
+            var ids = [];
+            $("input[name='seats_id[]']:checked").each(function() { ids.push($(this).val()); });
+            sessionStorage.setItem(bookingSeatsStorageKey, JSON.stringify(ids));
+        } catch (e) { /* ignore */ }
     }
 
     document.getElementById('close-modal').addEventListener('click', function () {

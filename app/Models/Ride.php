@@ -143,6 +143,14 @@ class Ride extends Model
         return $this->hasMany(SeatDetail::class, 'ride_id')->where('status', '!=', 'booked');
     }
 
+    /**
+     * All seat details for the ride, ordered by seat_number (left to right).
+     */
+    public function seatDetail()
+    {
+        return $this->hasMany(SeatDetail::class, 'ride_id')->orderBy('seat_number');
+    }
+
     public function getCarImageAttribute($value)
     {
         // You can perform any transformation you need here

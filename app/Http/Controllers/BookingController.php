@@ -158,7 +158,7 @@ class BookingController extends Controller
 
             // $rideDetailId = isset($request->rideDetailId) ? $request->rideDetailId : 0;
 
-            $ride = Ride::where('id', $id);
+            $ride = Ride::where('id', $id)->with('seatDetail');
             if ($rideDetailId != 0) {
                 $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
                     $q->where('id', $rideDetailId);
