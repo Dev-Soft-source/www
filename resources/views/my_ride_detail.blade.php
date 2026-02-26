@@ -723,18 +723,20 @@
                             <div class="text-center">
                                 <div class="flex items-center flex-wrap gap-x-2 text-sm text-black">
                                     @if ($ride->year)
-                                        <p class="text-sm">{{ $ride->year }}</p>
+                                        <p class="text-md">{{ $ride->year }}</p>
                                     @endif
-                                    <span>/</span>
-                                    <p class="text-sm">{{ $ride->model }}</p>
-                                    <span>/</span>
+                                    <span>|</span>
+                                    <p class="text-md">{{ $ride->make }}</p>
+                                    <span>|</span>
+                                    <p class="text-md">{{ $ride->model }}</p>
+                                    <span>|</span>
                                     @if ($ride->color)
-                                        <p class="text-sm">{{ $ride->color }}</p>
+                                        <p class="text-md">{{ $ride->color }}</p>
                                     @endif
                                 </div>
                                 <p class="font-semibold text-lg text-black text-start">{{ $ride->license_no }}</p>
                                 @if ($ride->vehicle_type)
-                                    <p class="text-sm">{{ $ride->vehicle_type }} </p>
+                                    <p class="text-md">{{ $ride->vehicle_type }} </p>
                                 @endif
                             </div>
                         </div>

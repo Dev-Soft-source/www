@@ -77,7 +77,7 @@
         $firm = false;
         $topUpBalance = $balance;
     @endphp
-    @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+    @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
         @php
             $hidePaymentSection = true;
         @endphp
@@ -385,7 +385,12 @@
                                 @isset($bookingPage->payment_method_label)
                                     {{ $bookingPage->payment_method_label }}
                                 @endisset
-                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
+                                <span class="text-lg text-primary font-normal inline-block cursor-help" style="font-family: 'Roboto', sans-serif;"
+                                    @if (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option3_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option4_tooltip ?? '' }}"
+                                    @endif>{{ $ride->payment_method?->name ?? '' }}</span>
                             </h4>
                         </div>
                         <div class="p-4 items-baseline">
@@ -394,8 +399,12 @@
                                     Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div
-                                        class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
+                                        @if ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option1)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option2)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option2_tooltip ?? '' }}"
+                                        @endif>
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -445,12 +454,14 @@
                         <div class="flex items-center gap-2">
                             @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
                                 @isset($postRidePage->smoking_option1->icon)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option1->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option1->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->smoking_option1_tooltip ?? '' }}">
                                 @endisset
                                 <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option1->name }}</p>
                             @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
                                 @isset($postRidePage->smoking_option2->icon)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option2->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option2->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->smoking_option2_tooltip ?? '' }}">
                                 @endisset
                                 <p class="font-semibold">{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
                             @endif
@@ -459,8 +470,11 @@
                             <div class="flex items-center gap-2">
                                 <img class="w-7 h-7"
                                     @if ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option1)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->animals_option1_tooltip ?? '' }}"
                                     @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option2)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->animals_option2_tooltip ?? '' }}"
                                     @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->animals_option3_tooltip ?? '' }}"
                                     @endif
                                     alt="">
                                 <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }} {{ $ride->animal_friendly->name }}</p>
@@ -470,10 +484,15 @@
                             <div class="flex items-center gap-2">
                                 <img class="w-7 h-7"
                                     @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option1)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->luggage_option1_tooltip ?? '' }}"
                                     @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option2)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->luggage_option2_tooltip ?? '' }}"
                                     @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option3)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->luggage_option3_tooltip ?? '' }}"
                                     @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option4)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->luggage_option4_tooltip ?? '' }}"
                                     @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->luggage_option5)->icon) }}"
+                                    data-tippy-content="{{ optional($postRidePage)->luggage_option5_tooltip ?? '' }}"
                                     @endif
                                     alt="">
                                 <p class="font-semibold">{{ $rideDetailPage->luggage_label ?? '' }} {{ $ride->luggage->name }}</p>
@@ -485,37 +504,53 @@
                         @foreach ($features as $feature)
                             <div class="flex items-center gap-2">
                                 @if ($feature === $postRidePage->features_option11->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option11->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option11->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option11_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option1->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option1->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option1->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option1_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option2->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option2->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option2->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option2_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option9->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option9->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option9->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option9_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option8->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option8->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option8->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option8_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option10->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option10->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option10->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option10_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option3->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option3->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option3->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option3_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option12->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option12->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option12->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option12_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option4->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option4_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option5->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option5_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option6->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option6_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option7->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option7_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option13->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option13->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option13->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option13_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option14->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option14->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option14->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option14_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option15->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option15->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option15->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option15_tooltip ?? '' }}">
                                 @elseif ($feature === $postRidePage->features_option16->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option16->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option16->icon)}}" alt=""
+                                    data-tippy-content="{{ optional($postRidePage)->features_option16_tooltip ?? '' }}">
                                 @else
                                     <input id="wi-fi" type="checkbox" name="features[]" value="" checked disabled
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
@@ -609,7 +644,7 @@
                                     </div>
                                 </div>
 
-                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && (optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                     <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p class="text-yellow-800 text-sm">
                                             <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
@@ -630,7 +665,7 @@
                                 @error('seats')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please select at least one seat to continue.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->seats_available_tooltip) {{ $bookingPage->seats_available_tooltip }} @endisset</p>
                                     </div>
                                   </div>
                                 @enderror
@@ -807,9 +842,9 @@
                                 </div>
                             @endif
 
-                            <input type="hidden" value="{{ $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id ? "cash" : "online" }}" id="check_payment_method">
+                            <input type="hidden" value="{{ (optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) ? "cash" : "online" }}" id="check_payment_method">
 
-                            @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id)
+                            @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                 <div class="flex items-center justify-between gap-2 mt-1">
                                     {{-- <p>Total online payment</p>
                                     <p class="totalAmount text-black"></p> --}}
@@ -864,7 +899,7 @@
                                 @error('driver_message')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please include a brief message for the driver with your booking.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->chat_with_driver_tooltip) {{ $bookingPage->chat_with_driver_tooltip }} @endisset</p>
                                     </div>
                                 </div>
                                 @enderror
@@ -890,18 +925,18 @@
                             </ul>
                             <div class="flex items-start my-4">
                                 <input id="" type="checkbox" name="agree_terms" value="1"
-                                    {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                    <label for="" class="ml-2 font-normal text-gray-900">
-                                        @isset($bookingPage->booking_term_agree_text)
-                                         {!! $bookingPage->booking_term_agree_text !!}
-                                        @endisset
-                                    </label>
-                                </div>
+                                {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                <label for="" class="ml-2 font-normal text-gray-900">
+                                    @isset($bookingPage->booking_term_agree_text)
+                                        {!! $bookingPage->booking_term_agree_text !!}
+                                    @endisset
+                                </label>
+                            </div>
                                 @error('agree_terms')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">Please read and accept our Disclaimers and Policies before proceeding.</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->aggreement_tooltip) {{ $bookingPage->aggreement_tooltip }} @endisset</p>
                                     </div>
                                 </div>
                                 @enderror
@@ -974,7 +1009,7 @@
                                     @error('pink_ride_agree_terms')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->pink_ride_tooltip) {{ $bookingPage->pink_ride_tooltip }} @endisset</p>
                                             </div>
                                         </div>
                                     @enderror
@@ -1000,7 +1035,7 @@
                                     @error('extra_care_ride_agree_terms')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                                <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->extra_care_ride_tooltip) {{ $bookingPage->extra_care_ride_tooltip }} @endisset</p>
                                             </div>
                                         </div>
                                     @enderror
@@ -1013,7 +1048,7 @@
                                 @endif
 
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
 
                                 @else
                                     <div id="paymentSection" class="space-y-4 mb-4">
@@ -1102,7 +1137,7 @@
 
                                 @isset($ride->booking_method->features_setting_id)
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                                @if ((optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) && $ride->rideDetail[0]->price <= 15)
 
                                 @else
                                     <div id="paymentSectionGPay">

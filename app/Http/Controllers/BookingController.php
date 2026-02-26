@@ -198,7 +198,7 @@ class BookingController extends Controller
 
                 $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
                     ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
+                    ->first();
 
                 $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
                     ->whereLanguageId($selectedLanguage->id)
@@ -253,7 +253,7 @@ class BookingController extends Controller
             $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
             // If ride requires online payment, user has cards, but no primary card set - redirect to my_cards to select one
-            $isOnlinePaymentRide = $ride->payment_method->features_setting_id !== $postRidePage->payment_methods_option1->features_setting_id;
+            $isOnlinePaymentRide = (optional($ride->payment_method)->features_setting_id ?? null) !== (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null);
             $hasPrimaryCard = $cards->contains(fn($c) => $c->primary_card == 1 || $c->primary_card === '1');
             if ($isOnlinePaymentRide && $cards->isNotEmpty() && !$hasPrimaryCard) {
                 return redirect()->route('my_cards', ['lang' => $selectedLanguage->abbreviation])

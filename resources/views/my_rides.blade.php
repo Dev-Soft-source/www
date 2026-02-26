@@ -2,6 +2,15 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        @keyframes booking-request-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+            50% { opacity: 0.95; transform: scale(1.08); box-shadow: 0 10px 15px -3px rgb(35 168 168 / 0.2); }
+        }
+        .booking-request-alert {
+            animation: booking-request-pulse 1.5s ease-in-out 5;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -211,7 +220,7 @@ function closeErrorModal() {
                                                                                     {{ $rideDetailPage->card_section_from_label }}
                                                                                 @endisset
                                                                             </p>
-                                                                            <div class="flex gap-2">
+                                                                            <div class="flex gap-2 items-baseline">
                                                                                 <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                     {{ $from }}.
                                                                                 </h3>
@@ -231,7 +240,7 @@ function closeErrorModal() {
                                                                                     src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                                             </span>
                                                                         </div>
-                                                                        <div class="ml-12 md:ml-20">
+                                                                        <div class="ml-12 md:ml-20 items-baseline">
                                                                             <p class="font-bold text-xl text-black">
                                                                                 @isset($rideDetailPage->card_section_to_label)
                                                                                     {{ $rideDetailPage->card_section_to_label }}
@@ -261,9 +270,15 @@ function closeErrorModal() {
                                                                     $pendingBookingRequests = $ride->bookings->where('status', 0);
                                                                 @endphp
                                                                 @if ($pendingBookingRequests->isNotEmpty())
-                                                                    <div class="">
-                                                                        <p class="font-medium text-red-600">
-                                                                            You have booking request(s).</p>
+                                                                    <div class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
+                                                                        <div class="flex items-center gap-2">
+                                                                            <svg class="h-5 w-5 flex-shrink-0 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                                                            </svg>
+                                                                            <p class="font-semibold text-red-700">
+                                                                                You have {{ $pendingBookingRequests->count() }} booking request(s).
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
                                                                 @endif
                                                             </div>
