@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Mail;
 use Stripe\PaymentMethod;
 use Stripe\Customer;
 use Stripe\Stripe;
+use Stripe\SetupIntent;
 
 class CardController extends Controller
 {
@@ -122,18 +123,23 @@ class CardController extends Controller
                 'email' => $user->email,
                 'name' => $user->first_name,
             ]);
-            User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
-            $user = User::whereId($user->id)->first();
+            $user->stripe_customer_id = $customer->id;
+            $user->save();
         }
-        
+
         try {
-            $setupIntent = \Stripe\SetupIntent::create([
+
+            $setupIntent = SetupIntent::create([
                 'customer' => $user->stripe_customer_id,
                 'payment_method_types' => ['card'],
+                // 'automatic_payment_methods' => [
+                //     'enabled' => true,
+                // ],
             ]);
-            
+            $clientSecret = $setupIntent->client_secret;
+
             return response()->json([
-                'clientSecret' => $setupIntent->client_secret
+                'clientSecret' => $clientSecret
             ]);
         } catch (\Exception $e) {
             Log::error('SetupIntent creation error: ' . $e->getMessage());
@@ -247,15 +253,16 @@ class CardController extends Controller
     
     private function storeCard(Request $request, $user, $user_id, $message, $selectedLanguage)
     {
+        // Validate only stripeToken is required - billing details come from Stripe PaymentMethod
         $validatedData = $request->validate([
-            'name_on_card' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\-]+$/'],
-            'street_address' => 'required',
-            'house_apartment_number' => 'nullable',
-            'city' => 'required',
-            'province' => 'required',
-            'country' => 'required',
-            'postal_code' => 'required|string|max:255',
             'stripeToken' => 'required',
+            'name_on_card' => ['nullable', 'string', 'max:255', 'regex:/^[a-zA-Z\s\-]+$/'],
+            'street_address' => 'nullable',
+            'house_apartment_number' => 'nullable',
+            'city' => 'nullable',
+            'province' => 'nullable',
+            'country' => 'nullable',
+            'postal_code' => 'nullable|string|max:255',
         ], [
             'name_on_card.regex' => 'Cardholder name can only contain letters, spaces, and hyphens',
         ]);
@@ -284,7 +291,7 @@ class CardController extends Controller
                 ],
             ]);
         } elseif (str_starts_with($stripeToken, 'pm_')) {
-            // It's already a PaymentMethod ID
+            // It's already a PaymentMethod ID - retrieve it to get billing details
             $paymentMethod = PaymentMethod::retrieve($stripeToken);
         } else {
             throw new \Exception('Invalid payment method identifier. Expected token (tok_...) or PaymentMethod ID (pm_...).');
@@ -307,6 +314,15 @@ class CardController extends Controller
             }
         }
 
+        // Get billing details from PaymentMethod if not provided in request
+        $nameOnCard = $request->name_on_card ?? $paymentMethod->billing_details->name ?? '';
+        $streetAddress = $request->street_address ?? $paymentMethod->billing_details->address->line1 ?? '';
+        $houseApartmentNumber = $request->house_apartment_number ?? $paymentMethod->billing_details->address->line2 ?? '';
+        $city = $request->city ?? $paymentMethod->billing_details->address->city ?? '';
+        $province = $request->province ?? $paymentMethod->billing_details->address->state ?? '';
+        $country = $request->country ?? $paymentMethod->billing_details->address->country ?? '';
+        $postalCode = $request->postal_code ?? $paymentMethod->billing_details->address->postal_code ?? '';
+
         // Handle primary card setting
         $userCardCount = Card::where('user_id', $user_id)->count();
         $primary_card = ($userCardCount == 0) ? 1 : ($request->filled('primary_card') ? $request->primary_card : 0);
@@ -316,12 +332,12 @@ class CardController extends Controller
 
         $card = Card::create([
             'user_id' => $user_id,
-            'name_on_card' => $request->name_on_card,
+            'name_on_card' => $nameOnCard,
             'card_number' => $paymentMethod->card->last4 ?? '',
             'card_type' => $paymentMethod->card->brand ?? '',
             'exp_month' => $paymentMethod->card->exp_month ?? '',
             'exp_year' => $paymentMethod->card->exp_year ?? '',
-            'address' => $request->street_address . "," . ($request->house_apartment_number ?? '') . "," . $request->city . "," . $request->province . "," . $request->country . "," . $request->postal_code,
+            'address' => $streetAddress . "," . ($houseApartmentNumber ?? '') . "," . $city . "," . $province . "," . $country . "," . $postalCode,
             'primary_card' => $primary_card,
             'fingerprint' => $paymentMethod->card->fingerprint ?? null,
             'stripe_payment_method_id' => $paymentMethod->id,
@@ -465,10 +481,11 @@ class CardController extends Controller
             Card::where('user_id', $user_id)->update(['primary_card' => 0]);
         }
 
-        $card = Card::create([
+        Card::create([
             'user_id' => $user_id,
             'payment_method_type' => 'apple_pay',
             'payment_method_details' => $request->payment_method_details,
+            'card_type' => $request->payment_method_details['card_type'] ?? '',
             'stripe_payment_method_id' => $paymentMethod->id,
             'exp_month' => $paymentMethod->card->exp_month ?? '',
             'exp_year' => $paymentMethod->card->exp_year ?? '',
@@ -549,10 +566,11 @@ class CardController extends Controller
             Card::where('user_id', $user_id)->update(['primary_card' => 0]);
         }
 
-        $card = Card::create([
+        Card::create([
             'user_id' => $user_id,
             'payment_method_type' => 'google_pay',
             'payment_method_details' => $request->payment_method_details,
+            'card_type' => $request->payment_method_details['card_type'] ?? '',
             'stripe_payment_method_id' => $paymentMethod->id,
             'exp_month' => $paymentMethod->card->exp_month ?? '',
             'exp_year' => $paymentMethod->card->exp_year ?? '',
