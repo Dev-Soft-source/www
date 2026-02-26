@@ -655,10 +655,12 @@
                                     @foreach ($ride->seatDetail as $detail)
                                         @php
                                             $isBooked = $detail->status === 'booked';
-                                            $isSelectedByMe = !$isBooked && ($detail->user_id == auth()->user()->id || in_array($detail->id, old('seats_id', [])));
+                                            $isHeldByOthers = $detail->status === 'hold' && $detail->user_id != optional(auth()->user())->id;
+                                            $isUnavailable = $isBooked || $isHeldByOthers;
+                                            $isSelectedByMe = !$isUnavailable && ($detail->user_id == optional(auth()->user())->id || in_array($detail->id, old('seats_id', [])));
                                         @endphp
-                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isBooked ? '1' : '0' }}">
-                                            @if ($isBooked)
+                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isUnavailable ? '1' : '0' }}">
+                                            @if ($isUnavailable)
                                                 <div class="opacity-50 cursor-not-allowed pointer-events-none">
                                                     <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
                                                         <img src="{{ asset('assets/seat.png') }}" class="w-8 h-8 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
@@ -714,8 +716,8 @@
                                         @endisset
                                     </p>
                                     <div class="relative sups inline-flex items-center group">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 cursor-help hover:text-gray-600 peer">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                         </svg>
                                         <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
                                             <div class="payment-method-tooltip">
@@ -769,8 +771,8 @@
                                     </p>
                                     @if (auth()->user() && auth()->user()->student == 2)
                                         <div class="relative sups inline-flex items-center group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-yellow-500 cursor-help hover:text-yellow-600 peer">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
                                             <!-- Tooltip -->
                                             <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
@@ -781,8 +783,8 @@
                                         </div>
                                     @elseif (auth()->user() && auth()->user()->charge_booking == '2')
                                         <div class="relative sups inline-flex items-center group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-500 cursor-help hover:text-green-600 peer">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
                                             <!-- Tooltip -->
                                             <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
@@ -1977,13 +1979,23 @@ $(document).ready(function () {
             return;
         }
 
+        var seatHoldInfoMessage = {!! json_encode($bookingPage->seats_available_info_text_ ?? "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.") !!};
+        var isSuccessMessage = function(msg) {
+            if (!msg) return false;
+            return msg === 'Seat on hold successfully' || (msg.indexOf('will be held for 10 minutes') !== -1);
+        };
+
         $.when.apply($, apiCalls).done(function() {
             var responses = arguments.length === 1 ? [arguments[0]] : Array.prototype.slice.call(arguments);
-            var hasError = responses.some(function(r) { return r[0] && r[0].message && r[0].message !== 'Seat on hold successfully'; });
+            var hasError = responses.some(function(r) { return r[0] && r[0].message && !isSuccessMessage(r[0].message); });
             if (hasError) {
-                var errMsg = (responses.find(function(r) { return r[0] && r[0].message && r[0].message !== 'Seat on hold successfully'; }) || [{}])[0].message;
+                var errMsg = (responses.find(function(r) { return r[0] && r[0].message && !isSuccessMessage(r[0].message); }) || [{}])[0].message;
                 var modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
                 if (modalMessageElement) modalMessageElement.textContent = errMsg || 'Seat could not be held.';
+                document.getElementById('bookingModal').classList.remove('hidden');
+            } else if (toHold.length > 0) {
+                var modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
+                if (modalMessageElement) modalMessageElement.textContent = seatHoldInfoMessage;
                 document.getElementById('bookingModal').classList.remove('hidden');
             }
             updateTotalAmount();
