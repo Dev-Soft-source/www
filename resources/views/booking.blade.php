@@ -337,7 +337,7 @@
                                                     <a class="text-xl xl:text-2xl text-black"
                                                         href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
                                                         @isset($bookingPage->seats_left_label)
-                                                            {{ $bookingPage->seats_left_label }}:
+                                                            {{ $bookingPage->seats_left_label }}
                                                         @endisset
                                                     </a>
                                                     <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
@@ -2046,5 +2046,16 @@ $(document).ready(function () {
         }
     });
 </script>
+<script>
+window.addEventListener("pageshow", function () {
 
+    const navEntries = performance.getEntriesByType("navigation");
+
+    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+        // User came using browser back/forward
+        window.location.reload();
+    }
+
+});
+</script>
 @endsection
