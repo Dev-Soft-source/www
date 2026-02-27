@@ -2077,8 +2077,9 @@ window.addEventListener("pageshow", function () {
     const navEntries = performance.getEntriesByType("navigation");
 
     if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
-        // User came using browser back/forward
-        window.location.reload();
+        // User came using browser back button - redirect to my_trips to avoid showing stale booking form
+        // (seats may have been booked; showing form again could allow double-booking)
+        window.location.replace('{{ route("my_trips", ["lang" => $selectedLanguage->abbreviation ?? "en"]) }}');
     }
 
 });

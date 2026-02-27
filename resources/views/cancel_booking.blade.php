@@ -90,7 +90,7 @@
                                 <h1 class="text-primary text-center">{{ $tripsPage->cancel_booking_heading ?? ""}}</h1>
                                 <div class="text-base md:text-lg"><span class="text-red-500">*  {{ $tripsPage->cancel_all_feilds_are_required ?? "All fields are required"}}</span></div>
                                 <div class="flex justify-between  max-w-sm w-full">
-                                    <p class="text-gray-900 font-medium text-lg lg:text-xl mb-2">{{ $tripsPage->number_of_seat_booked ?? "Number of seats booked"}}</p>
+                                    <label class="text-gray-900 font-medium text-lg lg:text-xl mb-2">{{ $tripsPage->number_of_seat_booked ?? "Number of seats booked"}}</label>
                                     <p class="mr-1">{{ $booking->seats }}</p>
                                 </div>
                                 <div class="flex justify-between items-center max-w-sm w-full">
@@ -104,13 +104,8 @@
                                     @endfor
                                 </select>
                             </div>
-                            {{-- <div class="flex justify-between items-center max-w-sm w-full">
-                                <label for="seats_amout" class="text-gray-900 font-medium text-lg lg:text-xl mb-2">Enter Amount</label>
-                                <input type="number" name="seats_amout"
-                                class="bg-gray-100 border-0 text-gray-500 rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block pr-8 p-2.5"/>
-                            </div> --}}
                             <div class="mt-6">
-                                <label for="meeting" class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->cancel_message_title ?? "Message to your driver" }}</label>
+                                <label for="meeting" class="text-gray-900 font-medium text-lg lg:text-xl mb-2">{{ $tripsPage->cancel_message_title ?? "Message to your driver" }}</label>
                                 <textarea id="meeting" rows="5" name="message"
                                 class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 placeholder="{{ $tripsPage->cancel_booking_trip_placeholder ?? 'Please provide as many details as you want as to why you want to cancel this booking &#10;Your driver will receive a copy of this message'}}">{{ old('message') }}</textarea>

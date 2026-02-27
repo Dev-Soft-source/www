@@ -1098,25 +1098,24 @@
                         @if (auth()->user() &&
                                 $ride->bookings &&
                                 $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
-                            <div class="grid grid-cols-1 gap-4">
-                                @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id) as $booking)
-                                    <div class="w-full flex items-center justify-end">
-                                        @if ($booking->status !== '3')
-                                            @if (strtotime($ride->date) > strtotime('today') ||
-                                                    (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                                                @if ($ride->seats - $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) { $query->whereNull('deleted_at'); })->sum('seats') != 0)
-                                                <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->id]) }}"
-                                                    class="button-exp-fill whitespace-nowrap me-1 text-xl">
-                                                    @isset($rideDetailPage->edit_button_actions_label)
-                                                        {{ $rideDetailPage->edit_button_actions_label }}
-                                                    @endisset
-                                                </a>
-                                                @endif
-                                            @endif
-                                        @endif
+                            @php
+                                $userBookingForEdit = $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first();
+                            @endphp
+                            @if ($userBookingForEdit && $userBookingForEdit->status !== '3')
+                                @if (strtotime($ride->date) > strtotime('today') ||
+                                        (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                    @if ($ride->seats - $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) { $query->whereNull('deleted_at'); })->sum('seats') != 0)
+                                    <div class="flex items-center justify-end">
+                                        <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $userBookingForEdit->id]) }}"
+                                            class="button-exp-fill whitespace-nowrap me-1 text-xl">
+                                            @isset($rideDetailPage->edit_button_actions_label)
+                                                {{ $rideDetailPage->edit_button_actions_label }}
+                                            @endisset
+                                        </a>
                                     </div>
-                                @endforeach
-                            </div>
+                                    @endif
+                                @endif
+                            @endif
                             @php
                                 $userBooking = $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first();
                             @endphp

@@ -311,7 +311,7 @@
                                                                                 {{ $rideDetailPage->card_section_age }}
                                                                             @endisset
                                                                             : {{ $age }}</p>
-                                                                            <p class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">{{ $booking->ride->driver->gender }}</p>
+                                                                            <p class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">{{ ucfirst($booking->ride->driver?->gender) }}</p>
                                                                             <p class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">
                                                                                 @isset($rideDetailPage->card_section_driven)
                                                                                 {{ $rideDetailPage->card_section_driven }}

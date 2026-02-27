@@ -510,10 +510,11 @@
                                 <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
                                     @foreach ($ride->seatDetail as $detail)
                                         @php
-                                            $isBookedByOthers = $detail->status === 'booked' && !$booking->seatDetail->contains('id', $detail->id);
+                                            $userBookedSeats = $userAllBookedSeats ?? $booking->seatDetail ?? collect();
+                                            $isMyBookedSeat = $userBookedSeats->contains('id', $detail->id);
+                                            $isBookedByOthers = $detail->status === 'booked' && !$isMyBookedSeat;
                                             $isHeldByOthers = $detail->status === 'hold' && $detail->user_id != optional(auth()->user())->id;
                                             $isUnavailable = $isBookedByOthers || $isHeldByOthers;
-                                            $isMyBookedSeat = $booking->seatDetail->contains('id', $detail->id);
                                             $isSelectedByMe = !$isUnavailable && !$isMyBookedSeat && in_array($detail->id, old('seats_id', []));
                                         @endphp
                                         <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ ($isUnavailable || $isMyBookedSeat) ? '1' : '0' }}">
@@ -1745,8 +1746,17 @@ document.getElementById('bookingModal').addEventListener('click', function (even
     }
 
 </script>
+<script>
+window.addEventListener("pageshow", function () {
 
+    const navEntries = performance.getEntriesByType("navigation");
 
+    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+        // User came using browser back button - redirect to my_trips to avoid showing stale edit form
+        window.location.replace('{{ route("my_trips", ["lang" => $selectedLanguage->abbreviation ?? "en"]) }}');
+    }
 
+});
+</script>
 
 @endsection

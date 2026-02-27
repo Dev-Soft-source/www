@@ -596,7 +596,18 @@ class BookingController extends Controller
         $getCrBalance = TopUpBalance::where('user_id', $user_id)->sum('cr_amount');
         $getDrBalance = TopUpBalance::where('user_id', $user_id)->sum('dr_amount');
 
-        return view('edit_booking', ['notificationPage' => $notificationPage, 'rideDetailPage' => $rideDetailPage, 'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'bookingPage' => $bookingPage]);
+        // Merge seat details from all user's bookings on this ride (for display - show all booked seats)
+        $userAllBookedSeats = collect();
+        $userBookingsOnRide = Booking::where('ride_id', $ride->id)
+            ->where('user_id', $user_id)
+            ->whereNotIn('status', [3, 4])
+            ->with('seatDetail')
+            ->get();
+        foreach ($userBookingsOnRide as $ub) {
+            $userAllBookedSeats = $userAllBookedSeats->merge($ub->seatDetail);
+        }
+
+        return view('edit_booking', ['notificationPage' => $notificationPage, 'rideDetailPage' => $rideDetailPage, 'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'bookingPage' => $bookingPage, 'userAllBookedSeats' => $userAllBookedSeats]);
     }
 
     public function cancel($lang = null, $id)
