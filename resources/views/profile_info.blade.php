@@ -6,8 +6,8 @@
     <div class="bg-white border rounded py-4 border-gray-200 md:w-[70%] mx-auto shadow">
       <div class=" px-4">
         <div class="pb-2 flex flex-col md:flex-row items-center justify-between">
-            <!-- <h1 class="mb-0">{{ $user->first_name }} profile</h1> -->
-            <h1 class="mb-0">Profile</h1>
+            <h1 class="mb-0">{{ $user->first_name }} Profile</h1>
+            <!-- <h1 class="mb-0">Profile</h1> -->
         </div>
         <div class="flex pb-2 justify-between">
             <div class="flex items-start">

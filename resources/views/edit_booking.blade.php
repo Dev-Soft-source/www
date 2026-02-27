@@ -29,6 +29,25 @@
     .tooltip.shift-left {
         margin-left: -150px;
     }
+
+    /* Payment method tooltip: above exclamation icon with arrow pointing down to icon */
+    .payment-method-tooltip {
+        position: relative;
+        background-color: #c75b5b;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        min-width: 300px;
+        max-width: 380px;
+    }
+    .payment-method-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #c75b5b;
+    }
 </style>
 @endsection
 
@@ -219,7 +238,12 @@
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $ride->payment_method->name }}</span>
+                                <span class="text-lg text-primary font-normal inline-block cursor-help" style="font-family: 'Roboto', sans-serif;"
+                                    @if (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option3_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option4_tooltip ?? '' }}"
+                                    @endif>{{ $ride->payment_method->name ?? '' }}</span>
                             </h4>
                         </div>
                         <div class="p-4">
@@ -228,7 +252,12 @@
                                     Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
+                                        @if ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option1)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option2)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option2_tooltip ?? '' }}"
+                                        @endif>
                                         {{ $ride->booking_method->name }}
                                     </div>
                                 @endisset
@@ -272,29 +301,65 @@
                     <div class="bg-primary text-white px-4 py-2">
                         <h3 class="text-2xl xl:text-3xl">Ride Preferences</h3>
                     </div>
-                    <div class="bg-white p-4 p space-y-4">
+                    <div class="bg-white p-4 space-y-4">
                         <div class="flex items-center space-x-2">
-                            @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                @isset($postRidePage->smoking_option1->icon)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option1->icon)}}" alt="">
+                            @if ($ride->smoke == (optional($postRidePage->smoking_option1)->features_setting_id ?? null))
+                                @isset(optional($postRidePage->smoking_option1)->icon)
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option1)->icon) }}" alt="">
                                 @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option1->name }}</p>
-                            @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                @isset($postRidePage->smoking_option2->icon)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->smoking_option2->icon)}}" alt="">
+                                <div class="flex items-center gap-1">
+                                    <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }} {{ optional($postRidePage->smoking_option1)->name }}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->smoking_option1_tooltip ?? '' }}" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                    </svg>
+                                </div>
+                            @elseif ($ride->smoke == (optional($postRidePage->smoking_option2)->features_setting_id ?? null))
+                                @isset(optional($postRidePage->smoking_option2)->icon)
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option2)->icon) }}" alt="">
                                 @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
+                                <div class="flex items-center gap-1">
+                                    <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }} {{ optional($postRidePage->smoking_option2)->name }}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->smoking_option2_tooltip ?? '' }}" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                    </svg>
+                                </div>
                             @endif
                         </div>
-                        @isset ($ride->animal_friendly->features_setting_id)
-                            <div class="flex items-center space-x-2">
+                        @isset($ride->animal_friendly->features_setting_id)
+                            <div class="flex items-center gap-2">
                                 <img class="w-7 h-7"
-                                    @if ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option1->features_setting_id) src="{{asset('home_page_icons/' . $postRidePage->animals_option1->icon)}}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option2->features_setting_id) src="{{asset('home_page_icons/' . $postRidePage->animals_option2->icon)}}"
-                                    @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
-                                        src="{{asset('home_page_icons/' . $postRidePage->animals_option3->icon)}}" @endif
+                                    @if ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option1)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option2)->icon) }}"
+                                    @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}"
+                                    @endif
                                     alt="">
-                                <p>{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
+                                <div class="flex items-center gap-1">
+                                    <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }} {{ $ride->animal_friendly->name }}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                        @if ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option2_tooltip ?? '' }}"
+                                        @elseif ($ride->animal_friendly->features_setting_id === (optional($postRidePage->animals_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option3_tooltip ?? '' }}"
+                                        @endif viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        @endisset
+                        @isset($ride->luggage->features_setting_id)
+                            <div class="flex items-center space-x-2">
+                                <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}" alt="">
+                                <div class="flex items-center gap-1">
+                                    <p class="font-semibold">{{ $rideDetailPage->luggage_label ?? '' }} {{ $ride->luggage->name }}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                        @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option2_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option3_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option4_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option5_tooltip ?? '' }}"
+                                        @endif viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                    </svg>
+                                </div>
                             </div>
                         @endisset
                         @php
@@ -303,50 +368,81 @@
                         @foreach ($features as $feature)
                             <div class="flex items-center space-x-2">
                                 @if ($feature === $postRidePage->features_option11->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option11->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option11->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option1->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option1->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option2->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option2->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option9->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option9->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option8->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option8->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option8->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option10->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option10->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option10->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option3->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option3->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option3->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option12->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option12->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option12->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option4->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option5->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option6->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option7->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option13->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option13->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option13->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option14->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option14->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option14->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option15->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option15->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option15->icon) }}" alt="">
                                 @elseif ($feature === $postRidePage->features_option16->name)
-                                    <img class="w-7 h-7" src="{{asset('home_page_icons/' . $postRidePage->features_option16->icon)}}" alt="">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $postRidePage->features_option16->icon) }}" alt="">
                                 @else
                                     <input id="wi-fi" type="checkbox" name="features[]" value="" checked disabled
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 @endif
-                                <p>{{ $feature }}</p>
+                                <p class="font-semibold flex items-center gap-1">
+                                    {{ $feature }}
+                                    @if ($feature === $postRidePage->features_option11->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option11_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option1->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option1_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option2->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option2_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option9->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option9_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option8->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option8_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option10->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option10_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option3->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option3_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option12->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option12_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option4->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option4_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option5->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option5_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option6->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option6_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option7->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option7_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option13->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option13_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option14->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option14_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option15->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option15_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @elseif ($feature === $postRidePage->features_option16->name)
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ optional($postRidePage)->features_option16_tooltip ?? '' }}" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                                    @endif
+                                </p>
                             </div>
                         @endforeach
                     </div>
                 </div>
-                {{-- <div class="mt-4 mb-5 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-                    <p class="text-gray-800">Important note from the driver: <span class="text-gray-500">{{ $ride->notes }}</span></p>
-                </div> --}}
-
             </div>
             <div class="col-span-1">
                 <div class="space-y-4 -mt-4">
@@ -382,8 +478,83 @@
                             @endisset
                         </div>
                     </div>
+
+                    <div class="bg-white rounded-lg shadow-3xl">
+                        <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
+                            <h3 class="text-2xl xl:text-3xl">
+                                @isset($bookingPage->booking_label)
+                                    {{ $bookingPage->booking_label }}
+                                @endisset
+                            </h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-b-lg">
+                            <div class="space-y-4 mb-4">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex relative">
+                                        <h3 class="text-primary text-2xl xl:text-3xl">
+                                            @isset($bookingPage->seats_available_label)
+                                                {{ $bookingPage->seats_available_label }}
+                                            @endisset
+                                        </h3>
+                                    </div>
+                                </div>
+
+                                @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && (optional($ride->payment_method)->features_setting_id ?? null) === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
+                                    <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p class="text-yellow-800 text-sm">
+                                            <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
+                                        </p>
+                                    </div>
+                                @endif
+                                <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
+                                    @foreach ($ride->seatDetail as $detail)
+                                        @php
+                                            $isBookedByOthers = $detail->status === 'booked' && !$booking->seatDetail->contains('id', $detail->id);
+                                            $isHeldByOthers = $detail->status === 'hold' && $detail->user_id != optional(auth()->user())->id;
+                                            $isUnavailable = $isBookedByOthers || $isHeldByOthers;
+                                            $isSelectedByMe = !$isUnavailable && ($booking->seatDetail->contains('id', $detail->id) || in_array($detail->id, old('seats_id', [])));
+                                        @endphp
+                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isUnavailable ? '1' : '0' }}">
+                                            @if ($isUnavailable)
+                                                <div class="opacity-50 cursor-not-allowed pointer-events-none">
+                                                    <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                        <img src="{{ asset('assets/seat.png') }}" class="w-8 h-8 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                        <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }}">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <label class="cursor-pointer inline-block seat-clickable" for="number-of-seat-{{ $detail->id }}" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" onclick="seat_selected(event, {{ $detail->id }}, {{ $detail->seat_number ?? $loop->iteration }})">
+                                                    <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden seat-checkbox" {{ $isSelectedByMe ? 'checked' : '' }} data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}">
+                                                    <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                        <img src="{{ $isSelectedByMe ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                        <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }} {{ $isSelectedByMe ? 'text-green-300' : '' }}">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                    </span>
+                                                </label>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @error('seats')
+                                  <div class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base">@isset($bookingPage->seats_available_tooltip) {{ $bookingPage->seats_available_tooltip }} @endisset</p>
+                                    </div>
+                                  </div>
+                                @enderror
+
+                                <div id ="seats-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded " >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                  </div>
+                                <!-- Hidden input to store count -->
+                                <input type="hidden" id="seat-count" name="seats" value="">
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="mt-4 bg-white rounded-lg shadow-3xl">
+                    <div class="mt-4 bg-white rounded-lg shadow-3xl">   
                         <div class="bg-primary text-white px-4 py-2 rounded-t-lg">
                             <h3 class="text-2xl xl:text-3xl">
                                 @isset($bookingPage->pricing_label)
@@ -486,6 +657,11 @@
                             @endif
 
                             @if ($coffeeBalance > 0)
+                                @php
+                                    $coffeePaymentOption1Id = is_object($postRidePage->payment_methods_option1 ?? null) ? ($postRidePage->payment_methods_option1->features_setting_id ?? null) : ($postRidePage->payment_methods_option1 ?? null);
+                                    $coffeePaymentOption3Id = isset($postRidePage->payment_methods_option3) ? (is_object($postRidePage->payment_methods_option3) ? ($postRidePage->payment_methods_option3->features_setting_id ?? null) : $postRidePage->payment_methods_option3) : null;
+                                    $coffeeRidePaymentId = is_object($ride->payment_method ?? null) ? ($ride->payment_method->features_setting_id ?? null) : ($ride->payment_method ?? null);
+                                @endphp
                                 <div class="flex items-center justify-between gap-2 mt-1">
                                     <div class="flex">
                                         <input type="checkbox" id="apply_coffee_wall" name="coffee_wall" value="1" class="form-control hidden peer">
@@ -494,19 +670,19 @@
                                                 {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                             </span>
                                         </label>
-                                        <div class="sups relative inline-flex ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <div class="sups relative inline-flex ml-2 group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div
-                                                class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                    style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(180px);"
-                                                >
-                                                    {!! str_replace('<p>', '<p class="text-white font-semibold text-start text-sm lg:text-base">', $bookingPage->coffee_from_wall_tooltip ?? '') !!}
+                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
+                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
+                                                    @if ($coffeeRidePaymentId !== null && $coffeeRidePaymentId == $coffeePaymentOption1Id)
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">To be paid in cash directly to the driver at the time of the ride.</p>
+                                                    @elseif ($coffeePaymentOption3Id !== null && $coffeeRidePaymentId == $coffeePaymentOption3Id)
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.</p>
+                                                    @else
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">ProximaRide will transfer this amount to the driver only after the ride is completed.</p>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -514,13 +690,19 @@
                                     <div id="hideBookingFee" class="hidden items-center space-x-1">
                                         <p class="text-black">-</p>
                                         <p class="totalAmount text-black"></p>
-                                        <div class="sups relative inline-flex ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                        <div class="sups relative inline-flex ml-2 group">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div class="absolute tooltip payment_tooltiptext_position top-6 right-0 group-hover:flex hidden peer-hover:flex">
-                                                <div role="tooltip" class="absolute right-0 z-10 transition duration-150 ease-in-out shadow-lg p-2 border rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4" style="background-color: #c75b5b; border-color: #c75b5b; transform: translateX(150px);">
-                                                   {{ $bookingPage->coffee_from_amount_wall_tooltip ?? '' }}
+                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
+                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
+                                                    @if ($coffeeRidePaymentId !== null && $coffeeRidePaymentId == $coffeePaymentOption1Id)
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">To be paid in cash directly to the driver at the time of the ride.</p>
+                                                    @elseif ($coffeePaymentOption3Id !== null && $coffeeRidePaymentId == $coffeePaymentOption3Id)
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.</p>
+                                                    @else
+                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">ProximaRide will transfer this amount to the driver only after the ride is completed.</p>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -569,109 +751,43 @@
                     
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white px-4 py-2">
-                            <h3 class="text-2xl xl:text-3xl">Select Number of Seats</h3>
+                            <h3 class="text-2xl xl:text-3xl">{{ $bookingPage->booking_term_label ?? 'User Declarations' }}</h3>
                         </div>
                         <div class="bg-white p-4">
-                            <div class="space-y-4 mb-4">
-
-                                <div class="flex items-center justify-between">
-                                    <div class="flex relative">
-                                        <h3 class="text-primary text-2xl xl:text-3xl">
-                                            @isset($bookingPage->seats_available_label)
-                                                {{ $bookingPage->seats_available_label }}
-                                            @endisset
-                                        </h3>
-                                        <!-- <div class="sups inline-flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                            </svg>
-                                            <div
-                                              class="absolute tooltip payment_tooltiptext_position top-8 left-0 group-hover:flex hidden peer-hover:flex"
-                                            >
-                                                <div
-                                                    role="tooltip"
-                                                    class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                                >
-                                                    <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                        {{ $bookingPage->seats_available_info_text ?? 'seat avaialbe info text' }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div> -->
-                                    </div>
-                                </div>
-
-                                {{-- {{ $booking->seatDetail }} --}}
-                                <div class="flex">
-                                    @foreach ($booking->seatDetail as $detail)
-                                        <div class="relative">
-                                            <label for="number-of-seat-{{ $detail->id }}">
-                                                <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden" checked onchange="keepChecked(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                                <img src="{{ asset('assets/seat-hover-1.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
-                                                <span class="absolute left-4 top-3 seat-number seat-number-{{ $detail->id }} {{ old('seats') == $detail->id ? 'text-green-300' : '' }}"></span>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                    @foreach ($ride->pendingSeatDetail as $detail)
-                                        <div class="relative">
-                                            <label for="number-of-seat-{{ $detail->id }}">
-                                                <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden" {{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                                <img src="{{ in_array($detail->id, old('seats_id', [])) || ($detail->user_id == auth()->user()->id) ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $detail->id }}" alt="">
-                                                <span class="absolute left-4 top-3 seat-number seat-number-{{ $detail->id }} {{ old('seats') == $detail->id ? 'text-green-300' : '' }}"></span>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <!-- Hidden input to store count -->
-                                <input type="hidden" id="seat-count" name="seats" value="">
-                                {{-- <div class="">
-                                    <label for="seats" class="text-gray-900 font-medium text-lg lg:text-xl mb-2">Seats</label>
-                                    <select id="type" name="seats"
-                                        class="bg-gray-100 border-0 text-gray-500 rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full pr-8 p-2.5">
-                                        @for ($i = $booking->seats; $i <= $ride->seats - $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', '!=', auth()->user()->id)->sum('seats'); $i++)
-                                            <option value="{{ $i }}" {{ old('seats', $booking->seats) == $i ? 'selected' : ($i == 1 ? 'selected' : '') }}>
-                                                {{ $i }}
-                                            </option>
-                                        @endfor
-                                    </select>
-                                </div> --}}
-                            </div>
-                            
-
                             <ul class="">
-                                <li><p class="text-left">{{ $bookingPage->booking_disclaimer_on_time ?? "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded" }}</p></li>
-                                <li><p class="text-left">{{ $bookingPage->booking_disclaimer_pink_ride ?? "I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}}</p></li>
-                                <li><p class="text-left">{{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards" }}</p></li>
+                                <li> <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time){!! $bookingPage->booking_disclaimer_on_time !!} @endisset</p></li>
+                                <li> <p class="text-left mt-4"><strong>● Pink Rides: </strong> {{ $bookingPage->booking_disclaimer_pink_ride ?? "I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}}</p></li>
+                                <li> <p class="text-left mt-4"><strong>● Extra+ Rides: </strong> {{ $bookingPage->booking_disclaimer_extra_care_ride ?? "I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards" }}</p></li>
                             </ul>
 
                             <div class="flex items-start my-4">
                                 <input id="" type="checkbox" name="agree_terms" value="1"
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-800  focus:ring-2">
-                                    <label for="" class="ml-2 font-normal text-gray-900">
-                                        @isset($bookingPage->booking_term_agree_text)
-                                            {!! $bookingPage->booking_term_agree_text !!}
-                                        @endisset
-                                        <span class="text-red-500">*</span>
-                                    </label>
+                                <label for="" class="ml-2 font-normal text-gray-900">
+                                    @isset($bookingPage->booking_term_agree_text)
+                                        {!! $bookingPage->booking_term_agree_text !!}
+                                    @endisset
+                                    <span class="text-red-500">*</span>
+                                </label>
+                            </div>
+                            @error('agree_terms')
+                            <div id="agree_terms-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                 </div>
-                                @error('agree_terms')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
+                            </div>
+                            @enderror
+
+                            <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base"></p>
                                 </div>
-                                @enderror
-
-                                <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base"></p>
-                                    </div>
-                                </div>
+                            </div>
 
 
 
-                                @if ($ride->booking_type == "37")
+                            @if ($ride->booking_type == "37")
                                 @php
                                     if ($setting){
                                         $settingFirmDiscount = $setting->frim_discount;
@@ -683,85 +799,85 @@
                                     <input id="" type="checkbox" name="firm_agree_terms" value="1"
                                         {{ old('firm_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
-                                            @isset($firmText)
-                                                {!! $firmText !!}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
+                                    <label for="" class="ml-2 font-normal text-gray-900">
+                                        @isset($firmText)
+                                            {!! $firmText !!}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                </div>
+                                @error('firm_agree_terms')
+                                <div id="firm_agree_terms-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                     </div>
-                                    @error('firm_agree_terms')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                </div>
+                                @enderror
+
+                                <div id ="firm_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                </div>
+
+                            @endif
+
+                            @if (in_array($postRidePage->features_option1->name, $features))
+                                <div class="flex items-start my-4">
+                                    <input id="" type="checkbox" name="pink_ride_agree_terms" value="1"
+                                        {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="" class="ml-2 font-normal text-gray-900">
+                                        @isset($bookingPage->booking_pink_ride_term_agree_text)
+                                            {!! $bookingPage->booking_pink_ride_term_agree_text !!}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                </div>
+                                @error('pink_ride_agree_terms')
+                                    <div id="pink_ride_agree_terms-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                         </div>
                                     </div>
-                                    @enderror
+                                @enderror
 
-                                    <div id ="firm_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
+                                <div id ="pink_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if (in_array($postRidePage->features_option2->name, $features))
+                                <div class="flex items-start my-4">
+                                    <input id="" type="checkbox" name="extra_care_ride_agree_terms" value="1"
+                                        {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
+                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <label for="" class="ml-2 font-normal text-gray-900">
+                                        @isset($bookingPage->booking_extra_care_ride_term_agree_text)
+                                            {!! $bookingPage->booking_extra_care_ride_term_agree_text !!}
+                                        @endisset
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                </div>
+                                @error('extra_care_ride_agree_terms')
+                                    <div id="extra_care_ride_agree_terms-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                         </div>
                                     </div>
+                                @enderror
 
-                                @endif
-
-                                @if (in_array($postRidePage->features_option1->name, $features))
-                                    <div class="flex items-start my-4">
-                                        <input id="" type="checkbox" name="pink_ride_agree_terms" value="1"
-                                            {{ old('pink_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
-                                            @isset($bookingPage->booking_pink_ride_term_agree_text)
-                                                {!! $bookingPage->booking_pink_ride_term_agree_text !!}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
+                                <div id ="extra_care_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
+                                    <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                        <p class="text-white leading-none text-sm lg:text-base"></p>
                                     </div>
-                                    @error('pink_ride_agree_terms')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
-                                        </div>
-                                    @enderror
-
-                                    <div id ="pink_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if (in_array($postRidePage->features_option2->name, $features))
-                                    <div class="flex items-start my-4">
-                                        <input id="" type="checkbox" name="extra_care_ride_agree_terms" value="1"
-                                            {{ old('extra_care_ride_agree_terms') == '1' ? 'checked' : '' }} onchange="getFirmAgreeTerms();"
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="" class="ml-2 font-normal text-gray-900">
-                                            @isset($bookingPage->booking_extra_care_ride_term_agree_text)
-                                                {!! $bookingPage->booking_extra_care_ride_term_agree_text !!}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                    </div>
-                                    @error('extra_care_ride_agree_terms')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
-                                        </div>
-                                    @enderror
-
-                                    <div id ="extra_care_ride_agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
-                                    </div>
-                                @endif
+                                </div>
+                            @endif
 
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                            @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
 
                             @else
                                 <div id="paymentSection" class="space-y-4 mb-4 hidden">
@@ -843,13 +959,13 @@
                                 </div>
                             @endif
 
-                                @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
+                            @if ($ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id && $ride->rideDetail[0]->price <= 15)
 
-                                @else
-                                    <div id="paymentSectionGPay" class="hidden">
-                                        <div id="payment-request-button"></div>
-                                    </div>
-                                @endif
+                            @else
+                                <div id="paymentSectionGPay" class="hidden">
+                                    <div id="payment-request-button"></div>
+                                </div>
+                            @endif
 
                                 @isset($ride->booking_method->features_setting_id)
                                 <div class="flex justify-center items-center mt-4">
@@ -870,36 +986,27 @@
 
 <div id="bookingModal" class="hidden fixed z-50 inset-0 overflow-y-auto">
     <div class="relative z-50">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-40" onclick="closeModal()"></div>
-        <div class="fixed inset-0 z-50 w-screen overflow-y-auto modal-border">
-            <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 ">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto pointer-events-none">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0 pointer-events-none">
                 <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border pointer-events-auto">
+                    <button type="button" id="close-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start justify-center">
-                            <!-- <div
-                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
                         </div>
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                            </div>
-                            <div class="mt-2 w-full">
-                                <p class="text-sm text-center text-gray-500"></p>
+                            <div class="w-full">
+                                <p class="text-md text-center mt-10 text-gray-500" id="bookingModalMessage"></p>
                             </div>
                         </div>
                     </div>
-                    <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                        <button type="button" id="close-modal" class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                        <button type="button" id="close-popup" class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
                             Close
                         </button>
                     </div>
@@ -1470,100 +1577,75 @@ inputs.forEach((input, index) => {
     window.showStudentSeatLimitModal = showStudentSeatLimitModal;
     window.closeStudentSeatLimitModal = closeStudentSeatLimitModal;
 
-    function seat_selected(th) {
-        // Get the count of selected seats
-        var selectedSeats = $("input[name='seats_id[]']:checked").length;
-        console.log('Number of selected seats:', selectedSeats);
-
-        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-        var isStudent = {{ (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2')) ? 'true' : 'false' }};
-        var paymentMethod = $('#check_payment_method').val(); // "cash" or "online"
-        var isCashPayment = (paymentMethod === 'cash');
-        
-        // If user is a student and payment is Cash, limit to 2 seats
-        if (isStudent && isCashPayment) {
-            // If trying to select more than 2 seats, prevent it
-            if ($(th).is(':checked') && selectedSeats > 2) {
-                $(th).prop('checked', false);
-                showStudentSeatLimitModal();
-                return;
-            }
-        }
-
-        var seat = $(th).val();
-        var clickedIndex = $("input[name='seats_id[]']").index(th);
-
-        // Change the image source for selected seats
-        // if ($(th).is(':checked')) {
-        //     // Change the image source for selected seats
-        //     $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
-        //     $(".seat-number.seat-number-" + seat).addClass('text-green-300');
-        // } else {
-        //     // Revert the image source for unselected seats
-        //     $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat.png") }}');
-        //     $(".seat-number.seat-number-" + seat).removeClass('text-green-300');
-        // }
-    $("input[name='seats_id[]']").each(function(index) {
-
-        var seatValue = $(this).val();
-
-        // if (index <= clickedIndex) {
-        //     // Select this seat (checked)
-        //     $(this).prop('checked', true);
-
-        //     // Change the image source for selected seats
-        //     $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
-        //     $(".seat-number.seat-number-" + seatValue).addClass('text-green-300');
-        // } else {
-        //     // Unselect this seat (unchecked)
-        //     $(this).prop('checked', false);
-
-        //     // Revert the image source for unselected seats
-        //     $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset("assets/seat.png") }}');
-        //     $(".seat-number.seat-number-" + seatValue).removeClass('text-green-300');
-        // }
-        if ($(th).is(':checked')) {
-            // Change the image source for selected seats
-            $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
-            $(".seat-number.seat-number-" + seat).addClass('text-green-300');
-        } else {
-            // Revert the image source for unselected seats
-            $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset("assets/seat.png") }}');
-            $(".seat-number.seat-number-" + seat).removeClass('text-green-300');
-        }
-    });
-    updateTotalAmount();
-
-        // Persist seat selection for refresh
+    function persistSeatSelection() {
         try {
             var ids = [];
             $("input[name='seats_id[]']:checked").each(function() { ids.push($(this).val()); });
             sessionStorage.setItem(editBookingSeatsStorageKey, JSON.stringify(ids));
         } catch (e) { /* ignore */ }
+    }
 
-        $.ajax({
-            url: '{{ route("seat_on_hold") }}', // Laravel route for the seat_on_hold
-            type: 'POST',
-            data: {
-                seat_id: seat,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function(response) {
-                console.log('Seats on hold:', response);
+    function seat_selected(event, clickedSeatId, clickedSeatNumber) {
+        event.preventDefault();
+        event.stopPropagation();
 
-                // Update the modal content with the response message
-                //const modalMessageElement = document.querySelector('#bookingModal .text-sm.text-gray-500');
-                //if (modalMessageElement) {
-                  //  modalMessageElement.textContent = response.message; // Assuming 'message' is part of the response
-                //}
-                //const modal = document.getElementById('bookingModal');
-                //modal.classList.remove('hidden');
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                // Handle error response
-            }
+        var isStudent = {{ (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2')) ? 'true' : 'false' }};
+        var paymentMethod = $('#check_payment_method').val();
+        var isCashPayment = (paymentMethod === 'cash');
+        var maxSeatsForStudent = 2;
+
+        // Build list of available seats (not booked) in order
+        var availableSeats = [];
+        $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
+            var seatId = $(this).data('seat-id');
+            var seatNum = parseInt($(this).data('seat-number'), 10);
+            availableSeats.push({ id: seatId, seatNumber: seatNum });
         });
+        availableSeats.sort(function(a, b) { return a.seatNumber - b.seatNumber; });
+
+        // Get seats to select: all available seats with seat_number <= clicked seat_number
+        var seatsToSelect = availableSeats.filter(function(s) { return s.seatNumber <= clickedSeatNumber; });
+
+        // Student limit: cap at 2 seats for Cash payment
+        if (isStudent && isCashPayment && seatsToSelect.length > maxSeatsForStudent) {
+            seatsToSelect = seatsToSelect.slice(0, maxSeatsForStudent);
+            showStudentSeatLimitModal();
+        }
+
+        // Check if this is a toggle-off: clicked seat was the rightmost selected
+        var currentlyChecked = [];
+        $("input.seat-checkbox:checked").each(function() { currentlyChecked.push(parseInt($(this).val(), 10)); });
+        var currentlySelectedIds = currentlyChecked;
+        var rightmostSelected = currentlySelectedIds.length > 0 ? Math.max.apply(null, currentlySelectedIds.map(function(id) {
+            var s = availableSeats.find(function(s) { return s.id == id; });
+            return s ? s.seatNumber : 0;
+        })) : 0;
+
+        var newSelectionIds = [];
+        if (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0) {
+            // Toggle off: deselect all
+            newSelectionIds = [];
+        } else {
+            newSelectionIds = seatsToSelect.map(function(s) { return s.id; });
+        }
+
+        // Update UI immediately
+        $("input.seat-checkbox").prop('checked', false);
+        newSelectionIds.forEach(function(id) {
+            $("#number-of-seat-" + id).prop('checked', true);
+        });
+
+        $(".seat-image").attr('src', '{{ asset("assets/seat.png") }}');
+        $(".seat-number").removeClass('text-green-300');
+        newSelectionIds.forEach(function(id) {
+            $(".seat-image.seat-unselect-" + id).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
+            $(".seat-number.seat-number-" + id).addClass('text-green-300');
+        });
+
+        // Edit booking: seats are already booked - no seat_on_hold API needed.
+        // Backend handles seat changes on form submit. Client-side selection only.
+        updateTotalAmount();
+        persistSeatSelection();
     }
 
     function keepChecked(checkbox) {
@@ -1581,6 +1663,11 @@ inputs.forEach((input, index) => {
     });
 
     document.getElementById('close-modal').addEventListener('click', function () {
+    const modal = document.getElementById('bookingModal');
+    modal.classList.add('hidden');
+});
+
+    document.getElementById('close-popup').addEventListener('click', function () {
     const modal = document.getElementById('bookingModal');
     modal.classList.add('hidden');
 });
@@ -1606,6 +1693,19 @@ document.getElementById('bookingModal').addEventListener('click', function (even
 
     function getFirmAgreeTerms() {
         updateTotalAmount();
+        // Hide error tooltips immediately when checkbox is checked
+        function hideErrorIfChecked(checkboxName, errorId, laravelErrorId) {
+            var cb = document.querySelector('[name="' + checkboxName + '"]');
+            if (!cb || !cb.checked) return;
+            var el = document.getElementById(errorId);
+            if (el) { el.classList.add('hidden'); var tt = el.querySelector('.tooltiptext'); if (tt) tt.classList.add('hidden'); }
+            el = document.getElementById(laravelErrorId);
+            if (el) el.classList.add('hidden');
+        }
+        hideErrorIfChecked('agree_terms', 'agree_terms-error', 'agree_terms-laravel-error');
+        hideErrorIfChecked('firm_agree_terms', 'firm_agree_terms-error', 'firm_agree_terms-laravel-error');
+        hideErrorIfChecked('pink_ride_agree_terms', 'pink_ride_agree_terms-error', 'pink_ride_agree_terms-laravel-error');
+        hideErrorIfChecked('extra_care_ride_agree_terms', 'extra_care_ride_agree_terms-error', 'extra_care_ride_agree_terms-laravel-error');
     }
 
     var submitFormEl = document.getElementById('submitForm');
