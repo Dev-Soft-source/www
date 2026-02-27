@@ -4147,6 +4147,7 @@ class BookingController extends Controller
             ]);
 
 
+            // Release seats linked to this booking
             $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
             if (isset($getSeatDetails) && !empty($getSeatDetails)) {
                 foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -4157,6 +4158,19 @@ class BookingController extends Controller
                 }
             }
 
+            // Also release any orphaned hold seats (held by this passenger for this ride but never linked to booking_id)
+            $orphanedHoldSeats = SeatDetail::where('ride_id', $booking->ride_id)
+                ->where('user_id', $booking->user_id)
+                ->where('status', 'hold')
+                ->get();
+            if ($orphanedHoldSeats->isNotEmpty()) {
+                foreach ($orphanedHoldSeats as $seat) {
+                    $seat->status = 'pending';
+                    $seat->booking_id = NULL;
+                    $seat->user_id = NULL;
+                    $seat->save();
+                }
+            }
 
             $getTranscationsSum = Transaction::where('booking_id', $booking->id)->where('type', '3')->sum('price');
 

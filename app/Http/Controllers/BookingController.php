@@ -2111,13 +2111,13 @@ class BookingController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message','booking_not_update_message')->first();
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message','booking_not_update_message')->first();
             }
         }
         $booking = Booking::where('id', $id)->first();
@@ -2536,7 +2536,7 @@ class BookingController extends Controller
                     return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
                 }
             } else {
-                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You did not update your booking in this ride']);
+                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
             }
         } elseif ($booking->status === '1') {
             if ($request->seats > $booking->seats) {
@@ -2819,7 +2819,7 @@ class BookingController extends Controller
                     return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
                 }
             } else {
-                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You did not update your booking in this ride']);
+                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update ']);
             }
         }
 
@@ -3413,6 +3413,7 @@ class BookingController extends Controller
                 'expires_at' => null,
             ]);
 
+            // Release seats linked to this booking
             $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
             if (isset($getSeatDetails) && !empty($getSeatDetails)) {
                 foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -3420,6 +3421,20 @@ class BookingController extends Controller
                     $getSeatDetail->booking_id = NULL;
                     $getSeatDetail->user_id = NULL;
                     $getSeatDetail->save();
+                }
+            }
+
+            // Also release any orphaned hold seats (held by this passenger for this ride but never linked to booking_id)
+            $orphanedHoldSeats = SeatDetail::where('ride_id', $booking->ride_id)
+                ->where('user_id', $booking->user_id)
+                ->where('status', 'hold')
+                ->get();
+            if ($orphanedHoldSeats->isNotEmpty()) {
+                foreach ($orphanedHoldSeats as $seat) {
+                    $seat->status = 'pending';
+                    $seat->booking_id = NULL;
+                    $seat->user_id = NULL;
+                    $seat->save();
                 }
             }
 
@@ -5735,7 +5750,7 @@ class BookingController extends Controller
 
             return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $message->book_seat_message]);
         } elseif ($request->seats <= $booking->seats) {
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You did not update your booking in this ride']);
+            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
         }
     }
 

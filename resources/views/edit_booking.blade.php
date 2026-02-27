@@ -513,14 +513,23 @@
                                             $isBookedByOthers = $detail->status === 'booked' && !$booking->seatDetail->contains('id', $detail->id);
                                             $isHeldByOthers = $detail->status === 'hold' && $detail->user_id != optional(auth()->user())->id;
                                             $isUnavailable = $isBookedByOthers || $isHeldByOthers;
-                                            $isSelectedByMe = !$isUnavailable && ($booking->seatDetail->contains('id', $detail->id) || in_array($detail->id, old('seats_id', [])));
+                                            $isMyBookedSeat = $booking->seatDetail->contains('id', $detail->id);
+                                            $isSelectedByMe = !$isUnavailable && !$isMyBookedSeat && in_array($detail->id, old('seats_id', []));
                                         @endphp
-                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isUnavailable ? '1' : '0' }}">
+                                        <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ ($isUnavailable || $isMyBookedSeat) ? '1' : '0' }}">
                                             @if ($isUnavailable)
                                                 <div class="opacity-50 cursor-not-allowed pointer-events-none">
                                                     <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
                                                         <img src="{{ asset('assets/seat.png') }}" class="w-8 h-8 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
                                                         <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }}">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                    </span>
+                                                </div>
+                                            @elseif ($isMyBookedSeat)
+                                                <div class="opacity-70 cursor-not-allowed pointer-events-none select-none">
+                                                    <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden seat-checkbox seat-checkbox-locked" checked readonly tabindex="-1" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}">
+                                                    <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                        <img src="{{ asset('assets/seat-hover-1.png') }}" class="w-8 h-8 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                        <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }} text-green-300">{{ $detail->seat_number ?? $loop->iteration }}</span>
                                                     </span>
                                                 </div>
                                             @else
@@ -929,7 +938,7 @@
                                                         @endif
                                                     @endforeach
                                                     @error('card_id')
-                                                      <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                      <div id="card_id-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                                         </div>
@@ -949,7 +958,7 @@
                                             </div>
                                         </div>
                                         @error('payment_method')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
+                                          <div id="payment_method-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                                 <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                             </div>
@@ -1612,9 +1621,9 @@ inputs.forEach((input, index) => {
             showStudentSeatLimitModal();
         }
 
-        // Check if this is a toggle-off: clicked seat was the rightmost selected
+        // Check if this is a toggle-off: clicked seat was the rightmost selected (exclude locked booked seats)
         var currentlyChecked = [];
-        $("input.seat-checkbox:checked").each(function() { currentlyChecked.push(parseInt($(this).val(), 10)); });
+        $("input.seat-checkbox:checked:not(.seat-checkbox-locked)").each(function() { currentlyChecked.push(parseInt($(this).val(), 10)); });
         var currentlySelectedIds = currentlyChecked;
         var rightmostSelected = currentlySelectedIds.length > 0 ? Math.max.apply(null, currentlySelectedIds.map(function(id) {
             var s = availableSeats.find(function(s) { return s.id == id; });
@@ -1629,14 +1638,15 @@ inputs.forEach((input, index) => {
             newSelectionIds = seatsToSelect.map(function(s) { return s.id; });
         }
 
-        // Update UI immediately
-        $("input.seat-checkbox").prop('checked', false);
+        // Update UI immediately (exclude locked booked seats from uncheck)
+        $("input.seat-checkbox:not(.seat-checkbox-locked)").prop('checked', false);
         newSelectionIds.forEach(function(id) {
             $("#number-of-seat-" + id).prop('checked', true);
         });
 
-        $(".seat-image").attr('src', '{{ asset("assets/seat.png") }}');
-        $(".seat-number").removeClass('text-green-300');
+        // Reset only selectable seats (exclude locked booked seats - they keep their selected styling)
+        $('#seat-selection-container .seat-item[data-is-booked="0"] .seat-image').attr('src', '{{ asset("assets/seat.png") }}');
+        $('#seat-selection-container .seat-item[data-is-booked="0"] .seat-number').removeClass('text-green-300');
         newSelectionIds.forEach(function(id) {
             $(".seat-image.seat-unselect-" + id).attr('src', '{{ asset("assets/seat-hover-1.png") }}');
             $(".seat-number.seat-number-" + id).addClass('text-green-300');
@@ -1690,6 +1700,25 @@ document.getElementById('bookingModal').addEventListener('click', function (even
     }
 });
 
+
+    // Hide payment/card error tooltips immediately when user selects an option
+    function hidePaymentErrors() {
+        function hideEl(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+        document.querySelectorAll('[name="payment_method"]').forEach(function(radio) {
+            radio.addEventListener('change', function() { hideEl('payment_method-laravel-error'); });
+        });
+        document.querySelectorAll('[name="card_id"]').forEach(function(radio) {
+            radio.addEventListener('change', function() { hideEl('card_id-laravel-error'); });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hidePaymentErrors);
+    } else {
+        hidePaymentErrors();
+    }
 
     function getFirmAgreeTerms() {
         updateTotalAmount();

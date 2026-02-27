@@ -1125,7 +1125,7 @@
                                                         @endif
                                                     @endforeach
                                                     @error('card_id')
-                                                        <div class="relative tooltip -bottom-4 group-hover:flex">
+                                                        <div id="card_id-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                                             <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                                         </div>
@@ -1145,7 +1145,7 @@
                                             </div>
                                         </div>
                                         @error('payment_method')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
+                                            <div id="payment_method-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
                                                     <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
                                                 </div>
@@ -2036,6 +2036,25 @@ $(document).ready(function () {
 
     function getFirmAgreeTerms() {
         updateTotalAmount();
+    }
+
+    // Hide payment/card error tooltips immediately when user selects an option
+    function hidePaymentErrors() {
+        function hideEl(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+        document.querySelectorAll('[name="payment_method"]').forEach(function(radio) {
+            radio.addEventListener('change', function() { hideEl('payment_method-laravel-error'); });
+        });
+        document.querySelectorAll('[name="card_id"]').forEach(function(radio) {
+            radio.addEventListener('change', function() { hideEl('card_id-laravel-error'); });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hidePaymentErrors);
+    } else {
+        hidePaymentErrors();
     }
 
     function closeModal() {
