@@ -104,10 +104,10 @@
         
         <input type="hidden" value="{{ $ride->payment_method->features_setting_id === $postRidePage->payment_methods_option1->features_setting_id ? "cash" : "online" }}" id="check_payment_method">
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
-            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 -mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4 items-baseline">
+            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3">
                 <h1 class="-mb-2">Edit Booking</h1>
-                <div class="text-red-500 text-lg pr-4">
+                <div class="text-red-500 text-lg mt-4 pr-4">
                     <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
                 </div>
             </div>

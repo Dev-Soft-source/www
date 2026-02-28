@@ -239,23 +239,49 @@
         <input type="hidden" name="id" value="{{ $ride->id}}">
         <input type="hidden" name="gPayApplePayId" value="">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
-            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 -mb-4">
+            <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 items-baseline">
                 <h1 class="-mb-2">
                     @isset($bookingPage->main_heading)
                         {{ $bookingPage->main_heading }}
                     @endisset
                 </h1>
-                @php
-                    $extraCareId = optional($postRidePage->features_option11 ?? null)->features_setting_id ?? ($postRidePage->features_option11 ?? null);
-                    $isExtraCareRide = $extraCareId && !empty($ride->features) && in_array((string)$extraCareId, array_filter(explode('=', $ride->features)));
-                @endphp
-                @if($isExtraCareRide)
-                    <p class="text-primary font-semibold text-lg mt-1 mb-0 w-full">This is an Extra+ Ride</p>
-                @endif
-                <div class="text-red-500 text-lg  pr-4">
+                <div class="text-red-500 text-lg mt-4 pr-4">
                     <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
                 </div>
             </div>
+            @if($isPinkRide && $isExtraCareRide)
+                <div class="col-span-3 w-full">
+                    <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
+                        <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="text-lg">This is a Pink Ride and Extra+ Ride</span>
+                    </div>
+                </div>
+            @else
+                @if($isExtraCareRide)
+                    <div class="col-span-3 w-full">
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
+                            <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="text-lg">This is a Extra+ Ride</span>
+                        </div>
+                    </div>
+                @elseif($isPinkRide)
+                    <div class="col-span-3 w-full">
+                        <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
+                            <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="text-lg">This is a Pink Ride</span>
+                        </div>
+                    </div>
+                @endif
+            @endif
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">

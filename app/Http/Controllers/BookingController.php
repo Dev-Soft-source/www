@@ -212,7 +212,13 @@ class BookingController extends Controller
                     ->whereLanguageId($selectedLanguage->id)
                     ->first();
 
-                $featureIds = explode('=', $ride->features);
+                // Compute Pink Ride and Extra Care flags BEFORE replacing features with names
+                $featureIds = array_filter(explode('=', $ride->features ?? ''));
+                
+                $pinkRideId = optional($postRidePage->features_option1 ?? null)->features_setting_id ?? ($postRidePage->features_option1 ?? null);
+                $isPinkRide = $pinkRideId && !empty($featureIds) && in_array((string)$pinkRideId, $featureIds);
+                $extraCareId = optional($postRidePage->features_option2 ?? null)->features_setting_id ?? ($postRidePage->features_option2 ?? null);
+                $isExtraCareRide = $extraCareId && !empty($featureIds) && in_array((string)$extraCareId, $featureIds);
                 // Fetch data for each feature ID and concatenate with '='
                 $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
                     return FeaturesSettingDetail::whereFeaturesSettingId($id)
@@ -274,7 +280,7 @@ class BookingController extends Controller
             $getCrBalance = TopUpBalance::where('user_id', $user->id)->sum('cr_amount');
             $getDrBalance = TopUpBalance::where('user_id', $user->id)->sum('dr_amount');
 
-            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax]);
+            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false]);
         } else {
             return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
         }
