@@ -2455,6 +2455,10 @@
                                 {!! str_replace('<ol>', '<ol class="list-decimal list-inside">', str_replace('<li>', '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">', $postRidePage->disclaimers_description)) !!}
                             @endisset
                         </div>
+                        @php
+                            $pinkRideChecked = false;
+                            $extraCareRideChecked = false;
+                        @endphp
                         @if($postRidePage->features_option1?->features_setting_id)
                             @php
                                 $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
@@ -2478,11 +2482,7 @@
                             <div id="Extra+-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
                                 <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
                                     <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                                    @if($pinkRideChecked)
-                                    6.
-                                    @else
-                                    5.
-                                    @endif
+                                    <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
                                     I understand that this is an Extra+ Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
                                 </p>
                             </div>
@@ -4187,9 +4187,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
         const pinkRideCheckbox = document.getElementById('pink-ride');
         const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
+        const extraCareDisclaimerNumber = document.getElementById('extra-care-disclaimer-number');
         if (pinkRideCheckbox && pinkRideDisclaimer) {
             pinkRideCheckbox.addEventListener('change', function() {
                 pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
+                // Update Extra+ disclaimer number: 6 when Pink Ride is checked, 5 when not
+                if (extraCareDisclaimerNumber) {
+                    extraCareDisclaimerNumber.textContent = this.checked ? '6.' : '5.';
+                }
             });
         }
 
