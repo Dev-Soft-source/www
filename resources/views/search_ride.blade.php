@@ -1084,16 +1084,13 @@
                                                                         {{ $findRidePage->card_section_from_label }}
                                                                     @endisset
                                                                 </p>
-                                                                <div class="flex gap-2">
-                                                                    <h3
-                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                        {{ $rideDetail->departure }}.
-                                                                    </h3>
+                                                                <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    {{ $rideDetail->departure }}.
                                                                     @php $segmentPickup = $rideDetail->pickup ?? $ride->pickup; @endphp
                                                                     @if(!empty($segmentPickup))
-                                                                        <p class="text-sm mt-2">
+                                                                        <span class="text-sm text-gray-700">
                                                                             Pick-up at: {{ $segmentPickup }}
-                                                                        </p>
+                                                                        </span>
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1115,16 +1112,13 @@
                                                                         {{ $findRidePage->card_section_to_label }}
                                                                     @endisset
                                                                 </p>
-                                                                <div class="flex gap-2">
-                                                                    <h3
-                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                        {{ $rideDetail->destination }}.
-                                                                    </h3>
+                                                                <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    {{ $rideDetail->destination }}.
                                                                     @php $segmentDropoff = $rideDetail->dropoff ?? $ride->dropoff; @endphp
                                                                     @if(!empty($segmentDropoff))
-                                                                    <p class="text-sm mt-2">
+                                                                    <span class="text-sm text-gray-700">
                                                                         Drop-off at: {{ $segmentDropoff }}
-                                                                    </p>
+                                                                    </span>
                                                                     @endif
                                                                 </div>
                                                             </div>

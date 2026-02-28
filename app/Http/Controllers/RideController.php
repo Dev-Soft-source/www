@@ -303,7 +303,7 @@ class RideController extends Controller
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
-        Log::info($rides);
+
         return view('search_ride', [
             'pinkRideSetting' => $pinkRideSetting,
             'postRidePage' => $postRidePage,

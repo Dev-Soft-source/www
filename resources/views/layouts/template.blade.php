@@ -13,7 +13,6 @@
     <title>@yield('title', config('app.name', 'Home'))</title>
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
@@ -363,7 +362,6 @@
     </div>
     <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="logout-modal-backdrop"></div>
 
-    <script src="https://unpkg.com/@popperjs/core@2.9.1/dist/umd/popper.min.js" charset="utf-8"></script>
     <script type="text/javascript">
         function toggleModal(modalID) {
             document.getElementById(modalID).classList.toggle("hidden");
@@ -664,9 +662,6 @@
     };
 </script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ asset('js/front.js') }}" defer></script>
 
     @if(isset($birthdayData) && $birthdayData)
@@ -940,88 +935,6 @@
     </script>
     @endif
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then(function(registration) {
-                    console.log('Service Worker registration successful with scope: ', registration.scope);
-                }).catch(function(err) {
-                    console.log('Service Worker registration failed: ', err);
-                });
-        }
-
-        // Your web app's Firebase configuration
-        // TODO: Replace with your new Firebase project (proxima-ride-app-devop) web app config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBt3Y5R24dI1V-qArWRVVXwSvrwrvreyf0",
-            authDomain: "proxima-ride-app-devop.firebaseapp.com",
-            projectId: "proxima-ride-app-devop",
-            storageBucket: "proxima-ride-app-devop.firebasestorage.app",
-            messagingSenderId: "785619130237",
-            appId: "1:785619130237:web:20f9ee0f705e60e4b5de14"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
-
-        // Check if user is authenticated (Example: Adjust this to your own authentication check)
-        const userIsLoggedIn = {!! json_encode(auth()->check()) !!}; // Assuming you have an auth check in your Laravel blade
-
-        if (userIsLoggedIn) {
-            initFirebaseMessagingRegistration();
-        }
-
-        function initFirebaseMessagingRegistration() {
-            messaging.requestPermission().then(function() {
-                return messaging.getToken()
-            }).then(function(token) {
-                axios.post("{{ route('fcmToken') }}", {
-                    _method: "PATCH",
-                    token
-                }).then(({
-                    data
-                }) => {
-                    // console.log(data);
-                }).catch(({
-                    response: {
-                        data
-                    }
-                }) => {
-                    console.error(data);
-                });
-
-            }).catch(function(err) {
-                console.log(`Token Error :: ${err}`);
-            });
-        }
-
-        // Foreground message handler
-        messaging.onMessage(function(payload) {
-            console.log('Message received. ', payload);
-            // Display notification in the DOM or use the Notification API
-            const notificationTitle = '';
-            const notificationOptions = {
-                body: payload.notification.body,
-                icon: payload.notification.icon
-            };
-
-            if (Notification.permission === 'granted') {
-                new Notification(notificationTitle, notificationOptions);
-            }
-
-            // Optionally, display the notification in a div
-            const notificationContainer = document.getElementById('notification-container');
-            if (notificationContainer) {
-                const notificationElement = document.createElement('div');
-                notificationElement.classList.add('notification');
-                notificationElement.innerHTML = `
-                    <p>${notificationOptions.body}</p>
-                `;
-                notificationContainer.appendChild(notificationElement);
-            }
-        });
-    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 

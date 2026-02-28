@@ -9,7 +9,6 @@ use App\Models\Admin;
 use App\Models\Article;
 use App\Models\CoffeeWallet;
 use App\Models\CoffeeWallPageSettingDetail;
-use App\Models\FCMToken;
 use App\Models\HomePageSettingDetail;
 use App\Models\Language;
 use App\Models\Notification;
@@ -81,7 +80,6 @@ class HomeController extends Controller
             $query->where('language_id', $langId);
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
-        
 
         return view(
             'index',
@@ -102,26 +100,6 @@ class HomeController extends Controller
     function redirectToAdminDashboard()
     {
         return view('admin.app');
-    }
-
-    public function updateToken(Request $request)
-    {
-        $request->validate([
-            'token' => 'required|string',
-        ]);
-
-        $user_id = auth()->user()->id;
-
-        $fcm_token = FCMToken::where('user_id', $user_id)->where('token', $request->token)->first();
-
-        if (!$fcm_token) {
-            FCMToken::create([
-                'user_id' => $user_id,
-                'token' => $request->token,
-            ]);
-        }
-
-        return response()->json(['message' => 'FCM token updated successfully.']);
     }
 
     public function createSubscription(Request $request)

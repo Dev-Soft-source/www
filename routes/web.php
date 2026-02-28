@@ -498,8 +498,6 @@ Route::put('step5-5/update/{id}', [Step5to5Controller::class, 'update'])->middle
 Route::put('step4-5/update/{id}', [Step4to5Controller::class, 'update'])->middleware('auth')->name('step4to5.update');
 Route::put('step2-5/update/{id}', [Step2to5Controller::class, 'update'])->middleware('auth')->name('step2to5.update');
 Route::put('step1-5/update/{id}', [Step1to5Controller::class, 'update'])->middleware('auth')->name('step1to5.update');
-Route::patch('/fcm-token', [HomeController::class, 'updateToken'])->name('fcmToken')->middleware('auth');
-
 Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
     ->middleware(['admin.auth'])
     ->where('any', '.*');
