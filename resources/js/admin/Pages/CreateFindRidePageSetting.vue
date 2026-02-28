@@ -243,36 +243,7 @@
                                                 )
                                                     "></p>
                                         </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`pink_ride_page_label_${activeLanguageId}`">
-                                                        Search pink ride only page label
-                                                    </label>
-                                                </div>
-                                                <input type="text" :name="`pink_ride_page_label_${activeLanguageId}`"
-                                                    :id="`pink_ride_page_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'pink_ride_page_label'
-                                                    )
-                                                        " @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'pink_ride_page_label'
-                                                        )
-                                                        " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `pink_ride_page_label.pink_ride_page_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                    `pink_ride_page_label.pink_ride_page_label_${activeLanguageId}`
-                                                )
-                                                    "></p>
-                                        </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -303,11 +274,107 @@
                                                 )
                                                     "></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pink_ride_page_label_${activeLanguageId}`">
+                                                        Search pink ride only page label
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`pink_ride_page_label_${activeLanguageId}`"
+                                                    :id="`pink_ride_page_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'pink_ride_page_label'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pink_ride_page_label'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `pink_ride_page_label.pink_ride_page_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `pink_ride_page_label.pink_ride_page_label_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pink_ride_description_${activeLanguageId}`">
+                                                      pink ride only page Important label
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`pink_ride_description_${activeLanguageId}`"
+                                                    :id="`pink_ride_description_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'pink_ride_description'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pink_ride_description'
+                                                        )
+                                                        " />
+                                            </div>
+                                            
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `pink_ride_description.pink_ride_description_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `pink_ride_description.pink_ride_description_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pink_ride_page_faq_heading_${activeLanguageId}`">
+                                                      pink ride FAQ heading label
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`pink_ride_page_faq_heading_${activeLanguageId}`"
+                                                    :id="`pink_ride_page_faq_heading_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'pink_ride_page_faq_heading'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pink_ride_page_faq_heading'
+                                                        )
+                                                        " />
+                                            </div>
+                                            
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label :for="`search_results_extra_care_ride_label_${activeLanguageId}`">
-                                                        Search results for extra care rides label
+                                                        Search results for extra+ rides label
                                                     </label>
                                                 </div>
                                                 <input type="text" :name="`search_results_extra_care_ride_label_${activeLanguageId}`"
@@ -3128,6 +3195,9 @@ export default {
                             this.handleInput("", language, "meta_description");
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "pink_ride_page_label");
+                            this.handleInput("", language, "pink_ride_description");
+                            this.handleInput("", language, "pink_ride_page_faq_heading");
+
                             this.handleInput("", language, "search_results_pink_ride_label");
                             this.handleInput("", language, "search_results_extra_care_ride_label");
                             this.handleInput("", language, "more_rides_pink_ride_label");
@@ -3282,6 +3352,11 @@ export default {
                                 "pink_ride_page_label"
                             );
                             this.handleInput(
+                                setting?.pink_ride_description,
+                                setting?.language,
+                                "pink_ride_description"
+                            );
+                            this.handleInput(
                                 setting?.search_results_pink_ride_label,
                                 setting?.language,
                                 "search_results_pink_ride_label"
@@ -3295,6 +3370,11 @@ export default {
                                 setting?.more_rides_pink_ride_label,
                                 setting?.language,
                                 "more_rides_pink_ride_label"
+                            );
+                            this.handleInput(
+                                setting?.pink_ride_page_faq_heading,
+                                setting?.language,
+                                "pink_ride_page_faq_heading"
                             );
                             this.handleInput(
                                 setting?.to_pink_ride_label,

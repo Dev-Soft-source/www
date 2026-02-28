@@ -280,6 +280,22 @@ class FolkRideController extends Controller
                 $rides = $rides->whereIn('animal_friendly', $pets);
                 $otherRides = $otherRides->whereIn('animal_friendly', $pets);
             }
+            if ($request->hide_full_rides) {
+                $rides = $rides->whereRaw('rides.seats > (
+                    SELECT COALESCE(SUM(bookings.seats), 0)
+                    FROM bookings
+                    INNER JOIN users ON bookings.user_id = users.id AND users.deleted_at IS NULL
+                    WHERE bookings.ride_id = rides.id
+                    AND bookings.status NOT IN (0, 1)
+                )');
+                $otherRides = $otherRides->whereRaw('rides.seats > (
+                    SELECT COALESCE(SUM(bookings.seats), 0)
+                    FROM bookings
+                    INNER JOIN users ON bookings.user_id = users.id AND users.deleted_at IS NULL
+                    WHERE bookings.ride_id = rides.id
+                    AND bookings.status NOT IN (0, 1)
+                )');
+            }
 
             $rides = $rides->orderBy('date', 'asc')->orderBy('time', 'asc')->get()->map(function ($ride) {
                 $ride->type = 'ride'; // Identify as ride

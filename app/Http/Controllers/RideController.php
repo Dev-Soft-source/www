@@ -250,6 +250,16 @@ class RideController extends Controller
                 $pets = explode(';', $request->pets);
                 $rides = $rides->whereIn('animal_friendly', $pets);
             }
+            if ($request->hide_full_rides) {
+                $rides = $rides->whereRaw('rides.seats > (
+                    SELECT COALESCE(SUM(bookings.seats), 0)
+                    FROM bookings
+                    INNER JOIN users ON bookings.user_id = users.id AND users.deleted_at IS NULL
+                    WHERE bookings.ride_id = rides.id
+                    AND bookings.status NOT IN (0, 1)
+                )');
+            }   
+            
             $rides = $rides->orderBy('date', 'asc')->orderBy('time', 'asc')->paginate(6);
             if ($request->driver_rating) {
                 $filteredRides = [];
@@ -281,16 +291,19 @@ class RideController extends Controller
                     Paginator::resolveCurrentPage(),
                     ['path' => Paginator::resolveCurrentPath()]
                 );
+                
             }
+            
         }
-
+ 
+        
         $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(2)->get();
 
 
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
-        
+        Log::info($rides);
         return view('search_ride', [
             'pinkRideSetting' => $pinkRideSetting,
             'postRidePage' => $postRidePage,

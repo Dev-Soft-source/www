@@ -5,58 +5,6 @@
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        /* Feature icon hover tooltips - content is shown in fixed floating tooltip so it's never clipped */
-        .proximalocal-ride-feature-tooltip {
-            /* Inline tooltip is hidden; JS copies its content to #proximalocal-ride-floating-tooltip */
-            position: absolute;
-            left: -9999px;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .proximalocal-ride-feature-tooltip-inner {
-            display: block;
-            color: #fff !important;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            text-align: left;
-            white-space: normal;
-            min-width: 8rem;
-        }
-        .proximalocal-ride-feature-tooltip-inner p {
-            color: #fff !important;
-            margin: 0;
-        }
-        #proximalocal-ride-floating-tooltip {
-            position: fixed;
-            z-index: 99999;
-            transform: translateX(-50%);
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            text-align: left;
-            color: #fff;
-            background-color: #c75b5b;
-            border-radius: 0.25rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            max-width: 240px;
-            pointer-events: none;
-        }
-        /* Arrow pointing up at the icon */
-        #proximalocal-ride-floating-tooltip::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            background-color: #c75b5b;
-        }
-        #proximalocal-ride-floating-tooltip p {
-            color: #fff !important;
-            margin: 0;
-        }
-
         /* FAQ - Extra+ Rides: themed bar (blue) and smooth expand/collapse */
         .proximalocal-ride-faq {
             border: 1px solid rgba(3, 105, 161, 0.3);
@@ -127,9 +75,6 @@
 @endsection
 
 @section('content')
-    {{-- Fixed-position tooltip so it is never clipped by overflow --}}
-    <div id="proximalocal-ride-floating-tooltip" class="hidden" aria-hidden="true"></div>
-
     @if (session('success'))
     <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -846,8 +791,17 @@
                                     </div>
                                 @endisset
                             </div>
-                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
-                        <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
+                            <div class="flex items-center justify-between p-3 mt-2 mb-2">
+                                <label for="hide-full-rides"
+                                    class="flex items-center gap-2 cursor-pointer select-none font-normal text-gray-900">
+                                    <input type="checkbox" id="hide-full-rides"
+                                        class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                                        {{ request('hide_full_rides') ? 'checked' : '' }}>
+                                    <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
+                                </label>
+                            </div>
+                            <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
+                            <button class="w-28 text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                         </div>
                     </div>
                 </div>
@@ -983,7 +937,7 @@
                                     $from = $ride->rideDetail[0]->departure;
                                     $to = $ride->rideDetail[0]->destination;
                                 @endphp
-                                <div class="relative">
+                                <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -1055,7 +1009,7 @@
                                             @endif
                                         @else
                                             href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}" @endif>
-                                        <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
+                                        <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
                                                    in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
                                             <div class="flex items-center justify-between pb-0 p-4">
@@ -1068,14 +1022,14 @@
                                                         {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option1_tooltip }}', '{{ $findRidePage->ride_features_option1->name ?? $findRidePage->ride_features_option1->label }}')">
-                                                            <img class="ml-2w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
-                                                        </button>
+                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}" title="{{ $postRidePage->features_option1_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        </span>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <button type="button" onclick="event.preventDefault(); event.stopPropagation(); toggleModal1('modal-id2', '{{ $postRidePage->features_option2_tooltip }}', '{{ $findRidePage->ride_features_option2->name ?? $findRidePage->ride_features_option2->label }}')">
-                                                            <img class="ml-2w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
-                                                        </button>
+                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}" title="{{ $postRidePage->features_option2_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
+                                                        </span>
                                                     @endif
                                                 </div>
                                                 <div class="pr-8">
@@ -1175,18 +1129,13 @@
                                                                     @endisset
                                                                 </small>
 
-                                                                <div class="sups inline-flex relative">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
+                                                                @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-flex" viewBox="0 0 16 16"
+                                                                        data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%') !!}"
+                                                                        title="{{ strip_tags($findRidePage->firm_cancellation_tooltip ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%') }}">
                                                                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                                                     </svg>
-                                                                    <div
-                                                                      class="absolute tooltip payment_tooltiptext_position top-8 group-hover:flex hidden peer-hover:flex bg-[#c75b5b] px-4 py-2 rounded right-0 w-60 z-10"
-                                                                    >
-                                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-                                                                            {!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
+                                                                @endif
                                                         </div>
                                                     </p>
                                                     {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
@@ -1229,81 +1178,97 @@
 
                                                     <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option1->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option1->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option1_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option1->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}" title="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option2_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}" title="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option3_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}" title="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->smoking_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}" title="{{ $postRidePage->smoking_option2_tooltip }}">
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->animals_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}" title="{{ $postRidePage->animals_option2_tooltip }}">
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->animals_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}" title="{{ $postRidePage->animals_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option1_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}" title="{{ $postRidePage->luggage_option1_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}" title="{{ $postRidePage->luggage_option2_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}" title="{{ $postRidePage->luggage_option3_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}" title="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}" title="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option3_tooltip }}" title="{{ $postRidePage->features_option3_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option8_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option8_tooltip }}" title="{{ $postRidePage->features_option8_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option9_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option9_tooltip }}" title="{{ $postRidePage->features_option9_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option10_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option10_tooltip }}" title="{{ $postRidePage->features_option10_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option11_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option11_tooltip }}" title="{{ $postRidePage->features_option11_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option12_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option12_tooltip }}" title="{{ $postRidePage->features_option12_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option13_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option13_tooltip }}" title="{{ $postRidePage->features_option13_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option14_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option14_tooltip }}" title="{{ $postRidePage->features_option14_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option15_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option15_tooltip }}" title="{{ $postRidePage->features_option15_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option16_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option16_tooltip }}" title="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option4_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option4_tooltip }}" title="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option5_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option5_tooltip }}" title="{{ $postRidePage->features_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option6_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option6_tooltip }}" title="{{ $postRidePage->features_option6_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option7_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option7_tooltip }}" title="{{ $postRidePage->features_option7_tooltip }}">
                                                         @endif
                                                     </div>
                                                 </div>
@@ -1445,7 +1410,7 @@
                                     $from = $ride->rideDetail[0]->departure;
                                     $to = $ride->rideDetail[0]->destination;
                                 @endphp
-                                <div class="relative">
+                                <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -1517,7 +1482,7 @@
                                             @endif
                                         @else
                                             href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}" @endif>
-                                        <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
+                                        <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
                                                 in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
                                                 in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
@@ -1686,81 +1651,97 @@
 
                                                     <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option1_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}" title="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option2_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}" title="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default">
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt="">
-                                                                <span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->payment_methods_option3_tooltip }}</span></span>
-                                                            </span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}" title="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->smoking_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}" title="{{ $postRidePage->smoking_option2_tooltip }}">
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->animals_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}" title="{{ $postRidePage->animals_option2_tooltip }}">
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->animals_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}" title="{{ $postRidePage->animals_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option1_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}" title="{{ $postRidePage->luggage_option1_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option2_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}" title="{{ $postRidePage->luggage_option2_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}" title="{{ $postRidePage->luggage_option3_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option4_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}" title="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->luggage_option5_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}" title="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option3_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option3_tooltip }}" title="{{ $postRidePage->features_option3_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option8_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option8_tooltip }}" title="{{ $postRidePage->features_option8_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option9_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option9_tooltip }}" title="{{ $postRidePage->features_option9_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option10_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option10_tooltip }}" title="{{ $postRidePage->features_option10_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option11_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option11_tooltip }}" title="{{ $postRidePage->features_option11_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option12_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option12_tooltip }}" title="{{ $postRidePage->features_option12_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option13_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option13_tooltip }}" title="{{ $postRidePage->features_option13_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option14_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option14_tooltip }}" title="{{ $postRidePage->features_option14_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option15_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option15_tooltip }}" title="{{ $postRidePage->features_option15_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option16_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option16_tooltip }}" title="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option4_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option4_tooltip }}" title="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option5_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option5_tooltip }}" title="{{ $postRidePage->features_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option6_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option6_tooltip }}" title="{{ $postRidePage->features_option6_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="group relative inline-flex flex-shrink-0 cursor-default"><img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""><span class="proximalocal-ride-feature-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-1 px-3 py-2 text-sm text-white text-left rounded shadow-lg bg-[#c75b5b] opacity-0 invisible group-hover:opacity-100 group-hover:visible z-[100] pointer-events-none max-w-[240px]"><span class="proximalocal-ride-feature-tooltip-inner">{{ $postRidePage->features_option7_tooltip }}</span></span></span>
+                                                            <img class="w-8 h-8 cursor-help" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""
+                                                                data-tippy-content="{{ $postRidePage->features_option7_tooltip }}" title="{{ $postRidePage->features_option7_tooltip }}">
                                                         @endif
                                                     </div>
                                                 </div>
@@ -1890,7 +1871,7 @@
                                 </div>
                             @endforeach
                         @endif
-                        {{ $paginatedRides->appends(request()->query())->links() }}
+                        {{ $paginatedRides->appends(request()->except('page'))->links() }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
                             <h3 class="text-primary">Sorry, we couldn't find any ProximaLocal Rides matching your search.</h3>
@@ -2392,9 +2373,10 @@
 
         function SearchRoute(SearchfromValue, SearchtoValue) {
             const featuresParam = selectedFeatures.length > 0 ? selectedFeatures.join(';') : '';
+            const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
             // Construct the URL with query parameters
             let searchUrl =
-                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${SearchfromValue}&to=${SearchtoValue}&date=&driver_age=&driver_rating=&driver_phone=&driver_name=&passenger_rating=&payment_method=&vehicle_type=&features=${featuresParam}&luggage=&smoking=&pets=`;
+                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${SearchfromValue}&to=${SearchtoValue}&date=&driver_age=&driver_rating=&driver_phone=&driver_name=&passenger_rating=&payment_method=&vehicle_type=&features=${featuresParam}&luggage=&smoking=&pets=&hide_full_rides=${hideFullRides}`;
 
             // Navigate to the constructed URL
             window.location.href = searchUrl;
@@ -2449,9 +2431,10 @@
                 toError.classList.add('hidden');
             }
 
+            const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
             // Construct the URL with query parameters
             let searchUrl =
-                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${fromValue}&to=${toValue}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}`;
+                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${fromValue}&to=${toValue}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
 
             // Navigate to the constructed URL
             window.location.href = searchUrl;
@@ -2473,6 +2456,9 @@
     document.getElementById('driverPhone').checked = false;
     document.getElementById('driverName').value = '';
     document.getElementById('keyword').value = '';
+
+    const hideFullRidesCheckbox = document.getElementById('hide-full-rides');
+    if (hideFullRidesCheckbox) hideFullRidesCheckbox.checked = false;
 
     // Clear any stored selections
     selectedFeatures = [];
@@ -2528,25 +2514,5 @@
             close.addEventListener('click', () => toggleSearchFilters(false));
             overlay.addEventListener('click', () => toggleSearchFilters(false));
         });
-
-        // Feature icon tooltips: show content in fixed-position element so it's never clipped by overflow
-        (function() {
-            var floating = document.getElementById('proximalocal-ride-floating-tooltip');
-            if (!floating) return;
-            document.querySelectorAll('.group').forEach(function(group) {
-                var inner = group.querySelector('.proximalocal-ride-feature-tooltip-inner');
-                if (!inner) return;
-                group.addEventListener('mouseenter', function() {
-                    floating.innerHTML = inner.innerHTML;
-                    floating.classList.remove('hidden');
-                    var rect = group.getBoundingClientRect();
-                    floating.style.left = (rect.left + rect.width / 2) + 'px';
-                    floating.style.top = (rect.bottom + 8) + 'px';
-                });
-                group.addEventListener('mouseleave', function() {
-                    floating.classList.add('hidden');
-                });
-            });
-        })();
     </script>
 @endsection

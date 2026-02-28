@@ -754,7 +754,8 @@
                                         <label for="hide-full-rides"
                                             class="flex items-center gap-2 cursor-pointer select-none font-normal text-gray-900">
                                             <input type="checkbox" id="hide-full-rides"
-                                                class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer">
+                                                class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                                                {{ request('hide_full_rides') ? 'checked' : '' }}>
                                             <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
                                         </label>
                                     </div>
@@ -887,7 +888,7 @@
                                     $seatsLeft = intval($ride->seats) - $bookedSeats;
                                     $isFull = $seatsLeft <= 0;
                                 @endphp
-                                <div class="ride-card-item relative even:bg-white odd:bg-gray-100 space-y-4 rounded-lg"
+                                <div class="ride-card-item relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg"
                                     data-ride-full="{{ $isFull ? '1' : '0' }}">
                                     <div class="absolute right-4 top-8">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -2001,9 +2002,10 @@
         });
 
         function SearchRoute(SearchfromValue, SearchtoValue) {
+            const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
             // Construct the URL with query parameters
             let searchUrl =
-                `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${SearchfromValue}&to=${SearchtoValue}&date=&driver_age=&driver_rating=&driver_phone=&driver_name=&keyword=&passenger_rating=&payment_method=&vehicle_type=&features=&luggage=&smoking=&pets=`;
+                `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${SearchfromValue}&to=${SearchtoValue}&date=&driver_age=&driver_rating=&driver_phone=&driver_name=&keyword=&passenger_rating=&payment_method=&vehicle_type=&features=&luggage=&smoking=&pets=&hide_full_rides=${hideFullRides}`;
 
             // Navigate to the constructed URL
             window.location.href = searchUrl;
@@ -2049,7 +2051,8 @@
                 features: selectedFeatures.join(';'),
                 luggage: selectedLuggages.join(';'),
                 smoking: selectedSmoking.join(';'),
-                pets: selectedPets.join(';')
+                pets: selectedPets.join(';'),
+                hide_full_rides: document.getElementById('hide-full-rides')?.checked ? '1' : ''
             };
 
             const baseUrl = '{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}';
@@ -2083,6 +2086,9 @@
             });
 
             document.getElementById('driverPhone').checked = false;
+
+            const hideFullRidesCheckbox = document.getElementById('hide-full-rides');
+            if (hideFullRidesCheckbox) hideFullRidesCheckbox.checked = false;
 
             // Clear stored selections
             selectedFeatures = [];
@@ -2206,22 +2212,7 @@
             window.location.href = '{{ route('step5to5', ['lang' => $lang]) }}';
         }
 
-        // Hide Full Rides checkbox: show/hide fully-booked ride cards
-        function applyHideFullRides() {
-            var checkbox = document.getElementById('hide-full-rides');
-            var fullCards = document.querySelectorAll('.ride-card-item[data-ride-full="1"]');
-            if (!checkbox || !fullCards.length) return;
-            fullCards.forEach(function(el) {
-                el.style.display = checkbox.checked ? 'none' : '';
-            });
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            var checkbox = document.getElementById('hide-full-rides');
-            if (checkbox) {
-                checkbox.addEventListener('change', applyHideFullRides);
-                applyHideFullRides();
-            }
-        });
+        // Hide Full Rides: filter is applied server-side via hide_full_rides query param
 
         // Make functions globally available
         window.showPhoneVerificationModal = showPhoneVerificationModal;
