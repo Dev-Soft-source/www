@@ -161,6 +161,7 @@
                                         </div>
 
 
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -369,8 +370,6 @@
                                                 )
                                                     "></p>
                                         </div>
-
-
                                     </div>
                                 </div>
                                 <!-- main section end -->
@@ -476,6 +475,8 @@ export default {
                             this.handleInput("", language, "no_payment_message");
                             this.handleInput("", language, "set_primary_card_label");
                             this.handleInput("", language, "select_card_type_text");
+                            this.handleInput("", language, "add_payment_method");
+                            this.handleInput("", language, "set_as_primary");
                         });
                         this.fetchPaymentPageSetting();
                     }
@@ -534,6 +535,16 @@ export default {
                                 setting?.no_payment_message,
                                 setting?.language,
                                 "no_payment_message"
+                            );
+                            setting?.language && this.handleInput(
+                                setting?.add_payment_method ?? "",
+                                setting.language,
+                                "add_payment_method"
+                            );
+                            setting?.language && this.handleInput(
+                                setting?.set_as_primary ?? "",
+                                setting.language,
+                                "set_as_primary"
                             );
                             this.handleInput(
                                 setting?.set_primary_card_label,
@@ -607,6 +618,12 @@ export default {
                 ) ||
                 validationErros.has(
                     `no_payment_message.no_payment_message_${language.id}`
+                ) ||
+                validationErros.has(
+                    `add_payment_method.add_payment_method_${language.id}`
+                ) ||
+                validationErros.has(
+                    `set_as_primary.set_as_primary_${language.id}`
                 ) ||
                 validationErros.has(
                     `set_primary_card_label.set_primary_card_label_${language.id}`

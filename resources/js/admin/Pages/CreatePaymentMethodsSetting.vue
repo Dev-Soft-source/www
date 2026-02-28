@@ -323,6 +323,7 @@
 
                                     <div class="p-4 bg-gray-100 border-t grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 lg:gap-6"
                                         v-if="collapseStates[1]">
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -352,6 +353,7 @@
                                                 )
                                                     "></p>
                                         </div>
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -383,6 +385,7 @@
                                                 )
                                                     "></p>
                                         </div>
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div class="flex items-center justify-between">
                                                 <div>
@@ -678,6 +681,7 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                                 <!-- payment section end -->
@@ -1067,11 +1071,13 @@ export default {
             );
         },
         handleInput(value, language, key) {
+            if (!language || language.id == null) return;
+            const safeValue = value ?? "";
             if (this.form.hasOwnProperty(key)) {
-                this.form[key][`${key}_${language.id}`] = value;
+                this.form[key][`${key}_${language.id}`] = safeValue;
             } else {
                 this.form[key] = {};
-                this.form[key][`${key}_${language.id}`] = value;
+                this.form[key][`${key}_${language.id}`] = safeValue;
             }
         },
         updateLanguageId(language) {
@@ -1205,7 +1211,7 @@ export default {
                                 setting?.payment_methods_option3_icon,
                                 setting?.language,
                                 "payment_methods_option3_icon"
-                            );
+                            );                            
                             this.handleInput(
                                 setting?.cancellation_policy_label1,
                                 setting?.language,
@@ -1361,7 +1367,7 @@ export default {
                 ) ||
                 validationErros.has(
                     `payment_methods_option3.payment_methods_option3_${language.id}`
-                ) ||
+                ) ||                
                 validationErros.has(
                     `cancellation_policy_label1.cancellation_policy_label1_${language.id}`
                 ) ||

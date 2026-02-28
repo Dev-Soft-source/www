@@ -349,8 +349,10 @@ class CardController extends Controller
             Mail::to($user->email)->send(new CardAddedEmail($emailData));
         }
 
+        $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
+
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => $message->card_add_message ?? 'Card added successfully']);
+            return response()->json(['success' => true, 'message' => $successMessage]);
         }
 
         // If user came from booking flow, return to the correct booking page to complete payment
@@ -362,16 +364,16 @@ class CardController extends Controller
         if ($bookingId && $type === 'edit-booking') {
             // Came from edit-booking page
             return redirect()->route('booking.edit', ['lang' => $selectedLanguage, 'id' => $bookingId])
-                ->with('message', $message->card_add_message ?? 'Card added successfully');
+                ->with('message', $successMessage);
         }
 
         if ($rideId && $rideDetailId && $type === 'booking') {
             // Came from initial booking page (booking.blade.php)
             return redirect()->route('booking', ['lang' => $selectedLanguage, 'id' => $rideId, 'rideDetailId' => $rideDetailId])
-                ->with('message', $message->card_add_message ?? 'Card added successfully');
+                ->with('message', $successMessage);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_add_message ?? 'Card added successfully');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $successMessage);
     }
     
     private function storePayPal(Request $request, $user, $user_id, $message, $selectedLanguage)
@@ -422,10 +424,10 @@ class CardController extends Controller
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'PayPal account added successfully']);
+            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'PayPal account added successfully');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
     }
     
     private function storeApplePay(Request $request, $user, $user_id, $message, $selectedLanguage)
@@ -493,10 +495,10 @@ class CardController extends Controller
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Apple Pay added successfully']);
+            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'Apple Pay added successfully');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
     }
     
     private function storeGooglePay(Request $request, $user, $user_id, $message, $selectedLanguage)
@@ -578,10 +580,10 @@ class CardController extends Controller
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Google Pay added successfully']);
+            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'Google Pay added successfully');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
     }
 
     public function primary($id)
@@ -611,6 +613,11 @@ class CardController extends Controller
     public function destroy($id)
     {
         $user = auth()->user();
+        if (!$user) {
+            $lang = session('selectedLanguage', Language::where('is_default', 1)->first()?->abbreviation ?? 'en');
+            return redirect()->route('login', ['lang' => $lang])->withErrors(['error' => 'Please log in to delete your card']);
+        }
+
         $card = Card::find($id);
 
         if (!$card) {

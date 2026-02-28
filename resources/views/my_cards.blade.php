@@ -6,32 +6,30 @@
     @include('layouts.inc.profile_sidebar')
 
     <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
-        @if(session('message'))
-            <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                            <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                    <div class="mt-2 w-full">
-                                        <p class="can-exp-p text-center">{{ session('message') }}</p>
-                                    </div>
+        <div id="myModal" class="relative z-50 {{ session('message') ? '' : 'hidden' }}" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="mt-2 w-full">
+                                    <p id="successPopupMessage" class="can-exp-p text-center">{{ session('message', '') }}</p>
                                 </div>
                             </div>
-                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                <a href="#" onclick="closeNotificationModal()" class="button-exp-fill w-28">Close </a>
-                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <a href="#" onclick="closeNotificationModal()" class="button-exp-fill w-28">Close </a>
                         </div>
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
 
         <div class="my-4 pb-2 flex justify-between items-center">
             <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Payment List"}}</h1>
@@ -250,19 +248,19 @@
                             <form action="{{ route('my_cards.set_primary', $card->id) }}" method="POST"
                                 class="inline">
                                 @csrf
-                                <button type="submit" class="bg-greenXS hover:bg-greenXS text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">{{$paymentSettingDetail->set_primary_card_label ?? "Make Primary"}}</button>
+                                <button type="submit" class="bg-greenXS hover:bg-greenXS text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-3 hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">{{$paymentSettingDetail->set_primary_card_label ?? "Make Primary"}}</button>
                             </form>
                         @endif
-                        <button type="button" onclick="toggleModalCard('card-modal', {{ $card->id }})" class="bg-red-500 hover:bg-red-500 text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-red-500 focus:text-white active:text-white active:bg-red-500">{{$paymentSettingDetail->delete_card_button_text}}</button>
+                        <button type="button" onclick="toggleModalCard('card-modal', {{ $card->id }})" class="bg-red-500 hover:bg-red-500 text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-3 hover:text-white text-center focus:bg-red-500 focus:text-white active:text-white active:bg-red-500">{{$paymentSettingDetail->delete_card_button_text}}</button>
                     </div>
                 </div>
             @empty
                 <div class="text-center pt-8">
-                    <h2>
+                    <!-- <h2>
                         @if(isset($paymentSettingDetail->no_payment_methods_title_label))
                             {{ $paymentSettingDetail->no_payment_methods_title_label }}
                         @endif
-                    </h2>
+                    </h2> -->
                     <p class="text-gray-600 text-center py-4">
                         @if(isset($paymentSettingDetail->no_payment_methods_text_label))
                             {{ $paymentSettingDetail->no_payment_methods_text_label }}
@@ -918,7 +916,8 @@
                     })
                     .then(data => {
                         if (data && data.success) {
-                            // Close modal and reload page to show new card
+                            // Store message for success popup after reload
+                            if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
                             closeAddPaymentMethodModal();
                             window.location.reload();
                         } else if (data && data.message) {
@@ -1093,6 +1092,7 @@
         })
         .then(data => {
             if (data.success) {
+                if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
                 window.location.reload();
             } else {
                 console.error('Apple Pay error:', data.message || 'Unknown error');
@@ -1240,6 +1240,7 @@
         })
         .then(data => {
             if (data.success) {
+                if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
                 window.location.reload();
             } else {
                 console.error('Google Pay error:', data.message || 'Unknown error');
@@ -1378,6 +1379,7 @@
         })
         .then(data => {
             if (data.success) {
+                if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
                 window.location.reload();
             } else {
                 console.error('PayPal error:', data.message || 'Unknown error');
@@ -1437,6 +1439,20 @@
     function closeNotificationModal() {
         closeModal();
     }
+
+    // Show success popup when message comes from sessionStorage (AJAX add card flow)
+    document.addEventListener('DOMContentLoaded', function() {
+        const msg = sessionStorage.getItem('cardAddSuccess');
+        if (msg) {
+            const popup = document.getElementById('myModal');
+            const messageEl = document.getElementById('successPopupMessage');
+            if (popup && messageEl) {
+                messageEl.textContent = msg;
+                popup.classList.remove('hidden');
+            }
+            sessionStorage.removeItem('cardAddSuccess');
+        }
+    });
 
     
 </script>

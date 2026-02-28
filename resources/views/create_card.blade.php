@@ -6,6 +6,37 @@
     @include('layouts.inc.profile_sidebar')
 
 
+    @if(session('message'))
+        <div id="successPopup" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        <button type="button" onclick="closeSuccessPopup()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <div class="mt-2 w-full">
+                                        <p class="text-lg text-center text-black">{{ session('message') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                            <a href="javascript:void(0);" onclick="closeSuccessPopup()"
+                                class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if($errors->has('error'))
         <div id="poppModal" class=" relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -46,7 +77,7 @@
     @endif
 
     <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
-        <div class=" pb-2">
+        <div class="pt-4 pb-2">
             <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Add a New Card"}}</h1>
         </div>
 
@@ -155,8 +186,8 @@
                 </div>
             </div>
                 
-            <h1 class="mt-8">{{$paymentSettingDetail->mobile_billing_address_label ?? "Billing Address"}}</h1>
-            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+            <h1 class="mt-10">{{$paymentSettingDetail->mobile_billing_address_label ?? "Billing Address"}}</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-2">
                 <div>
                     <label for="street_address">{{$paymentSettingDetail->mobile_street_name_label ?? "Street number/name"}}</label>
                     <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600" aria-required="true">
@@ -546,9 +577,13 @@ function stripeTokenHandler(token) {
 
 function closePopup() {
     var element = document.getElementById('poppModal');
-        element.classList.add('hidden');
-    
-    }
+    if (element) element.classList.add('hidden');
+}
+
+function closeSuccessPopup() {
+    var element = document.getElementById('successPopup');
+    if (element) element.classList.add('hidden');
+}
 </script>
 
 @endsection
