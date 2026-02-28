@@ -2473,14 +2473,20 @@
                                 $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
                                 $featuresArray = $isNewForm ? old('features', []) : (old('features') ?: (isset($ride->features) ? explode('=', $ride->features) : []));
                                 $extraCareRideChecked = is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
+                                
                             @endphp
                             <div id="Extra+-ride-disclaimer" class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
                                 <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
                                     <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                                    6. I understand that this is an Extra+ Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
+                                    @if($pinkRideChecked)
+                                    6.
+                                    @else
+                                    5.
+                                    @endif
+                                    I understand that this is an Extra+ Ride, exclusively for members with top-tier review ratings. I commit to upholding the exceptional professionalism and courtesy that earned me this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and ensuring a calm, respectful environment by preventing any passenger disputes.
                                 </p>
                             </div>
-                        @endisset
+                        @endif
                     </div>
                 </div>
 
@@ -4184,6 +4190,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (pinkRideCheckbox && pinkRideDisclaimer) {
             pinkRideCheckbox.addEventListener('change', function() {
                 pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
+            });
+        }
+
+        // Toggle Extra+ Ride disclaimer when Extra+ checkbox is checked/unchecked
+        const extraCareRideCheckbox = document.getElementById('Extra+');
+        const extraCareRideDisclaimer = document.getElementById('Extra+-ride-disclaimer');
+        if (extraCareRideCheckbox && extraCareRideDisclaimer) {
+            extraCareRideCheckbox.addEventListener('change', function() {
+                extraCareRideDisclaimer.classList.toggle('hidden', !this.checked);
             });
         }
     });

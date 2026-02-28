@@ -369,6 +369,38 @@
                                                 )
                                                     "></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`extra_care_ride_faqs_heading_${activeLanguageId}`">
+                                                      extra+ ride FAQ heading label
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`extra_care_ride_faqs_heading_${activeLanguageId}`"
+                                                    :id="`extra_care_ride_faqs_heading_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'extra_care_ride_faqs_heading'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'extra_care_ride_faqs_heading'
+                                                        )
+                                                        " />
+                                            </div>
+                                            
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `extra_care_ride_faqs_heading.extra_care_ride_faqs_heading_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `extra_care_ride_faqs_heading.extra_care_ride_faqs_heading_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
                                         
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -3197,7 +3229,7 @@ export default {
                             this.handleInput("", language, "pink_ride_page_label");
                             this.handleInput("", language, "pink_ride_description");
                             this.handleInput("", language, "pink_ride_page_faq_heading");
-
+                            this.handleInput("", language, "extra_care_ride_faqs_heading");
                             this.handleInput("", language, "search_results_pink_ride_label");
                             this.handleInput("", language, "search_results_extra_care_ride_label");
                             this.handleInput("", language, "more_rides_pink_ride_label");
@@ -3362,6 +3394,11 @@ export default {
                                 "search_results_pink_ride_label"
                             );
                             this.handleInput(
+                                setting?.search_results_pink_ride_label,
+                                setting?.language,
+                                "search_results_pink_ride_label"
+                            );
+                            this.handleInput(
                                 setting?.search_results_extra_care_ride_label,
                                 setting?.language,
                                 "search_results_extra_care_ride_label"
@@ -3375,6 +3412,11 @@ export default {
                                 setting?.pink_ride_page_faq_heading,
                                 setting?.language,
                                 "pink_ride_page_faq_heading"
+                            );
+                            this.handleInput(
+                                setting?.extra_care_ride_faqs_heading,
+                                setting?.language,
+                                "extra_care_ride_faqs_heading"
                             );
                             this.handleInput(
                                 setting?.to_pink_ride_label,
