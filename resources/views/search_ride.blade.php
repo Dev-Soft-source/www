@@ -866,7 +866,7 @@
 
                     <div class="mt-6 rounded-lg">
                         @if ($rides && $rides->count() > 0)
-                            <h1 class="can-exp-h1 text-center font-FuturaMdCnBT text-primary mb-4">
+                            <h1 class="text-center font-FuturaMdCnBT text-primary mb-4">
                                 @isset($findRidePage->heading_ride_card_section)
                                     {{ $findRidePage->heading_ride_card_section }}
                                 @endisset

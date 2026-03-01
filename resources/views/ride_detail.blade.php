@@ -313,41 +313,56 @@
                 // Pink Ride and Extra+ Ride flags are set by RideController (features_option1, features_option2)
                 $isPinkRide = !empty($ride->pink_ride);
                 $isExtraCareRide = !empty($ride->extra_care_ride);
+                // Short-Distance Ride: price per seat is on RideDetail, not Ride; no booking fee when < $15
+                $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
+                $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
             @endphp
-
-            @if($isPinkRide && $isExtraCareRide)
+            @if($isShortDistanceRide)
                 <div class="col-span-3 w-full">
                     <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
                         <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                             <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <span class="text-lg">This is a Pink Ride and Extra+ Ride</span>
+                        <span class="text-lg">This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.</span>
                     </div>
                 </div>
             @else
-                @if($isExtraCareRide)
+                @if($isPinkRide && $isExtraCareRide)
                     <div class="col-span-3 w-full">
-                        <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
-                            <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-800 px-4 py-2 rounded flex items-center" role="alert">
+                            <svg class="w-6 h-6 mr-2 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                                 <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span class="text-lg">This is a Extra+ Ride</span>
+                            <span class="text-lg">This is a Pink Ride and an Extra+ Ride</span>
                         </div>
                     </div>
-                @elseif($isPinkRide)
-                    <div class="col-span-3 w-full">
-                        <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
-                            <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="text-lg">This is a Pink Ride</span>
+                @else
+                    @if($isExtraCareRide)
+                        <div class="col-span-3 w-full">
+                            <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
+                                <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="text-lg">This is a Extra+ Ride</span>
+                            </div>
                         </div>
-                    </div>
+                    @elseif($isPinkRide)
+                        <div class="col-span-3 w-full">
+                            <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
+                                <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="text-lg">This is a Pink Ride</span>
+                            </div>
+                        </div>
+                    @endif
                 @endif
             @endif
+            
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-4">
             <div class="col-span-2">

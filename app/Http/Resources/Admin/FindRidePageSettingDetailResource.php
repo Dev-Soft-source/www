@@ -27,6 +27,8 @@ class FindRidePageSettingDetailResource extends JsonResource
             'extra_care_ride_page_label' => $this->extra_care_ride_page_label,
             'pink_ride_page_label' => $this->pink_ride_page_label,
             'pink_ride_description' => $this->pink_ride_description,
+            'proximalocal_ride_page_heading' => $this->proximalocal_ride_page_heading,
+            'proximalocal_ride_page_description' => $this->proximalocal_ride_page_description,
             'pink_ride_page_faq_heading' => $this->pink_ride_page_faq_heading,
             'extra_care_ride_faqs_heading' => $this->extra_care_ride_faqs_heading,
             'search_results_pink_ride_label' => $this->search_results_pink_ride_label,

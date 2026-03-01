@@ -341,6 +341,70 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`proximalocal_ride_page_heading_${activeLanguageId}`">
+                                                      proximalocal ride page heading
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`proximalocal_ride_page_heading_${activeLanguageId}`"
+                                                    :id="`proximalocal_ride_page_heading_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'proximalocal_ride_page_heading'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'proximalocal_ride_page_heading'
+                                                        )
+                                                        " />
+                                            </div>
+                                            
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `proximalocal_ride_page_heading.proximalocal_ride_page_heading_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `proximalocal_ride_page_heading.proximalocal_ride_page_heading_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`proximalocal_ride_page_description_${activeLanguageId}`">
+                                                      proximalocal ride page label
+                                                    </label>
+                                                </div>
+                                                <input type="text" :name="`proximalocal_ride_page_description_${activeLanguageId}`"
+                                                    :id="`proximalocal_ride_page_description_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'proximalocal_ride_page_description'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'proximalocal_ride_page_description'
+                                                        )
+                                                        " />
+                                            </div>
+                                            
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `proximalocal_ride_page_description.proximalocal_ride_page_description_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `proximalocal_ride_page_description.proximalocal_ride_page_description_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`pink_ride_page_faq_heading_${activeLanguageId}`">
                                                       pink ride FAQ heading label
                                                     </label>
@@ -3238,6 +3302,8 @@ export default {
                             this.handleInput("", language, "imp_extra_care_ride_label");
                             this.handleInput("", language, "extra_care_ride_page_label");
                             this.handleInput("", language, "pink_ride_page_heading");
+                            this.handleInput("", language, "proximalocal_ride_page_heading");
+                            this.handleInput("", language, "proximalocal_ride_page_description");
                             this.handleInput("", language, "navbar_icon");
                             this.handleInput("", language, "from_field_icon");
                             this.handleInput("", language, "swap_field_icon");
@@ -3507,6 +3573,16 @@ export default {
                                 setting?.search_section_date_placeholder,
                                 setting?.language,
                                 "search_section_date_placeholder"
+                            );
+                            this.handleInput(
+                                setting?.proximalocal_ride_page_heading,
+                                setting?.language,
+                                "proximalocal_ride_page_heading"
+                            );
+                            this.handleInput(
+                                setting?.proximalocal_ride_page_description,
+                                setting?.language,
+                                "proximalocal_ride_page_description"
                             );
                             this.handleInput(
                                 setting?.search_section_required_error,

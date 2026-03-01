@@ -150,17 +150,16 @@
                     <img class="" src="{{asset('/images/proximaridelocal.png')}}" alt="">
                 </div>
                 <h1 class="">
-                    Search ProximaLocal Rides
+                    @isset($findRidePage->proximalocal_ride_page_heading)
+                        {{ $findRidePage->proximalocal_ride_page_heading }}
+                    @endisset
                 </h1>
             </div>
         </div>
-        <!-- <p class="mt-1">
-            @isset($findRidePage->extra_care_ride_page_label)
-                {{ $findRidePage->extra_care_ride_page_label }}
-            @endisset
-        </p> -->
         <p class="mt-6">
-            ProximaLocal Rides are designed for passengers and drivers taking short trips, usually under $15 per seat. With no booking fee on these rides, travel locally is simpler, more convenient, and cost-effective. Whether you're commuting across town or running errands nearby, ProximaLocal Rides make every short-distance journey easy and affordable.
+            @isset($findRidePage->proximalocal_ride_page_description)
+                {{ $findRidePage->proximalocal_ride_page_description }}
+            @endisset
         </p>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
             <div>
@@ -930,7 +929,7 @@
                     @elseif ($paginatedRides && $paginatedRides->count() > 0)
                         @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() > 0)
                             <div class="flex flex-col items-center justify-center border-b border-gray-400">
-                                <h3 class="text-primary">Search results for ProximaLocal Rides</h3>
+                                <h3 class="text-primary">@isset($findRidePage->heading_ride_card_section) {{$findRidePage->heading_ride_card_section}} @endisset</h3>
                             </div>
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'ride') as $ride)
                                 @php

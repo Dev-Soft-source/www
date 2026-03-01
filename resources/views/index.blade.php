@@ -275,7 +275,7 @@
                                 <img class="" src="{{asset('home_page_icons/' . $homePage->section1_folks_rides_image)}}" alt="">
                             </div>
                             <div>
-                                <h3 class="mt-4 text-center">
+                                <h3 class="mt-4 text-green-700 hover:text-black text-center">
                                     @isset($homePage->section1_folks_rides_label)
                                         {{ $homePage->section1_folks_rides_label }}
                                     @endisset
@@ -299,7 +299,7 @@
                                 <img class="" src="{{asset('home_page_icons/' . $homePage->section1_customize_image)}}" alt="">
                             </div>
                             <div>
-                                <h3 class="mt-4 text-center text-green-700 hover:text-black">
+                                <h3 class="mt-4 text-center ">
                                     @isset($homePage->section1_customize_label)
                                         {{ $homePage->section1_customize_label }}
                                     @endisset

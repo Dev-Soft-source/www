@@ -29,6 +29,10 @@ class FindRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['pink_ride_description.pink_ride_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['extra_care_ride_faqs_heading.extra_care_ride_faqs_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['extra_care_ride_faqs_heading.extra_care_ride_faqs_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['proximalocal_ride_page_heading.proximalocal_ride_page_heading_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['proximalocal_ride_page_heading.proximalocal_ride_page_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['proximalocal_ride_page_description.proximalocal_ride_page_description_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['proximalocal_ride_page_description.proximalocal_ride_page_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pink_ride_page_faq_heading.pink_ride_page_faq_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pink_ride_page_faq_heading.pink_ride_page_faq_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['search_results_pink_ride_label.search_results_pink_ride_label_' . $language->id => ['required', 'string']]);
@@ -188,6 +192,8 @@ class FindRidePageSettingService
             'extra_care_ride_page_label' => $this->data($request, $language, 'extra_care_ride_page_label'),
             'pink_ride_page_label' => $this->data($request, $language, 'pink_ride_page_label'),
             'pink_ride_description' => $this->data($request, $language, 'pink_ride_description'),
+            'proximalocal_ride_page_heading' => $this->data($request, $language, 'proximalocal_ride_page_heading'),
+            'proximalocal_ride_page_description' => $this->data($request, $language, 'proximalocal_ride_page_description'),
             'extra_care_ride_faqs_heading' => $this->data($request, $language, 'extra_care_ride_faqs_heading'),
             'pink_ride_page_faq_heading' => $this->data($request, $language, 'pink_ride_page_faq_heading'),
             'search_results_pink_ride_label' => $this->data($request, $language, 'search_results_pink_ride_label'),

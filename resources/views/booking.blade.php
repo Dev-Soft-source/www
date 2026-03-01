@@ -46,7 +46,8 @@
     /* Payment method tooltip: above exclamation icon with arrow pointing down to icon */
     .payment-method-tooltip {
         position: relative;
-        background-color: #c75b5b;
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
         border-radius: 0.5rem;
         padding: 0.75rem;
         min-width: 300px;
@@ -59,7 +60,7 @@
         left: 50%;
         transform: translateX(-50%);
         border: 8px solid transparent;
-        border-top-color: #c75b5b;
+        border-top-color: #0891b2;
     }
 </style>
 @endsection
@@ -249,39 +250,52 @@
                     <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
                 </div>
             </div>
-            @if($isPinkRide && $isExtraCareRide)
+            @if($isProximalocalRide)
                 <div class="col-span-3 w-full">
                     <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
                         <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                             <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <span class="text-lg">This is a Pink Ride and Extra+ Ride</span>
+                        <span class="text-lg">This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.</span>
                     </div>
                 </div>
             @else
-                @if($isExtraCareRide)
+                @if($isPinkRide && $isExtraCareRide)
                     <div class="col-span-3 w-full">
-                        <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
-                            <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-800 px-4 py-2 rounded flex items-center" role="alert">
+                            <svg class="w-6 h-6 mr-2 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                                 <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span class="text-lg">This is a Extra+ Ride</span>
+                            <span class="text-lg">This is a Pink Ride and an Extra+ Ride</span>
                         </div>
                     </div>
-                @elseif($isPinkRide)
-                    <div class="col-span-3 w-full">
-                        <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
-                            <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="text-lg">This is a Pink Ride</span>
+                @else
+                    @if($isExtraCareRide)
+                        <div class="col-span-3 w-full">
+                            <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
+                                <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="text-lg">This is a Extra+ Ride</span>
+                            </div>
                         </div>
-                    </div>
+                    @elseif($isPinkRide)
+                        <div class="col-span-3 w-full">
+                            <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
+                                <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="text-lg">This is a Pink Ride</span>
+                            </div>
+                        </div>
+                    @endif
                 @endif
             @endif
+            
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
                     <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
@@ -820,11 +834,17 @@
                                 </div>
                             @endif
 
+                            @php
+                                $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+                                $chargeBooking = optional(auth()->user())->charge_booking ?? '1';
+                                $isStudentFeeWaived = ($chargeBooking == '2');
+                                $bookingFeeZero = $isStudentFeeWaived || ($pricePerSeat < 15);
+                            @endphp
                             @if ($coffeeBalance > 0)
                                 <div class="flex items-center justify-between gap-2 mt-1">
-                                    <div class="flex">
-                                        <input type="checkbox" id="apply_coffee_wall" name="coffee_wall" value="1" class="form-control hidden peer">
-                                        <label for="apply_coffee_wall" class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded cursor-pointer peer-checked:bg-primary peer-checked:text-white">
+                                    <div class="flex {{ $bookingFeeZero ? 'opacity-50 pointer-events-none cursor-not-allowed' : '' }}">
+                                        <input type="checkbox" id="apply_coffee_wall" name="coffee_wall" value="1" class="form-control hidden peer" {{ $bookingFeeZero ? 'disabled' : '' }}>
+                                        <label for="apply_coffee_wall" class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded {{ $bookingFeeZero ? 'cursor-not-allowed' : 'cursor-pointer' }} peer-checked:bg-primary peer-checked:text-white">
                                             <span class="font-medium font-FuturaMdCnBT text-xl line-clamp-2 max-w-36 w-full">
                                                 {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                             </span>
