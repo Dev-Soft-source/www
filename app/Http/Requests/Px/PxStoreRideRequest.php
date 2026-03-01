@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Px;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\View;
 use Illuminate\Validation\Rule;
 
 class PxStoreRideRequest extends FormRequest
@@ -104,5 +105,26 @@ class PxStoreRideRequest extends FormRequest
             'stops.*.is_pickup' => ['nullable', 'boolean'],
             'stops.*.is_dropoff' => ['nullable', 'boolean'],
         ];
+    }
+
+    public function messages(): array
+    {
+        $requiredMessage = $this->translatedRequiredMessage();
+
+        return [
+            'required' => $requiredMessage,
+            'required_if' => $requiredMessage,
+            'accepted' => $requiredMessage,
+        ];
+    }
+
+    protected function translatedRequiredMessage(): string
+    {
+        // Try to reuse siteText from Controller if already loaded
+        $siteText = View::shared('siteText', null);
+        if ($siteText === null) {
+            $siteText = getCurrentSiteText();
+        }
+        return (string) ($siteText['required_field_error_text'] ?? __('validation.required'));
     }
 }

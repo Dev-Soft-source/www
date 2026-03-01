@@ -4,6 +4,7 @@ use App\Models\FooterSetting;
 use App\Models\Language;
 use App\Models\MenuDetail;
 use App\Models\SiteText;
+use App\Models\SiteTextDetail;
 use Illuminate\Support\Facades\Session;
 
 if (!function_exists('getAllLanguages')) {
@@ -76,6 +77,42 @@ if (!function_exists('getTranslatedText')) {
         }
 
         return $text;
+    }
+}
+
+if (!function_exists('getCurrentSiteText')) {
+    /**
+     * Get site text map for current language with fallback to default language.
+     * Returns array keyed by slug, like: ['error_required_message' => '...'].
+     *
+     * @param string|null $langAbbreviation Optional language abbreviation from route/query.
+     * @return array
+     */
+    function getCurrentSiteText(?string $langAbbreviation = null): array
+    {
+        $defaultLang = getDefaultLanguage();
+
+        $lang = $langAbbreviation ?: request()->route('lang');
+        if ($lang) {
+            session(['selectedLanguage' => $lang]);
+        } else {
+            $lang = request()->query('lang');
+            if (!$lang) {
+                $lang = session('selectedLanguage', $defaultLang->abbreviation);
+            }
+            session(['selectedLanguage' => $lang]);
+        }
+
+        $selectedLang = Language::resolveLanguage(session('selectedLanguage'));
+
+        $selectedLangId = (int) (optional($selectedLang)->id ?: optional($defaultLang)->id);
+        $defaultLangId = (int) optional($defaultLang)->id;
+
+        if ($selectedLangId <= 0 || $defaultLangId <= 0) {
+            return [];
+        }
+
+        return SiteTextDetail::getByLanguageKeyedBySlug($selectedLangId, $defaultLangId);
     }
 }
 

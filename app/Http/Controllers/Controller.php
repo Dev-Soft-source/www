@@ -15,7 +15,6 @@ use App\Models\Rating;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
-use App\Models\SiteTextDetail;
 use App\Models\VideoDetail;
 
 class Controller extends BaseController
@@ -25,6 +24,8 @@ class Controller extends BaseController
     protected $defaultLang;
 
     protected $selectedLanguage;
+
+    protected $siteText;
 
     public function __construct()
     {
@@ -52,7 +53,7 @@ class Controller extends BaseController
 
         $successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+        $this->siteText = getCurrentSiteText();
 
         // Share notifications with all views
         $this->middleware(function ($request, $next) use ($lang) {
@@ -152,7 +153,7 @@ class Controller extends BaseController
         View::share([
             'selectedLanguage' => $this->selectedLanguage,
             'languages' => $languages,
-            'siteText' => $siteText,
+            'siteText' => $this->siteText,
             'successMessage' => $successMessage,
             // 'ratings' => $ratings,
             // 'notificationPage' => $notificationPage,

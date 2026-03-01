@@ -52,6 +52,8 @@ class PxRideWebController extends Controller
 
     public function store(PxStoreRideRequest $request, PxRideService $service, $lang = null)
     {
+        $siteText = $this->siteText;
+
         $payload = $request->validated();
         $vehicleMode = (string) ($payload['vehicle_mode'] ?? '');
 
@@ -106,7 +108,7 @@ class PxRideWebController extends Controller
             if (!$ownsVehicle) {
                 return back()
                     ->withInput()
-                    ->withErrors(['vehicle_id' => 'Selected vehicle does not belong to your account.']);
+                    ->withErrors(['vehicle_id' => ($siteText['required_field_error_text'] ?? 'This field is required.')]);
             }
         }
 
