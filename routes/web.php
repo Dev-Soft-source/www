@@ -32,6 +32,7 @@ use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Controllers\PinkRideController;
 use App\Http\Controllers\ProximaLocalRideController;
+use App\Http\Controllers\PxRideWebController;
 use App\Http\Controllers\PostRideAgainController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\ProfileController;
@@ -314,6 +315,7 @@ Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])-
 Route::get('{lang?}/accept-booking-request/{id}/{email}', [BookingController::class, 'AcceptBookingRequest'])->name('accept_booking_request');
 Route::get('{lang?}/reject-booking-request/{id}/{email}', [BookingController::class, 'RejectBookingRequest'])->name('reject_booking_request');
 Route::get('{lang?}/post-ride', [RideController::class, 'PostRide'])->name('post_ride')->middleware('auth');
+Route::get('{lang?}/px/post-ride', [PxRideWebController::class, 'create'])->name('px.post_ride.create')->middleware('auth');
 Route::get('{lang?}/edit-ride/{id}', [RideController::class, 'EditRide'])->name('edit_ride')->middleware('auth');
 Route::put('{lang?}/update-ride/{ride_id}', [RideController::class, 'UpdateRide'])->name('update_ride')->middleware('auth');
 Route::get('{lang?}/post-ride/{id}', [RideController::class, 'CopyRide'])->name('copy_ride')->middleware('auth');
@@ -435,6 +437,7 @@ Route::post('payout/verifyBank', [PayoutController::class, 'verifyBank'])->name(
 Route::post('profile/vehicle/store', [ProfileVehicleController::class, 'store'])->name('profile.vehicle.store');
 Route::post('get-states-by-country', [CountryStateCityController::class, 'getState']);
 Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('post_ride.store')->middleware('auth');
+Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name('px.post_ride.store')->middleware('auth');
 Route::post('add-new-spots', [RideController::class, 'addNewSpots'])->name('post_ride.add_new_spot')->middleware('auth');
 Route::post('delete-spots', [RideController::class, 'deleteSpots'])->name('post_ride.delete_spot')->middleware('auth');
 Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');

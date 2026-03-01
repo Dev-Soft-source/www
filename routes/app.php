@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\App\CloseAccountController;
 use App\Http\Controllers\Api\App\NotificationController;
 use App\Http\Controllers\Api\App\ProfilePhotoController;
 use App\Http\Controllers\Api\App\VerifyDriverController;
+use App\Http\Controllers\Api\App\PxRideController;
 use App\Http\Controllers\Api\App\LogoutSettingController;
 use App\Http\Controllers\Api\App\PostRideAgainController;
 use App\Http\Controllers\Api\App\PostRideInitController;
@@ -67,6 +68,8 @@ Route::group(['prefix' => 'app/v1'], function () {
     Route::get('reset-password-page', [ResetPasswordController::class, 'create'])->name('app.auth.reset_password_page');
     Route::get('post-ride-page', [RideController::class, 'postRideIndex'])->name('app.auth.post_ride_page');
     Route::get('find-ride-page', [RideController::class, 'findRideIndex'])->name('app.auth.find_ride_page');
+    Route::get('px/ride-options', [PxRideController::class, 'rideOptions'])->name('app.auth.px.ride_options');
+    Route::get('px/rides/search', [PxRideController::class, 'search'])->name('app.auth.px.search_ride');
     Route::get('step1-page', [StepController::class, 'step1Index'])->name('app.auth.step1_page');
     Route::get('step2-page', [StepController::class, 'step2Index'])->name('app.auth.step2_page');
     Route::get('step3-page', [StepController::class, 'step3Index'])->name('app.auth.step3_page');
@@ -147,6 +150,8 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('post-ride-init', [PostRideInitController::class, 'getInitData'])->name('app.auth.post-ride-init');
     Route::get('select-location-setting', [InfoIconController::class, 'selectLocationSetting'])->name('app.auth.select-location-setting');
     Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('app.auth.post_ride.store');
+    Route::post('px/rides', [PxRideController::class, 'store'])->name('app.auth.px.post_ride');
+    Route::get('px/rides/search', [PxRideController::class, 'search'])->name('app.auth.px.search_ride_auth');
     Route::get('edit-ride', [RideController::class, 'EditRide'])->name('app.auth.edit_ride');
     Route::put('update-ride', [RideController::class, 'UpdateRide'])->name('app.auth.update_ride');
     Route::get('post-ride-again-upcoming', [PostRideAgainController::class, 'CurrentRides'])->name('app.auth.post_ride_again');
