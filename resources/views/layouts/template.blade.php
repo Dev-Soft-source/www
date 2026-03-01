@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('css/front.css') }}?v={{ filemtime(public_path('css/front.css')) }}">
 
     @yield('style')
+    @livewireStyles
     <style>
         .tooltip .tooltiptext {
             width: fit-content;
@@ -1128,6 +1129,7 @@
             }
         }
     </script>
+    @livewireScripts
     @yield('script')
 </body>
 

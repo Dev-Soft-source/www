@@ -103,6 +103,8 @@ class PxRideController extends Controller
             'arrival_estimated_at' => optional($ride->arrival_estimated_at)->toIso8601String(),
             'seats_total' => $ride->seats_total,
             'seats_available' => $ride->seats_available,
+            'middle_seats' => (int) data_get($ride->meta, 'seat_layout.middle_seats', 0),
+            'back_seats' => (int) data_get($ride->meta, 'seat_layout.back_seats', 0),
             'price_minor' => $ride->price_minor,
             'currency' => $ride->currency,
             'flags' => [
@@ -113,7 +115,13 @@ class PxRideController extends Controller
                 'pets_allowed' => (int) $ride->pets_allowed,
             ],
             'luggage_size' => (int) $ride->luggage_size,
+            'accept_more_luggage' => (bool) data_get($ride->meta, 'accept_more_luggage', false),
             'cancelation_policy' => (int) $ride->cancelation_policy,
+            'recurring' => [
+                'enabled' => (bool) data_get($ride->meta, 'recurring.enabled', false),
+                'frequency' => data_get($ride->meta, 'recurring.frequency'),
+                'trips' => data_get($ride->meta, 'recurring.trips'),
+            ],
             'notes' => $ride->notes,
             'route' => $ride->route ? [
                 'id' => $ride->route->id,

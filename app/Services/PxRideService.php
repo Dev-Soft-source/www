@@ -72,6 +72,23 @@ class PxRideService
             if ($dropoffLocation !== '') {
                 $meta['dropoff_location'] = $dropoffLocation;
             }
+            $meta['seat_layout'] = [
+                'middle_seats' => (int) Arr::get($payload, 'middle_seats', 0),
+                'back_seats' => (int) Arr::get($payload, 'back_seats', 0),
+            ];
+            $isRecurring = (bool) Arr::get($payload, 'is_recurring', false);
+            if ($isRecurring) {
+                $meta['recurring'] = [
+                    'enabled' => true,
+                    'frequency' => (string) Arr::get($payload, 'recurring_frequency'),
+                    'trips' => (int) Arr::get($payload, 'recurring_trips'),
+                ];
+            } else {
+                $meta['recurring'] = [
+                    'enabled' => false,
+                ];
+            }
+            $meta['accept_more_luggage'] = (bool) Arr::get($payload, 'accept_more_luggage', false);
 
             $ride = PxRide::query()->create([
                 'route_id' => $route->id,

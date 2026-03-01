@@ -3,6 +3,10 @@
     margin-bottom: 25px;
 }
 
+.required::after {
+    content: " *";
+    color: #ef4444;
+}
 
 /* hover tooltip */
 .tippy-box[data-theme~='custom'] {
