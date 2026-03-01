@@ -12,7 +12,6 @@
         class="w-full rounded border-gray-300"
         placeholder="{{ $placeholder }}"
         autocomplete="off"
-        required
     >
 
     <input type="hidden" name="{{ $field }}[city_id]" value="{{ $cityId }}">

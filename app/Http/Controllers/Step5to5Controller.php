@@ -26,7 +26,7 @@ class Step5to5Controller extends Controller
         $countries = Country::where('status', '1')->orderBy('name')->get();
         
         $step5Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
+dd($step5Page);
         // Update step
         if (request()->has('skip')) {
             User::whereId($user->id)->update([

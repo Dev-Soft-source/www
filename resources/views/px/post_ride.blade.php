@@ -64,7 +64,7 @@
                 </div>
             @endif
 
-            @if ($errors->any())
+            {{-- @if ($errors->any())
                 <div class="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 px-4 py-3">
                     <p class="font-semibold mb-1">Please fix the errors below:</p>
                     <ul class="list-disc pl-5">
@@ -73,13 +73,13 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif
+            @endif --}}
 
             <form method="POST"
                 action="{{ route('px.post_ride.store', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
                 enctype="multipart/form-data" class="space-y-8">
                 @csrf
-
+                <p>{{ $postRidePage->indicates_required_field_text }}</p>
                 <section>
                     <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Route</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,6 +95,9 @@
                                 ],
                                 key('px-origin-city-autocomplete')
                             )
+                            @error('origin.label')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1 required">{{ $postRidePage->to_label }}</label>
@@ -108,19 +111,28 @@
                                 ],
                                 key('px-destination-city-autocomplete')
                             )
+                            @error('destination.label')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                     </div>
                     <div>
                         <label
                             class="block text-sm font-semibold mb-1 required">{{ $postRidePage->pick_up_label }}</label>
                             <input name="origin[pickup_location]" value="{{ old('origin.pickup_location') }}" type="text"
-                                class="w-full rounded border-gray-300" placeholder="Exact pick-up point" required>
+                                class="w-full rounded border-gray-300" placeholder="Exact pick-up point" >
+                            @error('origin.pickup_location')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div>
                             <label
                                 class="block text-sm font-semibold mb-1 required">{{ $postRidePage->drop_off_label }}</label>
                             <input name="destination[dropoff_location]" value="{{ old('destination.dropoff_location') }}"
                                 type="text" class="w-full rounded border-gray-300" placeholder="Exact drop-off point"
-                                required>
+                                >
+                            @error('destination.dropoff_location')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="mt-4 border border-gray-200 rounded-lg">
@@ -156,12 +168,18 @@
                                     <option value="daily" @selected(old('recurring_frequency') === 'daily')>Daily</option>
                                     <option value="weekly" @selected(old('recurring_frequency') === 'weekly')>Weekly</option>
                                 </select>
+                                @error('recurring_frequency')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1 required">Number of Trips</label>
                                 <input type="number" min="1" max="365" name="recurring_trips"
                                     value="{{ old('recurring_trips') }}" class="w-full rounded border-gray-300"
                                     placeholder="e.g. 10">
+                                @error('recurring_trips')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -175,12 +193,18 @@
                             <input id="px-departure-date" name="departure_date" value="{{ $oldDepartureDate }}"
                                 type="text" class="w-full rounded border-gray-300" placeholder="Select departure date"
                                 autocomplete="off" >
+                            @error('departure_date')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-semibold mb-1 required">Departure Time</label>
                             <input id="px-departure-time" name="departure_time" value="{{ $oldDepartureTime }}"
                                 type="text" class="w-full rounded border-gray-300" placeholder="Select departure time"
                                 autocomplete="off" >
+                            @error('departure_time')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
                             <label class="block text-sm font-semibold mb-3 required">Total Seats</label>
@@ -260,7 +284,10 @@
                         <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
                             <label class="block text-sm font-semibold mb-1 required">Price per seat</label>
                             <input name="price_minor" value="{{ old('price_minor') }}" type="number" min="0"
-                                class="w-full rounded border-gray-300" placeholder="e.g. 2500 = 25.00" required>
+                                class="w-full rounded border-gray-300" placeholder="e.g. 2500 = 25.00" >
+                            @error('price_minor')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                             @if ($bookingMethodGroup && $bookingMethodOptions->isNotEmpty())
                                 <div class="mt-4">
                                     <label class="block text-sm font-semibold mb-1">Payment Method</label>
@@ -370,17 +397,23 @@
                             <div id="px-vehicle-new-fields"
                                 class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Make</label>
+                                    <label class="block text-sm font-semibold mb-1 required">Make</label>
                                     <input name="new_vehicle[make]" value="{{ old('new_vehicle.make') }}" type="text"
                                         class="w-full rounded border-gray-300">
+                                    @error('new_vehicle.make')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Model</label>
+                                    <label class="block text-sm font-semibold mb-1 required">Model</label>
                                     <input name="new_vehicle[model]" value="{{ old('new_vehicle.model') }}"
                                         type="text" class="w-full rounded border-gray-300">
+                                    @error('new_vehicle.model')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Vehicle Type</label>
+                                    <label class="block text-sm font-semibold mb-1 required">Vehicle Type</label>
                                     <select name="new_vehicle[type]" class="w-full rounded border-gray-300">
                                         <option value="">Select type</option>
                                         @foreach (['Convertable', 'Coupe', 'Hatchback', 'Minivan', 'Sedan', 'Station wagon', 'SUV', 'Truck', 'Van'] as $type)
@@ -388,21 +421,33 @@
                                                 {{ $type }}</option>
                                         @endforeach
                                     </select>
+                                    @error('new_vehicle.type')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">License Plate Number</label>
+                                    <label class="block text-sm font-semibold mb-1 required">License Plate Number</label>
                                     <input name="new_vehicle[liscense_no]" value="{{ old('new_vehicle.liscense_no') }}"
                                         maxlength="8" type="text" class="w-full rounded border-gray-300">
+                                    @error('new_vehicle.liscense_no')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Color</label>
+                                    <label class="block text-sm font-semibold mb-1 required">Color</label>
                                     <input name="new_vehicle[color]" value="{{ old('new_vehicle.color') }}"
                                         maxlength="15" type="text" class="w-full rounded border-gray-300">
+                                    @error('new_vehicle.color')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold mb-1">Year</label>
+                                    <label class="block text-sm font-semibold mb-1 required">Year</label>
                                     <input name="new_vehicle[year]" value="{{ old('new_vehicle.year') }}" maxlength="4"
                                         type="text" class="w-full rounded border-gray-300">
+                                    @error('new_vehicle.year')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold mb-1">Fuel</label>
@@ -448,7 +493,7 @@
                                             accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" />
                                     </label>
                                     @error('new_vehicle_image')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -538,10 +583,13 @@
                 <section>
                     <label class="inline-flex items-start gap-2 text-sm">
                         <input type="checkbox" name="agree_terms" value="1" @checked(old('agree_terms'))
-                            class="mt-0.5 rounded border-gray-300" required>
+                            class="mt-0.5 rounded border-gray-300" >
                         <span>I have read and agree to these rules, as well as ProximaRide's policies, terms and
                             conditions.</span>
                     </label>
+                    @error('agree_terms')
+                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                    @enderror
                 </section>
 
                 <div class="pt-2">
@@ -607,9 +655,9 @@
                 recurringFields.classList.toggle('opacity-60', !enabled);
                 recurringInputs.forEach((el) => {
                     el.disabled = !enabled;
-                    if (el.name === 'recurring_frequency' || el.name === 'recurring_trips') {
-                        el.required = enabled;
-                    }
+                    // if (el.name === 'recurring_frequency' || el.name === 'recurring_trips') {
+                    //     el.required = enabled;
+                    // }
                 });
             }
 
@@ -638,6 +686,36 @@
             };
             window.seat_selected(document.querySelector('input[name="seats_total"]:checked'));
 
+            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document.querySelector('form');
+
+            // Hide field tooltip error when user clicks/focuses inside its parent container.
+            function hideTooltipInParent(eventTarget) {
+                if (!(eventTarget instanceof HTMLElement) || !postRideForm) return;
+                let node = eventTarget.closest('div');
+
+                // Walk up until form root and remove only a tooltip that belongs
+                // to the current field wrapper (direct child), not nested/global tooltips.
+                while (node && node !== postRideForm) {
+                    const tooltip = Array.from(node.children).find((child) =>
+                        child instanceof HTMLElement && child.classList.contains('tooltip-error')
+                    );
+                    if (tooltip) {
+                        tooltip.remove();
+                        return;
+                    }
+                    node = node.parentElement?.closest('div') || null;
+                }
+            }
+
+            if (postRideForm) {
+                postRideForm.addEventListener('click', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+                postRideForm.addEventListener('focusin', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+            }
+
             // Initialize departure date/time pickers and guard submission for empty values.
             const departureDateInput = document.getElementById('px-departure-date');
             const departureTimeInput = document.getElementById('px-departure-time');
@@ -660,31 +738,30 @@
                 dateFormat: 'H:i',
             });
 
-            const postRideForm = document.querySelector('form');
-            if (postRideForm && departureDateFp && departureDateFp.input && departureDateFp.altInput &&
-                departureTimeFp && departureTimeFp.input && departureTimeFp.altInput) {
-                // On submit, if either departure date or time is empty, prevent submission and focus the empty field.
-                postRideForm.addEventListener('submit', function(e) {
-                    if (!departureDateFp.input.value) {
-                        e.preventDefault();
-                        departureDateFp.altInput.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        departureDateFp.altInput.focus();
-                        return;
-                    }
+            // if (postRideForm && departureDateFp && departureDateFp.input && departureDateFp.altInput &&
+            //     departureTimeFp && departureTimeFp.input && departureTimeFp.altInput) {
+            //     // On submit, if either departure date or time is empty, prevent submission and focus the empty field.
+            //     postRideForm.addEventListener('submit', function(e) {
+            //         if (!departureDateFp.input.value) {
+            //             e.preventDefault();
+            //             departureDateFp.altInput.scrollIntoView({
+            //                 behavior: 'smooth',
+            //                 block: 'center'
+            //             });
+            //             departureDateFp.altInput.focus();
+            //             return;
+            //         }
 
-                    if (!departureTimeFp.input.value) {
-                        e.preventDefault();
-                        departureTimeFp.altInput.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        departureTimeFp.altInput.focus();
-                    }
-                });
-            }
+            //         if (!departureTimeFp.input.value) {
+            //             e.preventDefault();
+            //             departureTimeFp.altInput.scrollIntoView({
+            //                 behavior: 'smooth',
+            //                 block: 'center'
+            //             });
+            //             departureTimeFp.altInput.focus();
+            //         }
+            //     });
+            // }
 
             // Client-side image preview for "add new vehicle" upload.
             const vehicleImageInput = document.getElementById('dropzone-file');
@@ -709,3 +786,4 @@
         });
     </script>
 @endsection
+
