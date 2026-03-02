@@ -2709,7 +2709,7 @@ class RideController extends Controller
     }
 
 
-    /**
+    /*
      * AJAX only: returns HTML for a new "add more spots" row. Does NOT save to the database.
      * Extra spots are saved when the user submits the main form (UpdateRide or PostRideStore).
      */

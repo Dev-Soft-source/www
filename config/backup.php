@@ -169,7 +169,7 @@ return [
             'to' => 'your@example.com',
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@proximaride.com'),
+                'address' => env('MAIL_FROM_ADDRESS', 'noreply@proximaride.com'),
                 'name' => env('MAIL_FROM_NAME', 'ProximaRide'),
             ],
         ],

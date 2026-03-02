@@ -38,6 +38,11 @@ return new class extends Migration
             $table->text('main_text')->nullable();
             $table->text('custom_amount_label')->nullable();
             $table->text('pay_button_label')->nullable();
+            $table->text('notify_coffee_used_label')->nullable();
+            $table->text('select_payment_method_label')->nullable();
+            $table->text('credit_card_label')->nullable();
+            $table->text('paypal_label')->nullable();
+            $table->text('donation_acknowledgment_label')->nullable();
             $table->text('frequency_label')->nullable();
             $table->text('email_label')->nullable();
             $table->text('name_label')->nullable();

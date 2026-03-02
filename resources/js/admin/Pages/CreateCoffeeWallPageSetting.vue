@@ -446,6 +446,232 @@
                                                 "
                                             ></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`notify_coffee_used_label_${activeLanguageId}`"
+                                                        >notify coffee used label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`notify_coffee_used_label_${activeLanguageId}`"
+                                                    :id="`notify_coffee_used_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'notify_coffee_used_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'notify_coffee_used_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `notify_coffee_used_label.notify_coffee_used_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `notify_coffee_used_label.notify_coffee_used_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`select_payment_method_label_${activeLanguageId}`"
+                                                        >select payment method label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`select_payment_method_label_${activeLanguageId}`"
+                                                    :id="`select_payment_method_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'select_payment_method_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'select_payment_method_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `select_payment_method_label.select_payment_method_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `select_payment_method_label.select_payment_method_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`credit_card_label_${activeLanguageId}`"
+                                                        >debit credit card labell</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`credit_card_label_${activeLanguageId}`"
+                                                    :id="`credit_card_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'credit_card_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'credit_card_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `credit_card_label.credit_card_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `credit_card_label.credit_card_labell_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`paypal_label_${activeLanguageId}`"
+                                                        >paypal label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`paypal_label_${activeLanguageId}`"
+                                                    :id="`paypal_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'paypal_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'paypal_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `paypal_label.paypal_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `paypal_label.paypal_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`donation_acknowledgment_label_${activeLanguageId}`"
+                                                        >donation acknowledgment label </label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`donation_acknowledgment_label_${activeLanguageId}`"
+                                                    :id="`donation_acknowledgment_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'donation_acknowledgment_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'donation_acknowledgment_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `donation_acknowledgment_label.donation_acknowledgment_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `donation_acknowledgment_label.donation_acknowledgment_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
                                         <div class="relative z-0 w-full group col-span-2 md:col-span-1">
                                             <div>
                                                 <div
@@ -1312,6 +1538,32 @@ export default {
                                 "pay_button_label"
                             );
                             this.handleInput(
+                                setting?.donation_acknowledgment_label,
+                                setting?.language,
+                                "donation_acknowledgment_label"
+                            );
+                            this.handleInput(
+                                setting?.paypal_label,
+                                setting?.language,
+                                "paypal_label"
+                            );
+                            this.handleInput(
+                                setting?.credit_card_label,
+                                setting?.language,
+                                "credit_card_label"
+                            );
+                            this.handleInput(
+                                setting?.select_payment_method_label,
+                                setting?.language,
+                                "select_payment_method_label"
+                            );
+                            this.handleInput(
+                                setting?.notify_coffee_used_label,
+                                setting?.language,
+                                "notify_coffee_used_label"
+                            );
+
+                            this.handleInput(
                                 setting?.frequency_label,
                                 setting?.language,
                                 "frequency_label"
@@ -1440,6 +1692,21 @@ export default {
                 ) ||
                 validationErros.has(
                     `pay_button_label.pay_button_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `donation_acknowledgment_label.donation_acknowledgment_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `paypal_label.paypal_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `credit_card_label.credit_card_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `select_payment_method_label.select_payment_method_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `notify_coffee_used_label.notify_coffee_used_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `frequency_label.frequency_label_${language.id}`

@@ -29,6 +29,16 @@ class CoffeeWallSettingService
                 $errorMessages = array_merge($errorMessages, ['custom_amount_label.custom_amount_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pay_button_label.pay_button_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pay_button_label.pay_button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['notify_coffee_used_label.notify_coffee_used_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['notify_coffee_used_label.notify_coffee_used_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['select_payment_method_label.select_payment_method_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['select_payment_method_label.select_payment_method_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['credit_card_label.credit_card_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['credit_card_label.credit_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['paypal_label.paypal_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['paypal_label.paypal_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['donation_acknowledgment_label.donation_acknowledgment_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['donation_acknowledgment_label.donation_acknowledgment_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['frequency_label.frequency_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['frequency_label.frequency_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['email_label.email_label_' . $language->id => ['required', 'string']]);
@@ -66,6 +76,11 @@ class CoffeeWallSettingService
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
             'custom_amount_label' => $this->data($request, $language, 'custom_amount_label'),
             'pay_button_label' => $this->data($request, $language, 'pay_button_label'),
+            'notify_coffee_used_label' => $this->data($request, $language, 'notify_coffee_used_label'),
+            'select_payment_method_label' => $this->data($request, $language, 'select_payment_method_label'),
+            'credit_card_label' => $this->data($request, $language, 'credit_card_label'),
+            'paypal_label' => $this->data($request, $language, 'paypal_label'),
+            'donation_acknowledgment_label' => $this->data($request, $language, 'donation_acknowledgment_label'),
             'frequency_label' => $this->data($request, $language, 'frequency_label'),
             'email_label' => $this->data($request, $language, 'email_label'),
             'name_label' => $this->data($request, $language, 'name_label'),

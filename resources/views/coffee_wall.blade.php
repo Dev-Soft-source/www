@@ -322,13 +322,13 @@
                                                     id="notify_coffee_used"
                                                     {{ old('notify_coffee_used') == '1' ? 'checked' : '' }}
                                                     class="h-5 w-5">
-                                                <span class="text-base md:text-lg">Notify me when my Coffee is used</span>
+                                                <span class="text-base md:text-lg">@isset($coffeeWallPage->notify_coffee_used_label) {{$coffeeWallPage->notify_coffee_used_label}} @endisset</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
-                                            <h3 class=" text-2xl">Select Your Payment Method</h3>
+                                            <h3 class=" text-2xl">@isset($coffeeWallPage->select_payment_method_label) {{$coffeeWallPage->select_payment_method_label}} @endisset</h3>
                                         </div>
                                         <div>
                                             <div class="flex flex-col md:flex-row gap-4 md:justify-normal justify-between md:gap-x-8 items-start md:items-center mt-2 p-1.5">
@@ -337,7 +337,7 @@
                                                         name="payment_method"
                                                         class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
                                                         checked>
-                                                    <label for="credit-card" class="text-base md:text-lg cursor-pointer">Debit or Credit Card</label>
+                                                    <label for="credit-card" class="text-base md:text-lg cursor-pointer">@isset($coffeeWallPage->credit_card_label) {{$coffeeWallPage->credit_card_label}} @endisset</label>
                                                 </div>
 
                                                 <div class="flex items-center gap-2">
@@ -345,7 +345,7 @@
                                                         name="payment_method"
                                                         class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
                                                         {{ old('payment_method') === 'paypal' ? 'checked' : '' }}>
-                                                    <label for="paypal" class="text-base md:text-lg cursor-pointer">PayPal</label>
+                                                    <label for="paypal" class="text-base md:text-lg cursor-pointer">@isset($coffeeWallPage->paypal_label) {{$coffeeWallPage->paypal_label}} @endisset</label>
                                                 </div>
                                             </div>
                                             @error('payment_method')
@@ -465,9 +465,7 @@
                                                 name="donation_acknowledgment" value="1"
                                                 {{ old('donation_acknowledgment') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <span class="text-base md:text-lg">I understand that my contribution is a voluntary
-                                                act of kindness. As such, it is considered a donation and is
-                                                non-refundable.</span>
+                                            <span class="text-base md:text-lg">@isset($coffeeWallPage->donation_acknowledgment_label) {{$coffeeWallPage->donation_acknowledgment_label}} @endisset</span>
                                         </div>
                                         @error('donation_acknowledgment')
                                             <div class="mt-2 w-full relative" id="donation-acknowledgment-error-wrap">
@@ -492,10 +490,7 @@
                                             <input id="terms_privacy" type="checkbox" name="terms_privacy" value="1"
                                                 {{ old('terms_privacy') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <span class="text-base md:text-lg">By clicking "Make Someone's Day", you agree to
-                                                our <a href="{{ route('terms_conditions', ['lang' => app()->getLocale()]) }}" class="text-blue-600 hover:underline">Terms and
-                                                    Conditions</a> and <a href="{{ route('privacy_policy', app()->getLocale()) }}"
-                                                    class="text-blue-600 hover:underline">Privacy Policy</a></span>
+                                            <span class="text-base md:text-lg">@isset($coffeeWallPage->agree_terms_label) {!! $coffeeWallPage->agree_terms_label !!} @endisset</span>
                                         </div>
                                         @error('terms_privacy')
                                         <div class="mt-2 w-full relative" id="terms-privacy-error-wrap">
@@ -1239,20 +1234,20 @@
                         }
                         // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
 
-                        // Stop form submission if there are validation errors
+                        // Stop form submission if there are validation errors - show popup
                         if (hasValidationErrors) {
-                            var errorTargets = [
-                                'package-errors-div', 'amount-errors-div',
-                                'name-errors-div', 'email-errors-div',
-                                'donation-acknowledgment-div', 'terms-privacy-div'
-                            ];
-                            for (var i = 0; i < errorTargets.length; i++) {
-                                var el = document.getElementById(errorTargets[i]);
-                                if (el && !el.classList.contains('hidden')) {
-                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    break;
-                                }
-                            }
+                            var popupMessage = '';
+                            var packageErr = document.getElementById('package-errors');
+                            if (packageErr && packageErr.textContent) popupMessage = packageErr.textContent;
+                            var amountErr = document.getElementById('amount-errors');
+                            if (!popupMessage && amountErr && amountErr.textContent) popupMessage = amountErr.textContent;
+                            var nameErr = document.getElementById('name-errors');
+                            if (!popupMessage && nameErr && nameErr.textContent) popupMessage = nameErr.textContent;
+                            var emailErr = document.getElementById('email-errors');
+                            if (!popupMessage && emailErr && emailErr.textContent) popupMessage = emailErr.textContent;
+                            if (!popupMessage && donationAckCheckbox && !donationAckCheckbox.checked) popupMessage = 'Please check this box if you want to proceed';
+                            if (!popupMessage && termsPrivacyCheckbox && !termsPrivacyCheckbox.checked) popupMessage = 'Please check this box if you want to proceed';
+                            if (popupMessage) alert(popupMessage);
                             return;
                         }
 

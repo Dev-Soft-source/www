@@ -387,7 +387,7 @@
     </div>
 
     <div class="flex justify-end md:items-center">
-        <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+        <a href="{{ ($isNewForm && ($routeType ?? '') === 'create') ? route('post_ride_again_completed', ['lang' => optional($selectedLanguage)->abbreviation]) : route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}" class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
             @isset($postRidePage->post_arrived_again_label)
                 {{ $postRidePage->post_arrived_again_label }}
             @endisset
