@@ -32,11 +32,11 @@
           <td style="width: 600px; max-width: 100%;background:#fff; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
             <table style="width: 100%;margin-bottom: 24px;" cellpadding="0" cellspacing="0" role="none">
                 <tr>
-                    <td align="center" style="display: flex;background:#fff;border-bottom: 3px solid black;">
-                        <div style="display: flex; margin: 20px auto;">
-                            <a href="">
-                                <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide"
-                                    style="height: 100px; vertical-align: middle">
+                    <td align="center" style="background:#fff;border-bottom: 3px solid black; padding: 20px 0;">
+                        <div style="margin: 0 auto; text-align: center;">
+                            <a href="" style="display: inline-block;">
+                                <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" width="200" height="100"
+                                    style="display: block; max-width: 200px; max-height: 100px; width: auto; height: auto;">
                             </a>
                         </div>
                     </td>
@@ -136,32 +136,32 @@
                         <table style="margin-bottom: 24px; margin-top: 16px; width: 100%" cellpadding="0" cellspacing="0"
                             role="none">
                             <tr>
-                                <td align="center" style="display: flex;">
-                                    <div style="display: flex; margin: 0 auto;">
+                                <td align="center">
+                                    <div style="display: inline-flex; flex-wrap: wrap; justify-content: center;">
                                         <a aria-label="ProximaRide" target="_blank" href="https://facebook.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/facebook.png') }}" alt="facebook icon"
-                                                style="max-width: 100%; vertical-align: middle; height: 20px;margin-top: 10px;margin-left: 13px;">
+                                            style="border: 1px solid #d1d5db; display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin-right: 16px;">
+                                            <img src="{{ asset('assets/images/facebook.png') }}" alt="facebook icon" width="20" height="20"
+                                                style="display: block; max-width: 20px; max-height: 20px; object-fit: contain;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://twitter.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/twitter.png') }}" alt="twiiter icon"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 11px;margin-left: 10px;">
+                                            style="border: 1px solid #d1d5db; display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin-right: 16px;">
+                                            <img src="{{ asset('assets/images/twitter.png') }}" alt="twiiter icon" width="20" height="20"
+                                                style="display: block; max-width: 20px; max-height: 20px; object-fit: contain;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://www.instagram.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/instagram.png') }}" alt="google icon"
-                                                style="max-width: 100%; vertical-align: middle; height: 20px;margin-top: 9px;margin-left: 9px;">
+                                            style="border: 1px solid #d1d5db; display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin-right: 16px;">
+                                            <img src="{{ asset('assets/images/instagram.png') }}" alt="google icon" width="20" height="20"
+                                                style="display: block; max-width: 20px; max-height: 20px; object-fit: contain;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://youtube.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/youtube.png') }}" alt="youtube icon"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 11px;margin-left: 8px;">
+                                            style="border: 1px solid #d1d5db; display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin-right: 16px;">
+                                            <img src="{{ asset('assets/images/youtube.png') }}" alt="youtube icon" width="20" height="20"
+                                                style="display: block; max-width: 20px; max-height: 20px; object-fit: contain;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://www.linkedin.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;">
-                                            <img src="{{ asset('assets/images/linkedin.png') }}" alt="linkedin icon"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 10px;margin-left: 12px;">
+                                            style="border: 1px solid #d1d5db; display: inline-flex; align-items: center; justify-content: center; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none;">
+                                            <img src="{{ asset('assets/images/linkedin.png') }}" alt="linkedin icon" width="20" height="20"
+                                                style="display: block; max-width: 20px; max-height: 20px; object-fit: contain;">
                                         </a>
                                     </div>
                                 </td>
