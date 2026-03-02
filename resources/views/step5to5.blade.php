@@ -32,7 +32,7 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
+                                <h2 class="font-FuturaMdCnBT text-gray-700 mb-4" id="modal-title">{!! session('heading') !!}</h2>
                                 <p class="can-exp-p text-center">{!! session('error') !!}</p>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
                                         <input type="tel" name="country_code" value="{{ old('country_code', '+1') }}" maxlength="5" readonly class="font-FuturaMdCnBT bg-gray-100 mt-1 border p-1.5 w-full rounded text-base  border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                     </div>
                                     <div class="w-full">
-                                        <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}" placeholder="@isset($step5Page->phone_placeholder){{ $step5Page->phone_placeholder }}@endisset" maxlength="15" inputmode="numeric" pattern="[0-9]+">
+                                        <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}" placeholder="@isset($step5Page->phone_placeholder){{ $step5Page->phone_placeholder }}@endisset" maxlength="15" inputmode="tel" pattern="[0-9+]+" oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
                                         @error('phone')
                                             <div class="relative tooltip -bottom-4 group-hover:flex">
                                                 <div role="tooltip" class="absolute tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
@@ -121,13 +121,19 @@
     {{-- Skip Confirmation Modal --}}
     <div id="skipModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" id="skipModalBackdrop" onclick="closeSkipConfirmation()"></div>
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                    <button type="button" onclick="closeSkipConfirmation()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <h3 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
+                            <h2 class="font-FuturaMdCnBT text-gray-700 mb-4">
                                 @isset($step5Page->confirm_title){{ $step5Page->confirm_title }}@endisset
-                            </h3>
+                            </h2>
                             <p class="text-gray-600">
                                 @isset($step5Page->confirm_text){{ $step5Page->confirm_text }}@endisset
                             </p>
@@ -148,13 +154,19 @@
     {{-- Save Unverified Confirmation Modal --}}
     <div id="saveUnverifiedModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50 flex" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" id="saveUnverifiedModalBackdrop" onclick="closeSaveUnverifiedModal()"></div>
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                    <button type="button" onclick="closeSaveUnverifiedModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                            <h2 class="font-FuturaMdCnBT text-gray-700 mb-4">
                                 @isset($step5Page->skip_confirmation_heading){{ $step5Page->skip_confirmation_heading }}@endisset
-                            </h3>
+                            </h2>
                             <p class="text-gray-600">
                                 @isset($step5Page->skip_confirmation_message){{ $step5Page->skip_confirmation_message }}@endisset
                             </p>
@@ -178,7 +190,7 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeWhatsAppUnavailableModal()"></div>
         <div class="fixed inset-0 z-60 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                     <button type="button" onclick="closeWhatsAppUnavailableModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -191,9 +203,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h3 class="font-FuturaMdCnBT font-medium text-gray-700 mb-4" id="whatsappUnavailableTitle">
+                            <h2 class="font-FuturaMdCnBT text-gray-700 mb-4" id="whatsappUnavailableTitle">
                                 WhatsApp Not Available
-                            </h3>
+                            </h2>
                             <p class="text-gray-600" id="whatsappUnavailableMessage">
                                 WhatsApp is not available for this number. Verification code has been sent via SMS instead.
                             </p>
@@ -224,11 +236,11 @@
                             </svg>
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="mt-2">
-                              <h3 class="text-left">
+                            <div class="flex flex-col items-center justify-center mt-2">
+                              <h3 class="font-FuturaMdCnBT text-gray-700 mb-4 text-center">
                                 @isset($step5Page->verify_code_heading){{ $step5Page->verify_code_heading }}@endisset
                               </h3>
-                              <p class="text-center mt-4">
+                              <p class="text-center mt-2">
                                 @isset($step5Page->verify_code_label_1){{ $step5Page->verify_code_label_1 }}@endisset
                               </p>
                               <div class="flex justify-center mt-4 space-x-2">
@@ -239,15 +251,7 @@
                               </div>
                               <div id="codeError" class="hidden mt-2">
                                 <p class="text-red-500 text-sm"></p>
-                              </div>
-                              <!-- <div id="whatsappResendContainer" class="hidden mt-4 pt-3 border-t border-gray-100">
-                                <p class="text-sm text-gray-600 mb-2">Didn't get the code?</p>
-                                <div id="whatsappResendBtnWrapper">
-                                    <button type="button" onclick="resendViaWhatsApp()" id="resendWhatsAppBtn" class="inline-flex items-center justify-center gap-2 rounded bg-green-500 hover:bg-green-600 text-white text-sm font-FuturaMdCnBT px-4 py-2">
-                                        Send code via WhatsApp
-                                    </button>
-                                </div>
-                              </div> -->
+                              </div>                              
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 flex flex-wrap items-center justify-center">
@@ -842,6 +846,28 @@ function closeWhatsAppUnavailableModal() {
         modal.classList.add('hidden');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+    }
+}
+
+function closeSaveUnverifiedModal() {
+    const modal = document.getElementById('saveUnverifiedModal');
+    const backdrop = document.getElementById('saveUnverifiedModalBackdrop');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    if (backdrop) {
+        backdrop.classList.add('hidden');
+    }
+}
+
+function closeSkipConfirmation() {
+    const modal = document.getElementById('skipModal');
+    const backdrop = document.getElementById('skipModalBackdrop');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    if (backdrop) {
+        backdrop.classList.add('hidden');
     }
 }
 

@@ -20,13 +20,6 @@
                         'If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it' !!}
                 </p>
 
-                <!-- <div class="pb-2 flex items-center justify-start mt-3">
-                    <p class="text-red-500">*
-                        @isset($step4Page->required_label)
-        {{ $step4Page->required_label }}
-    @endisset
-                    </p>
-                </div> -->
                 <form class="rounded-lg" method="POST"
                     action="{{ route('step4to5.store', ['id' => $user->id, 'lang' => $selectedLanguage->abbreviation]) }}"
                     enctype="multipart/form-data">
@@ -44,8 +37,11 @@
                             <label for="dropzone-file1"
                                 class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                                 <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                                    <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer"
-                                        src="{{ asset('assets/image-placeholder.png') }}">
+                                    @if (!empty($user->driver_liscense))
+                                        <img id="profile-image1" class="w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg" src="{{ $user->driver_liscense }}" alt="Driver license">
+                                    @else
+                                        <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Driver license placeholder">
+                                    @endif
                                     <p class="text-sm lg:text-lg text-gray-900">
                                         @isset($step4Page->driver_liscense_photo_label)
                                             {{ $step4Page->driver_liscense_photo_label }}
@@ -136,7 +132,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     profileImage1.src = e.target.result;
-                    profileImage1.className = 'w-68 h-58 object-contain mb-3 cursor-pointer rounded-lg';
+                    profileImage1.className = 'w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg';
                 };
                 reader.readAsDataURL(input.files[0]);
             }

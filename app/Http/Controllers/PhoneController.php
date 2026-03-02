@@ -357,7 +357,14 @@ class PhoneController extends Controller
     public function destroy($id)
     {
         $phone_number = PhoneNumber::where('id', $id)->first();
+        if (!$phone_number) {
+            return redirect()->back()->with('error', 'Phone number not found.');
+        }
         $user = User::find($phone_number->user_id);
+        if (!$user) {
+            $phone_number->delete();
+            return redirect()->back()->with('message', 'Phone number removed.');
+        }
         $emailData = [
             'first_name' => $user->first_name,
         ];

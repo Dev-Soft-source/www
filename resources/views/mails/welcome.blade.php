@@ -63,7 +63,7 @@
                         <p style="font-weight: 400;color: #000;">By the way, have you completed your profile yet? If not yet,
                          <br>
                          <br>
-                         <a style="border-radius: 4px; background-color: #2563eb; padding: 8px 16px; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; display: inline-flex;margin: 8px 0 6px 0; margin-bottom: 16px; margin-top: 16px;" href="{{ route('welcomeRoute', ['email' => $data['email']]) }}" target="_blank">click here</a>
+                         <a style="border-radius: 4px; background-color: #2563eb; padding: 8px 16px; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; display: inline-flex;margin: 8px 0 6px 0; margin-bottom: 16px; margin-top: 16px;" href="{{ route('welcomeRoute', ['email' => $data['email']]) }}" target="_blank">Click here</a>
                          <br>
                          <br>
                          to do so; it’s only four easy steps and only takes a couple of minutes

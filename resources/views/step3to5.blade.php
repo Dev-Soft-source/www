@@ -219,13 +219,12 @@
                                 <label for="dropzone-file"
                                     class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100 font-FuturaMdCnBT">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                                    <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
+                                    @if (!empty($user->car_image))
+                                        <img id="profile-image" class="w-72 h-72 object-contain mb-3 cursor-pointer rounded-lg" src="{{ $user->car_image }}" alt="Vehicle photo">
+                                    @else
+                                        <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Vehicle photo placeholder">
+                                    @endif
                                     <p class="text-sm lg:text-lg text-gray-900">Vehicle photo
-                                        <!-- <span class="text-primary"> 
-                                            @isset($step3Page->mobile_photo_choose_file_label)
-                                                {{ $step3Page->mobile_photo_choose_file_label }}
-                                            @endisset    
-                                        </span> -->
                                     </p>
                                     <p class="text-sm lg:text-base text-gray-900 ">
                                         @isset($step3Page->photo_detail_label)
@@ -290,18 +289,6 @@
                             </div>
                         </div>
                         @enderror
-                        <!-- <div class="mt-4 flex justify-center space-x-2 md:col-span-2">
-                            {{-- <a href="{{ route('step5to5', ['lang' => $selectedLanguage->abbreviation]) }}" class="button-exp-fill w-32">
-                                @isset($step3Page->skip_button_label)
-                                    {{ $step3Page->skip_button_label }}
-                                @endisset
-                            </a> --}}
-                            <button type="submit" name='action' value='skip_vehicle_info' class="button-exp-fill w-36">
-                                @isset($step3Page->skip_vehicle_info)
-                                    {{ $step3Page->skip_vehicle_info }}
-                                @endisset
-                            </button>
-                        </div> -->
                     </div>
                 </div>
 
@@ -411,7 +398,7 @@
 
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
-                profileImage.className = 'w-68 h-58 object-contain mb-3 cursor-pointer rounded-lg';
+                profileImage.className = 'w-72 h-72 object-contain mb-3 cursor-pointer rounded-lg';
                 hasVehiclePhoto = true;
                 validateStep3Form();
             };
