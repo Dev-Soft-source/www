@@ -38,11 +38,11 @@
           <td style="width: 600px; max-width: 100%;background:#fff; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
             <table style="width: 100%;margin-bottom: 24px;" cellpadding="0" cellspacing="0" role="none">
                 <tr>
-                    <td align="center" style="background:#fff;border-bottom: 3px solid black; padding: 20px 0;">
-                        <div style="margin: 0 auto; text-align: center;">
-                            <a href="" style="display: inline-block;">
+                    <td align="center" style="background:#fff;border-bottom: 3px solid black; padding: 20px 0; text-align: center;">
+                        <div style="text-align: center;">
+                            <a href="" style="display: inline-block; text-align: center;">
                                 <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" width="200" height="100"
-                                    style="display: block; max-width: 200px; max-height: 100px; width: auto; height: auto;">
+                                    style="display: inline-block; max-width: 200px; max-height: 100px; width: auto; height: auto;">
                             </a>
                         </div>
                     </td>
