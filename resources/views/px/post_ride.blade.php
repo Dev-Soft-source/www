@@ -119,7 +119,7 @@
                         <label
                             class="block text-sm font-semibold mb-1 required">{{ $postRidePage->pick_up_label }}</label>
                             <input name="origin[pickup_location]" value="{{ old('origin.pickup_location') }}" type="text"
-                                class="w-full rounded border-gray-300" placeholder="Exact pick-up point" >
+                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact pick-up point" >
                             @error('origin.pickup_location')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
@@ -128,7 +128,7 @@
                             <label
                                 class="block text-sm font-semibold mb-1 required">{{ $postRidePage->drop_off_label }}</label>
                             <input name="destination[dropoff_location]" value="{{ old('destination.dropoff_location') }}"
-                                type="text" class="w-full rounded border-gray-300" placeholder="Exact drop-off point"
+                                type="text" class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact drop-off point"
                                 >
                             @error('destination.dropoff_location')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -182,6 +182,16 @@
                                 @enderror
                             </div>
                         </div>
+                    </div>
+                </section>
+    
+                <section>
+                    <div class="">
+                        <label class="block text-sm font-semibold mb-1 required">Pick/Drop Off Description</label>
+                        <textarea name="pick_drop_off_description" rows="4" class="w-full rounded border-gray-300">{{ old('pick_drop_off_description') }}</textarea>
+                        @error('pick_drop_off_description')
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                        @enderror
                     </div>
                 </section>
 
@@ -647,7 +657,7 @@
             // Enable recurring inputs only when recurring trip is checked.
             const recurringToggle = document.getElementById('px-is-recurring');
             const recurringFields = document.getElementById('px-recurring-fields');
-            const recurringInputs = recurringFields ? recurringFields.querySelectorAll('select, input') : [];
+            const recurringInputs = recurringFields ? recurringFields.querySelectorAll('select, input, textarea') : [];
 
             function syncRecurringState() {
                 if (!recurringToggle || !recurringFields) return;

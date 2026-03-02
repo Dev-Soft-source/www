@@ -88,6 +88,8 @@ class PxRideService
                     'enabled' => false,
                 ];
             }
+            
+            $meta['pick_drop_off_description'] = trim((string) Arr::get($payload, 'pick_drop_off_description', ''));
             $meta['accept_more_luggage'] = (bool) Arr::get($payload, 'accept_more_luggage', false);
 
             $ride = PxRide::query()->create([

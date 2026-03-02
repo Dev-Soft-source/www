@@ -83,6 +83,8 @@ class PxStoreRideRequest extends FormRequest
             'is_recurring' => ['nullable', 'boolean'],
             'recurring_frequency' => ['required_if:is_recurring,1', Rule::in(['daily', 'weekly'])],
             'recurring_trips' => ['required_if:is_recurring,1', 'integer', 'min:1', 'max:365'],
+            
+            'pick_drop_off_description' => ['required', 'string', 'max:5000'],
             'smoking_allowed' => ['nullable', 'integer', 'min:0'],
             'pets_allowed' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:5000'],
