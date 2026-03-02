@@ -33,12 +33,18 @@
             <table style="width: 100%;margin-bottom: 24px;" cellpadding="0" cellspacing="0" role="none">
                 <tr>
                     <td align="center" style="background:#fff;border-bottom: 3px solid black; padding: 20px 0;">
-                        <div style="margin: 0 auto; text-align: center;">
-                            <a href="" style="display: inline-block;">
-                                <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" width="200" height="100"
-                                    style="display: block; max-width: 200px; max-height: 100px; width: auto; height: auto;">
-                            </a>
-                        </div>
+                    <center>
+                        <table align="center" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ route('home', app()->getLocale()) }}" style="display: inline-block;">
+                                        <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" width="200" height="100"
+                                            style="display: block; max-width: 200px; max-height: 100px; width: auto; height: auto; border: 0;">
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </center>
                     </td>
                 </tr>
             </table>

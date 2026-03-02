@@ -39,7 +39,6 @@
             <table style="width: 100%;margin-bottom: 24px;" cellpadding="0" cellspacing="0" role="none">
                 <tr>
                     <td style="background:#fff;border-bottom: 3px solid black; padding: 20px 0; width: 100%;">
-                        <!--[if mso]><div align="center"><![endif]-->
                         <center>
                             <table align="center" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                                 <tr>
@@ -52,7 +51,6 @@
                                 </tr>
                             </table>
                         </center>
-                        <!--[if mso]></div><![endif]-->
                     </td>
                 </tr>
             </table>
