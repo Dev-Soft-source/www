@@ -45,6 +45,8 @@ class SuccessMessagesSettingDetailResource extends JsonResource
             'profile_photo_update_message' => $this->profile_photo_update_message,
             'welcome_message' => $this->welcome_message,
             'email_sent_message' => $this->email_sent_message,
+            'registration_successful_title' => $this->registration_successful_title,
+            'go_to_homepage' => $this->go_to_homepage,
             'hey_message' => $this->hey_message,
             'complete_profile_message' => $this->complete_profile_message,
             'no_user_found_message' => $this->no_user_found_message,

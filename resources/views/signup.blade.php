@@ -524,8 +524,7 @@
                     </div>
                     <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                         <a href="{{ route('home', ['lang' => $selectedLanguage->abbreviation]) }}"
-                            class="inline-flex w-auto justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS w-auto whitespace-nowrap">Go
-                            to Home Page</a>
+                            class="inline-flex w-auto justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS w-auto whitespace-nowrap">@isset($successMessage->go_to_homepage){{ $successMessage->go_to_homepage }}@endisset</a>
                     </div>
                 </div>
             </div>

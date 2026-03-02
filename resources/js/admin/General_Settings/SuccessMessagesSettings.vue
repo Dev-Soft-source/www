@@ -1085,12 +1085,91 @@
                                             "
                                         ></p>
                                     </div>
+
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`registration_successful_title_${activeLanguageId}`"
+                                                    >23. registration successful title</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`registration_successful_title_${activeLanguageId}`"
+                                                :id="`registration_successful_title_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('registration_successful_title')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'registration_successful_title'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `registration_successful_title.registration_successful_title_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `registration_successful_title.registration_successful_title_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`go_to_homepage_${activeLanguageId}`"
+                                                    >go to homepage label</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`go_to_homepage_${activeLanguageId}`"
+                                                :id="`go_to_homepage_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('go_to_homepage')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'go_to_homepage'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `go_to_homepage.go_to_homepage_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `go_to_homepage.go_to_homepage_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+
                                     <div class="relative z-0 w-full group">
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
                                                     :for="`email_sent_message_${activeLanguageId}`"
-                                                    >23. we have just sent you a verification email. PLease check your inbox. If its not there, check your junk and spam folder</label
+                                                    >we have just sent you a verification email. PLease check your inbox. If its not there, check your junk and spam folder</label
                                                 >
                                             </div>
                                             <input
@@ -5156,6 +5235,8 @@ export default {
                             this.handleInput("", language, "profile_photo_update_message");
                             this.handleInput("", language, "welcome_message");
                             this.handleInput("", language, "email_sent_message");
+                            this.handleInput("", language, "registration_successful_title");
+                            this.handleInput("", language, "go_to_homepage");
                             this.handleInput("", language, "hey_message");
                             this.handleInput("", language, "complete_profile_message");
                             this.handleInput("", language, "no_user_found_message");
@@ -5406,6 +5487,16 @@ export default {
                                 setting?.email_sent_message,
                                 setting?.language,
                                 "email_sent_message"
+                            );
+                            this.handleInput(
+                                setting?.registration_successful_title,
+                                setting?.language,
+                                "registration_successful_title"
+                            );
+                            this.handleInput(
+                                setting?.go_to_homepage,
+                                setting?.language,
+                                "go_to_homepage"
                             );
                             this.handleInput(
                                 setting?.hey_message,
@@ -5994,6 +6085,8 @@ export default {
                 validationErros.has(`create_my_profile_btn_label.create_my_profile_btn_label_${language.id}`) ||
                 validationErros.has(`profile_photo_update_message.profile_photo_update_message_${language.id}`) ||
                 validationErros.has(`welcome_message.welcome_message_${language.id}`) ||
+                validationErros.has(`registration_successful_title.registration_successful_title_${language.id}`) ||
+                validationErros.has(`go_to_homepage.go_to_homepage_${language.id}`) ||
                 validationErros.has(`email_sent_message.email_sent_message_${language.id}`) ||
                 validationErros.has(`hey_message.hey_message_${language.id}`) ||
                 validationErros.has(`complete_profile_message.complete_profile_message_${language.id}`) ||
