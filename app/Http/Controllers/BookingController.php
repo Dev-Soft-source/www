@@ -219,8 +219,9 @@ class BookingController extends Controller
                 $isPinkRide = $pinkRideId && !empty($featureIds) && in_array((string)$pinkRideId, $featureIds);
                 $extraCareId = optional($postRidePage->features_option2 ?? null)->features_setting_id ?? ($postRidePage->features_option2 ?? null);
                 $isExtraCareRide = $extraCareId && !empty($featureIds) && in_array((string)$extraCareId, $featureIds);
-                $proximalocalRideId = optional($postRidePage->features_option3 ?? null)->features_setting_id ?? ($postRidePage->features_option3 ?? null);
-                $isProximalocalRide = $proximalocalRideId && !empty($featureIds) && in_array((string)$proximalocalRideId, $featureIds);
+                // Short-Distance Ride: price per seat from RideDetail <= $15, no booking fee (same logic as ride_detail)
+                $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
+                $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
                 // Fetch data for each feature ID and concatenate with '='
                 $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
                     return FeaturesSettingDetail::whereFeaturesSettingId($id)
@@ -282,7 +283,7 @@ class BookingController extends Controller
             $getCrBalance = TopUpBalance::where('user_id', $user->id)->sum('cr_amount');
             $getDrBalance = TopUpBalance::where('user_id', $user->id)->sum('dr_amount');
 
-            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isProximalocalRide' => $isProximalocalRide ?? false]);
+            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false]);
         } else {
             return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
         }

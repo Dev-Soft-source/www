@@ -250,14 +250,14 @@
                     <span class="text-red-500">*</span> {{ $bookingPage->required_fields ?? ""}}
                 </div>
             </div>
-            @if($isProximalocalRide)
+            @if($isShortDistanceRide ?? false)
                 <div class="col-span-3 w-full">
-                    <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
-                        <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 px-4 py-2 rounded flex items-center" role="alert">
+                        <svg class="w-6 h-6 mr-2 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                             <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <span class="text-lg">This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.</span>
+                        <span class="text-lg">{{ $siteText['proximalocal_ride_description'] ?? 'This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.' }}</span>
                     </div>
                 </div>
             @else
@@ -268,7 +268,7 @@
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                                 <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span class="text-lg">This is a Pink Ride and an Extra+ Ride</span>
+                            <span class="text-lg">{{ $siteText['pink_extra_ride_description'] ?? 'This is a Pink Ride and an Extra+ Ride.' }}</span>
                         </div>
                     </div>
                 @else
@@ -279,7 +279,7 @@
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                                     <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span class="text-lg">This is a Extra+ Ride</span>
+                                <span class="text-lg">{{ $siteText['extra_ride_description'] ?? 'This is a Extra+ Ride.' }}</span>
                             </div>
                         </div>
                     @elseif($isPinkRide)
@@ -289,7 +289,7 @@
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                                     <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span class="text-lg">This is a Pink Ride</span>
+                                <span class="text-lg">{{ $siteText['pink_ride_description'] ?? 'This is a Pink Ride.' }}</span>
                             </div>
                         </div>
                     @endif
