@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
@@ -11,6 +10,8 @@ class PusherService {
   static const String _cluster = 'ap2';
   // Note: Changed to /api/broadcasting/auth based on your backend setup
   static final String _authEndpoint = '$url/api/broadcasting/auth';
+
+  final GetConnect _getConnect = GetConnect(timeout: const Duration(seconds: 30));
 
   PusherChannelsFlutter? _pusher;
   bool _isInitialized = false;
@@ -46,39 +47,38 @@ class PusherService {
         logger.info('Channel Name: $channelName');
         logger.info('Socket ID: $socketId');
 
-        // ignore: prefer_typing_uninitialized_variables
-        var json;
         try {
-          var authUrl = '$url/api/broadcasting/auth';
-          logger.info('Auth URL: $authUrl');
-          logger.info(
-              'Request Body: socket_id=$socketId&channel_name=$channelName');
+          final authUrl = '$url/api/broadcasting/auth';
+          final body = 'socket_id=$socketId&channel_name=$channelName';
 
-          var result = await http.post(
-            Uri.parse(authUrl),
+          logger.info('Auth URL: $authUrl');
+          logger.info('Request Body: $body');
+
+          final result = await _getConnect.post(
+            authUrl,
+            body,
             headers: headers,
-            body: 'socket_id=$socketId&channel_name=$channelName',
           );
 
-          logger.info("Auth Response Status: ${result.statusCode}");
-          logger.info("Auth Response Body: ${result.body}");
+          logger.info('Auth Response Status: ${result.statusCode}');
+          logger.info('Auth Response Body: ${result.bodyString ?? result.body}');
 
-          if (result.statusCode != 200) {
-            logger.error("Auth failed with status ${result.statusCode}");
+          if (!result.isOk || result.body == null) {
+            logger.error('Auth failed with status ${result.statusCode}');
             return {};
           }
 
-          try {
-            json = jsonDecode(result.body);
-            logger.info("Parsed Auth Response: $json");
-          } catch (e) {
-            logger.error("Failed to parse auth response: $e");
-            return {};
+          if (result.body is Map<String, dynamic>) {
+            return result.body;
           }
 
-          return json;
+          if (result.bodyString != null && result.bodyString!.isNotEmpty) {
+            return jsonDecode(result.bodyString!);
+          }
+
+          return {};
         } catch (e) {
-          logger.error("Authorization Error: ${e.toString()}");
+          logger.error('Authorization Error: ${e.toString()}');
           return {};
         }
       },
@@ -97,13 +97,13 @@ class PusherService {
       channelName: channelName,
       onEvent: (event) {
         logger.info(
-            "New event data received: ${event.eventName} - ${event.data}");
+            'New event data received: ${event.eventName} - ${event.data}');
 
         onMessageReceived(event.data);
       },
     );
 
-    logger.info("Subscribed to channel: ${myChannel.channelName}");
+    logger.info('Subscribed to channel: ${myChannel.channelName}');
   }
 
   // Subscribe to user's chat channel
@@ -139,3 +139,4 @@ class PusherService {
     }
   }
 }
+

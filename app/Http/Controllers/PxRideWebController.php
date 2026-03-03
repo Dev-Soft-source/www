@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Px\PxStoreRideRequest;
-use App\Http\Requests\Px\PxSearchRidesRequest;
 use App\Models\PxOptionGroup;
 use App\Models\PxRide;
 use App\Models\Vehicle;
 use App\Models\TripsPageSettingDetail;
 use App\Models\RideDetailPageSettingDetail;
 use App\Services\PxRideService;
+use Illuminate\Http\Request;
 
 class PxRideWebController extends Controller
 {
@@ -518,7 +518,7 @@ class PxRideWebController extends Controller
             ->with('success', 'PX ride updated successfully.');
     }
 
-    public function search(PxSearchRidesRequest $request, PxRideService $service, $lang = null)
+    public function search(Request $request, PxRideService $service, $lang = null)
     {
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
@@ -530,17 +530,29 @@ class PxRideWebController extends Controller
         $hasSearch = false;
         
         // Check if there are search parameters
-        if ($request->has(['origin_label', 'destination_label', 'departure_date']) || 
-            $request->has(['origin_city_id', 'destination_city_id', 'departure_date'])) {
+        $originLabel = $request->input('origin.label');
+        $destinationLabel = $request->input('destination.label');
+        $departureDate = $request->input('departure_date');
+        
+        if (!empty($originLabel) && !empty($destinationLabel) && !empty($departureDate)) {
             $hasSearch = true;
+            
+            // Validate request if search parameters are present
+            $validated = $request->validate([
+                'origin.label' => ['required', 'string', 'max:160'],
+                'destination.label' => ['required', 'string', 'max:160'],
+                'departure_date' => ['required', 'date'],
+                'origin.city_id' => ['nullable', 'integer', 'exists:cities,id'],
+                'destination.city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            ]);
             
             // Prepare filters for search
             $filters = [
                 'origin_city_id' => $request->input('origin.city_id'),
                 'destination_city_id' => $request->input('destination.city_id'),
-                'origin_label' => $request->input('origin.label'),
-                'destination_label' => $request->input('destination.label'),
-                'departure_date' => $request->input('departure_date'),
+                'origin_label' => $originLabel,
+                'destination_label' => $destinationLabel,
+                'departure_date' => $departureDate,
                 'per_page' => 20,
                 'sort' => 'soonest',
             ];
@@ -566,11 +578,11 @@ class PxRideWebController extends Controller
             'postRidePage' => $postRidePage,
             'rides' => $rides,
             'hasSearch' => $hasSearch,
-            'oldOriginLabel' => old('origin.label', $request->input('origin.label')),
+            'oldOriginLabel' => old('origin.label', $originLabel),
             'oldOriginCityId' => old('origin.city_id', $request->input('origin.city_id')),
-            'oldDestinationLabel' => old('destination.label', $request->input('destination.label')),
+            'oldDestinationLabel' => old('destination.label', $destinationLabel),
             'oldDestinationCityId' => old('destination.city_id', $request->input('destination.city_id')),
-            'oldDepartureDate' => old('departure_date', $request->input('departure_date')),
+            'oldDepartureDate' => old('departure_date', $departureDate),
         ]);
     }
 }

@@ -21,10 +21,8 @@ class Language extends Model
 
     public function getFlagIconAttribute($value)
     {
-        // You can perform any transformation you need here
         if ($value) {
-            // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/flag_icons/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/flag-icons/' . rawurlencode($value);
         }
 
         return null;

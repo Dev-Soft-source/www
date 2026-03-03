@@ -89,6 +89,155 @@ class PxRideController extends Controller
         ], 201);
     }
 
+    public function index(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $selectedLanguage = Language::resolveLanguage($request->input('lang'));
+        $defaultLanguage = Language::where('is_default', 1)->first();
+        $selectedLangId = optional($selectedLanguage)->id;
+        $defaultLangId = optional($defaultLanguage)->id;
+
+        // Get tab filter from query parameter (default to 'upcoming')
+        $tab = $request->query('tab', 'upcoming');
+
+        // Build query based on tab
+        $query = PxRide::where('driver_id', $user->id)
+            ->with(['route', 'vehicle', 'stops', 'options.translations']);
+
+        switch ($tab) {
+            case 'completed':
+                // include past rides even if they are not marked as completed, as long as their departure time has passed
+                $query->where(function ($query) {
+                    $query->where('status', 'completed')
+                        ->orWhere(function ($query) {
+                            $query->where('status', '!=', 'completed')
+                                ->where('departure_at', '<', now());
+                        });
+                })
+                    ->orderBy('departure_at', 'desc');
+                break;
+            case 'cancelled':
+                $query->where('status', 'cancelled')
+                    ->orderBy('departure_at', 'desc');
+                break;
+            case 'upcoming':
+            default:
+                $query->whereIn('status', ['draft', 'published', 'started'])
+                    ->where('departure_at', '>=', now())
+                    ->orderBy('departure_at', 'asc');
+                break;
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        $rides = $query->paginate($perPage);
+
+        // Calculate counts for each tab
+        $upcomingCount = PxRide::where('driver_id', $user->id)
+            ->whereIn('status', ['draft', 'published', 'started'])
+            ->where('departure_at', '>=', now())
+            ->count();
+
+        $completedCount = PxRide::where('driver_id', $user->id)
+            ->where(function ($query) {
+                $query->where('status', 'completed')
+                    ->orWhere(function ($query) {
+                        $query->where('status', '!=', 'completed')
+                            ->where('departure_at', '<', now());
+                    });
+            })
+            ->count();
+
+        $cancelledCount = PxRide::where('driver_id', $user->id)
+            ->where('status', 'cancelled')
+            ->count();
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'PX rides fetched successfully.',
+            'data' => [
+                'items' => collect($rides->items())->map(fn (PxRide $ride) => $this->transformRide($ride))->values(),
+                'pagination' => [
+                    'total' => $rides->total(),
+                    'per_page' => $rides->perPage(),
+                    'current_page' => $rides->currentPage(),
+                    'last_page' => $rides->lastPage(),
+                ],
+                'counts' => [
+                    'upcoming' => $upcomingCount,
+                    'completed' => $completedCount,
+                    'cancelled' => $cancelledCount,
+                ],
+                'active_tab' => $tab,
+            ],
+        ]);
+    }
+
+    public function show(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        $selectedLanguage = Language::resolveLanguage($request->input('lang'));
+        $defaultLanguage = Language::where('is_default', 1)->first();
+        $selectedLangId = optional($selectedLanguage)->id;
+        $defaultLangId = optional($defaultLanguage)->id;
+
+        // Get the PX ride and verify ownership
+        $ride = PxRide::where('id', $id)
+            ->where('driver_id', $user->id)
+            ->with(['route', 'vehicle', 'stops', 'options.translations', 'driver'])
+            ->first();
+
+        if (!$ride) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'Ride not found or you do not have permission to view it.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'PX ride fetched successfully.',
+            'data' => $this->transformRide($ride),
+        ]);
+    }
+
+    public function update(PxStoreRideRequest $request, PxRideService $service, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        // Get the PX ride and verify ownership
+        $ride = PxRide::where('id', $id)
+            ->where('driver_id', $user->id)
+            ->first();
+
+        if (!$ride) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'Ride not found or you do not have permission to update it.',
+            ], 404);
+        }
+
+        // Check if ride can be edited (upcoming and not booked)
+        $isUpcoming = $ride->departure_at > now();
+        $isUpcomingStatus = in_array($ride->status, ['draft', 'published', 'started']);
+        $isNotBooked = $ride->seats_available == $ride->seats_total;
+
+        if (!$isUpcoming || !$isUpcomingStatus || !$isNotBooked) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'This ride cannot be updated. Only upcoming rides without bookings can be updated.',
+            ], 422);
+        }
+
+        $payload = $request->validated();
+        $updatedRide = $service->updateRide($ride, $payload, $user);
+
+        return response()->json([
+            'status' => 'Success',
+            'message' => 'PX ride updated successfully.',
+            'data' => $this->transformRide($updatedRide),
+        ]);
+    }
+
     protected function transformRide(PxRide $ride): array
     {
         return [

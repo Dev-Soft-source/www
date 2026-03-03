@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/helpers/image_url.dart';
 import '../../consts/constFileLink.dart';
 
 Widget circleImageWidget(
@@ -9,6 +10,8 @@ Widget circleImageWidget(
     double borderRadius = 50.0,
     context,
     bgColor = primaryColor}) {
+  final normalizedUrl = normalizeImageUrl(imagePath);
+
   return Container(
     height: getValueForScreenType<double>(
       context: context,
@@ -25,7 +28,7 @@ Widget circleImageWidget(
         color: bgColor.withOpacity(0.3),
         image: imageType != "local"
             ? DecorationImage(
-                image: NetworkImage(imagePath),
+                image: NetworkImage(normalizedUrl),
               )
             : DecorationImage(
                 image: AssetImage(imagePath),

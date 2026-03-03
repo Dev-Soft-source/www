@@ -101,6 +101,8 @@ Route::get('/run-queue', function () {
      return response()->json($payload)->header('Access-Control-Allow-Origin', '*');
  });
 
+
+
 Route::get('/accept/{bookingId}', [StripeWebhookController::class, 'acceptRedirect']);
 Route::get('/reject/{bookingId}', [StripeWebhookController::class, 'rejectRedirect']);
 
@@ -512,7 +514,7 @@ Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name
 Route::put('{lang?}/px/post-ride/{id}', [PxRideWebController::class, 'update'])->name('px.post_ride.update')->middleware('auth');
 Route::get('{lang?}/px/my-rides', [PxRideWebController::class, 'index'])->name('px.my_rides')->middleware('auth');
 Route::get('{lang?}/px/my-ride/{id}', [PxRideWebController::class, 'show'])->name('px.my_ride_detail')->middleware('auth');
-Route::get('{lang?}/px/search-ride', [PxRideWebController::class, 'search'])->name('px.search_ride');
+Route::get('{lang?}/px/search-rides', [PxRideWebController::class, 'search'])->name('px.search_ride');
 
 
 

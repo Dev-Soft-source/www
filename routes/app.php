@@ -62,6 +62,12 @@ use App\Http\Controllers\Api\App\ContactProximaRideSettingController;
 Route::group(['prefix' => 'app/v1'], function () {
 
     Route::get('languages', [LanguageController::class, 'index'])->name('app.auth.languages');
+    Route::get('flag-icons/{filename}', [LanguageController::class, 'flagIcon'])->where('filename', '.*')->name('app.auth.flag_icon');
+    Route::get('users-images/{filename}', [LanguageController::class, 'userImage'])->where('filename', '.*')->name('app.auth.user_image');
+    Route::get('student-cards/{filename}', [LanguageController::class, 'studentCard'])->where('filename', '.*')->name('app.auth.student_card');
+    Route::get('home-page-icons/{filename}', [LanguageController::class, 'homePageIcon'])->where('filename', '.*')->name('app.auth.home_page_icon');
+    Route::get('driver-liscenses/{filename}', [LanguageController::class, 'driverLiscense'])->where('filename', '.*')->name('app.auth.driver_liscense');
+    Route::get('car-images/{filename}', [LanguageController::class, 'carImage'])->where('filename', '.*')->name('app.auth.car_image');
     Route::get('login-page', [AuthController::class, 'create'])->name('app.auth.login_page');
     Route::get('signup-page', [SignupController::class, 'create'])->name('app.auth.signup_page');
     Route::get('forgot-password-page', [ForgotPasswordController::class, 'create'])->name('app.auth.forgot_password_page');
@@ -150,8 +156,12 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('post-ride-init', [PostRideInitController::class, 'getInitData'])->name('app.auth.post-ride-init');
     Route::get('select-location-setting', [InfoIconController::class, 'selectLocationSetting'])->name('app.auth.select-location-setting');
     Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('app.auth.post_ride.store');
-    Route::post('px/rides', [PxRideController::class, 'store'])->name('app.auth.px.post_ride');
+    // PX Rides routes - specific routes must come before parameterized routes
     Route::get('px/rides/search', [PxRideController::class, 'search'])->name('app.auth.px.search_ride_auth');
+    Route::get('px/rides', [PxRideController::class, 'index'])->name('app.auth.px.my_rides');
+    Route::get('px/rides/{id}', [PxRideController::class, 'show'])->name('app.auth.px.ride_detail');
+    Route::post('px/rides', [PxRideController::class, 'store'])->name('app.auth.px.post_ride');
+    Route::put('px/rides/{id}', [PxRideController::class, 'update'])->name('app.auth.px.update_ride');
     Route::get('edit-ride', [RideController::class, 'EditRide'])->name('app.auth.edit_ride');
     Route::put('update-ride', [RideController::class, 'UpdateRide'])->name('app.auth.update_ride');
     Route::get('post-ride-again-upcoming', [PostRideAgainController::class, 'CurrentRides'])->name('app.auth.post_ride_again');
@@ -249,3 +259,5 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
 
     Route::post('store-top-up-balance', [WalletController::class, 'storeTopUpBalance'])->name('app.auth.store_top_up_balance');
 });
+
+

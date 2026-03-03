@@ -75,9 +75,9 @@ class DeepLinkController extends GetxController {
           }
         }
       }
-      // Handle http://127.0.0.1:8000/en/login-with-app
+      // Handle http://localhost:8000/en/login-with-app
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          (uri.host == '127.0.0.1:8000' ||
+          (uri.host == 'localhost:8000' ||
               uri.host == '13b2407bb966.ngrok-free.app' ||
               uri.host == 'xelentride.shop') &&
           uri.path == '/en/login-with-app') {
@@ -116,7 +116,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email verification with token
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          uri.host == 'localhost:8000' &&
           uri.path == '/email-verified' &&
           uri.queryParameters['success'] == 'verified' &&
           uri.queryParameters['app'] == 'true' &&
@@ -146,7 +146,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email already verified (no token)
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          uri.host == 'localhost:8000' &&
           uri.path == '/email-verified' &&
           uri.queryParameters['app'] == 'true' &&
           !uri.queryParameters.containsKey('token')) {
@@ -161,7 +161,7 @@ class DeepLinkController extends GetxController {
         logger.info('→ Dialog showDialog() call completed');
       } // Handle mobile-close-redirect
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          uri.host == 'localhost:8000' &&
           uri.path == '/mobile-close-redirect') {
         logger.info('Mobile close redirect deep link detected');
 
@@ -179,11 +179,11 @@ class DeepLinkController extends GetxController {
         logger.info('Deep link does not match any known pattern.');
         logger.info('Available patterns:');
         logger.info('1. xelentride://booking?booking_id=X&action=Y');
-        logger.info('2. http://127.0.0.1:8000/en/login-with-app');
+        logger.info('2. http://localhost:8000/en/login-with-app');
         logger.info('3. https://13b2407bb966.ngrok-free.app/en/login-with-app');
         logger.info('4. https://xelentride.shop/en/login-with-app');
         logger
-            .info('5. http://127.0.0.1:8000/mobile-close-redirect');
+            .info('5. http://localhost:8000/mobile-close-redirect');
       }
     } catch (e, st) {
       logger.error('❌ Deep link handling ERROR: $e');

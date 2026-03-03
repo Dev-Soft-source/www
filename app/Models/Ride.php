@@ -156,7 +156,7 @@ class Ride extends Model
         // You can perform any transformation you need here
         if (isset($value) && $value != "") {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/car_images/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/car-images/' . rawurlencode($value);
         }elseif ($this->car_type === 'Convertable') {
             return rtrim(config('app.url'), '/') . '/assets/convertable.png';
         } elseif ($this->car_type === 'Hatchback') {
@@ -187,7 +187,7 @@ class Ride extends Model
         // You can perform any transformation you need here
         if (isset($value) && $value != "") {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/car_images/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/car-images/' . rawurlencode($value);
         }elseif ($this->car_type === 'Convertable') {
             return rtrim(config('app.url'), '/') . '/assets/convertable.png';
         } elseif ($this->car_type === 'Hatchback') {
@@ -279,3 +279,5 @@ class Ride extends Model
 
 
 }
+
+

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/image_url.dart';
 
 Widget profileImageWidget(
     {required controller,
@@ -8,6 +9,8 @@ Widget profileImageWidget(
     String imagePath = "",
     double mobileRadius = 0.0,
     double tabletRadius = 0.0}) {
+  final normalizedUrl = normalizeImageUrl(imagePath);
+
   return CircleAvatar(
     radius: getValueForScreenType<double>(
       context: context,
@@ -20,7 +23,7 @@ Widget profileImageWidget(
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.cover,
-          imageUrl: imagePath,
+          imageUrl: normalizedUrl,
           errorWidget: (context, url, error) =>
               controller.serviceController.loginUserDetail['gender'] == 'female'
                   ? Image.asset(defaultFemaleImage,

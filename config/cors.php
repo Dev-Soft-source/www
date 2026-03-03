@@ -15,7 +15,14 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => [
+        'api/*', 
+        'sanctum/csrf-cookie',
+        'flag_icons*',  // Allow CORS for flag icons (matches flag_icons/ and flag_icons/*)
+        'home_page_icons*',  // Allow CORS for home page icons
+        'storage*',  // Allow CORS for storage files
+        '*',  // Allow CORS for all paths (for development - restrict in production)
+    ],
 
     'allowed_methods' => ['*'],
 
@@ -25,7 +32,10 @@ return [
         env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_SCHEME).'://'.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
     )))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^http://localhost:\d+$#',  // Allow any localhost port (for Flutter web development)
+        '#^http://127\.0\.0\.1:\d+$#', // Allow any 127.0.0.1 port (for Flutter web development)
+    ],
 
     'allowed_headers' => ['*'],
 

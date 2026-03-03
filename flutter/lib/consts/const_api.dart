@@ -1,10 +1,10 @@
 // const baseUrl = "https://xelentride.shop/api/app/v1";
 // const baseUrl = 'https://13b2407bb966.ngrok-free.app/api/app/v1';
 
-const baseUrl = 'http://127.0.0.1:8000/api/app/v1';
+const baseUrl = 'http://localhost:8000/api/app/v1';
 // const url = "https://xelentride.com";
 // const url = "https://13b2407bb966.ngrok-free.app";
-const url = "http://127.0.0.1:8000";
+const url = "http://localhost:8000";
 
 const signup = "signup";
 const login = "login";

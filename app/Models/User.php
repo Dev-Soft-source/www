@@ -34,7 +34,7 @@ class User extends Authenticatable
                 return $value; // Return the URL as is
             }
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/users_images/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/users-images/' . rawurlencode($value);
         } elseif ($this->gender === 'male' || $this->gender === 'Male') {
             return rtrim(config('app.url'), '/') . '/assets/male.png';
         } elseif ($this->gender === 'female' || $this->gender === 'Female') {
@@ -55,7 +55,7 @@ class User extends Authenticatable
                 return $value; // Return the URL as is
             }
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/users_images/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/users-images/' . rawurlencode($value);
         } elseif ($this->gender === 'male' || $this->gender === 'Male') {
             return rtrim(config('app.url'), '/') . '/assets/male.png';
         } elseif ($this->gender === 'female' || $this->gender === 'Female') {
@@ -72,7 +72,7 @@ class User extends Authenticatable
         // You can perform any transformation you need here
         if ($value) {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/driver_liscenses/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/driver-liscenses/' . rawurlencode($value);
         }
         
         return null;
@@ -83,7 +83,7 @@ class User extends Authenticatable
         // You can perform any transformation you need here
         if ($value) {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/driver_liscenses/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/driver-liscenses/' . rawurlencode($value);
         }
         
         return null;
@@ -94,7 +94,7 @@ class User extends Authenticatable
         // You can perform any transformation you need here
         if ($value) {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/student_cards/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/student-cards/' . rawurlencode($value);
         }
         
         return null;
@@ -105,7 +105,7 @@ class User extends Authenticatable
         // You can perform any transformation you need here
         if ($value) {
             // For example, prepend the base URL to the image path
-            return rtrim(config('app.url'), '/') . '/student_cards/' . $value;
+            return rtrim(config('app.url'), '/') . '/api/app/v1/student-cards/' . rawurlencode($value);
         }
         
         return null;
@@ -199,3 +199,5 @@ class User extends Authenticatable
         return $this->hasMany(PhoneNumber::class, 'user_id');
     }
 }
+
+

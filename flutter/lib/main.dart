@@ -92,10 +92,13 @@ void main() async {
 
   logger.intialize();
 
-  Stripe.publishableKey = 'pk_test_51PQ40hHySwupjfTMAKFhcggJHnPhCgsnASCOyIFfNixqiReRCXa4v1w3Zds3OuOzADlGg2Uk0xbLbLU9CvSyrBSH000NbZbLzR';
-  Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
-  Stripe.urlScheme = 'flutterstripe';
-  await Stripe.instance.applySettings();
+  // Only initialize Stripe on mobile platforms (not web)
+  if (!kIsWeb) {
+    Stripe.publishableKey = 'pk_test_51PQ40hHySwupjfTMAKFhcggJHnPhCgsnASCOyIFfNixqiReRCXa4v1w3Zds3OuOzADlGg2Uk0xbLbLU9CvSyrBSH000NbZbLzR';
+    Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
+    Stripe.urlScheme = 'flutterstripe';
+    await Stripe.instance.applySettings();
+  }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -174,8 +177,11 @@ instalData() async {
     }
   });
 
-  Stripe.publishableKey = "${dotenv.env['STRIPE_KEY']}";
-  await Stripe.instance.applySettings();
+  // Only initialize Stripe on mobile platforms (not web)
+  if (!kIsWeb) {
+    Stripe.publishableKey = "${dotenv.env['STRIPE_KEY']}";
+    await Stripe.instance.applySettings();
+  }
 
   //await TiktokLoginFlutter.initializeTiktokLogin("sbawj9a1vuvtt3arxd");
 
