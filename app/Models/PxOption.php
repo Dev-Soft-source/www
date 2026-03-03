@@ -17,6 +17,7 @@ class PxOption extends Model
         'is_active',
         'sort_order',
         'meta',
+        'icon',
     ];
 
     protected $casts = [

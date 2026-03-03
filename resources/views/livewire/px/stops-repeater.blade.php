@@ -1,5 +1,5 @@
 <div class="space-y-3">
-    <label id="px-stops-origin-city" class="block text-sm font-semibold mb-1 origin_city"></label>
+    <label id="px-stops-origin-city" class="block text-sm font-semibold mb-1 origin_city">{{ $originLabel }}</label>
     <label class="block text-sm font-semibold mb-1">Stops Along the Way</label>
     @foreach($stops as $index => $stop)
         <div class="flex items-start gap-2 ml-6">
@@ -26,7 +26,7 @@
             </button>
         </div>
     @endforeach
-    <label id="px-stops-destination-city" class="block text-sm font-semibold mb-1 destination_city"></label>
+    <label id="px-stops-destination-city" class="block text-sm font-semibold mb-1 destination_city">{{ $destinationLabel }}</label>
     <button type="button" wire:click="addStop" class="button-exp-no-fill mt-1">Add a spot</button>
 
     @if(!is_null($pendingRemoveIndex))
@@ -61,23 +61,89 @@
                     }
                 }
 
+                // Function to find input by checking all inputs and matching the name pattern
+                function findInputByName(namePattern) {
+                    const inputs = document.querySelectorAll('input[type="text"]');
+                    for (const input of inputs) {
+                        if (input.name && input.name.includes(namePattern)) {
+                            return input;
+                        }
+                    }
+                    return null;
+                }
+
+                // Enhanced sync function that tries multiple methods
+                function syncStopsEdgeCitiesEnhanced() {
+                    const originLabel = document.getElementById('px-stops-origin-city');
+                    const destinationLabel = document.getElementById('px-stops-destination-city');
+
+                    // Try to find origin input
+                    let originInput = document.querySelector('input[name="origin[label]"]');
+                    if (!originInput) {
+                        originInput = findInputByName('origin[label]');
+                    }
+                    // Also check for Livewire wire:model bound inputs
+                    if (!originInput) {
+                        const livewireOrigin = document.querySelector('[wire\\:model*="query"][name*="origin"]');
+                        if (livewireOrigin) {
+                            originInput = livewireOrigin;
+                        }
+                    }
+
+                    // Try to find destination input
+                    let destinationInput = document.querySelector('input[name="destination[label]"]');
+                    if (!destinationInput) {
+                        destinationInput = findInputByName('destination[label]');
+                    }
+                    // Also check for Livewire wire:model bound inputs
+                    if (!destinationInput) {
+                        const livewireDestination = document.querySelector('[wire\\:model*="query"][name*="destination"]');
+                        if (livewireDestination) {
+                            destinationInput = livewireDestination;
+                        }
+                    }
+
+                    if (originLabel && originInput) {
+                        originLabel.textContent = originInput.value || '';
+                    }
+                    if (destinationLabel && destinationInput) {
+                        destinationLabel.textContent = destinationInput.value || '';
+                    }
+                }
+
+                // Listen for input changes
                 document.addEventListener('input', function(event) {
                     const target = event.target;
                     if (!(target instanceof HTMLInputElement)) {
                         return;
                     }
-                    if (target.name === 'origin[label]' || target.name === 'destination[label]') {
-                        syncStopsEdgeCities();
+                    if (target.name && (target.name.includes('origin[label]') || target.name.includes('destination[label]'))) {
+                        syncStopsEdgeCitiesEnhanced();
                     }
                 });
 
-                if (window.Livewire && typeof window.Livewire.hook === 'function') {
-                    window.Livewire.hook('message.processed', function() {
-                        syncStopsEdgeCities();
+                // Use Livewire hooks if available
+                if (window.Livewire) {
+                    // Hook into Livewire initialization
+                    if (typeof window.Livewire.hook === 'function') {
+                        window.Livewire.hook('message.processed', function() {
+                            setTimeout(syncStopsEdgeCitiesEnhanced, 100);
+                        });
+                    }
+                    
+                    // Also listen for component initialization
+                    document.addEventListener('livewire:load', function() {
+                        setTimeout(syncStopsEdgeCitiesEnhanced, 200);
                     });
                 }
 
-                syncStopsEdgeCities();
+                // Initial sync with multiple attempts to catch Livewire initialization
+                syncStopsEdgeCitiesEnhanced();
+                
+                // Retry after a short delay to catch Livewire components that load later
+                setTimeout(syncStopsEdgeCitiesEnhanced, 300);
+                setTimeout(syncStopsEdgeCitiesEnhanced, 600);
+                setTimeout(syncStopsEdgeCitiesEnhanced, 1000);
             });
         </script>
     @endonce

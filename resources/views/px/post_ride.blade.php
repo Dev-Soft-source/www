@@ -8,10 +8,96 @@
 
 @section('content')
     @php
-        $oldDepartureAt = old('departure_at');
-        $oldDepartureDate = old('departure_date');
-        $oldDepartureTime = old('departure_time');
-        $oldStops = old('stops', []);
+        // Handle edit mode - populate from ride if exists
+        $isEditMode = isset($ride) && isset($isEditMode) && $isEditMode;
+        
+        if ($isEditMode && $ride) {
+            // Populate origin data
+            if (!old('origin.label') && $ride->route) {
+                $oldOriginLabel = $ride->route->origin_label;
+                $oldOriginCityId = $ride->route->origin_city_id;
+            } else {
+                $oldOriginLabel = old('origin.label');
+                $oldOriginCityId = old('origin.city_id');
+            }
+            
+            // Populate destination data
+            if (!old('destination.label') && $ride->route) {
+                $oldDestinationLabel = $ride->route->destination_label;
+                $oldDestinationCityId = $ride->route->destination_city_id;
+            } else {
+                $oldDestinationLabel = old('destination.label');
+                $oldDestinationCityId = old('destination.city_id');
+            }
+            
+            // Populate pickup/dropoff locations
+            $oldPickupLocation = old('origin.pickup_location', $ride->meta['pickup_location'] ?? '');
+            $oldDropoffLocation = old('destination.dropoff_location', $ride->meta['dropoff_location'] ?? '');
+            
+            // Populate departure date/time
+            $oldDepartureAt = old('departure_at', $ride->departure_at);
+            $oldDepartureDate = old('departure_date', $ride->departure_at->format('Y-m-d'));
+            $oldDepartureTime = old('departure_time', $ride->departure_at->format('H:i'));
+            
+            // Populate stops (excluding origin and destination - already filtered in controller)
+            $oldStops = old('stops', []);
+            if (empty($oldStops) && isset($ride->intermediate_stops)) {
+                $oldStops = $ride->intermediate_stops;
+            }
+            
+            // Populate other fields
+            $oldSeatsTotal = old('seats_total', $ride->seats_total);
+            $oldPriceMinor = old('price_minor', $ride->price_minor);
+            $oldCurrency = old('currency', $ride->currency);
+            $oldVehicleId = old('vehicle_id', $ride->vehicle_id);
+            $oldNotes = old('notes', $ride->notes);
+            $oldStatus = old('status', $ride->status);
+            $oldVisibility = old('visibility', $ride->visibility);
+            $oldBookingMode = old('booking_mode', $ride->booking_mode);
+            $oldBookingMethod = old('booking_method', $ride->booking_method);
+            $oldIsRecurring = old('is_recurring', isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled']);
+            $oldRecurringFrequency = old('recurring_frequency', $ride->meta['recurring']['frequency'] ?? '');
+            $oldRecurringTrips = old('recurring_trips', $ride->meta['recurring']['trips'] ?? 0);
+            $oldPickDropOffDescription = old('pick_drop_off_description', $ride->meta['pick_drop_off_description'] ?? '');
+            
+            // Populate selected ride options
+            $oldRideOptionIds = old('ride_option_ids', $ride->options->pluck('id')->toArray());
+            
+            // Determine vehicle mode
+            if ($ride->vehicle_id) {
+                $oldVehicleMode = old('vehicle_mode', 'existing');
+            } else {
+                $oldVehicleMode = old('vehicle_mode', 'skip');
+            }
+        } else {
+            // Create mode - use old() values
+            $oldOriginLabel = old('origin.label');
+            $oldOriginCityId = old('origin.city_id');
+            $oldDestinationLabel = old('destination.label');
+            $oldDestinationCityId = old('destination.city_id');
+            $oldPickupLocation = old('origin.pickup_location');
+            $oldDropoffLocation = old('destination.dropoff_location');
+            $oldDepartureAt = old('departure_at');
+            $oldDepartureDate = old('departure_date');
+            $oldDepartureTime = old('departure_time');
+            $oldStops = old('stops', []);
+            $oldSeatsTotal = old('seats_total');
+            $oldPriceMinor = old('price_minor');
+            $oldCurrency = old('currency', 'USD');
+            $oldVehicleId = old('vehicle_id');
+            $oldNotes = old('notes');
+            $oldStatus = old('status', 'published');
+            $oldVisibility = old('visibility', 'public');
+            $oldBookingMode = old('booking_mode');
+            $oldBookingMethod = old('booking_method');
+            $oldIsRecurring = old('is_recurring', false);
+            $oldRecurringFrequency = old('recurring_frequency', '');
+            $oldRecurringTrips = old('recurring_trips', 0);
+            $oldPickDropOffDescription = old('pick_drop_off_description', '');
+            $oldRideOptionIds = old('ride_option_ids', []);
+            $oldVehicleMode = old('vehicle_mode', 'skip');
+        }
+        
         $stopsExpanded = !empty($oldStops);
 
         if (!$stopsExpanded && $errors->any()) {
@@ -49,13 +135,26 @@
         <div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-xl shadow p-6 md:p-8">
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-FuturaMdCnBT text-primary mb-1">Post a PX Ride</h1>
-                    <p class="text-sm text-gray-600">This creates rides in the new <code>px_*</code> schema.</p>
+                    <h1 class="text-2xl md:text-3xl font-FuturaMdCnBT text-primary mb-1">
+                        {{ isset($isEditMode) && $isEditMode ? 'Edit PX Ride' : 'Post a PX Ride' }}
+                    </h1>
+                    <p class="text-sm text-gray-600">
+                        {{ isset($isEditMode) && $isEditMode ? 'Update your ride details' : 'This creates rides in the new px_* schema.' }}
+                    </p>
                 </div>
-                <a href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                    class="button-exp-no-fill whitespace-nowrap">
-                    Back to Legacy Post Ride
-                </a>
+                <div class="flex gap-2">
+                    @if (isset($isEditMode) && $isEditMode)
+                        <a href="{{ route('px.my_ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}"
+                            class="button-exp-no-fill whitespace-nowrap">
+                            Cancel
+                        </a>
+                    @else
+                        <a href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                            class="button-exp-no-fill whitespace-nowrap">
+                            Back to Legacy Post Ride
+                        </a>
+                    @endif
+                </div>
             </div>
 
             @if (session('message'))
@@ -64,7 +163,7 @@
                 </div>
             @endif
 
-            {{-- @if ($errors->any())
+            @if ($errors->any())
                 <div class="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 px-4 py-3">
                     <p class="font-semibold mb-1">Please fix the errors below:</p>
                     <ul class="list-disc pl-5">
@@ -73,12 +172,15 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif --}}
+            @endif
 
             <form method="POST"
-                action="{{ route('px.post_ride.store', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                action="{{ isset($isEditMode) && $isEditMode ? route('px.post_ride.update', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) : route('px.post_ride.store', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
                 enctype="multipart/form-data" class="space-y-8">
                 @csrf
+                @if (isset($isEditMode) && $isEditMode)
+                    @method('PUT')
+                @endif
                 <p>{{ $postRidePage->indicates_required_field_text }}</p>
                 <section>
                     <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Route</h2>
@@ -90,8 +192,8 @@
                                 [
                                     'field' => 'origin',
                                     'placeholder' => $postRidePage->from_placeholder,
-                                    'initialLabel' => old('origin.label'),
-                                    'initialCityId' => old('origin.city_id'),
+                                    'initialLabel' => $oldOriginLabel ?? old('origin.label'),
+                                    'initialCityId' => $oldOriginCityId ?? old('origin.city_id'),
                                 ],
                                 key('px-origin-city-autocomplete')
                             )
@@ -106,8 +208,8 @@
                             [
                                     'field' => 'destination',
                                     'placeholder' => $postRidePage->to_placeholder,
-                                    'initialLabel' => old('destination.label'),
-                                    'initialCityId' => old('destination.city_id'),
+                                    'initialLabel' => $oldDestinationLabel ?? old('destination.label'),
+                                    'initialCityId' => $oldDestinationCityId ?? old('destination.city_id'),
                                 ],
                                 key('px-destination-city-autocomplete')
                             )
@@ -118,7 +220,7 @@
                     <div>
                         <label
                             class="block text-sm font-semibold mb-1 required">{{ $postRidePage->pick_up_label }}</label>
-                            <input name="origin[pickup_location]" value="{{ old('origin.pickup_location') }}" type="text"
+                            <input name="origin[pickup_location]" value="{{ $oldPickupLocation ?? old('origin.pickup_location') }}" type="text"
                                 class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact pick-up point" >
                             @error('origin.pickup_location')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -127,7 +229,7 @@
                         <div>
                             <label
                                 class="block text-sm font-semibold mb-1 required">{{ $postRidePage->drop_off_label }}</label>
-                            <input name="destination[dropoff_location]" value="{{ old('destination.dropoff_location') }}"
+                            <input name="destination[dropoff_location]" value="{{ $oldDropoffLocation ?? old('destination.dropoff_location') }}"
                                 type="text" class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact drop-off point"
                                 >
                             @error('destination.dropoff_location')
@@ -147,16 +249,17 @@
                             </svg>
                         </button>
                         <div id="px-stops-content" class="px-4 pb-4 {{ $stopsExpanded ? '' : 'hidden' }}">
-                            @livewire('px.stops-repeater', ['initialStops' => $oldStops], key('px-stops-repeater'))
-                            <p class="text-xs text-gray-500 mt-1">
-                                Search will use stop order direction. Example: B ? E valid, E ? B invalid.
-                            </p>
+                            @livewire('px.stops-repeater', [
+                                'initialStops' => $oldStops,
+                                'originLabel' => $oldOriginLabel ?? old('origin.label', ''),
+                                'destinationLabel' => $oldDestinationLabel ?? old('destination.label', '')
+                            ], key('px-stops-repeater'))
                         </div>
                     </div>
                     <div class="mt-4 md:col-span-2 border border-gray-200 rounded-lg p-4">
                         <label class="inline-flex items-center gap-2 text-sm font-semibold mb-3">
                             <input type="hidden" name="is_recurring" value="0">
-                            <input type="checkbox" id="px-is-recurring" name="is_recurring" value="1"
+                            <input type="checkbox" id="px-is-recurring" name="is_recurring" value="1" @checked($oldIsRecurring ?? old('is_recurring', false))
                                 @checked(old('is_recurring')) class="rounded border-gray-300">
                             Recurring Trip
                         </label>
@@ -165,8 +268,8 @@
                                 <label class="block text-sm font-semibold mb-1 required">Frequency</label>
                                 <select name="recurring_frequency" class="w-full rounded border-gray-300">
                                     <option value="">Select frequency</option>
-                                    <option value="daily" @selected(old('recurring_frequency') === 'daily')>Daily</option>
-                                    <option value="weekly" @selected(old('recurring_frequency') === 'weekly')>Weekly</option>
+                                    <option value="daily" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'daily')>Daily</option>
+                                    <option value="weekly" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'weekly')>Weekly</option>
                                 </select>
                                 @error('recurring_frequency')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -175,7 +278,7 @@
                             <div>
                                 <label class="block text-sm font-semibold mb-1 required">Number of Trips</label>
                                 <input type="number" min="1" max="365" name="recurring_trips"
-                                    value="{{ old('recurring_trips') }}" class="w-full rounded border-gray-300"
+                                    value="{{ $oldRecurringTrips ?? old('recurring_trips') }}" class="w-full rounded border-gray-300"
                                     placeholder="e.g. 10">
                                 @error('recurring_trips')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -188,7 +291,7 @@
                 <section>
                     <div class="">
                         <label class="block text-sm font-semibold mb-1 required">Pick/Drop Off Description</label>
-                        <textarea name="pick_drop_off_description" rows="4" class="w-full rounded border-gray-300">{{ old('pick_drop_off_description') }}</textarea>
+                        <textarea name="pick_drop_off_description" rows="4" class="w-full rounded border-gray-300">{{ $oldPickDropOffDescription ?? old('pick_drop_off_description') }}</textarea>
                         @error('pick_drop_off_description')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
@@ -228,17 +331,17 @@
                                                 type="radio"
                                                 value="{{ $i }}"
                                                 class="hidden"
-                                                @checked((string) old('seats_total', '1') === (string) $i)
+                                                @checked((string) ($oldSeatsTotal ?? old('seats_total', '1')) === (string) $i)
                                                 onchange="seat_selected(this)"
                                                 @required($i === 1)
                                             >
                                             <span class="relative inline-block w-10 h-10">
                                                 <img
-                                                    src="{{ (int) old('seats_total', 1) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
+                                                    src="{{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
                                                     class="w-12 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}"
                                                     alt=""
                                                 >
-                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ (int) old('seats_total', 1) >= $i ? 'text-green-300' : '' }}">
+                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? 'text-green-300' : '' }}">
                                                     {{ $i }}
                                                 </span>
                                             </span>
@@ -293,7 +396,7 @@
                         </div>
                         <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
                             <label class="block text-sm font-semibold mb-1 required">Price per seat</label>
-                            <input name="price_minor" value="{{ old('price_minor') }}" type="number" min="0"
+                            <input name="price_minor" value="{{ $oldPriceMinor ?? old('price_minor') }}" type="number" min="0"
                                 class="w-full rounded border-gray-300" placeholder="e.g. 2500 = 25.00" >
                             @error('price_minor')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -311,7 +414,7 @@
                                                     type="radio"
                                                     name="booking_method"
                                                     value="{{ $option->id }}"
-                                                    @checked((string) old('booking_method', $defaultBookingMethodId) === (string) $option->id)
+                                                    @checked((string) ($oldBookingMethod ?? old('booking_method', $defaultBookingMethodId)) === (string) $option->id)
                                                     class="mt-0.5"
                                                 >
                                                 @if ($bookingMethodIcon)
@@ -341,7 +444,7 @@
                                                 type="radio"
                                                 name="booking_mode"
                                                 value="{{ $option->id }}"
-                                                @checked((string) old('booking_mode', $defaultBookingModeId) === (string) $option->id)
+                                                @checked((string) ($oldBookingMode ?? old('booking_mode', $defaultBookingModeId)) === (string) $option->id)
                                                 class="peer sr-only"
                                             >
                                             <span class="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50">
@@ -375,17 +478,17 @@
                             <div class="flex flex-wrap items-center gap-4">
                                 <label class="inline-flex items-center gap-2 text-sm">
                                     <input type="radio" name="vehicle_mode" value="skip"
-                                        class="rounded border-gray-300" @checked(old('vehicle_mode', 'skip') === 'skip')>
+                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'skip')>
                                     Skip This Time
                                 </label>
                                 <label class="inline-flex items-center gap-2 text-sm">
                                     <input type="radio" name="vehicle_mode" value="add_new"
-                                        class="rounded border-gray-300" @checked(old('vehicle_mode') === 'add_new')>
+                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'add_new')>
                                     Add new vehicle
                                 </label>
                                 <label class="inline-flex items-center gap-2 text-sm">
                                     <input type="radio" name="vehicle_mode" value="existing"
-                                        class="rounded border-gray-300" @checked(old('vehicle_mode') === 'existing')>
+                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'existing')>
                                     Existing
                                 </label>
                             </div>
@@ -396,7 +499,7 @@
                                 <select name="vehicle_id" class="w-full rounded border-gray-300">
                                     <option value="">Select vehicle</option>
                                     @foreach ($vehicles as $vehicle)
-                                        <option value="{{ $vehicle->id }}" @selected((string) old('vehicle_id') === (string) $vehicle->id)>
+                                        <option value="{{ $vehicle->id }}" @selected((string) ($oldVehicleId ?? old('vehicle_id')) === (string) $vehicle->id)>
                                             #{{ $vehicle->id }} - {{ $vehicle->make }} {{ $vehicle->model }}
                                             ({{ $vehicle->liscense_no }})
                                         </option>
@@ -525,7 +628,7 @@
                                         <label class="flex items-start gap-2 text-sm">
                                             @if ($group->is_checkbox)
                                                 <input type="checkbox" name="ride_option_ids[]"
-                                                    value="{{ $option->id }}" @checked(in_array($option->id, old('ride_option_ids', [])))
+                                                    value="{{ $option->id }}" @checked(in_array($option->id, $oldRideOptionIds ?? old('ride_option_ids', [])))
                                                     class="mt-0.5">
                                             @else
                                                 <input type="radio" name="{{ $group->code }}"
@@ -578,7 +681,7 @@
 
                 <section>
                     <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Anything to Add?</h2>
-                    <textarea name="notes" rows="5" class="w-full rounded border-gray-300" placeholder="Optional ride notes">{{ old('notes') }}</textarea>
+                    <textarea name="notes" rows="5" class="w-full rounded border-gray-300" placeholder="Optional ride notes">{{ $oldNotes ?? old('notes') }}</textarea>
                 </section>
 
                 <section>
@@ -591,7 +694,7 @@
 
 
                 <section>
-                    <label class="inline-flex items-start gap-2 text-sm">
+                    <label class="inline-flex items-start gap-2 text-sm w-full">
                         <input type="checkbox" name="agree_terms" value="1" @checked(old('agree_terms'))
                             class="mt-0.5 rounded border-gray-300" >
                         <span>I have read and agree to these rules, as well as ProximaRide's policies, terms and
@@ -696,24 +799,155 @@
             };
             window.seat_selected(document.querySelector('input[name="seats_total"]:checked'));
 
-            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document.querySelector('form');
+            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document.querySelector('form[action*="px.post_ride.update"]') || document.querySelector('form');
+
+            // Filter out empty stops before form submission
+            if (postRideForm) {
+                postRideForm.addEventListener('submit', function(event) {
+                    // Get all stop inputs
+                    const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
+                    const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
+                    const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
+                    const stopIsDropoffInputs = document.querySelectorAll('input[name^="stops["][name$="[is_dropoff]"]');
+                    
+                    // Collect all stop indices and their data
+                    const stopsData = new Map();
+                    
+                    stopLabelInputs.forEach(function(input) {
+                        const match = input.name.match(/^stops\[(\d+)\]\[label\]$/);
+                        if (match) {
+                            const index = parseInt(match[1], 10);
+                            if (!stopsData.has(index)) {
+                                stopsData.set(index, {});
+                            }
+                            stopsData.get(index).label = input.value.trim();
+                        }
+                    });
+                    
+                    stopCityIdInputs.forEach(function(input) {
+                        const match = input.name.match(/^stops\[(\d+)\]\[city_id\]$/);
+                        if (match) {
+                            const index = parseInt(match[1], 10);
+                            if (!stopsData.has(index)) {
+                                stopsData.set(index, {});
+                            }
+                            stopsData.get(index).cityId = input.value.trim();
+                        }
+                    });
+                    
+                    stopIsPickupInputs.forEach(function(input) {
+                        const match = input.name.match(/^stops\[(\d+)\]\[is_pickup\]$/);
+                        if (match) {
+                            const index = parseInt(match[1], 10);
+                            if (!stopsData.has(index)) {
+                                stopsData.set(index, {});
+                            }
+                            stopsData.get(index).isPickup = input.value;
+                        }
+                    });
+                    
+                    stopIsDropoffInputs.forEach(function(input) {
+                        const match = input.name.match(/^stops\[(\d+)\]\[is_dropoff\]$/);
+                        if (match) {
+                            const index = parseInt(match[1], 10);
+                            if (!stopsData.has(index)) {
+                                stopsData.set(index, {});
+                            }
+                            stopsData.get(index).isDropoff = input.value;
+                        }
+                    });
+                    
+                    // Filter out empty stops (where label is empty or city_id is empty)
+                    const validStops = [];
+                    const sortedIndices = Array.from(stopsData.keys()).sort((a, b) => a - b);
+                    
+                    sortedIndices.forEach(function(index) {
+                        const stop = stopsData.get(index);
+                        // Keep stop only if it has both label and city_id
+                        if (stop.label && stop.cityId) {
+                            validStops.push({
+                                label: stop.label,
+                                cityId: stop.cityId,
+                                isPickup: stop.isPickup || '1',
+                                isDropoff: stop.isDropoff || '1'
+                            });
+                        }
+                    });
+                    
+                    // Remove all existing stop inputs
+                    stopLabelInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopCityIdInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopIsPickupInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopIsDropoffInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    
+                    // Add back only valid stops with sequential indices
+                    validStops.forEach(function(stop, newIndex) {
+                        const labelInput = document.createElement('input');
+                        labelInput.type = 'text';
+                        labelInput.name = `stops[${newIndex}][label]`;
+                        labelInput.value = stop.label;
+                        labelInput.style.display = 'none';
+                        postRideForm.appendChild(labelInput);
+                        
+                        const cityIdInput = document.createElement('input');
+                        cityIdInput.type = 'hidden';
+                        cityIdInput.name = `stops[${newIndex}][city_id]`;
+                        cityIdInput.value = stop.cityId;
+                        postRideForm.appendChild(cityIdInput);
+                        
+                        const isPickupInput = document.createElement('input');
+                        isPickupInput.type = 'hidden';
+                        isPickupInput.name = `stops[${newIndex}][is_pickup]`;
+                        isPickupInput.value = stop.isPickup;
+                        postRideForm.appendChild(isPickupInput);
+                        
+                        const isDropoffInput = document.createElement('input');
+                        isDropoffInput.type = 'hidden';
+                        isDropoffInput.name = `stops[${newIndex}][is_dropoff]`;
+                        isDropoffInput.value = stop.isDropoff;
+                        postRideForm.appendChild(isDropoffInput);
+                    });
+                });
+            }
 
             // Hide field tooltip error when user clicks/focuses inside its parent container.
             function hideTooltipInParent(eventTarget) {
                 if (!(eventTarget instanceof HTMLElement) || !postRideForm) return;
-                let node = eventTarget.closest('div');
+                let node = eventTarget.closest('div, section, label');
 
-                // Walk up until form root and remove only a tooltip that belongs
-                // to the current field wrapper (direct child), not nested/global tooltips.
+                // Walk up until form root and remove tooltips that belong to the current field
                 while (node && node !== postRideForm) {
-                    const tooltip = Array.from(node.children).find((child) =>
+                    // Check for tooltip as a direct child
+                    const tooltipInChildren = Array.from(node.children).find((child) =>
                         child instanceof HTMLElement && child.classList.contains('tooltip-error')
                     );
-                    if (tooltip) {
-                        tooltip.remove();
+                    if (tooltipInChildren) {
+                        tooltipInChildren.remove();
                         return;
                     }
-                    node = node.parentElement?.closest('div') || null;
+                    
+                    // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
+                    if (node.parentElement) {
+                        const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
+                            sibling instanceof HTMLElement && 
+                            sibling.classList.contains('tooltip-error') &&
+                            sibling !== node
+                        );
+                        if (tooltipSibling) {
+                            tooltipSibling.remove();
+                            return;
+                        }
+                    }
+                    
+                    node = node.parentElement?.closest('div, section') || null;
                 }
             }
 
@@ -748,30 +982,7 @@
                 dateFormat: 'H:i',
             });
 
-            // if (postRideForm && departureDateFp && departureDateFp.input && departureDateFp.altInput &&
-            //     departureTimeFp && departureTimeFp.input && departureTimeFp.altInput) {
-            //     // On submit, if either departure date or time is empty, prevent submission and focus the empty field.
-            //     postRideForm.addEventListener('submit', function(e) {
-            //         if (!departureDateFp.input.value) {
-            //             e.preventDefault();
-            //             departureDateFp.altInput.scrollIntoView({
-            //                 behavior: 'smooth',
-            //                 block: 'center'
-            //             });
-            //             departureDateFp.altInput.focus();
-            //             return;
-            //         }
-
-            //         if (!departureTimeFp.input.value) {
-            //             e.preventDefault();
-            //             departureTimeFp.altInput.scrollIntoView({
-            //                 behavior: 'smooth',
-            //                 block: 'center'
-            //             });
-            //             departureTimeFp.altInput.focus();
-            //         }
-            //     });
-            // }
+            
 
             // Client-side image preview for "add new vehicle" upload.
             const vehicleImageInput = document.getElementById('dropzone-file');
@@ -791,6 +1002,38 @@
                     };
                     reader.readAsDataURL(file);
                 });
+            }
+
+            // Scroll to first error on page load if validation errors exist
+            const firstError = document.querySelector('.tooltip-error');
+            if (firstError) {
+                // Find the parent container that contains the error (usually a form field wrapper)
+                let errorContainer = firstError.closest('div');
+                
+                // Walk up to find a meaningful container (section or field wrapper)
+                while (errorContainer && errorContainer !== postRideForm) {
+                    // Check if this container is a section or has a meaningful structure
+                    if (errorContainer.tagName === 'SECTION' || 
+                        errorContainer.querySelector('input, select, textarea, label')) {
+                        break;
+                    }
+                    errorContainer = errorContainer.parentElement;
+                }
+                
+                // Scroll to the error container or the error itself
+                const scrollTarget = errorContainer || firstError;
+                scrollTarget.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // // Optionally focus the associated input field if it exists
+                // const associatedInput = scrollTarget.querySelector('input, select, textarea');
+                // if (associatedInput && !associatedInput.disabled) {
+                //     setTimeout(() => {
+                //         associatedInput.focus();
+                //     }, 300);
+                // }
             }
 
         });

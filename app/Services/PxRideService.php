@@ -150,6 +150,151 @@ class PxRideService
         });
     }
 
+    public function updateRide(PxRide $ride, array $payload, User $driver): PxRide
+    {
+        return DB::transaction(function () use ($ride, $payload, $driver) {
+            $origin = Arr::get($payload, 'origin', []);
+            $destination = Arr::get($payload, 'destination', []);
+
+            $fingerprint = $this->routeFingerprint(
+                Arr::get($origin, 'city_id'),
+                Arr::get($destination, 'city_id'),
+                Arr::get($origin, 'label'),
+                Arr::get($destination, 'label'),
+                Arr::get($origin, 'lat'),
+                Arr::get($origin, 'lng'),
+                Arr::get($destination, 'lat'),
+                Arr::get($destination, 'lng')
+            );
+
+            $route = PxRoute::query()->firstOrCreate(
+                ['fingerprint' => $fingerprint],
+                [
+                    'origin_city_id' => Arr::get($origin, 'city_id'),
+                    'destination_city_id' => Arr::get($destination, 'city_id'),
+                    'origin_label' => Arr::get($origin, 'label'),
+                    'destination_label' => Arr::get($destination, 'label'),
+                    'origin_lat' => Arr::get($origin, 'lat'),
+                    'origin_lng' => Arr::get($origin, 'lng'),
+                    'destination_lat' => Arr::get($destination, 'lat'),
+                    'destination_lng' => Arr::get($destination, 'lng'),
+                    'distance_meters' => Arr::get($payload, 'distance_meters'),
+                    'duration_seconds' => Arr::get($payload, 'duration_seconds'),
+                    'timezone' => Arr::get($payload, 'timezone', 'UTC'),
+                    'polyline' => Arr::get($payload, 'polyline'),
+                ]
+            );
+
+            $seatsTotal = (int) Arr::get($payload, 'seats_total');
+            $status = Arr::get($payload, 'status', 'published');
+            
+            // Accept both payload keys:
+            // - ride_option_ids: API/normalized
+            // - preference: legacy/UI checkbox alias
+            $selectedRideOptionIds = collect(Arr::get($payload, 'ride_option_ids', Arr::get($payload, 'preference', [])))
+                ->filter()
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+
+            $meta = Arr::get($payload, 'meta', []);
+            if (!is_array($meta)) {
+                $meta = [];
+            }
+            $pickupLocation = trim((string) Arr::get($origin, 'pickup_location', ''));
+            $dropoffLocation = trim((string) Arr::get($destination, 'dropoff_location', ''));
+            if ($pickupLocation !== '') {
+                $meta['pickup_location'] = $pickupLocation;
+            }
+            if ($dropoffLocation !== '') {
+                $meta['dropoff_location'] = $dropoffLocation;
+            }
+            $meta['seat_layout'] = [
+                'middle_seats' => (int) Arr::get($payload, 'middle_seats', 0),
+                'back_seats' => (int) Arr::get($payload, 'back_seats', 0),
+            ];
+            $isRecurring = (bool) Arr::get($payload, 'is_recurring', false);
+            if ($isRecurring) {
+                $meta['recurring'] = [
+                    'enabled' => true,
+                    'frequency' => (string) Arr::get($payload, 'recurring_frequency'),
+                    'trips' => (int) Arr::get($payload, 'recurring_trips'),
+                ];
+            } else {
+                $meta['recurring'] = [
+                    'enabled' => false,
+                ];
+            }
+            
+            $meta['pick_drop_off_description'] = trim((string) Arr::get($payload, 'pick_drop_off_description', ''));
+            $meta['accept_more_luggage'] = (bool) Arr::get($payload, 'accept_more_luggage', false);
+
+            // Calculate new seats_available based on current bookings
+            $currentBookedSeats = $ride->seats_total - $ride->seats_available;
+            $newSeatsAvailable = max(0, $seatsTotal - $currentBookedSeats);
+
+            $ride->update([
+                'route_id' => $route->id,
+                'vehicle_id' => Arr::get($payload, 'vehicle_id'),
+                'departure_at' => Arr::get($payload, 'departure_at'),
+                'arrival_estimated_at' => Arr::get($payload, 'arrival_estimated_at'),
+                'boarding_window_minutes' => Arr::get($payload, 'boarding_window_minutes', 15),
+                'seats_total' => $seatsTotal,
+                'seats_available' => $newSeatsAvailable,
+                'price_minor' => (int) Arr::get($payload, 'price_minor'),
+                'currency' => strtoupper((string) Arr::get($payload, 'currency', 'USD')),
+                'status' => $status,
+                'visibility' => Arr::get($payload, 'visibility', 'public'),
+                'booking_mode' => (int) Arr::get($payload, 'booking_mode', 0),
+                'booking_method' => (int) Arr::get($payload, 'booking_method', 0),
+                'allow_detour' => (bool) Arr::get($payload, 'allow_detour', false),
+                'women_only' => (bool) Arr::get($payload, 'women_only', false),
+                'extra_care' => (bool) Arr::get($payload, 'extra_care', false),
+                'smoking_allowed' => (int) Arr::get($payload, 'smoking_allowed', 0),
+                'pets_allowed' => (int) Arr::get($payload, 'pets_allowed', 0),
+                'luggage_size' => (int) Arr::get($payload, 'luggage_size', 0),
+                'cancelation_policy' => (int) Arr::get($payload, 'cancelation_policy', 0),
+                'notes' => Arr::get($payload, 'notes'),
+                'meta' => empty($meta) ? null : $meta,
+                'published_at' => $status === 'published' && !$ride->published_at ? now() : $ride->published_at,
+            ]);
+
+            // Delete existing stops and create new ones
+            $ride->stops()->delete();
+            $stops = Arr::get($payload, 'stops', []);
+            $orderedStops = $this->buildOrderedStops($origin, $destination, $stops);
+
+            foreach ($orderedStops as $index => $stop) {
+                $ride->stops()->create([
+                    'stop_order' => $index + 1,
+                    'city_id' => Arr::get($stop, 'city_id'),
+                    'label' => Arr::get($stop, 'label'),
+                    'lat' => Arr::get($stop, 'lat'),
+                    'lng' => Arr::get($stop, 'lng'),
+                    'eta_at' => Arr::get($stop, 'eta_at'),
+                    'price_delta_minor' => (int) Arr::get($stop, 'price_delta_minor', 0),
+                    'seats_available' => Arr::get($stop, 'seats_available'),
+                    'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
+                    'is_dropoff' => (bool) Arr::get($stop, 'is_dropoff', true),
+                ]);
+            }
+
+            // Update ride options
+            if ($selectedRideOptionIds->isNotEmpty()) {
+                $validOptionIds = PxOption::query()
+                    ->whereIn('id', $selectedRideOptionIds)
+                    ->where('is_active', true)
+                    ->pluck('id')
+                    ->all();
+                $ride->options()->sync($validOptionIds);
+            } else {
+                $ride->options()->detach();
+            }
+
+            return $ride->load(['route', 'stops', 'driver', 'vehicle', 'options.translations']);
+        });
+    }
+
     public function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
     {
         $query = PxRide::query()

@@ -315,7 +315,7 @@ Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])-
 Route::get('{lang?}/accept-booking-request/{id}/{email}', [BookingController::class, 'AcceptBookingRequest'])->name('accept_booking_request');
 Route::get('{lang?}/reject-booking-request/{id}/{email}', [BookingController::class, 'RejectBookingRequest'])->name('reject_booking_request');
 Route::get('{lang?}/post-ride', [RideController::class, 'PostRide'])->name('post_ride')->middleware('auth');
-Route::get('{lang?}/px/post-ride', [PxRideWebController::class, 'create'])->name('px.post_ride.create')->middleware('auth');
+
 Route::get('{lang?}/edit-ride/{id}', [RideController::class, 'EditRide'])->name('edit_ride')->middleware('auth');
 Route::put('{lang?}/update-ride/{ride_id}', [RideController::class, 'UpdateRide'])->name('update_ride')->middleware('auth');
 Route::get('{lang?}/post-ride/{id}', [RideController::class, 'CopyRide'])->name('copy_ride')->middleware('auth');
@@ -437,7 +437,6 @@ Route::post('payout/verifyBank', [PayoutController::class, 'verifyBank'])->name(
 Route::post('profile/vehicle/store', [ProfileVehicleController::class, 'store'])->name('profile.vehicle.store');
 Route::post('get-states-by-country', [CountryStateCityController::class, 'getState']);
 Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('post_ride.store')->middleware('auth');
-Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name('px.post_ride.store')->middleware('auth');
 Route::post('add-new-spots', [RideController::class, 'addNewSpots'])->name('post_ride.add_new_spot')->middleware('auth');
 Route::post('delete-spots', [RideController::class, 'deleteSpots'])->name('post_ride.delete_spot')->middleware('auth');
 Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
@@ -506,6 +505,18 @@ Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
     ->where('any', '.*');
 
 
+// new logic for px post ride
+Route::get('{lang?}/px/post-ride', [PxRideWebController::class, 'create'])->name('px.post_ride.create')->middleware('auth');
+Route::get('{lang?}/px/post-ride/{id}/edit', [PxRideWebController::class, 'edit'])->name('px.post_ride.edit')->middleware('auth');
+Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name('px.post_ride.store')->middleware('auth');
+Route::put('{lang?}/px/post-ride/{id}', [PxRideWebController::class, 'update'])->name('px.post_ride.update')->middleware('auth');
+Route::get('{lang?}/px/my-rides', [PxRideWebController::class, 'index'])->name('px.my_rides')->middleware('auth');
+Route::get('{lang?}/px/my-ride/{id}', [PxRideWebController::class, 'show'])->name('px.my_ride_detail')->middleware('auth');
+Route::get('{lang?}/px/search-ride', [PxRideWebController::class, 'search'])->name('px.search_ride');
+
+
+
+
 
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Response;
@@ -542,51 +553,3 @@ Route::get('/sitemap.xml', function () {
 });
 
 
-// Route::get('send-notification', function () {
-//     $fcmService = new FCMService();
-//     $message = 'You got a new notification';
-//     $body = $message;
-
-//     $user_id = auth()->user()->id;
-//     $fcm_tokens = FCMToken::where('user_id',$user_id)->get();
-
-//     foreach ($fcm_tokens as $fcm_token) {
-//         $fcmService->sendNotification($fcm_token->token, $body);
-//     }
-
-//     return 'message sent';
-// });
-
-// Route::get('create-stripe-acc', function () {
-//     \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-//     $customer = \Stripe\Customer::create([
-//         'email' => 'info@xelent.io',
-//         'name' => 'Xelent solution',
-//     ]);
-
-//     Log::info('stripe customer id = ' . $customer->id);
-
-//     $paymentMethod = \Stripe\PaymentMethod::create([
-//         'type' => 'card',
-//         'card' => [
-//             'number' => '4000056655665556',
-//             'exp_month' => '12',
-//             'exp_year' => '2029',
-//             'cvc' => '1234',
-//             ],
-//         'billing_details' => [
-//             'name' => 'Xelent Solutions',
-//             ],
-//             ]);
-
-//             // Attach the PaymentMethod to the customer
-//     \Stripe\PaymentMethod::attach(
-//         $paymentMethod->id,
-//         ['customer' => $customer->id]
-//         );
-
-//         $stripe_payment_method_id = $paymentMethod->id;
-//         Log::info('stripe payment method id = ' . $stripe_payment_method_id);
-
-// });
