@@ -16,6 +16,7 @@ use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\VideoDetail;
+use App\Models\PxOptionGroup;
 
 class Controller extends BaseController
 {
@@ -26,6 +27,8 @@ class Controller extends BaseController
     protected $selectedLanguage;
 
     protected $siteText;
+    protected $selectedCurrency;
+    protected $availableCurrencies = [];
 
     public function __construct()
     {
@@ -48,6 +51,20 @@ class Controller extends BaseController
         $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
 
         $languages = Language::all();
+        $this->availableCurrencies = $this->resolveAvailableCurrencies();
+        $currencyFromQuery = strtoupper((string) request()->query('currency', ''));
+        if ($currencyFromQuery !== '' && array_key_exists($currencyFromQuery, $this->availableCurrencies)) {
+            session(['selectedCurrency' => $currencyFromQuery]);
+        }
+        $sessionCurrency = strtoupper((string) session('selectedCurrency', ''));
+        if (!array_key_exists($sessionCurrency, $this->availableCurrencies)) {
+            $preferredCurrency = strtoupper((string) env('PX_DEFAULT_CURRENCY', 'CAD'));
+            $sessionCurrency = array_key_exists($preferredCurrency, $this->availableCurrencies)
+                ? $preferredCurrency
+                : (array_key_first($this->availableCurrencies) ?: 'CAD');
+            session(['selectedCurrency' => $sessionCurrency]);
+        }
+        $this->selectedCurrency = $sessionCurrency;
 
         // $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
@@ -155,9 +172,63 @@ class Controller extends BaseController
             'languages' => $languages,
             'siteText' => $this->siteText,
             'successMessage' => $successMessage,
+            'selectedCurrency' => $this->selectedCurrency,
+            'availableCurrencies' => $this->availableCurrencies,
+            'selectedCurrencySymbol' => $this->availableCurrencies[$this->selectedCurrency]['symbol'] ?? '$',
             // 'ratings' => $ratings,
             // 'notificationPage' => $notificationPage,
         ]);
+    }
+
+    protected function resolveAvailableCurrencies(): array
+    {
+        $fallback = [
+            'USD' => ['code' => 'USD', 'label' => 'USD', 'symbol' => '$'],
+            'CAD' => ['code' => 'CAD', 'label' => 'CAD', 'symbol' => 'C$'],
+        ];
+
+        try {
+            $group = PxOptionGroup::query()
+                ->where('code', 'currency')
+                ->with(['options' => function ($q) {
+                    $q->where('is_active', true)->orderBy('sort_order');
+                }])
+                ->first();
+
+            if (!$group || $group->options->isEmpty()) {
+                return $fallback;
+            }
+
+            $resolved = [];
+            foreach ($group->options as $option) {
+                $code = strtoupper((string) ($option->code ?? ''));
+                if ($code === '' || strlen($code) !== 3) {
+                    continue;
+                }
+                $meta = is_array($option->meta) ? $option->meta : [];
+                $resolved[$code] = [
+                    'code' => $code,
+                    'label' => (string) ($meta['label'] ?? $code),
+                    'symbol' => (string) ($meta['symbol'] ?? $this->currencySymbolFor($code)),
+                ];
+            }
+
+            return !empty($resolved) ? $resolved : $fallback;
+        } catch (\Throwable $e) {
+            return $fallback;
+        }
+    }
+
+    protected function currencySymbolFor(string $code): string
+    {
+        $upper = strtoupper($code);
+        if ($upper === 'USD') {
+            return '$';
+        }
+        if ($upper === 'CAD') {
+            return 'C$';
+        }
+        return $upper . ' ';
     }
 
     /**

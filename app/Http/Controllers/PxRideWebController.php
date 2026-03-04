@@ -526,6 +526,8 @@ class PxRideWebController extends Controller
         $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
+        $rideCurrencyCode = strtoupper((string) ($ride->currency ?: ($this->selectedCurrency ?? 'USD')));
+        $stripeCurrencyCode = strtolower($rideCurrencyCode);
 
         $cards = Card::query()
             ->where('user_id', auth()->id())
@@ -621,7 +623,7 @@ class PxRideWebController extends Controller
 
             $paymentIntent = PaymentIntent::create([
                 'amount' => $amountMinor,
-                'currency' => 'cad',
+                'currency' => $stripeCurrencyCode,
                 'payment_method' => $paymentMethod->id,
                 'customer' => $user->stripe_customer_id,
                 'confirmation_method' => 'automatic',
@@ -650,6 +652,7 @@ class PxRideWebController extends Controller
                     'status' => 'succeeded',
                     'payment_intent_id' => $paymentIntentId,
                     'amount_minor' => (int) $existingTransaction->amount_minor,
+                    'currency' => (string) ($existingTransaction->currency ?? $rideCurrencyCode),
                     'booking_id' => (int) $existingTransaction->booking_id,
                     'transaction_id' => (int) $existingTransaction->id,
                     'idempotent' => true,
@@ -668,6 +671,7 @@ class PxRideWebController extends Controller
                 $seatsRequested,
                 $segmentPriceMinor,
                 $amountMinor,
+                $rideCurrencyCode,
                 $card,
                 $paymentIntent,
                 $paymentIntentId,
@@ -692,7 +696,7 @@ class PxRideWebController extends Controller
                     'seats' => $seatsRequested,
                     'segment_price_minor' => (int) $segmentPriceMinor,
                     'total_price_minor' => (int) $amountMinor,
-                    'currency' => strtoupper((string) ($ride->currency ?: 'CAD')),
+                    'currency' => $rideCurrencyCode,
                     'status' => 'paid',
                     'booked_at' => now(),
                     'meta' => [
@@ -711,7 +715,7 @@ class PxRideWebController extends Controller
                     'ride_id' => (int) $ride->id,
                     'user_id' => (int) $user->id,
                     'amount_minor' => (int) $amountMinor,
-                    'currency' => strtoupper((string) ($ride->currency ?: 'CAD')),
+                    'currency' => $rideCurrencyCode,
                     'provider' => 'stripe',
                     'type' => 'charge',
                     'status' => (string) ($paymentIntent->status ?: 'succeeded'),
@@ -731,6 +735,7 @@ class PxRideWebController extends Controller
                 'status' => 'succeeded',
                 'payment_intent_id' => $paymentIntentId,
                 'amount_minor' => $amountMinor,
+                'currency' => $rideCurrencyCode,
                 'booking_id' => (int) ($booking->id ?? 0),
                 'transaction_id' => (int) ($transaction->id ?? 0),
             ]);
@@ -748,6 +753,7 @@ class PxRideWebController extends Controller
                         'status' => 'succeeded',
                         'payment_intent_id' => $maybePaymentIntentId,
                         'amount_minor' => (int) $existingTransaction->amount_minor,
+                        'currency' => (string) ($existingTransaction->currency ?? $rideCurrencyCode),
                         'booking_id' => (int) $existingTransaction->booking_id,
                         'transaction_id' => (int) $existingTransaction->id,
                         'idempotent' => true,

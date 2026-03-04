@@ -24,7 +24,9 @@
             $pickupLocation = $ride->meta['pickup_location'] ?? null;
             $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
             $pricePerSeatMinor = (int) ($displayPriceMinor ?? $ride->price_minor);
-            $currency = '$';
+            $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+            $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
+            $currency = $currencyMap[$currencyCode] ?? ($currencyCode . ' ');
             $segmentStops = $displaySegmentStops ?? collect();
             $segmentMode = (bool) ($isSegmentView ?? false);
         @endphp

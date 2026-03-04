@@ -89,7 +89,7 @@
             $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
             $oldSeatsTotal = old('seats_total');
             $oldPriceMinor = old('price_minor');
-            $oldCurrency = old('currency', 'USD');
+            $oldCurrency = old('currency', strtoupper((string) env('PX_DEFAULT_CURRENCY', 'CAD')));
             $oldVehicleId = old('vehicle_id');
             $oldNotes = old('notes');
             $oldStatus = old('status', 'published');
@@ -107,6 +107,15 @@
         $oldPriceMajorDisplay = $oldPriceMinor !== null && $oldPriceMinor !== ''
             ? number_format(((int) $oldPriceMinor) / 100, 2, '.', '')
             : '';
+        $pxCurrencyMap = [
+            'USD' => '$',
+            'CAD' => 'C$',
+        ];
+        $oldCurrencyCode = strtoupper((string) ($oldCurrency ?: env('PX_DEFAULT_CURRENCY', 'CAD')));
+        if ($oldCurrencyCode === '') {
+            $oldCurrencyCode = 'CAD';
+        }
+        $oldCurrencySymbol = $pxCurrencyMap[$oldCurrencyCode] ?? ($oldCurrencyCode . ' ');
 
         $stopsExpanded = !empty($oldStops);
 
@@ -408,6 +417,16 @@
                         </div>
                         <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
                             <label id="px-price-label" class="block text-sm font-semibold mb-1 required">Price per Seat</label>
+                            <div class="mb-3">
+                                <label class="block text-sm font-semibold mb-1">Currency</label>
+                                <select name="currency" class="w-full rounded border-gray-300">
+                                    @foreach (($availableCurrencies ?? ['USD' => ['code' => 'USD'], 'CAD' => ['code' => 'CAD']]) as $currencyCode => $currencyData)
+                                        <option value="{{ strtoupper((string) $currencyCode) }}" @selected($oldCurrencyCode === strtoupper((string) $currencyCode))>
+                                            {{ strtoupper((string) $currencyCode) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div id="px-price-single-wrap">
                                 <input
                                     id="px-price-minor-input"
@@ -417,7 +436,7 @@
                                     min="0"
                                     step="0.01"
                                     class="w-full rounded border-gray-300"
-                                    placeholder="e.g. 25.00"
+                                    placeholder="e.g. {{ $oldCurrencySymbol }}25.00"
                                 >
                             </div>
                             <div id="px-price-segments-wrap" class="hidden space-y-3">

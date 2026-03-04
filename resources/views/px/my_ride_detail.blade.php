@@ -166,7 +166,9 @@
                             $pickupLocation = $ride->meta['pickup_location'] ?? null;
                             $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
                             $pricePerSeatMinor = (int) $ride->price_minor;
-                            $currency = '$';
+                            $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+                            $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
+                            $currency = $currencyMap[$currencyCode] ?? ($currencyCode . ' ');
                         @endphp
                         <div class="w-full md:w-2/3 order-2 md:order-1">
                             @if ($origin || $destination)
@@ -546,7 +548,7 @@
             cancelRideBtn.addEventListener('click', function(event) {
                 event.preventDefault();
                 const bookedSeats = {{ $ride->seats_total - $ride->seats_available }};
-
+                
                 if (bookedSeats === 0) {
                     const confirmModal = document.getElementById('cancelRideConfirmModal');
                     if (confirmModal) {

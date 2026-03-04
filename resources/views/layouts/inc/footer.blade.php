@@ -76,7 +76,7 @@
         <div class="w-full flex justify-center">
           <p class="text-white">{!! getTranslatedText('footer_copyright', $selectedLanguage ?? 1, ['year' => date('Y')], '© ProximaRide ' . date('Y') . '. All rights reserved') !!}</p>
         </div> 
-        {{-- multi language list --}}
+        {{-- language list --}}
         <div class="relative lg:w-1/2 flex justify-end lg:absolute lg:right-0">
             <button id="dropdownDesktopButton" data-dropdown-toggle="dropdown_desktop" class="min-w-fit px-3 py-1.5 border border-white rounded flex gap-2 items-center bg-white/10 hover:bg-white/20 transition-colors" type="button">
                 <img class="h-4" src="{{ $selectedLanguage->flag_icon ?? 'assets/flag.png' }}" alt="">

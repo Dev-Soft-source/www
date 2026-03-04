@@ -7,7 +7,7 @@
     'showOptions' => true,
     'priceMinor' => null,
     'priceMajor' => null,
-    'currency' => '$',
+    'currency' => null,
     'rightInfo' => null,
     'cardId' => null,
     'detailQuery' => [],
@@ -28,9 +28,18 @@
     }
 
     $seats = $ride->seats_available ?? $ride->seats ?? 0;
+    $priceMinorSource = (float) (!is_null($priceMinor) ? $priceMinor : ($ride->price_per_seat_minor ?? $ride->price_minor ?? 0));
     $normalizedPrice = !is_null($priceMajor)
         ? (float) $priceMajor
-        : ((float) (!is_null($priceMinor) ? $priceMinor : ($ride->price_per_seat_minor ?? $ride->price_minor ?? 0)) / 100);
+        : ($priceMinorSource / 100);
+    $rideCurrencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+    $currencySymbolMap = [
+        'USD' => '$',
+        'CAD' => 'C$',
+    ];
+    $resolvedCurrency = !is_null($currency)
+        ? (string) $currency
+        : ($currencySymbolMap[$rideCurrencyCode] ?? ($rideCurrencyCode . ' '));
 
     $resolvedRightInfo = $rightInfo;
     if (is_null($resolvedRightInfo)) {
@@ -149,7 +158,7 @@
 
                 <div class="mt-4 justify-items-end order-1 md:order-2">
                     <p class="text-xl text-right font-semibold text-primary">
-                        {{ $currency }}{{ number_format($normalizedPrice, 2) }}
+                        {{ $resolvedCurrency }}{{ number_format($normalizedPrice, 2) }}
                         <small>per seat</small>
                     </p>
                     @if(!empty($resolvedRightInfo))

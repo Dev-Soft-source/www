@@ -5,6 +5,9 @@
         $fromLabel = $fromStop->label ?? 'N/A';
         $toLabel = $toStop->label ?? 'N/A';
         $perSeatMinor = (int) ($segmentPriceMinor ?? 0);
+        $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+        $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
+        $currencySymbol = $currencyMap[$currencyCode] ?? ($currencyCode . ' ');
     @endphp
 
     <div class="container mx-auto my-10 px-4">
@@ -47,8 +50,8 @@
                 <div>
                     <label class="block text-sm font-semibold mb-1">Price</label>
                     <div class="rounded border border-gray-200 p-3 bg-gray-50">
-                        <p class="text-sm text-gray-700">$<span id="px-booking-per-seat">{{ number_format($perSeatMinor / 100, 2) }}</span> per seat</p>
-                        <p class="text-lg font-semibold text-primary">Total: $<span id="px-booking-total">{{ number_format($perSeatMinor / 100, 2) }}</span></p>
+                        <p class="text-sm text-gray-700">{{ $currencySymbol }}<span id="px-booking-per-seat">{{ number_format($perSeatMinor / 100, 2) }}</span> per seat</p>
+                        <p class="text-lg font-semibold text-primary">Total: {{ $currencySymbol }}<span id="px-booking-total">{{ number_format($perSeatMinor / 100, 2) }}</span></p>
                     </div>
                 </div>
             </div>
@@ -96,6 +99,8 @@
         const payNowBtn = document.getElementById('px-pay-now');
         const statusEl = document.getElementById('px-booking-status');
         const perSeatMinor = {{ (int) $perSeatMinor }};
+        const currencySymbol = @json($currencySymbol);
+        
         const fromStopId = {{ (int) ($fromStop->id ?? 0) }};
         const toStopId = {{ (int) ($toStop->id ?? 0) }};
 
@@ -155,7 +160,7 @@
                         throw new Error(payload?.message || 'Payment failed');
                     }
                     if (statusEl) {
-                        statusEl.textContent = `Payment successful. Charged $${formatMajor(amountMinor)}.`;
+                        statusEl.textContent = `Payment successful. Charged ${currencySymbol}${formatMajor(amountMinor)}.`;
                     }
                 } catch (error) {
                     if (statusEl) {
