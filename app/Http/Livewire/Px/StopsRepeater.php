@@ -18,6 +18,7 @@ class StopsRepeater extends Component
                 return [
                     'label' => (string) ($stop['label'] ?? ''),
                     'city_id' => isset($stop['city_id']) && is_numeric($stop['city_id']) ? (int) $stop['city_id'] : null,
+                    'price_delta_minor' => isset($stop['price_delta_minor']) && is_numeric($stop['price_delta_minor']) ? (int) $stop['price_delta_minor'] : 0,
                 ];
             })
             ->values()
@@ -32,6 +33,7 @@ class StopsRepeater extends Component
         $this->stops[] = [
             'label' => '',
             'city_id' => null,
+            'price_delta_minor' => 0,
         ];
     }
 
@@ -66,4 +68,3 @@ class StopsRepeater extends Component
         return view('livewire.px.stops-repeater');
     }
 }
-

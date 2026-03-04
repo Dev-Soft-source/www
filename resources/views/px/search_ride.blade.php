@@ -130,69 +130,18 @@
 
                     <div class="space-y-4">
                         @foreach($rides as $ride)
-                            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-4 mb-3">
-                                            <div class="flex items-center gap-2">
-                                                <img src="{{ asset('assets/search-bar-from.png') }}" class="w-5 h-5" alt="">
-                                                <span class="font-semibold text-lg">
-                                                    {{ $ride->route->origin_label ?? 'N/A' }}
-                                                </span>
-                                            </div>
-                                            <span class="text-gray-400">→</span>
-                                            <div class="flex items-center gap-2">
-                                                <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-5 h-5" alt="">
-                                                <span class="font-semibold text-lg">
-                                                    {{ $ride->route->destination_label ?? 'N/A' }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                                            <div>
-                                                <span class="font-semibold">Departure:</span>
-                                                <p class="text-gray-900">{{ $ride->departure_at ? \Carbon\Carbon::parse($ride->departure_at)->format('M d, Y H:i') : 'N/A' }}</p>
-                                            </div>
-                                            <div>
-                                                <span class="font-semibold">Price:</span>
-                                                <p class="text-gray-900">${{ number_format($ride->price_per_seat_minor / 100, 2) }}</p>
-                                            </div>
-                                            <div>
-                                                <span class="font-semibold">Seats:</span>
-                                                <p class="text-gray-900">{{ $ride->seats_available ?? $ride->seats ?? 'N/A' }}</p>
-                                            </div>
-                                            <div>
-                                                <span class="font-semibold">Driver:</span>
-                                                <p class="text-gray-900">{{ $ride->driver->name ?? 'N/A' }}</p>
-                                            </div>
-                                        </div>
-
-                                        @if($ride->options && $ride->options->count() > 0)
-                                            <div class="mt-4 flex flex-wrap gap-2">
-                                                @foreach($ride->options as $option)
-                                                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
-                                                        @if($option->icon)
-                                                            <img src="{{ $option->icon }}" alt="" class="w-4 h-4">
-                                                        @endif
-                                                        <span>{{ $option->display_label ?? $option->code }}</span>
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <div class="flex flex-col gap-2">
-                                        <a href="{{ route('px.my_ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}"
-                                            class="bg-blue-500 text-white px-6 py-2 rounded-lg text-center hover:bg-blue-600 transition-colors">
-                                            View Details
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                            <x-px.ride-card
+                                :ride="$ride"
+                                :lang="optional($selectedLanguage)->abbreviation"
+                                :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor"
+                                :detail-query="[
+                                    'from_stop_id' => $ride->matched_from_stop_id,
+                                    'to_stop_id' => $ride->matched_to_stop_id,
+                                ]"
+                                detail-route="px.ride_detail"
+                            />
                         @endforeach
                     </div>
-
                     <div class="mt-6">
                         {{ $rides->links() }}
                     </div>
@@ -249,3 +198,4 @@
         }
     </script>
 @endsection
+

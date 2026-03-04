@@ -12,6 +12,7 @@
                 ], key('px-stop-city-' . $index . '-' . md5(($stop['label'] ?? '') . '|' . ($stop['city_id'] ?? ''))))
                 <input type="hidden" name="stops[{{ $index }}][is_pickup]" value="1">
                 <input type="hidden" name="stops[{{ $index }}][is_dropoff]" value="1">
+                <input type="hidden" name="stops[{{ $index }}][price_delta_minor]" value="{{ (int) ($stop['price_delta_minor'] ?? 0) }}">
             </div>
             <button
                 type="button"

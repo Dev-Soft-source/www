@@ -88,6 +88,16 @@ class PxRide extends Model
             ->withTimestamps();
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(PxBooking::class, 'ride_id');
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(PxTransaction::class, 'ride_id');
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query

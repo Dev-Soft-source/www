@@ -44,6 +44,11 @@
             if (empty($oldStops) && isset($ride->intermediate_stops)) {
                 $oldStops = $ride->intermediate_stops;
             }
+            $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
+            if ($oldDestinationPriceDeltaMinor === null && isset($ride->stops) && $ride->stops->isNotEmpty()) {
+                $destinationStop = $ride->stops->sortBy('stop_order')->last();
+                $oldDestinationPriceDeltaMinor = $destinationStop ? ($destinationStop->price_delta_minor ?? 0) : 0;
+            }
             
             // Populate other fields
             $oldSeatsTotal = old('seats_total', $ride->seats_total);
@@ -81,6 +86,7 @@
             $oldDepartureDate = old('departure_date');
             $oldDepartureTime = old('departure_time');
             $oldStops = old('stops', []);
+            $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
             $oldSeatsTotal = old('seats_total');
             $oldPriceMinor = old('price_minor');
             $oldCurrency = old('currency', 'USD');
@@ -98,6 +104,10 @@
             $oldVehicleMode = old('vehicle_mode', 'skip');
         }
         
+        $oldPriceMajorDisplay = $oldPriceMinor !== null && $oldPriceMinor !== ''
+            ? number_format(((int) $oldPriceMinor) / 100, 2, '.', '')
+            : '';
+
         $stopsExpanded = !empty($oldStops);
 
         if (!$stopsExpanded && $errors->any()) {
@@ -237,25 +247,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="mt-4 border border-gray-200 rounded-lg">
-                        <button type="button" id="px-stops-toggle" class="w-full flex items-center justify-between text-left px-4 py-3"
-                            aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="px-stops-content">
-                            <span class="block text-sm font-semibold">Ordered Intermediate Stops (optional)</span>
-                            <svg id="px-stops-chevron" class="w-5 h-5 text-gray-500 transition-transform {{ $stopsExpanded ? 'rotate-180' : '' }}"
-                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        <div id="px-stops-content" class="px-4 pb-4 {{ $stopsExpanded ? '' : 'hidden' }}">
-                            @livewire('px.stops-repeater', [
-                                'initialStops' => $oldStops,
-                                'originLabel' => $oldOriginLabel ?? old('origin.label', ''),
-                                'destinationLabel' => $oldDestinationLabel ?? old('destination.label', '')
-                            ], key('px-stops-repeater'))
-                        </div>
-                    </div>
+                    
                     <div class="mt-4 md:col-span-2 border border-gray-200 rounded-lg p-4">
                         <label class="inline-flex items-center gap-2 text-sm font-semibold mb-3">
                             <input type="hidden" name="is_recurring" value="0">
@@ -284,6 +276,26 @@
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border border-gray-200 rounded-lg">
+                        <button type="button" id="px-stops-toggle" class="w-full flex items-center justify-between text-left px-4 py-3"
+                            aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="px-stops-content">
+                            <span class="block text-sm font-semibold">Ordered Intermediate Stops (optional)</span>
+                            <svg id="px-stops-chevron" class="w-5 h-5 text-gray-500 transition-transform {{ $stopsExpanded ? 'rotate-180' : '' }}"
+                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <div id="px-stops-content" class="px-4 pb-4 {{ $stopsExpanded ? '' : 'hidden' }}">
+                            @livewire('px.stops-repeater', [
+                                'initialStops' => $oldStops,
+                                'originLabel' => $oldOriginLabel ?? old('origin.label', ''),
+                                'destinationLabel' => $oldDestinationLabel ?? old('destination.label', '')
+                            ], key('px-stops-repeater'))
                         </div>
                     </div>
                 </section>
@@ -395,10 +407,32 @@
                             </div>
                         </div>
                         <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-sm font-semibold mb-1 required">Price per seat</label>
-                            <input name="price_minor" value="{{ $oldPriceMinor ?? old('price_minor') }}" type="number" min="0"
-                                class="w-full rounded border-gray-300" placeholder="e.g. 2500 = 25.00" >
+                            <label id="px-price-label" class="block text-sm font-semibold mb-1 required">Price per Seat</label>
+                            <div id="px-price-single-wrap">
+                                <input
+                                    id="px-price-minor-input"
+                                    name="price_minor"
+                                    value="{{ $oldPriceMajorDisplay }}"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    class="w-full rounded border-gray-300"
+                                    placeholder="e.g. 25.00"
+                                >
+                            </div>
+                            <div id="px-price-segments-wrap" class="hidden space-y-3">
+                                <div id="px-price-segments-list" class="space-y-2"></div>
+                                <div class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
+                                    <span class="text-sm font-semibold text-gray-700">Total price per seat</span>
+                                    <span id="px-price-segments-total" class="text-sm font-semibold text-gray-900">0.00</span>
+                                </div>
+                                <input type="hidden" id="px-price-minor-hidden" value="{{ (int) ($oldPriceMinor ?? old('price_minor', 0)) }}">
+                                <input type="hidden" id="px-destination-price-delta-initial" value="{{ $oldDestinationPriceDeltaMinor ?? old('destination.price_delta_minor', 0) }}">
+                            </div>
                             @error('price_minor')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
+                            @error('stops.*.price_delta_minor')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                             @if ($bookingMethodGroup && $bookingMethodOptions->isNotEmpty())
@@ -800,80 +834,304 @@
             window.seat_selected(document.querySelector('input[name="seats_total"]:checked'));
 
             const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document.querySelector('form[action*="px.post_ride.update"]') || document.querySelector('form');
+            const priceLabel = document.getElementById('px-price-label');
+            const priceSingleWrap = document.getElementById('px-price-single-wrap');
+            const priceSegmentsWrap = document.getElementById('px-price-segments-wrap');
+            const priceSegmentsList = document.getElementById('px-price-segments-list');
+            const priceSegmentsTotal = document.getElementById('px-price-segments-total');
+            const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
+            const destinationPriceDeltaInitialInput = document.getElementById('px-destination-price-delta-initial');
+
+            function toMinorInt(value) {
+                const parsed = parseInt((value ?? '').toString().trim(), 10);
+                return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            }
+
+            function toMinorFromMajor(value) {
+                const normalized = (value ?? '').toString().trim().replace(',', '.');
+                const parsed = parseFloat(normalized);
+                if (!Number.isFinite(parsed) || parsed < 0) {
+                    return 0;
+                }
+                return Math.round(parsed * 100);
+            }
+
+            function toMajorFromMinor(minorValue) {
+                return (toMinorInt(minorValue) / 100).toFixed(2);
+            }
+
+            function getFirstInputValueByName(name) {
+                const direct = document.querySelector(`input[name="${name}"]`);
+                if (direct) {
+                    return direct.value.trim();
+                }
+                const anyInput = Array.from(document.querySelectorAll('input[type="text"],input[type="hidden"]'))
+                    .find((input) => input.name && input.name.includes(name));
+                return anyInput ? anyInput.value.trim() : '';
+            }
+
+            function getStopsData() {
+                const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
+                const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
+                const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
+                const stopIsDropoffInputs = document.querySelectorAll('input[name^="stops["][name$="[is_dropoff]"]');
+                const stopPriceDeltaInputs = document.querySelectorAll('input[name^="stops["][name$="[price_delta_minor]"]');
+                const stopsData = new Map();
+
+                stopLabelInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[label\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).label = input.value.trim();
+                });
+
+                stopCityIdInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[city_id\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).cityId = input.value.trim();
+                });
+
+                stopIsPickupInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[is_pickup\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).isPickup = input.value;
+                });
+
+                stopIsDropoffInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[is_dropoff\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).isDropoff = input.value;
+                });
+
+                stopPriceDeltaInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[price_delta_minor\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).priceDeltaMinor = toMinorInt(input.value);
+                });
+
+                return Array.from(stopsData.keys())
+                    .sort((a, b) => a - b)
+                    .map((index) => ({ index, ...stopsData.get(index) }));
+            }
+
+            function getValidStopsData() {
+                return getStopsData().filter((stop) => stop.label && stop.cityId);
+            }
+
+            function syncSegmentPriceTotal() {
+                if (!priceSegmentsList || !priceMinorHiddenInput) return;
+                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input');
+                let totalMinor = 0;
+                segmentInputs.forEach((input) => {
+                    totalMinor += toMinorFromMajor(input.value);
+                });
+                priceMinorHiddenInput.value = String(totalMinor);
+                if (priceSegmentsTotal) {
+                    priceSegmentsTotal.textContent = toMajorFromMinor(totalMinor);
+                }
+            }
+
+            function syncStopPriceDeltaInputsFromSegmentRows() {
+                if (!priceSegmentsList) return;
+                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input[data-stop-index]');
+                segmentInputs.forEach((input) => {
+                    const stopIndex = input.getAttribute('data-stop-index');
+                    if (stopIndex === null || stopIndex === '') return;
+                    const hiddenStopPrice = document.querySelector(`input[name="stops[${stopIndex}][price_delta_minor]"]`);
+                    if (hiddenStopPrice) {
+                        hiddenStopPrice.value = String(toMinorFromMajor(input.value));
+                    }
+                });
+            }
+
+            function syncPriceInputMode() {
+                if (!priceLabel || !priceSingleWrap || !priceSegmentsWrap || !priceMinorInput || !priceMinorHiddenInput || !priceSegmentsList) {
+                    return;
+                }
+
+                const validStops = getValidStopsData();
+                const hasValidStops = validStops.length > 0;
+
+                if (!hasValidStops) {
+                    priceLabel.textContent = 'Price per Seat';
+                    priceSingleWrap.classList.remove('hidden');
+                    priceSegmentsWrap.classList.add('hidden');
+                    priceSegmentsList.innerHTML = '';
+                    priceMinorInput.disabled = false;
+                    priceMinorInput.name = 'price_minor';
+                    priceMinorHiddenInput.name = '';
+                    return;
+                }
+
+                const originLabel = getFirstInputValueByName('origin[label]') || 'Origin';
+                const destinationLabel = getFirstInputValueByName('destination[label]') || 'Destination';
+                const points = [originLabel, ...validStops.map((stop) => stop.label), destinationLabel];
+
+                priceLabel.textContent = 'Price per Seat (by Route Section)';
+                priceSingleWrap.classList.add('hidden');
+                priceSegmentsWrap.classList.remove('hidden');
+                priceMinorInput.disabled = true;
+                priceMinorInput.name = '';
+                priceMinorHiddenInput.name = 'price_minor';
+
+                const previousValues = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input')).map((input) => toMinorFromMajor(input.value));
+                const existingStopValues = validStops.map((stop) => toMinorInt(stop.priceDeltaMinor));
+                const initialDestinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
+                const hasAnyExistingStopValue = existingStopValues.some((value) => value > 0) || initialDestinationDeltaMinor > 0;
+                const segmentCount = points.length - 1;
+                const baseTotalMinor = priceMinorHiddenInput.value
+                    ? toMinorInt(priceMinorHiddenInput.value)
+                    : toMinorFromMajor(priceMinorInput.value);
+                priceSegmentsList.innerHTML = '';
+
+                for (let i = 0; i < points.length - 1; i++) {
+                    const from = points[i] || 'Point A';
+                    const to = points[i + 1] || 'Point B';
+                    const stopIndex = i < validStops.length ? String(validStops[i].index) : '';
+                    let initialMinor = previousValues[i] ?? (stopIndex !== '' ? toMinorInt(validStops[i].priceDeltaMinor) : initialDestinationDeltaMinor);
+
+                    // If segment prices are not set yet, distribute current single total across segments.
+                    if (!hasAnyExistingStopValue && previousValues.length === 0 && baseTotalMinor > 0 && segmentCount > 0) {
+                        const share = Math.floor(baseTotalMinor / segmentCount);
+                        const remainder = baseTotalMinor - (share * segmentCount);
+                        initialMinor = share + (i === segmentCount - 1 ? remainder : 0);
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-end';
+
+                    const routeLabelWrap = document.createElement('div');
+                    const routeLabel = document.createElement('label');
+                    routeLabel.className = 'block text-sm font-semibold text-gray-700';
+                    routeLabel.textContent = `${from} \u2192 ${to}`;
+                    routeLabelWrap.appendChild(routeLabel);
+
+                    const priceInput = document.createElement('input');
+                    priceInput.type = 'number';
+                    priceInput.min = '0';
+                    priceInput.step = '0.01';
+                    priceInput.value = toMajorFromMinor(initialMinor);
+                    priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
+                    priceInput.placeholder = 'e.g. 12.00';
+                    if (stopIndex !== '') {
+                        priceInput.setAttribute('data-stop-index', stopIndex);
+                    }
+                    priceInput.addEventListener('input', function() {
+                        syncStopPriceDeltaInputsFromSegmentRows();
+                        syncSegmentPriceTotal();
+                    });
+
+                    row.appendChild(routeLabelWrap);
+                    row.appendChild(priceInput);
+                    priceSegmentsList.appendChild(row);
+                }
+
+                syncStopPriceDeltaInputsFromSegmentRows();
+                syncSegmentPriceTotal();
+            }
+
+            if (priceMinorInput) {
+                priceMinorInput.addEventListener('input', function() {
+                    if (priceMinorHiddenInput) {
+                        priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
+                    }
+                });
+            }
+
+            document.addEventListener('input', function(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+                if (target.name && (
+                    target.name.includes('origin[label]') ||
+                    target.name.includes('destination[label]') ||
+                    target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
+                )) {
+                    syncPriceInputMode();
+                }
+            });
+
+            if (window.Livewire && typeof window.Livewire.hook === 'function') {
+                window.Livewire.hook('message.processed', function() {
+                    setTimeout(syncPriceInputMode, 60);
+                });
+            }
+
+            syncPriceInputMode();
 
             // Filter out empty stops before form submission
             if (postRideForm) {
                 postRideForm.addEventListener('submit', function(event) {
-                    // Get all stop inputs
+                    if (priceMinorInput && !priceMinorInput.disabled) {
+                        priceMinorInput.value = String(toMinorFromMajor(priceMinorInput.value));
+                    }
+                    syncStopPriceDeltaInputsFromSegmentRows();
+                    syncSegmentPriceTotal();
+
                     const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
                     const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
                     const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
                     const stopIsDropoffInputs = document.querySelectorAll('input[name^="stops["][name$="[is_dropoff]"]');
-                    
-                    // Collect all stop indices and their data
-                    const stopsData = new Map();
-                    
-                    stopLabelInputs.forEach(function(input) {
-                        const match = input.name.match(/^stops\[(\d+)\]\[label\]$/);
-                        if (match) {
-                            const index = parseInt(match[1], 10);
-                            if (!stopsData.has(index)) {
-                                stopsData.set(index, {});
+                    const stopPriceDeltaInputs = document.querySelectorAll('input[name^="stops["][name$="[price_delta_minor]"]');
+                    const existingDestinationPriceDeltaInput = postRideForm.querySelector('input[name="destination[price_delta_minor]"][data-generated="1"]');
+                    if (existingDestinationPriceDeltaInput) {
+                        existingDestinationPriceDeltaInput.remove();
+                    }
+
+                    const validStops = getValidStopsData().map((stop) => ({
+                        label: stop.label,
+                        cityId: stop.cityId,
+                        isPickup: stop.isPickup || '1',
+                        isDropoff: stop.isDropoff || '1',
+                        priceDeltaMinor: toMinorInt(stop.priceDeltaMinor),
+                    }));
+
+                    // Source-of-truth for stop leg prices: visible segment rows.
+                    // Map first N segment rows to N intermediate stops (in route order).
+                    if (priceSegmentsList && validStops.length > 0) {
+                        const stopSegmentInputs = Array.from(
+                            priceSegmentsList.querySelectorAll('.px-segment-price-input[data-stop-index]')
+                        );
+                        for (let i = 0; i < validStops.length; i++) {
+                            if (stopSegmentInputs[i]) {
+                                validStops[i].priceDeltaMinor = toMinorFromMajor(stopSegmentInputs[i].value);
                             }
-                            stopsData.get(index).label = input.value.trim();
                         }
-                    });
-                    
-                    stopCityIdInputs.forEach(function(input) {
-                        const match = input.name.match(/^stops\[(\d+)\]\[city_id\]$/);
-                        if (match) {
-                            const index = parseInt(match[1], 10);
-                            if (!stopsData.has(index)) {
-                                stopsData.set(index, {});
-                            }
-                            stopsData.get(index).cityId = input.value.trim();
+
+                        // Persist last section price (last stop -> destination) on destination payload.
+                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
+                        const lastSegmentInput = allSegmentInputs.length > 0 ? allSegmentInputs[allSegmentInputs.length - 1] : null;
+                        if (lastSegmentInput) {
+                            const destinationPriceDeltaInput = document.createElement('input');
+                            destinationPriceDeltaInput.type = 'hidden';
+                            destinationPriceDeltaInput.name = 'destination[price_delta_minor]';
+                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastSegmentInput.value));
+                            destinationPriceDeltaInput.setAttribute('data-generated', '1');
+                            postRideForm.appendChild(destinationPriceDeltaInput);
                         }
-                    });
-                    
-                    stopIsPickupInputs.forEach(function(input) {
-                        const match = input.name.match(/^stops\[(\d+)\]\[is_pickup\]$/);
-                        if (match) {
-                            const index = parseInt(match[1], 10);
-                            if (!stopsData.has(index)) {
-                                stopsData.set(index, {});
-                            }
-                            stopsData.get(index).isPickup = input.value;
-                        }
-                    });
-                    
-                    stopIsDropoffInputs.forEach(function(input) {
-                        const match = input.name.match(/^stops\[(\d+)\]\[is_dropoff\]$/);
-                        if (match) {
-                            const index = parseInt(match[1], 10);
-                            if (!stopsData.has(index)) {
-                                stopsData.set(index, {});
-                            }
-                            stopsData.get(index).isDropoff = input.value;
-                        }
-                    });
-                    
-                    // Filter out empty stops (where label is empty or city_id is empty)
-                    const validStops = [];
-                    const sortedIndices = Array.from(stopsData.keys()).sort((a, b) => a - b);
-                    
-                    sortedIndices.forEach(function(index) {
-                        const stop = stopsData.get(index);
-                        // Keep stop only if it has both label and city_id
-                        if (stop.label && stop.cityId) {
-                            validStops.push({
-                                label: stop.label,
-                                cityId: stop.cityId,
-                                isPickup: stop.isPickup || '1',
-                                isDropoff: stop.isDropoff || '1'
-                            });
-                        }
-                    });
-                    
+                    }
+
                     // Remove all existing stop inputs
                     stopLabelInputs.forEach(function(input) {
                         input.remove();
@@ -885,6 +1143,9 @@
                         input.remove();
                     });
                     stopIsDropoffInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopPriceDeltaInputs.forEach(function(input) {
                         input.remove();
                     });
                     
@@ -914,6 +1175,12 @@
                         isDropoffInput.name = `stops[${newIndex}][is_dropoff]`;
                         isDropoffInput.value = stop.isDropoff;
                         postRideForm.appendChild(isDropoffInput);
+
+                        const priceDeltaInput = document.createElement('input');
+                        priceDeltaInput.type = 'hidden';
+                        priceDeltaInput.name = `stops[${newIndex}][price_delta_minor]`;
+                        priceDeltaInput.value = String(stop.priceDeltaMinor);
+                        postRideForm.appendChild(priceDeltaInput);
                     });
                 });
             }

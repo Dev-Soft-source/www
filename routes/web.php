@@ -363,13 +363,13 @@ Route::get('{lang?}/all-transactions', [TransactionController::class, 'index'])-
 Route::get('{lang?}/user-booking-credits', [BookingCreditController::class, 'index'])->name('booking.credits');
 Route::get('{lang?}/payout-options', [PayoutController::class, 'index'])->name('payout');
 
-Route::get('{lang?}/payment-options', [PaymentMethodController::class, 'index'])->middleware('auth')->name('payment.methods');
-Route::middleware('auth')->group(function () {
-    Route::post('/payment-methods/stripe', [PaymentMethodController::class, 'storeStripe'])->name('payment.methods.stripe.store');
-    Route::post('/payment-methods/paypal', [PaymentMethodController::class, 'storePaypal'])->name('payment.methods.paypal.store');
-    Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy'])->name('payment.methods.delete');
-    Route::post('/payment-methods/{id}/default', [PaymentMethodController::class, 'setDefault'])->name('payment.methods.default');
-});
+// Route::get('{lang?}/payment-options', [PaymentMethodController::class, 'index'])->middleware('auth')->name('payment.methods');
+// Route::middleware('auth')->group(function () {
+//     Route::post('/payment-methods/stripe', [PaymentMethodController::class, 'storeStripe'])->name('payment.methods.stripe.store');
+//     Route::post('/payment-methods/paypal', [PaymentMethodController::class, 'storePaypal'])->name('payment.methods.paypal.store');
+//     Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy'])->name('payment.methods.delete');
+//     Route::post('/payment-methods/{id}/default', [PaymentMethodController::class, 'setDefault'])->name('payment.methods.default');
+// });
 
 Route::get('{lang?}/my-cards', [CardController::class, 'index'])->middleware('auth')->name('my_cards');
 Route::get('{lang?}/my-cards/add', [CardController::class, 'create'])->name('my_cards.create')->middleware('auth');
@@ -514,7 +514,10 @@ Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name
 Route::put('{lang?}/px/post-ride/{id}', [PxRideWebController::class, 'update'])->name('px.post_ride.update')->middleware('auth');
 Route::get('{lang?}/px/my-rides', [PxRideWebController::class, 'index'])->name('px.my_rides')->middleware('auth');
 Route::get('{lang?}/px/my-ride/{id}', [PxRideWebController::class, 'show'])->name('px.my_ride_detail')->middleware('auth');
+Route::get('{lang?}/px/ride/{id}', [PxRideWebController::class, 'rideDetail'])->name('px.ride_detail');
 Route::get('{lang?}/px/search-rides', [PxRideWebController::class, 'search'])->name('px.search_ride');
+Route::get('{lang?}/px/booking/{from_stop_id}/{to_stop_id}', [PxRideWebController::class, 'booking'])->name('px.booking')->middleware(['auth', 'nocache']);
+Route::post('{lang?}/px/booking/pay', [PxRideWebController::class, 'payBooking'])->name('px.booking.pay')->middleware(['auth', 'nocache']);
 
 
 

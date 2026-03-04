@@ -103,143 +103,34 @@
                                     <div class="space-y-4">
                                         @if (!empty($rides) && $rides->count() > 0)
                                             @foreach ($rides as $ride)
-                                                @php
-                                                    $origin = $ride->route->origin_label ?? 'N/A';
-                                                    $destination = $ride->route->destination_label ?? 'N/A';
-                                                    $pickupLocation = $ride->meta['pickup_location'] ?? null;
-                                                    $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
-                                                    $pricePerSeat = $ride->price_minor; // / 100; // Convert from minor units
-                                                    $currency = '$'; //$ride->currency ?? 
-                                                @endphp
-                                                <div class="relative even:bg-gray-200 odd:bg-white">
-                                                    <a href="{{ route('px.my_ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}" class="block">
-                                                    <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100">
-                                                        @if ($ride->status === 'draft')
-                                                            <span class="bg-yellow-100 text-yellow-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded">Draft</span>
-                                                        @elseif ($ride->status === 'published')
-                                                            <span class="bg-green-100 text-green-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded">Published</span>
-                                                        @endif
+                                                <x-px.ride-card
+                                                    :ride="$ride"
+                                                    :lang="optional($selectedLanguage)->abbreviation"
+                                                    :show-status="true"
+                                                    :price-minor="$ride->price_minor"
+                                                >
+                                                    @if ($ride->notes)
+                                                        <div class="mt-3 border-t border-gray-200">
+                                                            <p class="font-semibold mb-1">Notes:</p>
+                                                            <p class="text-gray-600 text-sm">{{ $ride->notes }}</p>
+                                                        </div>
+                                                    @endif
 
-                                                        <div class="flex items-center justify-between pb-0 p-4">
-                                                            <p class="flex items-center space-x-2 font-semibold">
-                                                                {{ $ride->departure_at->format('F d, Y') }}
-                                                                at
-                                                                {{ $ride->departure_at->format('h:i A') == '12:00 PM' ? '12 noon' : ($ride->departure_at->format('h:i A') == '12:00 AM' ? '12 midnight' : $ride->departure_at->format('h:i A')) }}
+                                                    @if (isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled'])
+                                                        <div class="mt-3 border-t border-gray-200">
+                                                            <p class="font-semibold mb-1">Recurring Trip:</p>
+                                                            <p class="text-gray-600 text-sm">
+                                                                Frequency: {{ ucfirst($ride->meta['recurring']['frequency'] ?? 'N/A') }},
+                                                                {{ $ride->meta['recurring']['trips'] ?? 0 }} trips
                                                             </p>
-                                                            <div class="">
-                                                                <p class="font-semibold">
-                                                                    Total {{ $ride->seats_available }} seats
+                                                            @if (isset($ride->meta['recurring']['pick_drop_off_description']))
+                                                                <p class="text-gray-600 text-sm mt-1">
+                                                                    <strong>Description:</strong> {{ $ride->meta['recurring']['pick_drop_off_description'] }}
                                                                 </p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="flex flex-col md:flex-row justify-between px-4">
-                                                            <div class="w-full md:w-2/3 order-2 md:order-1">
-                                                                <div class="relative mt-5 text-left">
-                                                                    <div class="flex items-center relative">
-                                                                        <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                                            <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="ml-12 md:ml-20">
-                                                                            <p class="font-bold text-xl text-black">From</p>
-                                                                            <div class="flex gap-2 items-baseline">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                    {{ $origin }}.
-                                                                                </h3>
-                                                                                @if ($pickupLocation)
-                                                                                    <p class="text-sm mt-2">
-                                                                                        Pick-up at: {{ $pickupLocation }}
-                                                                                    </p>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="flex items-center relative">
-                                                                        <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                                            <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="ml-12 md:ml-20 items-baseline">
-                                                                            <p class="font-bold text-xl text-black">To</p>
-                                                                            <div class="flex gap-2">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                    {{ $destination }}.
-                                                                                </h3>
-                                                                                @if ($dropoffLocation)
-                                                                                    <p class="text-sm mt-2">
-                                                                                        Drop-off at: {{ $dropoffLocation }}
-                                                                                    </p>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    @if ($ride->stops->isNotEmpty())
-                                                                        <div class="ml-12 md:ml-20 mt-2">
-                                                                            <p class="text-sm text-gray-600">
-                                                                                <strong>Stops:</strong> 
-                                                                                {{ $ride->stops->pluck('label')->join(', ') }}
-                                                                            </p>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="mt-4 justify-items-end order-1 md:order-2">
-                                                                <p class="text-xl text-right font-semibold text-primary">
-                                                                    {{ $currency }}{{ number_format($pricePerSeat, 2) }}
-                                                                    <small>per seat</small>
-                                                                </p>
-                                                                @if ($ride->vehicle)
-                                                                    <p class="text-sm text-right text-gray-600 mt-1">
-                                                                        {{ $ride->vehicle->make }} | {{ $ride->vehicle->model }} | {{ $ride->vehicle->year }}
-                                                                    </p>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 p-3">
-                                                            <!-- ride options -->
-                                                            @if ($ride->options->isNotEmpty())
-                                                                <div class="flex flex-wrap items-center gap-2">
-                                                                    @foreach ($ride->options as $option)
-                                                                        <img src="{{ asset('home_page_icons/' . $option->icon) }}" 
-                                                                                        alt="{{ $option->display_label }}" 
-                                                                                        data-tippy-content="{{ $option->display_description }}"
-                                                                                        class="w-8 h-8 object-contain">
-                                                                    @endforeach
-                                                                </div>
                                                             @endif
                                                         </div>
-                                                        <div class="border-t border-gray-300 pt-0 p-3">
-                                                            @if ($ride->notes)
-                                                                <div class="mt-3 border-t border-gray-200">
-                                                                    <p class="font-semibold mb-1">Notes:</p>
-                                                                    <p class="text-gray-600 text-sm">{{ $ride->notes }}</p>
-                                                                </div>
-                                                            @endif
-
-                                                            @if (isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled'])
-                                                                <div class="mt-3 border-t border-gray-200">
-                                                                    <p class="font-semibold mb-1">Recurring Trip:</p>
-                                                                    <p class="text-gray-600 text-sm">
-                                                                        Frequency: {{ ucfirst($ride->meta['recurring']['frequency'] ?? 'N/A') }}, 
-                                                                        {{ $ride->meta['recurring']['trips'] ?? 0 }} trips
-                                                                    </p>
-                                                                    @if (isset($ride->meta['recurring']['pick_drop_off_description']))
-                                                                        <p class="text-gray-600 text-sm mt-1">
-                                                                            <strong>Description:</strong> {{ $ride->meta['recurring']['pick_drop_off_description'] }}
-                                                                        </p>
-                                                                    @endif
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    </a>
-                                                </div>
+                                                    @endif
+                                                </x-px.ride-card>
                                             @endforeach
 
                                             <div class="mt-6">

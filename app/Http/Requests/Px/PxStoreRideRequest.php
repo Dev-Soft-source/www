@@ -39,6 +39,7 @@ class PxStoreRideRequest extends FormRequest
             'destination.city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'destination.label' => ['required', 'string', 'max:160'],
             'destination.dropoff_location' => ['required', 'string', 'max:255'],
+            'destination.price_delta_minor' => ['nullable', 'integer', 'min:0'],
             'destination.lat' => ['nullable', 'numeric', 'between:-90,90'],
             'destination.lng' => ['nullable', 'numeric', 'between:-180,180'],
 

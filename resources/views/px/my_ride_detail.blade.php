@@ -165,7 +165,7 @@
                             $destination = $ride->route->destination_label ?? 'N/A';
                             $pickupLocation = $ride->meta['pickup_location'] ?? null;
                             $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
-                            $pricePerSeat = $ride->price_minor;
+                            $pricePerSeatMinor = (int) $ride->price_minor;
                             $currency = '$';
                         @endphp
                         <div class="w-full md:w-2/3 order-2 md:order-1">
@@ -179,35 +179,39 @@
                                                         <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
                                                     </span>
                                                 </div>
-                                                <div class="flex items-center ml-12 md:ml-20">
+                                                <div class="items-center ml-12 md:ml-20">
                                                     <p class="font-bold text-xl text-black">
-                                                        @isset($rideDetailPage->from_label)
-                                                            {{ $rideDetailPage->from_label }}:
-                                                        @else
-                                                            From:
-                                                        @endisset
-                                                    </p>
-                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2 inline-flex items-center items-baseline">
-                                                        {{ $origin }}. <p class="text-gray-600 text-sm ml-2"><strong>Pick-up at:</strong> {{ $pickupLocation }}</p>
-                                                    </h4>
+                                                        {{ $rideDetailPage->from_label ?? 'From' }}</p>
+                                                    <div class="flex gap-2 items-baseline">
+                                                        <h3
+                                                            class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                            {{ $origin }}.
+                                                        </h3>
+                                                        @if ($pickupLocation)
+                                                            <p class="text-gray-600 text-sm ml-2"><strong>Pick-up at:</strong>
+                                                                {{ $pickupLocation }}</p>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
 
                                         @if ($ride->stops->isNotEmpty())
                                             <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10"></div>
-                                                <div class="ml-12 md:ml-20 py-2">
+                                                <div
+                                                    class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                </div>
+                                                <div class="ml-12 md:ml-20 flex">
                                                     <p class="font-bold text-xl text-black mb-2">
-                                                        @isset($rideDetailPage->stops_label)
-                                                            {{ $rideDetailPage->stops_label }}
-                                                        @else
-                                                            Stops:
-                                                        @endisset
-                                                    </p>
-                                                    <ul class="list-disc list-inside space-y-1 ml-6 text-gray-900 text-base md:text-lg">
-                                                        @foreach ($ride->stops->where('is_pickup', true)->where('is_dropoff', true) as $stop)
-                                                            <li class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">{{ $stop->label }}</li>
+                                                        {{ $rideDetailPage->stops_label ?? 'Stops on the way' }}</p>
+                                                    <ul class="flex flex-col gap-2 text-sm ml-4 mt-1 mb-4">
+                                                         @foreach ($ride->stops->where('is_pickup', true)->where('is_dropoff', true) as $stop)
+                                                            <li class="flex items-center px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
+                                                                <span class="h-4 w-4 inline-flex mr-2 ">
+                                                                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill="#666666" d="M256 17.108c-75.73 0-137.122 61.392-137.122 137.122.055 23.25 6.022 46.107 11.58 56.262L256 494.892l119.982-274.244h-.063c11.27-20.324 17.188-43.18 17.202-66.418C393.122 78.5 331.73 17.108 256 17.108zm0 68.56a68.56 68.56 0 0 1 68.56 68.562A68.56 68.56 0 0 1 256 222.79a68.56 68.56 0 0 1-68.56-68.56A68.56 68.56 0 0 1 256 85.67z"></path></g></svg>
+                                                                </span>
+                                                                {{ $stop->label }}
+                                                            </li>
                                                         @endforeach
                                                     </ul>
                                                 </div>
@@ -221,17 +225,19 @@
                                                         <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
                                                     </span>
                                                 </div>
-                                                <div class="flex items-center ml-12 md:ml-20">
+                                                <div class="items-center ml-12 md:ml-20">
                                                     <p class="font-bold text-xl text-black">
-                                                        @isset($rideDetailPage->to_label)
-                                                            {{ $rideDetailPage->to_label }}:
-                                                        @else
-                                                            To:
-                                                        @endisset
-                                                    </p>
-                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2 inline-flex items-center items-baseline">
-                                                        {{ $destination }}. <p class="text-gray-600 text-sm ml-2"><strong>Drop-off at:</strong> {{ $dropoffLocation }}</p>
-                                                    </h4>
+                                                        {{ $rideDetailPage->to_label ?? 'To' }}</p>
+                                                    <div class="flex gap-2 items-baseline">
+                                                        <h3
+                                                            class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                            {{ $destination }}.
+                                                        </h3>
+                                                        @if ($dropoffLocation)
+                                                            <p class="text-gray-600 text-sm ml-2"><strong>Drop-off at:</strong>
+                                                                {{ $dropoffLocation }}</p>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
@@ -260,7 +266,7 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $currency }}{{ number_format($pricePerSeat, 2) }}
+                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">{{ $currency }}{{ number_format($pricePerSeatMinor / 100, 2) }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -273,7 +279,7 @@
                         <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                 @isset($rideDetailPage->payment_method_label)
-                                    {{ $rideDetailPage->payment_method_label }}
+                                    {{ $rideDetailPage->payment_method_label }}:
                                 @else
                                     Payment method:
                                 @endisset
@@ -309,7 +315,7 @@
                                     {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}:
                                 </h4>
                                 <p class="">
-                                    {{ $currency }}{{ number_format(floatval($pricePerSeat * ($ride->seats_total - $ride->seats_available)), 2) }}
+                                    {{ $currency }}{{ number_format((($pricePerSeatMinor * ($ride->seats_total - $ride->seats_available)) / 100), 2) }}
                                 </p>
                             </div>
                             <div class="flex items-center justify-between">
@@ -341,9 +347,12 @@
                             @foreach ($ride->options as $option)
                                 <div class="flex items-center space-x-2">
                                     @if ($option->icon)
-                                        <img class="w-7 h-7" data-tippy-content="{{ $option->display_description }}" src="{{ asset('home_page_icons/' . $option->icon) }}" alt="{{ $option->display_label }}">
+                                        <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $option->icon) }}" alt="{{ $option->display_label }}">
                                     @endif
                                     <p>{{ $option->display_label }}</p>
+                                    <span class="inline-flex cursor-help w-4 h-4" data-tippy-content="{{ $option->display_description }}">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z" fill="#666666"></path></svg>
+                                    </span>
                                 </div>
                             @endforeach
                         @else

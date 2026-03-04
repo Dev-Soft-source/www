@@ -535,6 +535,7 @@ class PxRideService
             'label' => Arr::get($destination, 'label'),
             'lat' => Arr::get($destination, 'lat'),
             'lng' => Arr::get($destination, 'lng'),
+            'price_delta_minor' => Arr::get($destination, 'price_delta_minor', 0),
             'is_pickup' => false,
             'is_dropoff' => true,
         ];
