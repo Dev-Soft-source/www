@@ -133,7 +133,7 @@
                             <div class="p-4">
                                 <a href="{{ route('notifications', ['lang' => $selectedLanguage->abbreviation]) }}"
                                     class="w-full text-center font-FuturaMdCnBT bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                                    {{ $siteText['view_all_btn_text'] ?? 'View All' }}
+                                    {{ $siteText['view_all_btn_text'] ?? 'Inbox' }}
                                 </a>
                             </div>
                             <ul class="max-h-[400px] overflow-y-auto rounded-lg shadow-lg"

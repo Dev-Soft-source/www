@@ -47,6 +47,7 @@ class SuccessMessagesSettingDetailResource extends JsonResource
             'email_sent_message' => $this->email_sent_message,
             'registration_successful_title' => $this->registration_successful_title,
             'go_to_homepage' => $this->go_to_homepage,
+            'overlap_ride_title' => $this->overlap_ride_title,
             'hey_message' => $this->hey_message,
             'complete_profile_message' => $this->complete_profile_message,
             'no_user_found_message' => $this->no_user_found_message,

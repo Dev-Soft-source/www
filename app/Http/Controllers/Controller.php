@@ -17,6 +17,7 @@ use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\SiteTextDetail;
 use App\Models\VideoDetail;
+use Illuminate\Support\Facades\Log;
 
 class Controller extends BaseController
 {
@@ -79,7 +80,7 @@ class Controller extends BaseController
                         return redirect()->route('step5to5', ['lang' => $lang]);
                     }
                 }
-
+                
                 if ($routeName === 'my_rides' || $routeName === 'post_ride') { // || $routeName === 'ride_detail' 
                     if ($user->step3 !== 1) {
                         // vehicle information

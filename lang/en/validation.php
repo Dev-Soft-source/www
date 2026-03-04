@@ -10,7 +10,7 @@ return
 	'alpha' => 'The :attribute field must only contain letters.',
 	'alpha_dash' => 'The :attribute field must only contain letters, numbers, dashes and underscores.',
 	'alpha_num' => 'The :attribute field must only contain letters and numbers.',
-	'array' => 'The :attribute field must be an array.',
+	'array' => 'The :attribute field must contain :size items.',
 	'ascii' => 'The :attribute field must only contain single-byte alphanumeric characters and symbols.',
 	'before' => 'The :attribute field must be a date before :date.',
 	'before_or_equal' => 'The :attribute field must be a date before or equal to :date.',

@@ -74,6 +74,8 @@ class SuccessMessagesSettingService
                 $errorMessages = array_merge($errorMessages, ['registration_successful_title.registration_successful_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['go_to_homepage.go_to_homepage_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['go_to_homepage.go_to_homepage_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['overlap_ride_title.overlap_ride_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['overlap_ride_title.overlap_ride_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['hey_message.hey_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['hey_message.hey_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['complete_profile_message.complete_profile_message_' . $language->id => ['required', 'string']]);
@@ -347,6 +349,7 @@ class SuccessMessagesSettingService
             'email_sent_message' => $this->data($request, $language, 'email_sent_message'),
             'registration_successful_title' => $this->data($request, $language, 'registration_successful_title'),
             'go_to_homepage' => $this->data($request, $language, 'go_to_homepage'),
+            'overlap_ride_title' => $this->data($request, $language, 'overlap_ride_title'),
             'hey_message' => $this->data($request, $language, 'hey_message'),
             'complete_profile_message' => $this->data($request, $language, 'complete_profile_message'),
             'no_user_found_message' => $this->data($request, $language, 'no_user_found_message'),

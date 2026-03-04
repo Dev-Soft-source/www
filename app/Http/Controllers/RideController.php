@@ -34,6 +34,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\SeatDetail;
 use App\Services\FCMService;
+use App\Models\PhoneNumber;
 use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ class RideController extends Controller
 {
     public function SearchRide(Request $request, $lang = null)
     {
+        
         $rides = null;
 
         $findRidePage = $this->getFindRidePageWithSettingDetail();
@@ -556,10 +558,10 @@ class RideController extends Controller
         if ($selectedLanguage) {
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'overlap_ride_message', 'ride_dead_time_text', 'profile_photo_required_message')->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'overlap_ride_title', 'overlap_ride_message', 'ride_dead_time_text', 'profile_photo_required_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'overlap_ride_message', 'ride_dead_time_text', 'profile_photo_required_message')->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'overlap_ride_title', 'overlap_ride_message', 'ride_dead_time_text', 'profile_photo_required_message')->first();
         }
 
         if ($user->block_post_ride == '1') {
@@ -594,7 +596,7 @@ class RideController extends Controller
 
         if (isset($rides) && !empty($rides)) {
             $oldInput = $request->all();
-            return back()->with('error', $message->overlap_ride_message ?? 'this ride overlaps with an existing ride you already have')->with('heading', 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
+            return back()->with('error', $message->overlap_ride_message ?? 'this ride overlaps with an existing ride you already have')->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
         }
         $rideDateTime = Carbon::parse($formattedDate . ' ' . $formattedTime);
         if ($rideDateTime->lte(Carbon::now()->addMinutes($adminSetting->ride_post_dead_time ?? 0))) {
@@ -650,17 +652,6 @@ class RideController extends Controller
         } elseif ($skip_vehicle !== 0) {
             $filename = '';
         }
-
-        // Check if any existing ride has the same date and time
-        // foreach ($rides as $existingRide) {
-        //     if (
-        //         $existingRide->date == Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d') &&
-        //         $existingRide->time == $request->time . ':00'
-        //     ) {
-        //         $oldInput = $request->all();
-        //         return back()->with('error', 'You already have a ride scheduled for the same date and time.')->with('heading', 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
-        //     }
-        // }
 
         $max_back_seats = $request->filled('max_back_seats') ? $request->max_back_seats : 0;
         $accept_more_luggage = $request->filled('accept_more_luggage') ? $request->accept_more_luggage : 0;
@@ -1593,13 +1584,24 @@ class RideController extends Controller
     public function PostRide($lang = null)
     {
         $user_id = auth()->user()->id;
-        Log::info('PostRide', ['user_id' => $user_id, 'lang' => $lang]);
         $user = User::whereId($user_id)->first();
         $pinkRideSetting = PinkRideSetting::first();
         $setting = FolkRideSetting::first();
         $vehicles = Vehicle::where('user_id', $user_id)->get();
         $rides = Ride::where('added_by', $user_id)->get();
         $noshows = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
+        
+        $phone_verified = PhoneNumber::where('user_id', $user_id)->where('verified', '1')->first();
+        if (!$phone_verified) {
+            // phone number not verified, redirect to phone verification page
+            return redirect()->route('phone', ['lang' => $lang]);
+        }
+
+        $driver_license_verified = User::where('id', $user_id)->where('driver', '1')->first();
+        if (!$driver_license_verified) {
+            // driver license not verified, redirect to driver license verification page
+            return redirect()->route('driver.verify', ['lang' => $lang]);
+        }
 
         if ($rides->isNotEmpty()) {
             // Fetch ratings where the driver_id matches the authenticated user's ID
@@ -1682,7 +1684,7 @@ class RideController extends Controller
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'profile_photo_required_message', 'overlap_ride_message', 'ride_dead_time_text')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'profile_photo_required_message', 'overlap_ride_message', 'ride_dead_time_text')->first();
                 $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
             }
         } else {
@@ -1690,7 +1692,7 @@ class RideController extends Controller
             if ($selectedLanguage) {
                 $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
 
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'overlap_ride_message', 'profile_photo_required_message', 'ride_dead_time_text')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'overlap_ride_message', 'profile_photo_required_message', 'ride_dead_time_text')->first();
             }
         }
 
@@ -1939,7 +1941,7 @@ class RideController extends Controller
                 $existingRide->time == $request->time . ':00'
             ) {
                 $oldInput = $request->all();
-                return back()->with('error', $message->ride_schedule_message)->with('heading', 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
+                return back()->with('error', $message->ride_schedule_message)->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
             }
         }
 
@@ -2088,7 +2090,7 @@ class RideController extends Controller
 
         if (isset($rides) && !empty($rides)) {
             $oldInput = $request->all();
-            return back()->with('error', $message->overlap_ride_message ?? 'this ride overlaps with an existing ride you already have')->with('heading', 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
+            return back()->with('error', $message->overlap_ride_message ?? 'this ride overlaps with an existing ride you already have')->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
         }
         $rideDateTime = Carbon::parse($formattedDate . ' ' . $formattedTime);
 

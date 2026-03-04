@@ -1162,7 +1162,7 @@
                                                 )
                                             "
                                         ></p>
-                                    </div>
+                                    </div>                                   
 
                                     <div class="relative z-0 w-full group">
                                         <div>
@@ -1544,12 +1544,53 @@
                                             "
                                         ></p>
                                     </div>
+
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`overlap_ride_title_${activeLanguageId}`"
+                                                    >32. overlap ride title</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`overlap_ride_title_${activeLanguageId}`"
+                                                :id="`overlap_ride_title_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('overlap_ride_title')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'overlap_ride_title'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `overlap_ride_title.overlap_ride_title_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `overlap_ride_title.overlap_ride_title_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+
+
                                     <div class="relative z-0 w-full group">
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
                                                     :for="`ride_schedule_message_${activeLanguageId}`"
-                                                    >32. You already have a ride scheduled for the same date and time</label
+                                                    >You already have a ride scheduled for the same date and time</label
                                                 >
                                             </div>
                                             <input
@@ -5237,6 +5278,7 @@ export default {
                             this.handleInput("", language, "email_sent_message");
                             this.handleInput("", language, "registration_successful_title");
                             this.handleInput("", language, "go_to_homepage");
+                            this.handleInput("", language, "overlap_ride_title");
                             this.handleInput("", language, "hey_message");
                             this.handleInput("", language, "complete_profile_message");
                             this.handleInput("", language, "no_user_found_message");
@@ -5497,6 +5539,11 @@ export default {
                                 setting?.go_to_homepage,
                                 setting?.language,
                                 "go_to_homepage"
+                            );
+                            this.handleInput(
+                                setting?.overlap_ride_title,
+                                setting?.language,
+                                "overlap_ride_title"
                             );
                             this.handleInput(
                                 setting?.hey_message,

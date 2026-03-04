@@ -159,7 +159,7 @@
                                     </svg>
                                 </div> -->
                             </div>
-                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="text-center sm:mt-0 sm:text-left">
                                 <div class="">
                                     <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                                 </div>
@@ -229,7 +229,7 @@
                                     </svg>
                                 </div> -->
                             </div>
-                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="text-center sm:mt-0 sm:text-left">
                                 <div class="">
                                     <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                                 </div>
@@ -271,7 +271,7 @@
                                 </svg>
                             </div> -->
                         </div>
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="text-center sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                             </div>
@@ -306,7 +306,7 @@
                         </svg>
                     </button>
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="text-center sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="seats-modal-title">Heads up for 5+ seats</h3>
                             </div>
@@ -336,7 +336,7 @@
                         </svg>
                     </button>
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="text-center sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="priceErrorHeading">Price Limit Exceeded</h3>
                             </div>
@@ -367,7 +367,7 @@
                         </svg>
                     </button>
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <div class="text-center sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended Contribution Limit</h3>
                             </div>
@@ -509,7 +509,7 @@
                                             </svg>
                                         </button>
                                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                            <div class="text-center sm:mt-0 sm:text-left">
                                                 <div class="mt-2 w-full">
                                                     <p id="delete-stop-modal-title-post" class="can-exp-p text-center text-xl">Delete Stop?</p>
                                                 </div>
@@ -606,7 +606,17 @@
                                                     d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
                                             </svg>
                                         </div>
+                                        @php
+                                            $dateValue = old('date');
+                                            if (empty($dateValue) && ($routeType ?? '') === 'copy' && isset($ride) && $ride) {
+                                                $copyDate = $ride->date ?? (isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->date : null);
+                                                if ($copyDate) {
+                                                    $dateValue = \Carbon\Carbon::parse($copyDate)->format('F d, Y');
+                                                }
+                                            }
+                                        @endphp
                                         <input type="text" id="dateInput" name="date"
+                                            value="{{ $dateValue }}"
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             placeholder="">
                                     </div>
@@ -921,168 +931,168 @@
                 </div>
                 
                 <div class="mt-6 bg-white rounded-lg overflow-visible shadow-3xl">
-                        <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
-                            <h3 class="text-2xl">
-                                @isset($postRidePage->price_payment_heading)
-                                    {{ $postRidePage->price_payment_heading }}
-                                @endisset
-                                <span class="text-white">*</span>
-                            </h3>
+                    <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->price_payment_heading)
+                                {{ $postRidePage->price_payment_heading }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div id="post-ride-price-section" class="bg-white p-4 rounded-b-lg">
+                        @error('price')
+                            <div id="price-error-message" class="relative tooltip -bottom-4 group-hover:flex mb-2">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                </div>
+                            </div>
+                        @enderror
+                        <div id="price-client-error" class="hidden mb-2">
+                            <div class="relative tooltiptext -top-2 z-10 shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                <p class="text-white leading-none text-sm lg:text-base">Please enter the full route price.</p>
+                            </div>
                         </div>
-                        <div id="post-ride-price-section" class="bg-white p-4 rounded-b-lg">
-                            @error('price')
-                                <div id="price-error-message" class="relative tooltip -bottom-4 group-hover:flex mb-2">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
-                            @enderror
-                            <div id="price-client-error" class="hidden mb-2">
-                                <div class="relative tooltiptext -top-2 z-10 shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">Please enter the full route price.</p>
-                                </div>
-                            </div>
-                            <div id="single-price-block">
-                                <div>
-                                    <label for="" class=" text-gray-700 font-medium">
-                                        @isset($postRidePage->price_per_seat_label)
-                                            {{ $postRidePage->price_per_seat_label }}
-                                        @endisset
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative mt-2">
-                                        <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
-                                            </svg>
-                                        </span>
-                                        @php
-                                            $defaultPrice = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->price : "";
-                                        @endphp
-                                        <input type="number" step="any" name="price" id="priceData0" placeholder=""
-                                            value="{{ old('price', $defaultPrice) }}"
-                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
-                                    </div>
+                        <div id="single-price-block">
+                            <div>
+                                <label for="" class=" text-gray-700 font-medium">
+                                    @isset($postRidePage->price_per_seat_label)
+                                        {{ $postRidePage->price_per_seat_label }}
+                                    @endisset
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative mt-2">
+                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                        <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
+                                        </svg>
+                                    </span>
+                                    @php
+                                        $defaultPrice = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->price : "";
+                                    @endphp
+                                    <input type="number" step="any" name="price" id="priceData0" placeholder=""
+                                        value="{{ old('price', $defaultPrice) }}"
+                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
                                 </div>
                             </div>
-                            <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
-                                <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
-                                <div class="relative">
-                                    <div class="relative mt-2 mb-2">
-                                        <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
-                                            </svg>
-                                        </span>
-                                        <input type="number" step="any" id="priceData0DynamicInput" placeholder="" value="{{ old('price', '') }}"
-                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
-                                    </div>
-                                    <div id="full-route-tooltip-container-dynamic" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
-                                        <div class="tooltip-error">
-                                            The full-route price can't be higher than the total of all route sections.<br>
-                                            You can lower the full-route price or adjust section prices.
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
-                                <div class="relative mt-2 mb-4">
-                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none text-gray-500 font-medium">
+                        </div>
+                        <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
+                            <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
+                            <div class="relative">
+                                <div class="relative mt-2 mb-2">
+                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                         <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
                                         </svg>
                                     </span>
-                                    <input type="text" id="segment-total-price-input-dynamic" readonly placeholder="0.00" value="0.00"
-                                        class="bg-gray-200 border border-gray-300 pl-7 text-gray-700 text-base lg:text-lg rounded block w-full p-2.5 mt-2 cursor-default"/>
+                                    <input type="number" step="any" id="priceData0DynamicInput" placeholder="" value="{{ old('price', '') }}"
+                                        class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
                                 </div>
-                                <div id="segment-price-rows-dynamic"></div>
-                            </div>
-                            <div class="mt-6">
-                                <label for="" class="block mb-2 font-medium text-gray-900">
-                                    @isset($postRidePage->payment_methods_label)
-                                        {{ $postRidePage->payment_methods_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="space-y-2 mt-2">
-                                    @if($postRidePage->payment_methods_option1?->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="cash"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                @isset($postRidePage->payment_methods_option1->icon)
-                                                    <div class="w-8 h-6">
-                                                            <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon)}}" class="mx-auto w-full h-full object-contain" alt="">
-                                                    </div>
-                                                @endisset
-                                                <span class="">
-                                                    {{ $postRidePage->payment_methods_option1->name }}
-                                                </span>
-                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if($postRidePage->payment_methods_option2?->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="online"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                @isset($postRidePage->payment_methods_option2->icon)
-                                                    <div class="w-8 h-6">
-                                                            <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon)}}" class="h-full w-full mx-auto object-contain" alt="">
-                                                    </div>
-                                                @endisset
-                                                <span class="">
-                                                    {{ $postRidePage->payment_methods_option2->name }}
-                                                </span>
-                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                    @if($postRidePage->payment_methods_option3?->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="secured"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                @isset($postRidePage->payment_methods_option3->icon)
-                                                    <div class="w-8 h-6">
-                                                        <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon)}}" class="mx-auto h-full w-full object-contain" alt="">
-                                                    </div>
-                                                @endisset
-                                                <span class="">
-                                                    {{ $postRidePage->payment_methods_option3->name }}
-                                                </span>
-                                                <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endif
-                                </div>
-                                @error('payment_method')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                <div id="full-route-tooltip-container-dynamic" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
+                                    <div class="tooltip-error">
+                                        The full-route price can't be higher than the total of all route sections.<br>
+                                        You can lower the full-route price or adjust section prices.
                                     </div>
-                                  </div>
-                                @enderror
+                                </div>
                             </div>
+                            <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
+                            <div class="relative mt-2 mb-4">
+                                <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none text-gray-500 font-medium">
+                                    <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z"/>
+                                    </svg>
+                                </span>
+                                <input type="text" id="segment-total-price-input-dynamic" readonly placeholder="0.00" value="0.00"
+                                    class="bg-gray-200 border border-gray-300 pl-7 text-gray-700 text-base lg:text-lg rounded block w-full p-2.5 mt-2 cursor-default"/>
+                            </div>
+                            <div id="segment-price-rows-dynamic"></div>
                         </div>
+                        <div class="mt-6">
+                            <label for="" class="block mb-2 font-medium text-gray-900">
+                                @isset($postRidePage->payment_methods_label)
+                                    {{ $postRidePage->payment_methods_label }}
+                                @endisset
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <div class="space-y-2 mt-2">
+                                @if($postRidePage->payment_methods_option1?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="cash"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option1->icon)
+                                                <div class="w-8 h-6">
+                                                        <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon)}}" class="mx-auto w-full h-full object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option1->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if($postRidePage->payment_methods_option2?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="online"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option2->icon)
+                                                <div class="w-8 h-6">
+                                                        <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon)}}" class="h-full w-full mx-auto object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option2->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if($postRidePage->payment_methods_option3?->features_setting_id)
+                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                        <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
+                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
+                                            class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                        <label for="secured"
+                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                            @isset($postRidePage->payment_methods_option3->icon)
+                                                <div class="w-8 h-6">
+                                                    <img src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon)}}" class="mx-auto h-full w-full object-contain" alt="">
+                                                </div>
+                                            @endisset
+                                            <span class="">
+                                                {{ $postRidePage->payment_methods_option3->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help payment-method-tooltip" data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+                            @error('payment_method')
+                                <div class="relative tooltip -bottom-4 group-hover:flex">
+                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
+                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                </div>
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 ">
@@ -3174,18 +3184,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Retrieve old values from Laravel's old() function
 
+    var rideDate = "";
     var rideTime = "";
-    if('{{$routeType}}' == "repost"){
-        rideTime = '{{ $ride->time }}';
+    if (('{{ $routeType ?? '' }}' == "repost" || '{{ $routeType ?? '' }}' == "copy") && {{ isset($ride) && $ride ? 'true' : 'false' }}) {
+        rideTime = '{{ optional($ride)->time ? \Carbon\Carbon::parse(optional($ride)->time)->format('H:i') : '' }}';
     }
-    const oldDate = '{{ old('date') }}';
+    if ('{{ $routeType ?? '' }}' == "copy" && {{ isset($ride) && $ride ? 'true' : 'false' }}) {
+        @php
+            $copyDate = optional($ride)->date ?? (isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->date : null);
+        @endphp
+        rideDate = '{{ $copyDate ? \Carbon\Carbon::parse($copyDate)->format('F d, Y') : '' }}';
+    }
+    const oldDate = (rideDate && rideDate !== "") ? rideDate : '{{ old('date') }}';
     const oldTime = rideTime == "" ? '{{ old('time') }}' : rideTime;
 
     // Initialize the date picker
     flatpickr(dateInput, {
         dateFormat: 'F d, Y',
         minDate: 'today',   // Restrict to future dates only
-        defaultDate: oldDate || 'today', // Set default date to today
+        defaultDate: (oldDate && oldDate !== '') ? oldDate : 'today', // Set default date to today
         disableMobile: true,
         onChange: function(selectedDates, dateStr, instance) {
             // Update minTime based on whether the selected date is today or a future date
@@ -3207,21 +3224,55 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
     });
+    if (rideDate && rideDate !== "" && dateInput._flatpickr) {
+        setTimeout(function() {
+            try {
+                dateInput._flatpickr.setDate(rideDate, true);
+            } catch (e) { /* ignore if date is invalid or past */ }
+        }, 10);
+    }
 
-    // Initialize the date picker for time input with AM/PM control
-    // Use altInput to display 12-hour format to user but submit 24-hour format
-    flatpickr(timeInput, {
+    // Initialize the date picker for time input
+    // AM: display with "am" suffix (e.g. 9:30 am); PM: 24-hour format (e.g. 14:30)
+    function formatTimeDisplay(date) {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const mins = minutes < 10 ? '0' + minutes : String(minutes);
+        if (hours < 12) {
+            const h = hours === 0 ? 12 : hours;
+            return h + ':' + mins + ' am';
+        } else {
+            const h = hours < 10 ? '0' + hours : String(hours);
+            return h + ':' + mins;
+        }
+    }
+    const timePicker = flatpickr(timeInput, {
         enableTime: true,
         noCalendar: true,
         dateFormat: 'H:i', // 24-hour format for backend (stored value)
         altInput: true,
-        altFormat: 'h:i K', // 12-hour format with AM/PM (displayed to user)
+        altFormat: 'H:i', // Initial display, overridden by onChange
         time_24hr: false, // Enable AM/PM controls in picker
         disableMobile: true,
         minTime: getCurrentProjectTime(), // Set min time to current time
         defaultDate: oldTime || '',
         minuteIncrement: 1, // Set minute increment to 1
+        onChange: function(selectedDates) {
+            if (selectedDates.length && timeInput._flatpickr.altInput) {
+                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
+            }
+        },
+        onClose: function(selectedDates) {
+            if (selectedDates.length && timeInput._flatpickr.altInput) {
+                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
+            }
+        }
     });
+    setTimeout(function() {
+        if (timePicker.selectedDates.length && timePicker.altInput) {
+            timePicker.altInput.value = formatTimeDisplay(timePicker.selectedDates[0]);
+        }
+    }, 0);
 
     // Add a click event listener to the time input field
     timeInput.addEventListener('click', function() {
@@ -3888,6 +3939,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         var priceSectionPost = document.getElementById('post-ride-price-section');
         if (priceSectionPost) {
+            priceSectionPost.addEventListener('focus', function(e) {
+                var inp = e.target;
+                if (inp && !inp.readOnly && (inp.name === 'price' || inp.classList.contains('full-route-price-input') || inp.name === 'price_spot_display[]')) {
+                    var val = inp.value;
+                    if (val !== '' && (parseFloat(val) === 0 || val === '0' || val === '0.0' || val === '0.00')) {
+                        inp.value = '';
+                    }
+                }
+            }, true);
             priceSectionPost.addEventListener('input', function(e) {
                 if (e.target && e.target.classList && e.target.classList.contains('full-route-price-input') && typeof checkFullRouteVsTotalPostRide === 'function') checkFullRouteVsTotalPostRide();
                 if (e.target && (e.target.name === 'price' || e.target.classList.contains('full-route-price-input') || e.target.name === 'price_spot_display[]')) {
