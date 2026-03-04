@@ -136,20 +136,22 @@
                                     {{ $siteText['view_all_btn_text'] ?? 'Inbox' }}
                                 </a>
                             </div>
-                            <ul class="max-h-[400px] overflow-y-auto rounded-lg shadow-lg"
+                            <ul class="max-h-[400px] overflow-y-auto divide-y divide-gray-100"
                                 aria-labelledby="dropdownNotificationButton">
                                 @if ($notifications && $notifications->count() > 0)
                                     @foreach ($notifications as $notification)
-                                        <li
-                                            class="relative {{ $notification->is_read == 0 ? 'bg-blue-50' : 'bg-white' }}">
+                                        @php
+                                            $rowBg = $notification->is_read == 0 ? 'bg-blue-50' : ($loop->iteration % 2 === 1 ? 'bg-white' : 'bg-gray-100');
+                                        @endphp
+                                        <li class="relative {{ $rowBg }}">
                                             <button onclick="openModal('{{ $notification->id }}')"
-                                                class="text-gray-400 hover:text-gray-500 transition-colors bg-primary h-5 w-5 rounded-full flex items-center justify-center absolute top-3 right-2 z-10"
+                                                class="text-gray-400 hover:text-gray-500 transition-colors bg-primary h-5 w-5 rounded-full flex items-center justify-center absolute top-1/2 -translate-y-1/2 right-2 z-10"
                                                 aria-label="Delete notification">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
-                                            @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
+                                            @if ($notification->from || $notification->category == 'system')
                                                 @php
                                                     if (
                                                         $notification->type == '1' &&
@@ -181,15 +183,16 @@
                                                             $hasChatTarget =
                                                                 !empty($notification->ride_id) &&
                                                                 !empty($notification->posted_by);
+                                                            $isGeneralUpdate = $notification->category == 'system' && !$hasChatTarget;
                                                             $targetUrl = $hasChatTarget
                                                                 ? route('chat_detail', [
                                                                     'lang' => optional($selectedLanguage)->abbreviation,
                                                                     'id' => $notification->ride_id,
                                                                     'passenger' => $notification->posted_by,
                                                                 ])
-                                                                : route('my_chats', [
-                                                                    'lang' => optional($selectedLanguage)->abbreviation,
-                                                                ]);
+                                                                : ($isGeneralUpdate
+                                                                    ? route('notifications', ['lang' => optional($selectedLanguage)->abbreviation])
+                                                                    : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]));
                                                         }
                                                     } else {
                                                         $targetUrl = route('notifications', [
@@ -199,8 +202,8 @@
                                                 @endphp
                                                 <a href="javascript:void(0);" data-redirect-url="{{ $targetUrl }}"
                                                     onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, this.getAttribute('data-redirect-url'))"
-                                                    class="block border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors duration-150">
-                                                    <div class="flex gap-3 p-4 relative">
+                                                    class="block w-full pr-10 hover:bg-black/5 transition-colors duration-150">
+                                                    <div class="flex items-center gap-3 p-3 relative">
                                                         <div class="flex-shrink-0 relative">
                                                             <img class="w-10 h-10 rounded-full object-cover"
                                                                 src="{{ $notification->category == 'system' ? asset('assets/favicon.png') : ($notification->from ? $notification->from->profile_image : asset('assets/favicon.png')) }}"
@@ -212,7 +215,7 @@
                                                         </div>
                                                         <div class="flex-1 min-w-0">
                                                             <p
-                                                                class="text-sm {{ $notification->is_read == 0 ? 'font-semibold text-primary' : 'font-medium text-gray-800' }} whitespace-pre-line">
+                                                                class="text-sm {{ $notification->is_read == 0 ? 'font-semibold text-primary' : 'font-medium text-gray-800' }}">
                                                                 {{ $notification->message }}</p>
                                                             <p class="text-xs text-gray-400 mt-2 flex items-center">
                                                                 <svg xmlns="http://www.w3.org/2000/svg"

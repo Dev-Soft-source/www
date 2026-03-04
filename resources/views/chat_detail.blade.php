@@ -73,7 +73,7 @@
                                     <h3 class="mb-0 text-white" id="modal-title">
                                         {{ $chatsPage->driver_chat_with ?? 'Chat with' }} {{ $passenger->first_name ?? 'User' }}
                                     </h3>
-                                    <a href="{{ route('my_chats', ['lang' => app()->getLocale()]) }}"
+                                    <a href="{{ route('notifications', ['lang' => app()->getLocale()]) }}"
                                         class="h-fit block text-gray-100 bg-transparent rounded-full border border-gray-100 text-sm p-1 ml-auto">
                                         <svg aria-hidden="true" class="w-3 h-3 text-gray-100" fill="currentColor"
                                             viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

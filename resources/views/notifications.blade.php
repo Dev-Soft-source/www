@@ -45,100 +45,146 @@
   </div>
 </div>
     <div class="container mx-auto p-4">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl md:text-3xl font-bold font-FuturaMdCnBT text-gray-800 mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="font-FuturaMdCnBT text-primary mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
             <div class="flex items-center gap-3">
                 @if ($notifications && $notifications->where('is_read', 0)->count() > 0)
-                    <button type="button" onclick="markAllAsRead()" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Mark all as read
-                    </button>
-                    <span class="bg-red-500 text-white text-sm px-3 py-1 rounded-full">{{ $notifications->where('is_read', 0)->count() }} unread</span>
+                    <div class="inline-flex items-center gap-3 border-2 border-blue-600 rounded-lg px-4 py-2 bg-gray-50">
+                        <button type="button" onclick="markAllAsRead()" class="text-gray-800 hover:text-primary text-[1.3125rem] font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Mark all as read
+                        </button>
+                        <span class="text-gray-800 text-[1.3125rem] bg-blue-600 text-white px-2 py-1 rounded-lg font-medium">{{ $notifications->where('is_read', 0)->count() }} unread</span>
+                    </div>
                 @endif
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-lg shadow">
-            @if ($notifications && $notifications->count() > 0)
-                <ul class="divide-y divide-gray-100">
-                    @foreach ($notifications as $notification)
-                        @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
-                            <li class="relative {{ $notification->is_read == 0 ? 'bg-blue-50 border-l-4 border-l-primary' : 'bg-white' }} hover:bg-gray-50 transition-colors">
-                                <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-2 px-3">
-                                    Delete
-                                </button>
-                                @php
-                                    // Check if it's a welcome/system notification – take user to welcome message page
-                                    if ($notification->category == 'system' && $notification->notification_type == 'welcome') {
-                                        $targetUrl = route('welcome_message', ['lang' => optional($selectedLanguage)->abbreviation]);
-                                    } else {
-                                        $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
-                                        $targetUrl = $hasChatTarget
-                                            ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
-                                            : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
-                                    }
-                                @endphp
-                                <a href="javascript:void(0);" onclick="markNotificationAsReadAndRedirect({{ $notification->id }}, '{{ $targetUrl }}')" class="block">
-                                    <div class="flex gap-3 items-start px-4 py-4 pr-24">
-                                        <div class="flex-shrink-0 relative">
+        <div id="notifications-info-bar" class="mb-4 rounded-lg overflow-hidden transition-all duration-300 ease-in-out">
+            <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 bg-green-500 hover:bg-green-600 text-white px-4 py-3 text-left transition-colors cursor-pointer">
+                <span class="font-medium">Stay connected – your chats live here</span>
+                <svg id="notifications-info-bar-icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <div id="notifications-info-bar-content" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out">
+                <div class="overflow-hidden">
+                    <div class="bg-white p-4 rounded-lg shadow border border-gray-100">
+                        @if ($notifications && $notifications->count() > 0)
+                            <ul class="divide-y divide-gray-100">
+                                @foreach ($notifications as $notification)
+                                    @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
+                                        @php
+                                            $rowBg = $notification->is_read == 0
+                                                ? 'bg-blue-50 border-l-4 border-l-primary'
+                                                : ($loop->iteration % 2 === 1 ? 'bg-white' : 'bg-gray-50');
+                                        @endphp
+                                        <li class="relative {{ $rowBg }} hover:bg-gray-100 transition-colors">
+                                            <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-2 px-3">
+                                                Delete
+                                            </button>
                                             @php
-                                                $defaultImage = asset('assets/image-placeholder.png');
-                                                if ($notification->category == 'system') {
-                                                    $imageSrc = asset('assets/favicon.png');
-                                                } elseif ($notification->from && !empty(trim($notification->from->profile_image ?? ''))) {
-                                                    $imageSrc = $notification->from->profile_image;
+                                                // 1. Ride details: type 1 = my ride, type 2 = other's ride
+                                                if ($notification->type == '1' && $notification->departure && $notification->destination) {
+                                                    $targetUrl = route('my_ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'departure' => $notification->departure, 'destination' => $notification->destination, 'id' => $notification->ride_id]);
+                                                    $isGeneralUpdate = false;
+                                                } elseif ($notification->type == '2' && $notification->departure && $notification->destination) {
+                                                    $targetUrl = route('ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'departure' => $notification->departure ?? 'unknown', 'destination' => $notification->destination ?? 'unknown', 'id' => $notification->ride_id ?? 0]);
+                                                    $isGeneralUpdate = false;
+                                                } elseif ($notification->category == 'system' && $notification->notification_type == 'welcome') {
+                                                    $targetUrl = route('welcome_message', ['lang' => optional($selectedLanguage)->abbreviation]);
+                                                    $isGeneralUpdate = false;
                                                 } else {
-                                                    $imageSrc = $defaultImage;
+                                                    $hasChatTarget = !empty($notification->ride_id) && !empty($notification->posted_by);
+                                                    $isGeneralUpdate = $notification->category == 'system' && !$hasChatTarget;
+                                                    $targetUrl = $hasChatTarget
+                                                        ? route('chat_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $notification->ride_id, 'passenger' => $notification->posted_by])
+                                                        : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
                                                 }
                                             @endphp
-                                            <img class="w-12 h-12 rounded-full object-cover"
-                                                src="{{ $imageSrc }}"
-                                                alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}"
-                                                onerror="this.onerror=null; this.src='{{ $defaultImage }}';">
-                                            @if ($notification->is_read == 0)
-                                                <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
-                                            @endif
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="font-medium text-gray-900 {{ $notification->is_read == 0 ? 'font-semibold' : '' }}">
-                                                @if ($notification->category == 'system')
-                                                    {{ config('app.name') }}
-                                                @else
-                                                    {{ $notification->from ? $notification->from->first_name : 'System' }}
-                                                @endif
-                                            </p>
-                                            <p class="text-gray-600 mt-1 {{ $notification->is_read == 0 ? 'text-gray-800' : '' }}">{{ $notification->message }}</p>
-                                            <p class="text-sm text-gray-400 mt-2 flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                {{ \Carbon\Carbon::parse($notification->added_on)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($notification->added_on)->format('h:i A') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
+                                            <a href="javascript:void(0);" class="block notification-link" data-id="{{ $notification->id }}" data-general="{{ $isGeneralUpdate ? '1' : '0' }}" data-target="{{ $targetUrl }}">
+                                                <div class="flex gap-3 items-start px-4 py-4 pr-24">
+                                                    <div class="flex-shrink-0 relative">
+                                                        @php
+                                                            $defaultImage = asset('assets/image-placeholder.png');
+                                                            if ($notification->category == 'system') {
+                                                                $imageSrc = asset('assets/favicon.png');
+                                                            } elseif ($notification->from && !empty(trim($notification->from->profile_image ?? ''))) {
+                                                                $imageSrc = $notification->from->profile_image;
+                                                            } else {
+                                                                $imageSrc = $defaultImage;
+                                                            }
+                                                        @endphp
+                                                        <img class="w-12 h-12 rounded-full object-cover"
+                                                            src="{{ $imageSrc }}"
+                                                            alt="{{ $notification->category == 'system' ? 'System' : ($notification->from ? $notification->from->first_name : 'System') }}"
+                                                            onerror="this.onerror=null; this.src='{{ $defaultImage }}';">
+                                                        @if ($notification->is_read == 0)
+                                                            <span class="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full border-2 border-white"></span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-medium text-gray-900 {{ $notification->is_read == 0 ? 'font-semibold' : '' }}">
+                                                            @if ($notification->category == 'system')
+                                                                {{ config('app.name') }}
+                                                            @else
+                                                                {{ $notification->from ? $notification->from->first_name : 'System' }}
+                                                            @endif
+                                                        </p>
+                                                        <p class="text-gray-600 mt-1 {{ $notification->is_read == 0 ? 'text-gray-800' : '' }}">{{ $notification->message }}</p>
+                                                        <p class="text-sm text-gray-400 mt-2 flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            {{ \Carbon\Carbon::parse($notification->added_on)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($notification->added_on)->format('h:i A') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        @else
+                            <div class="text-center py-12">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <p class="mt-4 text-gray-500 font-medium">No notifications found.</p>
+                                <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
+                            </div>
                         @endif
-                    @endforeach
-                </ul>
-            @else
-                <div class="text-center py-12">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    <p class="mt-4 text-gray-500 font-medium">No notifications found.</p>
-                    <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
+                    </div>
                 </div>
-            @endif
+            </div>
         </div>
+
+        
     </div>
 @endsection
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        let notificationsInfoBarOpen = false;
+
+        function toggleNotificationsInfoBar() {
+            notificationsInfoBarOpen = !notificationsInfoBarOpen;
+            const content = document.getElementById('notifications-info-bar-content');
+            const icon = document.getElementById('notifications-info-bar-icon');
+            if (notificationsInfoBarOpen) {
+                content.classList.remove('grid-rows-[0fr]');
+                content.classList.add('grid-rows-[1fr]');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.remove('grid-rows-[1fr]');
+                content.classList.add('grid-rows-[0fr]');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
         function openModal(id){
             $('#delete_message_confirmation').removeClass('hidden');
             $('#notificationId').val(id);
@@ -180,6 +226,32 @@
                 }
             });
         }
+
+        function markNotificationAsReadOnly(notificationId) {
+            $.ajax({
+                url: "{{ route('web.read_notifications') }}",
+                type: 'GET',
+                data: { id: notificationId },
+                success: function(response) {
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    window.location.reload();
+                }
+            });
+        }
+
+        $(document).on('click', '.notification-link', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            const isGeneral = $(this).data('general') === 1 || $(this).data('general') === '1';
+            const target = $(this).data('target');
+            if (isGeneral) {
+                markNotificationAsReadOnly(id);
+            } else {
+                markNotificationAsReadAndRedirect(id, target);
+            }
+        });
 
         function markAllAsRead() {
             $.ajax({
