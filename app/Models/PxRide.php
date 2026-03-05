@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use phpseclib3\Crypt\Hash;
 
 class PxRide extends Model
 {
@@ -96,6 +97,11 @@ class PxRide extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(PxTransaction::class, 'ride_id');
+    }
+
+    public function seatDetail(): HasMany
+    {
+        return $this->hasMany(SeatDetail::class, 'ride_id')->orderBy('seat_number');
     }
 
     public function scopePublished(Builder $query): Builder

@@ -116,48 +116,98 @@
             </form>
         </div>
 
-        @if($hasSearch)
-            <div class="my-6">
-                @if($rides && $rides->count() > 0)
-                    <h2 class="text-center font-FuturaMdCnBT text-primary mb-4 text-xl md:text-2xl">
+        <div class="my-6">
+            @if($rides && $rides->count() > 0)
+                <h2 class="text-center font-FuturaMdCnBT text-primary mb-4 text-xl md:text-2xl">
+                    @if($hasSearch)
                         @isset($findRidePage->heading_ride_card_section)
                             {{ $findRidePage->heading_ride_card_section }}
                         @else
                             Available Rides
                         @endisset
-                        ({{ $rides->total() }})
-                    </h2>
+                    @else
+                        Recent Added Rides
+                    @endif
+                    ({{ $rides->total() }})
+                </h2>
 
-                    <div class="space-y-4">
-                        @foreach($rides as $ride)
-                            <x-px.ride-card
-                                :ride="$ride"
-                                :lang="optional($selectedLanguage)->abbreviation"
-                                :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor"
-                                :detail-query="[
-                                    'from_stop_id' => $ride->matched_from_stop_id,
-                                    'to_stop_id' => $ride->matched_to_stop_id,
-                                ]"
-                                detail-route="px.ride_detail"
-                            />
-                        @endforeach
-                    </div>
-                    <div class="mt-6">
-                        {{ $rides->links() }}
-                    </div>
-                @else
-                    <div class="text-center py-12 bg-white rounded-lg shadow-md">
-                        <p class="text-xl text-gray-600">
+                <div class="space-y-4">
+                    @foreach($rides as $ride)
+                        @php
+                            $fromLabel = $ride->route->origin_label ?? 'N/A';
+                            $toLabel = $ride->route->destination_label ?? 'N/A';
+                            $orderedStops = ($ride->stops ?? collect())->sortBy('stop_order')->values();
+
+                            if (!empty($ride->matched_from_stop_index) || $ride->matched_from_stop_index === 0) {
+                                $fromStop = $orderedStops->get((int) $ride->matched_from_stop_index);
+                                $fromLabel = $fromStop->label ?? $fromLabel;
+                            }
+                            if (!empty($ride->matched_to_stop_index) || $ride->matched_to_stop_index === 0) {
+                                $toStop = $orderedStops->get((int) $ride->matched_to_stop_index);
+                                $toLabel = $toStop->label ?? $toLabel;
+                            }
+                        @endphp
+
+                        <a href="{{ route('px.ride_detail', [
+                            'lang' => optional($selectedLanguage)->abbreviation,
+                            'id' => $ride->id,
+                            'from_stop_id' => $ride->matched_from_stop_id,
+                            'to_stop_id' => $ride->matched_to_stop_id,
+                        ]) }}" class="block">
+                            <div class="rounded-lg bg-white border border-gray-200 shadow-sm p-4">
+                                <div class="items-center relative">
+                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                        </span>
+                                    </div>
+                                    <div class="ml-12 md:ml-20">
+                                        <p class="font-bold text-xl text-black">Origin</p>
+                                        <div class="flex gap-2 items-baseline">
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                {{ $fromLabel }}.
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center relative">
+                                    <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                        <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                        </span>
+                                    </div>
+                                    <div class="ml-12 md:ml-20 items-baseline">
+                                        <p class="font-bold text-xl text-black">Destination</p>
+                                        <div class="flex gap-2">
+                                            <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                {{ $toLabel }}.
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+                <div class="mt-6">
+                    {{ $rides->links() }}
+                </div>
+            @else
+                <div class="text-center py-12 bg-white rounded-lg shadow-md">
+                    <p class="text-xl text-gray-600">
+                        @if($hasSearch)
                             @isset($findRidePage->no_rides_found_message)
                                 {{ $findRidePage->no_rides_found_message }}
                             @else
                                 No rides found matching your search criteria.
                             @endisset
-                        </p>
-                    </div>
-                @endif
-            </div>
-        @endif
+                        @else
+                            No recent rides available.
+                        @endif
+                    </p>
+                </div>
+            @endif
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

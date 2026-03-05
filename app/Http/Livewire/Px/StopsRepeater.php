@@ -15,10 +15,51 @@ class StopsRepeater extends Component
     {
         $this->stops = collect($initialStops)
             ->map(function ($stop) {
+                $departureAt = $stop['departure_at'] ?? null;
+                
+                // If we have separate date/time, combine them
+                if (!$departureAt && isset($stop['departure_date']) && isset($stop['departure_time'])) {
+                    $departureDate = $stop['departure_date'];
+                    $departureTime = $stop['departure_time'];
+                    if ($departureDate && $departureTime) {
+                        try {
+                            $departureAt = \Illuminate\Support\Carbon::parse($departureDate . ' ' . $departureTime);
+                        } catch (\Throwable $e) {
+                            // Keep null if parsing fails
+                        }
+                    }
+                }
+                
+                // Format for display in input field (Y-m-d H:i)
+                $departureAtFormatted = '';
+                if ($departureAt) {
+                    try {
+                        $dt = \Illuminate\Support\Carbon::parse($departureAt);
+                        $departureAtFormatted = $dt->format('Y-m-d H:i');
+                    } catch (\Throwable $e) {
+                        // Keep empty if parsing fails
+                    }
+                }
+                
+                // Combine pickup and dropoff locations into one field, preferring pickup if both exist
+                $pickupDropoffLocation = (string) ($stop['pickup_dropoff_location'] ?? '');
+                if (empty($pickupDropoffLocation)) {
+                    $pickupLocation = (string) ($stop['pickup_location'] ?? '');
+                    $dropoffLocation = (string) ($stop['dropoff_location'] ?? '');
+                    // Combine both if they exist, otherwise use whichever is available
+                    if (!empty($pickupLocation) && !empty($dropoffLocation)) {
+                        $pickupDropoffLocation = $pickupLocation . ' / ' . $dropoffLocation;
+                    } else {
+                        $pickupDropoffLocation = $pickupLocation ?: $dropoffLocation;
+                    }
+                }
+                
                 return [
                     'label' => (string) ($stop['label'] ?? ''),
                     'city_id' => isset($stop['city_id']) && is_numeric($stop['city_id']) ? (int) $stop['city_id'] : null,
                     'price_delta_minor' => isset($stop['price_delta_minor']) && is_numeric($stop['price_delta_minor']) ? (int) $stop['price_delta_minor'] : 0,
+                    'departure_at' => $departureAtFormatted,
+                    'pickup_dropoff_location' => $pickupDropoffLocation,
                 ];
             })
             ->values()
@@ -34,6 +75,8 @@ class StopsRepeater extends Component
             'label' => '',
             'city_id' => null,
             'price_delta_minor' => 0,
+            'departure_at' => '',
+            'pickup_dropoff_location' => '',
         ];
     }
 

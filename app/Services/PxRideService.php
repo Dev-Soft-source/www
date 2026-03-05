@@ -6,6 +6,7 @@ use App\Models\PxRide;
 use App\Models\PxRideSearchLog;
 use App\Models\PxRoute;
 use App\Models\PxOption;
+use App\Models\SeatDetail;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,6 +58,17 @@ class PxRideService
             $selectedRideOptionIds = collect(Arr::get($payload, 'ride_option_ids', Arr::get($payload, 'preference', [])))
                 ->filter()
                 ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+            $assignmentOptionIds = $selectedRideOptionIds
+                ->merge([
+                    (int) Arr::get($payload, 'booking_mode', 0),
+                    (int) Arr::get($payload, 'booking_method', 0),
+                    (int) Arr::get($payload, 'smoking_allowed', 0),
+                    (int) Arr::get($payload, 'pets_allowed', 0),
+                    (int) Arr::get($payload, 'luggage_size', 0),
+                ])
+                ->filter(fn ($id) => $id > 0)
                 ->unique()
                 ->values();
 
@@ -120,26 +132,53 @@ class PxRideService
             ]);
 
             $stops = Arr::get($payload, 'stops', []);
-            $orderedStops = $this->buildOrderedStops($origin, $destination, $stops);
+            $rideDepartureAt = Arr::get($payload, 'departure_at');
+            $orderedStops = $this->buildOrderedStops($origin, $destination, $stops, $rideDepartureAt);
 
             foreach ($orderedStops as $index => $stop) {
+                // Use departure_at if available, otherwise fall back to eta_at
+                $departureAt = Arr::get($stop, 'departure_at');
+                $etaAt = Arr::get($stop, 'eta_at');
+                
+                // Convert departure_at (Y-m-d H:i format) to Carbon instance for eta_at
+                if ($departureAt && !$etaAt) {
+                    try {
+                        // If departure_at is a string in Y-m-d H:i format
+                        if (is_string($departureAt)) {
+                            $etaAt = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $departureAt);
+                            if ($etaAt === false) {
+                                $etaAt = \Illuminate\Support\Carbon::parse($departureAt);
+                            }
+                        } else {
+                            // If it's already a Carbon instance
+                            $etaAt = $departureAt;
+                        }
+                    } catch (\Throwable $e) {
+                        $etaAt = null;
+                    }
+                }
+                
                 $ride->stops()->create([
                     'stop_order' => $index + 1,
                     'city_id' => Arr::get($stop, 'city_id'),
                     'label' => Arr::get($stop, 'label'),
                     'lat' => Arr::get($stop, 'lat'),
                     'lng' => Arr::get($stop, 'lng'),
-                    'eta_at' => Arr::get($stop, 'eta_at'),
+                    'eta_at' => $etaAt,
                     'price_delta_minor' => (int) Arr::get($stop, 'price_delta_minor', 0),
                     'seats_available' => Arr::get($stop, 'seats_available'),
                     'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
                     'is_dropoff' => (bool) Arr::get($stop, 'is_dropoff', true),
+                    'pickup_dropoff_location' => Arr::get($stop, 'pickup_dropoff_location') ?: null,
                 ]);
             }
 
-            if ($selectedRideOptionIds->isNotEmpty()) {
+            // Create seat_details rows for this PX ride, mirroring legacy ride logic
+            $this->rebuildSeatDetailsForRide($ride, $seatsTotal);
+
+            if ($assignmentOptionIds->isNotEmpty()) {
                 $validOptionIds = PxOption::query()
-                    ->whereIn('id', $selectedRideOptionIds)
+                    ->whereIn('id', $assignmentOptionIds)
                     ->where('is_active', true)
                     ->pluck('id')
                     ->all();
@@ -194,6 +233,17 @@ class PxRideService
             $selectedRideOptionIds = collect(Arr::get($payload, 'ride_option_ids', Arr::get($payload, 'preference', [])))
                 ->filter()
                 ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+            $assignmentOptionIds = $selectedRideOptionIds
+                ->merge([
+                    (int) Arr::get($payload, 'booking_mode', 0),
+                    (int) Arr::get($payload, 'booking_method', 0),
+                    (int) Arr::get($payload, 'smoking_allowed', 0),
+                    (int) Arr::get($payload, 'pets_allowed', 0),
+                    (int) Arr::get($payload, 'luggage_size', 0),
+                ])
+                ->filter(fn ($id) => $id > 0)
                 ->unique()
                 ->values();
 
@@ -262,27 +312,48 @@ class PxRideService
             // Delete existing stops and create new ones
             $ride->stops()->delete();
             $stops = Arr::get($payload, 'stops', []);
-            $orderedStops = $this->buildOrderedStops($origin, $destination, $stops);
+            $rideDepartureAt = Arr::get($payload, 'departure_at');
+            $orderedStops = $this->buildOrderedStops($origin, $destination, $stops, $rideDepartureAt);
 
             foreach ($orderedStops as $index => $stop) {
+                // Use departure_at if available, otherwise fall back to eta_at
+                $departureAt = Arr::get($stop, 'departure_at');
+                $etaAt = Arr::get($stop, 'eta_at');
+                
+                // Convert departure_at (Y-m-d H:i format) to Carbon instance for eta_at
+                if ($departureAt && !$etaAt) {
+                    try {
+                        $etaAt = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $departureAt);
+                        if ($etaAt === false) {
+                            $etaAt = \Illuminate\Support\Carbon::parse($departureAt);
+                        }
+                    } catch (\Throwable $e) {
+                        $etaAt = null;
+                    }
+                }
+                
                 $ride->stops()->create([
                     'stop_order' => $index + 1,
                     'city_id' => Arr::get($stop, 'city_id'),
                     'label' => Arr::get($stop, 'label'),
                     'lat' => Arr::get($stop, 'lat'),
                     'lng' => Arr::get($stop, 'lng'),
-                    'eta_at' => Arr::get($stop, 'eta_at'),
+                    'eta_at' => $etaAt,
                     'price_delta_minor' => (int) Arr::get($stop, 'price_delta_minor', 0),
                     'seats_available' => Arr::get($stop, 'seats_available'),
                     'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
                     'is_dropoff' => (bool) Arr::get($stop, 'is_dropoff', true),
+                    'pickup_dropoff_location' => Arr::get($stop, 'pickup_dropoff_location') ?: null,
                 ]);
             }
 
+            // Rebuild seat_details rows for this PX ride to reflect the updated seats_total
+            $this->rebuildSeatDetailsForRide($ride, $seatsTotal);
+
             // Update ride options
-            if ($selectedRideOptionIds->isNotEmpty()) {
+            if ($assignmentOptionIds->isNotEmpty()) {
                 $validOptionIds = PxOption::query()
-                    ->whereIn('id', $selectedRideOptionIds)
+                    ->whereIn('id', $assignmentOptionIds)
                     ->where('is_active', true)
                     ->pluck('id')
                     ->all();
@@ -293,6 +364,28 @@ class PxRideService
 
             return $ride->load(['route', 'stops', 'driver', 'vehicle', 'options.translations']);
         });
+    }
+
+    /**
+     * (Re)build seat_details rows for a PX ride, mirroring legacy ride logic.
+     *
+     * This creates one SeatDetail per seat_number (1..$seatsTotal) with status 'pending'.
+     * Existing seat_details for the ride are removed first.
+     */
+    protected function rebuildSeatDetailsForRide(PxRide $ride, int $seatsTotal): void
+    {
+        // Remove any existing seat details for this ride
+        SeatDetail::where('ride_id', $ride->id)->delete();
+
+        // Create fresh seat details
+        $seatsTotal = max(0, $seatsTotal);
+        for ($i = 1; $i <= $seatsTotal; $i++) {
+            SeatDetail::create([
+                'ride_id' => $ride->id,
+                'seat_number' => $i,
+                'status' => 'pending',
+            ]);
+        }
     }
 
     public function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
@@ -446,6 +539,11 @@ class PxRideService
 
     protected function applySorting(Builder $query, string $sort): void
     {
+        if ($sort === 'latest_added') {
+            $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+            return;
+        }
+
         if ($sort === 'price_asc') {
             $query->orderBy('price_minor', 'asc')->orderBy('departure_at', 'asc');
             return;
@@ -499,15 +597,37 @@ class PxRideService
         ]));
     }
 
-    protected function buildOrderedStops(array $origin, array $destination, array $intermediateStops): array
+    protected function buildOrderedStops(array $origin, array $destination, array $intermediateStops, ?string $rideDepartureAt = null): array
     {
         $stops = [];
 
+        // Convert ride departure_at to Carbon instance if provided
+        $rideEtaAt = null;
+        if ($rideDepartureAt) {
+            try {
+                if (is_string($rideDepartureAt)) {
+                    $rideEtaAt = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $rideDepartureAt);
+                    if ($rideEtaAt === false) {
+                        $rideEtaAt = \Illuminate\Support\Carbon::parse($rideDepartureAt);
+                    }
+                } else {
+                    $rideEtaAt = $rideDepartureAt;
+                }
+            } catch (\Throwable $e) {
+                $rideEtaAt = null;
+            }
+        }
+
+        // First stop (origin) - add ride's departure_at and pickup_location
+        $originPickupLocation = Arr::get($origin, 'pickup_location', '');
         $stops[] = [
             'city_id' => Arr::get($origin, 'city_id'),
             'label' => Arr::get($origin, 'label'),
             'lat' => Arr::get($origin, 'lat'),
             'lng' => Arr::get($origin, 'lng'),
+            'eta_at' => $rideEtaAt,
+            'departure_at' => $rideDepartureAt,
+            'pickup_dropoff_location' => $originPickupLocation,
             'is_pickup' => true,
             'is_dropoff' => false,
         ];
@@ -517,12 +637,49 @@ class PxRideService
             if ($label === '') {
                 continue;
             }
+            
+            // Use departure_at directly (format: Y-m-d H:i)
+            $departureAt = Arr::get($stop, 'departure_at');
+            $etaAt = Arr::get($stop, 'eta_at') ?? null;
+            
+            if ($departureAt && !$etaAt) {
+                try {
+                    // Try to parse as Y-m-d H:i format first
+                    if (is_string($departureAt)) {
+                        $etaAt = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $departureAt);
+                        if ($etaAt === false) {
+                            $etaAt = \Illuminate\Support\Carbon::parse($departureAt);
+                        }
+                    } else {
+                        // If it's already a Carbon instance
+                        $etaAt = $departureAt;
+                    }
+                } catch (\Throwable $e) {
+                    $etaAt = null;
+                }
+            }
+            
+            // Handle pickup_dropoff_location - use single field
+            $pickupDropoffLocation = Arr::get($stop, 'pickup_dropoff_location', '');
+            // For backward compatibility, also check separate fields
+            if (empty($pickupDropoffLocation)) {
+                $pickupLocation = Arr::get($stop, 'pickup_location', '');
+                $dropoffLocation = Arr::get($stop, 'dropoff_location', '');
+                if (!empty($pickupLocation) && !empty($dropoffLocation)) {
+                    $pickupDropoffLocation = $pickupLocation . ' / ' . $dropoffLocation;
+                } else {
+                    $pickupDropoffLocation = $pickupLocation ?: $dropoffLocation;
+                }
+            }
+            
             $stops[] = [
                 'city_id' => Arr::get($stop, 'city_id'),
                 'label' => $label,
                 'lat' => Arr::get($stop, 'lat'),
                 'lng' => Arr::get($stop, 'lng'),
-                'eta_at' => Arr::get($stop, 'eta_at'),
+                'eta_at' => $etaAt,
+                'departure_at' => $etaAt, // Alias for consistency
+                'pickup_dropoff_location' => $pickupDropoffLocation,
                 'price_delta_minor' => Arr::get($stop, 'price_delta_minor', 0),
                 'seats_available' => Arr::get($stop, 'seats_available'),
                 'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
@@ -530,12 +687,15 @@ class PxRideService
             ];
         }
 
+        // Last stop (destination) - add dropoff_location
+        $destinationDropoffLocation = Arr::get($destination, 'dropoff_location', '');
         $stops[] = [
             'city_id' => Arr::get($destination, 'city_id'),
             'label' => Arr::get($destination, 'label'),
             'lat' => Arr::get($destination, 'lat'),
             'lng' => Arr::get($destination, 'lng'),
             'price_delta_minor' => Arr::get($destination, 'price_delta_minor', 0),
+            'pickup_dropoff_location' => $destinationDropoffLocation,
             'is_pickup' => false,
             'is_dropoff' => true,
         ];

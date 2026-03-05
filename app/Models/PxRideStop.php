@@ -21,6 +21,7 @@ class PxRideStop extends Model
         'seats_available',
         'is_pickup',
         'is_dropoff',
+        'pickup_dropoff_location',
     ];
 
     protected $casts = [

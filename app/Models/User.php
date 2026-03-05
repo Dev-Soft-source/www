@@ -198,6 +198,136 @@ class User extends Authenticatable
     function phoneNumber(){
         return $this->hasMany(PhoneNumber::class, 'user_id');
     }
-}
 
+    /**
+     * Determine if Pink Ride features should be disabled for this user,
+     * based on the same logic currently used in Blade.
+     */
+    public function isPinkRideDisabled(?\App\Models\PinkRideSetting $pinkRideSetting = null): bool
+    {
+        // Explicitly disabled by admin flag
+        if ($this->pink_ride === '0') {
+            return true;
+        }
+
+        // If pink_ride has a non-empty, non-zero value (e.g. '1'), treat as override
+        if ($this->pink_ride !== null && $this->pink_ride !== '') {
+            return false;
+        }
+
+        // When pink_ride is empty, apply PinkRideSetting rules (if any)
+        if (!$pinkRideSetting) {
+            // No settings to enforce → do not disable here
+            return false;
+        }
+
+        // Gender and identity checks
+        if ($this->gender === 'female' && (empty($this->government_issued_id) || empty($this->address))) {
+            return true;
+        }
+
+        if ($this->gender !== 'female') {
+            return true;
+        }
+
+        // Phone verification requirement
+        if ($pinkRideSetting->verfiy_phone === '1' && $this->phone_verified !== '1') {
+            return true;
+        }
+
+        // Email verification requirement
+        if ($pinkRideSetting->verify_email === '1' && $this->email_verified !== '1') {
+            return true;
+        }
+
+        // Driver licence requirement
+        if ($pinkRideSetting->driver_license === '1' && $this->driver !== '1') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if Extra+ (Folk) Ride features should be disabled for this user,
+     * based on the legacy Blade logic.
+     *
+     * @param  \App\Models\FolkRideSetting|null  $folkSetting
+     * @param  float|null  $overallRating
+     * @param  int|null    $age
+     * @param  int|null    $totalRidesCount
+     * @param  int|null    $rideLimit
+     * @param  int|null    $noShowsCount
+     * @param  int|null    $cancellationCount
+     * @param  int|null    $noShows
+     */
+    public function isFolkRideDisabled(
+        ?\App\Models\FolkRideSetting $folkSetting = null,
+        ?float $overallRating = null,
+        ?int $age = null,
+        ?int $totalRidesCount = null,
+        ?int $rideLimit = null,
+        ?int $noShowsCount = null,
+        ?int $cancellationCount = null,
+        ?int $noShows = null
+    ): bool {
+        // Explicitly disabled by admin flag
+        if ($this->folks_ride === '0') {
+            return true;
+        }
+
+        // If folks_ride has a non-empty, non-zero value (e.g. '1'), treat as override
+        if ($this->folks_ride !== null && $this->folks_ride !== '') {
+            return false;
+        }
+
+        // When folks_ride is empty, apply FolkRideSetting rules (if any)
+        if (!$folkSetting) {
+            return false;
+        }
+
+        // Phone verification requirement (for passengers: check any verified phone)
+        if ($folkSetting->verfiy_phone === '1') {
+            $hasVerifiedPhone = $this->phone_numbers && $this->phone_numbers->contains('verified', 1);
+            if (!$hasVerifiedPhone) {
+                return true;
+            }
+        }
+
+        // Email verification requirement
+        if ($folkSetting->verify_email === '1' && $this->email_verified !== '1') {
+            return true;
+        }
+
+        // Driver licence requirement
+        if ($folkSetting->driver_license === '1' && $this->driver !== '1') {
+            return true;
+        }
+
+        // Rating, age, ride count, no-shows, cancellations, additional noshows flag
+        $failsRatingOrAge = false;
+        if ($overallRating !== null && $folkSetting->average_rating !== null && $age !== null && $folkSetting->driver_age !== null) {
+            $failsRatingOrAge = ($overallRating < $folkSetting->average_rating) || ($age < $folkSetting->driver_age);
+        }
+
+        $failsRideCount = false;
+        if ($totalRidesCount !== null && $rideLimit !== null) {
+            $failsRideCount = $totalRidesCount < $rideLimit;
+        }
+
+        $failsNoShows = ($noShowsCount !== null && $noShowsCount > 0) || ($noShows !== null && $noShows > 0);
+        $failsCancellations = $cancellationCount !== null && $cancellationCount > 0;
+
+        if ($failsRatingOrAge || $failsRideCount || $failsNoShows || $failsCancellations) {
+            return true;
+        }
+
+        // Identity: government ID and address must be present
+        if (empty($this->government_issued_id) || empty($this->address)) {
+            return true;
+        }
+
+        return false;
+    }
+}
 

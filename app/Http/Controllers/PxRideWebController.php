@@ -3,21 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Px\PxStoreRideRequest;
-use App\Models\Card;
 use App\Models\PxBooking;
 use App\Models\PxOptionGroup;
 use App\Models\PxRide;
-use App\Models\PxRideStop;
-use App\Models\PxTransaction;
 use App\Models\Vehicle;
 use App\Models\TripsPageSettingDetail;
 use App\Models\RideDetailPageSettingDetail;
 use App\Services\PxRideService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Stripe\PaymentIntent;
-use Stripe\PaymentMethod as StripePaymentMethod;
-use Stripe\Stripe;
 
 class PxRideWebController extends Controller
 {
@@ -110,6 +104,9 @@ class PxRideWebController extends Controller
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
 
+        $isPinkRideDisabled = auth()->user()->isPinkRideDisabled();
+        $isExtraRideDisabled = auth()->user()->isFolkRideDisabled();
+
         $vehicles = Vehicle::query()
             ->where('user_id', auth()->id())
             ->orderByDesc('primary_vehicle')
@@ -141,6 +138,8 @@ class PxRideWebController extends Controller
 
         return view('px.post_ride', [
             'vehicles' => $vehicles,
+            'isExtraRideDisabled' => $isExtraRideDisabled,
+            'isPinkRideDisabled' => $isPinkRideDisabled,
             'optionGroups' => $optionGroups,
             'postRidePage' => $postRidePage,
         ]);
@@ -245,6 +244,8 @@ class PxRideWebController extends Controller
             $parsed[] = [
                 'city_id' => !empty($stop['city_id']) ? (int) $stop['city_id'] : null,
                 'label' => $label,
+                'departure_at' => $stop['departure_at'] ?? null,
+                'pickup_dropoff_location' => $stop['pickup_dropoff_location'] ?? null,
                 'price_delta_minor' => isset($stop['price_delta_minor']) && is_numeric($stop['price_delta_minor']) ? (int) $stop['price_delta_minor'] : 0,
                 'is_pickup' => isset($stop['is_pickup']) ? (bool) $stop['is_pickup'] : true,
                 'is_dropoff' => isset($stop['is_dropoff']) ? (bool) $stop['is_dropoff'] : true,
@@ -304,7 +305,18 @@ class PxRideWebController extends Controller
         // Get the PX ride and verify ownership
         $ride = PxRide::where('id', $id)
             ->where('driver_id', $user_id)
-            ->with(['route', 'vehicle', 'stops', 'options.translations', 'driver'])
+            ->with([
+                'route',
+                'vehicle',
+                'stops',
+                'options.translations',
+                'driver',
+                'bookings' => function ($query) {
+                    $query->where('status', 'waiting')
+                        ->with(['passenger', 'fromStop', 'toStop'])
+                        ->latest('id');
+                },
+            ])
             ->first();
 
         if (!$ride) {
@@ -353,6 +365,104 @@ class PxRideWebController extends Controller
             'bookingMethodLabel' => $bookingMethodLabel,
             'cancelationPolicyLabel' => $cancelationPolicyLabel,
         ]);
+    }
+
+    public function approveBookingRequest($lang = null, $id = null, $bookingId = null)
+    {
+        $driverId = (int) auth()->id();
+
+        $ride = PxRide::query()
+            ->where('id', (int) $id)
+            ->where('driver_id', $driverId)
+            ->first();
+
+        if (!$ride) {
+            return redirect()
+                ->route('px.my_rides', ['lang' => optional($this->selectedLanguage)->abbreviation])
+                ->with('error', 'Ride not found or you do not have permission to manage bookings.');
+        }
+
+        $booking = PxBooking::query()
+            ->where('id', (int) $bookingId)
+            ->where('ride_id', (int) $ride->id)
+            ->where('driver_id', $driverId)
+            ->first();
+
+        if (!$booking || (string) $booking->status !== 'waiting') {
+            return redirect()
+                ->route('px.my_ride_detail', ['lang' => optional($this->selectedLanguage)->abbreviation, 'id' => $ride->id])
+                ->with('error', 'Booking request is no longer available.');
+        }
+
+        $meta = is_array($booking->meta) ? $booking->meta : [];
+        $meta['approved_at'] = now()->toDateTimeString();
+        $meta['approved_by'] = 'driver_web';
+        $booking->meta = $meta;
+        $booking->status = 'approved';
+        $booking->save();
+
+        return redirect()
+            ->route('px.my_ride_detail', ['lang' => optional($this->selectedLanguage)->abbreviation, 'id' => $ride->id])
+            ->with('success', 'Booking request approved.');
+    }
+
+    public function declineBookingRequest($lang = null, $id = null, $bookingId = null)
+    {
+        $driverId = (int) auth()->id();
+
+        $ride = PxRide::query()
+            ->where('id', (int) $id)
+            ->where('driver_id', $driverId)
+            ->first();
+
+        if (!$ride) {
+            return redirect()
+                ->route('px.my_rides', ['lang' => optional($this->selectedLanguage)->abbreviation])
+                ->with('error', 'Ride not found or you do not have permission to manage bookings.');
+        }
+
+        try {
+            DB::transaction(function () use ($ride, $bookingId, $driverId): void {
+                $rideForUpdate = PxRide::query()
+                    ->where('id', (int) $ride->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $booking = PxBooking::query()
+                    ->where('id', (int) $bookingId)
+                    ->where('ride_id', (int) $ride->id)
+                    ->where('driver_id', $driverId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$rideForUpdate || !$booking || (string) $booking->status !== 'waiting') {
+                    throw new \RuntimeException('Booking request is no longer available.');
+                }
+
+                $meta = is_array($booking->meta) ? $booking->meta : [];
+                $meta['declined_at'] = now()->toDateTimeString();
+                $meta['declined_by'] = 'driver_web';
+                $booking->meta = $meta;
+                $booking->status = 'cancelled';
+                $booking->save();
+
+                $newSeatsAvailable = (int) $rideForUpdate->seats_available + (int) $booking->seats;
+                $maxSeats = (int) ($rideForUpdate->seats_total ?? 0);
+                if ($maxSeats > 0) {
+                    $newSeatsAvailable = min($maxSeats, $newSeatsAvailable);
+                }
+                $rideForUpdate->seats_available = max(0, $newSeatsAvailable);
+                $rideForUpdate->save();
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()
+                ->route('px.my_ride_detail', ['lang' => optional($this->selectedLanguage)->abbreviation, 'id' => $ride->id])
+                ->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('px.my_ride_detail', ['lang' => optional($this->selectedLanguage)->abbreviation, 'id' => $ride->id])
+            ->with('success', 'Booking request declined.');
     }
 
     public function rideDetail($lang = null, $id)
@@ -422,8 +532,8 @@ class PxRideWebController extends Controller
                     $matchedToIndex = $idx;
                 }
             }
-
-            if ($matchedFromIndex !== null && $matchedToIndex !== null && $matchedFromIndex < $matchedToIndex) {
+            
+            if ($matchedFromIndex !== null && $matchedToIndex !== null && $matchedFromIndex < $matchedToIndex && !($matchedFromIndex === 0 && $matchedToIndex === count($orderedStops) - 1)) {
                 $displayOrigin = (string) ($orderedStops[$matchedFromIndex]->label ?? $displayOrigin);
                 $displayDestination = (string) ($orderedStops[$matchedToIndex]->label ?? $displayDestination);
                 $displayPriceMinor = $this->resolveMatchedSegmentPriceMinor(
@@ -449,6 +559,18 @@ class PxRideWebController extends Controller
             $selectedToStopId = (int) ($orderedStops[count($orderedStops) - 1]->id ?? 0);
         }
 
+        $existingBooking = null;
+        if (auth()->check() && $ride->driver_id !== auth()->id() && $selectedFromStopId && $selectedToStopId) {
+            $existingBooking = PxBooking::query()
+                ->where('ride_id', (int) $ride->id)
+                ->where('passenger_id', (int) auth()->id())
+                ->where('from_stop_id', (int) $selectedFromStopId)
+                ->where('to_stop_id', (int) $selectedToStopId)
+                ->whereNotIn('status', ['cancelled', 'refunded', 'failed'])
+                ->latest('id')
+                ->first();
+        }
+
         $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         return view('px.ride_detail', [
@@ -466,302 +588,138 @@ class PxRideWebController extends Controller
             'isSegmentView' => $isSegmentView,
             'selectedFromStopId' => $selectedFromStopId,
             'selectedToStopId' => $selectedToStopId,
+            'existingBooking' => $existingBooking,
         ]);
     }
 
-    public function booking($lang = null, $from_stop_id = null, $to_stop_id = null)
+    public function myTrips($lang = null)
     {
-        $fromStop = PxRideStop::query()->find($from_stop_id);
-        $toStop = PxRideStop::query()->find($to_stop_id);
+        $userId = auth()->id();
+        $tab = request()->query('tab', 'upcoming');
 
-        if (!$fromStop || !$toStop || (int) $fromStop->ride_id !== (int) $toStop->ride_id) {
-            return redirect()
-                ->route('px.search_ride', ['lang' => optional($this->selectedLanguage)->abbreviation])
-                ->with('error', 'Invalid booking segment.');
-        }
+        $baseQuery = PxBooking::query()
+            ->where('passenger_id', $userId)
+            ->with([
+                'ride.route',
+                'ride.vehicle',
+                'ride.driver',
+                'ride.stops',
+                'ride.options.translations',
+                'fromStop',
+                'toStop',
+            ]);
 
-        $ride = PxRide::query()
-            ->with(['route', 'stops', 'driver', 'vehicle'])
-            ->published()
-            ->where('id', $fromStop->ride_id)
-            ->first();
-
-        if (!$ride) {
-            return redirect()
-                ->route('px.search_ride', ['lang' => optional($this->selectedLanguage)->abbreviation])
-                ->with('error', 'Ride not found or unavailable.');
-        }
-
-        $orderedStops = $ride->stops->sortBy('stop_order')->values()->all();
-        $fromIndex = null;
-        $toIndex = null;
-        foreach ($orderedStops as $idx => $stop) {
-            $stopId = (int) ($stop->id ?? 0);
-            if ($stopId === (int) $from_stop_id) {
-                $fromIndex = $idx;
+        $applyTabFilter = function ($query) use ($tab) {
+            if ($tab === 'completed') {
+                $query->whereNotIn('status', ['cancelled', 'refunded', 'failed'])
+                    ->whereHas('ride', function ($rideQuery) {
+                        $rideQuery->where('departure_at', '<', now())
+                            ->where('status', '!=', 'cancelled');
+                    });
+                return;
             }
-            if ($stopId === (int) $to_stop_id) {
-                $toIndex = $idx;
+
+            if ($tab === 'cancelled') {
+                $query->where(function ($cancelledQuery) {
+                    $cancelledQuery
+                        ->whereIn('status', ['cancelled', 'refunded', 'failed'])
+                        ->orWhereHas('ride', function ($rideQuery) {
+                            $rideQuery->where('status', 'cancelled');
+                        });
+                });
+                return;
             }
+
+            $query->whereNotIn('status', ['cancelled', 'refunded', 'failed'])
+                ->whereHas('ride', function ($rideQuery) {
+                    $rideQuery->where('departure_at', '>=', now())
+                        ->where('status', '!=', 'cancelled');
+                });
+        };
+
+        $bookingsQuery = (clone $baseQuery);
+        $applyTabFilter($bookingsQuery);
+        $bookings = $bookingsQuery
+            ->orderByDesc('booked_at')
+            ->paginate(10);
+
+        foreach ($bookings as $booking) {
+            if (!$booking->ride) {
+                continue;
+            }
+
+            $orderedStops = $booking->ride->stops
+                ? $booking->ride->stops->sortBy('stop_order')->values()->all()
+                : [];
+            $fromIndex = null;
+            $toIndex = null;
+
+            foreach ($orderedStops as $idx => $stop) {
+                $stopId = (int) ($stop->id ?? 0);
+                if ($stopId === (int) $booking->from_stop_id) {
+                    $fromIndex = $idx;
+                }
+                if ($stopId === (int) $booking->to_stop_id) {
+                    $toIndex = $idx;
+                }
+            }
+
+            $booking->ride->matched_from_stop_index = $fromIndex;
+            $booking->ride->matched_to_stop_index = $toIndex;
         }
 
-        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
-            return redirect()
-                ->route('px.ride_detail', ['lang' => optional($this->selectedLanguage)->abbreviation, 'id' => $ride->id])
-                ->with('error', 'Invalid route section for booking.');
-        }
+        $upcomingCount = (clone $baseQuery)
+            ->whereNotIn('status', ['cancelled', 'refunded', 'failed'])
+            ->whereHas('ride', function ($rideQuery) {
+                $rideQuery->where('departure_at', '>=', now())
+                    ->where('status', '!=', 'cancelled');
+            })
+            ->count();
+
+        $completedCount = (clone $baseQuery)
+            ->whereNotIn('status', ['cancelled', 'refunded', 'failed'])
+            ->whereHas('ride', function ($rideQuery) {
+                $rideQuery->where('departure_at', '<', now())
+                    ->where('status', '!=', 'cancelled');
+            })
+            ->count();
+
+        $cancelledCount = (clone $baseQuery)
+            ->where(function ($cancelledQuery) {
+                $cancelledQuery
+                    ->whereIn('status', ['cancelled', 'refunded', 'failed'])
+                    ->orWhereHas('ride', function ($rideQuery) {
+                        $rideQuery->where('status', 'cancelled');
+                    });
+            })
+            ->count();
 
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
-        $optionGroups = PxOptionGroup::whereIn('code', ['booking_mode', 'booking_method'])
-            ->with(['options' => function ($q) use ($selectedLangId, $defaultLangId) {
-                $q->where('is_active', true)
-                    ->with(['translations' => function ($tq) use ($selectedLangId, $defaultLangId) {
-                        $tq->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
-                    }]);
-            }])
-            ->get()
-            ->keyBy('code');
 
-        $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
-        $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
-        $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
-        $rideCurrencyCode = strtoupper((string) ($ride->currency ?: ($this->selectedCurrency ?? 'USD')));
-        $stripeCurrencyCode = strtolower($rideCurrencyCode);
-
-        $cards = Card::query()
-            ->where('user_id', auth()->id())
-            ->orderByDesc('primary_card')
-            ->orderByDesc('id')
-            ->get();
-
-        return view('px.booking', [
-            'ride' => $ride,
-            'fromStop' => $orderedStops[$fromIndex],
-            'toStop' => $orderedStops[$toIndex],
-            'segmentStops' => collect($orderedStops)->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
-            'segmentPriceMinor' => $segmentPriceMinor,
-            'bookingModeCode' => $bookingModeCode,
-            'bookingMethodLabel' => $bookingMethodLabel,
-            'cards' => $cards,
-        ]);
-    }
-
-    public function payBooking(Request $request, $lang = null)
-    {
-        $validated = $request->validate([
-            'from_stop_id' => ['required', 'integer', 'exists:px_ride_stops,id'],
-            'to_stop_id' => ['required', 'integer', 'exists:px_ride_stops,id'],
-            'card_id' => ['required', 'integer', 'exists:cards,id'],
-            'seats' => ['required', 'integer', 'min:1', 'max:8'],
-        ]);
-
-        $fromStop = PxRideStop::query()->find((int) $validated['from_stop_id']);
-        $toStop = PxRideStop::query()->find((int) $validated['to_stop_id']);
-        if (!$fromStop || !$toStop || (int) $fromStop->ride_id !== (int) $toStop->ride_id) {
-            return response()->json(['message' => 'Invalid booking segment.'], 422);
-        }
-
-        $ride = PxRide::query()
-            ->with('stops')
-            ->published()
-            ->where('id', $fromStop->ride_id)
-            ->first();
-        if (!$ride) {
-            return response()->json(['message' => 'Ride not found or unavailable.'], 404);
-        }
-
-        $orderedStops = $ride->stops->sortBy('stop_order')->values()->all();
-        $fromIndex = null;
-        $toIndex = null;
-        foreach ($orderedStops as $idx => $stop) {
-            $stopId = (int) ($stop->id ?? 0);
-            if ($stopId === (int) $validated['from_stop_id']) {
-                $fromIndex = $idx;
+        foreach ($bookings as $booking) {
+            if (!$booking->ride || !$booking->ride->relationLoaded('options')) {
+                continue;
             }
-            if ($stopId === (int) $validated['to_stop_id']) {
-                $toIndex = $idx;
-            }
-        }
-        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
-            return response()->json(['message' => 'Invalid route section for booking.'], 422);
-        }
-
-        $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
-        $amountMinor = (int) $segmentPriceMinor * (int) $validated['seats'];
-        
-        if ($amountMinor <= 0) {
-            return response()->json(['message' => 'Invalid payment amount.'], 422);
-        }
-
-        $card = Card::query()
-            ->where('id', (int) $validated['card_id'])
-            ->where('user_id', auth()->id())
-            ->first();
-        if (!$card || empty($card->stripe_payment_method_id)) {
-            return response()->json(['message' => 'Selected card is invalid.'], 422);
-        }
-
-        $user = auth()->user();
-        if (empty($user->stripe_customer_id)) {
-            return response()->json(['message' => 'No Stripe customer found for this user.'], 422);
-        }
-
-        $seatsRequested = (int) $validated['seats'];
-        if ($seatsRequested > (int) $ride->seats_available) {
-            return response()->json(['message' => 'Not enough available seats for this route section.'], 422);
-        }
-
-        try {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-            $paymentMethod = StripePaymentMethod::retrieve($card->stripe_payment_method_id);
-            try {
-                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
-            } catch (\Throwable $e) {
-                // Ignore if already attached; Stripe will validate on create.
-            }
-
-            $paymentIntent = PaymentIntent::create([
-                'amount' => $amountMinor,
-                'currency' => $stripeCurrencyCode,
-                'payment_method' => $paymentMethod->id,
-                'customer' => $user->stripe_customer_id,
-                'confirmation_method' => 'automatic',
-                'confirm' => true,
-                'off_session' => true,
-                'description' => 'PX booking payment for ride ' . $ride->id,
-                'metadata' => [
-                    'px_ride_id' => (string) $ride->id,
-                    'from_stop_id' => (string) $validated['from_stop_id'],
-                    'to_stop_id' => (string) $validated['to_stop_id'],
-                    'seats' => (string) $validated['seats'],
-                ],
-            ]);
-
-            $paymentIntentId = (string) ($paymentIntent->id ?? '');
-            if ($paymentIntentId === '') {
-                return response()->json(['message' => 'Payment provider did not return a payment intent ID.'], 422);
-            }
-
-            $existingTransaction = PxTransaction::query()
-                ->with('booking')
-                ->where('stripe_payment_intent_id', $paymentIntentId)
-                ->first();
-            if ($existingTransaction) {
-                return response()->json([
-                    'status' => 'succeeded',
-                    'payment_intent_id' => $paymentIntentId,
-                    'amount_minor' => (int) $existingTransaction->amount_minor,
-                    'currency' => (string) ($existingTransaction->currency ?? $rideCurrencyCode),
-                    'booking_id' => (int) $existingTransaction->booking_id,
-                    'transaction_id' => (int) $existingTransaction->id,
-                    'idempotent' => true,
-                ]);
-            }
-
-            $booking = null;
-            $transaction = null;
-            DB::transaction(function () use (
-                &$booking,
-                &$transaction,
-                $ride,
-                $fromStop,
-                $toStop,
-                $validated,
-                $seatsRequested,
-                $segmentPriceMinor,
-                $amountMinor,
-                $rideCurrencyCode,
-                $card,
-                $paymentIntent,
-                $paymentIntentId,
-                $user
-            ) {
-                $rideForUpdate = PxRide::query()
-                    ->where('id', $ride->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (!$rideForUpdate || (int) $rideForUpdate->seats_available < $seatsRequested) {
-                    throw new \RuntimeException('Not enough available seats for this route section.');
-                }
-
-                $booking = PxBooking::query()->create([
-                    'ride_id' => (int) $ride->id,
-                    'passenger_id' => (int) $user->id,
-                    'driver_id' => (int) $ride->driver_id,
-                    'from_stop_id' => (int) $fromStop->id,
-                    'to_stop_id' => (int) $toStop->id,
-                    'card_id' => (int) $card->id,
-                    'seats' => $seatsRequested,
-                    'segment_price_minor' => (int) $segmentPriceMinor,
-                    'total_price_minor' => (int) $amountMinor,
-                    'currency' => $rideCurrencyCode,
-                    'status' => 'paid',
-                    'booked_at' => now(),
-                    'meta' => [
-                        'booking_source' => 'px_web',
-                        'payment_provider' => 'stripe',
-                        'booking_mode' => $ride->booking_mode,
-                        'booking_method' => $ride->booking_method,
-                        'from_stop_label' => (string) ($fromStop->label ?? ''),
-                        'to_stop_label' => (string) ($toStop->label ?? ''),
-                        'seats' => $seatsRequested,
-                    ],
-                ]);
-
-                $transaction = PxTransaction::query()->create([
-                    'booking_id' => (int) $booking->id,
-                    'ride_id' => (int) $ride->id,
-                    'user_id' => (int) $user->id,
-                    'amount_minor' => (int) $amountMinor,
-                    'currency' => $rideCurrencyCode,
-                    'provider' => 'stripe',
-                    'type' => 'charge',
-                    'status' => (string) ($paymentIntent->status ?: 'succeeded'),
-                    'stripe_payment_intent_id' => $paymentIntentId,
-                    'stripe_payment_method_id' => (string) ($paymentIntent->payment_method ?: $card->stripe_payment_method_id),
-                    'provider_payload' => method_exists($paymentIntent, 'toArray')
-                        ? $paymentIntent->toArray()
-                        : ['id' => $paymentIntentId],
-                    'processed_at' => now(),
-                ]);
-
-                $rideForUpdate->seats_available = max(0, (int) $rideForUpdate->seats_available - $seatsRequested);
-                $rideForUpdate->save();
+            $booking->ride->options->transform(function ($option) use ($selectedLangId, $defaultLangId) {
+                $selected = $option->translations->firstWhere('language_id', $selectedLangId);
+                $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
+                $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+                $option->display_description = optional($selected)->description ?: optional($fallback)->description;
+                return $option;
             });
-
-            return response()->json([
-                'status' => 'succeeded',
-                'payment_intent_id' => $paymentIntentId,
-                'amount_minor' => $amountMinor,
-                'currency' => $rideCurrencyCode,
-                'booking_id' => (int) ($booking->id ?? 0),
-                'transaction_id' => (int) ($transaction->id ?? 0),
-            ]);
-        } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        } catch (\Throwable $e) {
-            $maybePaymentIntentId = isset($paymentIntent) ? (string) ($paymentIntent->id ?? '') : '';
-            if ($maybePaymentIntentId !== '') {
-                $existingTransaction = PxTransaction::query()
-                    ->with('booking')
-                    ->where('stripe_payment_intent_id', $maybePaymentIntentId)
-                    ->first();
-                if ($existingTransaction) {
-                    return response()->json([
-                        'status' => 'succeeded',
-                        'payment_intent_id' => $maybePaymentIntentId,
-                        'amount_minor' => (int) $existingTransaction->amount_minor,
-                        'currency' => (string) ($existingTransaction->currency ?? $rideCurrencyCode),
-                        'booking_id' => (int) $existingTransaction->booking_id,
-                        'transaction_id' => (int) $existingTransaction->id,
-                        'idempotent' => true,
-                    ]);
-                }
-            }
-            return response()->json(['message' => $e->getMessage()], 422);
         }
+
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
+
+        return view('px.my_trips', [
+            'bookings' => $bookings,
+            'tripsPage' => $tripsPage,
+            'activeTab' => $tab,
+            'upcomingCount' => $upcomingCount,
+            'completedCount' => $completedCount,
+            'cancelledCount' => $cancelledCount,
+        ]);
     }
 
     public function edit($lang = null, $id)
@@ -769,6 +727,10 @@ class PxRideWebController extends Controller
         $user_id = auth()->user()->id;
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
+
+        $isPinkRideDisabled = auth()->user()->isPinkRideDisabled();
+        $isExtraRideDisabled = auth()->user()->isFolkRideDisabled();
+        
 
         // Get the PX ride and verify ownership
         $ride = PxRide::where('id', $id)
@@ -806,6 +768,32 @@ class PxRideWebController extends Controller
                     && strcasecmp($stopLabel, $destinationLabel) !== 0;
             })
             ->map(function ($stop) {
+                $departureAt = $stop->departure_at ?? $stop->eta_at ?? null;
+                
+                // Format for display in input field (Y-m-d H:i)
+                $departureAtFormatted = '';
+                if ($departureAt) {
+                    try {
+                        $dt = \Illuminate\Support\Carbon::parse($departureAt);
+                        $departureAtFormatted = $dt->format('Y-m-d H:i');
+                    } catch (\Throwable $e) {
+                        // Keep empty if parsing fails
+                    }
+                }
+                
+                // Use pickup_dropoff_location from database, with fallback for backward compatibility
+                $pickupDropoffLocation = $stop->pickup_dropoff_location ?? '';
+                if (empty($pickupDropoffLocation)) {
+                    // Fallback: combine old separate fields if they exist
+                    $pickupLocation = $stop->pickup_location ?? $stop->meta['pickup_location'] ?? '';
+                    $dropoffLocation = $stop->dropoff_location ?? $stop->meta['dropoff_location'] ?? '';
+                    if (!empty($pickupLocation) && !empty($dropoffLocation)) {
+                        $pickupDropoffLocation = $pickupLocation . ' / ' . $dropoffLocation;
+                    } else {
+                        $pickupDropoffLocation = $pickupLocation ?: $dropoffLocation;
+                    }
+                }
+                
                 return [
                     'label' => $stop->label,
                     'city_id' => $stop->city_id,
@@ -814,6 +802,8 @@ class PxRideWebController extends Controller
                     'price_delta_minor' => $stop->price_delta_minor,
                     'is_pickup' => $stop->is_pickup,
                     'is_dropoff' => $stop->is_dropoff,
+                    'departure_at' => $departureAtFormatted,
+                    'pickup_dropoff_location' => $pickupDropoffLocation,
                 ];
             })
             ->values()
@@ -853,6 +843,8 @@ class PxRideWebController extends Controller
 
         return view('px.post_ride', [
             'ride' => $ride,
+            'isPinkRideDisabled' => $isPinkRideDisabled,
+            'isExtraRideDisabled' => $isExtraRideDisabled,
             'vehicles' => $vehicles,
             'optionGroups' => $optionGroups,
             'postRidePage' => $postRidePage,
@@ -960,7 +952,10 @@ class PxRideWebController extends Controller
         $findRidePage = $this->getFindRidePageWithSettingDetail();
         $postRidePage = $this->getPostRidePageWithSettingDetail();
         
-        $rides = null;
+        $rides = $service->searchRides([
+            'per_page' => 20,
+            'sort' => 'latest_added',
+        ], auth()->user());
         $hasSearch = false;
         
         // Check if there are search parameters
@@ -968,14 +963,14 @@ class PxRideWebController extends Controller
         $destinationLabel = $request->input('destination.label');
         $departureDate = $request->input('departure_date');
         
-        if (!empty($originLabel) && !empty($destinationLabel) && !empty($departureDate)) {
+        if (!empty($originLabel) && !empty($destinationLabel)) {
             $hasSearch = true;
             
             // Validate request if search parameters are present
-            $validated = $request->validate([
+            $request->validate([
                 'origin.label' => ['required', 'string', 'max:160'],
                 'destination.label' => ['required', 'string', 'max:160'],
-                'departure_date' => ['required', 'date'],
+                'departure_date' => ['nullable', 'date'],
                 'origin.city_id' => ['nullable', 'integer', 'exists:cities,id'],
                 'destination.city_id' => ['nullable', 'integer', 'exists:cities,id'],
             ]);
@@ -986,29 +981,35 @@ class PxRideWebController extends Controller
                 'destination_city_id' => $request->input('destination.city_id'),
                 'origin_label' => $originLabel,
                 'destination_label' => $destinationLabel,
-                'departure_date' => $departureDate,
                 'per_page' => 20,
-                'sort' => 'soonest',
+                'sort' => 'latest_added',
             ];
-            
-            // Perform search
-            $rides = $service->searchRides($filters, auth()->user());
-            $originCityId = $request->input('origin.city_id');
-            $destinationCityId = $request->input('destination.city_id');
-            
-            // Add translated labels to ride options
-            foreach ($rides as $ride) {
-                $ride->options->transform(function ($option) use ($selectedLangId, $defaultLangId) {
-                    $selected = $option->translations->firstWhere('language_id', $selectedLangId);
-                    $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
-                    $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
-                    $option->display_description = optional($selected)->description ?: optional($fallback)->description;
-                    return $option;
-                });
 
-                $orderedStops = $ride->stops
-                    ? $ride->stops->sortBy('stop_order')->values()->all()
-                    : [];
+            if (!empty($departureDate)) {
+                $filters['departure_date'] = $departureDate;
+            }
+            
+            // Perform filtered search
+            $rides = $service->searchRides($filters, auth()->user());
+        }
+
+        $originCityId = $request->input('origin.city_id');
+        $destinationCityId = $request->input('destination.city_id');
+
+        foreach ($rides as $ride) {
+            $ride->options->transform(function ($option) use ($selectedLangId, $defaultLangId) {
+                $selected = $option->translations->firstWhere('language_id', $selectedLangId);
+                $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
+                $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+                $option->display_description = optional($selected)->description ?: optional($fallback)->description;
+                return $option;
+            });
+
+            $orderedStops = $ride->stops
+                ? $ride->stops->sortBy('stop_order')->values()->all()
+                : [];
+
+            if ($hasSearch) {
                 [$matchedFromIndex, $matchedToIndex] = $this->findMatchingStopPair(
                     $orderedStops,
                     $originCityId,
@@ -1016,25 +1017,28 @@ class PxRideWebController extends Controller
                     (string) $originLabel,
                     (string) $destinationLabel
                 );
-
-                $ride->matched_from_stop_index = $matchedFromIndex;
-                $ride->matched_to_stop_index = $matchedToIndex;
-                $ride->matched_from_stop_id = ($matchedFromIndex !== null && isset($orderedStops[$matchedFromIndex]))
-                    ? (int) ($orderedStops[$matchedFromIndex]->id ?? 0)
-                    : null;
-                $ride->matched_to_stop_id = ($matchedToIndex !== null && isset($orderedStops[$matchedToIndex]))
-                    ? (int) ($orderedStops[$matchedToIndex]->id ?? 0)
-                    : null;
-                $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
-                    $ride,
-                    $originCityId,
-                    $destinationCityId,
-                    (string) $originLabel,
-                    (string) $destinationLabel,
-                    $matchedFromIndex,
-                    $matchedToIndex
-                );
+            } else {
+                $matchedFromIndex = count($orderedStops) >= 2 ? 0 : null;
+                $matchedToIndex = count($orderedStops) >= 2 ? count($orderedStops) - 1 : null;
             }
+
+            $ride->matched_from_stop_index = $matchedFromIndex;
+            $ride->matched_to_stop_index = $matchedToIndex;
+            $ride->matched_from_stop_id = ($matchedFromIndex !== null && isset($orderedStops[$matchedFromIndex]))
+                ? (int) ($orderedStops[$matchedFromIndex]->id ?? 0)
+                : null;
+            $ride->matched_to_stop_id = ($matchedToIndex !== null && isset($orderedStops[$matchedToIndex]))
+                ? (int) ($orderedStops[$matchedToIndex]->id ?? 0)
+                : null;
+            $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
+                $ride,
+                $originCityId,
+                $destinationCityId,
+                (string) $originLabel,
+                (string) $destinationLabel,
+                $matchedFromIndex,
+                $matchedToIndex
+            );
         }
         
         return view('px.search_ride', [

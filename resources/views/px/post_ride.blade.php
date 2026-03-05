@@ -34,10 +34,23 @@
             $oldPickupLocation = old('origin.pickup_location', $ride->meta['pickup_location'] ?? '');
             $oldDropoffLocation = old('destination.dropoff_location', $ride->meta['dropoff_location'] ?? '');
             
-            // Populate departure date/time
+            // Populate departure_at
             $oldDepartureAt = old('departure_at', $ride->departure_at);
-            $oldDepartureDate = old('departure_date', $ride->departure_at->format('Y-m-d'));
-            $oldDepartureTime = old('departure_time', $ride->departure_at->format('H:i'));
+            $oldDepartureAtFormatted = '';
+            if ($oldDepartureAt) {
+                try {
+                    $dt = \Illuminate\Support\Carbon::parse($oldDepartureAt);
+                    $oldDepartureAtFormatted = $dt->format('Y-m-d H:i');
+                } catch (\Throwable $e) {
+                    // Keep empty if parsing fails
+                }
+            }
+            // For backward compatibility, also check separate date/time fields
+            $oldDepartureDate = old('departure_date');
+            $oldDepartureTime = old('departure_time');
+            if (empty($oldDepartureAtFormatted) && $oldDepartureDate && $oldDepartureTime) {
+                $oldDepartureAtFormatted = trim($oldDepartureDate . ' ' . $oldDepartureTime);
+            }
             
             // Populate stops (excluding origin and destination - already filtered in controller)
             $oldStops = old('stops', []);
@@ -60,6 +73,10 @@
             $oldVisibility = old('visibility', $ride->visibility);
             $oldBookingMode = old('booking_mode', $ride->booking_mode);
             $oldBookingMethod = old('booking_method', $ride->booking_method);
+            $oldSmokingAllowed = old('smoking_allowed', $ride->smoking_allowed);
+            $oldPetsAllowed = old('pets_allowed', $ride->pets_allowed);
+            $oldLuggageSize = old('luggage_size', $ride->luggage_size);
+            $oldAcceptMoreLuggage = old('accept_more_luggage', $ride->meta['accept_more_luggage'] ?? false);
             $oldIsRecurring = old('is_recurring', isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled']);
             $oldRecurringFrequency = old('recurring_frequency', $ride->meta['recurring']['frequency'] ?? '');
             $oldRecurringTrips = old('recurring_trips', $ride->meta['recurring']['trips'] ?? 0);
@@ -83,8 +100,21 @@
             $oldPickupLocation = old('origin.pickup_location');
             $oldDropoffLocation = old('destination.dropoff_location');
             $oldDepartureAt = old('departure_at');
+            $oldDepartureAtFormatted = '';
+            if ($oldDepartureAt) {
+                try {
+                    $dt = \Illuminate\Support\Carbon::parse($oldDepartureAt);
+                    $oldDepartureAtFormatted = $dt->format('Y-m-d H:i');
+                } catch (\Throwable $e) {
+                    // Keep empty if parsing fails
+                }
+            }
+            // For backward compatibility, also check separate date/time fields
             $oldDepartureDate = old('departure_date');
             $oldDepartureTime = old('departure_time');
+            if (empty($oldDepartureAtFormatted) && $oldDepartureDate && $oldDepartureTime) {
+                $oldDepartureAtFormatted = trim($oldDepartureDate . ' ' . $oldDepartureTime);
+            }
             $oldStops = old('stops', []);
             $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
             $oldSeatsTotal = old('seats_total');
@@ -94,9 +124,13 @@
             $oldNotes = old('notes');
             $oldStatus = old('status', 'published');
             $oldVisibility = old('visibility', 'public');
-            $oldBookingMode = old('booking_mode');
-            $oldBookingMethod = old('booking_method');
-            $oldIsRecurring = old('is_recurring', false);
+             $oldBookingMode = old('booking_mode');
+             $oldBookingMethod = old('booking_method');
+             $oldSmokingAllowed = old('smoking_allowed');
+             $oldPetsAllowed = old('pets_allowed');
+             $oldLuggageSize = old('luggage_size');
+             $oldAcceptMoreLuggage = old('accept_more_luggage', false);
+             $oldIsRecurring = old('is_recurring', false);
             $oldRecurringFrequency = old('recurring_frequency', '');
             $oldRecurringTrips = old('recurring_trips', 0);
             $oldPickDropOffDescription = old('pick_drop_off_description', '');
@@ -128,13 +162,13 @@
             }
         }
 
-        if ($oldDepartureAt && (!$oldDepartureDate || !$oldDepartureTime)) {
+        // Ensure oldDepartureAtFormatted is set if we have oldDepartureAt
+        if ($oldDepartureAt && empty($oldDepartureAtFormatted)) {
             try {
                 $dt = \Illuminate\Support\Carbon::parse($oldDepartureAt);
-                $oldDepartureDate = $oldDepartureDate ?: $dt->format('Y-m-d');
-                $oldDepartureTime = $oldDepartureTime ?: $dt->format('H:i');
+                $oldDepartureAtFormatted = $dt->format('Y-m-d H:i');
             } catch (\Throwable $e) {
-                // Keep user-entered values as-is if parsing fails.
+                // Keep empty if parsing fails
             }
         }
 
@@ -239,8 +273,9 @@
                     <div>
                         <label
                             class="block text-sm font-semibold mb-1 required">{{ $postRidePage->pick_up_label }}</label>
-                            <input name="origin[pickup_location]" value="{{ $oldPickupLocation ?? old('origin.pickup_location') }}" type="text"
-                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact pick-up point" >
+                            <textarea name="origin[pickup_location]" rows="2"
+                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="{{ $postRidePage->pick_up_placeholder }}" 
+                                >{{ $oldPickupLocation ?? old('origin.pickup_location') }}</textarea>
                             @error('origin.pickup_location')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
@@ -248,9 +283,9 @@
                         <div>
                             <label
                                 class="block text-sm font-semibold mb-1 required">{{ $postRidePage->drop_off_label }}</label>
-                            <input name="destination[dropoff_location]" value="{{ $oldDropoffLocation ?? old('destination.dropoff_location') }}"
-                                type="text" class="w-full rounded border-gray-300" autocomplete="off" placeholder="Exact drop-off point"
-                                >
+                            <textarea name="destination[dropoff_location]" rows="2"
+                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="{{$postRidePage->drop_off_placeholder}}"
+                                >{{ $oldDropoffLocation ?? old('destination.dropoff_location') }}</textarea>
                             @error('destination.dropoff_location')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
@@ -312,7 +347,7 @@
                 <section>
                     <div class="">
                         <label class="block text-sm font-semibold mb-1 required">Pick/Drop Off Description</label>
-                        <textarea name="pick_drop_off_description" rows="4" class="w-full rounded border-gray-300">{{ $oldPickDropOffDescription ?? old('pick_drop_off_description') }}</textarea>
+                        <textarea name="pick_drop_off_description" rows="6" class="w-full rounded border-gray-300" placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}">{{ $oldPickDropOffDescription ?? old('pick_drop_off_description') }}</textarea>
                         @error('pick_drop_off_description')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
@@ -323,19 +358,16 @@
                     <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Schedule & Price</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold mb-1 required">Departure Date</label>
-                            <input id="px-departure-date" name="departure_date" value="{{ $oldDepartureDate }}"
-                                type="text" class="w-full rounded border-gray-300" placeholder="Select departure date"
+                            <label class="block text-sm font-semibold mb-1 required">Departure Date & Time</label>
+                            <input id="px-departure-at" name="departure_at" value="{{ $oldDepartureAtFormatted ?? old('departure_at') }}"
+                                type="text" class="w-full rounded border-gray-300" placeholder="Select departure date and time"
                                 autocomplete="off" >
+                            @error('departure_at')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                             @error('departure_date')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-1 required">Departure Time</label>
-                            <input id="px-departure-time" name="departure_time" value="{{ $oldDepartureTime }}"
-                                type="text" class="w-full rounded border-gray-300" placeholder="Select departure time"
-                                autocomplete="off" >
                             @error('departure_time')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
@@ -669,23 +701,55 @@
 
                 <section>
                     <div class="space-y-5">
-                        @foreach ($optionGroups as $group)
-                            @continue($group->code === 'booking_method')
-                            @continue($group->code === 'booking_mode')
+                         @foreach ($optionGroups as $group)
+                             @continue($group->code === 'booking_method')
+                             @continue($group->code === 'booking_mode')
+                            @php
+                                $selectedSingleValue = old($group->code);
+                                if ($selectedSingleValue === null) {
+                                    if ($group->code === 'smoking_allowed') {
+                                        $selectedSingleValue = $oldSmokingAllowed;
+                                    } elseif ($group->code === 'pets_allowed') {
+                                        $selectedSingleValue = $oldPetsAllowed;
+                                    } elseif ($group->code === 'luggage_size') {
+                                        $selectedSingleValue = $oldLuggageSize;
+                                    }
+                                }
+                                if ($selectedSingleValue === null) {
+                                    $selectedSingleValue = optional($group->options->first())->id;
+                                }
+
+                                
+                            @endphp
                             <div class="border border-gray-200 rounded-lg p-4">
                                 <h3 class="text-base font-semibold text-gray-800 mb-3">
                                     {{ ucwords(str_replace('_', ' ', $group->code)) }}</h3>
 
                                 <div class="grid grid-cols-1 gap-3">
                                     @foreach ($group->options as $option)
+                                    @php
+                                        $checkboxDisabled = '';
+                                        // pink ride
+                                        $pinkRideCls = "";
+                                        if(!$isPinkRideDisabled && $option->code === 'pink_rides') {
+                                            $pinkRideCls = "text-pink-500 line-through";
+                                            $checkboxDisabled = 'disabled';
+                                        }
+                                        // extra ride
+                                        $extraRideCls = "";
+                                        if(!$isExtraRideDisabled && $option->code === 'extra_plus_rides') {
+                                            $extraRideCls = "text-green-500 line-through";
+                                            $checkboxDisabled = 'disabled';
+                                        }
+                                    @endphp
                                         <label class="flex items-start gap-2 text-sm">
                                             @if ($group->is_checkbox)
                                                 <input type="checkbox" name="ride_option_ids[]"
                                                     value="{{ $option->id }}" @checked(in_array($option->id, $oldRideOptionIds ?? old('ride_option_ids', [])))
-                                                    class="mt-0.5">
+                                                    class="mt-0.5" {{ $checkboxDisabled }}>
                                             @else
                                                 <input type="radio" name="{{ $group->code }}"
-                                                    value="{{ $option->id }}" @checked((string) old($group->code, optional($group->options->first())->id) === (string) $option->id)
+                                                    value="{{ $option->id }}" @checked((string) $selectedSingleValue === (string) $option->id)
                                                     class="mt-0.5">
                                             @endif
                                             {{-- icon --}}
@@ -707,7 +771,7 @@
                                                         class="w-6 h-6 object-contain" alt="">
                                                 @endif
                                             @endif
-                                            <span class="font-medium text-gray-800">{{ $option->display_label }}</span>
+                                            <span class="font-medium text-gray-800 {{ $pinkRideCls }} {{ $extraRideCls }}">{{ $option->display_label }}</span>
                                             <span class="inline-flex cursor-help w-4 h-4"
                                                 data-tippy-content="{{ $option->display_description }}">
                                                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z" fill="#666666" /></svg>
@@ -721,7 +785,7 @@
                                         <label class="inline-flex items-start gap-2 text-sm">
                                             <input type="hidden" name="accept_more_luggage" value="0">
                                             <input type="checkbox" name="accept_more_luggage" value="1"
-                                                @checked(old('accept_more_luggage')) class="mt-0.5">
+                                                @checked($oldAcceptMoreLuggage) class="mt-0.5">
                                             <span class="font-medium text-gray-800">I accept more luggage for extra
                                                 charge</span>
                                         </label>
@@ -1246,26 +1310,20 @@
                 });
             }
 
-            // Initialize departure date/time pickers and guard submission for empty values.
-            const departureDateInput = document.getElementById('px-departure-date');
-            const departureTimeInput = document.getElementById('px-departure-time');
-            if (!departureDateInput || !departureTimeInput || typeof flatpickr === 'undefined') {
+            // Initialize departure date/time picker (combined)
+            const departureAtInput = document.getElementById('px-departure-at');
+            if (!departureAtInput || typeof flatpickr === 'undefined') {
                 return;
             }
 
-            const departureDateFp = flatpickr(departureDateInput, {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: 'F d, Y',
-                minDate: 'today',
-            });
-
-            const departureTimeFp = flatpickr(departureTimeInput, {
+            const departureAtFp = flatpickr(departureAtInput, {
                 enableTime: true,
-                noCalendar: true,
+                dateFormat: 'Y-m-d H:i',
+                altInput: true,
+                altFormat: 'F d, Y at H:i',
+                minDate: 'today',
                 time_24hr: true,
                 minuteIncrement: 5,
-                dateFormat: 'H:i',
             });
 
             

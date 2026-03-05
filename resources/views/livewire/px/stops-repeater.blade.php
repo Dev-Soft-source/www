@@ -1,46 +1,82 @@
 <div class="space-y-3">
     <label id="px-stops-origin-city" class="block text-sm font-semibold mb-1 origin_city">{{ $originLabel }}</label>
     <label class="block text-sm font-semibold mb-1">Stops Along the Way</label>
-    @foreach($stops as $index => $stop)
-        <div class="flex items-start gap-2 ml-6">
-            <div class="flex-1 min-w-0">
-                @livewire('px.city-autocomplete', [
-                    'field' => "stops[$index]",
-                    'placeholder' => 'Stop city (in route order)',
-                    'initialLabel' => $stop['label'] ?? '',
-                    'initialCityId' => $stop['city_id'] ?? null,
-                ], key('px-stop-city-' . $index . '-' . md5(($stop['label'] ?? '') . '|' . ($stop['city_id'] ?? ''))))
-                <input type="hidden" name="stops[{{ $index }}][is_pickup]" value="1">
-                <input type="hidden" name="stops[{{ $index }}][is_dropoff]" value="1">
-                <input type="hidden" name="stops[{{ $index }}][price_delta_minor]" value="{{ (int) ($stop['price_delta_minor'] ?? 0) }}">
+    @foreach ($stops as $index => $stop)
+        <div class="border border-gray-200 rounded-lg p-4 ml-6 mb-3 relative">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div class="flex items-start gap-2">
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-sm font-semibold mb-1 required">Stop City</label>
+                        @livewire(
+                            'px.city-autocomplete',
+                            [
+                                'field' => "stops[$index]",
+                                'placeholder' => 'Stop city (in route order)',
+                                'initialLabel' => $stop['label'] ?? '',
+                                'initialCityId' => $stop['city_id'] ?? null,
+                            ],
+                            key('px-stop-city-' . $index . '-' . md5(($stop['label'] ?? '') . '|' . ($stop['city_id'] ?? '')))
+                        )
+                        <input type="hidden" name="stops[{{ $index }}][is_pickup]" value="1">
+                        <input type="hidden" name="stops[{{ $index }}][is_dropoff]" value="1">
+                        <input type="hidden" name="stops[{{ $index }}][price_delta_minor]"
+                            value="{{ (int) ($stop['price_delta_minor'] ?? 0) }}">
+                    </div>
+
+                </div>
+                <div class="">
+                    <label class="block text-sm font-semibold mb-1 required">Departure Date & Time</label>
+                    <input type="text" name="stops[{{ $index }}][departure_at]"
+                        value="{{ $stop['departure_at'] ?? old("stops.$index.departure_at") }}"
+                        class="w-full rounded border-gray-300" data-stop-departure-picker="{{ $index }}"
+                        placeholder="Select departure date and time" autocomplete="off">
+                    @error("stops.$index.departure_at")
+                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                    @enderror
+                    
+                </div>
+                
             </div>
-            <button
-                type="button"
-                wire:click="requestRemove({{ $index }})"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
-                aria-label="Remove stop"
-                title="Remove stop"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
+            <div class="mt-3">
+                <label class="block text-sm font-semibold mb-1 required">Pick Up/Drop Off Location</label>
+                <textarea name="stops[{{ $index }}][pickup_dropoff_location]" rows="2"
+                    class="w-full rounded border-gray-300" placeholder="Pick up/drop off location details" autocomplete="off">{{ $stop['pickup_dropoff_location'] ?? old("stops.$index.pickup_dropoff_location") }}</textarea>
+                @error("stops.$index.pickup_dropoff_location")
+                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="absolute top-1 right-1">
+            <button type="button" wire:click="requestRemove({{ $index }})"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 hover:text-gray-800 flex-shrink-0"
+                    aria-label="Remove stop" title="Remove stop">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                        aria-hidden="true">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
             </button>
+            </div>
         </div>
     @endforeach
-    <label id="px-stops-destination-city" class="block text-sm font-semibold mb-1 destination_city">{{ $destinationLabel }}</label>
-    <button type="button" wire:click="addStop" class="button-exp-no-fill mt-1">Add a spot</button>
+    <label id="px-stops-destination-city"
+        class="block text-sm font-semibold mb-1 destination_city">{{ $destinationLabel }}</label>
+    <button type="button" wire:click="addStop" class="button-exp-no-fill mt-1">Add a stop</button>
 
-    @if(!is_null($pendingRemoveIndex))
+    @if (!is_null($pendingRemoveIndex))
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div class="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
                 <div class="flex items-start justify-between gap-3">
                     <h3 class="text-lg font-semibold text-gray-900">Remove this stop?</h3>
-                    <button type="button" wire:click="cancelRemove" class="text-gray-500 hover:text-gray-700">x</button>
+                    <button type="button" wire:click="cancelRemove"
+                        class="text-gray-500 hover:text-gray-700">x</button>
                 </div>
                 <p class="mt-3 text-sm text-gray-600">Are you sure you want to delete this stop row?</p>
                 <div class="mt-5 flex items-center justify-end gap-2">
-                    <button type="button" wire:click="cancelRemove" class="button-exp-no-fill !px-3 !py-2">Cancel</button>
-                    <button type="button" wire:click="confirmRemove" class="button-exp-fill !px-3 !py-2">Delete</button>
+                    <button type="button" wire:click="cancelRemove"
+                        class="button-exp-no-fill !px-3 !py-2">Cancel</button>
+                    <button type="button" wire:click="confirmRemove"
+                        class="button-exp-fill !px-3 !py-2">Delete</button>
                 </div>
             </div>
         </div>
@@ -98,7 +134,8 @@
                     }
                     // Also check for Livewire wire:model bound inputs
                     if (!destinationInput) {
-                        const livewireDestination = document.querySelector('[wire\\:model*="query"][name*="destination"]');
+                        const livewireDestination = document.querySelector(
+                            '[wire\\:model*="query"][name*="destination"]');
                         if (livewireDestination) {
                             destinationInput = livewireDestination;
                         }
@@ -118,7 +155,8 @@
                     if (!(target instanceof HTMLInputElement)) {
                         return;
                     }
-                    if (target.name && (target.name.includes('origin[label]') || target.name.includes('destination[label]'))) {
+                    if (target.name && (target.name.includes('origin[label]') || target.name.includes(
+                            'destination[label]'))) {
                         syncStopsEdgeCitiesEnhanced();
                     }
                 });
@@ -131,7 +169,7 @@
                             setTimeout(syncStopsEdgeCitiesEnhanced, 100);
                         });
                     }
-                    
+
                     // Also listen for component initialization
                     document.addEventListener('livewire:load', function() {
                         setTimeout(syncStopsEdgeCitiesEnhanced, 200);
@@ -140,11 +178,49 @@
 
                 // Initial sync with multiple attempts to catch Livewire initialization
                 syncStopsEdgeCitiesEnhanced();
-                
+
                 // Retry after a short delay to catch Livewire components that load later
                 setTimeout(syncStopsEdgeCitiesEnhanced, 300);
                 setTimeout(syncStopsEdgeCitiesEnhanced, 600);
                 setTimeout(syncStopsEdgeCitiesEnhanced, 1000);
+
+                // Initialize flatpickr for stop departure date/time fields
+                function initializeStopDatePickers() {
+                    if (typeof flatpickr === 'undefined') {
+                        return;
+                    }
+
+                    // Find all stop departure inputs (date + time combined)
+                    const stopDepartureInputs = document.querySelectorAll('[data-stop-departure-picker]');
+                    stopDepartureInputs.forEach(function(input) {
+                        if (input.dataset.flatpickrInitialized) {
+                            return;
+                        }
+
+                        flatpickr(input, {
+                            enableTime: true,
+                            dateFormat: 'Y-m-d H:i',
+                            altInput: true,
+                            altFormat: 'F d, Y at H:i',
+                            minDate: 'today',
+                            time_24hr: true,
+                            minuteIncrement: 5,
+                        });
+                        input.dataset.flatpickrInitialized = 'true';
+                    });
+                }
+
+                // Initialize on load
+                initializeStopDatePickers();
+
+                // Re-initialize after Livewire updates
+                if (window.Livewire) {
+                    if (typeof window.Livewire.hook === 'function') {
+                        window.Livewire.hook('message.processed', function() {
+                            setTimeout(initializeStopDatePickers, 100);
+                        });
+                    }
+                }
             });
         </script>
     @endonce

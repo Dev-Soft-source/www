@@ -156,6 +156,79 @@
 
         <h1>{{ $rideDetailPage->main_heading ?? 'My ride detail' }}</h1>
 
+        @if ($ride->relationLoaded('bookings') && $ride->bookings->isNotEmpty())
+        <div class="flex overflow-x-auto gap-4 py-4">
+            @foreach ($ride->bookings as $waitingBooking)
+                @php
+                    $passengerName = trim(($waitingBooking->passenger->first_name ?? '') . ' ' . ($waitingBooking->passenger->last_name ?? ''));
+                    $passengerName = $passengerName !== '' ? $passengerName : ($waitingBooking->passenger->name ?? ($waitingBooking->passenger->email ?? 'Passenger'));
+                    $passengerInitial = strtoupper(substr((string) $passengerName, 0, 1));
+                    
+                    // Get origin and destination from booking stops
+                    $bookingOrigin = $waitingBooking->fromStop->label ?? 'N/A';
+                    $bookingDestination = $waitingBooking->toStop->label ?? 'N/A';
+                    $bookingOriginPickup = $waitingBooking->fromStop->pickup_dropoff_location ?? null;
+                    $bookingDestinationDropoff = $waitingBooking->toStop->pickup_dropoff_location ?? null;
+                    
+                    // Check if ride has multiple stops (more than just origin and destination)
+                    $hasMultipleStops = $ride->stops && $ride->stops->count() > 2;
+                @endphp
+                <div class="rounded-xl border border-[#e9cc6a] bg-[#f2f2f2] overflow-hidden max-w-lg">
+                    <h3 class="px-6 py-2 text-black text-2xl font-FuturaMdCnBT border-b border-gray-300">
+                        Booking Requested
+                    </h3>
+                    <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div class="flex items-center gap-4">
+                            <span class="h-20 w-20 rounded-full bg-[#f57c00] text-white text-5xl font-FuturaMdCnBT flex items-center justify-center">
+                                {{ $passengerInitial !== '' ? $passengerInitial : 'P' }}
+                            </span>
+                            <div>
+                                <p class="text-2xl text-black font-FuturaMdCnBT">{{ $passengerName }}</p>
+                                <p class="text-gray-600 text-base">
+                                    {{ (int) $waitingBooking->seats }} {{ (int) $waitingBooking->seats === 1 ? 'seat requested' : 'seats requested' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($hasMultipleStops)
+                    <div class="px-6 py-3 border-t border-gray-300">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold">From</p>
+                                <p class="text-xl md:text-lg text-primary font-FuturaMdCnBT">{{ $bookingOrigin }}</p>
+                                @if ($bookingOriginPickup)
+                                    <p class="text-xs text-gray-500 mt-1">Pick up: {{ $bookingOriginPickup }}</p>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold">To</p>
+                                <p class="text-xl md:text-lg text-primary font-FuturaMdCnBT">{{ $bookingDestination }}</p>
+                                @if ($bookingDestinationDropoff)
+                                    <p class="text-xs text-gray-500 mt-1">Drop off: {{ $bookingDestinationDropoff }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    <div class="flex justify-center border-t border-gray-300 gap-4 w-full px-4 py-2">
+                        <form method="POST" class="js-booking-decline-form" action="{{ route('px.my_ride_detail.booking.decline', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id, 'bookingId' => $waitingBooking->id]) }}">
+                            @csrf
+                            <button type="submit" class="inline-flex justify-center rounded bg-red-700 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 min-w-[220px]">
+                                Decline                  
+                            </button>
+                        </form>
+                        <form method="POST" class="js-booking-approve-form" action="{{ route('px.my_ride_detail.booking.approve', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id, 'bookingId' => $waitingBooking->id]) }}">
+                            @csrf
+                            <button type="submit" class="inline-flex justify-center rounded bg-green-700 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:opacity-90 min-w-[220px]">
+                                Approve Booking
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        @endif
+
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
                 <div class="bg-white rounded-lg shadow-3xl">
@@ -345,8 +418,13 @@
                         {{ $rideDetailPage->ride_features_label ?? 'Ride features' }}
                     </h3>
                     <div class="bg-white p-4 space-y-3">
-                        @if ($ride->options->isNotEmpty())
-                            @foreach ($ride->options as $option)
+                        @php
+                            $preferenceOptions = $ride->options->filter(function ($option) {
+                                return optional($option->group)->code === 'preference';
+                            });
+                        @endphp
+                        @if ($preferenceOptions->isNotEmpty())
+                            @foreach ($preferenceOptions as $option)
                                 <div class="flex items-center space-x-2">
                                     @if ($option->icon)
                                         <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $option->icon) }}" alt="{{ $option->display_label }}">
@@ -508,6 +586,89 @@
         </div>
     </div>
 
+    {{-- Approve booking request: confirmation modal --}}
+    <div id="approveBookingConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('approveBookingConfirmModal')"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border-4 border-[#0ea5a6]">
+                    <button type="button" onclick="closeBookingModal('approveBookingConfirmModal')" class="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="px-6 pt-10 pb-6">
+                        <p class="text-left text-gray-800 text-xl font-FuturaMdCnBT">Are you sure you want to approve this booking request?</p>
+                    </div>
+                    <div class="px-6 pb-8 flex flex-col sm:flex-row items-center sm:justify-center gap-3">
+                        <button type="button" id="approveBookingConfirmYes" class="inline-flex justify-center rounded bg-[#0ea5a6] px-7 py-3 font-FuturaMdCnBT text-xl text-white hover:opacity-90">
+                            Yes, approve it!
+                        </button>
+                        <button type="button" onclick="closeBookingModal('approveBookingConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-gray-100 px-7 py-3 font-FuturaMdCnBT text-xl text-gray-600 hover:bg-gray-200">
+                            No, take me back!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Decline booking request: confirmation modal --}}
+    <div id="declineBookingConfirmModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('declineBookingConfirmModal')"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border-4 border-[#ef4444]">
+                    <button type="button" onclick="closeBookingModal('declineBookingConfirmModal')" class="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="px-6 pt-10 pb-6">
+                        <p class="text-left text-gray-800 text-xl font-FuturaMdCnBT">Are you sure you want to decline this booking request? This action cannot be undone.</p>
+                    </div>
+                    <div class="px-6 pb-8 flex flex-col sm:flex-row items-center sm:justify-center gap-3">
+                        <button type="button" id="declineBookingConfirmYes" class="inline-flex justify-center rounded bg-[#ef4444] px-7 py-3 font-FuturaMdCnBT text-xl text-white hover:opacity-90">
+                            Yes, decline
+                        </button>
+                        <button type="button" onclick="closeBookingModal('declineBookingConfirmModal')" class="inline-flex justify-center rounded border border-gray-300 bg-gray-100 px-7 py-3 font-FuturaMdCnBT text-xl text-gray-600 hover:bg-gray-200">
+                            No, take me back!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Cannot cancel ride alert modal --}}
+    <div id="cannotCancelRideModal" class="hidden fixed inset-0 z-50 w-screen overflow-y-auto" aria-modal="true" role="dialog">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeBookingModal('cannotCancelRideModal')"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border-4 border-[#ef4444]">
+                    <button type="button" onclick="closeBookingModal('cannotCancelRideModal')" class="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="px-6 pt-10 pb-6">
+                        <div class="flex justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#ef4444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <p class="text-center text-gray-800 text-xl font-FuturaMdCnBT">Cannot cancel ride with booked seats. Please contact support.</p>
+                    </div>
+                    <div class="px-6 pb-8 flex justify-center">
+                        <button type="button" onclick="closeBookingModal('cannotCancelRideModal')" class="inline-flex justify-center rounded bg-[#106BC7] px-7 py-3 font-FuturaMdCnBT text-xl text-white hover:opacity-90">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('script')
@@ -542,6 +703,53 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            let pendingApproveForm = null;
+            let pendingDeclineForm = null;
+
+            document.querySelectorAll('.js-booking-approve-form').forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    pendingApproveForm = form;
+                    const modal = document.getElementById('approveBookingConfirmModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.js-booking-decline-form').forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    pendingDeclineForm = form;
+                    const modal = document.getElementById('declineBookingConfirmModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            const approveBookingConfirmYes = document.getElementById('approveBookingConfirmYes');
+            if (approveBookingConfirmYes) {
+                approveBookingConfirmYes.addEventListener('click', function() {
+                    closeBookingModal('approveBookingConfirmModal');
+                    if (pendingApproveForm) {
+                        pendingApproveForm.submit();
+                    }
+                });
+            }
+
+            const declineBookingConfirmYes = document.getElementById('declineBookingConfirmYes');
+            if (declineBookingConfirmYes) {
+                declineBookingConfirmYes.addEventListener('click', function() {
+                    closeBookingModal('declineBookingConfirmModal');
+                    if (pendingDeclineForm) {
+                        pendingDeclineForm.submit();
+                    }
+                });
+            }
+
             const cancelRideBtn = document.getElementById('cancelRideBtn');
             if (!cancelRideBtn) return;
 
@@ -556,8 +764,12 @@
                         confirmModal.style.display = 'block';
                     }
                 } else {
-                    // If there are booked seats, redirect to cancellation page or show different message
-                    alert('Cannot cancel ride with booked seats. Please contact support.');
+                    // If there are booked seats, show alert modal
+                    const alertModal = document.getElementById('cannotCancelRideModal');
+                    if (alertModal) {
+                        alertModal.classList.remove('hidden');
+                        alertModal.style.display = 'block';
+                    }
                 }
             });
 

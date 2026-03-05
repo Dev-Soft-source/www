@@ -50,7 +50,7 @@
         @include('layouts.inc.profile_sidebar')
         @php
             $currentRoute = Route::currentRouteName();
-            $isPassengerSection = in_array($currentRoute, ['my_trips', 'past_trips', 'cancelled_trips']);
+            $isPassengerSection = in_array($currentRoute, ['px.my_trips']);
             $isDriverSection = in_array($currentRoute, ['px.my_rides']);
             $tabSelected = 'border-blue-600 border leading-normal text-white bg-blue-600';
             $tabUnselected = 'border-gray-100 border leading-normal text-blue-600 bg-white';
@@ -58,7 +58,7 @@
         <div class="bg-white rounded pt-0 lg:px-4 w-full col-span-12 lg:col-span-9">
             <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row">
                 <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-                    <a href="{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block {{ $isPassengerSection ? $tabSelected : $tabUnselected }} cursor-pointer">
+                    <a href="{{ route('px.my_trips', ['lang' => $selectedLanguage->abbreviation]) }}" class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block {{ $isPassengerSection ? $tabSelected : $tabUnselected }} cursor-pointer">
                         {{ optional($tripsPage)->passenger_trips_heading ?? 'Passenger trips' }}
                     </a>
                 </li>
@@ -109,12 +109,13 @@
                                                     :show-status="true"
                                                     :price-minor="$ride->price_minor"
                                                 >
-                                                    @if ($ride->notes)
+                                                    {{-- @if ($ride->notes)
                                                         <div class="mt-3 border-t border-gray-200">
                                                             <p class="font-semibold mb-1">Notes:</p>
                                                             <p class="text-gray-600 text-sm">{{ $ride->notes }}</p>
                                                         </div>
-                                                    @endif
+                                                    @endif --}}
+                                                    
 
                                                     @if (isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled'])
                                                         <div class="mt-3 border-t border-gray-200">

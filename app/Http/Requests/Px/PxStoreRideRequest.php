@@ -5,6 +5,7 @@ namespace App\Http\Requests\Px;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class PxStoreRideRequest extends FormRequest
 {
@@ -15,13 +16,45 @@ class PxStoreRideRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $departureDate = $this->input('departure_date');
-        $departureTime = $this->input('departure_time');
+        // Handle departure_at - use directly if provided, otherwise combine from date/time (backward compatibility)
+        $departureAt = $this->input('departure_at');
+        if (!$departureAt) {
+            $departureDate = $this->input('departure_date');
+            $departureTime = $this->input('departure_time');
+            if ($departureDate && $departureTime) {
+                $departureAt = trim($departureDate . ' ' . $departureTime);
+                $this->merge(['departure_at' => $departureAt]);
+            }
+        }
+        
+        // Ensure departure_at is in Y-m-d H:i format
+        if ($departureAt) {
+            try {
+                $dt = \Illuminate\Support\Carbon::parse($departureAt);
+                $this->merge(['departure_at' => $dt->format('Y-m-d H:i')]);
+            } catch (\Throwable $e) {
+                // Keep original value if parsing fails
+            }
+        }
 
-        if (!$this->filled('departure_at') && $departureDate && $departureTime) {
-            $this->merge([
-                'departure_at' => trim($departureDate . ' ' . $departureTime),
-            ]);
+        // Process stops departure_at fields - convert from Y-m-d H:i format to datetime
+        $stops = $this->input('stops', []);
+        if (!empty($stops)) {
+            $processedStops = [];
+            foreach ($stops as $index => $stop) {
+                $processedStop = $stop;
+                if (isset($stop['departure_at']) && !empty($stop['departure_at'])) {
+                    try {
+                        // Validate and ensure proper format
+                        $dt = \Illuminate\Support\Carbon::parse($stop['departure_at']);
+                        $processedStop['departure_at'] = $dt->format('Y-m-d H:i');
+                    } catch (\Throwable $e) {
+                        // Keep original value if parsing fails
+                    }
+                }
+                $processedStops[$index] = $processedStop;
+            }
+            $this->merge(['stops' => $processedStops]);
         }
     }
 
@@ -60,9 +93,10 @@ class PxStoreRideRequest extends FormRequest
             'new_vehicle.car_type' => ['required_if:vehicle_mode,add_new', Rule::in(['Electric', 'Hybrid', 'Gas'])],
             'new_vehicle.primary_vehicle' => ['required_if:vehicle_mode,add_new', Rule::in(['0', '1', 0, 1])],
             'new_vehicle_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:10240'],
-            'departure_date' => ['required', 'date_format:Y-m-d'],
-            'departure_time' => ['required', 'date_format:H:i'],
-            'departure_at' => ['nullable', 'date', 'after:' . now()->addMinutes(5)->toDateTimeString()],
+            'departure_at' => ['required', 'date_format:Y-m-d H:i', 'after:' . now()->addMinutes(5)->toDateTimeString()],
+            // Backward compatibility - these are optional if departure_at is provided
+            'departure_date' => ['nullable', 'date_format:Y-m-d'],
+            'departure_time' => ['nullable', 'date_format:H:i'],
             'arrival_estimated_at' => ['nullable', 'date', 'after_or_equal:departure_at'],
             'boarding_window_minutes' => ['nullable', 'integer', 'min:0', 'max:180'],
             'middle_seats' => ['required', Rule::in([2, 3, '2', '3'])],
@@ -102,12 +136,71 @@ class PxStoreRideRequest extends FormRequest
             'stops.*.label' => ['required_with:stops', 'string', 'max:160'],
             'stops.*.lat' => ['nullable', 'numeric', 'between:-90,90'],
             'stops.*.lng' => ['nullable', 'numeric', 'between:-180,180'],
-            'stops.*.eta_at' => ['nullable', 'date', 'after_or_equal:departure_at'],
+            'stops.*.departure_at' => ['required_with:stops', 'date_format:Y-m-d H:i'],
+            'stops.*.eta_at' => ['nullable', 'date'],
+            'stops.*.pickup_dropoff_location' => ['required_with:stops', 'string', 'max:500'],
             'stops.*.price_delta_minor' => ['nullable', 'integer', 'min:0'],
             'stops.*.seats_available' => ['nullable', 'integer', 'min:0', 'max:8'],
             'stops.*.is_pickup' => ['nullable', 'boolean'],
             'stops.*.is_dropoff' => ['nullable', 'boolean'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            // Get main ride departure_at - try both direct input and combined from date/time
+            $mainDepartureAt = $this->input('departure_at');
+            if (!$mainDepartureAt) {
+                $departureDate = $this->input('departure_date');
+                $departureTime = $this->input('departure_time');
+                if ($departureDate && $departureTime) {
+                    $mainDepartureAt = trim($departureDate . ' ' . $departureTime);
+                }
+            }
+
+            $stops = $this->input('stops', []);
+
+            if (!$mainDepartureAt || empty($stops)) {
+                return;
+            }
+
+            try {
+                // Parse main departure - try Y-m-d H:i format first, then fallback to parse
+                $mainDeparture = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $mainDepartureAt);
+                if ($mainDeparture === false) {
+                    $mainDeparture = \Illuminate\Support\Carbon::parse($mainDepartureAt);
+                }
+            } catch (\Throwable $e) {
+                // Main departure_at validation will handle this
+                return;
+            }
+
+            foreach ($stops as $index => $stop) {
+                if (!isset($stop['departure_at']) || empty($stop['departure_at'])) {
+                    continue;
+                }
+
+                try {
+                    // Parse stop departure - try Y-m-d H:i format first, then fallback to parse
+                    $stopDeparture = \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i', $stop['departure_at']);
+                    if ($stopDeparture === false) {
+                        $stopDeparture = \Illuminate\Support\Carbon::parse($stop['departure_at']);
+                    }
+                    
+                    // Compare: stop must be >= main departure
+                    if ($stopDeparture->lt($mainDeparture)) {
+                        $validator->errors()->add(
+                            "stops.$index.departure_at",
+                            "The stop departure date & time must be after or equal to the main ride departure time."
+                        );
+                    }
+                } catch (\Throwable $e) {
+                    // Date format validation will handle this - skip this stop
+                    continue;
+                }
+            }
+        });
     }
 
     public function messages(): array
