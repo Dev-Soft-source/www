@@ -218,7 +218,7 @@ class PhoneController extends Controller
                 }
             } else {
                 // same user apna number dobara add kar raha hai
-                return back()->withErrors(['phone' => 'You have already added this phone number.'])->withInput();
+                return back()->with('error', 'You have already added this phone number.')->withInput();
             }
         }
 

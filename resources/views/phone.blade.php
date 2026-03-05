@@ -77,6 +77,32 @@
                 </div>
             @endif
 
+            {{-- AJAX Error Popup Modal (for dynamic messages from JS) --}}
+            <div id="ajaxErrorModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div onclick="closeAjaxErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                            <button type="button" onclick="closeAjaxErrorModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <div class="mt-2 w-full">
+                                        <p id="ajaxErrorModalMessage" class="can-exp-p text-center"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                <a href="#" onclick="closeAjaxErrorModal(); return false;" class="button-exp-fill">Close</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class=" pb-2">
                 <h1 class="mb-0">
                     @isset($phoneSetting->main_heading)
@@ -352,7 +378,7 @@
                                         class="no-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">No,
                                         go back</button>
                                     <a id="delete-card-link"
-                                        class="cursor-pointer yes-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">Yes,
+                                        class="cursor-pointer button-exp-red-fill inline-flex w-full justinline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm sm:ml-3 sm:w-auto">Yes,
                                         remove it</a>
                                 </div>
                             </div>
@@ -380,6 +406,7 @@
                             </svg>
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            
                             <div class="mt-2">
                               <h6 class="text-left">
                                 @isset($phoneSetting->verify_code_heading)
@@ -406,8 +433,9 @@
                               @endif
                             </div>
                         </div>
+
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <button type="submit" class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-42">
+                            <button type="submit" class="inline-flex w-auto justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-42">
                                 @isset($phoneSetting->verify_button_label_1)
                                     {{ $phoneSetting->verify_button_label_1 }}
                                 @endisset
@@ -621,6 +649,26 @@
             }
         }
 
+        function showAjaxErrorModal(message) {
+            const modal = document.getElementById('ajaxErrorModal');
+            const messageEl = document.getElementById('ajaxErrorModalMessage');
+            if (modal && messageEl) {
+                messageEl.textContent = message;
+                modal.classList.remove('hidden');
+                modal.classList.add('block');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeAjaxErrorModal() {
+            const modal = document.getElementById('ajaxErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('block');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
         function sendVerificationCode(phoneNumberId) {
             const lang = document.getElementById('selectedLangForUrl').value;
             const url = `/${lang}/send-verification-code/${phoneNumberId}`;
@@ -660,7 +708,7 @@
 
             // Validate inputs
             if (!country || !countryCode || !phone) {
-                alert('Please fill in all fields');
+                showAjaxErrorModal('Please fill in all fields');
                 return;
             }
 
@@ -703,9 +751,9 @@
                         for (let field in data.errors) {
                             errorMessage += data.errors[field].join('\n') + '\n';
                         }
-                        alert(errorMessage);
+                        showAjaxErrorModal(errorMessage.trim());
                     } else {
-                        alert(data.message || 'Error sending verification code');
+                        showAjaxErrorModal(data.message || 'Error sending verification code');
                     }
                 }
             })
@@ -713,7 +761,7 @@
                 console.error('Error:', error);
                 button.disabled = false;
                 button.innerHTML = originalText;
-                alert('Error sending verification code. Please try again.');
+                showAjaxErrorModal('Error sending verification code. Please try again.');
             });
         }
 

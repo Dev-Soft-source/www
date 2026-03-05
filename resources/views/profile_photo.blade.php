@@ -122,11 +122,6 @@
                                     @isset($profilePhotoPage->upload_profile_photo_placeholder)
                                         {{ $profilePhotoPage->upload_profile_photo_placeholder }}
                                     @endisset
-                                    <!-- <span class="text-primary">
-                                        @isset($profilePhotoPage->choose_file_placeholder)
-        {{ $profilePhotoPage->choose_file_placeholder }}
-    @endisset
-                                    </span> -->
                                 </p>
                                 <p class="text-sm lg:text-base text-gray-900 font-normal">
                                     @isset($profilePhotoPage->images_option_placeholder)
@@ -149,7 +144,6 @@
                                 </div>
                             </div>
                         @enderror
-
 
                         <div class="mt-4 flex justify-center md:justify-start">
                             <button type="submit"
