@@ -183,7 +183,7 @@
             
             // Disable submit button and show loading state
             submitButton.prop('disabled', true);
-            submitButton.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...');
+            submitButton.html('<span class="spinner-border spinner-border-sm me-2 mt-2" role="status" aria-hidden="true"></span>Loading...');
             
             // Clear previous errors
             $('.tooltip-error').remove();

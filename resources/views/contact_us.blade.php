@@ -12,7 +12,6 @@
                 @endisset
             </h1>
             <span class="text-red-500">
-*
                 @isset($contactProximaPage->mobile_indicate_required_field_label)
                 {{ $contactProximaPage->mobile_indicate_required_field_label }}
                 @endisset
