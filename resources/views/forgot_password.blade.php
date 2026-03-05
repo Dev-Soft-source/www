@@ -221,8 +221,12 @@
                     const response = xhr.responseJSON;
                     
                     if (xhr.status === 422) {
-                        // Validation errors
-                        handleValidationErrors(response.errors || {});
+                        // Validation errors or general error (e.g. closed account)
+                        if (response && response.error) {
+                            showErrorModal(response.error, response.verify_email, response.email);
+                        } else if (response && response.errors && Object.keys(response.errors).length > 0) {
+                            handleValidationErrors(response.errors);
+                        }
                     } else if (response && response.error) {
                         // General error - use existing error-modal
                         showErrorModal(response.error, response.verify_email, response.email);

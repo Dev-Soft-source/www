@@ -10,7 +10,7 @@
     @endphp
 
     <div class="bg-white border border-gray-200 rounded p-4 lg:p-4 w-full col-span-12 lg:col-span-9">
-        <div class="flex flex-wrap" id="tabs-id">
+        <div class="flex flex-wrap mt-4" id="tabs-id">
             <div class="w-full">
                 <form id="submitForm" method="POST" action="{{ route('store_top_up_balance') }}" enctype="multipart/form-data">
                     @csrf
@@ -40,9 +40,9 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="space-y-4 mb-4">
+                                        <div class="space-y-4 mt-8">
                                             <div class="w-full md:w-1/2">
-                                                <label for="payment_method" class="block mb-3 font-medium text-gray-900 mt-12 font-FuturaMdCnBT can-exp-h4">Pay with</label>
+                                                <!-- <label for="payment_method" class="block mb-3 font-medium text-gray-900 mt-12 font-FuturaMdCnBT can-exp-h4">Pay with</label> -->
                                                 <div class="border rounded-md overflow-hidden divide-y">
                                                     @php
                                                     $paymentMethodOld = old('payment_method');

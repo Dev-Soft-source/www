@@ -150,7 +150,7 @@ class ForgotPasswordController extends Controller
             session(['user' => $user]);
 
             // Get the close_modal_error_message from LoginPageSettingDetail
-            $closeModalErrorMessage = isset($loginPage) && isset($loginPage->close_modal_error_message) ? $loginPage->close_modal_error_message : 'Account has been closed';
+            $closeModalErrorMessage = isset($loginPage) && isset($loginPage->close_modal_error_message) ? $loginPage->close_modal_error_message : 'This account has been closed';
             
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([

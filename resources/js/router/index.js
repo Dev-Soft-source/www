@@ -19,6 +19,8 @@ import PinkRideFaqs from '../admin/Pink_Ride_Faqs/PinkRideFaqs.vue'
 import CreatePinkRideFaqs from '../admin/Pink_Ride_Faqs/Create.vue'
 import DriverRewardPoints from '../admin/Driver_Reward_Points/DriverRewardPoints.vue'
 import CreateDriverRewardPoints from '../admin/Driver_Reward_Points/Create.vue'
+import PassengerRewardPoints from '../admin/Passenger_Reward_Points/PassengerRewardPoints.vue'
+import CreatePassengerRewardPoints from '../admin/Passenger_Reward_Points/Create.vue'
 import StudentRewardPoints from '../admin/Student_Reward_Points/StudentRewardPoints.vue'
 import CreateStudentRewardPoints from '../admin/Student_Reward_Points/Create.vue'
 import CreatePackages from '../admin/Packages/Create.vue'
@@ -321,6 +323,30 @@ const routes = [
         component: CreateDriverRewardPoints,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'DriverRewardPoints', 'routeName': 'admin.driver-reward-points.index', 'isCurrentRoute': 0}, {'name': 'Edit', 'routeName': 'admin.driver-reward-points.edit', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/passenger-reward-points',
+        name: 'admin.passenger-reward-points.index',
+        component: PassengerRewardPoints,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'PassengerRewardPoints', 'routeName': 'admin.passenger-reward-points.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/passenger-reward-points/create',
+        name: 'admin.passenger-reward-points.create',
+        component: CreatePassengerRewardPoints,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'PassengerRewardPoints', 'routeName': 'admin.passenger-reward-points.index', 'isCurrentRoute': 0}, {'name': 'Create', 'routeName': 'admin.passenger-reward-points.create', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/passenger-reward-points/:id/edit',
+        name: 'admin.passenger-reward-points.edit',
+        component: CreatePassengerRewardPoints,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'PassengerRewardPoints', 'routeName': 'admin.passenger-reward-points.index', 'isCurrentRoute': 0}, {'name': 'Edit', 'routeName': 'admin.passenger-reward-points.edit', 'isCurrentRoute': 1}],
         },
     },
     {

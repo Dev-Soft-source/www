@@ -188,11 +188,14 @@ class PassengerWalletController extends Controller
             ->get();
         }
 
-        $rewardPointSettings = RewardPointSettingDetail::whereHas('rewardPointSetting', function ($query) {
-            $query->where('type', 'student');
+        // Use student rewards for students, passenger rewards for non-students
+        $rewardType = (auth()->user()->student != 0) ? 'student' : 'passenger';
+
+        $rewardPointSettings = RewardPointSettingDetail::whereHas('rewardPointSetting', function ($query) use ($rewardType) {
+            $query->where('type', $rewardType);
         })->with('rewardPointSetting')->where('language_id', $selectedLanguage->id)->get();
 
-        $studentTotalRewardPoint = RewardPoint::where('type', 'student')->where('user_id', $user_id)->where('status', 'pending')->sum('point');
+        $studentTotalRewardPoint = RewardPoint::where('type', $rewardType)->where('user_id', $user_id)->where('status', 'pending')->sum('point');
 
         return view('passenger_wallet_rewards',['reviewSetting' => $reviewSetting,'rewardPointSettings' => $rewardPointSettings,'studentTotalRewardPoint' => $studentTotalRewardPoint,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage, 'walletSettingPage' => $walletSettingPage,'ProfileSetting' => $ProfileSetting,'ProfilePage' => $ProfilePage]);
     }

@@ -160,7 +160,7 @@
                         <div for="dropzone-file"
                             class="flex flex-col items-center justify-center w-full h-auto p-4 border-2 border-gray-300 border-dashed rounded bg-white hover:bg-gray-100">
                             <div class="flex flex-col items-center justify-center pb-6">
-                                <img id="profile-image" src="{{ $user->student_card }}" class="w-full h-full object-cover">
+                                <img id="profile-image" src="{{ $user->student_card }}" class="w-48 h-48 object-cover">
                             </div>
                         </div>
                     @else
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
-                profileImage.className = 'w-68 h-58 object-contain mb-3 cursor-pointer rounded-lg';
+                profileImage.className = 'w-56 h-56 object-contain mb-3 cursor-pointer rounded-lg';
                 
                 // Enable button and make it full color when image is uploaded
                 submitBtn.removeAttribute('disabled');

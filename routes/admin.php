@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\{
     AuthController,
     BankController,
     DriverRewardPointController,
+    PassengerRewardPointController,
     StudentRewardPointController,
     BankSettingController,
     LanguageController,
@@ -271,6 +272,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::apiResource('extra-care-faqs', ExtraCareFaqController::class);
     Route::apiResource('pink-ride-faqs', PinkRideFaqController::class);
     Route::apiResource('driver-reward-points', DriverRewardPointController::class);
+    Route::apiResource('passenger-reward-points', PassengerRewardPointController::class);
     Route::apiResource('student-reward-points', StudentRewardPointController::class);
     Route::apiResource('bank-settings', BankSettingController::class);
     Route::apiResource('review-settings', ReviewSettingController::class);

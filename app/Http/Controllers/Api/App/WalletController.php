@@ -90,12 +90,15 @@ class WalletController extends Controller
         $currentDate = date('Y-m-d H:i:s');
 
         $langId = $request->lang_id;
-        
-        $rewardPointSettings = RewardPointSettingDetail::whereHas('rewardPointSetting', function ($query) {
-            $query->where('type', 'student');
+
+        // Use student rewards for students, passenger rewards for non-students
+        $rewardType = ($user->student != 0) ? 'student' : 'passenger';
+
+        $rewardPointSettings = RewardPointSettingDetail::whereHas('rewardPointSetting', function ($query) use ($rewardType) {
+            $query->where('type', $rewardType);
         })->with('rewardPointSetting')->where('language_id', $langId)->get();
 
-        $studentTotalRewardPoint = RewardPoint::where('type', 'student')->where('user_id', $user_id)->where('status', 'pending')->sum('point');
+        $studentTotalRewardPoint = RewardPoint::where('type', $rewardType)->where('user_id', $user_id)->where('status', 'pending')->sum('point');
         
 
         $data = ['rewardPointSettings' => $rewardPointSettings, 'studentTotalRewardPoint' => $studentTotalRewardPoint];

@@ -8,6 +8,7 @@ import banks from "./admin/banks.js"
 import extraCareFaqs from "./admin/extra_care_faqs.js"
 import pinkRideFaqs from "./admin/pink_ride_faqs.js"
 import rewardPointSettings from "./admin/driver_reward_points.js"
+import passengerRewardPointSettings from "./admin/passenger_reward_points.js"
 import studentsRewardPointSettings from "./admin/student_reward_points.js"
 import packages from "./admin/packages.js"
 import coffeewallets from "./admin/coffee_wallet.js"
@@ -54,6 +55,7 @@ export default new createStore({
         extraCareFaqs,
         pinkRideFaqs,
         rewardPointSettings,
+        passengerRewardPointSettings,
         studentsRewardPointSettings,
         packages,
         coffeewallets,
