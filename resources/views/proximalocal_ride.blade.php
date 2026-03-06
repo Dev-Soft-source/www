@@ -815,39 +815,41 @@
                 <div class="bg-gray-100 rounded-md p-4 py-6">
                     <div
                         class="flex items-end flex-col md:flex-row justify-between gap-4 md:gap-0 rounded-lg">
-                        <div class="w-full md:w-[30%]">
+                        <div class="w-full md:w-[30%] relative">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6"
                                         alt="">
                                 </div>
-                                <input type="text" id="from_spot_0" value="{{ $request->from }}" oninput="fromInput('0')" autocomplete="off"
+                                <input type="text" id="from_spot_0" value="{{ $request->from }}" autocomplete="off"
                                     class="bg-white rounded-md md:rounded-none pl-7 border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                     @isset($findRidePage->search_section_from_placeholder)
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
                                     @endisset>
-                                <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
-                            <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
+                            <div class="absolute hidden mt-1 z-10" id="fromInputError">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                            </div>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
                             <button type="button" onclick="swapLocations()">
                                 <img src="{{ asset('assets/arrow.png') }}" class="w-8 h-8 mx-auto" alt="">
                             </button>
                         </div>
-                        <div class="w-full md:w-[30%]">
+                        <div class="w-full md:w-[30%] relative">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
                                 </div>
-                                <input type="text" id="to_spot_0" value="{{ $request->to }}" oninput="toInput('0')" autocomplete="off"
+                                <input type="text" id="to_spot_0" value="{{ $request->to }}" autocomplete="off"
                                     class="bg-white pl-7 rounded-md md:rounded-none md:border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
                                     @isset($findRidePage->search_section_to_placeholder)
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
                                     @endisset>
-                                <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
-                            <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
+                            <div class="absolute hidden mt-1 z-10" id="toInputError">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                            </div>
                         </div>
                         <div class="w-48 mx-auto md:mx-0 md:w-[30%]">
                             <div class="relative">
@@ -2008,6 +2010,18 @@
         let removedRideIds = [];
         let currentRideIdToHide = null;
 
+        // Google Places (from/to) – used when API loads
+        var selectedFromPlace = null;
+        var selectedToPlace = null;
+        var geocoderProximalocalRide = null;
+        var fromAutocompleteProximalocalRide = null;
+        var toAutocompleteProximalocalRide = null;
+        var isSettingPlaceValueProximalocalRide = false;
+        var isSelectingFromDropdownProximalocalRide = false;
+        var errorFromRequiredProximalocalRide = 'The origin field is required';
+        var errorToRequiredProximalocalRide = 'The destination field is required';
+        var errorCityMissingProximalocalRide = 'We could not find this city name in our records, please double-check the spelling.';
+
         // Function to close the hide ride modal
         function closeHideRideModal() {
             document.getElementById('hide-ride-confirm-modal').classList.add('hidden');
@@ -2180,49 +2194,153 @@
             .catch(err => console.error('fetchCities error', err));
         }
 
-        const debouncedFromFetch = debounce(function() {
-            const searchTerm = (document.getElementById('from_spot_0') || {}).value || '';
-            fetchCities(searchTerm, 'from_spot', '0');
-        }, 500);
-        const debouncedToFetch = debounce(function() {
-            const searchTerm = (document.getElementById('to_spot_0') || {}).value || '';
-            fetchCities(searchTerm, 'to_spot', '0');
-        }, 500);
-
-        function fromInput(index) {
-            const el = document.getElementById('from_spot_' + index);
-            if (el && el.value.length < 2) {
-                const container = document.getElementById('from_spot_suggestions' + index);
-                if (container) container.innerHTML = '';
-            }
-            debouncedFromFetch();
-        }
-
-        function toInput(index) {
-            const el = document.getElementById('to_spot_' + index);
-            if (el && el.value.length < 2) {
-                const container = document.getElementById('to_spot_suggestions' + index);
-                if (container) container.innerHTML = '';
-            }
-            debouncedToFetch();
-        }
-
-        document.addEventListener('click', function(e) {
-            const fromSuggest = document.getElementById('from_spot_suggestions0');
-            const toSuggest = document.getElementById('to_spot_suggestions0');
-            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
-            if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
-        });
-
         function swapLocations() {
-            const fromEl = document.getElementById('from_spot_0');
-            const toEl = document.getElementById('to_spot_0');
-            if (!fromEl || !toEl) return;
-            const fromValue = fromEl.value;
-            const toValue = toEl.value;
-            fromEl.value = toValue;
-            toEl.value = fromValue;
-            navigateToSearchRoute();
+            const fromValue = document.getElementById('from_spot_0').value;
+            const toValue = document.getElementById('to_spot_0').value;
+            document.getElementById('from_spot_0').value = toValue;
+            document.getElementById('to_spot_0').value = fromValue;
+            var tempPlace = selectedFromPlace;
+            selectedFromPlace = selectedToPlace;
+            selectedToPlace = tempPlace;
+        }
+
+        window.initProximalocalRidePlaces = function() {
+            if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+            geocoderProximalocalRide = new google.maps.Geocoder();
+            var fromInput = document.getElementById('from_spot_0');
+            var toInput = document.getElementById('to_spot_0');
+            if (!fromInput || !toInput) return;
+            fromAutocompleteProximalocalRide = new google.maps.places.Autocomplete(fromInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+            toAutocompleteProximalocalRide = new google.maps.places.Autocomplete(toInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+            fromAutocompleteProximalocalRide.addListener('place_changed', function() {
+                var place = fromAutocompleteProximalocalRide.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValueProximalocalRide = true; isSelectingFromDropdownProximalocalRide = true;
+                    var formatted = formatPlaceAddressProximalocalRide(place);
+                    selectedFromPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                    fromInput.value = formatted;
+                    var err = document.getElementById('fromInputError'); if (err) err.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValueProximalocalRide = false; isSelectingFromDropdownProximalocalRide = false; }, 100);
+                }
+            });
+            toAutocompleteProximalocalRide.addListener('place_changed', function() {
+                var place = toAutocompleteProximalocalRide.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValueProximalocalRide = true; isSelectingFromDropdownProximalocalRide = true;
+                    var formatted = formatPlaceAddressProximalocalRide(place);
+                    selectedToPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                    toInput.value = formatted;
+                    var err = document.getElementById('toInputError'); if (err) err.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValueProximalocalRide = false; isSelectingFromDropdownProximalocalRide = false; }, 100);
+                }
+            });
+            fromInput.addEventListener('input', function() { if (!isSettingPlaceValueProximalocalRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null; });
+            toInput.addEventListener('input', function() { if (!isSettingPlaceValueProximalocalRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null; });
+            fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
+            toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+            fromInput.addEventListener('blur', function() {
+                if (isSettingPlaceValueProximalocalRide || isSelectingFromDropdownProximalocalRide) return;
+                var self = this;
+                setTimeout(function() {
+                    if (isSettingPlaceValueProximalocalRide || isSelectingFromDropdownProximalocalRide) return;
+                    var currentValue = self.value.trim();
+                    var fromInputError = document.getElementById('fromInputError');
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                        resolveTypedCityValueProximalocalRide(currentValue, 'from').then(function() {
+                            currentValue = self.value.trim();
+                            if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                                selectedFromPlace = null;
+                                if (currentValue !== '' && fromInputError) {
+                                    var te = fromInputError.querySelector('.tooltip-error');
+                                    if (te) te.textContent = errorCityMissingProximalocalRide;
+                                    fromInputError.classList.remove('hidden');
+                                } else if (fromInputError) fromInputError.classList.add('hidden');
+                            } else if (fromInputError) fromInputError.classList.add('hidden');
+                        });
+                    } else {
+                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                            selectedFromPlace = null;
+                            if (currentValue !== '' && fromInputError) {
+                                var te = fromInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = currentValue === '' ? errorFromRequiredProximalocalRide : errorCityMissingProximalocalRide;
+                                fromInputError.classList.remove('hidden');
+                            }
+                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                    }
+                }, 200);
+            });
+            toInput.addEventListener('blur', function() {
+                if (isSettingPlaceValueProximalocalRide || isSelectingFromDropdownProximalocalRide) return;
+                var self = this;
+                setTimeout(function() {
+                    if (isSettingPlaceValueProximalocalRide || isSelectingFromDropdownProximalocalRide) return;
+                    var currentValue = self.value.trim();
+                    var toInputError = document.getElementById('toInputError');
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                        resolveTypedCityValueProximalocalRide(currentValue, 'to').then(function() {
+                            currentValue = self.value.trim();
+                            if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                                selectedToPlace = null;
+                                if (currentValue !== '' && toInputError) {
+                                    var te = toInputError.querySelector('.tooltip-error');
+                                    if (te) te.textContent = errorCityMissingProximalocalRide;
+                                    toInputError.classList.remove('hidden');
+                                } else if (toInputError) toInputError.classList.add('hidden');
+                            } else if (toInputError) toInputError.classList.add('hidden');
+                        });
+                    } else {
+                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                            selectedToPlace = null;
+                            if (currentValue !== '' && toInputError) {
+                                var te = toInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = currentValue === '' ? errorToRequiredProximalocalRide : errorCityMissingProximalocalRide;
+                                toInputError.classList.remove('hidden');
+                            }
+                        } else if (toInputError) toInputError.classList.add('hidden');
+                    }
+                }, 200);
+            });
+            document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownProximalocalRide = true; else setTimeout(function() { isSelectingFromDropdownProximalocalRide = false; }, 50); });
+        };
+        function formatPlaceAddressProximalocalRide(place) {
+            var city = '', province = '', country = 'Canada';
+            if (!place.address_components) return place.name || place.formatted_address || '';
+            for (var i = 0; i < place.address_components.length; i++) {
+                var c = place.address_components[i], t = c.types;
+                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+                if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
+                if (t.indexOf('country') !== -1) country = c.long_name;
+            }
+            if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
+            if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
+            var out = city || ''; if (province) out += (out ? ', ' : '') + province; if (country && out) out += ', ' + country;
+            return out || place.name || place.formatted_address || '';
+        }
+        function resolveTypedCityValueProximalocalRide(rawValue, target) {
+            var value = (rawValue || '').trim();
+            if (!value || !geocoderProximalocalRide) return Promise.resolve(false);
+            var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
+            var input = document.getElementById(inputId);
+            return new Promise(function(resolve) {
+                geocoderProximalocalRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                    if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                    var result = null;
+                    for (var i = 0; i < response.length; i++) {
+                        var item = response[i];
+                        if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                    }
+                    if (!result) { resolve(false); return; }
+                    var formatted = formatPlaceAddressProximalocalRide(result);
+                    if (!formatted) { resolve(false); return; }
+                    isSettingPlaceValueProximalocalRide = true;
+                    var sel = { place_id: result.place_id, formatted_address: formatted, value: formatted };
+                    if (target === 'from') selectedFromPlace = sel; else selectedToPlace = sel;
+                    if (input) input.value = formatted;
+                    var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValueProximalocalRide = false; }, 100);
+                    resolve(true);
+                });
+            });
         }
 
         const dateInput = document.getElementById('dateInput');
@@ -2384,9 +2502,31 @@
         function navigateToSearchRoute() {
             localStorage.setItem('removedRideIds', JSON.stringify([]));
 
-            // Get the values of the input fields
-            const fromValue = document.getElementById('from_spot_0').value;
-            const toValue = document.getElementById('to_spot_0').value;
+            const fromValue = (document.getElementById('from_spot_0') || {}).value || '';
+            const toValue = (document.getElementById('to_spot_0') || {}).value || '';
+            const fromInputError = document.getElementById('fromInputError');
+            const toInputError = document.getElementById('toInputError');
+
+            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value || '').trim();
+            var toInvalid = !toValue.trim() || !selectedToPlace || toValue.trim() !== (selectedToPlace.value || '').trim();
+            if (fromInvalid || toInvalid) {
+                if (fromInvalid && fromInputError) {
+                    var te = fromInputError.querySelector('.tooltip-error');
+                    if (te) te.textContent = !fromValue.trim() ? errorFromRequiredProximalocalRide : errorCityMissingProximalocalRide;
+                    fromInputError.classList.remove('hidden');
+                }
+                if (toInvalid && toInputError) {
+                    var te2 = toInputError.querySelector('.tooltip-error');
+                    if (te2) te2.textContent = !toValue.trim() ? errorToRequiredProximalocalRide : errorCityMissingProximalocalRide;
+                    toInputError.classList.remove('hidden');
+                }
+                var firstField = document.getElementById('from_spot_0');
+                if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            if (fromInputError) fromInputError.classList.add('hidden');
+            if (toInputError) toInputError.classList.add('hidden');
+
             const dateValue = document.getElementById('dateInput').value;
             const driverAge = document.getElementById('driverAge').value;
             const passengerRating = document.getElementById('passengerRating').value;
@@ -2395,47 +2535,14 @@
             const driverPhone = document.getElementById('driverPhone').checked ? 1 : 0;
             const driverName = document.getElementById('driverName').value;
             const VehicleType = document.getElementById('VehicleType').value;
-
-            // Construct the URL with the selected features as a comma-separated list
             const featuresParam = selectedFeatures.length > 0 ? selectedFeatures.join(';') : '';
-            // return;
             const luggage = selectedLuggages.join(';');
-
             const smokingValue = selectedSmoking.join(';');
-
             const petsValue = selectedPets.join(';');
-
-            // Get the error message elements
-            const fromError = document.getElementById('fromError');
-            const toError = document.getElementById('toError');
-
-            // Check if "From" and "To" fields are empty
-            if (fromValue.trim() === '') {
-                @isset($findRidePage->search_section_required_error)
-                    fromError.textContent = '{{ $findRidePage->search_section_required_error }}';
-                @endisset
-                fromError.classList.remove('hidden');
-                toError.classList.add('hidden');
-                return;
-            } else if (toValue.trim() === '') {
-                @isset($findRidePage->search_section_required_error)
-                    toError.textContent = '{{ $findRidePage->search_section_required_error }}';
-                @endisset
-                toError.classList.remove('hidden');
-                fromError.classList.add('hidden');
-                return;
-            } else {
-                // Both fields are filled, hide error messages
-                fromError.classList.add('hidden');
-                toError.classList.add('hidden');
-            }
-
             const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
-            // Construct the URL with query parameters
             let searchUrl =
-                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${fromValue}&to=${toValue}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
+                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
 
-            // Navigate to the constructed URL
             window.location.href = searchUrl;
         }
         function resetFilters() {
@@ -2514,4 +2621,5 @@
             overlay.addEventListener('click', () => toggleSearchFilters(false));
         });
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initProximalocalRidePlaces" async defer></script>
 @endsection

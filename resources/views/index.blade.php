@@ -213,7 +213,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                     <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
                         <div class="relative w-full">

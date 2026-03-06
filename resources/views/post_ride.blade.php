@@ -414,7 +414,7 @@
                     </h3>
                     <div class="bg-white p-4 space-y-3">
                         <div class="flex flex-col md:flex-row justify-between items-start">
-                            <div class="w-full md:w-[45%] mb-4">
+                            <div class="w-full md:w-[45%] mb-4 relative">
                                 <div>
                                     <label for="from"
                                         class="block mb-2 text-gray-900">
@@ -434,22 +434,18 @@
                                         $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
                                         @endphp
 
-                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')" autocomplete="off"
+                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" autocomplete="off"
                                             class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
                                             @isset($postRidePage->from_placeholder)
                                                 placeholder="{{ $postRidePage->from_placeholder }}"
                                             @endisset>
-
-                                        <!-- Suggestions Container for 'from' field -->
-                                        <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                    <div class="absolute hidden mt-1 z-50" id="fromInputError">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
                                     </div>
                                     @error('from')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }} <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a> </p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
                                     </div>
                                     @enderror
                                 </div>
@@ -459,7 +455,7 @@
                                     <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
                                 </button>
                             </div>
-                            <div class="w-full md:w-[45%] mb-4">
+                            <div class="w-full md:w-[45%] mb-4 relative">
                                 <div>
                                     <label for="to"
                                         class="block mb-2 text-gray-900">
@@ -472,25 +468,18 @@
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                             <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6" alt="">
                                         </div>
-                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')" autocomplete="off"
+                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" autocomplete="off"
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             @isset($postRidePage->to_placeholder)
                                                 placeholder="{{ $postRidePage->to_placeholder }}"
                                             @endisset>
-
-                                        <!-- Suggestions Container for 'to' field -->
-                                        <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                    <div class="absolute hidden mt-1 z-50" id="toInputError">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
                                     </div>
                                     @error('to')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-
-                                                <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                    {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                                </a>
-                                            </p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
                                     </div>
                                     @enderror
                                 </div>
@@ -539,14 +528,8 @@
                                 @endisset
                                 >{{ old('pickup', optional($ride)->pickup) }}</textarea>
                                 @error('pickup')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                            <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a>
-                                        </p>
-                                    </div>
+                                <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
                                 </div>
                                 @enderror
                             </div>
@@ -564,14 +547,8 @@
                                 @endisset
                                 >{{ old('dropoff', optional($ride)->dropoff) }}</textarea>
                                 @error('dropoff')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                            <a class="text-white leading-none text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">
-                                                {{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}
-                                            </a>
-                                        </p>
-                                    </div>
+                                <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
                                 </div>
                                 @enderror
                             </div>
@@ -621,10 +598,8 @@
                                             placeholder="">
                                     </div>
                                     @error('date')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                     </div>
                                     @enderror
                                 </div>
@@ -656,10 +631,8 @@
                                             placeholder="">
                                     </div>
                                     @error('time')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                     </div>
                                     @enderror
                                 </div>
@@ -769,10 +742,8 @@
                                         </select>
                                     </div>
                                     @error('recurring_type')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                     </div>
                                     @enderror
                                 </div>
@@ -796,10 +767,8 @@
                                             class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                     </div>
                                     @error('recurring_trips')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                     </div>
                                     @enderror
                                 </div>
@@ -822,10 +791,8 @@
                                     placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}"
                                 @endisset>{{ old('details', optional($ride)->details) }}</textarea>
                             @error('details')
-                              <div class="relative tooltip -bottom-1 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
+                              <div class="absolute mt-1 z-10">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                               </div>
                             @enderror
                         </div>
@@ -858,10 +825,8 @@
                                 </div>
                                 @endfor
                                 @error('seats')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
+                                <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
                             </div>
@@ -892,10 +857,8 @@
                                         </li>
                                     </ul>
                                     @error('middle_seats')
-                                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                      <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                       </div>
                                     @enderror
                                 </div>
@@ -925,10 +888,8 @@
                                         </li>
                                     </ul>
                                     @error('back_seats')
-                                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext after:left-6 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                      <div class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                       </div>
                                     @enderror
                                 </div>
@@ -947,18 +908,7 @@
                         </h3>
                     </div>
                     <div id="post-ride-price-section" class="bg-white p-4 rounded-b-lg">
-                        @error('price')
-                            <div id="price-error-message" class="relative tooltip -bottom-4 group-hover:flex mb-2">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
-                        @enderror
-                        <div id="price-client-error" class="hidden mb-2">
-                            <div class="relative tooltiptext -top-2 z-10 shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                <p class="text-white leading-none text-sm lg:text-base">Please enter the full route price.</p>
-                            </div>
-                        </div>
+                        
                         <div id="single-price-block">
                             <div>
                                 <label for="" class=" text-gray-700 font-medium">
@@ -980,6 +930,15 @@
                                         value="{{ old('price', $defaultPrice) }}"
                                         class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
                                 </div>
+
+                                @error('price')
+                                    <div id="price-error-message" class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                    </div>
+                                @enderror
+                                <div id="price-client-error" class="absolute hidden mt-1 z-10 mb-2">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">Please enter the full route price.</div>
+                                </div>
                             </div>
                         </div>
                         <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
@@ -995,7 +954,7 @@
                                         class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>
                                 </div>
                                 <div id="full-route-tooltip-container-dynamic" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
-                                    <div class="tooltip-error">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
                                         The full-route price can't be higher than the total of all route sections.<br>
                                         You can lower the full-route price or adjust section prices.
                                     </div>
@@ -1092,10 +1051,8 @@
                                 @endif
                             </div>
                             @error('payment_method')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
+                                <div class="absolute mt-1 z-10">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                             @enderror
                         </div>
@@ -1151,10 +1108,8 @@
                                     @endif
                                 </ul>
                                 @error('booking_method')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
+                                  <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                   </div>
                                 @enderror
                             </div>
@@ -1209,10 +1164,8 @@
                                 </div>
                             </div>
                             @error('vehicle_selection')
-                                <div class="relative tooltip bottom-0 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
+                                <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                             @enderror
                             <div id="skipVehicle">
@@ -1238,10 +1191,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('make')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1266,10 +1217,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('model')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1329,10 +1278,8 @@
                                             </select>
                                         </div>
                                         @error('vehicle_type')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1353,10 +1300,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('year')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1378,10 +1323,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('color')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1402,10 +1345,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('license_no')
-                                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                           </div>
                                         @enderror
                                     </div>
@@ -1449,10 +1390,8 @@
                                             @endisset
                                         </div>
                                         @error('car_type')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                                </div>
+                                            <div class="absolute mt-1 z-10">
+                                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                             </div>
                                         @enderror
                                     </div>
@@ -1527,10 +1466,8 @@
                                         @endforeach
                                     </select>
                                     @error('vehicle_id')
-                                        <div class="relative tooltip -bottom-4 flex mt-1">
-                                            <div role="alert" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
+                                        <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                         </div>
                                     @enderror
                                 </div>
@@ -1652,10 +1589,8 @@
                             @endisset
                         </div>
                         @error('luggage')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
+                            <div class="absolute mt-1 z-10">
+                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                             </div>
                         @enderror
                         <div class="mt-6 space-y-2">
@@ -1728,10 +1663,8 @@
                             @endisset
                         </div>
                         @error('smoke')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
+                            <div class="absolute mt-1 z-10">
+                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                             </div>
                         @enderror
                     </div>
@@ -1780,10 +1713,8 @@
                             @endisset
                         </div>
                         @error('animal_friendly')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
+                            <div class="absolute mt-1 z-10">
+                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                             </div>
                         @enderror
                     </div>
@@ -2419,10 +2350,8 @@
                                     @endif
                                 </div>
                                 @error('booking_type')
-                                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
+                                  <div class="absolute mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                   </div>
                                 @enderror
                             </div>
@@ -2447,10 +2376,8 @@
                                     placeholder="{{ $postRidePage->anything_to_add_placeholder }}"
                                 @endisset>{{ old('notes', $ride->notes) }}</textarea>
                             @error('notes')
-                              <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
+                              <div class="absolute mt-1 z-10">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                               </div>
                             @enderror
                         </div>
@@ -2521,10 +2448,8 @@
                         </label>
                     </div>
                     @error('agree_terms')
-                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
+                    <div class="absolute mt-1 z-10">
+                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                     </div>
                     @enderror
                     <div class="hidden lg:flex justify-center items-center mt-8">
@@ -2563,26 +2488,17 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    // let autocomplete;
-    // function initMap() {
-    //     autocomplete = new google.maps.places.Autocomplete(
-    //         document.getElementById('from'),
-    //         {
-    //             types: ['establishment'],
-    //             componentRestrictions: {'country' : ['AU']},
-    //             fields: ['place_id', 'geometry', 'name']
-    //         }
-    //     );
-    //     autocomplete = new google.maps.places.Autocomplete(
-    //         document.getElementById('from'),
-    //         {
-    //             types: ['establishment'],
-    //             componentRestrictions: {'country' : ['AU']},
-    //             fields: ['place_id', 'geometry', 'name']
-    //         }
-    //     );
-    // }
-
+    // Google Places (from/to) – used when API loads
+    var selectedFromPlace = null;
+    var selectedToPlace = null;
+    var geocoderPostRide = null;
+    var fromAutocompletePostRide = null;
+    var toAutocompletePostRide = null;
+    var isSettingPlaceValuePostRide = false;
+    var isSelectingFromDropdownPostRide = false;
+    var errorFromRequiredPostRide = 'The origin field is required';
+    var errorToRequiredPostRide = 'The destination field is required';
+    var errorCityMissingPostRide = 'We could not find this city name in our records, please double-check the spelling.';
 
     // Define the handler function
     function extraCareRideModal(parms) {
@@ -2594,15 +2510,13 @@
     
     
     function hideTooltip(parms) {
-        if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-            $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-        }
+        // Hide validation tooltips (wrapper is parent of .tooltip-error)
+        if (parms === 'label') return;
+        var $el = $(this);
+        var $wrappers = $el.parent().find('.tooltip-error').parent();
+        if ($wrappers.length === 0) $wrappers = $el.parent().parent().find('.tooltip-error').parent();
+        if ($wrappers.length === 0) $wrappers = $el.parent().parent().parent().find('.tooltip-error').parent();
+        if ($wrappers.length > 0) $wrappers.addClass('hidden');
     }
 
     const inputs = document.querySelectorAll('input, textarea');
@@ -2642,34 +2556,22 @@ document.addEventListener('keydown', function(event) {
     }
 });
 function scrollToFirstError() {
-    // Find all error elements
-    const errorElements = document.querySelectorAll('.tooltip, .tooltiptext');
+    const errorInner = document.querySelectorAll('.tooltip-error');
+    const wrappers = Array.from(errorInner).map(el => el.parentElement).filter(Boolean);
 
-    // Find the first visible error element
-    let firstVisibleError = null;
-
-    errorElements.forEach(element => {
-        // Check if element is visible (basic check - you might need more robust visibility detection)
-        if (!firstVisibleError &&
-            element.offsetParent !== null &&
-            element.getBoundingClientRect().width > 0 &&
-            element.getBoundingClientRect().height > 0) {
-            firstVisibleError = element;
-        }
+    let firstVisible = null;
+    wrappers.forEach(el => {
+        if (firstVisible || !el) return;
+        if (el.classList.contains('hidden')) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) firstVisible = el;
     });
 
-    if (firstVisibleError) {
-        // Scroll to the error with smooth behavior
-        firstVisibleError.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-        });
-
-        // Also focus on the related input field if possible
-        const relatedInput = firstVisibleError.closest('.relative')?.previousElementSibling?.querySelector('input, select, textarea');
-        if (relatedInput) {
-            relatedInput.focus();
-        }
+    if (firstVisible) {
+        firstVisible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const rel = firstVisible.closest('.relative');
+        const relatedInput = rel ? rel.querySelector('input, select, textarea') : firstVisible.previousElementSibling?.querySelector('input, select, textarea');
+        if (relatedInput) relatedInput.focus();
     }
 }
 
@@ -2885,9 +2787,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Add our submit handler with capture phase to run first
-        // Use capture phase and make sure we run before other handlers
         form.addEventListener('submit', function(e) {
         console.log('Form submit event triggered - starting validation');
+        var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
+        var toVal = (document.getElementById('to_spot_0') || {}).value || '';
+        var fromInputError = document.getElementById('fromInputError');
+        var toInputError = document.getElementById('toInputError');
+        var fromInvalid = !fromVal.trim() || !selectedFromPlace || fromVal.trim() !== (selectedFromPlace.value || '').trim();
+        var toInvalid = !toVal.trim() || !selectedToPlace || toVal.trim() !== (selectedToPlace.value || '').trim();
+        if (fromInvalid || toInvalid) {
+            e.preventDefault();
+            if (fromInvalid && fromInputError) {
+                var te = fromInputError.querySelector('.tooltip-error');
+                if (te) te.textContent = !fromVal.trim() ? errorFromRequiredPostRide : errorCityMissingPostRide;
+                fromInputError.classList.remove('hidden');
+            }
+            if (toInvalid && toInputError) {
+                var te2 = toInputError.querySelector('.tooltip-error');
+                if (te2) te2.textContent = !toVal.trim() ? errorToRequiredPostRide : errorCityMissingPostRide;
+                toInputError.classList.remove('hidden');
+            }
+            var firstField = document.getElementById('from_spot_0');
+            if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (fromInputError) fromInputError.classList.add('hidden');
+        if (toInputError) toInputError.classList.add('hidden');
+
         var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
         var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
         if (tooltipDyn) tooltipDyn.classList.add('hidden');
@@ -2900,21 +2826,23 @@ document.addEventListener('DOMContentLoaded', function() {
         var priceClientErr = document.getElementById('price-client-error');
         if (priceClientErr) priceClientErr.classList.add('hidden');
         var singleBlock = document.getElementById('single-price-block');
-        if (singleBlock && singleBlock.style.display !== 'none' && singleBlock.offsetParent !== null) {
-            var singlePriceInput = singleBlock.querySelector('input[type="number"]');
-            if (singlePriceInput && (!singlePriceInput.value || singlePriceInput.value.trim() === '' || parseFloat(singlePriceInput.value) <= 0)) {
-                e.preventDefault();
-                if (priceClientErr) {
-                    priceClientErr.querySelector('p').textContent = 'Please enter the price per seat.';
-                    priceClientErr.classList.remove('hidden');
-                }
-                var priceSection = document.getElementById('post-ride-price-section');
-                if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                if (singlePriceInput) singlePriceInput.focus();
-                return;
-            }
-        }
-        if (priceClientErr && priceClientErr.querySelector('p')) priceClientErr.querySelector('p').textContent = 'Please enter the full route price.';
+        // if (singleBlock && singleBlock.style.display !== 'none' && singleBlock.offsetParent !== null) {
+        //     var singlePriceInput = singleBlock.querySelector('input[type="number"]');
+        //     if (singlePriceInput && (!singlePriceInput.value || singlePriceInput.value.trim() === '' || parseFloat(singlePriceInput.value) <= 0)) {
+        //         e.preventDefault();
+        //         if (priceClientErr) {
+        //             var priceTe = priceClientErr.querySelector('.tooltip-error');
+        //             if (priceTe) priceTe.textContent = 'Please enter the price per seat.';
+        //             priceClientErr.classList.remove('hidden');
+        //         }
+        //         var priceSection = document.getElementById('post-ride-price-section');
+        //         if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        //         if (singlePriceInput) singlePriceInput.focus();
+        //         return;
+        //     }
+        // }
+        var priceTe = priceClientErr ? priceClientErr.querySelector('.tooltip-error') : null;
+        if (priceTe) priceTe.textContent = 'Please enter the full route price.';
         if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
             var fullRouteInput = dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input');
             var totalInput = dynamicBlock.querySelector('#segment-total-price-input-dynamic');
@@ -3157,13 +3085,160 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true); // Use capture phase to run before other handlers
     });
     function swapLocations() {
-        // Get the values of the "From" and "To" input fields
         const fromValue = document.getElementById('from_spot_0').value;
         const toValue = document.getElementById('to_spot_0').value;
-
-        // Swap the values
         document.getElementById('from_spot_0').value = toValue;
         document.getElementById('to_spot_0').value = fromValue;
+        var tempPlace = selectedFromPlace;
+        selectedFromPlace = selectedToPlace;
+        selectedToPlace = tempPlace;
+    }
+
+    window.initPostRidePlaces = function() {
+        if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+        geocoderPostRide = new google.maps.Geocoder();
+        var fromInput = document.getElementById('from_spot_0');
+        var toInput = document.getElementById('to_spot_0');
+        if (!fromInput || !toInput) return;
+        fromAutocompletePostRide = new google.maps.places.Autocomplete(fromInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+        toAutocompletePostRide = new google.maps.places.Autocomplete(toInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+        fromAutocompletePostRide.addListener('place_changed', function() {
+            var place = fromAutocompletePostRide.getPlace();
+            if (place.address_components && place.place_id) {
+                isSettingPlaceValuePostRide = true; isSelectingFromDropdownPostRide = true;
+                var formatted = formatPlaceAddressPostRide(place);
+                selectedFromPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                fromInput.value = formatted;
+                var err = document.getElementById('fromInputError'); if (err) err.classList.add('hidden');
+                if (typeof fetchAndStoreDistance === 'function') setTimeout(function() { fetchAndStoreDistance(0); }, 300);
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                setTimeout(function() { isSettingPlaceValuePostRide = false; isSelectingFromDropdownPostRide = false; }, 100);
+            }
+        });
+        toAutocompletePostRide.addListener('place_changed', function() {
+            var place = toAutocompletePostRide.getPlace();
+            if (place.address_components && place.place_id) {
+                isSettingPlaceValuePostRide = true; isSelectingFromDropdownPostRide = true;
+                var formatted = formatPlaceAddressPostRide(place);
+                selectedToPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                toInput.value = formatted;
+                var err = document.getElementById('toInputError'); if (err) err.classList.add('hidden');
+                if (typeof fetchAndStoreDistance === 'function') setTimeout(function() { fetchAndStoreDistance(0); }, 300);
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                setTimeout(function() { isSettingPlaceValuePostRide = false; isSelectingFromDropdownPostRide = false; }, 100);
+            }
+        });
+        fromInput.addEventListener('input', function() { if (!isSettingPlaceValuePostRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null; if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide(); });
+        toInput.addEventListener('input', function() { if (!isSettingPlaceValuePostRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null; if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide(); });
+        fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
+        toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+        fromInput.addEventListener('blur', function() {
+            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+                var currentValue = self.value.trim();
+                var fromInputError = document.getElementById('fromInputError');
+                if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                    resolveTypedCityValuePostRide(currentValue, 'from').then(function() {
+                        currentValue = self.value.trim();
+                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                            selectedFromPlace = null;
+                            if (currentValue !== '' && fromInputError) {
+                                var te = fromInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = errorCityMissingPostRide;
+                                fromInputError.classList.remove('hidden');
+                            } else if (fromInputError) fromInputError.classList.add('hidden');
+                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                        if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value) fetchAndStoreDistance(0);
+                    });
+                } else {
+                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                        selectedFromPlace = null;
+                        if (currentValue !== '' && fromInputError) {
+                            var te = fromInputError.querySelector('.tooltip-error');
+                            if (te) te.textContent = currentValue === '' ? errorFromRequiredPostRide : errorCityMissingPostRide;
+                            fromInputError.classList.remove('hidden');
+                        }
+                    } else if (fromInputError) fromInputError.classList.add('hidden');
+                    if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value) fetchAndStoreDistance(0);
+                }
+            }, 200);
+        });
+        toInput.addEventListener('blur', function() {
+            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+                var currentValue = self.value.trim();
+                var toInputError = document.getElementById('toInputError');
+                if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                    resolveTypedCityValuePostRide(currentValue, 'to').then(function() {
+                        currentValue = self.value.trim();
+                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                            selectedToPlace = null;
+                            if (currentValue !== '' && toInputError) {
+                                var te = toInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = errorCityMissingPostRide;
+                                toInputError.classList.remove('hidden');
+                            } else if (toInputError) toInputError.classList.add('hidden');
+                        } else if (toInputError) toInputError.classList.add('hidden');
+                        if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value) fetchAndStoreDistance(0);
+                    });
+                } else {
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                        selectedToPlace = null;
+                        if (currentValue !== '' && toInputError) {
+                            var te = toInputError.querySelector('.tooltip-error');
+                            if (te) te.textContent = currentValue === '' ? errorToRequiredPostRide : errorCityMissingPostRide;
+                            toInputError.classList.remove('hidden');
+                        }
+                    } else if (toInputError) toInputError.classList.add('hidden');
+                    if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value) fetchAndStoreDistance(0);
+                }
+            }, 200);
+        });
+        document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownPostRide = true; else setTimeout(function() { isSelectingFromDropdownPostRide = false; }, 50); });
+    };
+    function formatPlaceAddressPostRide(place) {
+        var city = '', province = '', country = 'Canada';
+        if (!place.address_components) return place.name || place.formatted_address || '';
+        for (var i = 0; i < place.address_components.length; i++) {
+            var c = place.address_components[i], t = c.types;
+            if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+            if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
+            if (t.indexOf('country') !== -1) country = c.long_name;
+        }
+        if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
+        if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
+        var out = city || ''; if (province) out += (out ? ', ' : '') + province; if (country && out) out += ', ' + country;
+        return out || place.name || place.formatted_address || '';
+    }
+    function resolveTypedCityValuePostRide(rawValue, target) {
+        var value = (rawValue || '').trim();
+        if (!value || !geocoderPostRide) return Promise.resolve(false);
+        var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
+        var input = document.getElementById(inputId);
+        return new Promise(function(resolve) {
+            geocoderPostRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                var result = null;
+                for (var i = 0; i < response.length; i++) {
+                    var item = response[i];
+                    if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                }
+                if (!result) { resolve(false); return; }
+                var formatted = formatPlaceAddressPostRide(result);
+                if (!formatted) { resolve(false); return; }
+                isSettingPlaceValuePostRide = true;
+                var sel = { place_id: result.place_id, formatted_address: formatted, value: formatted };
+                if (target === 'from') selectedFromPlace = sel; else selectedToPlace = sel;
+                if (input) input.value = formatted;
+                var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
+                setTimeout(function() { isSettingPlaceValuePostRide = false; }, 100);
+                resolve(true);
+            });
+        });
     }
 
     const dateInput = document.getElementById('dateInput');
@@ -4275,6 +4350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initPostRidePlaces" async defer></script>
 
 <style>
     .validation-tooltip {

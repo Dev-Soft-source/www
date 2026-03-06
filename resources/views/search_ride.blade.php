@@ -782,7 +782,7 @@
                         </h1>
                     </div>
                     <div class="flex items-end flex-col md:flex-row justify-between gap-4 md:gap-0 rounded-lg">
-                        <div class="w-full md:w-[30%]">
+                        <div class="w-full md:w-[30%] relative">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->from_field_icon)
@@ -791,14 +791,15 @@
                                         <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
                                     @endisset
                                 </div>
-                                <input type="text" id="from_spot_0" value="{{ $request->from }}" oninput="fromInput('0')" autocomplete="off"
+                                <input type="text" id="from_spot_0" value="{{ $request->from }}" autocomplete="off"
                                     class="bg-white rounded-md md:rounded-none pl-7 border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                     @isset($findRidePage->search_section_from_placeholder)
                                         placeholder="{{ $findRidePage->search_section_from_placeholder }}"
                                     @endisset>
-                                <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
-                            <p id="fromError" class="text-sm hidden text-red-500 absolute mt-1"></p>
+                            <div class="absolute hidden mt-1 z-10" id="fromInputError">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                            </div>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
                             <button type="button" onclick="swapLocations()">
@@ -809,7 +810,7 @@
                                 @endisset
                             </button>
                         </div>
-                        <div class="w-full md:w-[30%]">
+                        <div class="w-full md:w-[30%] relative">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->to_field_icon)
@@ -818,14 +819,15 @@
                                         <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
                                     @endisset
                                 </div>
-                                <input type="text" id="to_spot_0" value="{{ $request->to }}" oninput="toInput('0')" autocomplete="off"
+                                <input type="text" id="to_spot_0" value="{{ $request->to }}" autocomplete="off"
                                     class="bg-white pl-7 rounded-md md:rounded-none md:border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
                                     @isset($findRidePage->search_section_to_placeholder)
                                         placeholder="{{ $findRidePage->search_section_to_placeholder }}"
                                     @endisset>
-                                <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50 rounded border border-gray-200"></div>
                             </div>
-                            <p id="toError" class="text-sm hidden text-red-500 absolute mt-1"></p>
+                            <div class="absolute hidden mt-1 z-10" id="toInputError">
+                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                            </div>
                         </div>
                         <div class="w-48 mx-auto md:mx-0 md:w-[30%]">
                             <div class="relative">
@@ -1742,6 +1744,18 @@
         let removedRideIds = [];
         let currentRideIdToHide = null;
 
+        // Google Places (from/to) – used when API loads
+        let selectedFromPlace = null;
+        let selectedToPlace = null;
+        let geocoder = null;
+        let fromAutocomplete = null;
+        let toAutocomplete = null;
+        let isSettingPlaceValue = false;
+        let isSelectingFromDropdown = false;
+        const errorFromRequired = 'The origin field is required';
+        const errorToRequired = 'The destination field is required';
+        const errorCityMissing = 'We could not find this city name in our records, please double-check the spelling.';
+
         // Function to close the hide ride modal
         function closeHideRideModal() {
             document.getElementById('hide-ride-confirm-modal').classList.add('hidden');
@@ -1830,6 +1844,9 @@
             const toValue = document.getElementById('to_spot_0').value;
             document.getElementById('from_spot_0').value = toValue;
             document.getElementById('to_spot_0').value = fromValue;
+            const tempPlace = selectedFromPlace;
+            selectedFromPlace = selectedToPlace;
+            selectedToPlace = tempPlace;
         }
 
         function debounce(func, delay) {
@@ -2016,25 +2033,38 @@
 
             const fromValue = document.getElementById('from_spot_0').value.trim();
             const toValue = document.getElementById('to_spot_0').value.trim();
-            const fromError = document.getElementById('fromError');
-            const toError = document.getElementById('toError');
+            const fromInputError = document.getElementById('fromInputError');
+            const toInputError = document.getElementById('toInputError');
 
-            if (fromValue === '') {
-                @isset($findRidePage->search_section_required_error)
-                    if (fromError) { fromError.textContent = '{{ $findRidePage->search_section_required_error }}'; fromError.classList.remove('hidden'); }
-                @endisset
-                if (toError) toError.classList.add('hidden');
-                return;
+            let isValid = true;
+            if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
+                if (fromInputError) {
+                    const tooltipError = fromInputError.querySelector('.tooltip-error');
+                    if (tooltipError) tooltipError.textContent = fromValue === '' ? errorFromRequired : errorCityMissing;
+                    fromInputError.classList.remove('hidden');
+                }
+                isValid = false;
             }
-            if (toValue === '') {
-                @isset($findRidePage->search_section_required_error)
-                    if (toError) { toError.textContent = '{{ $findRidePage->search_section_required_error }}'; toError.classList.remove('hidden'); }
-                @endisset
-                if (fromError) fromError.classList.add('hidden');
-                return;
+            if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
+                if (toInputError) {
+                    const tooltipError = toInputError.querySelector('.tooltip-error');
+                    if (tooltipError) tooltipError.textContent = toValue === '' ? errorToRequired : errorCityMissing;
+                    toInputError.classList.remove('hidden');
+                }
+                isValid = false;
             }
-            if (fromError) fromError.classList.add('hidden');
-            if (toError) toError.classList.add('hidden');
+            if (!isValid) return;
+
+            if (fromInputError) {
+                fromInputError.classList.add('hidden');
+                const tooltipError = fromInputError.querySelector('.tooltip-error');
+                if (tooltipError) tooltipError.textContent = '';
+            }
+            if (toInputError) {
+                toInputError.classList.add('hidden');
+                const tooltipError = toInputError.querySelector('.tooltip-error');
+                if (tooltipError) tooltipError.textContent = '';
+            }
 
             const formData = {
                 from: fromValue,
@@ -2098,8 +2128,192 @@
 
             window.location.href = "{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}";
         }
-        // From/To use get-cities-by-state search engine (same as pink_ride). No-op for Google Maps callback if script loads.
-        window.initGooglePlaces = function() {};
+        // Google Places init (from/to) – same behaviour as index.blade.php
+        window.initGooglePlaces = function() {
+            geocoder = new google.maps.Geocoder();
+            const fromInput = document.getElementById('from_spot_0');
+            const toInput = document.getElementById('to_spot_0');
+            if (!fromInput || !toInput) return;
+
+            fromAutocomplete = new google.maps.places.Autocomplete(fromInput, {
+                componentRestrictions: { country: 'ca' },
+                types: ['(cities)'],
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
+            });
+            toAutocomplete = new google.maps.places.Autocomplete(toInput, {
+                componentRestrictions: { country: 'ca' },
+                types: ['(cities)'],
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
+            });
+
+            fromAutocomplete.addListener('place_changed', function() {
+                const place = fromAutocomplete.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValue = true;
+                    isSelectingFromDropdown = true;
+                    const formattedAddress = formatPlaceAddressSearchRide(place);
+                    selectedFromPlace = { place_id: place.place_id, formatted_address: formattedAddress, value: formattedAddress };
+                    fromInput.value = formattedAddress;
+                    const err = document.getElementById('fromInputError');
+                    if (err) err.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValue = false; isSelectingFromDropdown = false; }, 100);
+                }
+            });
+            toAutocomplete.addListener('place_changed', function() {
+                const place = toAutocomplete.getPlace();
+                if (place.address_components && place.place_id) {
+                    isSettingPlaceValue = true;
+                    isSelectingFromDropdown = true;
+                    const formattedAddress = formatPlaceAddressSearchRide(place);
+                    selectedToPlace = { place_id: place.place_id, formatted_address: formattedAddress, value: formattedAddress };
+                    toInput.value = formattedAddress;
+                    const err = document.getElementById('toInputError');
+                    if (err) err.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValue = false; isSelectingFromDropdown = false; }, 100);
+                }
+            });
+
+            fromInput.addEventListener('input', function() {
+                if (isSettingPlaceValue) return;
+                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+            });
+            toInput.addEventListener('input', function() {
+                if (isSettingPlaceValue) return;
+                if (selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null;
+            });
+
+            fromInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValueSearchRide(this.value, 'from').then(function(r) { if (r) event.preventDefault(); });
+            });
+            toInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValueSearchRide(this.value, 'to').then(function(r) { if (r) event.preventDefault(); });
+            });
+
+            document.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.pac-container')) isSelectingFromDropdown = true;
+                else setTimeout(function() { isSelectingFromDropdown = false; }, 50);
+            });
+
+            fromInput.addEventListener('blur', function() {
+                if (isSettingPlaceValue || isSelectingFromDropdown) return;
+                var self = this;
+                setTimeout(function() {
+                    if (isSettingPlaceValue || isSelectingFromDropdown) return;
+                    var currentValue = self.value.trim();
+                    var fromInputError = document.getElementById('fromInputError');
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                        resolveTypedCityValueSearchRide(currentValue, 'from').then(function() {
+                            currentValue = self.value.trim();
+                            if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                                selectedFromPlace = null;
+                                if (currentValue !== '' && fromInputError) {
+                                    var tooltipError = fromInputError.querySelector('.tooltip-error');
+                                    if (tooltipError) tooltipError.textContent = errorCityMissing;
+                                    fromInputError.classList.remove('hidden');
+                                } else if (fromInputError) fromInputError.classList.add('hidden');
+                            } else if (fromInputError) fromInputError.classList.add('hidden');
+                        });
+                    } else {
+                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                            selectedFromPlace = null;
+                            if (currentValue !== '' && fromInputError) {
+                                var tooltipError = fromInputError.querySelector('.tooltip-error');
+if (tooltipError) tooltipError.textContent = currentValue === '' ? errorFromRequired : errorCityMissing;
+                                    fromInputError.classList.remove('hidden');
+                            } else if (fromInputError) fromInputError.classList.add('hidden');
+                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                    }
+                }, 200);
+            });
+
+            toInput.addEventListener('blur', function() {
+                if (isSettingPlaceValue || isSelectingFromDropdown) return;
+                var self = this;
+                setTimeout(function() {
+                    if (isSettingPlaceValue || isSelectingFromDropdown) return;
+                    var currentValue = self.value.trim();
+                    var toInputError = document.getElementById('toInputError');
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                        resolveTypedCityValueSearchRide(currentValue, 'to').then(function() {
+                            currentValue = self.value.trim();
+                            if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                                selectedToPlace = null;
+                                if (currentValue !== '' && toInputError) {
+                                    var tooltipError = toInputError.querySelector('.tooltip-error');
+                                    if (tooltipError) tooltipError.textContent = errorCityMissing;
+                                    toInputError.classList.remove('hidden');
+                                } else if (toInputError) toInputError.classList.add('hidden');
+                            } else if (toInputError) toInputError.classList.add('hidden');
+                        });
+                    } else {
+                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                            selectedToPlace = null;
+                            if (currentValue !== '' && toInputError) {
+                                var tooltipError = toInputError.querySelector('.tooltip-error');
+                                if (tooltipError) tooltipError.textContent = currentValue === '' ? errorToRequired : errorCityMissing;
+                                toInputError.classList.remove('hidden');
+                            } else if (toInputError) toInputError.classList.add('hidden');
+                        } else if (toInputError) toInputError.classList.add('hidden');
+                    }
+                }, 200);
+            });
+
+            fromInput.addEventListener('focus', function() {
+                var fromInputError = document.getElementById('fromInputError');
+                if (fromInputError) fromInputError.classList.add('hidden');
+            });
+            toInput.addEventListener('focus', function() {
+                var toInputError = document.getElementById('toInputError');
+                if (toInputError) toInputError.classList.add('hidden');
+            });
+        };
+
+        function formatPlaceAddressSearchRide(place) {
+            var city = '', province = '', country = 'Canada';
+            if (!place.address_components) return place.name || place.formatted_address || '';
+            for (var i = 0; i < place.address_components.length; i++) {
+                var c = place.address_components[i], t = c.types;
+                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+                if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
+                if (t.indexOf('country') !== -1) country = c.long_name;
+            }
+            if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
+            if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
+            var out = city || '';
+            if (province) out += (out ? ', ' : '') + province;
+            if (country && out) out += ', ' + country;
+            return out || place.name || place.formatted_address || '';
+        }
+
+        function resolveTypedCityValueSearchRide(rawValue, target) {
+            var value = (rawValue || '').trim();
+            if (!value || !geocoder) return Promise.resolve(false);
+            var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
+            var input = document.getElementById(inputId);
+            return new Promise(function(resolve) {
+                geocoder.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                    if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                    var result = null;
+                    for (var i = 0; i < response.length; i++) {
+                        var item = response[i];
+                        if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) {
+                            result = item; break;
+                        }
+                    }
+                    if (!result) { resolve(false); return; }
+                    var formattedAddress = formatPlaceAddressSearchRide(result);
+                    if (!formattedAddress) { resolve(false); return; }
+                    isSettingPlaceValue = true;
+                    var selectedPlace = { place_id: result.place_id, formatted_address: formattedAddress, value: formattedAddress };
+                    if (target === 'from') selectedFromPlace = selectedPlace; else selectedToPlace = selectedPlace;
+                    if (input) input.value = formattedAddress;
+                    var errorEl = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError');
+                    if (errorEl) errorEl.classList.add('hidden');
+                    setTimeout(function() { isSettingPlaceValue = false; }, 100);
+                    resolve(true);
+                });
+            });
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
