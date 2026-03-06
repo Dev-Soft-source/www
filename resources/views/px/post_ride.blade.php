@@ -1684,6 +1684,7 @@
                     let distanceSuffix = 'distance unavailable';
 
                     const segmentDistanceMeters = getSegmentDistanceMeters(fromIndex, toIndex);
+                    input.setAttribute('data-distance-meters', String(segmentDistanceMeters));
                     if (segmentDistanceMeters > 0) {
                         const priceEstimate = calculateExpectedSegmentPriceMinor(segmentDistanceMeters, seatsTotal);
                         suggestedMinor = priceEstimate.suggestedMinor;
@@ -1980,6 +1981,7 @@
                         priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
                         priceInput.setAttribute('data-from-index', String(fromIndex));
                         priceInput.setAttribute('data-to-index', String(toIndex));
+                        priceInput.setAttribute('data-distance-meters', '0');
 
                         if (toIndex === fromIndex + 1 && toIndex <= validStops.length) {
                             priceInput.setAttribute('data-adjacent-stop-index', String(validStops[toIndex - 1].index));
@@ -1992,6 +1994,11 @@
                         priceInput.addEventListener('input', function() {
                             syncStopPriceDeltaInputsFromSegmentRows();
                             syncSegmentPriceTotal();
+                            maybeShowPxLivePriceAlert(false, priceInput);
+                        });
+
+                        priceInput.addEventListener('blur', function() {
+                            maybeShowPxLivePriceAlert(true, priceInput);
                         });
 
                         row.appendChild(routeLabelWrap);
@@ -2490,6 +2497,7 @@
 
         // Store distance globally when available (from Google API calculation)
         window.pxRideDistanceKm = null;
+        let lastPxPriceValidationInput = null;
 
         function setModalVisibility(modalId, isVisible) {
             const modal = document.getElementById(modalId);
@@ -2523,8 +2531,8 @@
             }
         }
 
-        function focusPxPriceInput() {
-            const priceInput = document.getElementById('px-price-minor-input');
+        function focusPxPriceInput(targetInput = null) {
+            const priceInput = targetInput instanceof HTMLElement ? targetInput : document.getElementById('px-price-minor-input');
             if (!priceInput) {
                 return;
             }
@@ -2602,37 +2610,61 @@
             };
         }
 
-        function getCurrentPxPriceValidationContext() {
-            const priceMinorInput = document.getElementById('px-price-minor-input');
-            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
-            const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
-            const distanceMetersInput = document.getElementById('px-distance-meters-input');
-
-            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor'
-                ? parseInt(priceMinorHiddenInput.value || '0', 10)
-                : (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
-            const seatsTotal = selectedSeatsInput ? parseInt(selectedSeatsInput.value || '0', 10) : 0;
-
-            let distanceKm = null;
-            if (distanceMetersInput && distanceMetersInput.value) {
-                distanceKm = (parseInt(distanceMetersInput.value || '0', 10) || 0) / 1000;
-            } else if (window.pxRideDistanceKm) {
-                distanceKm = parseFloat(window.pxRideDistanceKm);
-            }
+        function buildPxPriceValidationContext(priceMinor, seatsTotal, distanceMeters, routeLabel) {
+            const parsedDistanceMeters = Number.parseInt(distanceMeters || '0', 10) || 0;
 
             return {
                 priceMinor: Number.isNaN(priceMinor) ? 0 : priceMinor,
                 seatsTotal: Number.isNaN(seatsTotal) ? 0 : seatsTotal,
-                distanceKm: Number.isFinite(distanceKm) ? distanceKm : null,
+                distanceKm: parsedDistanceMeters > 0 ? parsedDistanceMeters / 1000 : null,
+                routeLabel,
             };
         }
 
-        function maybeShowPxLivePriceAlert(force = false) {
+        function getCurrentPxPriceValidationContext(sourceInput = null) {
+            const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
+            const seatsTotal = selectedSeatsInput ? parseInt(selectedSeatsInput.value || '0', 10) : 0;
+
+            if (sourceInput instanceof HTMLInputElement && sourceInput.classList.contains('px-segment-price-input')) {
+                const distanceMeters = Number.parseInt(sourceInput.getAttribute('data-distance-meters') || '0', 10) || 0;
+                const routeLabel = sourceInput.parentElement?.querySelector('label')?.textContent?.trim() || 'this segment';
+                const normalizedPrice = (sourceInput.value ?? '').toString().trim().replace(',', '.');
+                const parsedPrice = parseFloat(normalizedPrice);
+                const priceMinor = Number.isFinite(parsedPrice) && parsedPrice >= 0 ? Math.round(parsedPrice * 100) : 0;
+
+                return buildPxPriceValidationContext(
+                    priceMinor,
+                    seatsTotal,
+                    distanceMeters,
+                    routeLabel
+                );
+            }
+
+            const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
+            const distanceMetersInput = document.getElementById('px-distance-meters-input');
+            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor'
+                ? parseInt(priceMinorHiddenInput.value || '0', 10)
+                : (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
+
+            let distanceMeters = 0;
+            if (distanceMetersInput && distanceMetersInput.value) {
+                distanceMeters = parseInt(distanceMetersInput.value || '0', 10) || 0;
+            } else if (window.pxRideDistanceKm) {
+                distanceMeters = Math.round((parseFloat(window.pxRideDistanceKm) || 0) * 1000);
+            }
+
+            return buildPxPriceValidationContext(priceMinor, seatsTotal, distanceMeters, 'this trip');
+        }
+
+        function maybeShowPxLivePriceAlert(force = false, sourceInput = null) {
+            lastPxPriceValidationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById('px-price-minor-input');
             const {
                 priceMinor,
                 seatsTotal,
-                distanceKm
-            } = getCurrentPxPriceValidationContext();
+                distanceKm,
+                routeLabel
+            } = getCurrentPxPriceValidationContext(sourceInput);
 
             if (!priceMinor || !seatsTotal || !distanceKm || distanceKm <= 0) {
                 lastPxPriceValidationSignature = null;
@@ -2648,6 +2680,7 @@
 
             const signature = JSON.stringify({
                 type: validation.type,
+                routeLabel,
                 priceMinor,
                 seatsTotal,
                 distanceKm: Number(distanceKm).toFixed(2),
@@ -2662,24 +2695,24 @@
             lastPxPriceValidationSignature = signature;
 
             if (validation.type === 'error') {
-                showPxPriceErrorModal(validation.maxPricePerSeat);
+                showPxPriceErrorModal(validation.maxPricePerSeat, routeLabel);
                 return;
             }
 
             if (validation.type === 'warning') {
                 showPxPriceWarningModal(function() {
                     closeModalById('pxPriceWarningModal');
-                });
+                }, routeLabel, validation.softWarningPrice);
             }
         }
 
         // Function to show error modal (Price Limit Exceeded)
-        function showPxPriceErrorModal(maxPricePerSeat) {
+        function showPxPriceErrorModal(maxPricePerSeat, routeLabel = 'this trip') {
             setElementText('pxPriceErrorParagraph1',
                 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.'
             );
             setElementText('pxPriceErrorParagraph2',
-                'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.'
+                'The maximum allowed for ' + routeLabel + ' is $' + maxPricePerSeat + ' per seat.'
             );
             setElementText('pxPriceErrorParagraph3',
                 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.'
@@ -2688,7 +2721,7 @@
         }
 
         // Function to show warning modal (Recommended Contribution Limit)
-        function showPxPriceWarningModal(callback) {
+        function showPxPriceWarningModal(callback, routeLabel = 'this trip', softWarningPrice = null) {
             console.log('showPxPriceWarningModal called');
             const modal = document.getElementById('pxPriceWarningModal');
             if (!modal) {
@@ -2698,8 +2731,6 @@
 
             const para1 = document.getElementById('pxPriceWarningParagraph1');
             const para2 = document.getElementById('pxPriceWarningParagraph2');
-            const routeLabel = 'this trip';
-            const softWarningPrice = null;
 
             if (para1) {
                 para1.textContent =
@@ -2718,6 +2749,9 @@
             const continueBtn = document.getElementById('pxPriceWarningContinue');
             if (continueBtn) {
                 continueBtn.onclick = function() {
+                    if (!postRideForm || !postRideForm.querySelector('input[name="bypass_price_validation"]')) {
+                        focusPxPriceInput(lastPxPriceValidationInput);
+                    }
                     if (callback) callback();
                 };
             }
@@ -2726,14 +2760,14 @@
         // Function to adjust price from error (focus on price input field)
         function adjustPxPriceFromError() {
             closeModalById('pxPriceErrorModal');
-            focusPxPriceInput();
+            focusPxPriceInput(lastPxPriceValidationInput);
         }
 
         // Function to adjust price from warning (focus on price input field)
         function adjustPxPriceFromWarning() {
             console.log('Adjust PX Price clicked - closing modal and focusing on price field');
             closeModalById('pxPriceWarningModal');
-            focusPxPriceInput();
+            focusPxPriceInput(lastPxPriceValidationInput);
             return false;
         }
 
