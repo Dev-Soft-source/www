@@ -2244,10 +2244,16 @@
             });
 
             fromInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') resolveTypedCityValueProximalocalRide(this.value, 'from').then(function(r) { if (r) event.preventDefault(); });
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueProximalocalRide(this.value, 'from').then(function() { navigateToSearchRoute(); });
+                }
             });
             toInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') resolveTypedCityValueProximalocalRide(this.value, 'to').then(function(r) { if (r) event.preventDefault(); });
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueProximalocalRide(this.value, 'to').then(function() { navigateToSearchRoute(); });
+                }
             });
 
             document.addEventListener('mousedown', function(e) {

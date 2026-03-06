@@ -2259,10 +2259,16 @@
             });
 
             fromInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') resolveTypedCityValueFolkRide(this.value, 'from').then(function(r) { if (r) event.preventDefault(); });
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueFolkRide(this.value, 'from').then(function() { navigateToSearchRoute(); });
+                }
             });
             toInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') resolveTypedCityValueFolkRide(this.value, 'to').then(function(r) { if (r) event.preventDefault(); });
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueFolkRide(this.value, 'to').then(function() { navigateToSearchRoute(); });
+                }
             });
 
             document.addEventListener('mousedown', function(e) {
