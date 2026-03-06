@@ -2246,13 +2246,13 @@
             fromInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueProximalocalRide(this.value, 'from').then(function() { navigateToSearchRoute(); });
+                    resolveTypedCityValueProximalocalRide(this.value, 'from').then(function() { navigateToSearchRoute1(); });
                 }
             });
             toInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueProximalocalRide(this.value, 'to').then(function() { navigateToSearchRoute(); });
+                    resolveTypedCityValueProximalocalRide(this.value, 'to').then(function() { navigateToSearchRoute1(); });
                 }
             });
 
@@ -2589,6 +2589,46 @@
 
             window.location.href = searchUrl;
         }
+
+        function navigateToSearchRoute1() {
+            localStorage.setItem('removedRideIds', JSON.stringify([]));
+
+            const fromValue = (document.getElementById('from_spot_0') || {}).value || '';
+            const toValue = (document.getElementById('to_spot_0') || {}).value || '';
+            const fromInputError = document.getElementById('fromInputError');
+            const toInputError = document.getElementById('toInputError');
+
+            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value || '').trim();
+            var toInvalid = !toValue.trim() || !selectedToPlace || toValue.trim() !== (selectedToPlace.value || '').trim();
+            if (fromInvalid || toInvalid) {
+                var firstField = document.getElementById('from_spot_0');
+                if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                var secondField = document.getElementById('to_spot_0');
+                if (toInvalid && secondField) secondField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            if (fromInputError) fromInputError.classList.add('hidden');
+            if (toInputError) toInputError.classList.add('hidden');
+
+            const dateValue = document.getElementById('dateInput').value;
+            const driverAge = document.getElementById('driverAge').value;
+            const passengerRating = document.getElementById('passengerRating').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+            const driverRating = document.getElementById('driverRating').value;
+            const driverPhone = document.getElementById('driverPhone').checked ? 1 : 0;
+            const driverName = document.getElementById('driverName').value;
+            const VehicleType = document.getElementById('VehicleType').value;
+            const featuresParam = selectedFeatures.length > 0 ? selectedFeatures.join(';') : '';
+            const luggage = selectedLuggages.join(';');
+            const smokingValue = selectedSmoking.join(';');
+            const petsValue = selectedPets.join(';');
+            const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
+            let searchUrl =
+                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
+
+            window.location.href = searchUrl;
+        }
+        
         function resetFilters() {
     // Reset checkboxes
     document.querySelectorAll('.ride-preferences, .luggage, .smoking, .pet').forEach(checkbox => {

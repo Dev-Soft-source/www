@@ -2093,6 +2093,61 @@
             window.location.href = `${baseUrl}?${queryParams}`;
         }
 
+        function navigateToSearchRoute1() {
+            localStorage.setItem('removedRideIds', JSON.stringify([]));
+
+            const fromValue = document.getElementById('from_spot_0').value.trim();
+            const toValue = document.getElementById('to_spot_0').value.trim();
+            const fromInputError = document.getElementById('fromInputError');
+            const toInputError = document.getElementById('toInputError');
+
+            let isValid = true;
+            if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
+                isValid = false;
+            }
+            if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            if (fromInputError) {
+                fromInputError.classList.add('hidden');
+                const tooltipError = fromInputError.querySelector('.tooltip-error');
+                if (tooltipError) tooltipError.textContent = '';
+            }
+            if (toInputError) {
+                toInputError.classList.add('hidden');
+                const tooltipError = toInputError.querySelector('.tooltip-error');
+                if (tooltipError) tooltipError.textContent = '';
+            }
+
+            const formData = {
+                from: fromValue,
+                to: toValue,
+                date: document.getElementById('dateInput').value,
+                driver_age: document.getElementById('driverAge').value,
+                driver_rating: document.getElementById('driverRating').value,
+                driver_phone: document.getElementById('driverPhone').checked ? 1 : 0,
+                driver_name: document.getElementById('driverName').value,
+                keyword: document.getElementById('keyword').value,
+                passenger_rating: document.getElementById('passengerRating').value,
+                payment_method: document.getElementById('payment-method').value,
+                vehicle_type: document.getElementById('VehicleType').value,
+                features: selectedFeatures.join(';'),
+                luggage: selectedLuggages.join(';'),
+                smoking: selectedSmoking.join(';'),
+                pets: selectedPets.join(';'),
+                hide_full_rides: document.getElementById('hide-full-rides')?.checked ? '1' : ''
+            };
+
+            const baseUrl = '{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}';
+            const queryParams = Object.entries(formData)
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
+
+            window.location.href = `${baseUrl}?${queryParams}`;
+        }
+
         function resetFilters() {
             // Reset checkboxes
             document.querySelectorAll('.ride-preferences, .luggage, .smoking, .pet').forEach(checkbox => {
@@ -2185,13 +2240,13 @@
             fromInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueSearchRide(this.value, 'from').then(function() { navigateToSearchRoute(); });
+                    resolveTypedCityValueSearchRide(this.value, 'from').then(function() { navigateToSearchRoute1(); });
                 }
             });
             toInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueSearchRide(this.value, 'to').then(function() { navigateToSearchRoute(); });
+                    resolveTypedCityValueSearchRide(this.value, 'to').then(function() { navigateToSearchRoute1(); });
                 }
             });
 
