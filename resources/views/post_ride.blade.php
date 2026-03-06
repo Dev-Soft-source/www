@@ -644,7 +644,14 @@
                                                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
+                                        @php
+                                            $timeValue = old('time');
+                                            if ($timeValue === null && ($routeType ?? '') !== '' && in_array($routeType ?? '', ['repost', 'copy']) && isset($ride) && $ride && !empty($ride->time)) {
+                                                $timeValue = \Carbon\Carbon::parse($ride->time)->format('H:i');
+                                            }
+                                        @endphp
                                         <input type="text" id="timeInput" name="time"
+                                            value="{{ $timeValue ?? '' }}"
                                             class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             placeholder="">
                                     </div>

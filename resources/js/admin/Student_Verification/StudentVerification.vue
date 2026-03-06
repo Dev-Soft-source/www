@@ -68,7 +68,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="flex-1 text-gray-700 sm:flex-none">
-                                    <tr v-for="student in students" :key="student.id"
+                                    <tr v-for="student in sortedStudents" :key="student.id"
                                         class="border-t first:border-t-0 flex p-3 md:p-3  md:table-row flex-col w-full flex-wrap even:bg-gray-50 odd:bg-white">
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
@@ -259,6 +259,18 @@ export default {
             searchParam: (state) => state.students.searchParam,
             loading: (state) => state.students.loading,
         }),
+        sortedStudents() {
+            if (!this.students) return [];
+            return [...this.students].sort((a, b) => {
+                const firstA = (a.first_name || '').toLowerCase().trim();
+                const firstB = (b.first_name || '').toLowerCase().trim();
+                const cmp = firstA.localeCompare(firstB);
+                if (cmp !== 0) return cmp;
+                const lastA = (a.last_name || '').toLowerCase().trim();
+                const lastB = (b.last_name || '').toLowerCase().trim();
+                return lastA.localeCompare(lastB);
+            });
+        },
         limit: {
             get() {
                 return this.$store.state.students.limit;

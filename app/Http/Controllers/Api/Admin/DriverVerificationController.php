@@ -23,7 +23,6 @@ class DriverVerificationController extends Controller
             $users = $this->whereClause($users);
             $users = $this->loadRelations($users);
             $users = $this->sortingAndLimit($users);
-
             // $users->orderBy('driver_license_upload', 'desc');
     
             return $this->apiSuccessResponse(UserResource::collection($users), 'Data Get Successfully!');
@@ -95,13 +94,17 @@ class DriverVerificationController extends Controller
         if (isset($_GET['getAll']) && $_GET['getAll'] == '1') {
             return $users->orderBy('is_default', 'desc')->orderBy('name', 'asc')->get();
         }
-
+        Log::info("sortBy: " . $_GET['sortBy']);
         $sortType = ['ASC', 'asc', 'DESC', 'desc'];
-        $sortBy = ['driver_license_upload'];
+        $sortBy = ['first_name', 'last_name'];
         if (isset($_GET['sortBy']) && $_GET['sortBy'] != '' && isset($_GET['sortType']) && $_GET['sortType'] != '' && in_array($_GET['sortBy'], $sortBy) && in_array($_GET['sortType'], $sortType)) {
             $users = $users->OrderBy($_GET['sortBy'], $_GET['sortType']);
+            $users = $_GET['sortBy'] == 'first_name'
+                ? $users->orderBy('last_name', 'asc')
+                : $users->orderBy('first_name', 'asc');
+        } else {
+            $users = $users->orderBy('first_name', 'asc')->orderBy('last_name', 'asc');
         }
-
 
         if (isset($_GET['limit']) && $_GET['limit'] != '') {
             $limit = $_GET['limit'];

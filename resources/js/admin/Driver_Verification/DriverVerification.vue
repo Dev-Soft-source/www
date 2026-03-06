@@ -72,7 +72,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="flex-1 text-gray-700 sm:flex-none">
-                                    <tr v-for="driver in drivers" :key="driver.id"
+                                    <tr v-for="driver in sortedDrivers" :key="driver.id"
                                         class="border-t first:border-t-0 flex p-3 md:p-3  md:table-row flex-col w-full flex-wrap even:bg-gray-50 odd:bg-white">
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
@@ -318,6 +318,18 @@ export default {
             searchParam: (state) => state.drivers.searchParam,
             loading: (state) => state.drivers.loading,
         }),
+        sortedDrivers() {
+            if (!this.drivers) return [];
+            return [...this.drivers].sort((a, b) => {
+                const firstA = (a.first_name || '').toLowerCase().trim();
+                const firstB = (b.first_name || '').toLowerCase().trim();
+                const cmp = firstA.localeCompare(firstB);
+                if (cmp !== 0) return cmp;
+                const lastA = (a.last_name || '').toLowerCase().trim();
+                const lastB = (b.last_name || '').toLowerCase().trim();
+                return lastA.localeCompare(lastB);
+            });
+        },
         limit: {
             get() {
                 return this.$store.state.drivers.limit;
@@ -450,6 +462,10 @@ export default {
             }
         },
         getDriverLiscenseUrl(filename) {
+            if (!filename) return '#';
+            if (filename.startsWith('http://') || filename.startsWith('https://')) {
+                return filename;
+            }
             const driverLiscenseFolder = 'driver_liscenses/';
             return `/${driverLiscenseFolder}${filename}`;
         },
@@ -459,8 +475,8 @@ export default {
     },
     created() {
         this.$store.commit("drivers/setLimit", 100);
-        this.$store.commit("drivers/setSortBy", "driver_license_upload");
-        this.$store.commit("drivers/setSortType", "desc");
+        this.$store.commit("drivers/setSortBy", "first_name");
+        this.$store.commit("drivers/setSortType", "asc");
         this.$store.commit("drivers/setSearchParam", '');
         this.$store.dispatch("drivers/fetchDrivers");
     },
