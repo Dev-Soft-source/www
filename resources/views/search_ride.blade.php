@@ -2197,31 +2197,33 @@
             fromInput.addEventListener('blur', function() {
                 if (isSettingPlaceValue || isSelectingFromDropdown) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValue || isSelectingFromDropdown) return;
                     var currentValue = self.value.trim();
                     var fromInputError = document.getElementById('fromInputError');
+
                     if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
-                        resolveTypedCityValueSearchRide(currentValue, 'from').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                                selectedFromPlace = null;
-                                if (currentValue !== '' && fromInputError) {
-                                    var tooltipError = fromInputError.querySelector('.tooltip-error');
-                                    if (tooltipError) tooltipError.textContent = errorCityMissing;
-                                    fromInputError.classList.remove('hidden');
-                                } else if (fromInputError) fromInputError.classList.add('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        });
+                        await resolveTypedCityValueSearchRide(currentValue, 'from');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                        selectedFromPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && fromInputError) {
+                            var tooltipError = fromInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorFromRequired : errorCityMissing;
+                            }
+                            fromInputError.classList.remove('hidden');
+                        }
                     } else {
-                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                            selectedFromPlace = null;
-                            if (currentValue !== '' && fromInputError) {
-                                var tooltipError = fromInputError.querySelector('.tooltip-error');
-if (tooltipError) tooltipError.textContent = currentValue === '' ? errorFromRequired : errorCityMissing;
-                                    fromInputError.classList.remove('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && fromInputError) {
+                            fromInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
@@ -2229,31 +2231,33 @@ if (tooltipError) tooltipError.textContent = currentValue === '' ? errorFromRequ
             toInput.addEventListener('blur', function() {
                 if (isSettingPlaceValue || isSelectingFromDropdown) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValue || isSelectingFromDropdown) return;
                     var currentValue = self.value.trim();
                     var toInputError = document.getElementById('toInputError');
+
                     if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
-                        resolveTypedCityValueSearchRide(currentValue, 'to').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                                selectedToPlace = null;
-                                if (currentValue !== '' && toInputError) {
-                                    var tooltipError = toInputError.querySelector('.tooltip-error');
-                                    if (tooltipError) tooltipError.textContent = errorCityMissing;
-                                    toInputError.classList.remove('hidden');
-                                } else if (toInputError) toInputError.classList.add('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        });
+                        await resolveTypedCityValueSearchRide(currentValue, 'to');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                        selectedToPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && toInputError) {
+                            var tooltipError = toInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorToRequired : errorCityMissing;
+                            }
+                            toInputError.classList.remove('hidden');
+                        }
                     } else {
-                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                            selectedToPlace = null;
-                            if (currentValue !== '' && toInputError) {
-                                var tooltipError = toInputError.querySelector('.tooltip-error');
-                                if (tooltipError) tooltipError.textContent = currentValue === '' ? errorToRequired : errorCityMissing;
-                                toInputError.classList.remove('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        } else if (toInputError) toInputError.classList.add('hidden');
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && toInputError) {
+                            toInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
@@ -2266,6 +2270,15 @@ if (tooltipError) tooltipError.textContent = currentValue === '' ? errorFromRequ
                 var toInputError = document.getElementById('toInputError');
                 if (toInputError) toInputError.classList.add('hidden');
             });
+
+            // Initialize place state from pre-filled values (e.g. from request) so swap + search works without tooltip errors
+            (function initPlaceStateFromInputs() {
+                var fromVal = (fromInput.value || '').trim();
+                var toVal = (toInput.value || '').trim();
+                if (fromVal) resolveTypedCityValueSearchRide(fromVal, 'from');
+                if (toVal) resolveTypedCityValueSearchRide(toVal, 'to');
+
+            })();
         };
 
         function formatPlaceAddressSearchRide(place) {

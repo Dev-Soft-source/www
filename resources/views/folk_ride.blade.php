@@ -2249,73 +2249,111 @@
                     setTimeout(function() { isSettingPlaceValueFolkRide = false; isSelectingFromDropdownFolkRide = false; }, 100);
                 }
             });
-            fromInput.addEventListener('input', function() { if (!isSettingPlaceValueFolkRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null; });
-            toInput.addEventListener('input', function() { if (!isSettingPlaceValueFolkRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null; });
-            fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
-            toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+            fromInput.addEventListener('input', function() {
+                if (isSettingPlaceValueFolkRide) return;
+                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+            });
+            toInput.addEventListener('input', function() {
+                if (isSettingPlaceValueFolkRide) return;
+                if (selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null;
+            });
+
+            fromInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValueFolkRide(this.value, 'from').then(function(r) { if (r) event.preventDefault(); });
+            });
+            toInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValueFolkRide(this.value, 'to').then(function(r) { if (r) event.preventDefault(); });
+            });
+
+            document.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.pac-container')) isSelectingFromDropdownFolkRide = true;
+                else setTimeout(function() { isSelectingFromDropdownFolkRide = false; }, 50);
+            });
+
             fromInput.addEventListener('blur', function() {
                 if (isSettingPlaceValueFolkRide || isSelectingFromDropdownFolkRide) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValueFolkRide || isSelectingFromDropdownFolkRide) return;
                     var currentValue = self.value.trim();
                     var fromInputError = document.getElementById('fromInputError');
+
                     if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
-                        resolveTypedCityValueFolkRide(currentValue, 'from').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                                selectedFromPlace = null;
-                                if (currentValue !== '' && fromInputError) {
-                                    var te = fromInputError.querySelector('.tooltip-error');
-                                    if (te) te.textContent = errorCityMissingFolkRide;
-                                    fromInputError.classList.remove('hidden');
-                                } else if (fromInputError) fromInputError.classList.add('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        });
-                    } else {
-                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                            selectedFromPlace = null;
-                            if (currentValue !== '' && fromInputError) {
-                                var te = fromInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = currentValue === '' ? errorFromRequiredFolkRide : errorCityMissingFolkRide;
-                                fromInputError.classList.remove('hidden');
+                        await resolveTypedCityValueFolkRide(currentValue, 'from');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                        selectedFromPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && fromInputError) {
+                            var tooltipError = fromInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorFromRequiredFolkRide : errorCityMissingFolkRide;
                             }
-                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                            fromInputError.classList.remove('hidden');
+                        }
+                    } else {
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && fromInputError) {
+                            fromInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
+
             toInput.addEventListener('blur', function() {
                 if (isSettingPlaceValueFolkRide || isSelectingFromDropdownFolkRide) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValueFolkRide || isSelectingFromDropdownFolkRide) return;
                     var currentValue = self.value.trim();
                     var toInputError = document.getElementById('toInputError');
+
                     if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
-                        resolveTypedCityValueFolkRide(currentValue, 'to').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                                selectedToPlace = null;
-                                if (currentValue !== '' && toInputError) {
-                                    var te = toInputError.querySelector('.tooltip-error');
-                                    if (te) te.textContent = errorCityMissingFolkRide;
-                                    toInputError.classList.remove('hidden');
-                                } else if (toInputError) toInputError.classList.add('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        });
-                    } else {
-                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                            selectedToPlace = null;
-                            if (currentValue !== '' && toInputError) {
-                                var te = toInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = currentValue === '' ? errorToRequiredFolkRide : errorCityMissingFolkRide;
-                                toInputError.classList.remove('hidden');
+                        await resolveTypedCityValueFolkRide(currentValue, 'to');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                        selectedToPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && toInputError) {
+                            var tooltipError = toInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorToRequiredFolkRide : errorCityMissingFolkRide;
                             }
-                        } else if (toInputError) toInputError.classList.add('hidden');
+                            toInputError.classList.remove('hidden');
+                        }
+                    } else {
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && toInputError) {
+                            toInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
-            document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownFolkRide = true; else setTimeout(function() { isSelectingFromDropdownFolkRide = false; }, 50); });
+
+            fromInput.addEventListener('focus', function() {
+                var fromInputError = document.getElementById('fromInputError');
+                if (fromInputError) fromInputError.classList.add('hidden');
+            });
+            toInput.addEventListener('focus', function() {
+                var toInputError = document.getElementById('toInputError');
+                if (toInputError) toInputError.classList.add('hidden');
+            });
+
+            // Initialize place state from pre-filled values (e.g. from request) so swap + search works without tooltip errors
+            (function initPlaceStateFromInputs() {
+                var fromVal = (fromInput.value || '').trim();
+                var toVal = (toInput.value || '').trim();
+                if (fromVal) resolveTypedCityValueFolkRide(fromVal, 'from');
+                if (toVal) resolveTypedCityValueFolkRide(toVal, 'to');
+            })();
         };
         function formatPlaceAddressFolkRide(place) {
             var city = '', province = '', country = 'Canada';

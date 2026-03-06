@@ -2145,73 +2145,111 @@
                     setTimeout(function() { isSettingPlaceValuePinkRide = false; isSelectingFromDropdownPinkRide = false; }, 100);
                 }
             });
-            fromInput.addEventListener('input', function() { if (!isSettingPlaceValuePinkRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null; });
-            toInput.addEventListener('input', function() { if (!isSettingPlaceValuePinkRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null; });
-            fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
-            toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+            fromInput.addEventListener('input', function() {
+                if (isSettingPlaceValuePinkRide) return;
+                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+            });
+            toInput.addEventListener('input', function() {
+                if (isSettingPlaceValuePinkRide) return;
+                if (selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null;
+            });
+
+            fromInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValuePinkRide(this.value, 'from').then(function(r) { if (r) event.preventDefault(); });
+            });
+            toInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') resolveTypedCityValuePinkRide(this.value, 'to').then(function(r) { if (r) event.preventDefault(); });
+            });
+
+            document.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.pac-container')) isSelectingFromDropdownPinkRide = true;
+                else setTimeout(function() { isSelectingFromDropdownPinkRide = false; }, 50);
+            });
+
             fromInput.addEventListener('blur', function() {
                 if (isSettingPlaceValuePinkRide || isSelectingFromDropdownPinkRide) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValuePinkRide || isSelectingFromDropdownPinkRide) return;
                     var currentValue = self.value.trim();
                     var fromInputError = document.getElementById('fromInputError');
+
                     if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
-                        resolveTypedCityValuePinkRide(currentValue, 'from').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                                selectedFromPlace = null;
-                                if (currentValue !== '' && fromInputError) {
-                                    var te = fromInputError.querySelector('.tooltip-error');
-                                    if (te) te.textContent = errorCityMissingPinkRide;
-                                    fromInputError.classList.remove('hidden');
-                                } else if (fromInputError) fromInputError.classList.add('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        });
+                        await resolveTypedCityValuePinkRide(currentValue, 'from');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                        selectedFromPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && fromInputError) {
+                            var tooltipError = fromInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorFromRequiredPinkRide : errorCityMissingPinkRide;
+                            }
+                            fromInputError.classList.remove('hidden');
+                        }
                     } else {
-                        if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
-                            selectedFromPlace = null;
-                            if (currentValue !== '' && fromInputError) {
-                                var te = fromInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = currentValue === '' ? errorFromRequiredPinkRide : errorCityMissingPinkRide;
-                                fromInputError.classList.remove('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && fromInputError) {
+                            fromInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
+
             toInput.addEventListener('blur', function() {
                 if (isSettingPlaceValuePinkRide || isSelectingFromDropdownPinkRide) return;
                 var self = this;
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (isSettingPlaceValuePinkRide || isSelectingFromDropdownPinkRide) return;
                     var currentValue = self.value.trim();
                     var toInputError = document.getElementById('toInputError');
+
                     if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
-                        resolveTypedCityValuePinkRide(currentValue, 'to').then(function() {
-                            currentValue = self.value.trim();
-                            if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                                selectedToPlace = null;
-                                if (currentValue !== '' && toInputError) {
-                                    var te = toInputError.querySelector('.tooltip-error');
-                                    if (te) te.textContent = errorCityMissingPinkRide;
-                                    toInputError.classList.remove('hidden');
-                                } else if (toInputError) toInputError.classList.add('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        });
+                        await resolveTypedCityValuePinkRide(currentValue, 'to');
+                        currentValue = self.value.trim();
+                    }
+
+                    // Validate: check if input has value but no valid place is selected
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                        selectedToPlace = null;
+
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && toInputError) {
+                            var tooltipError = toInputError.querySelector('.tooltip-error');
+                            if (tooltipError) {
+                                tooltipError.textContent = currentValue === '' ? errorToRequiredPinkRide : errorCityMissingPinkRide;
+                            }
+                            toInputError.classList.remove('hidden');
+                        }
                     } else {
-                        if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
-                            selectedToPlace = null;
-                            if (currentValue !== '' && toInputError) {
-                                var te = toInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = currentValue === '' ? errorToRequiredPinkRide : errorCityMissingPinkRide;
-                                toInputError.classList.remove('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        } else if (toInputError) toInputError.classList.add('hidden');
+                        // Valid place selected, hide error if showing
+                        if (currentValue !== '' && toInputError) {
+                            toInputError.classList.add('hidden');
+                        }
                     }
                 }, 200);
             });
-            document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownPinkRide = true; else setTimeout(function() { isSelectingFromDropdownPinkRide = false; }, 50); });
+
+            fromInput.addEventListener('focus', function() {
+                var fromInputError = document.getElementById('fromInputError');
+                if (fromInputError) fromInputError.classList.add('hidden');
+            });
+            toInput.addEventListener('focus', function() {
+                var toInputError = document.getElementById('toInputError');
+                if (toInputError) toInputError.classList.add('hidden');
+            });
+
+            // Initialize place state from pre-filled values (e.g. from request) so swap + search works without tooltip errors
+            (function initPlaceStateFromInputs() {
+                var fromVal = (fromInput.value || '').trim();
+                var toVal = (toInput.value || '').trim();
+                if (fromVal) resolveTypedCityValuePinkRide(fromVal, 'from');
+                if (toVal) resolveTypedCityValuePinkRide(toVal, 'to');
+            })();
         };
         function formatPlaceAddressPinkRide(place) {
             var city = '', province = '', country = 'Canada';

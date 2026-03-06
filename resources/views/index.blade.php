@@ -2177,26 +2177,22 @@
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace
-                        .value) {
+                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
                         // Clear the selection if invalid
                         selectedFromPlace = null;
 
-                        // Show error tooltip if there's a value (user typed something)
-                        if (currentValue !== '' && fromInputError) {
+                        // Show error tooltip: required when empty, city not found when invalid text
+                        if (currentValue !== '' && toInputError) {
                             const tooltipError = fromInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
                                 tooltipError.textContent = currentValue === '' ? errorCityRequrired :
                                     errorCityMissing;
                             }
                             fromInputError.classList.remove('hidden');
-                        } else if (currentValue === '' && fromInputError) {
-                            // Hide error if field is empty (optional: you can show required error here too)
-                            fromInputError.classList.add('hidden');
                         }
                     } else {
                         // Valid place selected, hide error if showing
-                        if (fromInputError) {
+                        if (currentValue !== '' && fromInputError) {
                             fromInputError.classList.add('hidden');
                         }
                     }
@@ -2229,7 +2225,7 @@
                         // Clear the selection if invalid
                         selectedToPlace = null;
 
-                        // Show error tooltip if there's a value (user typed something)
+                        // Show error tooltip: required when empty, city not found when invalid text
                         if (currentValue !== '' && toInputError) {
                             const tooltipError = toInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
@@ -2237,13 +2233,10 @@
                                     errorCityMissing;
                             }
                             toInputError.classList.remove('hidden');
-                        } else if (currentValue === '' && toInputError) {
-                            // Hide error if field is empty (optional: you can show required error here too)
-                            toInputError.classList.add('hidden');
                         }
                     } else {
                         // Valid place selected, hide error if showing
-                        if (toInputError) {
+                        if (currentValue !== '' && toInputError) {
                             toInputError.classList.add('hidden');
                         }
                     }
