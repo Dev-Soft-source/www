@@ -3,6 +3,9 @@
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        
+    </style>
 @endsection
 
 @section('content')
@@ -149,103 +152,68 @@
                         @endisset
                     </div>
                 </div>
-                <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
-                    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
-                        <div class="w-54 relative">
-                            <div class="relative">
-                                <div
-                                    class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                    <div class="w-6 h-6">
-                                        @isset($homePage->from_field_icon)
-                                            <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->from_field_icon) }}"
-                                                alt="">
-                                        @endisset
-                                    </div>
-                                </div>
-                                <input id="fromInput" type="text"
-                                    @isset($homePage->slider_from_placeholder)
-                                    placeholder="{{ $homePage->slider_from_placeholder }}"
-                                @endisset
-                                    class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
-                                    autocomplete="off">
-
-                            </div>
-                            <div class="absolute hidden" id="fromInputError">
-                                <div class="tooltip-error">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="relative">
-                            <div class="flex justify-center items-center">
-                                <button onclick="swapLocations()">
-                                    <div class="w-8 h-8">
-                                        @isset($homePage->swap_field_icon)
-                                            <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->swap_field_icon) }}"
-                                                alt="">
-                                        @endisset
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="w-54 relative">
-                            <div class="relative">
-                                <div
-                                    class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                    <div class="w-6 h-6">
-                                        @isset($homePage->to_field_icon)
-                                            <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->to_field_icon) }}"
-                                                alt="">
-                                        @endisset
-                                    </div>
-                                </div>
-                                <input id="toInput" type="text"
-                                    @isset($homePage->slider_to_placeholder)
-                                    placeholder="{{ $homePage->slider_to_placeholder }}"
-                                @endisset
-                                    class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
-                                    autocomplete="off">
-                            </div>
-                            <div class="absolute hidden" id="toInputError">
-                                <div class="tooltip-error">
-                                </div>
+                <div class="w-full max-w-6xl px-4 md:px-8 xl:px-0">
+                    <form method="GET" action="{{ route('px.search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}" id="home-px-search-form">
+                    <div class="px-search-shell flex flex-col md:flex-row md:items-stretch">
+                        <div class="w-full md:w-[26.5%] px-search-segment px-search-divider">
+                            <div class="h-full">
+                                @livewire('px.city-autocomplete', [
+                                    'field' => 'origin',
+                                    'placeholder' => $homePage->slider_from_placeholder ?? 'Leaving from',
+                                    'initialLabel' => request()->input('origin.label', ''),
+                                    'initialCityId' => request()->input('origin.city_id'),
+                                    'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
+                                    'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                ], key('home-px-search-origin'))
                             </div>
                         </div>
 
-                    </div>
-                    <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
-                        <div class="relative w-full">
-                            <div class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                <div class="w-6 h-6">
-                                    @isset($homePage->date_field_icon)
-                                        <img class="w-full h-full object-contain"
-                                            src="{{ asset('home_page_icons/' . $homePage->date_field_icon) }}"
-                                            alt="">
-                                    @endisset
-                                </div>
-                            </div>
-                            <input id="dateInput" type="text"
-                                @isset($homePage->slider_date_placeholder)
-                                placeholder="{{ $homePage->slider_date_placeholder }}"
-                            @endisset
-                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0 cursor-pointer">
+                        <div class="home-search-swap w-full md:w-[4%] px-search-segment px-search-divider flex items-center justify-center bg-white">
+                            <button type="button" onclick="swapLocations()" class="flex h-10 w-10 items-center justify-center rounded-full text-[#1677e6] transition hover:bg-blue-50">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.28001 11.7193C8.13939 11.5789 7.94876 11.5 7.75001 11.5C7.55126 11.5 7.36064 11.5789 7.22001 11.7193L3.22001 15.7193C3.07956 15.86 3.00067 16.0506 3.00067 16.2493C3.00067 16.4481 3.07956 16.6387 3.22001 16.7793L7.22001 20.7793C7.28867 20.853 7.37147 20.9121 7.46347 20.9531C7.55547 20.9941 7.65479 21.0162 7.75549 21.0179C7.85619 21.0197 7.95622 21.0012 8.04961 20.9635C8.143 20.9257 8.22783 20.8696 8.29905 20.7984C8.37027 20.7272 8.42641 20.6423 8.46413 20.5489C8.50186 20.4555 8.52038 20.3555 8.5186 20.2548C8.51683 20.1541 8.49479 20.0548 8.45379 19.9628C8.4128 19.8708 8.3537 19.788 8.28001 19.7193L5.56001 16.9993L17 16.9993C17.1989 16.9993 17.3897 16.9203 17.5303 16.7797C17.671 16.639 17.75 16.4483 17.75 16.2493C17.75 16.0504 17.671 15.8597 17.5303 15.719C17.3897 15.5784 17.1989 15.4993 17 15.4993L5.56001 15.4993L8.28001 12.7793C8.42046 12.6387 8.49935 12.4481 8.49935 12.2493C8.49935 12.0506 8.42046 11.86 8.28001 11.7193Z" fill="currentColor" class="f12whk1"></path><path d="M15.77 12.2777C15.9106 12.4182 16.1012 12.4971 16.3 12.4971C16.4987 12.4971 16.6894 12.4182 16.83 12.2777L20.83 8.27773C20.9704 8.1371 21.0493 7.94648 21.0493 7.74773C21.0493 7.54898 20.9704 7.35835 20.83 7.21773L16.83 3.21773C16.7613 3.14404 16.6785 3.08494 16.5865 3.04395C16.4945 3.00296 16.3952 2.98092 16.2945 2.97914C16.1938 2.97736 16.0938 2.99589 16.0004 3.03361C15.907 3.07133 15.8222 3.12747 15.7509 3.19869C15.6797 3.26991 15.6236 3.35475 15.5859 3.44813C15.5481 3.54152 15.5296 3.64155 15.5314 3.74225C15.5332 3.84295 15.5552 3.94227 15.5962 4.03427C15.6372 4.12627 15.6963 4.20907 15.77 4.27773L18.49 6.99773L7.04998 6.99773C6.85106 6.99773 6.6603 7.07675 6.51965 7.2174C6.37899 7.35805 6.29998 7.54882 6.29998 7.74773C6.29998 7.94664 6.37899 8.13741 6.51965 8.27806C6.6603 8.41871 6.85106 8.49773 7.04998 8.49773L18.49 8.49773L15.77 11.2177C15.6295 11.3584 15.5506 11.549 15.5506 11.7477C15.5506 11.9465 15.6295 12.1371 15.77 12.2777Z" fill="currentColor" class="f12whk2"></path></svg>
+                            </button>
                         </div>
-                        <div class="flex justify-center items-center">
-                            <button onclick="navigateToSearchRoute()"
-                                class="bg-primary py-2 px-3 rounded button-exp-fill">
-                                <span class="block md:hidden">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
-                                <div class="w-auto h-6 hidden md:block">
-                                    @isset($homePage->search_field_icon)
-                                        <img class="w-full h-full object-contain"
-                                            src="{{ asset('home_page_icons/' . $homePage->search_field_icon) }}"
-                                            alt="">
-                                    @endisset
+
+                        <div class="w-full md:w-[26.5%] px-search-segment px-search-divider">
+                            <div class="h-full">
+                                @livewire('px.city-autocomplete', [
+                                    'field' => 'destination',
+                                    'placeholder' => $homePage->slider_to_placeholder ?? 'Going to',
+                                    'initialLabel' => request()->input('destination.label', ''),
+                                    'initialCityId' => request()->input('destination.city_id'),
+                                    'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
+                                    'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                ], key('home-px-search-destination'))
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-[23%] px-search-segment px-search-divider bg-white">
+                            <div class="relative h-full">
+                                <div class="absolute inset-y-0 start-0 flex items-center pl-4 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill="#888888" fill-rule="evenodd"
+                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
                                 </div>
+                                <input id="departure_date" name="departure_date" type="text"
+                                    value="{{ request()->input('departure_date', '') }}"
+                                    @isset($homePage->slider_date_placeholder)
+                                    placeholder="{{ $homePage->slider_date_placeholder }}"
+                                @endisset
+                                    class="h-full w-full cursor-pointer border-0 bg-transparent pl-12 pr-4 text-[15px] font-semibold text-slate-900 placeholder-slate-900 focus:ring-0">
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-[20%]">
+                            <button type="submit" name="search" value="1"
+                                class="px-search-submit flex w-full items-center justify-center text-base font-semibold text-white transition-colors">
+                                {{ $siteText['search_btn_text'] ?? 'Search' }}
                             </button>
                         </div>
                     </div>
+                    </form>
                 </div>
             </section>
         </div>
@@ -2005,416 +1973,55 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
-        var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This field is required";
-        var errorCityMissing = "{{ $homePage->slider_required_error }}" ?? "Please select a valid city from the dropdown";
-
-        // Google Places Autocomplete initialization - Define function before loading Google Maps API
-        let fromAutocomplete, toAutocomplete, geocoder;
-        // Store selected place data for validation
-        let selectedFromPlace = null;
-        let selectedToPlace = null;
-        // Flag to prevent input event from interfering with place selection
-        let isSettingPlaceValue = false;
-        // Flag to prevent blur from clearing when user is selecting from dropdown
-        let isSelectingFromDropdown = false;
-
-        // This function will be called by Google Maps API when it loads
-        window.initGooglePlaces = function() {
-            geocoder = new google.maps.Geocoder();
-
-            // Initialize autocomplete for "From" input - Canada only
-            fromAutocomplete = new google.maps.places.Autocomplete(
-                document.getElementById('fromInput'), {
-                    componentRestrictions: {
-                        country: 'ca'
-                    }, // Restrict to Canada
-                    types: ['(cities)'], // Focus on cities
-                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
-                }
-            );
-
-            // Initialize autocomplete for "To" input - Canada only
-            toAutocomplete = new google.maps.places.Autocomplete(
-                document.getElementById('toInput'), {
-                    componentRestrictions: {
-                        country: 'ca'
-                    }, // Restrict to Canada
-                    types: ['(cities)'], // Focus on cities
-                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
-                }
-            );
-
-            // Handle place selection for "From" input
-            fromAutocomplete.addListener('place_changed', function() {
-                const place = fromAutocomplete.getPlace();
-                if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
-                    isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
-                    const formattedAddress = formatPlaceAddress(place);
-                    selectedFromPlace = {
-                        place_id: place.place_id,
-                        formatted_address: formattedAddress,
-                        value: formattedAddress
-                    };
-                    // Set the formatted address in the input
-                    document.getElementById('fromInput').value = formattedAddress;
-                    // Hide error message if it was showing
-                    const fromError = document.getElementById('fromError');
-                    if (fromError) fromError.classList.add('hidden');
-                    // Reset flags after a short delay to allow input event to process
-                    setTimeout(() => {
-                        isSettingPlaceValue = false;
-                        isSelectingFromDropdown = false;
-                    }, 100);
-                }
-            });
-
-            // Handle place selection for "To" input
-            toAutocomplete.addListener('place_changed', function() {
-                const place = toAutocomplete.getPlace();
-                if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
-                    isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
-                    const formattedAddress = formatPlaceAddress(place);
-                    selectedToPlace = {
-                        place_id: place.place_id,
-                        formatted_address: formattedAddress,
-                        value: formattedAddress
-                    };
-                    // Set the formatted address in the input
-                    document.getElementById('toInput').value = formattedAddress;
-                    // Hide error message if it was showing
-                    const toError = document.getElementById('toError');
-                    if (toError) toError.classList.add('hidden');
-                    // Reset flags after a short delay to allow input event to process
-                    setTimeout(() => {
-                        isSettingPlaceValue = false;
-                        isSelectingFromDropdown = false;
-                    }, 100);
-                }
-            });
-
-            // Clear selected place when user manually types in "From" input
-            document.getElementById('fromInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
-                    selectedFromPlace = null;
-                }
-            });
-
-            // Clear selected place when user manually types in "To" input
-            document.getElementById('toInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedToPlace && currentValue !== selectedToPlace.value) {
-                    selectedToPlace = null;
-                }
-            });
-
-            document.getElementById('fromInput').addEventListener('keydown', async function(event) {
-                if (event.key !== 'Enter') {
-                    return;
-                }
-
-                const resolved = await resolveTypedCityValue(this.value, 'from');
-                if (resolved) {
-                    event.preventDefault();
-                }
-            });
-
-            document.getElementById('toInput').addEventListener('keydown', async function(event) {
-                if (event.key !== 'Enter') {
-                    return;
-                }
-
-                const resolved = await resolveTypedCityValue(this.value, 'to');
-                if (resolved) {
-                    event.preventDefault();
-                }
-            });
-
-            // Detect clicks on autocomplete dropdown to prevent blur from clearing
-            document.addEventListener('mousedown', function(e) {
-                // Check if click is on Google's autocomplete dropdown (pac-container)
-                if (e.target.closest('.pac-container')) {
-                    isSelectingFromDropdown = true;
-                } else {
-                    // If clicking outside dropdown, reset flag after a short delay
-                    setTimeout(() => {
-                        isSelectingFromDropdown = false;
-                    }, 50);
-                }
-            });
-
-            // Validate and show tooltip on blur if no valid place was selected
-            document.getElementById('fromInput').addEventListener('blur', function() {
-                 
-                 
-                // Don't validate if we're programmatically setting the value or selecting from dropdown
-                if (isSettingPlaceValue || isSelectingFromDropdown) {
-                    return;
-                }
-                // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(async () => {
-                    // Check again if we're setting a place value or selecting from dropdown
-                    if (isSettingPlaceValue || isSelectingFromDropdown) {
-                        return;
-                    }
-                    let currentValue = this.value.trim();
-                    const fromInputError = document.getElementById('fromInputError');
-
-                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
-                        await resolveTypedCityValue(currentValue, 'from');
-                        currentValue = this.value.trim();
-                    }
-
-                    // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace
-                        .value) {
-                        // Clear the selection if invalid
-                        selectedFromPlace = null;
-
-                        // Show error tooltip if there's a value (user typed something)
-                        if (currentValue !== '' && fromInputError) {
-                            const tooltipError = fromInputError.querySelector('.tooltip-error');
-                            if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorCityRequrired :
-                                    errorCityMissing;
-                            }
-                            fromInputError.classList.remove('hidden');
-                        } else if (currentValue === '' && fromInputError) {
-                            // Hide error if field is empty (optional: you can show required error here too)
-                            fromInputError.classList.add('hidden');
-                        }
-                    } else {
-                        // Valid place selected, hide error if showing
-                        if (fromInputError) {
-                            fromInputError.classList.add('hidden');
-                        }
-                    }
-                }, 200);
-            });
-
-            // Validate and show tooltip on blur if no valid place was selected
-            document.getElementById('toInput').addEventListener('blur', function() {
-                // Don't validate if we're programmatically setting the value or selecting from dropdown
-                if (isSettingPlaceValue || isSelectingFromDropdown) {
-                    return;
-                }
-                // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(async () => {
-                    // Check again if we're setting a place value or selecting from dropdown
-                    if (isSettingPlaceValue || isSelectingFromDropdown) {
-                        return;
-                    }
-                    let currentValue = this.value.trim();
-                    const toInputError = document.getElementById('toInputError');
-
-                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
-                        await resolveTypedCityValue(currentValue, 'to');
-                        currentValue = this.value.trim();
-                    }
-
-                    // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
-                        .value) {
-                        // Clear the selection if invalid
-                        selectedToPlace = null;
-
-                        // Show error tooltip if there's a value (user typed something)
-                        if (currentValue !== '' && toInputError) {
-                            const tooltipError = toInputError.querySelector('.tooltip-error');
-                            if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorCityRequrired :
-                                    errorCityMissing;
-                            }
-                            toInputError.classList.remove('hidden');
-                        } else if (currentValue === '' && toInputError) {
-                            // Hide error if field is empty (optional: you can show required error here too)
-                            toInputError.classList.add('hidden');
-                        }
-                    } else {
-                        // Valid place selected, hide error if showing
-                        if (toInputError) {
-                            toInputError.classList.add('hidden');
-                        }
-                    }
-                }, 200);
-            });
-
-            // Hide error tooltip when inputs get focus
-            document.getElementById('fromInput').addEventListener('focus', function() {
-                const fromInputError = document.getElementById('fromInputError');
-                if (fromInputError) {
-                    fromInputError.classList.add('hidden');
-                }
-            });
-
-            document.getElementById('toInput').addEventListener('focus', function() {
-                const toInputError = document.getElementById('toInputError');
-                if (toInputError) {
-                    toInputError.classList.add('hidden');
-                }
-            });
-        };
-
-        async function resolveTypedCityValue(rawValue, target) {
-            const value = (rawValue || '').trim();
-            if (!value || !geocoder) {
-                return false;
-            }
-
-            const inputId = target === 'from' ? 'fromInput' : 'toInput';
-            const input = document.getElementById(inputId);
-
-            try {
-                const response = await geocoder.geocode({
-                    address: value,
-                    componentRestrictions: {
-                        country: 'CA'
-                    }
-                });
-                const result = response?.results?.find((item) => item.address_components?.some((component) =>
-                    component.types.includes('locality') ||
-                    component.types.includes('administrative_area_level_2')
-                ));
-
-                if (!result) {
-                    return false;
-                }
-
-                const formattedAddress = formatPlaceAddress(result);
-                if (!formattedAddress) {
-                    return false;
-                }
-
-                isSettingPlaceValue = true;
-
-                const selectedPlace = {
-                    place_id: result.place_id,
-                    formatted_address: formattedAddress,
-                    value: formattedAddress
-                };
-
-                if (target === 'from') {
-                    selectedFromPlace = selectedPlace;
-                } else {
-                    selectedToPlace = selectedPlace;
-                }
-
-                if (input) {
-                    input.value = formattedAddress;
-                }
-
-                const errorEl = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError');
-                if (errorEl) {
-                    errorEl.classList.add('hidden');
-                }
-
-                setTimeout(() => {
-                    isSettingPlaceValue = false;
-                }, 100);
-
-                return true;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Format place address to "City, Province, Canada" format
-        function formatPlaceAddress(place) {
-            let city = '';
-            let province = '';
-            let country = 'Canada'; // Default to Canada since we're restricting to CA
-
-            // First, try to extract from address components
-            for (const component of place.address_components) {
-                const types = component.types;
-
-                // Prioritize locality for city (this is the most reliable for cities)
-                if (!city && types.includes('locality')) {
-                    city = component.long_name;
-                }
-                // Fallback to administrative_area_level_2 if no locality found
-                else if (!city && types.includes('administrative_area_level_2')) {
-                    city = component.long_name;
-                }
-
-                // Get province/state (administrative_area_level_1)
-                if (!province && types.includes('administrative_area_level_1')) {
-                    province = component.short_name; // Use short name for province code (e.g., ON, BC)
-                }
-
-                // Get country
-                if (types.includes('country')) {
-                    country = component.long_name;
-                }
-            }
-
-            // If we still don't have a city, try parsing from place name
-            // The place.name is what's shown in the autocomplete dropdown
-            if (!city && place.name) {
-                // Parse "City, Province" or "City, Province, Country" format
-                const nameParts = place.name.split(',').map(part => part.trim());
-                if (nameParts.length >= 1) {
-                    city = nameParts[0];
-                }
-                if (nameParts.length >= 2 && !province) {
-                    // Check if second part is a province code (2-3 letters) or full name
-                    const secondPart = nameParts[1];
-                    if (secondPart.length <= 3) {
-                        province = secondPart.toUpperCase();
-                    }
-                }
-            }
-
-            // If still no city, try formatted_address as last resort
-            if (!city && place.formatted_address) {
-                const addrParts = place.formatted_address.split(',').map(part => part.trim());
-                if (addrParts.length >= 1) {
-                    city = addrParts[0];
-                }
-            }
-
-            // Format: "City, Province, Canada"
-            let formattedAddress = city || '';
-            if (province) {
-                formattedAddress += (formattedAddress ? ', ' : '') + province;
-            }
-            if (country && formattedAddress) {
-                formattedAddress += ', ' + country;
-            }
-
-            return formattedAddress || place.name || place.formatted_address || '';
-        }
-    </script>
-    <!-- Google Places Autocomplete API -->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initGooglePlaces"
-        async defer></script>
-    <script>
-        const dateInput = document.getElementById('dateInput');
-
-        // Initialize the date picker
-        flatpickr(dateInput, {
-            dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
-            altInput: true,
-            altFormat: 'F d, Y',
-            minDate: 'today', // Restrict to future dates only
-            disableMobile: true, // Disable mobile-friendly mode for consistent experience
-            allowInput: true, // Allow manual input
-            clickOpens: true, // Open calendar on click
-            theme: 'default' // Use default theme
+        flatpickr("#departure_date", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            enableTime: false,
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const originInput = document.querySelector('input[name="origin[label]"]');
+            const destinationInput = document.querySelector('input[name="destination[label]"]');
+            const departureDateInput = document.querySelector('#departure_date');
+
+            if (originInput) {
+                originInput.addEventListener('keydown', function(event) {
+                    if (event.key !== 'Enter') {
+                        return;
+                    }
+
+                    setTimeout(() => {
+                        const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
+
+                        if (!originCityIdInput || !destinationInput || !originCityIdInput.value) {
+                            return;
+                        }
+
+                        destinationInput.focus();
+                        destinationInput.select();
+                    }, 150);
+                });
+            }
+
+            if (destinationInput) {
+                destinationInput.addEventListener('keydown', function(event) {
+                    if (event.key !== 'Enter') {
+                        return;
+                    }
+
+                    setTimeout(() => {
+                        const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
+
+                        if (!destinationCityIdInput || !departureDateInput || !destinationCityIdInput.value) {
+                            return;
+                        }
+
+                        departureDateInput.focus();
+                    }, 150);
+                });
+            }
+        });
+
         const mobileCloseRedirectUrl = "{{ route('mobile_close_redirect') }}";
 
         function isMobileClient() {
@@ -2476,18 +2083,43 @@
         // });
 
         function swapLocations() {
-            // Get the values of the "From" and "To" input fields
-            const fromValue = document.getElementById('fromInput').value;
-            const toValue = document.getElementById('toInput').value;
+            const originComponent = document.querySelector('input[name="origin[label]"]')?.closest('[wire\\:id]');
+            const destinationComponent = document.querySelector('input[name="destination[label]"]')?.closest('[wire\\:id]');
+            const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
+            const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
 
-            // Swap the values
-            document.getElementById('fromInput').value = toValue;
-            document.getElementById('toInput').value = fromValue;
+            const originCityId = originCityIdInput ? parseInt(originCityIdInput.value) : null;
+            const destinationCityId = destinationCityIdInput ? parseInt(destinationCityIdInput.value) : null;
 
-            // Swap the selected place data as well
-            const tempPlace = selectedFromPlace;
-            selectedFromPlace = selectedToPlace;
-            selectedToPlace = tempPlace;
+            if (window.Livewire && originComponent && destinationComponent) {
+                const originWireId = originComponent.getAttribute('wire:id');
+                const destinationWireId = destinationComponent.getAttribute('wire:id');
+
+                if (originWireId && destinationWireId) {
+                    try {
+                        const originLivewire = window.Livewire.find(originWireId);
+                        const destinationLivewire = window.Livewire.find(destinationWireId);
+
+                        if (destinationCityId && originLivewire) {
+                            originLivewire.call('selectCity', destinationCityId);
+                        }
+                        if (originCityId && destinationLivewire) {
+                            destinationLivewire.call('selectCity', originCityId);
+                        }
+
+                        if (!destinationCityId && originLivewire) {
+                            originLivewire.set('query', '');
+                            originLivewire.set('cityId', null);
+                        }
+                        if (!originCityId && destinationLivewire) {
+                            destinationLivewire.set('query', '');
+                            destinationLivewire.set('cityId', null);
+                        }
+                    } catch (e) {
+                        console.error('Error swapping Livewire components:', e);
+                    }
+                }
+            }
         }
 
 
@@ -2540,83 +2172,6 @@
                 $showMoreDriverBtn.show();
             });
         });
-
-
-        function navigateToSearchRoute() {
-            // Get the values of the "From," "To," and "Date" input fields
-            const fromValue = document.getElementById('fromInput').value.trim();
-            const toValue = document.getElementById('toInput').value.trim();
-            const dateValue = document.getElementById('dateInput').value;
-
-            // Get the tooltip error element
-            const fromInputError = document.getElementById('fromInputError');
-            const toInputError = document.getElementById('toInputError');
-
-            // Validate that both inputs contain valid selected places (not just any string)
-            let isValid = true;
-
-            // Check if "From" or "To" fields are empty
-            if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
-                // Show the tooltip
-                if (fromInputError) {
-                    const tooltipError = fromInputError.querySelector('.tooltip-error');
-                    if (tooltipError) {
-                        tooltipError.textContent = fromValue === '' ? errorCityRequrired :
-                        errorCityMissing; // Show required error if empty, otherwise show invalid error
-                    }
-                    fromInputError.classList.remove('hidden');
-                }
-                isValid = false;
-            }
-
-            if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
-                // Show the tooltip
-                if (toInputError) {
-                    const tooltipError = toInputError.querySelector('.tooltip-error');
-                    if (tooltipError) {
-                        tooltipError.textContent = toValue === '' ? errorCityRequrired :
-                        errorCityMissing; // Show required error if empty, otherwise show invalid error
-                    }
-                    toInputError.classList.remove('hidden');
-                }
-                isValid = false;
-            }
-
-            if (!isValid) {
-                return; // If not valid, do not proceed with navigation
-            }
-
-            // Both fields are filled and valid, hide error tooltip if it's showing
-            if (fromInputError) {
-                fromInputError.classList.add('hidden');
-                const tooltipError = fromInputError.querySelector('.tooltip-error');
-                if (tooltipError) {
-                    tooltipError.textContent = ''; // Clear any previous error message
-                }
-            }
-            if (toInputError) {
-                toInputError.classList.add('hidden');
-                const tooltipError = toInputError.querySelector('.tooltip-error');
-                if (tooltipError) {
-                    tooltipError.textContent = ''; // Clear any previous error message
-                }
-            }
-
-            // Construct the URL with query parameters
-            let searchUrl =
-                `{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}`;
-
-            // Check if a date is provided and append it to the URL if available
-            if (dateValue) {
-                searchUrl += `&date=${encodeURIComponent(dateValue)}`;
-            }
-
-            // Navigate to the constructed URL
-            window.location.href = searchUrl;
-        }
-
-
-
         function closeModal() {
             // Remove the modal from the DOM
             const modal = document.querySelector('[aria-modal="true"]');

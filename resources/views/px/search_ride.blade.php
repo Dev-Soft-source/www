@@ -3,97 +3,7 @@
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        .px-search-shell {
-            border: 2px solid #1677e6;
-            border-radius: 18px;
-            background: #fff;
-            overflow: visible;
-            box-shadow: 0 6px 18px rgba(15, 53, 110, 0.16);
-        }
-
-        .px-search-segment {
-            min-height: 56px;
-        }
-
-        .px-search-divider {
-            position: relative;
-        }
-
-        .px-search-divider::after {
-            content: "";
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 1px;
-            height: calc(100% - 24px);
-            background: #d8deea;
-        }
-
-        .px-search-submit {
-            min-height: 56px;
-            background: #1677e6;
-            border-radius: 0 14px 14px 0;
-        }
-
-        .px-search-submit:hover {
-            background: #0f67ca;
-        }
-
-        @media (max-width: 767px) {
-            .px-search-shell {
-                display: block;
-                border-radius: 20px;
-                overflow: visible;
-                border-width: 2px;
-                background: #f3f4f6;
-                box-shadow: 0 10px 24px rgba(15, 53, 110, 0.14);
-            }
-
-            .px-search-segment {
-                min-height: 64px;
-                background: transparent;
-                display: flex;
-                align-items: center;
-            }
-
-            .px-search-shell > div:not(:last-child) {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-
-            .px-search-shell > div:last-child {
-                margin-top: 0;
-            }
-
-            .px-search-divider {
-                border-bottom: 1px solid #d8deea;
-            }
-
-            .px-search-shell .px-search-segment > .h-full,
-            .px-search-shell .px-search-segment > .relative {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-            }
-
-            .px-search-shell .px-search-segment input {
-                min-height: 64px;
-            }
-
-            .px-search-shell .md\:w-\[4\%\] {
-                display: none;
-            }
-
-            .px-search-submit {
-                min-height: 58px;
-                border-radius: 0 0 18px 18px;
-            }
-
-            .px-search-divider::after {
-                display: none;
-            }
-        }
+        
     </style>
 @endsection
 
@@ -119,14 +29,15 @@
                                 'placeholder' => $findRidePage->search_section_from_placeholder ?? 'Origin',
                                 'initialLabel' => $oldOriginLabel,
                                 'initialCityId' => $oldOriginCityId,
-                                'invalidErrorMessage' => $homePage->slider_required_error ?? 'Please select a valid city from the dropdown',
+                                'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
+                                'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
                             ], key('px-search-origin'))
                         </div>
                     </div>
 
                     <div class="w-full md:w-[4%] px-search-segment px-search-divider flex items-center justify-center bg-white">
                         <button type="button" onclick="swapLocations()" class="flex h-10 w-10 items-center justify-center rounded-full text-[#1677e6] transition hover:bg-blue-50">
-                            <img src="{{ asset('assets/arrow.png') }}" class="w-5 h-5 mx-auto" alt="Swap">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.28001 11.7193C8.13939 11.5789 7.94876 11.5 7.75001 11.5C7.55126 11.5 7.36064 11.5789 7.22001 11.7193L3.22001 15.7193C3.07956 15.86 3.00067 16.0506 3.00067 16.2493C3.00067 16.4481 3.07956 16.6387 3.22001 16.7793L7.22001 20.7793C7.28867 20.853 7.37147 20.9121 7.46347 20.9531C7.55547 20.9941 7.65479 21.0162 7.75549 21.0179C7.85619 21.0197 7.95622 21.0012 8.04961 20.9635C8.143 20.9257 8.22783 20.8696 8.29905 20.7984C8.37027 20.7272 8.42641 20.6423 8.46413 20.5489C8.50186 20.4555 8.52038 20.3555 8.5186 20.2548C8.51683 20.1541 8.49479 20.0548 8.45379 19.9628C8.4128 19.8708 8.3537 19.788 8.28001 19.7193L5.56001 16.9993L17 16.9993C17.1989 16.9993 17.3897 16.9203 17.5303 16.7797C17.671 16.639 17.75 16.4483 17.75 16.2493C17.75 16.0504 17.671 15.8597 17.5303 15.719C17.3897 15.5784 17.1989 15.4993 17 15.4993L5.56001 15.4993L8.28001 12.7793C8.42046 12.6387 8.49935 12.4481 8.49935 12.2493C8.49935 12.0506 8.42046 11.86 8.28001 11.7193Z" fill="currentColor" class="f12whk1"></path><path d="M15.77 12.2777C15.9106 12.4182 16.1012 12.4971 16.3 12.4971C16.4987 12.4971 16.6894 12.4182 16.83 12.2777L20.83 8.27773C20.9704 8.1371 21.0493 7.94648 21.0493 7.74773C21.0493 7.54898 20.9704 7.35835 20.83 7.21773L16.83 3.21773C16.7613 3.14404 16.6785 3.08494 16.5865 3.04395C16.4945 3.00296 16.3952 2.98092 16.2945 2.97914C16.1938 2.97736 16.0938 2.99589 16.0004 3.03361C15.907 3.07133 15.8222 3.12747 15.7509 3.19869C15.6797 3.26991 15.6236 3.35475 15.5859 3.44813C15.5481 3.54152 15.5296 3.64155 15.5314 3.74225C15.5332 3.84295 15.5552 3.94227 15.5962 4.03427C15.6372 4.12627 15.6963 4.20907 15.77 4.27773L18.49 6.99773L7.04998 6.99773C6.85106 6.99773 6.6603 7.07675 6.51965 7.2174C6.37899 7.35805 6.29998 7.54882 6.29998 7.74773C6.29998 7.94664 6.37899 8.13741 6.51965 8.27806C6.6603 8.41871 6.85106 8.49773 7.04998 8.49773L18.49 8.49773L15.77 11.2177C15.6295 11.3584 15.5506 11.549 15.5506 11.7477C15.5506 11.9465 15.6295 12.1371 15.77 12.2777Z" fill="currentColor" class="f12whk2"></path></svg>
                         </button>
                     </div>
 
@@ -137,8 +48,8 @@
                                 'placeholder' => $findRidePage->search_section_to_placeholder ?? 'Destination',
                                 'initialLabel' => $oldDestinationLabel,
                                 'initialCityId' => $oldDestinationCityId,
-                                'invalidErrorMessage' => $homePage->slider_required_error ?? 'Please select a valid city from the dropdown',
-                                'class' => 'h-full w-full border-0 bg-transparent pl-12 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
+                                'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
                             ], key('px-search-destination'))
                         </div>
                     </div>
@@ -156,7 +67,7 @@
                             <input id="departure_date" name="departure_date"
                                 value="{{ $oldDepartureDate }}" type="text"
                                 readonly
-                                class="h-full w-full border-0 bg-transparent pl-12 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                class="h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
                                 placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                 autocomplete="off">
                         </div>

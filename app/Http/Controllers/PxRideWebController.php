@@ -2273,6 +2273,24 @@ class PxRideWebController extends Controller
                 'destination.city_id' => ['nullable', 'integer', 'exists:cities,id'],
             ]);
 
+            $invalidCityMessage = $this->siteText['invalid_city_error_text']
+                ?? 'Please select a valid city from the dropdown.';
+
+            $validator->after(function ($validator) use ($request, $invalidCityMessage) {
+                $originLabel = trim((string) $request->input('origin.label'));
+                $destinationLabel = trim((string) $request->input('destination.label'));
+                $originCityId = $request->input('origin.city_id');
+                $destinationCityId = $request->input('destination.city_id');
+
+                if ($originLabel !== '' && empty($originCityId)) {
+                    $validator->errors()->add('origin.label', $invalidCityMessage);
+                }
+
+                if ($destinationLabel !== '' && empty($destinationCityId)) {
+                    $validator->errors()->add('destination.label', $invalidCityMessage);
+                }
+            });
+
             $validator->validate();
         }
 

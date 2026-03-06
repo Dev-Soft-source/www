@@ -1,9 +1,9 @@
 <div
-    class="relative"
+    class="relative h-full"
     data-city-autocomplete
     data-invalid-message="{{ $invalidErrorMessage }}"
 >
-    <div class="relative">
+    <div class="relative h-full">
         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
                 aria-hidden="true">

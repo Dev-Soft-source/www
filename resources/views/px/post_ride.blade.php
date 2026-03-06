@@ -250,8 +250,8 @@
                 @if (isset($isEditMode) && $isEditMode)
                     @method('PUT')
                 @endif
-                <section class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                <section class="bg-white rounded-lg shadow-3xl">
+                    <h3 class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
                         @isset($postRidePage->ride_info_heading)
                             {{ $postRidePage->ride_info_heading }}
                         @endisset
@@ -338,9 +338,9 @@
                             @enderror
                         </div>
 
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                        <div class="bg-white rounded-lg shadow-3xl mt-6">
                             <button type="button" id="px-stops-toggle"
-                                class="bg-primary text-white w-full flex items-center justify-between text-left px-4 py-2"
+                                class="bg-primary rounded-lg text-white w-full flex items-center justify-between text-left px-4 py-2"
                                 aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="px-stops-content">
                                 <h3 class="text-2xl">
                                     @isset($postRidePage->add_more_from_to)
