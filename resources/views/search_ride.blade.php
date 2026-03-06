@@ -2338,7 +2338,6 @@
                 var toVal = (toInput.value || '').trim();
                 if (fromVal) resolveTypedCityValueSearchRide(fromVal, 'from');
                 if (toVal) resolveTypedCityValueSearchRide(toVal, 'to');
-
             })();
         };
 

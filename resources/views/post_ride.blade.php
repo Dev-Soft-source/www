@@ -678,10 +678,9 @@
                                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                                             <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
                                                         </div>
-                                                        <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
+                                                        <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" autocomplete="off"
                                                             class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                             placeholder="">
-                                                        <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
                                                     </div>
                                                     <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
                                                         class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>
@@ -3199,7 +3198,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 200);
         });
         document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownPostRide = true; else setTimeout(function() { isSelectingFromDropdownPostRide = false; }, 50); });
+
+        // Attach Google Places Autocomplete to all existing stop inputs (server-rendered rows)
+        document.querySelectorAll('input[name="stop_spot_display[]"]').forEach(function(inp) {
+            if (inp.id && inp.id.indexOf('stop_spot_') === 0 && !inp.getAttribute('data-autocomplete-attached')) {
+                attachStopAutocompletePostRide(inp);
+            }
+        });
     };
+
+    function attachStopAutocompletePostRide(inputElement) {
+        if (!inputElement || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+        if (inputElement.getAttribute('data-autocomplete-attached')) return;
+        inputElement.setAttribute('data-autocomplete-attached', '1');
+        inputElement.setAttribute('autocomplete', 'off');
+        var autocomplete = new google.maps.places.Autocomplete(inputElement, {
+            componentRestrictions: { country: 'ca' },
+            types: ['(cities)'],
+            fields: ['address_components', 'formatted_address', 'name', 'place_id']
+        });
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (place.address_components && place.place_id) {
+                var formatted = typeof formatPlaceAddressPostRide === 'function' ? formatPlaceAddressPostRide(place) : (place.formatted_address || place.name || '');
+                if (formatted) inputElement.value = formatted;
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+            }
+        });
+    }
+
     function formatPlaceAddressPostRide(place) {
         var city = '', province = '', country = 'Canada';
         if (!place.address_components) return place.name || place.formatted_address || '';
@@ -3687,8 +3715,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">' +
             '<div class="relative flex-1 min-w-0">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
-            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
-            '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
+            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
             '</div>' +
             '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '</div>' +
@@ -3696,6 +3723,8 @@ document.addEventListener('DOMContentLoaded', function() {
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
             '</button>';
         container.appendChild(row);
+        var newStopInput = document.getElementById('stop_spot_' + nextIndex);
+        if (newStopInput && typeof attachStopAutocompletePostRide === 'function') attachStopAutocompletePostRide(newStopInput);
         updateStopsOriginDestinationLabelsPostRide();
         if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
     }
