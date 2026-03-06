@@ -70,9 +70,10 @@
         $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
         $currencySymbol = $currencyMap[$currencyCode] ?? $currencyCode . ' ';
         $currentBookedSeats = $isEditMode ? (int) ($existingBooking->seats ?? 1) : 0;
+        $segmentAvailableSeats = (int) ($segmentAvailableSeats ?? $ride->seats_available);
         $maxSeatsAllowed = $isEditMode
-            ? max(1, (int) $ride->seats_available + $currentBookedSeats)
-            : max(1, (int) $ride->seats_available);
+            ? max(1, $segmentAvailableSeats + $currentBookedSeats)
+            : max(1, $segmentAvailableSeats);
         $bookingModeCodeValue = strtolower((string) ($bookingModeCode ?? ''));
         $bookingMethodCode = strtolower((string) ($bookingMethodCode ?? ''));
         $isCashBookingMethod = $bookingMethodCode === 'cash';
@@ -266,7 +267,7 @@
                                             class="w-full rounded border-gray-300" required>
                                         <p class="text-xs text-gray-500 mt-1">
                                             Available:
-                                            {{ $isEditMode ? (int) $ride->seats_available + $currentBookedSeats : (int) $ride->seats_available }}
+                                            {{ $isEditMode ? $segmentAvailableSeats + $currentBookedSeats : $segmentAvailableSeats }}
                                         </p>
                                         @error('seats')
                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>

@@ -159,6 +159,10 @@
             $oldCurrencyCode = 'CAD';
         }
         $oldCurrencySymbol = $pxCurrencyMap[$oldCurrencyCode] ?? $oldCurrencyCode . ' ';
+        $oldSegmentPrices = old('meta.segment_prices', $prefillRide->meta['segment_prices'] ?? []);
+        if (!is_array($oldSegmentPrices)) {
+            $oldSegmentPrices = [];
+        }
 
         $stopsExpanded = !empty($oldStops);
 
@@ -532,6 +536,7 @@
                                 <input id="px-price-minor-input" name="price_minor" value="{{ $oldPriceMajorDisplay }}"
                                     type="number" min="0" step="0.01" class="w-full rounded border-gray-300"
                                     placeholder="e.g. {{ $oldCurrencySymbol }}25.00">
+                                <p id="px-price-single-expected" class="mt-2 text-xs text-gray-500 hidden"></p>
                                 @error('price_minor')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
@@ -541,13 +546,14 @@
                                 <div id="px-price-segments-list" class="space-y-2"></div>
                                 <div
                                     class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
-                                    <span class="text-gray-700">Total price per seat</span>
+                                    <span class="text-gray-700">Parent route price per seat</span>
                                     <span id="px-price-segments-total" class="text-gray-900">0.00</span>
                                 </div>
                                 <input type="hidden" id="px-price-minor-hidden"
                                     value="{{ (int) ($oldPriceMinor ?? old('price_minor', 0)) }}">
                                 <input type="hidden" id="px-destination-price-delta-initial"
                                     value="{{ $oldDestinationPriceDeltaMinor ?? old('destination.price_delta_minor', 0) }}">
+                                <script type="application/json" id="px-initial-segment-prices-json">{!! json_encode(array_values($oldSegmentPrices), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
                                 <input type="hidden" name="distance_meters" id="px-distance-meters-input"
                                     value="{{ old('distance_meters', '') }}">
                                 @error('price_minor')
@@ -1360,10 +1366,31 @@
             const priceSegmentsList = document.getElementById('px-price-segments-list');
             const priceSegmentsTotal = document.getElementById('px-price-segments-total');
             const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceSingleExpected = document.getElementById('px-price-single-expected');
             const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
             const destinationPriceDeltaInitialInput = document.getElementById('px-destination-price-delta-initial');
+            const initialSegmentPricesJson = document.getElementById('px-initial-segment-prices-json');
             const currencySelect = document.getElementById('px-currency-select');
             const currencySymbols = @json($pxCurrencyMap);
+            const segmentDistanceEstimateUrl = @json(route('px.post_ride.segment_distance_estimates', ['lang' => optional($selectedLanguage)->abbreviation]));
+            let lastPxPriceValidationSignature = null;
+            const initialSegmentPrices = (() => {
+                if (!initialSegmentPricesJson) return [];
+                try {
+                    const parsed = JSON.parse(initialSegmentPricesJson.textContent || '[]');
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (error) {
+                    return [];
+                }
+            })();
+            let segmentDistanceState = {
+                key: '',
+                pendingKey: '',
+                legDistancesMeters: [],
+                segmentDistancesMeters: {},
+                totalDistanceMeters: 0,
+            };
+            let segmentDistanceDebounceTimer = null;
 
             function getSelectedCurrencySymbol() {
                 const currencyCode = currencySelect ? currencySelect.value.toUpperCase() : '';
@@ -1482,26 +1509,341 @@
                 return getStopsData().filter((stop) => stop.label && stop.cityId);
             }
 
+            function hasValidCityId(fieldName) {
+                const cityIdValue = getFirstInputValueByName(fieldName);
+                if (cityIdValue === '') {
+                    return false;
+                }
+
+                const parsed = Number.parseInt(cityIdValue, 10);
+                return !Number.isNaN(parsed) && parsed > 0;
+            }
+
+            function canRequestDistanceEstimates(validStops) {
+                if (!hasValidCityId('origin[city_id]') || !hasValidCityId('destination[city_id]')) {
+                    return false;
+                }
+
+                return validStops.every((stop) => {
+                    const parsed = Number.parseInt(stop.cityId || '0', 10);
+                    return !Number.isNaN(parsed) && parsed > 0;
+                });
+            }
+
+            function getSegmentPriceKey(fromIndex, toIndex) {
+                return `${fromIndex}:${toIndex}`;
+            }
+
+            function getInitialSegmentPriceMap() {
+                const priceMap = new Map();
+                initialSegmentPrices.forEach((segmentPrice) => {
+                    const fromIndex = Number.parseInt(segmentPrice?.from_index ?? '', 10);
+                    const toIndex = Number.parseInt(segmentPrice?.to_index ?? '', 10);
+                    const priceMinor = toMinorInt(segmentPrice?.price_minor ?? 0);
+                    if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && toIndex > fromIndex) {
+                        priceMap.set(getSegmentPriceKey(fromIndex, toIndex), priceMinor);
+                    }
+                });
+                return priceMap;
+            }
+
+            function getAllRoutePoints(validStops) {
+                const originLabel = getFirstInputValueByName('origin[label]') || 'Origin';
+                const destinationLabel = getFirstInputValueByName('destination[label]') || 'Destination';
+
+                return [{
+                        index: 0,
+                        label: originLabel
+                    },
+                    ...validStops.map((stop, idx) => ({
+                        index: idx + 1,
+                        label: stop.label || `Stop ${idx + 1}`,
+                        stopIndex: stop.index
+                    })),
+                    {
+                        index: validStops.length + 1,
+                        label: destinationLabel
+                    }
+                ];
+            }
+
+            function getPointLabelsForDistance(points) {
+                return points
+                    .map((point) => (point?.label ?? '').toString().trim())
+                    .filter((label) => label !== '');
+            }
+
+            function getDistanceRequestKey(points) {
+                return getPointLabelsForDistance(points).join('||');
+            }
+
+            function buildLegacyAdjacentPriceMap(validStops, points) {
+                const adjacentPriceMap = new Map();
+                validStops.forEach((stop, idx) => {
+                    adjacentPriceMap.set(getSegmentPriceKey(idx, idx + 1), toMinorInt(stop.priceDeltaMinor));
+                });
+
+                const destinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
+                if (points.length >= 2) {
+                    adjacentPriceMap.set(
+                        getSegmentPriceKey(points.length - 2, points.length - 1),
+                        destinationDeltaMinor
+                    );
+                }
+
+                return adjacentPriceMap;
+            }
+
+            function resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices, parentPriceMinor) {
+                const configuredPrice = configuredPrices.get(getSegmentPriceKey(fromIndex, toIndex));
+                if (configuredPrice !== undefined) {
+                    return configuredPrice;
+                }
+
+                let adjacentSum = 0;
+                let hasAllAdjacentPrices = true;
+                for (let idx = fromIndex; idx < toIndex; idx++) {
+                    const adjacentPrice = adjacentPrices.get(getSegmentPriceKey(idx, idx + 1));
+                    if (adjacentPrice === undefined) {
+                        hasAllAdjacentPrices = false;
+                        break;
+                    }
+                    adjacentSum += adjacentPrice;
+                }
+
+                if (hasAllAdjacentPrices && adjacentSum > 0) {
+                    return adjacentSum;
+                }
+
+                if (fromIndex === 0 && parentPriceMinor > 0) {
+                    return parentPriceMinor;
+                }
+
+                return 0;
+            }
+
+            function getSelectedSeatsTotal() {
+                const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
+                const selectedSeats = selectedSeatsInput ? Number.parseInt(selectedSeatsInput.value || '0', 10) : 0;
+                return Number.isNaN(selectedSeats) || selectedSeats <= 0 ? 0 : selectedSeats;
+            }
+
+            function calculateExpectedSegmentPriceMinor(distanceMeters, seatsTotal) {
+                const normalizedDistanceMeters = Math.max(0, Number.parseInt(distanceMeters || '0', 10) || 0);
+                const normalizedSeatsTotal = Math.max(0, Number.parseInt(seatsTotal || '0', 10) || 0);
+
+                if (normalizedDistanceMeters <= 0 || normalizedSeatsTotal <= 0) {
+                    return {
+                        suggestedMinor: 0,
+                        maxMinor: 0,
+                    };
+                }
+
+                const distanceKm = normalizedDistanceMeters / 1000;
+                const suggestedMajor = (distanceKm * SOFT_WARNING_CAP) / normalizedSeatsTotal;
+                const maxMajor = (distanceKm * ERROR_TRIGGERING_CAP) / normalizedSeatsTotal;
+
+                return {
+                    suggestedMinor: Math.round(suggestedMajor * 100),
+                    maxMinor: Math.round(maxMajor * 100),
+                };
+            }
+
+            function getSegmentDistanceMeters(fromIndex, toIndex) {
+                const segmentDistancesMeters = segmentDistanceState &&
+                    segmentDistanceState.segmentDistancesMeters &&
+                    typeof segmentDistanceState.segmentDistancesMeters === 'object'
+                    ? segmentDistanceState.segmentDistancesMeters
+                    : {};
+
+                return Number.parseInt(segmentDistancesMeters[`${fromIndex}:${toIndex}`] || '0', 10) || 0;
+            }
+
+            function refreshExpectedSegmentPriceHints() {
+                if (!priceSegmentsList) {
+                    return;
+                }
+
+                const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
+                if (allSegmentInputs.length === 0) {
+                    return;
+                }
+
+                const seatsTotal = getSelectedSeatsTotal();
+
+                allSegmentInputs.forEach((input) => {
+                    const fromIndex = Number.parseInt(input.getAttribute('data-from-index') || '-1', 10);
+                    const toIndex = Number.parseInt(input.getAttribute('data-to-index') || '-1', 10);
+                    const hint = input.parentElement?.querySelector('.px-segment-price-expected');
+                    if (Number.isNaN(fromIndex) || Number.isNaN(toIndex) || !hint) {
+                        return;
+                    }
+
+                    let suggestedMinor = 0;
+                    let maxMinor = 0;
+                    let distanceSuffix = 'distance unavailable';
+
+                    const segmentDistanceMeters = getSegmentDistanceMeters(fromIndex, toIndex);
+                    if (segmentDistanceMeters > 0) {
+                        const priceEstimate = calculateExpectedSegmentPriceMinor(segmentDistanceMeters, seatsTotal);
+                        suggestedMinor = priceEstimate.suggestedMinor;
+                        maxMinor = priceEstimate.maxMinor;
+                        distanceSuffix = `${(segmentDistanceMeters / 1000).toFixed(1)} km`;
+                    }
+
+                    const suggestedMajor = toMajorFromMinor(suggestedMinor);
+                    const maxMajor = toMajorFromMinor(maxMinor);
+                    hint.textContent = `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceSuffix})`;
+                });
+            }
+
+            function refreshSingleRouteExpectedPriceHint() {
+                if (!priceSingleExpected) {
+                    return;
+                }
+
+                const originLabel = getFirstInputValueByName('origin[label]');
+                const destinationLabel = getFirstInputValueByName('destination[label]');
+                const seatsTotal = getSelectedSeatsTotal();
+                const totalDistanceMeters = toMinorInt(segmentDistanceState.totalDistanceMeters);
+
+                if (!originLabel || !destinationLabel || seatsTotal <= 0) {
+                    priceSingleExpected.classList.add('hidden');
+                    priceSingleExpected.textContent = '';
+                    return;
+                }
+
+                if (totalDistanceMeters <= 0) {
+                    priceSingleExpected.classList.remove('hidden');
+                    priceSingleExpected.textContent = 'Suggested/Max price will appear when distance is available.';
+                    return;
+                }
+
+                const priceEstimate = calculateExpectedSegmentPriceMinor(totalDistanceMeters, seatsTotal);
+                const suggestedMajor = toMajorFromMinor(priceEstimate.suggestedMinor);
+                const maxMajor = toMajorFromMinor(priceEstimate.maxMinor);
+                const distanceKm = (totalDistanceMeters / 1000).toFixed(1);
+
+                priceSingleExpected.classList.remove('hidden');
+                priceSingleExpected.textContent =
+                    `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceKm} km)`;
+            }
+
+            async function requestSegmentDistanceEstimates(points) {
+                const pointLabels = getPointLabelsForDistance(points);
+                const requestKey = pointLabels.join('||');
+
+                if (pointLabels.length < 2) {
+                    segmentDistanceState = {
+                        key: '',
+                        pendingKey: '',
+                        legDistancesMeters: [],
+                        segmentDistancesMeters: {},
+                        totalDistanceMeters: 0,
+                    };
+                    window.pxRideDistanceKm = null;
+                    const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                    if (distanceMetersInput) {
+                        distanceMetersInput.value = '';
+                    }
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                    return;
+                }
+
+                if (segmentDistanceState.key === requestKey || segmentDistanceState.pendingKey === requestKey) {
+                    refreshExpectedSegmentPriceHints();
+                    return;
+                }
+
+                segmentDistanceState.pendingKey = requestKey;
+
+                const csrfToken = postRideForm?.querySelector('input[name="_token"]')?.value || '';
+
+                try {
+                    const response = await fetch(segmentDistanceEstimateUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            point_labels: pointLabels,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Distance estimate request failed: ${response.status}`);
+                    }
+
+                    const payload = await response.json();
+                    if (segmentDistanceState.pendingKey !== requestKey) {
+                        return;
+                    }
+
+                    segmentDistanceState = {
+                        key: requestKey,
+                        pendingKey: '',
+                        legDistancesMeters: Array.isArray(payload.leg_distances_meters) ? payload.leg_distances_meters : [],
+                        segmentDistancesMeters: payload.segment_distances_meters && typeof payload.segment_distances_meters === 'object'
+                            ? payload.segment_distances_meters
+                            : {},
+                        totalDistanceMeters: Number.parseInt(payload.total_distance_meters || '0', 10) || 0,
+                    };
+
+                    if (segmentDistanceState.totalDistanceMeters > 0) {
+                        window.pxRideDistanceKm = segmentDistanceState.totalDistanceMeters / 1000;
+                        const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                        if (distanceMetersInput) {
+                            distanceMetersInput.value = String(segmentDistanceState.totalDistanceMeters);
+                        }
+                    }
+                } catch (error) {
+                    if (segmentDistanceState.pendingKey === requestKey) {
+                        segmentDistanceState.pendingKey = '';
+                    }
+                    console.warn('PX segment distance estimates failed', error);
+                } finally {
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                }
+            }
+
+            function scheduleSegmentDistanceEstimates(points) {
+                if (segmentDistanceDebounceTimer) {
+                    clearTimeout(segmentDistanceDebounceTimer);
+                }
+
+                segmentDistanceDebounceTimer = setTimeout(() => {
+                    requestSegmentDistanceEstimates(points);
+                }, 350);
+            }
+
             function syncSegmentPriceTotal() {
                 if (!priceSegmentsList || !priceMinorHiddenInput) return;
-                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input');
-                let totalMinor = 0;
-                segmentInputs.forEach((input) => {
-                    totalMinor += toMinorFromMajor(input.value);
-                });
-                priceMinorHiddenInput.value = String(totalMinor);
+
+                const parentSegmentInput = priceSegmentsList.querySelector(
+                    '.px-segment-price-input[data-parent-segment="1"]'
+                );
+                const parentPriceMinor = parentSegmentInput ? toMinorFromMajor(parentSegmentInput.value) : 0;
+                priceMinorHiddenInput.value = String(parentPriceMinor);
                 if (priceSegmentsTotal) {
-                    priceSegmentsTotal.textContent = toMajorFromMinor(totalMinor);
+                    priceSegmentsTotal.textContent = toMajorFromMinor(parentPriceMinor);
                 }
+                refreshExpectedSegmentPriceHints();
+                refreshSingleRouteExpectedPriceHint();
+                maybeShowPxLivePriceAlert();
             }
 
             function syncStopPriceDeltaInputsFromSegmentRows() {
                 if (!priceSegmentsList) return;
-                const segmentInputs = priceSegmentsList.querySelectorAll(
-                    '.px-segment-price-input[data-stop-index]');
+                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input[data-adjacent-stop-index]');
                 segmentInputs.forEach((input) => {
-                    const stopIndex = input.getAttribute('data-stop-index');
-                    if (stopIndex === null || stopIndex === '') return;
+                    const stopIndex = input.getAttribute('data-adjacent-stop-index');
+                    if (stopIndex === null || stopIndex === '') {
+                        return;
+                    }
                     const hiddenStopPrice = document.querySelector(
                         `input[name="stops[${stopIndex}][price_delta_minor]"]`);
                     if (hiddenStopPrice) {
@@ -1518,8 +1860,26 @@
 
                 const validStops = getValidStopsData();
                 const hasValidStops = validStops.length > 0;
+                const canEstimateDistance = canRequestDistanceEstimates(validStops);
 
                 if (!hasValidStops) {
+                    const points = getAllRoutePoints(validStops);
+                    if (canEstimateDistance) {
+                        scheduleSegmentDistanceEstimates(points);
+                    } else {
+                        segmentDistanceState = {
+                            key: '',
+                            pendingKey: '',
+                            legDistancesMeters: [],
+                            segmentDistancesMeters: {},
+                            totalDistanceMeters: 0,
+                        };
+                        window.pxRideDistanceKm = null;
+                        const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                        if (distanceMetersInput) {
+                            distanceMetersInput.value = '';
+                        }
+                    }
                     priceLabel.textContent = 'Price per Seat';
                     priceSingleWrap.classList.remove('hidden');
                     priceSegmentsWrap.classList.add('hidden');
@@ -1527,78 +1887,124 @@
                     priceMinorInput.disabled = false;
                     priceMinorInput.name = 'price_minor';
                     priceMinorHiddenInput.name = '';
+                    refreshSingleRouteExpectedPriceHint();
                     return;
                 }
 
-                const originLabel = getFirstInputValueByName('origin[label]') || 'Origin';
-                const destinationLabel = getFirstInputValueByName('destination[label]') || 'Destination';
-                const points = [originLabel, ...validStops.map((stop) => stop.label), destinationLabel];
+                const points = getAllRoutePoints(validStops);
+                if (canEstimateDistance) {
+                    scheduleSegmentDistanceEstimates(points);
+                } else {
+                    segmentDistanceState = {
+                        key: '',
+                        pendingKey: '',
+                        legDistancesMeters: [],
+                        segmentDistancesMeters: {},
+                        totalDistanceMeters: 0,
+                    };
+                    window.pxRideDistanceKm = null;
+                    const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                    if (distanceMetersInput) {
+                        distanceMetersInput.value = '';
+                    }
+                }
 
-                priceLabel.textContent = 'Price per Seat (by Route Section)';
+                priceLabel.textContent = 'Price per Seat (all route sections)';
                 priceSingleWrap.classList.add('hidden');
                 priceSegmentsWrap.classList.remove('hidden');
                 priceMinorInput.disabled = true;
                 priceMinorInput.name = '';
                 priceMinorHiddenInput.name = 'price_minor';
 
-                const previousValues = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'))
-                    .map((input) => toMinorFromMajor(input.value));
-                const existingStopValues = validStops.map((stop) => toMinorInt(stop.priceDeltaMinor));
-                const initialDestinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
-                const hasAnyExistingStopValue = existingStopValues.some((value) => value > 0) ||
-                    initialDestinationDeltaMinor > 0;
-                const segmentCount = points.length - 1;
+                const previousValues = new Map();
+                Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input')).forEach((input) => {
+                    const fromIndex = input.getAttribute('data-from-index');
+                    const toIndex = input.getAttribute('data-to-index');
+                    if (fromIndex === null || toIndex === null) {
+                        return;
+                    }
+                    previousValues.set(
+                        getSegmentPriceKey(Number.parseInt(fromIndex, 10), Number.parseInt(toIndex, 10)),
+                        toMinorFromMajor(input.value)
+                    );
+                });
+
+                const configuredPrices = getInitialSegmentPriceMap();
+                const adjacentPrices = buildLegacyAdjacentPriceMap(validStops, points);
                 const baseTotalMinor = priceMinorHiddenInput.value ?
                     toMinorInt(priceMinorHiddenInput.value) :
                     toMinorFromMajor(priceMinorInput.value);
                 priceSegmentsList.innerHTML = '';
 
-                for (let i = 0; i < points.length - 1; i++) {
-                    const from = points[i] || 'Point A';
-                    const to = points[i + 1] || 'Point B';
-                    const stopIndex = i < validStops.length ? String(validStops[i].index) : '';
-                    let initialMinor = previousValues[i] ?? (stopIndex !== '' ? toMinorInt(validStops[i]
-                        .priceDeltaMinor) : initialDestinationDeltaMinor);
+                for (let fromIndex = 0; fromIndex < points.length - 1; fromIndex++) {
+                    const group = document.createElement('div');
+                    group.className = 'rounded-md border border-gray-200 bg-gray-50 p-3 space-y-2';
 
-                    // If segment prices are not set yet, distribute current single total across segments.
-                    if (!hasAnyExistingStopValue && previousValues.length === 0 && baseTotalMinor > 0 &&
-                        segmentCount > 0) {
-                        const share = Math.floor(baseTotalMinor / segmentCount);
-                        const remainder = baseTotalMinor - (share * segmentCount);
-                        initialMinor = share + (i === segmentCount - 1 ? remainder : 0);
+                    const groupTitle = document.createElement('div');
+                    groupTitle.className = 'text-sm font-semibold text-gray-700';
+                    groupTitle.textContent = `From ${points[fromIndex].label}`;
+                    group.appendChild(groupTitle);
+
+                    for (let toIndex = fromIndex + 1; toIndex < points.length; toIndex++) {
+                        const from = points[fromIndex].label || 'Point A';
+                        const to = points[toIndex].label || 'Point B';
+                        const previousKey = getSegmentPriceKey(fromIndex, toIndex);
+                        let initialMinor = previousValues.has(previousKey)
+                            ? previousValues.get(previousKey)
+                            : resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices, baseTotalMinor);
+
+                        if (fromIndex === 0 && toIndex === points.length - 1 && initialMinor <= 0 && baseTotalMinor > 0) {
+                            initialMinor = baseTotalMinor;
+                        }
+
+                        const row = document.createElement('div');
+                        row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-end';
+
+                        const routeLabelWrap = document.createElement('div');
+                        const routeLabel = document.createElement('label');
+                        routeLabel.className = 'block text-primary text-gray-700';
+                        routeLabel.textContent = `${from} \u2192 ${to}`;
+                        routeLabelWrap.appendChild(routeLabel);
+
+                        const expectedHint = document.createElement('p');
+                        expectedHint.className = 'px-segment-price-expected text-xs text-gray-500 mt-1';
+                        expectedHint.textContent = `Expected: ${getSelectedCurrencySymbol()}0.00`;
+                        routeLabelWrap.appendChild(expectedHint);
+
+                        const priceInput = document.createElement('input');
+                        priceInput.type = 'number';
+                        priceInput.min = '0';
+                        priceInput.step = '0.01';
+                        priceInput.value = toMajorFromMinor(initialMinor);
+                        priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
+                        priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
+                        priceInput.setAttribute('data-from-index', String(fromIndex));
+                        priceInput.setAttribute('data-to-index', String(toIndex));
+
+                        if (toIndex === fromIndex + 1 && toIndex <= validStops.length) {
+                            priceInput.setAttribute('data-adjacent-stop-index', String(validStops[toIndex - 1].index));
+                        }
+
+                        if (fromIndex === 0 && toIndex === points.length - 1) {
+                            priceInput.setAttribute('data-parent-segment', '1');
+                        }
+
+                        priceInput.addEventListener('input', function() {
+                            syncStopPriceDeltaInputsFromSegmentRows();
+                            syncSegmentPriceTotal();
+                        });
+
+                        row.appendChild(routeLabelWrap);
+                        row.appendChild(priceInput);
+                        group.appendChild(row);
                     }
 
-                    const row = document.createElement('div');
-                    row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-end';
-
-                    const routeLabelWrap = document.createElement('div');
-                    const routeLabel = document.createElement('label');
-                    routeLabel.className = 'block text-primary text-gray-700';
-                    routeLabel.textContent = `${from} \u2192 ${to}`;
-                    routeLabelWrap.appendChild(routeLabel);
-
-                    const priceInput = document.createElement('input');
-                    priceInput.type = 'number';
-                    priceInput.min = '0';
-                    priceInput.step = '0.01';
-                    priceInput.value = toMajorFromMinor(initialMinor);
-                    priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
-                    priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
-                    if (stopIndex !== '') {
-                        priceInput.setAttribute('data-stop-index', stopIndex);
-                    }
-                    priceInput.addEventListener('input', function() {
-                        syncStopPriceDeltaInputsFromSegmentRows();
-                        syncSegmentPriceTotal();
-                    });
-
-                    row.appendChild(routeLabelWrap);
-                    row.appendChild(priceInput);
-                    priceSegmentsList.appendChild(row);
+                    priceSegmentsList.appendChild(group);
                 }
 
                 syncStopPriceDeltaInputsFromSegmentRows();
                 syncSegmentPriceTotal();
+                refreshExpectedSegmentPriceHints();
             }
 
             if (priceMinorInput) {
@@ -1606,11 +2012,18 @@
                     if (priceMinorHiddenInput) {
                         priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
+                maybeShowPxLivePriceAlert();
+                });
+                priceMinorInput.addEventListener('blur', function() {
+                    maybeShowPxLivePriceAlert(true);
                 });
             }
 
             if (currencySelect) {
-                currencySelect.addEventListener('change', syncPricePlaceholders);
+                currencySelect.addEventListener('change', function() {
+                    syncPricePlaceholders();
+                    refreshExpectedSegmentPriceHints();
+                });
             }
 
             document.addEventListener('input', function(event) {
@@ -1624,6 +2037,19 @@
                         target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
                     )) {
                     syncPriceInputMode();
+                }
+            });
+
+            document.addEventListener('change', function(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                if (target.name === 'seats_total') {
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                    maybeShowPxLivePriceAlert();
                 }
             });
 
@@ -1738,6 +2164,9 @@
                     if (existingDestinationPriceDeltaInput) {
                         existingDestinationPriceDeltaInput.remove();
                     }
+                    postRideForm.querySelectorAll('input[data-generated-segment-price="1"]').forEach((input) => {
+                        input.remove();
+                    });
 
                     const validStops = getValidStopsData().map((stop) => ({
                         label: stop.label,
@@ -1750,31 +2179,59 @@
                     // Source-of-truth for stop leg prices: visible segment rows.
                     // Map first N segment rows to N intermediate stops (in route order).
                     if (priceSegmentsList && validStops.length > 0) {
-                        const stopSegmentInputs = Array.from(
-                            priceSegmentsList.querySelectorAll(
-                                '.px-segment-price-input[data-stop-index]')
+                        const adjacentSegmentInputs = Array.from(
+                            priceSegmentsList.querySelectorAll('.px-segment-price-input[data-adjacent-stop-index]')
                         );
-                        for (let i = 0; i < validStops.length; i++) {
-                            if (stopSegmentInputs[i]) {
-                                validStops[i].priceDeltaMinor = toMinorFromMajor(stopSegmentInputs[i]
-                                    .value);
+                        adjacentSegmentInputs.forEach((input) => {
+                            const stopIndex = input.getAttribute('data-adjacent-stop-index');
+                            if (stopIndex === null || stopIndex === '') {
+                                return;
                             }
-                        }
+                            const matchingStop = validStops.find((stop) => String(stop.index) === String(stopIndex));
+                            if (matchingStop) {
+                                matchingStop.priceDeltaMinor = toMinorFromMajor(input.value);
+                            }
+                        });
 
-                        // Persist last section price (last stop -> destination) on destination payload.
-                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll(
-                            '.px-segment-price-input'));
-                        const lastSegmentInput = allSegmentInputs.length > 0 ? allSegmentInputs[
-                            allSegmentInputs.length - 1] : null;
-                        if (lastSegmentInput) {
+                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
+                        const lastAdjacentSegmentInput = allSegmentInputs.find((input) => {
+                            const fromIndex = Number.parseInt(input.getAttribute('data-from-index') || '-1', 10);
+                            const toIndex = Number.parseInt(input.getAttribute('data-to-index') || '-1', 10);
+                            const pointCount = validStops.length + 2;
+                            return fromIndex === pointCount - 2 && toIndex === pointCount - 1;
+                        });
+
+                        if (lastAdjacentSegmentInput) {
                             const destinationPriceDeltaInput = document.createElement('input');
                             destinationPriceDeltaInput.type = 'hidden';
                             destinationPriceDeltaInput.name = 'destination[price_delta_minor]';
-                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastSegmentInput
+                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastAdjacentSegmentInput
                                 .value));
                             destinationPriceDeltaInput.setAttribute('data-generated', '1');
                             postRideForm.appendChild(destinationPriceDeltaInput);
                         }
+
+                        allSegmentInputs.forEach((input, index) => {
+                            const fromIndex = input.getAttribute('data-from-index');
+                            const toIndex = input.getAttribute('data-to-index');
+                            if (fromIndex === null || toIndex === null) {
+                                return;
+                            }
+
+                            const priceMinor = toMinorFromMajor(input.value);
+                            [
+                                ['from_index', fromIndex],
+                                ['to_index', toIndex],
+                                ['price_minor', String(priceMinor)],
+                            ].forEach(([field, value]) => {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = `meta[segment_prices][${index}][${field}]`;
+                                hiddenInput.value = value;
+                                hiddenInput.setAttribute('data-generated-segment-price', '1');
+                                postRideForm.appendChild(hiddenInput);
+                            });
+                        });
                     }
 
                     // Remove all existing stop inputs
@@ -1991,6 +2448,7 @@
                         bypassInput.name = 'bypass_price_validation';
                         bypassInput.value = '1';
                         postRideForm.appendChild(bypassInput);
+                        
                         // Remove the event listener to prevent re-validation
                         const newForm = postRideForm.cloneNode(true);
                         postRideForm.parentNode.replaceChild(newForm, postRideForm);
@@ -2144,6 +2602,77 @@
             };
         }
 
+        function getCurrentPxPriceValidationContext() {
+            const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
+            const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
+            const distanceMetersInput = document.getElementById('px-distance-meters-input');
+
+            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor'
+                ? parseInt(priceMinorHiddenInput.value || '0', 10)
+                : (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
+            const seatsTotal = selectedSeatsInput ? parseInt(selectedSeatsInput.value || '0', 10) : 0;
+
+            let distanceKm = null;
+            if (distanceMetersInput && distanceMetersInput.value) {
+                distanceKm = (parseInt(distanceMetersInput.value || '0', 10) || 0) / 1000;
+            } else if (window.pxRideDistanceKm) {
+                distanceKm = parseFloat(window.pxRideDistanceKm);
+            }
+
+            return {
+                priceMinor: Number.isNaN(priceMinor) ? 0 : priceMinor,
+                seatsTotal: Number.isNaN(seatsTotal) ? 0 : seatsTotal,
+                distanceKm: Number.isFinite(distanceKm) ? distanceKm : null,
+            };
+        }
+
+        function maybeShowPxLivePriceAlert(force = false) {
+            const {
+                priceMinor,
+                seatsTotal,
+                distanceKm
+            } = getCurrentPxPriceValidationContext();
+
+            if (!priceMinor || !seatsTotal || !distanceKm || distanceKm <= 0) {
+                lastPxPriceValidationSignature = null;
+                return;
+            }
+
+            const validation = validatePxPricePerSeat(priceMinor, distanceKm, seatsTotal);
+
+            if (!validation.type) {
+                lastPxPriceValidationSignature = null;
+                return;
+            }
+
+            const signature = JSON.stringify({
+                type: validation.type,
+                priceMinor,
+                seatsTotal,
+                distanceKm: Number(distanceKm).toFixed(2),
+                maxPricePerSeat: validation.maxPricePerSeat ?? null,
+                softWarningPrice: validation.softWarningPrice ?? null,
+            });
+
+            if (!force && lastPxPriceValidationSignature === signature) {
+                return;
+            }
+
+            lastPxPriceValidationSignature = signature;
+
+            if (validation.type === 'error') {
+                showPxPriceErrorModal(validation.maxPricePerSeat);
+                return;
+            }
+
+            if (validation.type === 'warning') {
+                showPxPriceWarningModal(function() {
+                    closeModalById('pxPriceWarningModal');
+                });
+            }
+        }
+
         // Function to show error modal (Price Limit Exceeded)
         function showPxPriceErrorModal(maxPricePerSeat) {
             setElementText('pxPriceErrorParagraph1',
@@ -2169,14 +2698,17 @@
 
             const para1 = document.getElementById('pxPriceWarningParagraph1');
             const para2 = document.getElementById('pxPriceWarningParagraph2');
+            const routeLabel = 'this trip';
+            const softWarningPrice = null;
 
             if (para1) {
                 para1.textContent =
-                    'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+                    'The price you entered for ' + routeLabel + ' is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
             }
             if (para2) {
-                para2.textContent =
-                    'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+                para2.textContent = softWarningPrice
+                    ? 'We suggest keeping this segment at or below $' + softWarningPrice + ' per seat.'
+                    : 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
             }
 
             modal.classList.remove('hidden');

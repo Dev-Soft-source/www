@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
-        @if ($ride->seats_available == 0)
+        @if (($displaySeatsAvailable ?? $ride->seats_available) == 0)
             <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
                 {{ $rideDetailPage->all_seats_booked_label ?? 'All seats are booked' }}
             </div>
@@ -246,7 +246,7 @@
                                 </button>
                             </div>
                         @elseif (
-                            (int) $ride->seats_available > 0 &&
+                            (int) ($displaySeatsAvailable ?? $ride->seats_available) > 0 &&
                                 $ride->status !== 'cancelled' &&
                                 strtotime($ride->departure_at) > strtotime('now'))
                             <div class="flex justify-center mt-4">

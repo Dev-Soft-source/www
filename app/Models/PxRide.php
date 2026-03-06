@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use phpseclib3\Crypt\Hash;
 
 class PxRide extends Model
 {
@@ -110,5 +109,125 @@ class PxRide extends Model
             ->where('status', 'published')
             ->where('visibility', 'public')
             ->where('departure_at', '>=', now());
+    }
+
+    public function resolveStopIndexes(int $fromStopId, int $toStopId): array
+    {
+        $orderedStops = $this->relationLoaded('stops')
+            ? $this->stops->sortBy('stop_order')->values()
+            : $this->stops()->orderBy('stop_order')->get()->values();
+
+        $fromIndex = null;
+        $toIndex = null;
+
+        foreach ($orderedStops as $idx => $stop) {
+            $stopId = (int) ($stop->id ?? 0);
+            if ($stopId === $fromStopId) {
+                $fromIndex = $idx;
+            }
+            if ($stopId === $toStopId) {
+                $toIndex = $idx;
+            }
+        }
+
+        return [$fromIndex, $toIndex];
+    }
+
+    public function resolveSegmentAvailableSeats(int $fromStopId, int $toStopId): int
+    {
+        $orderedStops = $this->relationLoaded('stops')
+            ? $this->stops->sortBy('stop_order')->values()
+            : $this->stops()->orderBy('stop_order')->get()->values();
+
+        [$fromIndex, $toIndex] = $this->resolveStopIndexes($fromStopId, $toStopId);
+        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
+            return 0;
+        }
+
+        $segmentLegStops = $orderedStops->slice($fromIndex + 1, $toIndex - $fromIndex);
+        if ($segmentLegStops->isEmpty()) {
+            return 0;
+        }
+
+        return max(0, (int) $segmentLegStops->min(function ($stop) {
+            return (int) ($stop->seats_available ?? $this->seats_available ?? $this->seats_total ?? 0);
+        }));
+    }
+
+    public function resolveConfiguredSegmentPriceMinor(int $fromIndex, int $toIndex): ?int
+    {
+        $segmentPrices = $this->meta['segment_prices'] ?? null;
+        if (!is_array($segmentPrices)) {
+            return null;
+        }
+
+        foreach ($segmentPrices as $segmentPrice) {
+            if (!is_array($segmentPrice)) {
+                continue;
+            }
+
+            if (
+                (int) ($segmentPrice['from_index'] ?? -1) === $fromIndex
+                && (int) ($segmentPrice['to_index'] ?? -1) === $toIndex
+            ) {
+                return max(0, (int) ($segmentPrice['price_minor'] ?? 0));
+            }
+        }
+
+        return null;
+    }
+
+    public function adjustSegmentSeatAvailability(int $fromStopId, int $toStopId, int $seatDelta): void
+    {
+        $this->load('stops');
+        $orderedStops = $this->stops->sortBy('stop_order')->values();
+        [$fromIndex, $toIndex] = $this->resolveStopIndexes($fromStopId, $toStopId);
+
+        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
+            throw new \RuntimeException('Invalid route section for booking.');
+        }
+
+        $maxSeats = max(0, (int) ($this->seats_total ?? 0));
+
+        for ($idx = $fromIndex + 1; $idx <= $toIndex; $idx++) {
+            $stop = $orderedStops->get($idx);
+            if (!$stop) {
+                continue;
+            }
+
+            $currentSeats = (int) ($stop->seats_available ?? $maxSeats);
+            $updatedSeats = $currentSeats - $seatDelta;
+
+            if ($seatDelta > 0 && $updatedSeats < 0) {
+                throw new \RuntimeException('Not enough available seats for this route section.');
+            }
+
+            if ($maxSeats > 0) {
+                $updatedSeats = min($maxSeats, $updatedSeats);
+            }
+
+            $stop->seats_available = max(0, $updatedSeats);
+            $stop->save();
+        }
+
+        $this->refreshSeatsAvailableFromStops();
+    }
+
+    public function refreshSeatsAvailableFromStops(): void
+    {
+        $this->load('stops');
+        $orderedStops = $this->stops->sortBy('stop_order')->values();
+        $segmentLegStops = $orderedStops->slice(1);
+
+        $seatsAvailable = $segmentLegStops->isEmpty()
+            ? (int) ($this->seats_total ?? 0)
+            : max(0, (int) $segmentLegStops->min(function ($stop) {
+                return (int) ($stop->seats_available ?? $this->seats_total ?? 0);
+            }));
+
+        if ((int) $this->seats_available !== $seatsAvailable) {
+            $this->seats_available = $seatsAvailable;
+            $this->save();
+        }
     }
 }

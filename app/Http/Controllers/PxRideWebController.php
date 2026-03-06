@@ -383,48 +383,48 @@ class PxRideWebController extends Controller
         $originLabel = $payload['origin']['label'] ?? '';
         $destinationLabel = $payload['destination']['label'] ?? '';
 
-        if (!empty($originLabel) && !empty($destinationLabel)) {
-            $googleApiData = $this->getDataFromGoogleApi($originLabel, $destinationLabel);
-            if (isset($googleApiData) && !empty($googleApiData)) {
-                // Check element status first before accessing distance/duration
-                $elementStatus = isset($googleApiData['rows']) &&
-                    isset($googleApiData['rows'][0]) &&
-                    isset($googleApiData['rows'][0]['elements']) &&
-                    isset($googleApiData['rows'][0]['elements'][0]) &&
-                    isset($googleApiData['rows'][0]['elements'][0]['status'])
-                    ? $googleApiData['rows'][0]['elements'][0]['status']
-                    : null;
+        // if (!empty($originLabel) && !empty($destinationLabel)) {
+        //     $googleApiData = $this->getDataFromGoogleApi($originLabel, $destinationLabel);
+        //     if (isset($googleApiData) && !empty($googleApiData)) {
+        //         // Check element status first before accessing distance/duration
+        //         $elementStatus = isset($googleApiData['rows']) &&
+        //             isset($googleApiData['rows'][0]) &&
+        //             isset($googleApiData['rows'][0]['elements']) &&
+        //             isset($googleApiData['rows'][0]['elements'][0]) &&
+        //             isset($googleApiData['rows'][0]['elements'][0]['status'])
+        //             ? $googleApiData['rows'][0]['elements'][0]['status']
+        //             : null;
 
-                if ($elementStatus === 'OK') {
-                    $distanceMeters = isset($googleApiData['rows'][0]['elements'][0]['distance']['value'])
-                        ? (int) $googleApiData['rows'][0]['elements'][0]['distance']['value']
-                        : 0;
-                    $durationSeconds = isset($googleApiData['rows'][0]['elements'][0]['duration']['value'])
-                        ? (int) $googleApiData['rows'][0]['elements'][0]['duration']['value']
-                        : 0;
+        //         if ($elementStatus === 'OK') {
+        //             $distanceMeters = isset($googleApiData['rows'][0]['elements'][0]['distance']['value'])
+        //                 ? (int) $googleApiData['rows'][0]['elements'][0]['distance']['value']
+        //                 : 0;
+        //             $durationSeconds = isset($googleApiData['rows'][0]['elements'][0]['duration']['value'])
+        //                 ? (int) $googleApiData['rows'][0]['elements'][0]['duration']['value']
+        //                 : 0;
 
-                    $payload['distance_meters'] = $distanceMeters;
-                    $payload['duration_seconds'] = $durationSeconds;
+        //             $payload['distance_meters'] = $distanceMeters;
+        //             $payload['duration_seconds'] = $durationSeconds;
 
-                    Log::info('Google API data added to payload (PX Ride)', [
-                        'user_id' => auth()->id(),
-                        'distance_meters' => $distanceMeters,
-                        'duration_seconds' => $durationSeconds,
-                    ]);
-                } else {
-                    // Log error if API returns an error status
-                    Log::error('Google API returned error status (PX Ride)', [
-                        'user_id' => auth()->id(),
-                        'status' => $elementStatus,
-                    ]);
-                }
-            }
-        }
-        // Cost-sharing cap validation: Price per seat validation
-        $costSharingValidationResponse = $this->validateCostSharingCap($request, $payload);
-        if ($costSharingValidationResponse) {
-            return $costSharingValidationResponse;
-        }
+        //             Log::info('Google API data added to payload (PX Ride)', [
+        //                 'user_id' => auth()->id(),
+        //                 'distance_meters' => $distanceMeters,
+        //                 'duration_seconds' => $durationSeconds,
+        //             ]);
+        //         } else {
+        //             // Log error if API returns an error status
+        //             Log::error('Google API returned error status (PX Ride)', [
+        //                 'user_id' => auth()->id(),
+        //                 'status' => $elementStatus,
+        //             ]);
+        //         }
+        //     }
+        // }
+        // // Cost-sharing cap validation: Price per seat validation
+        // $costSharingValidationResponse = $this->validateCostSharingCap($request, $payload);
+        // if ($costSharingValidationResponse) {
+        //     return $costSharingValidationResponse;
+        // }
 
         $this->processVehicleMode($request, $payload);
         $this->processStops($request, $payload);
@@ -561,6 +561,74 @@ class PxRideWebController extends Controller
         if (empty($payload['stops'])) {
             $payload['stops'] = $this->parseStopsText((string) $request->input('stops_text', ''));
         }
+    }
+
+    public function segmentDistanceEstimates(Request $request, $lang = null)
+    {
+        $validator = Validator::make($request->all(), [
+            'point_labels' => ['required', 'array', 'min:2', 'max:22'],
+            'point_labels.*' => ['required', 'string', 'max:160'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid route points.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $pointLabels = array_values(array_map(
+            fn($label) => trim((string) $label),
+            (array) $request->input('point_labels', [])
+        ));
+
+        $legDistancesMeters = [];
+        $segmentDistancesMeters = [];
+        $resolvedLegs = 0;
+        $resolvedSegments = 0;
+        $pointCount = count($pointLabels);
+
+        for ($fromIndex = 0; $fromIndex < $pointCount - 1; $fromIndex++) {
+            for ($toIndex = $fromIndex + 1; $toIndex < $pointCount; $toIndex++) {
+                $from = $pointLabels[$fromIndex] ?? '';
+                $to = $pointLabels[$toIndex] ?? '';
+                $distanceMeters = 0;
+
+                if ($from !== '' && $to !== '') {
+                    $googleApiData = $this->getDataFromGoogleApi($from, $to);
+                    $elementStatus = isset($googleApiData['rows'][0]['elements'][0]['status'])
+                        ? $googleApiData['rows'][0]['elements'][0]['status']
+                        : null;
+
+                    if ($elementStatus === 'OK') {
+                        $distanceMeters = isset($googleApiData['rows'][0]['elements'][0]['distance']['value'])
+                            ? (int) $googleApiData['rows'][0]['elements'][0]['distance']['value']
+                            : 0;
+                    }
+                }
+
+                if ($toIndex === $fromIndex + 1) {
+                    if ($distanceMeters > 0) {
+                        $resolvedLegs++;
+                    }
+                    $legDistancesMeters[] = $distanceMeters;
+                }
+
+                if ($distanceMeters > 0) {
+                    $resolvedSegments++;
+                }
+
+                $segmentDistancesMeters["{$fromIndex}:{$toIndex}"] = $distanceMeters;
+            }
+        }
+
+        return response()->json([
+            'leg_distances_meters' => $legDistancesMeters,
+            'total_distance_meters' => array_sum($legDistancesMeters),
+            'resolved_legs' => $resolvedLegs,
+            'segment_distances_meters' => $segmentDistancesMeters,
+            'resolved_segments' => $resolvedSegments,
+        ]);
     }
 
     /**
@@ -990,7 +1058,7 @@ class PxRideWebController extends Controller
                 ->withInput();
         }
 
-        // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+        // Soft warning is handled client-side on the post-ride form.
         if ($pricePerSeat > $softWarningPricePerSeat) {
             Log::info('Price per seat exceeds soft warning cap but within error cap (PX Ride)', [
                 'user_id' => auth()->id(),
@@ -998,15 +1066,6 @@ class PxRideWebController extends Controller
                 'soft_warning_price' => round($softWarningPricePerSeat, 2),
                 'warning_cap' => $warningCap,
             ]);
-
-            // Return back to form with warning - user will see modal and can choose to proceed or adjust
-            return back()
-                ->with('price_warning', [
-                    'message' => 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.',
-                    'price_per_seat' => $pricePerSeat,
-                    'soft_warning_price' => round($softWarningPricePerSeat, 2),
-                ])
-                ->withInput();
         }
 
         return null;
@@ -1653,13 +1712,11 @@ class PxRideWebController extends Controller
                 $booking->status = 'cancelled';
                 $booking->save();
 
-                $newSeatsAvailable = (int) $rideForUpdate->seats_available + (int) $booking->seats;
-                $maxSeats = (int) ($rideForUpdate->seats_total ?? 0);
-                if ($maxSeats > 0) {
-                    $newSeatsAvailable = min($maxSeats, $newSeatsAvailable);
-                }
-                $rideForUpdate->seats_available = max(0, $newSeatsAvailable);
-                $rideForUpdate->save();
+                $rideForUpdate->adjustSegmentSeatAvailability(
+                    (int) $booking->from_stop_id,
+                    (int) $booking->to_stop_id,
+                    -(int) $booking->seats
+                );
             });
         } catch (\RuntimeException $e) {
             return redirect()
@@ -1727,6 +1784,7 @@ class PxRideWebController extends Controller
         $displayOrigin = $ride->route->origin_label ?? 'N/A';
         $displayDestination = $ride->route->destination_label ?? 'N/A';
         $displayPriceMinor = (int) ($ride->price_minor ?? 0);
+        $displaySeatsAvailable = (int) ($ride->seats_available ?? 0);
         $displaySegmentStops = collect();
         $isSegmentView = false;
         $selectedFromStopId = null;
@@ -1757,6 +1815,10 @@ class PxRideWebController extends Controller
                     '',
                     $matchedFromIndex,
                     $matchedToIndex
+                );
+                $displaySeatsAvailable = $ride->resolveSegmentAvailableSeats(
+                    (int) ($orderedStops[$matchedFromIndex]->id ?? 0),
+                    (int) ($orderedStops[$matchedToIndex]->id ?? 0)
                 );
                 $displaySegmentStops = collect($orderedStops)
                     ->slice($matchedFromIndex + 1, max(0, $matchedToIndex - $matchedFromIndex - 1))
@@ -1849,6 +1911,7 @@ class PxRideWebController extends Controller
             'displayOrigin' => $displayOrigin,
             'displayDestination' => $displayDestination,
             'displayPriceMinor' => $displayPriceMinor,
+            'displaySeatsAvailable' => $displaySeatsAvailable,
             'displaySegmentStops' => $displaySegmentStops,
             'isSegmentView' => $isSegmentView,
             'selectedFromStopId' => $selectedFromStopId,
@@ -2361,6 +2424,12 @@ class PxRideWebController extends Controller
                 $matchedFromIndex,
                 $matchedToIndex
             );
+            $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id)
+                ? $ride->resolveSegmentAvailableSeats(
+                    (int) $ride->matched_from_stop_id,
+                    (int) $ride->matched_to_stop_id
+                )
+                : (int) ($ride->seats_available ?? 0);
         }
 
         return view('px.search_ride', [
@@ -2392,6 +2461,11 @@ class PxRideWebController extends Controller
 
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
             return (int) ($ride->price_minor ?? 0);
+        }
+
+        $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
+        if ($configuredSegmentPriceMinor !== null) {
+            return $configuredSegmentPriceMinor;
         }
 
         $lastIndex = count($stops) - 1;

@@ -522,6 +522,7 @@ Route::get('{lang?}/px/post-ride/{id}/copy', [PxRideWebController::class, 'copy'
 Route::get('{lang?}/px/post-ride/{id}/edit', [PxRideWebController::class, 'edit'])->name('px.post_ride.edit')->middleware('auth');
 Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name('px.post_ride.store')->middleware('auth');
 Route::put('{lang?}/px/post-ride/{id}', [PxRideWebController::class, 'update'])->name('px.post_ride.update')->middleware('auth');
+Route::post('{lang?}/px/post-ride/segment-distance-estimates', [PxRideWebController::class, 'segmentDistanceEstimates'])->name('px.post_ride.segment_distance_estimates')->middleware('auth');
 Route::get('{lang?}/px/my-rides', [PxRideWebController::class, 'index'])->name('px.my_rides')->middleware('auth');
 Route::get('{lang?}/px/my-ride/{id}', [PxRideWebController::class, 'show'])->name('px.my_ride_detail')->middleware('auth');
 Route::post('{lang?}/px/my-ride/{id}/booking/{bookingId}/approve', [PxRideWebController::class, 'approveBookingRequest'])->whereNumber('id')->whereNumber('bookingId')->name('px.my_ride_detail.booking.approve')->middleware('auth');

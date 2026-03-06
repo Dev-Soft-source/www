@@ -166,7 +166,7 @@ class PxRideService
                     'lng' => Arr::get($stop, 'lng'),
                     'eta_at' => $etaAt,
                     'price_delta_minor' => (int) Arr::get($stop, 'price_delta_minor', 0),
-                    'seats_available' => Arr::get($stop, 'seats_available'),
+                    'seats_available' => $seatsTotal,
                     'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
                     'is_dropoff' => (bool) Arr::get($stop, 'is_dropoff', true),
                     'pickup_dropoff_location' => Arr::get($stop, 'pickup_dropoff_location') ?: null,
@@ -340,7 +340,7 @@ class PxRideService
                     'lng' => Arr::get($stop, 'lng'),
                     'eta_at' => $etaAt,
                     'price_delta_minor' => (int) Arr::get($stop, 'price_delta_minor', 0),
-                    'seats_available' => Arr::get($stop, 'seats_available'),
+                    'seats_available' => $seatsTotal,
                     'is_pickup' => (bool) Arr::get($stop, 'is_pickup', true),
                     'is_dropoff' => (bool) Arr::get($stop, 'is_dropoff', true),
                     'pickup_dropoff_location' => Arr::get($stop, 'pickup_dropoff_location') ?: null,
@@ -519,7 +519,49 @@ class PxRideService
     protected function applyRideFilters(Builder $query, array $filters): void
     {
         $seatsRequired = (int) Arr::get($filters, 'seats_required', 1);
-        $query->where('seats_available', '>=', max(1, $seatsRequired));
+        $seatsRequired = max(1, $seatsRequired);
+
+        $fromCityId = Arr::get($filters, 'origin_city_id');
+        $toCityId = Arr::get($filters, 'destination_city_id');
+        $fromLabel = trim((string) Arr::get($filters, 'origin_label', ''));
+        $toLabel = trim((string) Arr::get($filters, 'destination_label', ''));
+        $hasFrom = !empty($fromCityId) || $fromLabel !== '';
+        $hasTo = !empty($toCityId) || $toLabel !== '';
+
+        if ($hasFrom && $hasTo) {
+            $query->whereExists(function ($sub) use ($fromCityId, $toCityId, $fromLabel, $toLabel, $seatsRequired) {
+                $sub->select(DB::raw(1))
+                    ->from('px_ride_stops as s_from')
+                    ->join('px_ride_stops as s_to', function ($join) {
+                        $join->on('s_to.ride_id', '=', 's_from.ride_id')
+                            ->whereColumn('s_from.stop_order', '<', 's_to.stop_order');
+                    })
+                    ->whereColumn('s_from.ride_id', 'px_rides.id');
+
+                if (!empty($fromCityId)) {
+                    $sub->where('s_from.city_id', $fromCityId);
+                } else {
+                    $sub->where('s_from.label', 'like', '%' . $fromLabel . '%');
+                }
+
+                if (!empty($toCityId)) {
+                    $sub->where('s_to.city_id', $toCityId);
+                } else {
+                    $sub->where('s_to.label', 'like', '%' . $toLabel . '%');
+                }
+
+                $sub->whereNotExists(function ($legSub) use ($seatsRequired) {
+                    $legSub->select(DB::raw(1))
+                        ->from('px_ride_stops as s_leg')
+                        ->whereColumn('s_leg.ride_id', 'px_rides.id')
+                        ->whereColumn('s_leg.stop_order', '>', 's_from.stop_order')
+                        ->whereColumn('s_leg.stop_order', '<=', 's_to.stop_order')
+                        ->whereRaw('COALESCE(s_leg.seats_available, px_rides.seats_available) < ?', [$seatsRequired]);
+                });
+            });
+        } else {
+            $query->where('seats_available', '>=', $seatsRequired);
+        }
 
         if (Arr::has($filters, 'price_minor_min')) {
             $query->where('price_minor', '>=', (int) Arr::get($filters, 'price_minor_min'));

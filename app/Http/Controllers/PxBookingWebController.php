@@ -85,6 +85,18 @@ class PxBookingWebController extends Controller
         $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
+        $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $from_stop_id, (int) $to_stop_id);
+
+        if ($segmentAvailableSeats <= 0) {
+            return redirect()
+                ->route('px.ride_detail', [
+                    'lang' => optional($this->selectedLanguage)->abbreviation,
+                    'id' => $ride->id,
+                    'from_stop_id' => (int) $from_stop_id,
+                    'to_stop_id' => (int) $to_stop_id,
+                ])
+                ->with('error', 'Not enough available seats for this route section.');
+        }
 
         $cards = Card::query()
             ->where('user_id', auth()->id())
@@ -120,6 +132,7 @@ class PxBookingWebController extends Controller
             'toStop' => $orderedStops[$toIndex],
             'segmentStops' => collect($orderedStops)->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
             'segmentPriceMinor' => $segmentPriceMinor,
+            'segmentAvailableSeats' => $segmentAvailableSeats,
             'bookingModeCode' => $bookingModeCode,
             'bookingMethodCode' => $bookingMethodCode,
             'bookingMethodLabel' => $bookingMethodLabel,
@@ -158,11 +171,7 @@ class PxBookingWebController extends Controller
                 ->with('error', 'This booking can no longer be updated.');
         }
 
-        [$fromIndex, $toIndex] = $this->resolveRideStopIndexes(
-            $ride,
-            (int) $booking->from_stop_id,
-            (int) $booking->to_stop_id
-        );
+        [$fromIndex, $toIndex] = $this->resolveRideStopIndexes($ride, (int) $booking->from_stop_id, (int) $booking->to_stop_id);
 
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
             return redirect()
@@ -195,6 +204,7 @@ class PxBookingWebController extends Controller
         $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
+        $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $booking->from_stop_id, (int) $booking->to_stop_id);
 
         $cards = Card::query()
             ->where('user_id', auth()->id())
@@ -230,6 +240,7 @@ class PxBookingWebController extends Controller
             'toStop' => $ride->stops->sortBy('stop_order')->values()->get($toIndex),
             'segmentStops' => $ride->stops->sortBy('stop_order')->values()->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
             'segmentPriceMinor' => $segmentPriceMinor,
+            'segmentAvailableSeats' => $segmentAvailableSeats,
             'bookingModeCode' => $bookingModeCode,
             'bookingMethodCode' => $bookingMethodCode,
             'bookingMethodLabel' => $bookingMethodLabel,
@@ -311,6 +322,7 @@ class PxBookingWebController extends Controller
                 ->lockForUpdate()
                 ->first();
             $rideForUpdate = PxRide::query()
+                ->with('stops')
                 ->where('id', (int) $ride->id)
                 ->lockForUpdate()
                 ->first();
@@ -328,17 +340,20 @@ class PxBookingWebController extends Controller
             $currentSeats = (int) $bookingForUpdate->seats;
             $seatDiff = $requestedSeats - $currentSeats;
 
-            if ($seatDiff > 0 && $seatDiff > (int) $rideForUpdate->seats_available) {
+            if ($seatDiff > 0 && $seatDiff > $rideForUpdate->resolveSegmentAvailableSeats(
+                (int) $bookingForUpdate->from_stop_id,
+                (int) $bookingForUpdate->to_stop_id
+            )) {
                 throw new \RuntimeException('Not enough available seats for this update.');
             }
 
-            $newSeatsAvailable = (int) $rideForUpdate->seats_available - $seatDiff;
-            $maxSeats = (int) ($rideForUpdate->seats_total ?? 0);
-            if ($maxSeats > 0) {
-                $newSeatsAvailable = min($maxSeats, $newSeatsAvailable);
+            if ($seatDiff !== 0) {
+                $rideForUpdate->adjustSegmentSeatAvailability(
+                    (int) $bookingForUpdate->from_stop_id,
+                    (int) $bookingForUpdate->to_stop_id,
+                    $seatDiff
+                );
             }
-            $rideForUpdate->seats_available = max(0, $newSeatsAvailable);
-            $rideForUpdate->save();
 
             $bookingForUpdate->seats = $requestedSeats;
             $bookingForUpdate->segment_price_minor = (int) $segmentPriceMinor;
@@ -409,6 +424,7 @@ class PxBookingWebController extends Controller
                 ->lockForUpdate()
                 ->first();
             $rideForUpdate = PxRide::query()
+                ->with('stops')
                 ->where('id', (int) $booking->ride_id)
                 ->lockForUpdate()
                 ->first();
@@ -421,13 +437,11 @@ class PxBookingWebController extends Controller
                 return;
             }
 
-            $restoredSeats = (int) $rideForUpdate->seats_available + (int) $bookingForUpdate->seats;
-            $maxSeats = (int) ($rideForUpdate->seats_total ?? 0);
-            if ($maxSeats > 0) {
-                $restoredSeats = min($restoredSeats, $maxSeats);
-            }
-            $rideForUpdate->seats_available = max(0, $restoredSeats);
-            $rideForUpdate->save();
+            $rideForUpdate->adjustSegmentSeatAvailability(
+                (int) $bookingForUpdate->from_stop_id,
+                (int) $bookingForUpdate->to_stop_id,
+                -(int) $bookingForUpdate->seats
+            );
 
             $meta = is_array($bookingForUpdate->meta) ? $bookingForUpdate->meta : [];
             $meta['cancelled_at'] = now()->toDateTimeString();
@@ -501,11 +515,7 @@ class PxBookingWebController extends Controller
                 ->with('error', 'Ride not found or unavailable.');
         }
 
-        [$fromIndex, $toIndex] = $this->resolveRideStopIndexes(
-            $ride,
-            (int) $validated['from_stop_id'],
-            (int) $validated['to_stop_id']
-        );
+        [$fromIndex, $toIndex] = $this->resolveRideStopIndexes($ride, (int) $validated['from_stop_id'], (int) $validated['to_stop_id']);
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
             return redirect()
                 ->route('px.booking', [
@@ -572,7 +582,7 @@ class PxBookingWebController extends Controller
         }
 
         $seatsRequested = (int) $validated['seats'];
-        if ($seatsRequested > (int) $ride->seats_available) {
+        if ($seatsRequested > $ride->resolveSegmentAvailableSeats((int) $fromStop->id, (int) $toStop->id)) {
             return redirect()
                 ->route('px.booking', [
                     'lang' => optional($this->selectedLanguage)->abbreviation,
@@ -786,21 +796,7 @@ class PxBookingWebController extends Controller
 
     protected function resolveRideStopIndexes(PxRide $ride, int $fromStopId, int $toStopId): array
     {
-        $orderedStops = $ride->stops->sortBy('stop_order')->values()->all();
-        $fromIndex = null;
-        $toIndex = null;
-
-        foreach ($orderedStops as $idx => $stop) {
-            $stopId = (int) ($stop->id ?? 0);
-            if ($stopId === $fromStopId) {
-                $fromIndex = $idx;
-            }
-            if ($stopId === $toStopId) {
-                $toIndex = $idx;
-            }
-        }
-
-        return [$fromIndex, $toIndex];
+        return $ride->resolveStopIndexes($fromStopId, $toStopId);
     }
 
     protected function findTransactionByPaymentIntentId(string $paymentIntentId): ?PxTransaction
@@ -845,11 +841,15 @@ class PxBookingWebController extends Controller
             $driverMessage
         ) {
             $rideForUpdate = PxRide::query()
+                ->with('stops')
                 ->where('id', $ride->id)
                 ->lockForUpdate()
                 ->first();
 
-            if (!$rideForUpdate || (int) $rideForUpdate->seats_available < $seatsRequested) {
+            if (
+                !$rideForUpdate
+                || $rideForUpdate->resolveSegmentAvailableSeats((int) $fromStop->id, (int) $toStop->id) < $seatsRequested
+            ) {
                 throw new \RuntimeException('Not enough available seats for this route section.');
             }
 
@@ -890,8 +890,7 @@ class PxBookingWebController extends Controller
                 ],
             ]);
 
-            $rideForUpdate->seats_available = max(0, (int) $rideForUpdate->seats_available - $seatsRequested);
-            $rideForUpdate->save();
+            $rideForUpdate->adjustSegmentSeatAvailability((int) $fromStop->id, (int) $toStop->id, $seatsRequested);
         });
 
         return $booking;
@@ -931,11 +930,15 @@ class PxBookingWebController extends Controller
             $driverMessage
         ) {
             $rideForUpdate = PxRide::query()
+                ->with('stops')
                 ->where('id', $ride->id)
                 ->lockForUpdate()
                 ->first();
 
-            if (!$rideForUpdate || (int) $rideForUpdate->seats_available < $seatsRequested) {
+            if (
+                !$rideForUpdate
+                || $rideForUpdate->resolveSegmentAvailableSeats((int) $fromStop->id, (int) $toStop->id) < $seatsRequested
+            ) {
                 throw new \RuntimeException('Not enough available seats for this route section.');
             }
 
@@ -991,8 +994,7 @@ class PxBookingWebController extends Controller
                 'processed_at' => now(),
             ]);
 
-            $rideForUpdate->seats_available = max(0, (int) $rideForUpdate->seats_available - $seatsRequested);
-            $rideForUpdate->save();
+            $rideForUpdate->adjustSegmentSeatAvailability((int) $fromStop->id, (int) $toStop->id, $seatsRequested);
         });
 
         return [$booking, $transaction];
@@ -1036,6 +1038,11 @@ class PxBookingWebController extends Controller
 
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
             return (int) ($ride->price_minor ?? 0);
+        }
+
+        $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
+        if ($configuredSegmentPriceMinor !== null) {
+            return $configuredSegmentPriceMinor;
         }
 
         $lastIndex = count($stops) - 1;

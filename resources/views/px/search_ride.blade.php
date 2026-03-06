@@ -110,7 +110,7 @@
                             :show-status="false"
                             :show-booking-info="false"
                             :show-options="false"
-                            :price-minor="$ride->price_minor"
+                            :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor"
                         />
                     @endforeach
                 </div>
