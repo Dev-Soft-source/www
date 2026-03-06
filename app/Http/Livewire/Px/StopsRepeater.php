@@ -8,10 +8,10 @@ class StopsRepeater extends Component
 {
     public array $stops = [];
     public ?int $pendingRemoveIndex = null;
-    public string $originLabel = '';
-    public string $destinationLabel = '';
+    public ?string $originLabel = '';
+    public ?string $destinationLabel = '';
 
-    public function mount(array $initialStops = [], string $originLabel = '', string $destinationLabel = ''): void
+    public function mount(array $initialStops = [], ?string $originLabel = '', ?string $destinationLabel = ''): void
     {
         $this->stops = collect($initialStops)
             ->map(function ($stop) {

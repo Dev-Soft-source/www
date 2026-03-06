@@ -102,7 +102,7 @@ class PxStoreRideRequest extends FormRequest
             'middle_seats' => ['required', Rule::in([2, 3, '2', '3'])],
             'back_seats' => ['required', Rule::in([2, 3, '2', '3'])],
             'seats_total' => ['required', 'integer', 'min:1', 'max:7'],
-            'price_minor' => ['required', 'integer', 'min:0'],
+            'price_minor' => ['required', 'integer', 'gt:0', 'required_if:stops,null,empty,[]'],
             'currency' => ['nullable', 'string', 'size:3'],
             'status' => ['nullable', Rule::in(['draft', 'published'])],
             'visibility' => ['nullable', Rule::in(['public', 'private'])],
@@ -124,6 +124,7 @@ class PxStoreRideRequest extends FormRequest
             'pets_allowed' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'agree_terms' => ['accepted'],
+            'bypass_price_validation' => ['nullable', 'boolean'],
             'meta' => ['nullable', 'array'],
             // Backward-compatible alias from UI checkboxes (name="preference[]")
             'preference' => ['nullable', 'array'],

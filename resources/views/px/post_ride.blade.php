@@ -10,7 +10,7 @@
     @php
         // Handle edit mode - populate from ride if exists
         $isEditMode = isset($ride) && isset($isEditMode) && $isEditMode;
-        
+
         if ($isEditMode && $ride) {
             // Populate origin data
             if (!old('origin.label') && $ride->route) {
@@ -20,7 +20,7 @@
                 $oldOriginLabel = old('origin.label');
                 $oldOriginCityId = old('origin.city_id');
             }
-            
+
             // Populate destination data
             if (!old('destination.label') && $ride->route) {
                 $oldDestinationLabel = $ride->route->destination_label;
@@ -29,11 +29,11 @@
                 $oldDestinationLabel = old('destination.label');
                 $oldDestinationCityId = old('destination.city_id');
             }
-            
+
             // Populate pickup/dropoff locations
             $oldPickupLocation = old('origin.pickup_location', $ride->meta['pickup_location'] ?? '');
             $oldDropoffLocation = old('destination.dropoff_location', $ride->meta['dropoff_location'] ?? '');
-            
+
             // Populate departure_at
             $oldDepartureAt = old('departure_at', $ride->departure_at);
             $oldDepartureAtFormatted = '';
@@ -51,7 +51,7 @@
             if (empty($oldDepartureAtFormatted) && $oldDepartureDate && $oldDepartureTime) {
                 $oldDepartureAtFormatted = trim($oldDepartureDate . ' ' . $oldDepartureTime);
             }
-            
+
             // Populate stops (excluding origin and destination - already filtered in controller)
             $oldStops = old('stops', []);
             if (empty($oldStops) && isset($ride->intermediate_stops)) {
@@ -60,9 +60,9 @@
             $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
             if ($oldDestinationPriceDeltaMinor === null && isset($ride->stops) && $ride->stops->isNotEmpty()) {
                 $destinationStop = $ride->stops->sortBy('stop_order')->last();
-                $oldDestinationPriceDeltaMinor = $destinationStop ? ($destinationStop->price_delta_minor ?? 0) : 0;
+                $oldDestinationPriceDeltaMinor = $destinationStop ? $destinationStop->price_delta_minor ?? 0 : 0;
             }
-            
+
             // Populate other fields
             $oldSeatsTotal = old('seats_total', $ride->seats_total);
             $oldPriceMinor = old('price_minor', $ride->price_minor);
@@ -77,14 +77,20 @@
             $oldPetsAllowed = old('pets_allowed', $ride->pets_allowed);
             $oldLuggageSize = old('luggage_size', $ride->luggage_size);
             $oldAcceptMoreLuggage = old('accept_more_luggage', $ride->meta['accept_more_luggage'] ?? false);
-            $oldIsRecurring = old('is_recurring', isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled']);
+            $oldIsRecurring = old(
+                'is_recurring',
+                isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled'],
+            );
             $oldRecurringFrequency = old('recurring_frequency', $ride->meta['recurring']['frequency'] ?? '');
             $oldRecurringTrips = old('recurring_trips', $ride->meta['recurring']['trips'] ?? 0);
-            $oldPickDropOffDescription = old('pick_drop_off_description', $ride->meta['pick_drop_off_description'] ?? '');
-            
+            $oldPickDropOffDescription = old(
+                'pick_drop_off_description',
+                $ride->meta['pick_drop_off_description'] ?? '',
+            );
+
             // Populate selected ride options
             $oldRideOptionIds = old('ride_option_ids', $ride->options->pluck('id')->toArray());
-            
+
             // Determine vehicle mode
             if ($ride->vehicle_id) {
                 $oldVehicleMode = old('vehicle_mode', 'existing');
@@ -124,23 +130,24 @@
             $oldNotes = old('notes');
             $oldStatus = old('status', 'published');
             $oldVisibility = old('visibility', 'public');
-             $oldBookingMode = old('booking_mode');
-             $oldBookingMethod = old('booking_method');
-             $oldSmokingAllowed = old('smoking_allowed');
-             $oldPetsAllowed = old('pets_allowed');
-             $oldLuggageSize = old('luggage_size');
-             $oldAcceptMoreLuggage = old('accept_more_luggage', false);
-             $oldIsRecurring = old('is_recurring', false);
+            $oldBookingMode = old('booking_mode');
+            $oldBookingMethod = old('booking_method');
+            $oldSmokingAllowed = old('smoking_allowed');
+            $oldPetsAllowed = old('pets_allowed');
+            $oldLuggageSize = old('luggage_size');
+            $oldAcceptMoreLuggage = old('accept_more_luggage', false);
+            $oldIsRecurring = old('is_recurring', false);
             $oldRecurringFrequency = old('recurring_frequency', '');
             $oldRecurringTrips = old('recurring_trips', 0);
             $oldPickDropOffDescription = old('pick_drop_off_description', '');
             $oldRideOptionIds = old('ride_option_ids', []);
-            $oldVehicleMode = old('vehicle_mode', 'skip');
+            $oldVehicleMode = old('vehicle_mode', 'existing');
         }
-        
-        $oldPriceMajorDisplay = $oldPriceMinor !== null && $oldPriceMinor !== ''
-            ? number_format(((int) $oldPriceMinor) / 100, 2, '.', '')
-            : '';
+
+        $oldPriceMajorDisplay =
+            $oldPriceMinor !== null && $oldPriceMinor !== ''
+                ? number_format(((int) $oldPriceMinor) / 100, 2, '.', '')
+                : '';
         $pxCurrencyMap = [
             'USD' => '$',
             'CAD' => 'C$',
@@ -149,7 +156,7 @@
         if ($oldCurrencyCode === '') {
             $oldCurrencyCode = 'CAD';
         }
-        $oldCurrencySymbol = $pxCurrencyMap[$oldCurrencyCode] ?? ($oldCurrencyCode . ' ');
+        $oldCurrencySymbol = $pxCurrencyMap[$oldCurrencyCode] ?? $oldCurrencyCode . ' ';
 
         $stopsExpanded = !empty($oldStops);
 
@@ -183,331 +190,394 @@
         $bookingModeGroup = collect($optionGroups ?? [])->firstWhere('code', 'booking_mode');
         $bookingModeOptions = collect(optional($bookingModeGroup)->options ?? []);
         $defaultBookingModeId = optional($bookingModeOptions->first())->id;
+
+        // Check if pink_rides and extra_plus_rides are initially checked
+        $pinkRideChecked = false;
+        $extraCareRideChecked = false;
+        if (!empty($oldRideOptionIds)) {
+            foreach ($optionGroups as $group) {
+                if ($group->is_checkbox) {
+                    foreach ($group->options as $option) {
+                        if ($option->code === 'pink_rides' && in_array($option->id, $oldRideOptionIds)) {
+                            $pinkRideChecked = true;
+                        }
+                        if ($option->code === 'extra_plus_rides' && in_array($option->id, $oldRideOptionIds)) {
+                            $extraCareRideChecked = true;
+                        }
+                    }
+                }
+            }
+        }
     @endphp
-    <div class="container mx-auto my-10 px-4">
-        <div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-xl shadow p-6 md:p-8">
-            <div class="flex items-start justify-between gap-4 mb-6">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-FuturaMdCnBT text-primary mb-1">
-                        {{ isset($isEditMode) && $isEditMode ? 'Edit PX Ride' : 'Post a PX Ride' }}
-                    </h1>
-                    <p class="text-sm text-gray-600">
-                        {{ isset($isEditMode) && $isEditMode ? 'Update your ride details' : 'This creates rides in the new px_* schema.' }}
-                    </p>
-                </div>
-                <div class="flex gap-2">
-                    @if (isset($isEditMode) && $isEditMode)
-                        <a href="{{ route('px.my_ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}"
-                            class="button-exp-no-fill whitespace-nowrap">
-                            Cancel
-                        </a>
-                    @else
-                        <a href="{{ route('post_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                            class="button-exp-no-fill whitespace-nowrap">
-                            Back to Legacy Post Ride
-                        </a>
-                    @endif
-                </div>
-            </div>
+    <div class="container px-4 mx-auto my-14 page-post_a_ride">
+        <div class="flex justify-end md:items-center">
+            <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
+                @isset($postRidePage->post_arrived_again_label)
+                    {{ $postRidePage->post_arrived_again_label }}
+                @endisset
+            </a>
+        </div>
+        <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
+            <h1>
+                @if (isset($isEditMode) && $isEditMode)
+                    Edit a Ride
+                @else
+                    {{ $postRidePage->main_heading }}
+                @endif
+            </h1>
+            <p>
+                <span class="text-red-500">*
+                    {{ $postRideSubDetailPage->feilds_required_text ?? 'Indicates required fields' }}
+                </span>
+            </p>
+        </div>
 
+        <div class="">
             @if (session('message'))
-                <div class="mb-4 rounded-md border border-green-200 bg-green-50 text-green-700 px-4 py-3">
+                {{-- <div class="mb-4 rounded-md border border-green-200 bg-green-50 text-green-700 px-4 py-3">
                     {{ session('message') }}
-                </div>
+                </div> --}}
             @endif
-
-            @if ($errors->any())
-                <div class="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 px-4 py-3">
-                    <p class="font-semibold mb-1">Please fix the errors below:</p>
-                    <ul class="list-disc pl-5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form method="POST"
                 action="{{ isset($isEditMode) && $isEditMode ? route('px.post_ride.update', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) : route('px.post_ride.store', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                enctype="multipart/form-data" class="space-y-8">
+                enctype="multipart/form-data" class="">
                 @csrf
                 @if (isset($isEditMode) && $isEditMode)
                     @method('PUT')
                 @endif
-                <p>{{ $postRidePage->indicates_required_field_text }}</p>
-                <section>
-                    <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Route</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1 required">{{ $postRidePage->from_label }}</label>
-                            @livewire(
-                                'px.city-autocomplete',
-                                [
-                                    'field' => 'origin',
-                                    'placeholder' => $postRidePage->from_placeholder,
-                                    'initialLabel' => $oldOriginLabel ?? old('origin.label'),
-                                    'initialCityId' => $oldOriginCityId ?? old('origin.city_id'),
-                                ],
-                                key('px-origin-city-autocomplete')
-                            )
-                            @error('origin.label')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1 required">{{ $postRidePage->to_label }}</label>
-                        @livewire(
-                            'px.city-autocomplete',
-                            [
-                                    'field' => 'destination',
-                                    'placeholder' => $postRidePage->to_placeholder,
-                                    'initialLabel' => $oldDestinationLabel ?? old('destination.label'),
-                                    'initialCityId' => $oldDestinationCityId ?? old('destination.city_id'),
-                                ],
-                                key('px-destination-city-autocomplete')
-                            )
-                            @error('destination.label')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-semibold mb-1 required">{{ $postRidePage->pick_up_label }}</label>
-                            <textarea name="origin[pickup_location]" rows="2"
-                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="{{ $postRidePage->pick_up_placeholder }}" 
-                                >{{ $oldPickupLocation ?? old('origin.pickup_location') }}</textarea>
-                            @error('origin.pickup_location')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div>
-                            <label
-                                class="block text-sm font-semibold mb-1 required">{{ $postRidePage->drop_off_label }}</label>
-                            <textarea name="destination[dropoff_location]" rows="2"
-                                class="w-full rounded border-gray-300" autocomplete="off" placeholder="{{$postRidePage->drop_off_placeholder}}"
-                                >{{ $oldDropoffLocation ?? old('destination.dropoff_location') }}</textarea>
-                            @error('destination.dropoff_location')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 md:col-span-2 border border-gray-200 rounded-lg p-4">
-                        <label class="inline-flex items-center gap-2 text-sm font-semibold mb-3">
-                            <input type="hidden" name="is_recurring" value="0">
-                            <input type="checkbox" id="px-is-recurring" name="is_recurring" value="1" @checked($oldIsRecurring ?? old('is_recurring', false))
-                                @checked(old('is_recurring')) class="rounded border-gray-300">
-                            Recurring Trip
-                        </label>
-                        <div id="px-recurring-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold mb-1 required">Frequency</label>
-                                <select name="recurring_frequency" class="w-full rounded border-gray-300">
-                                    <option value="">Select frequency</option>
-                                    <option value="daily" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'daily')>Daily</option>
-                                    <option value="weekly" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'weekly')>Weekly</option>
-                                </select>
-                                @error('recurring_frequency')
-                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-1 required">Number of Trips</label>
-                                <input type="number" min="1" max="365" name="recurring_trips"
-                                    value="{{ $oldRecurringTrips ?? old('recurring_trips') }}" class="w-full rounded border-gray-300"
-                                    placeholder="e.g. 10">
-                                @error('recurring_trips')
-                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->ride_info_heading)
+                            {{ $postRidePage->ride_info_heading }}
+                        @endisset
+                    </h3>
+                    <div class="bg-white p-4 space-y-6">
 
-                    <div class="mt-4 border border-gray-200 rounded-lg">
-                        <button type="button" id="px-stops-toggle" class="w-full flex items-center justify-between text-left px-4 py-3"
-                            aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="px-stops-content">
-                            <span class="block text-sm font-semibold">Ordered Intermediate Stops (optional)</span>
-                            <svg id="px-stops-chevron" class="w-5 h-5 text-gray-500 transition-transform {{ $stopsExpanded ? 'rotate-180' : '' }}"
-                                viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        <div id="px-stops-content" class="px-4 pb-4 {{ $stopsExpanded ? '' : 'hidden' }}">
-                            @livewire('px.stops-repeater', [
-                                'initialStops' => $oldStops,
-                                'originLabel' => $oldOriginLabel ?? old('origin.label', ''),
-                                'destinationLabel' => $oldDestinationLabel ?? old('destination.label', '')
-                            ], key('px-stops-repeater'))
+                        <div class="flex flex-col md:flex-row justify-between items-start">
+                            <div class="w-full md:w-[45%] ">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->from_label }}</label>
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'origin',
+                                        'placeholder' => $postRidePage->from_placeholder,
+                                        'initialLabel' => $oldOriginLabel ?? old('origin.label'),
+                                        'initialCityId' => $oldOriginCityId ?? old('origin.city_id'),
+                                    ],
+                                    key('px-origin-city-autocomplete')
+                                )
+                                @error('origin.label')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="w-full md:w-[10%] md:mt-10 flex justify-center items-start">
+                                <button type="button" onclick="swapLocations()">
+                                    <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
+                                </button>
+                            </div>
+                            <div class="w-full md:w-[45%] ">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->to_label }}</label>
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'destination',
+                                        'placeholder' => $postRidePage->to_placeholder,
+                                        'initialLabel' => $oldDestinationLabel ?? old('destination.label'),
+                                        'initialCityId' => $oldDestinationCityId ?? old('destination.city_id'),
+                                    ],
+                                    key('px-destination-city-autocomplete')
+                                )
+                                @error('destination.label')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="flex items-end flex-col md:flex-row justify-between mt-4">
+                            <div class="w-full md:w-[45%]">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->pick_up_label }}</label>
+                                <textarea name="origin[pickup_location]" rows="2" class="w-full rounded border-gray-300" autocomplete="off"
+                                    placeholder="{{ $postRidePage->pick_up_placeholder }}">{{ $oldPickupLocation ?? old('origin.pickup_location') }}</textarea>
+                                @error('origin.pickup_location')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="w-full md:w-[45%]">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->drop_off_label }}</label>
+                                <textarea name="destination[dropoff_location]" rows="2" class="w-full rounded border-gray-300" autocomplete="off"
+                                    placeholder="{{ $postRidePage->drop_off_placeholder }}">{{ $oldDropoffLocation ?? old('destination.dropoff_location') }}</textarea>
+                                @error('destination.dropoff_location')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm mb-4 required">{{ $postRidePage->date_time_label }}</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill="#888888" fill-rule="evenodd"
+                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <input id="px-departure-at" name="departure_at"
+                                    value="{{ $oldDepartureAtFormatted ?? old('departure_at') }}" type="text"
+                                    class="w-full pl-8 rounded border-gray-300 placeholder-gray-400"
+                                    placeholder="Select departure date and time" autocomplete="off">
+                            </div>
+                            @error('departure_at')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                            <button type="button" id="px-stops-toggle"
+                                class="bg-primary text-white w-full flex items-center justify-between text-left px-4 py-2"
+                                aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="px-stops-content">
+                                <h3 class="text-2xl">
+                                    @isset($postRidePage->add_more_from_to)
+                                        {{ $postRidePage->add_more_from_to }}
+                                    @else
+                                        Stops Along the Way (Optional)
+                                    @endisset
+                                </h3>
+                                <svg id="px-stops-chevron"
+                                    class="w-5 h-5 text-white transition-transform {{ $stopsExpanded ? 'rotate-180' : '' }}"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div id="px-stops-content" class="px-4 py-4 {{ $stopsExpanded ? '' : 'hidden' }}">
+                                @livewire(
+                                    'px.stops-repeater',
+                                    [
+                                        'initialStops' => $oldStops,
+                                        'originLabel' => $oldOriginLabel ?? old('origin.label', ''),
+                                        'destinationLabel' => $oldDestinationLabel ?? old('destination.label', ''),
+                                    ],
+                                    key('px-stops-repeater')
+                                )
+                            </div>
+                        </div>
+
+
+                        <div class="mt-4 md:col-span-2">
+                            <label class="inline-flex items-center gap-2 mb-3">
+                                <input type="hidden" name="is_recurring" value="0">
+                                <input type="checkbox" id="px-is-recurring" name="is_recurring" value="1"
+                                    @checked($oldIsRecurring ?? old('is_recurring', false)) @checked(old('is_recurring'))
+                                    class="rounded border-gray-300">
+                                @isset($postRidePage->recurring_label)
+                                    {{ $postRidePage->recurring_label }}
+                                @endisset
+                            </label>
+                            <div id="px-recurring-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-4 required">Frequency</label>
+                                    <select name="recurring_frequency" class="w-full rounded border-gray-300">
+                                        <option value="">Select frequency</option>
+                                        <option value="daily" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'daily')>Daily</option>
+                                        <option value="weekly" @selected(($oldRecurringFrequency ?? old('recurring_frequency')) === 'weekly')>Weekly</option>
+                                    </select>
+                                    @error('recurring_frequency')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-4 required">Number of Trips</label>
+                                    <input type="number" min="1" max="365" name="recurring_trips"
+                                        value="{{ $oldRecurringTrips ?? old('recurring_trips') }}"
+                                        class="w-full rounded border-gray-300" placeholder="e.g. 10">
+                                    @error('recurring_trips')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
-    
-                <section>
-                    <div class="">
-                        <label class="block text-sm font-semibold mb-1 required">Pick/Drop Off Description</label>
-                        <textarea name="pick_drop_off_description" rows="6" class="w-full rounded border-gray-300" placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}">{{ $oldPickDropOffDescription ?? old('pick_drop_off_description') }}</textarea>
+
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->meeting_drop_off_description_label)
+                            {{ $postRidePage->meeting_drop_off_description_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+                        <textarea name="pick_drop_off_description" rows="6" class="w-full rounded border-gray-300"
+                            placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}">{{ $oldPickDropOffDescription ?? old('pick_drop_off_description') }}</textarea>
                         @error('pick_drop_off_description')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                 </section>
 
-                <section>
-                    <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Schedule & Price</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold mb-1 required">Departure Date & Time</label>
-                            <input id="px-departure-at" name="departure_at" value="{{ $oldDepartureAtFormatted ?? old('departure_at') }}"
-                                type="text" class="w-full rounded border-gray-300" placeholder="Select departure date and time"
-                                autocomplete="off" >
-                            @error('departure_at')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                            @error('departure_date')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                            @error('departure_time')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-sm font-semibold mb-3 required">Total Seats</label>
-                            <div class="flex items-center flex-wrap gap-2 mt-2">
-                                @for ($i = 1; $i <= 7; $i++)
-                                    <div class="relative">
-                                        <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                            <input
-                                                id="number-of-seat-{{ $i }}"
-                                                name="seats_total"
-                                                type="radio"
-                                                value="{{ $i }}"
-                                                class="hidden"
-                                                @checked((string) ($oldSeatsTotal ?? old('seats_total', '1')) === (string) $i)
-                                                onchange="seat_selected(this)"
-                                                @required($i === 1)
-                                            >
-                                            <span class="relative inline-block w-10 h-10">
-                                                <img
-                                                    src="{{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
-                                                    class="w-12 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}"
-                                                    alt=""
-                                                >
-                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? 'text-green-300' : '' }}">
-                                                    {{ $i }}
-                                                </span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endfor
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold mb-2 required">Middle seats</label>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        @foreach([2, 3] as $seatCount)
-                                            <label class="block cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="middle_seats"
-                                                    value="{{ $seatCount }}"
-                                                    @checked((string) old('middle_seats', '2') === (string) $seatCount)
-                                                    @required($seatCount === 2)
-                                                    class="peer sr-only"
-                                                >
-                                                <span class="flex items-center justify-center text-center rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50 peer-checked:text-green-600">
-                                                    <span class="leading-none">{{ $seatCount }} Seats</span>
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-2 required">Back seats</label>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        @foreach([2, 3] as $seatCount)
-                                            <label class="block cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="back_seats"
-                                                    value="{{ $seatCount }}"
-                                                    @checked((string) old('back_seats', '2') === (string) $seatCount)
-                                                    @required($seatCount === 2)
-                                                    class="peer sr-only"
-                                                >
-                                                <span class="flex items-center justify-center text-center rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50 peer-checked:text-green-600">
-                                                    <span class="flex items-center justify-center gap-2">
-                                                        <span class="leading-none">{{ $seatCount }} Seats</span>
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->seats_label)
+                            {{ $postRidePage->seats_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center flex-wrap gap-2 mt-2">
+                                    @for ($i = 1; $i <= 7; $i++)
+                                        <div class="relative">
+                                            <label class="cursor-pointer inline-block"
+                                                for="number-of-seat-{{ $i }}">
+                                                <input id="number-of-seat-{{ $i }}" name="seats_total"
+                                                    type="radio" value="{{ $i }}" class="hidden"
+                                                    @checked((string) ($oldSeatsTotal ?? old('seats_total', '1')) === (string) $i) onchange="seat_selected(this)"
+                                                    @required($i === 1)>
+                                                <span class="relative inline-block w-12 h-12">
+                                                    <img src="{{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
+                                                        class="w-12 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}"
+                                                        alt="">
+                                                    <span
+                                                        class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ (int) ($oldSeatsTotal ?? old('seats_total', 1)) >= $i ? 'text-green-300' : '' }}">
+                                                        {{ $i }}
                                                     </span>
                                                 </span>
                                             </label>
-                                        @endforeach
+                                        </div>
+                                    @endfor
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                    <div>
+                                        <label class="block text-sm mb-4 required">
+                                            @isset($postRidePage->seats_middle_label)
+                                                {{ $postRidePage->seats_middle_label }}
+                                            @endisset
+                                        </label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            @foreach ([2, 3] as $seatCount)
+                                                <label class="block cursor-pointer">
+                                                    <input type="radio" name="middle_seats"
+                                                        value="{{ $seatCount }}" @checked((string) old('middle_seats', '2') === (string) $seatCount)
+                                                        @required($seatCount === 2) class="peer sr-only">
+                                                    <span
+                                                        class="flex items-center justify-center text-center rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50 peer-checked:text-green-600">
+                                                        <span class="leading-none">{{ $seatCount }} Seats</span>
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">
+                                            @isset($postRidePage->seats_back_label)
+                                                {{ $postRidePage->seats_back_label }}
+                                            @endisset
+                                        </label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            @foreach ([2, 3] as $seatCount)
+                                                <label class="block cursor-pointer">
+                                                    <input type="radio" name="back_seats" value="{{ $seatCount }}"
+                                                        @checked((string) old('back_seats', '2') === (string) $seatCount) @required($seatCount === 2)
+                                                        class="peer sr-only">
+                                                    <span
+                                                        class="flex items-center justify-center text-center rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50 peer-checked:text-green-600">
+                                                        <span class="flex items-center justify-center gap-2">
+                                                            <span class="leading-none">{{ $seatCount }} Seats</span>
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+
                         </div>
-                        <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
-                            <label id="px-price-label" class="block text-sm font-semibold mb-1 required">Price per Seat</label>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->price_payment_heading)
+                            {{ $postRidePage->price_payment_heading }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+                        <div class="md:col-span-2">
+                            <label id="px-price-label" class="block text-sm mb-4 required">Price per
+                                Seat</label>
                             <div class="mb-3">
-                                <label class="block text-sm font-semibold mb-1">Currency</label>
-                                <select name="currency" class="w-full rounded border-gray-300">
-                                    @foreach (($availableCurrencies ?? ['USD' => ['code' => 'USD'], 'CAD' => ['code' => 'CAD']]) as $currencyCode => $currencyData)
-                                        <option value="{{ strtoupper((string) $currencyCode) }}" @selected($oldCurrencyCode === strtoupper((string) $currencyCode))>
+                                <label class="block text-sm mb-4 hidden">Currency</label>
+                                <select id="px-currency-select" name="currency" class="w-full rounded border-gray-300">
+                                    @foreach ($availableCurrencies ?? ['USD' => ['code' => 'USD'], 'CAD' => ['code' => 'CAD']] as $currencyCode => $currencyData)
+                                        <option value="{{ strtoupper((string) $currencyCode) }}"
+                                            @selected($oldCurrencyCode === strtoupper((string) $currencyCode))>
                                             {{ strtoupper((string) $currencyCode) }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div id="px-price-single-wrap">
-                                <input
-                                    id="px-price-minor-input"
-                                    name="price_minor"
-                                    value="{{ $oldPriceMajorDisplay }}"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    class="w-full rounded border-gray-300"
-                                    placeholder="e.g. {{ $oldCurrencySymbol }}25.00"
-                                >
+                                <input id="px-price-minor-input" name="price_minor" value="{{ $oldPriceMajorDisplay }}"
+                                    type="number" min="0" step="0.01" class="w-full rounded border-gray-300"
+                                    placeholder="e.g. {{ $oldCurrencySymbol }}25.00">
+                                @error('price_minor')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+
                             </div>
                             <div id="px-price-segments-wrap" class="hidden space-y-3">
                                 <div id="px-price-segments-list" class="space-y-2"></div>
-                                <div class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
-                                    <span class="text-sm font-semibold text-gray-700">Total price per seat</span>
-                                    <span id="px-price-segments-total" class="text-sm font-semibold text-gray-900">0.00</span>
+                                <div
+                                    class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
+                                    <span class="text-gray-700">Total price per seat</span>
+                                    <span id="px-price-segments-total" class="text-gray-900">0.00</span>
                                 </div>
-                                <input type="hidden" id="px-price-minor-hidden" value="{{ (int) ($oldPriceMinor ?? old('price_minor', 0)) }}">
-                                <input type="hidden" id="px-destination-price-delta-initial" value="{{ $oldDestinationPriceDeltaMinor ?? old('destination.price_delta_minor', 0) }}">
+                                <input type="hidden" id="px-price-minor-hidden"
+                                    value="{{ (int) ($oldPriceMinor ?? old('price_minor', 0)) }}">
+                                <input type="hidden" id="px-destination-price-delta-initial"
+                                    value="{{ $oldDestinationPriceDeltaMinor ?? old('destination.price_delta_minor', 0) }}">
+                                <input type="hidden" name="distance_meters" id="px-distance-meters-input"
+                                    value="{{ old('distance_meters', '') }}">
+                                @error('price_minor')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('price_minor')
-                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                            @enderror
                             @error('stops.*.price_delta_minor')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                             @if ($bookingMethodGroup && $bookingMethodOptions->isNotEmpty())
-                                <div class="mt-4">
-                                    <label class="block text-sm font-semibold mb-1">Payment Method</label>
-                                    <div class="space-y-2 mt-2">
+                                <div class="mt-8">
+                                    <label class="block text-sm mb-4">Payment Method</label>
+                                    <div class="space-y-4 mt-2">
                                         @foreach ($bookingMethodOptions as $option)
                                             @php
                                                 $bookingMethodIcon = $bookingMethodIcons[$option->code] ?? null;
                                             @endphp
                                             <label class="flex items-center gap-2 text-sm">
-                                                <input
-                                                    type="radio"
-                                                    name="booking_method"
-                                                    value="{{ $option->id }}"
-                                                    @checked((string) ($oldBookingMethod ?? old('booking_method', $defaultBookingMethodId)) === (string) $option->id)
-                                                    class="mt-0.5"
-                                                >
+                                                <input type="radio" name="booking_method" value="{{ $option->id }}"
+                                                    @checked((string) ($oldBookingMethod ?? old('booking_method', $defaultBookingMethodId)) === (string) $option->id) class="mt-0.5">
                                                 @if ($bookingMethodIcon)
-                                                    <img src="{{ asset('home_page_icons/' . $bookingMethodIcon) }}" class="h-6 w-6 object-contain" alt="">
+                                                    <img src="{{ asset('home_page_icons/' . $bookingMethodIcon) }}"
+                                                        class="h-6 w-6 object-contain" alt="">
                                                 @endif
-                                                <span class="font-medium text-gray-800">{{ $option->display_label }}</span>
-                                                <span class="inline-flex cursor-help w-4 h-4" data-tippy-content="{{ $option->display_description }}">
-                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z" fill="#666666"></path></svg>
+                                                <span
+                                                    class="font-medium text-gray-800">{{ $option->display_label }}</span>
+                                                <span class="inline-flex cursor-help w-4 h-4"
+                                                    data-tippy-content="{{ $option->display_description }}">
+                                                    <svg viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                                            d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
+                                                            fill="#666666"></path>
+                                                    </svg>
                                                 </span>
                                             </label>
                                         @endforeach
@@ -516,34 +586,51 @@
                             @endif
                         </div>
 
+                    </div>
+                </section>
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->booking_label)
+                            {{ $postRidePage->booking_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+
+
                         @if ($bookingModeGroup && $bookingModeOptions->isNotEmpty())
-                            <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
-                                <label class="block text-sm font-semibold mb-2">Booking Mode</label>
+                            <div class="md:col-span-2 p-2">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     @foreach ($bookingModeOptions as $option)
                                         @php
                                             $isInstant = $option->code === 'instant';
                                         @endphp
                                         <label class="block cursor-pointer">
-                                            <input
-                                                type="radio"
-                                                name="booking_mode"
-                                                value="{{ $option->id }}"
-                                                @checked((string) ($oldBookingMode ?? old('booking_mode', $defaultBookingModeId)) === (string) $option->id)
-                                                class="peer sr-only"
-                                            >
-                                            <span class="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 px-3 py-2 transition peer-checked:border-green-500 peer-checked:bg-blue-50">
+                                            <input type="radio" name="booking_mode" value="{{ $option->id }}"
+                                                @checked((string) ($oldBookingMode ?? old('booking_mode', $defaultBookingModeId)) === (string) $option->id) class="peer sr-only">
+                                            <span
+                                                class="flex items-center gap-3 rounded-lg border-2 border-gray-200 bg-gray-50 px-4 py-4 transition peer-checked:border-green-500 peer-checked:bg-blue-50">
                                                 <span class="inline-flex items-center justify-center">
                                                     @if ($isInstant)
-                                                        <img class="w-12 h-12" src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}" alt="">
+                                                        <img class="w-12 h-12"
+                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                            alt="">
                                                     @else
-                                                        <img class="w-12 h-12" src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}" alt="">
+                                                        <img class="w-12 h-12"
+                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                            alt="">
                                                     @endif
                                                 </span>
                                                 <span class="flex items-center gap-2">
-                                                    <span class="text-xl leading-none {{ $isInstant ? 'text-green-600' : 'text-blue-800' }}">{{ $option->display_label }}</span>
-                                                    <span class="cursor-help w-4 h-4" data-tippy-content="{{ $option->display_description }}">
-                                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z" fill="#666666" /></svg>
+                                                    <span
+                                                        class="text-xl leading-none {{ $isInstant ? 'text-green-600' : 'text-blue-800' }}">{{ $option->display_label }}</span>
+                                                    <span class="cursor-help w-4 h-4"
+                                                        data-tippy-content="{{ $option->display_description }}">
+                                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
+                                                                fill="#666666" />
+                                                        </svg>
                                                     </span>
                                                 </span>
                                             </span>
@@ -552,280 +639,506 @@
                                 </div>
                             </div>
                         @endif
-                        
+
                     </div>
                 </section>
 
-                <section>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-sm font-semibold mb-2">Vehicle</label>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="radio" name="vehicle_mode" value="skip"
-                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'skip')>
-                                    Skip This Time
-                                </label>
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="radio" name="vehicle_mode" value="add_new"
-                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'add_new')>
-                                    Add new vehicle
-                                </label>
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="radio" name="vehicle_mode" value="existing"
-                                        class="rounded border-gray-300" @checked($oldVehicleMode === 'existing')>
-                                    Existing
-                                </label>
-                            </div>
-
-
-                            <div id="px-vehicle-existing-fields" class="md:col-span-2 mt-4">
-                                <label class="block text-sm font-semibold mb-1">Existing Vehicle</label>
-                                <select name="vehicle_id" class="w-full rounded border-gray-300">
-                                    <option value="">Select vehicle</option>
-                                    @foreach ($vehicles as $vehicle)
-                                        <option value="{{ $vehicle->id }}" @selected((string) ($oldVehicleId ?? old('vehicle_id')) === (string) $vehicle->id)>
-                                            #{{ $vehicle->id }} - {{ $vehicle->make }} {{ $vehicle->model }}
-                                            ({{ $vehicle->liscense_no }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div id="px-vehicle-new-fields"
-                                class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">Make</label>
-                                    <input name="new_vehicle[make]" value="{{ old('new_vehicle.make') }}" type="text"
-                                        class="w-full rounded border-gray-300">
-                                    @error('new_vehicle.make')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->vehicle_label)
+                            {{ $postRidePage->vehicle_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 p-4">
+                                <div class="flex flex-wrap items-center gap-12">
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="skip"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'skip')>
+                                        Skip This Time
+                                    </label>
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="add_new"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'add_new')>
+                                        Add new vehicle
+                                    </label>
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="existing"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'existing')>
+                                        Existing
+                                    </label>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">Model</label>
-                                    <input name="new_vehicle[model]" value="{{ old('new_vehicle.model') }}"
-                                        type="text" class="w-full rounded border-gray-300">
-                                    @error('new_vehicle.model')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">Vehicle Type</label>
-                                    <select name="new_vehicle[type]" class="w-full rounded border-gray-300">
-                                        <option value="">Select type</option>
-                                        @foreach (['Convertable', 'Coupe', 'Hatchback', 'Minivan', 'Sedan', 'Station wagon', 'SUV', 'Truck', 'Van'] as $type)
-                                            <option value="{{ $type }}" @selected(old('new_vehicle.type') === $type)>
-                                                {{ $type }}</option>
+
+
+                                <div id="px-vehicle-existing-fields" class="md:col-span-2 mt-8">
+                                    <label class="block text-sm mb-4">Existing Vehicle</label>
+                                    <select name="vehicle_id" class="w-full rounded border-gray-300">
+                                        <option value="">Select vehicle</option>
+                                        @foreach ($vehicles as $vehicle)
+                                            <option value="{{ $vehicle->id }}" @selected((string) ($oldVehicleId ?? old('vehicle_id')) === (string) $vehicle->id)>
+                                                #{{ $vehicle->id }} - {{ $vehicle->make }} {{ $vehicle->model }}
+                                                ({{ $vehicle->liscense_no }})
+                                            </option>
                                         @endforeach
                                     </select>
-                                    @error('new_vehicle.type')
+                                    @error('vehicle_id')
                                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">License Plate Number</label>
-                                    <input name="new_vehicle[liscense_no]" value="{{ old('new_vehicle.liscense_no') }}"
-                                        maxlength="8" type="text" class="w-full rounded border-gray-300">
-                                    @error('new_vehicle.liscense_no')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">Color</label>
-                                    <input name="new_vehicle[color]" value="{{ old('new_vehicle.color') }}"
-                                        maxlength="15" type="text" class="w-full rounded border-gray-300">
-                                    @error('new_vehicle.color')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1 required">Year</label>
-                                    <input name="new_vehicle[year]" value="{{ old('new_vehicle.year') }}" maxlength="4"
-                                        type="text" class="w-full rounded border-gray-300">
-                                    @error('new_vehicle.year')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1">Fuel</label>
-                                    <div class="flex flex-wrap items-center gap-4 mt-2">
-                                        @foreach (['Electric', 'Hybrid', 'Gas'] as $fuel)
-                                            <label class="inline-flex items-center gap-2 text-sm">
-                                                <input type="radio" name="new_vehicle[car_type]"
-                                                    value="{{ $fuel }}" class="rounded border-gray-300"
-                                                    @checked(old('new_vehicle.car_type', 'Electric') === $fuel)>
-                                                {{ $fuel }}
-                                            </label>
-                                        @endforeach
+
+                                <div id="px-vehicle-new-fields"
+                                    class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                                    <div>
+                                        <label class="block text-sm mb-4 required">Make</label>
+                                        <input name="new_vehicle[make]" value="{{ old('new_vehicle.make') }}"
+                                            type="text" class="w-full rounded border-gray-300">
+                                        @error('new_vehicle.make')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-1">Set as primary vehicle</label>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <label class="inline-flex items-center gap-2 text-sm">
-                                            <input type="radio" name="new_vehicle[primary_vehicle]" value="1"
-                                                class="rounded border-gray-300" @checked(old('new_vehicle.primary_vehicle', '1') === '1')>
-                                            Yes
-                                        </label>
-                                        <label class="inline-flex items-center gap-2 text-sm">
-                                            <input type="radio" name="new_vehicle[primary_vehicle]" value="0"
-                                                class="rounded border-gray-300" @checked(old('new_vehicle.primary_vehicle') === '0')>
-                                            No
-                                        </label>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">Model</label>
+                                        <input name="new_vehicle[model]" value="{{ old('new_vehicle.model') }}"
+                                            type="text" class="w-full rounded border-gray-300">
+                                        @error('new_vehicle.model')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-semibold mb-1">Car Image (optional)</label>
-                                    <label for="dropzone-file"
-                                        class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
-                                        <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                                            <img id="px-vehicle-image-preview"
-                                                class="w-12 h-12 object-contain mb-4 cursor-pointer"
-                                                src="{{ asset('assets/image-placeholder.png') }}" alt="">
-                                            <p class="text-sm lg:text-lg text-gray-900">Upload car photo.</p>
-                                            <p class="text-sm lg:text-base text-gray-900 font-normal">JPEG, JPG, PNG, GIF -
-                                                10MB max.</p>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">Vehicle Type</label>
+                                        <select name="new_vehicle[type]" class="w-full rounded border-gray-300">
+                                            <option value="">Select type</option>
+                                            @foreach (['Convertable', 'Coupe', 'Hatchback', 'Minivan', 'Sedan', 'Station wagon', 'SUV', 'Truck', 'Van'] as $type)
+                                                <option value="{{ $type }}" @selected(old('new_vehicle.type') === $type)>
+                                                    {{ $type }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('new_vehicle.type')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">License Plate Number</label>
+                                        <input name="new_vehicle[liscense_no]"
+                                            value="{{ old('new_vehicle.liscense_no') }}" maxlength="8" type="text"
+                                            class="w-full rounded border-gray-300">
+                                        @error('new_vehicle.liscense_no')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">Color</label>
+                                        <input name="new_vehicle[color]" value="{{ old('new_vehicle.color') }}"
+                                            maxlength="15" type="text" class="w-full rounded border-gray-300">
+                                        @error('new_vehicle.color')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4 required">Year</label>
+                                        <input name="new_vehicle[year]" value="{{ old('new_vehicle.year') }}"
+                                            maxlength="4" type="text" class="w-full rounded border-gray-300">
+                                        @error('new_vehicle.year')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4">Fuel</label>
+                                        <div class="flex flex-wrap items-center gap-4 mt-2">
+                                            @foreach (['Electric', 'Hybrid', 'Gas'] as $fuel)
+                                                <label class="inline-flex items-center gap-2 text-sm">
+                                                    <input type="radio" name="new_vehicle[car_type]"
+                                                        value="{{ $fuel }}" class="rounded border-gray-300"
+                                                        @checked(old('new_vehicle.car_type', 'Electric') === $fuel)>
+                                                    {{ $fuel }}
+                                                </label>
+                                            @endforeach
                                         </div>
-                                        <input id="dropzone-file" name="new_vehicle_image" type="file"
-                                            accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" />
-                                    </label>
-                                    @error('new_vehicle_image')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-4">Set as primary vehicle</label>
+                                        <div class="flex items-center gap-4 mt-2">
+                                            <label class="inline-flex items-center gap-2 text-sm">
+                                                <input type="radio" name="new_vehicle[primary_vehicle]" value="1"
+                                                    class="rounded border-gray-300" @checked(old('new_vehicle.primary_vehicle', '1') === '1')>
+                                                Yes
+                                            </label>
+                                            <label class="inline-flex items-center gap-2 text-sm">
+                                                <input type="radio" name="new_vehicle[primary_vehicle]" value="0"
+                                                    class="rounded border-gray-300" @checked(old('new_vehicle.primary_vehicle') === '0')>
+                                                No
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm mb-4">Car Image (optional)</label>
+                                        <label for="dropzone-file"
+                                            class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
+                                                <img id="px-vehicle-image-preview"
+                                                    class="w-12 h-12 object-contain mb-4 cursor-pointer"
+                                                    src="{{ asset('assets/image-placeholder.png') }}" alt="">
+                                                <p class="text-sm lg:text-lg text-gray-900">Upload car photo.</p>
+                                                <p class="text-sm lg:text-base text-gray-900 font-normal">JPEG, JPG, PNG,
+                                                    GIF -
+                                                    10MB max.</p>
+                                            </div>
+                                            <input id="dropzone-file" name="new_vehicle_image" type="file"
+                                                accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" />
+                                        </label>
+                                        @error('new_vehicle_image')
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section>
-                    <div class="space-y-5">
-                         @foreach ($optionGroups as $group)
-                             @continue($group->code === 'booking_method')
-                             @continue($group->code === 'booking_mode')
-                            @php
-                                $selectedSingleValue = old($group->code);
-                                if ($selectedSingleValue === null) {
-                                    if ($group->code === 'smoking_allowed') {
-                                        $selectedSingleValue = $oldSmokingAllowed;
-                                    } elseif ($group->code === 'pets_allowed') {
-                                        $selectedSingleValue = $oldPetsAllowed;
-                                    } elseif ($group->code === 'luggage_size') {
-                                        $selectedSingleValue = $oldLuggageSize;
-                                    }
-                                }
-                                if ($selectedSingleValue === null) {
-                                    $selectedSingleValue = optional($group->options->first())->id;
-                                }
 
-                                
-                            @endphp
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <h3 class="text-base font-semibold text-gray-800 mb-3">
-                                    {{ ucwords(str_replace('_', ' ', $group->code)) }}</h3>
+                @foreach ($optionGroups as $group)
+                    @continue($group->code === 'booking_method')
+                    @continue($group->code === 'booking_mode')
 
-                                <div class="grid grid-cols-1 gap-3">
-                                    @foreach ($group->options as $option)
+                    <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                        @php
+                            $selectedSingleValue = old($group->code);
+                            if ($selectedSingleValue === null) {
+                                if ($group->code === 'smoking_allowed') {
+                                    $selectedSingleValue = $oldSmokingAllowed;
+                                } elseif ($group->code === 'pets_allowed') {
+                                    $selectedSingleValue = $oldPetsAllowed;
+                                } elseif ($group->code === 'luggage_size') {
+                                    $selectedSingleValue = $oldLuggageSize;
+                                }
+                            }
+                            if ($selectedSingleValue === null) {
+                                $selectedSingleValue = optional($group->options->first())->id;
+                            }
+
+                        @endphp
+                        <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                            {{ ucwords(str_replace('_', ' ', $group->code)) }}
+                            <span class="text-white">*</span>
+                        </h3>
+
+                        <div class="bg-white p-4 space-y-3">
+                            <div class="grid grid-cols-1 gap-4">
+                                @foreach ($group->options as $option)
                                     @php
                                         $checkboxDisabled = '';
                                         // pink ride
-                                        $pinkRideCls = "";
-                                        if(!$isPinkRideDisabled && $option->code === 'pink_rides') {
-                                            $pinkRideCls = "text-pink-500 line-through";
+                                        $pinkRideDisabledCls = '';
+                                        $pinkRideCls = '';
+                                        if (!$isPinkRideDisabled && $option->code === 'pink_rides') {
+                                            $pinkRideDisabledCls = 'line-through';
                                             $checkboxDisabled = 'disabled';
+                                        }
+                                        if ($option->code === 'pink_rides') {
+                                            $pinkRideCls = 'text-pink-500';
                                         }
                                         // extra ride
-                                        $extraRideCls = "";
-                                        if(!$isExtraRideDisabled && $option->code === 'extra_plus_rides') {
-                                            $extraRideCls = "text-green-500 line-through";
+                                        $extraRideDisabledCls = '';
+                                        $extraRideCls = '';
+                                        if ($isExtraRideDisabled && $option->code === 'extra_plus_rides') {
+                                            $extraRideDisabledCls = 'line-through';
                                             $checkboxDisabled = 'disabled';
                                         }
+                                        if ($option->code === 'extra_plus_rides') {
+                                            $extraRideCls = 'text-green-500';
+                                        }
                                     @endphp
-                                        <label class="flex items-start gap-2 text-sm">
-                                            @if ($group->is_checkbox)
-                                                <input type="checkbox" name="ride_option_ids[]"
-                                                    value="{{ $option->id }}" @checked(in_array($option->id, $oldRideOptionIds ?? old('ride_option_ids', [])))
-                                                    class="mt-0.5" {{ $checkboxDisabled }}>
-                                            @else
-                                                <input type="radio" name="{{ $group->code }}"
-                                                    value="{{ $option->id }}" @checked((string) $selectedSingleValue === (string) $option->id)
-                                                    class="mt-0.5">
+                                    <label class="flex items-start gap-2 text-sm">
+                                        @if ($group->is_checkbox)
+                                            <input type="checkbox" name="ride_option_ids[]" value="{{ $option->id }}"
+                                                @checked(in_array($option->id, $oldRideOptionIds ?? old('ride_option_ids', [])))
+                                                class="mt-0.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                                data-ride-option-code="{{ $option->code }}" {{ $checkboxDisabled }}>
+                                        @else
+                                            <input type="radio" name="{{ $group->code }}"
+                                                value="{{ $option->id }}" @checked((string) $selectedSingleValue === (string) $option->id)
+                                                class="mt-0.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                        @endif
+                                        {{-- icon --}}
+                                        @if ($group->code === 'luggage_size')
+                                            @php
+                                                $luggageIcons = [
+                                                    'no_luggage' => optional($postRidePage->luggage_option1)->icon,
+                                                    'small' => optional($postRidePage->luggage_option2)->icon,
+                                                    'medium' => optional($postRidePage->luggage_option3)->icon,
+                                                    'large' => optional($postRidePage->luggage_option4)->icon,
+                                                    'xl_multiple' => optional($postRidePage->luggage_option5)->icon,
+                                                ];
+                                                $luggageIcon = $luggageIcons[$option->code] ?? null;
+                                            @endphp
+                                            @if ($luggageIcon)
+                                                <img src="{{ asset('home_page_icons/' . $luggageIcon) }}"
+                                                    class="w-6 h-6 object-contain" alt="">
                                             @endif
-                                            {{-- icon --}}
-                                            @if ($group->code === 'luggage_size')
-                                                @php
-                                                    $luggageIcons = [
-                                                        'no_luggage' => optional($postRidePage->luggage_option1)
-                                                            ->icon,
-                                                        'small' => optional($postRidePage->luggage_option2)->icon,
-                                                        'medium' => optional($postRidePage->luggage_option3)->icon,
-                                                        'large' => optional($postRidePage->luggage_option4)->icon,
-                                                        'xl_multiple' => optional($postRidePage->luggage_option5)
-                                                            ->icon,
-                                                    ];
-                                                    $luggageIcon = $luggageIcons[$option->code] ?? null;
-                                                @endphp
-                                                @if ($luggageIcon)
-                                                    <img src="{{ asset('home_page_icons/' . $luggageIcon) }}"
-                                                        class="w-6 h-6 object-contain" alt="">
-                                                @endif
-                                            @endif
-                                            <span class="font-medium text-gray-800 {{ $pinkRideCls }} {{ $extraRideCls }}">{{ $option->display_label }}</span>
-                                            <span class="inline-flex cursor-help w-4 h-4"
-                                                data-tippy-content="{{ $option->display_description }}">
-                                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z" fill="#666666" /></svg>
-                                            </span>
-                                        </label>
-                                    @endforeach
-                                </div>
-
-                                @if ($group->code === 'luggage_size')
-                                    <div class="mt-3 pt-3 border-t border-gray-100">
-                                        <label class="inline-flex items-start gap-2 text-sm">
-                                            <input type="hidden" name="accept_more_luggage" value="0">
-                                            <input type="checkbox" name="accept_more_luggage" value="1"
-                                                @checked($oldAcceptMoreLuggage) class="mt-0.5">
-                                            <span class="font-medium text-gray-800">I accept more luggage for extra
-                                                charge</span>
-                                        </label>
-                                    </div>
-                                @endif
+                                        @endif
+                                        <span
+                                            class="font-medium text-gray-800 {{ $pinkRideCls }} {{ $extraRideCls }} {{ $pinkRideDisabledCls }} {{ $extraRideDisabledCls }}">{{ $option->display_label }}</span>
+                                        <span class="inline-flex cursor-help w-4 h-4"
+                                            data-tippy-content="{{ $option->display_description }}">
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
+                                                    fill="#666666" />
+                                            </svg>
+                                        </span>
+                                    </label>
+                                @endforeach
                             </div>
-                        @endforeach
+
+                            @if ($group->code === 'luggage_size')
+                                <div class="mt-3 pt-3 border-t border-gray-100">
+                                    <label class="inline-flex items-start gap-2 text-sm">
+                                        <input type="hidden" name="accept_more_luggage" value="0">
+                                        <input type="checkbox" name="accept_more_luggage" value="1"
+                                            @checked($oldAcceptMoreLuggage) class="mt-0.5">
+                                        <span class="font-medium text-gray-800">I accept more luggage for extra
+                                            charge</span>
+                                    </label>
+                                </div>
+                            @endif
+                        </div>
+                    </section>
+                @endforeach
+
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->anything_to_add_label)
+                            {{ $postRidePage->anything_to_add_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4 space-y-3">
+                        <textarea name="notes" rows="5" class="w-full rounded border-gray-300" placeholder="Optional ride notes">{{ $oldNotes ?? old('notes') }}</textarea>
                     </div>
                 </section>
 
-                <section>
-                    <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Anything to Add?</h2>
-                    <textarea name="notes" rows="5" class="w-full rounded border-gray-300" placeholder="Optional ride notes">{{ $oldNotes ?? old('notes') }}</textarea>
-                </section>
-
-                <section>
-                    <h2 class="text-xl font-FuturaMdCnBT text-gray-900 mb-4">Disclaimers</h2>
-                    <div class="space-y-5">
-                        <div class="border border-gray-200 rounded-lg p-4">
+                <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                    <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                        @isset($postRidePage->disclaimers_label)
+                            {{ $postRidePage->disclaimers_label }}
+                        @endisset
+                        <span class="text-white">*</span>
+                    </h3>
+                    <div class="bg-white p-4">
+                        @isset($postRidePage->disclaimers_description)
+                            {!! str_replace(
+                                '<ol>',
+                                '<ol class="list-decimal list-inside">',
+                                str_replace(
+                                    '<li>',
+                                    '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">',
+                                    $postRidePage->disclaimers_description,
+                                ),
+                            ) !!}
+                        @endisset
+                        {{-- if pink_rides checked --}}
+                        <div id="pink-ride-disclaimer"
+                            class="bg-white border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+                            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                                5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
+                                male driver in my place and will not accept any male passengers over 12 years old, even if
+                                the booking is made by a female.
+                            </p>
+                        </div>
+                        {{-- if extra_care_rides checked --}}
+                        <div id="extra-care-ride-disclaimer"
+                            class="bg-white border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+                            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                                <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
+                                I understand that this is an Extra+ Ride, exclusively for members with top-tier review
+                                ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
+                                this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
+                                ensuring a calm, respectful environment by preventing any passenger disputes.
+                            </p>
                         </div>
                     </div>
                 </section>
 
 
-                <section>
-                    <label class="inline-flex items-start gap-2 text-sm w-full">
+                <section class="mt-6">
+                    <label class="inline-flex items-start gap-2 text-sm w-full required">
                         <input type="checkbox" name="agree_terms" value="1" @checked(old('agree_terms'))
-                            class="mt-0.5 rounded border-gray-300" >
-                        <span>I have read and agree to these rules, as well as ProximaRide's policies, terms and
-                            conditions.</span>
+                            class="mt-0.5 rounded border-gray-300">
+                        <span class="font-medium text-gray-800">
+                            @isset($postRidePage->agree_terms_label)
+                                {{ strip_tags($postRidePage->agree_terms_label) }}
+                            @endisset
+                        </span>
                     </label>
                     @error('agree_terms')
                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </section>
 
-                <div class="pt-2">
+                <div class="pt-2 mt-8">
                     <button type="submit" class="button-exp-fill">Post PX Ride</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal for 5+ seats warning -->
+    <div id="pxSeatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-seats-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+        </div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxSeatsWarningModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                    id="px-seats-modal-title">Heads up for 5+ seats</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 justify-center">
+                        <button type="button" onclick="closePxSeatsWarningModal()"
+                            class="button-exp-fill">Got it</button>
+                        <button type="button"
+                            onclick="window.location.href='{{ route('cost_sharing_compliance_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
+                            class="button-exp-no-fill inline-block text-center">Learn more about limits</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
+    <div id="pxPriceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-price-error-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxPriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxPriceErrorModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                    id="pxPriceErrorHeading">Price Limit Exceeded</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center mb-3" id="pxPriceErrorParagraph1"></p>
+                                <p class="can-exp-p text-center mb-3" id="pxPriceErrorParagraph2"></p>
+                                <p class="can-exp-p text-center" id="pxPriceErrorParagraph3"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" id="pxPriceErrorAdjustBtn" onclick="adjustPxPriceFromError()"
+                            class="button-exp-fill">Adjust Price</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Validation Error -->
+    <div id="pxValidationErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-validation-error-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxValidationErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+        </div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxValidationErrorModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="mx-auto h-16 w-16 flex items-center justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="w-12 h-12 text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                id="pxValidationErrorHeading">Validation Failed</h3>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center text-gray-700" id="pxValidationErrorParagraph"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
+                        <button type="button" onclick="closePxValidationErrorModal()"
+                            class="button-exp-fill">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
+    <div id="pxPriceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-price-warning-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxPriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+        </div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxPriceWarningModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended
+                                    Contribution Limit</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center mb-3" id="pxPriceWarningParagraph1"></p>
+                                <p class="can-exp-p text-center" id="pxPriceWarningParagraph2"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" id="pxPriceWarningAdjustBtn"
+                            onclick="adjustPxPriceFromWarning(); return false;" class="button-exp-fill">Adjust
+                            Price</button>
+                        <button type="button" id="pxPriceWarningContinue" class="button-exp-fill">Keep Current
+                            Price</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -833,6 +1146,104 @@
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        // Swap origin and destination values
+        function swapLocations() {
+            // Find Livewire components by their wire:id
+            const originComponent = document.querySelector('input[name="origin[label]"]')?.closest('[wire\\:id]');
+            const destinationComponent = document.querySelector('input[name="destination[label]"]')?.closest('[wire\\:id]');
+
+            // Get origin and destination city_id hidden inputs
+            const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
+            const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
+
+            // Get origin pickup_location and destination dropoff_location textareas
+            const originPickupTextarea = document.querySelector('textarea[name="origin[pickup_location]"]');
+            const destinationDropoffTextarea = document.querySelector('textarea[name="destination[dropoff_location]"]');
+
+            // Get current city IDs
+            const originCityId = originCityIdInput ? parseInt(originCityIdInput.value) : null;
+            const destinationCityId = destinationCityIdInput ? parseInt(destinationCityIdInput.value) : null;
+
+            // Swap city IDs using Livewire's selectCity method
+            if (window.Livewire && originComponent && destinationComponent) {
+                const originWireId = originComponent.getAttribute('wire:id');
+                const destinationWireId = destinationComponent.getAttribute('wire:id');
+
+                if (originWireId && destinationWireId) {
+                    try {
+                        const originLivewire = window.Livewire.find(originWireId);
+                        const destinationLivewire = window.Livewire.find(destinationWireId);
+
+                        // Swap city selections
+                        if (destinationCityId && originLivewire) {
+                            originLivewire.call('selectCity', destinationCityId);
+                        }
+                        if (originCityId && destinationLivewire) {
+                            destinationLivewire.call('selectCity', originCityId);
+                        }
+
+                        // If one is null, clear the other
+                        if (!destinationCityId && originLivewire) {
+                            originLivewire.set('query', '');
+                            originLivewire.set('cityId', null);
+                        }
+                        if (!originCityId && destinationLivewire) {
+                            destinationLivewire.set('query', '');
+                            destinationLivewire.set('cityId', null);
+                        }
+                    } catch (e) {
+                        console.error('Error swapping Livewire components:', e);
+                        // Fallback: try direct input manipulation
+                        const originInput = originComponent.querySelector('input[name="origin[label]"]');
+                        const destinationInput = destinationComponent.querySelector('input[name="destination[label]"]');
+                        if (originInput && destinationInput) {
+                            const temp = originInput.value;
+                            originInput.value = destinationInput.value;
+                            destinationInput.value = temp;
+                            originInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                            destinationInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                        }
+                    }
+                }
+            } else {
+                // Fallback: direct input manipulation if Livewire is not available
+                const originInput = document.querySelector('input[name="origin[label]"]');
+                const destinationInput = document.querySelector('input[name="destination[label]"]');
+                if (originInput && destinationInput) {
+                    const temp = originInput.value;
+                    originInput.value = destinationInput.value;
+                    destinationInput.value = temp;
+                    originInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    destinationInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                }
+            }
+
+            // Swap pickup/dropoff location values
+            if (originPickupTextarea && destinationDropoffTextarea) {
+                const tempLocation = originPickupTextarea.value;
+                originPickupTextarea.value = destinationDropoffTextarea.value;
+                destinationDropoffTextarea.value = tempLocation;
+
+                // Trigger input event
+                originPickupTextarea.dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                }));
+                destinationDropoffTextarea.dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                }));
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Toggle vehicle form sections based on selected vehicle mode.
             const vehicleModeInputs = document.querySelectorAll('input[name="vehicle_mode"]');
@@ -877,14 +1288,21 @@
             // Enable recurring inputs only when recurring trip is checked.
             const recurringToggle = document.getElementById('px-is-recurring');
             const recurringFields = document.getElementById('px-recurring-fields');
-            const recurringInputs = recurringFields ? recurringFields.querySelectorAll('select, input, textarea') : [];
+            const recurringInputs = recurringFields ? recurringFields.querySelectorAll('select, input, textarea') :
+                [];
 
             function syncRecurringState() {
                 if (!recurringToggle || !recurringFields) return;
                 const enabled = recurringToggle.checked;
+
+                // Show/hide the recurring fields block
+                recurringFields.classList.toggle('hidden', !enabled);
                 recurringFields.classList.toggle('opacity-60', !enabled);
+
+                // Enable/disable inner inputs so they don't submit when hidden
                 recurringInputs.forEach((el) => {
                     el.disabled = !enabled;
+                    // If you ever want hard required on these, uncomment:
                     // if (el.name === 'recurring_frequency' || el.name === 'recurring_trips') {
                     //     el.required = enabled;
                     // }
@@ -897,7 +1315,23 @@
             }
 
             // Seat visual selector: highlight all seats up to selected total.
-            window.seat_selected = function(th) {
+            window.showPxSeatsWarningModal = function() {
+                const modal = document.getElementById('pxSeatsWarningModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.style.display = 'block';
+                }
+            };
+
+            window.closePxSeatsWarningModal = function() {
+                const modal = document.getElementById('pxSeatsWarningModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                }
+            };
+
+            window.seat_selected = function(th, showWarning = true) {
                 const seat = parseInt(th?.value || '0', 10);
                 const maxSeats = 7;
 
@@ -907,16 +1341,22 @@
                     const selected = i <= seat;
 
                     if (image) {
-                        image.src = selected ? '{{ asset('assets/seat-hover-1.png') }}' : '{{ asset('assets/seat.png') }}';
+                        image.src = selected ? '{{ asset('assets/seat-hover-1.png') }}' :
+                            '{{ asset('assets/seat.png') }}';
                     }
                     if (number) {
                         number.classList.toggle('text-green-300', selected);
                     }
                 }
-            };
-            window.seat_selected(document.querySelector('input[name="seats_total"]:checked'));
 
-            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document.querySelector('form[action*="px.post_ride.update"]') || document.querySelector('form');
+                if (showWarning && seat >= 5) {
+                    window.showPxSeatsWarningModal();
+                }
+            };
+            window.seat_selected(document.querySelector('input[name="seats_total"]:checked'), false);
+
+            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document
+                .querySelector('form[action*="px.post_ride.update"]') || document.querySelector('form');
             const priceLabel = document.getElementById('px-price-label');
             const priceSingleWrap = document.getElementById('px-price-single-wrap');
             const priceSegmentsWrap = document.getElementById('px-price-segments-wrap');
@@ -925,6 +1365,25 @@
             const priceMinorInput = document.getElementById('px-price-minor-input');
             const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
             const destinationPriceDeltaInitialInput = document.getElementById('px-destination-price-delta-initial');
+            const currencySelect = document.getElementById('px-currency-select');
+            const currencySymbols = @json($pxCurrencyMap);
+
+            function getSelectedCurrencySymbol() {
+                const currencyCode = currencySelect ? currencySelect.value.toUpperCase() : '';
+                return currencySymbols[currencyCode] || (currencyCode ? `${currencyCode} ` : '');
+            }
+
+            function syncPricePlaceholders() {
+                const currencySymbol = getSelectedCurrencySymbol();
+                if (priceMinorInput) {
+                    priceMinorInput.placeholder = `e.g. ${currencySymbol}25.00`;
+                }
+                if (priceSegmentsList) {
+                    priceSegmentsList.querySelectorAll('.px-segment-price-input').forEach((input) => {
+                        input.placeholder = `e.g. ${currencySymbol}12.00`;
+                    });
+                }
+            }
 
             function toMinorInt(value) {
                 const parsed = parseInt((value ?? '').toString().trim(), 10);
@@ -958,8 +1417,10 @@
                 const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
                 const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
                 const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
-                const stopIsDropoffInputs = document.querySelectorAll('input[name^="stops["][name$="[is_dropoff]"]');
-                const stopPriceDeltaInputs = document.querySelectorAll('input[name^="stops["][name$="[price_delta_minor]"]');
+                const stopIsDropoffInputs = document.querySelectorAll(
+                    'input[name^="stops["][name$="[is_dropoff]"]');
+                const stopPriceDeltaInputs = document.querySelectorAll(
+                    'input[name^="stops["][name$="[price_delta_minor]"]');
                 const stopsData = new Map();
 
                 stopLabelInputs.forEach(function(input) {
@@ -1014,7 +1475,10 @@
 
                 return Array.from(stopsData.keys())
                     .sort((a, b) => a - b)
-                    .map((index) => ({ index, ...stopsData.get(index) }));
+                    .map((index) => ({
+                        index,
+                        ...stopsData.get(index)
+                    }));
             }
 
             function getValidStopsData() {
@@ -1036,11 +1500,13 @@
 
             function syncStopPriceDeltaInputsFromSegmentRows() {
                 if (!priceSegmentsList) return;
-                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input[data-stop-index]');
+                const segmentInputs = priceSegmentsList.querySelectorAll(
+                    '.px-segment-price-input[data-stop-index]');
                 segmentInputs.forEach((input) => {
                     const stopIndex = input.getAttribute('data-stop-index');
                     if (stopIndex === null || stopIndex === '') return;
-                    const hiddenStopPrice = document.querySelector(`input[name="stops[${stopIndex}][price_delta_minor]"]`);
+                    const hiddenStopPrice = document.querySelector(
+                        `input[name="stops[${stopIndex}][price_delta_minor]"]`);
                     if (hiddenStopPrice) {
                         hiddenStopPrice.value = String(toMinorFromMajor(input.value));
                     }
@@ -1048,7 +1514,8 @@
             }
 
             function syncPriceInputMode() {
-                if (!priceLabel || !priceSingleWrap || !priceSegmentsWrap || !priceMinorInput || !priceMinorHiddenInput || !priceSegmentsList) {
+                if (!priceLabel || !priceSingleWrap || !priceSegmentsWrap || !priceMinorInput || !
+                    priceMinorHiddenInput || !priceSegmentsList) {
                     return;
                 }
 
@@ -1077,24 +1544,28 @@
                 priceMinorInput.name = '';
                 priceMinorHiddenInput.name = 'price_minor';
 
-                const previousValues = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input')).map((input) => toMinorFromMajor(input.value));
+                const previousValues = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'))
+                    .map((input) => toMinorFromMajor(input.value));
                 const existingStopValues = validStops.map((stop) => toMinorInt(stop.priceDeltaMinor));
                 const initialDestinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
-                const hasAnyExistingStopValue = existingStopValues.some((value) => value > 0) || initialDestinationDeltaMinor > 0;
+                const hasAnyExistingStopValue = existingStopValues.some((value) => value > 0) ||
+                    initialDestinationDeltaMinor > 0;
                 const segmentCount = points.length - 1;
-                const baseTotalMinor = priceMinorHiddenInput.value
-                    ? toMinorInt(priceMinorHiddenInput.value)
-                    : toMinorFromMajor(priceMinorInput.value);
+                const baseTotalMinor = priceMinorHiddenInput.value ?
+                    toMinorInt(priceMinorHiddenInput.value) :
+                    toMinorFromMajor(priceMinorInput.value);
                 priceSegmentsList.innerHTML = '';
 
                 for (let i = 0; i < points.length - 1; i++) {
                     const from = points[i] || 'Point A';
                     const to = points[i + 1] || 'Point B';
                     const stopIndex = i < validStops.length ? String(validStops[i].index) : '';
-                    let initialMinor = previousValues[i] ?? (stopIndex !== '' ? toMinorInt(validStops[i].priceDeltaMinor) : initialDestinationDeltaMinor);
+                    let initialMinor = previousValues[i] ?? (stopIndex !== '' ? toMinorInt(validStops[i]
+                        .priceDeltaMinor) : initialDestinationDeltaMinor);
 
                     // If segment prices are not set yet, distribute current single total across segments.
-                    if (!hasAnyExistingStopValue && previousValues.length === 0 && baseTotalMinor > 0 && segmentCount > 0) {
+                    if (!hasAnyExistingStopValue && previousValues.length === 0 && baseTotalMinor > 0 &&
+                        segmentCount > 0) {
                         const share = Math.floor(baseTotalMinor / segmentCount);
                         const remainder = baseTotalMinor - (share * segmentCount);
                         initialMinor = share + (i === segmentCount - 1 ? remainder : 0);
@@ -1105,7 +1576,7 @@
 
                     const routeLabelWrap = document.createElement('div');
                     const routeLabel = document.createElement('label');
-                    routeLabel.className = 'block text-sm font-semibold text-gray-700';
+                    routeLabel.className = 'block text-primary text-gray-700';
                     routeLabel.textContent = `${from} \u2192 ${to}`;
                     routeLabelWrap.appendChild(routeLabel);
 
@@ -1115,7 +1586,7 @@
                     priceInput.step = '0.01';
                     priceInput.value = toMajorFromMinor(initialMinor);
                     priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
-                    priceInput.placeholder = 'e.g. 12.00';
+                    priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
                     if (stopIndex !== '') {
                         priceInput.setAttribute('data-stop-index', stopIndex);
                     }
@@ -1141,16 +1612,20 @@
                 });
             }
 
+            if (currencySelect) {
+                currencySelect.addEventListener('change', syncPricePlaceholders);
+            }
+
             document.addEventListener('input', function(event) {
                 const target = event.target;
                 if (!(target instanceof HTMLInputElement)) {
                     return;
                 }
                 if (target.name && (
-                    target.name.includes('origin[label]') ||
-                    target.name.includes('destination[label]') ||
-                    target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
-                )) {
+                        target.name.includes('origin[label]') ||
+                        target.name.includes('destination[label]') ||
+                        target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
+                    )) {
                     syncPriceInputMode();
                 }
             });
@@ -1162,22 +1637,107 @@
             }
 
             syncPriceInputMode();
+            syncPricePlaceholders();
 
             // Filter out empty stops before form submission
             if (postRideForm) {
                 postRideForm.addEventListener('submit', function(event) {
+                    // Check if bypass flag is already set (user already saw warning and chose to continue)
+                    const bypassInput = postRideForm.querySelector('input[name="bypass_price_validation"]');
+                    if (bypassInput && bypassInput.value === '1') {
+                        console.log('PX Price validation bypassed - user already confirmed');
+                        // Continue with normal form submission
+                    } else {
+                        // Validate price per seat before submission
+                        const priceMinorValue = priceMinorHiddenInput ? parseInt(priceMinorHiddenInput
+                                .value) :
+                            (priceMinorInput ? toMinorFromMajor(priceMinorInput.value) : null);
+                        const seatsValue = document.querySelector('input[name="seats_total"]:checked') ?
+                            parseInt(document.querySelector('input[name="seats_total"]:checked').value) :
+                            null;
+
+                        // Get distance - try from hidden input, then global variable
+                        let distanceKm = null;
+                        const distanceMetersInput = postRideForm.querySelector(
+                            'input[name="distance_meters"]');
+                        if (distanceMetersInput && distanceMetersInput.value) {
+                            distanceKm = parseFloat(distanceMetersInput.value) /
+                            1000; // Convert meters to km
+                        } else if (window.pxRideDistanceKm) {
+                            distanceKm = window.pxRideDistanceKm;
+                        }
+
+                        console.log('PX Form submission validation:', {
+                            priceMinor: priceMinorValue,
+                            distanceKm: distanceKm,
+                            seats: seatsValue,
+                        });
+
+                        // If we have price, distance, and seats, validate
+                        if (priceMinorValue && priceMinorValue > 0 && distanceKm && distanceKm > 0 &&
+                            seatsValue && seatsValue > 0) {
+                            const validation = validatePxPricePerSeat(priceMinorValue, distanceKm,
+                                seatsValue);
+
+                            console.log('PX Price validation result:', validation);
+
+                            if (!validation.valid) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                event.stopImmediatePropagation();
+                                showPxPriceErrorModal(validation.maxPricePerSeat);
+                                return false;
+                            }
+
+                            if (validation.type === 'warning') {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                event.stopImmediatePropagation();
+                                console.log('Showing PX soft warning modal');
+                                showPxPriceWarningModal(function() {
+                                    // User clicked "Keep Current Price" - submit the form with bypass flag
+                                    console.log(
+                                        'User chose to keep current price, submitting PX form');
+                                    const bypassInput = document.createElement('input');
+                                    bypassInput.type = 'hidden';
+                                    bypassInput.name = 'bypass_price_validation';
+                                    bypassInput.value = '1';
+                                    postRideForm.appendChild(bypassInput);
+                                    // Remove the event listener to prevent re-validation
+                                    const newForm = postRideForm.cloneNode(true);
+                                    postRideForm.parentNode.replaceChild(newForm, postRideForm);
+                                    // Submit the form
+                                    newForm.submit();
+                                });
+                                return false;
+                            }
+                        } else {
+                            console.warn('Skipping PX price validation - missing required data:', {
+                                priceMinor: priceMinorValue,
+                                distanceKm: distanceKm,
+                                seats: seatsValue,
+                            });
+                        }
+                    }
+
                     if (priceMinorInput && !priceMinorInput.disabled) {
                         priceMinorInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
                     syncStopPriceDeltaInputsFromSegmentRows();
                     syncSegmentPriceTotal();
 
-                    const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
-                    const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
-                    const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
-                    const stopIsDropoffInputs = document.querySelectorAll('input[name^="stops["][name$="[is_dropoff]"]');
-                    const stopPriceDeltaInputs = document.querySelectorAll('input[name^="stops["][name$="[price_delta_minor]"]');
-                    const existingDestinationPriceDeltaInput = postRideForm.querySelector('input[name="destination[price_delta_minor]"][data-generated="1"]');
+                    const stopLabelInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[label]"]');
+                    const stopCityIdInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[city_id]"]');
+                    const stopIsPickupInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[is_pickup]"]');
+                    const stopIsDropoffInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[is_dropoff]"]');
+                    const stopPriceDeltaInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[price_delta_minor]"]');
+                    const existingDestinationPriceDeltaInput = postRideForm.querySelector(
+                        'input[name="destination[price_delta_minor]"][data-generated="1"]');
                     if (existingDestinationPriceDeltaInput) {
                         existingDestinationPriceDeltaInput.remove();
                     }
@@ -1194,22 +1754,27 @@
                     // Map first N segment rows to N intermediate stops (in route order).
                     if (priceSegmentsList && validStops.length > 0) {
                         const stopSegmentInputs = Array.from(
-                            priceSegmentsList.querySelectorAll('.px-segment-price-input[data-stop-index]')
+                            priceSegmentsList.querySelectorAll(
+                                '.px-segment-price-input[data-stop-index]')
                         );
                         for (let i = 0; i < validStops.length; i++) {
                             if (stopSegmentInputs[i]) {
-                                validStops[i].priceDeltaMinor = toMinorFromMajor(stopSegmentInputs[i].value);
+                                validStops[i].priceDeltaMinor = toMinorFromMajor(stopSegmentInputs[i]
+                                    .value);
                             }
                         }
 
                         // Persist last section price (last stop -> destination) on destination payload.
-                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
-                        const lastSegmentInput = allSegmentInputs.length > 0 ? allSegmentInputs[allSegmentInputs.length - 1] : null;
+                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll(
+                            '.px-segment-price-input'));
+                        const lastSegmentInput = allSegmentInputs.length > 0 ? allSegmentInputs[
+                            allSegmentInputs.length - 1] : null;
                         if (lastSegmentInput) {
                             const destinationPriceDeltaInput = document.createElement('input');
                             destinationPriceDeltaInput.type = 'hidden';
                             destinationPriceDeltaInput.name = 'destination[price_delta_minor]';
-                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastSegmentInput.value));
+                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastSegmentInput
+                                .value));
                             destinationPriceDeltaInput.setAttribute('data-generated', '1');
                             postRideForm.appendChild(destinationPriceDeltaInput);
                         }
@@ -1231,7 +1796,7 @@
                     stopPriceDeltaInputs.forEach(function(input) {
                         input.remove();
                     });
-                    
+
                     // Add back only valid stops with sequential indices
                     validStops.forEach(function(stop, newIndex) {
                         const labelInput = document.createElement('input');
@@ -1240,19 +1805,19 @@
                         labelInput.value = stop.label;
                         labelInput.style.display = 'none';
                         postRideForm.appendChild(labelInput);
-                        
+
                         const cityIdInput = document.createElement('input');
                         cityIdInput.type = 'hidden';
                         cityIdInput.name = `stops[${newIndex}][city_id]`;
                         cityIdInput.value = stop.cityId;
                         postRideForm.appendChild(cityIdInput);
-                        
+
                         const isPickupInput = document.createElement('input');
                         isPickupInput.type = 'hidden';
                         isPickupInput.name = `stops[${newIndex}][is_pickup]`;
                         isPickupInput.value = stop.isPickup;
                         postRideForm.appendChild(isPickupInput);
-                        
+
                         const isDropoffInput = document.createElement('input');
                         isDropoffInput.type = 'hidden';
                         isDropoffInput.name = `stops[${newIndex}][is_dropoff]`;
@@ -1283,11 +1848,11 @@
                         tooltipInChildren.remove();
                         return;
                     }
-                    
+
                     // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
                     if (node.parentElement) {
                         const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
-                            sibling instanceof HTMLElement && 
+                            sibling instanceof HTMLElement &&
                             sibling.classList.contains('tooltip-error') &&
                             sibling !== node
                         );
@@ -1296,7 +1861,6 @@
                             return;
                         }
                     }
-                    
                     node = node.parentElement?.closest('div, section') || null;
                 }
             }
@@ -1326,8 +1890,6 @@
                 minuteIncrement: 5,
             });
 
-            
-
             // Client-side image preview for "add new vehicle" upload.
             const vehicleImageInput = document.getElementById('dropzone-file');
             const vehicleImagePreview = document.getElementById('px-vehicle-image-preview');
@@ -1348,39 +1910,329 @@
                 });
             }
 
+            // Toggle Pink Ride and Extra+ Ride disclaimers based on checkbox state
+            function updateRideDisclaimers() {
+                const pinkRideCheckbox = document.querySelector('input[data-ride-option-code="pink_rides"]');
+                const extraCareCheckbox = document.querySelector('input[data-ride-option-code="extra_plus_rides"]');
+                const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
+                const extraCareDisclaimer = document.getElementById('extra-care-ride-disclaimer');
+                const extraCareNumber = document.getElementById('extra-care-disclaimer-number');
+
+                if (!pinkRideCheckbox || !extraCareCheckbox || !pinkRideDisclaimer || !extraCareDisclaimer || !
+                    extraCareNumber) {
+                    return;
+                }
+
+                const isPinkRideChecked = pinkRideCheckbox.checked;
+                const isExtraCareChecked = extraCareCheckbox.checked;
+
+                // Toggle Pink Ride disclaimer
+                if (isPinkRideChecked) {
+                    pinkRideDisclaimer.classList.remove('hidden');
+                } else {
+                    pinkRideDisclaimer.classList.add('hidden');
+                }
+
+                // Toggle Extra+ Ride disclaimer
+                if (isExtraCareChecked) {
+                    extraCareDisclaimer.classList.remove('hidden');
+                } else {
+                    extraCareDisclaimer.classList.add('hidden');
+                }
+
+                // Update numbering: if pink ride is checked, extra+ is 6, otherwise 5
+                if (isExtraCareChecked) {
+                    extraCareNumber.textContent = isPinkRideChecked ? '6.' : '5.';
+                }
+            }
+
+            // Add event listeners to ride option checkboxes
+            document.addEventListener('change', function(event) {
+                const target = event.target;
+                if (target && target.hasAttribute('data-ride-option-code')) {
+                    const optionCode = target.getAttribute('data-ride-option-code');
+                    if (optionCode === 'pink_rides' || optionCode === 'extra_plus_rides') {
+                        updateRideDisclaimers();
+                    }
+                }
+            });
+
+            // Initialize disclaimers on page load
+            updateRideDisclaimers();
+
+            // Handle server-side validation error (from validation redirect)
+            @if (session('validation_error') && session('validation_heading'))
+                const validationError = {
+                    message: @json(session('validation_error')),
+                    heading: @json(session('validation_heading', 'Validation Failed'))
+                };
+                if (validationError.message && validationError.heading) {
+                    // Show the validation error modal
+                    const modal = document.getElementById('pxValidationErrorModal');
+                    const errorHeading = document.getElementById('pxValidationErrorHeading');
+                    const errorPara = document.getElementById('pxValidationErrorParagraph');
+
+                    if (modal && errorHeading && errorPara) {
+                        errorHeading.textContent = validationError.heading;
+                        errorPara.textContent = validationError.message;
+                        modal.classList.remove('hidden');
+                        modal.style.display = 'block';
+                    }
+                }
+            @endif
+
+            // Handle server-side price error (from validation redirect)
+            @if (session('error') && session('max_price_per_seat'))
+                const serverError = {
+                    message: @json(session('error')),
+                    heading: @json(session('heading', 'Price Limit Exceeded')),
+                    maxPricePerSeat: parseFloat(@json(session('max_price_per_seat')))
+                };
+                if (serverError.message && serverError.maxPricePerSeat) {
+                    // Show the error modal first (this sets default content)
+                    showPxPriceErrorModal(serverError.maxPricePerSeat);
+
+                    // Then update with server-side message and heading
+                    const errorHeading = document.getElementById('pxPriceErrorHeading');
+                    if (errorHeading && serverError.heading) {
+                        errorHeading.textContent = serverError.heading;
+                    }
+                    const errorPara1 = document.getElementById('pxPriceErrorParagraph1');
+                    if (errorPara1 && serverError.message) {
+                        errorPara1.textContent = serverError.message;
+                    }
+                }
+            @endif
+
+            // Handle server-side price warning (from validation redirect)
+            @if (session('price_warning'))
+                const priceWarning = @json(session('price_warning'));
+                if (priceWarning && priceWarning.message) {
+                    showPxPriceWarningModal(function() {
+                        // User clicked "Keep Current Price" - submit the form with bypass flag
+                        const bypassInput = document.createElement('input');
+                        bypassInput.type = 'hidden';
+                        bypassInput.name = 'bypass_price_validation';
+                        bypassInput.value = '1';
+                        postRideForm.appendChild(bypassInput);
+                        // Remove the event listener to prevent re-validation
+                        const newForm = postRideForm.cloneNode(true);
+                        postRideForm.parentNode.replaceChild(newForm, postRideForm);
+                        // Submit the form
+                        newForm.submit();
+                    });
+                }
+            @endif
+
             // Scroll to first error on page load if validation errors exist
             const firstError = document.querySelector('.tooltip-error');
             if (firstError) {
                 // Find the parent container that contains the error (usually a form field wrapper)
                 let errorContainer = firstError.closest('div');
-                
+
                 // Walk up to find a meaningful container (section or field wrapper)
                 while (errorContainer && errorContainer !== postRideForm) {
                     // Check if this container is a section or has a meaningful structure
-                    if (errorContainer.tagName === 'SECTION' || 
+                    if (errorContainer.tagName === 'SECTION' ||
                         errorContainer.querySelector('input, select, textarea, label')) {
                         break;
                     }
                     errorContainer = errorContainer.parentElement;
                 }
-                
+
                 // Scroll to the error container or the error itself
                 const scrollTarget = errorContainer || firstError;
                 scrollTarget.scrollIntoView({
                     behavior: 'smooth',
                     block: 'center'
                 });
-                
-                // // Optionally focus the associated input field if it exists
-                // const associatedInput = scrollTarget.querySelector('input, select, textarea');
-                // if (associatedInput && !associatedInput.disabled) {
-                //     setTimeout(() => {
-                //         associatedInput.focus();
-                //     }, 300);
-                // }
             }
 
         });
+
+        // Cost-sharing cap validation constants
+        const ERROR_TRIGGERING_CAP = 0.72; // $0.72 per km - BLOCK if exceeded
+        const SOFT_WARNING_CAP = 0.66; // $0.66 per km - WARN but ALLOW
+
+        // Store distance globally when available (from Google API calculation)
+        window.pxRideDistanceKm = null;
+
+        // Function to validate price per seat
+        // Formula: (Distance × Cap) ÷ Seats = Max price per seat
+        function validatePxPricePerSeat(priceMinor, distanceKm, seats) {
+            if (!priceMinor || !distanceKm || !seats || distanceKm <= 0 || priceMinor <= 0 || seats <= 0) {
+                console.log('PX Price validation skipped - missing data:', {
+                    priceMinor,
+                    distanceKm,
+                    seats
+                });
+                return {
+                    valid: true,
+                    type: null
+                };
+            }
+
+            // Convert price from minor units (cents) to major units (dollars)
+            const pricePerSeat = parseFloat(priceMinor) / 100;
+            const distance = parseFloat(distanceKm);
+            const numSeats = parseInt(seats);
+
+            // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
+            const maxPricePerSeat = (distance * ERROR_TRIGGERING_CAP) / numSeats;
+
+            // Calculate soft warning price per seat: $0.66/km
+            const softWarningPricePerSeat = (distance * SOFT_WARNING_CAP) / numSeats;
+
+            console.log('PX Price validation calculations:', {
+                pricePerSeat: pricePerSeat,
+                distanceKm: distance,
+                numSeats: numSeats,
+                maxPricePerSeat: maxPricePerSeat,
+                softWarningPricePerSeat: softWarningPricePerSeat,
+                exceedsMax: pricePerSeat > maxPricePerSeat,
+                exceedsSoftWarning: pricePerSeat > softWarningPricePerSeat
+            });
+
+            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+            if (pricePerSeat > maxPricePerSeat) {
+                console.log('PX ERROR CAP TRIGGERED');
+                return {
+                    valid: false,
+                    type: 'error',
+                    maxPricePerSeat: maxPricePerSeat.toFixed(2)
+                };
+            }
+
+            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+            if (pricePerSeat > softWarningPricePerSeat) {
+                console.log('PX SOFT WARNING CAP TRIGGERED');
+                return {
+                    valid: true,
+                    type: 'warning',
+                    softWarningPrice: softWarningPricePerSeat.toFixed(2)
+                };
+            }
+
+            console.log('PX No warning or error - price is within limits');
+            return {
+                valid: true,
+                type: null
+            };
+        }
+
+        // Function to show error modal (Price Limit Exceeded)
+        function showPxPriceErrorModal(maxPricePerSeat) {
+            const modal = document.getElementById('pxPriceErrorModal');
+            if (modal) {
+                document.getElementById('pxPriceErrorParagraph1').textContent =
+                    'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.';
+                document.getElementById('pxPriceErrorParagraph2').textContent =
+                    'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.';
+                document.getElementById('pxPriceErrorParagraph3').textContent =
+                    'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
+
+                modal.classList.remove('hidden');
+                modal.style.display = 'block';
+            }
+        }
+
+        // Function to show warning modal (Recommended Contribution Limit)
+        function showPxPriceWarningModal(callback) {
+            console.log('showPxPriceWarningModal called');
+            const modal = document.getElementById('pxPriceWarningModal');
+            if (!modal) {
+                console.error('PX Price warning modal not found!');
+                return;
+            }
+
+            const para1 = document.getElementById('pxPriceWarningParagraph1');
+            const para2 = document.getElementById('pxPriceWarningParagraph2');
+
+            if (para1) {
+                para1.textContent =
+                    'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+            }
+            if (para2) {
+                para2.textContent =
+                    'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'block';
+
+            // Set up continue button callback
+            const continueBtn = document.getElementById('pxPriceWarningContinue');
+            if (continueBtn) {
+                continueBtn.onclick = function() {
+                    if (callback) callback();
+                };
+            }
+        }
+
+        // Function to adjust price from error (focus on price input field)
+        function adjustPxPriceFromError() {
+            const modal = document.getElementById('pxPriceErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            const priceInput = document.getElementById('px-price-minor-input');
+            if (priceInput) {
+                priceInput.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                setTimeout(() => {
+                    priceInput.focus();
+                    priceInput.select();
+                }, 300);
+            }
+        }
+
+        // Function to adjust price from warning (focus on price input field)
+        function adjustPxPriceFromWarning() {
+            console.log('Adjust PX Price clicked - closing modal and focusing on price field');
+            const modal = document.getElementById('pxPriceWarningModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            const priceInput = document.getElementById('px-price-minor-input');
+            if (priceInput) {
+                priceInput.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                setTimeout(() => {
+                    priceInput.focus();
+                    priceInput.select();
+                }, 300);
+            }
+            return false;
+        }
+
+        function closePxPriceErrorModal() {
+            const modal = document.getElementById('pxPriceErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        }
+
+        function closePxPriceWarningModal() {
+            const modal = document.getElementById('pxPriceWarningModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        }
+
+        function closePxValidationErrorModal() {
+            const modal = document.getElementById('pxValidationErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+        }
     </script>
 @endsection
-
