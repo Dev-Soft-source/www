@@ -18,14 +18,16 @@ class LanguageMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        $selectedLanguage = $request->query('lang');
-    
+        $selectedLanguage = $request->route('lang')
+            ?: $request->query('lang')
+            ?: session('selectedLanguage', config('app.locale', 'en'));
+
         if ($selectedLanguage) {
             session(['selectedLanguage' => $selectedLanguage]);
         }
 
-        // Get the language from the session or default to 'en'
-        $locale = session('selectedLanguage', 'en');
+        // Get the language from the session or default locale
+        $locale = session('selectedLanguage', config('app.locale', 'en'));
 
         // Set the application locale
         App::setLocale($locale);

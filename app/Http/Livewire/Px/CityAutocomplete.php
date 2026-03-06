@@ -8,17 +8,31 @@ use Livewire\Component;
 class CityAutocomplete extends Component
 {
     public string $field;
+    public ?string $class = '';
     public string $placeholder;
     public string $query = '';
     public ?int $cityId = null;
     public array $suggestions = [];
     public int $highlightedIndex = -1;
+    public ?string $errorMessage = null;
+    public string $invalidErrorMessage = 'Please select a valid city from the dropdown.';
 
-    public function mount(string $field, string $placeholder = 'City, station, or address', ?string $initialLabel = null, $initialCityId = null): void
+    public function mount(
+        string $field,
+        string $class = '',
+        string $placeholder = 'City, station, or address',
+        ?string $initialLabel = null,
+        $initialCityId = null,
+        ?string $invalidErrorMessage = null
+    ): void
     {
         $this->field = $field;
+        $this->class = $class;
         $this->placeholder = $placeholder;
         $this->cityId = is_numeric($initialCityId) ? (int) $initialCityId : null;
+        $this->invalidErrorMessage = trim((string) ($invalidErrorMessage ?? '')) !== ''
+            ? (string) $invalidErrorMessage
+            : $this->invalidErrorMessage;
 
         if ($this->cityId) {
             $city = City::query()
@@ -35,11 +49,13 @@ class CityAutocomplete extends Component
     public function updatedQuery(string $value): void
     {
         $this->cityId = null;
+        $this->errorMessage = null;
         $this->loadSuggestions(trim($value));
     }
 
     public function onFocus(): void
     {
+        $this->errorMessage = null;
         $this->loadSuggestions(trim($this->query));
     }
 
@@ -55,17 +71,20 @@ class CityAutocomplete extends Component
 
         $this->cityId = (int) $city->id;
         $this->query = $this->formatCityLabel($city);
+        $this->errorMessage = null;
         $this->suggestions = [];
         $this->highlightedIndex = -1;
     }
 
     public function closeSuggestions(): void
     {
-        // Enforce city list selection:
-        // if user typed free text and left the field without selecting a city,
-        // reset the input to empty.
-        if ($this->cityId === null) {
-            $this->query = '';
+        if ($this->cityId === null && !$this->commitTypedExactMatch()) {
+            $this->errorMessage = trim($this->query) !== ''
+                ? $this->invalidErrorMessage
+                : null;
+            // $this->query = '';
+        } else {
+            $this->errorMessage = null;
         }
 
         $this->suggestions = [];
@@ -100,7 +119,19 @@ class CityAutocomplete extends Component
 
     public function selectHighlighted(): void
     {
+        if ($this->cityId !== null) {
+            $this->errorMessage = null;
+            $this->suggestions = [];
+            $this->highlightedIndex = -1;
+            return;
+        }
+
         if (!isset($this->suggestions[$this->highlightedIndex])) {
+            if (!$this->commitTypedExactMatch()) {
+                $this->errorMessage = trim($this->query) !== ''
+                    ? $this->invalidErrorMessage
+                    : null;
+            }
             return;
         }
 
@@ -135,6 +166,42 @@ class CityAutocomplete extends Component
             ->all();
 
         $this->highlightedIndex = empty($this->suggestions) ? -1 : 0;
+    }
+
+    protected function commitTypedExactMatch(): bool
+    {
+        $search = trim($this->query);
+        if ($search === '') {
+            return false;
+        }
+
+        $normalizedSearch = mb_strtolower($search);
+
+        foreach ($this->suggestions as $suggestion) {
+            $label = mb_strtolower(trim((string) ($suggestion['label'] ?? '')));
+            $name = mb_strtolower(trim((string) ($suggestion['name'] ?? '')));
+
+            if ($normalizedSearch === $label || $normalizedSearch === $name) {
+                $this->selectCity((int) $suggestion['id']);
+                return true;
+            }
+        }
+
+        $city = City::query()
+            ->with(['state:id,abrv,country_id', 'state.country:id,name'])
+            ->where('status', '1')
+            ->whereRaw('LOWER(name) = ?', [$normalizedSearch])
+            ->orderBy('name')
+            ->first();
+
+        if (!$city) {
+            return false;
+        }
+
+        $this->cityId = (int) $city->id;
+        $this->query = $this->formatCityLabel($city);
+
+        return true;
     }
 
     public function render()

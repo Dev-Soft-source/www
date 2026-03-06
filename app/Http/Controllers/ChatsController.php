@@ -12,6 +12,8 @@ use App\Models\ChatsPageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\FCMToken;
 use App\Models\Ride;
+use App\Models\PxRide;
+use App\Models\PxRideStop;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Models\UserMessageCount;
@@ -23,6 +25,94 @@ use Carbon\Carbon;
 
 class ChatsController extends Controller
 {
+    public function pxIndex($lang = null, $id = null, $from_stop_id = null, $to_stop_id = null)
+    {
+        $fromStop = PxRideStop::query()
+            ->with('ride.route')
+            ->find((int) $from_stop_id);
+        $toStop = PxRideStop::query()->find((int) $to_stop_id);
+
+        if (
+            !$fromStop ||
+            !$toStop ||
+            (int) $id !== (int) $fromStop->ride_id ||
+            (int) $fromStop->ride_id !== (int) $toStop->ride_id ||
+            !$fromStop->ride ||
+            !$fromStop->ride->route ||
+            !(int) ($fromStop->ride->driver_id ?? 0)
+        ) {
+            return redirect()->route('my_chats', ['lang' => $lang ?? app()->getLocale()])
+                ->with('error', 'Ride or driver not found.');
+        }
+
+        return $this->index(
+            $lang,
+            $fromStop->label ?? ($fromStop->ride->route->origin_label ?? 'unknown'),
+            $toStop->label ?? ($fromStop->ride->route->destination_label ?? 'unknown'),
+            -1 * (int) $fromStop->ride_id,
+            (int) $fromStop->ride->driver_id
+        );
+    }
+
+    protected function resolveChatRide(int $rawRideId)
+    {
+        if ($rawRideId < 0) {
+            $pxRide = PxRide::query()
+                ->with(['route', 'driver'])
+                ->find(abs($rawRideId));
+
+            if (!$pxRide) {
+                return [null, null, null];
+            }
+
+            $proxyRide = (object) [
+                'id' => $rawRideId,
+                'date' => optional($pxRide->departure_at)->format('Y-m-d'),
+                'time' => optional($pxRide->departure_at)->format('H:i:s'),
+                'rideDetail' => [
+                    (object) [
+                        'departure' => $pxRide->route->origin_label ?? '',
+                        'destination' => $pxRide->route->destination_label ?? '',
+                        'date' => optional($pxRide->departure_at)->format('Y-m-d'),
+                        'time' => optional($pxRide->departure_at)->format('H:i:s'),
+                    ],
+                ],
+            ];
+
+            $chatMeta = [
+                'type' => 'px',
+                'ride_id' => $rawRideId,
+                'departure' => $pxRide->route->origin_label ?? '',
+                'destination' => $pxRide->route->destination_label ?? '',
+                'date' => optional($pxRide->departure_at)->format('Y-m-d'),
+                'time' => optional($pxRide->departure_at)->format('H:i:s'),
+                'driver_id' => $pxRide->driver_id,
+            ];
+
+            return [$proxyRide, $pxRide, $chatMeta];
+        }
+
+        $ride = Ride::whereId($rawRideId)->with(['rideDetail' => function ($q) {
+            $q->where('default_ride', '1');
+        }])->first();
+
+        if (!$ride) {
+            return [null, null, null];
+        }
+
+        $chatMeta = [
+            'type' => 'classic',
+            'ride_id' => (int) $ride->id,
+            'departure' => $ride->rideDetail[0]->departure ?? '',
+            'destination' => $ride->rideDetail[0]->destination ?? '',
+            'date' => $ride->date ?? '',
+            'time' => $ride->time ?? '',
+            'driver_id' => $ride->added_by ?? null,
+        ];
+
+        return [$ride, $ride, $chatMeta];
+    }
+
     public function index($lang = null, $departure, $destination, $id, $passenger)
     {
         $languages = Language::all();
@@ -70,7 +160,7 @@ class ChatsController extends Controller
                 ->get();
         }
 
-        $ride = Ride::whereId($id)->first();
+        [$ride, $sourceRide, $chatRideMeta] = $this->resolveChatRide((int) $id);
         $passenger = User::whereId($passenger)->first();
         
         // Validate that ride and passenger exist
@@ -81,7 +171,7 @@ class ChatsController extends Controller
 
         // dd($chatsPage);
         
-        return view('chat', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
+        return view('chat', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage, 'chatRideMeta' => $chatRideMeta]);
     }
 
     public function chatDetail($lang = null, $id, $passenger)
@@ -130,7 +220,7 @@ class ChatsController extends Controller
                 ->get();
         }
 
-        $ride = Ride::whereId($id)->first();
+        [$ride, $sourceRide, $chatRideMeta] = $this->resolveChatRide((int) $id);
         $passenger = User::whereId($passenger)->first();
         
         // Validate that ride and passenger exist
@@ -139,7 +229,7 @@ class ChatsController extends Controller
                 ->with('error', 'Ride or passenger not found.');
         }
         
-        return view('chat_detail', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
+        return view('chat_detail', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage, 'chatRideMeta' => $chatRideMeta]);
     }
 
     public function fetchMessages($id, $userId)
@@ -209,12 +299,14 @@ class ChatsController extends Controller
             ->first();
 
         if (is_null($contact_count) || $contact_count->user_inbox_count < $contact_limit) {
-            $ride = Ride::whereId($request->ride_id)->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }])->first();
+            [$ride, $sourceRide, $chatRideMeta] = $this->resolveChatRide((int) $request->ride_id);
+
+            if (!$ride || !$sourceRide) {
+                return ['status' => 'Ride not found.'];
+            }
 
             $rideDetailId = "";
-            if (isset($ride->rideDetail[0]) && !empty($ride->rideDetail[0])) {
+            if (($chatRideMeta['type'] ?? 'classic') === 'classic' && isset($ride->rideDetail[0]) && !empty($ride->rideDetail[0])) {
                 $rideDetailId = $ride->rideDetail[0]->id;
             }
 
@@ -234,7 +326,7 @@ class ChatsController extends Controller
             })->orWhere(function ($query) use ($user, $request) {
                 $query->where('sender', $request->userId)
                     ->where('receiver', $user->id);
-            })->where('ride_id', $ride->id)->first();
+            })->where('ride_id', $chatRideMeta['ride_id'])->first();
 
             if ($lastMessage) {
                 $lastMessageTime = $lastMessage->created_at;
@@ -255,9 +347,11 @@ class ChatsController extends Controller
                     if (isset($receiver->email_notification) && $receiver->email_notification == 1) {
 
                         // Generate and send email
-                        $booking = Booking::where('ride_id', $request->ride_id)->where('user_id', $user->id)->first();
+                        $booking = ($chatRideMeta['type'] ?? 'classic') === 'classic'
+                            ? Booking::where('ride_id', abs((int) $request->ride_id))->where('user_id', $user->id)->first()
+                            : null;
                         $isBooked = !is_null($booking);
-                        $type = $user->id === $ride->added_by ? 'driver' : 'passenger';
+                        $type = $user->id === ($chatRideMeta['driver_id'] ?? null) ? 'driver' : 'passenger';
                         if ($booking ) {
 
                             $data = [ 'isBooked' => $isBooked,'type' => $type,'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
@@ -273,10 +367,10 @@ class ChatsController extends Controller
                                 'senderLastName' => $user->last_name,
                                 // 'seats' => $booking->seats,
                                 // 'price' => $booking->fare,
-                                'from' => $ride->rideDetail[0]->departure,
-                                'to' => $ride->rideDetail[0]->destination,
-                                'date' => $ride->rideDetail[0]->date,
-                                'time' => $ride->rideDetail[0]->time
+                                'from' => $chatRideMeta['departure'] ?? '',
+                                'to' => $chatRideMeta['destination'] ?? '',
+                                'date' => $chatRideMeta['date'] ?? '',
+                                'time' => $chatRideMeta['time'] ?? ''
                             ];
                             Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
                         }
@@ -299,8 +393,10 @@ class ChatsController extends Controller
                 // Generate and send email
                 if (isset($receiver->email_notification) && $receiver->email_notification == 1) {
 
-                    $booking = Booking::where('ride_id', $request->ride_id)->where('user_id', $user->id)->first();
-                    $type = $user->id === $ride->added_by ? 'driver' : 'passenger';
+                    $booking = ($chatRideMeta['type'] ?? 'classic') === 'classic'
+                        ? Booking::where('ride_id', abs((int) $request->ride_id))->where('user_id', $user->id)->first()
+                        : null;
+                    $type = $user->id === ($chatRideMeta['driver_id'] ?? null) ? 'driver' : 'passenger';
                     $isBooked = !is_null($booking);
                     if ($booking) {
 
@@ -340,8 +436,10 @@ class ChatsController extends Controller
                 if (isset($receiver->email_notification) && $receiver->email_notification == 1) {
 
                     // Generate and send email
-                    $booking = Booking::where('ride_id', $request->ride_id)->where('user_id', $user->id)->first();
-                    $type = $user->id === $ride->added_by ? 'driver' : 'passenger';
+                    $booking = ($chatRideMeta['type'] ?? 'classic') === 'classic'
+                        ? Booking::where('ride_id', abs((int) $request->ride_id))->where('user_id', $user->id)->first()
+                        : null;
+                    $type = $user->id === ($chatRideMeta['driver_id'] ?? null) ? 'driver' : 'passenger';
                     $isBooked = !is_null($booking);
                     if ($booking) {
 
@@ -372,7 +470,7 @@ class ChatsController extends Controller
 
             if (empty($rideFirstMessage)) {
                 $message1 = Message::create([
-                    'ride_id' => $ride->id,
+                    'ride_id' => $chatRideMeta['ride_id'],
                     'receiver' => $request->input('userId'),
                     'sender' => $user->id,
                     'message' => $request->input('message'),
@@ -385,7 +483,7 @@ class ChatsController extends Controller
             } else {
                 // Only create regular message if it's not the first message
                 $message = Message::create([
-                    'ride_id' => $ride->id,
+                    'ride_id' => $chatRideMeta['ride_id'],
                     'receiver' => $request->input('userId'),
                     'sender' => $user->id,
                     'message' => $request->input('message'),
@@ -431,7 +529,7 @@ class ChatsController extends Controller
             // Only create the message here if it wasn't created above
             if (!isset($message)) {
                 $message = Message::create([
-                    'ride_id' => $ride->id,
+                    'ride_id' => $chatRideMeta['ride_id'],
                     'receiver' => $request->input('userId'),
                     'sender' => $user->id,
                     'message' => $request->input('message'),
@@ -451,7 +549,7 @@ class ChatsController extends Controller
             $extraData = [
                 'notification_type' => 'chat received',
                 'other_user_id' => (string) $user->id,
-                'ride_id' => (string) $ride->id,
+                'ride_id' => (string) $chatRideMeta['ride_id'],
                 'type' => 'new',
                 'sender_id' => (string) $user->id,
                 'receiver_id' => (string) $receiver->id,
@@ -481,7 +579,7 @@ class ChatsController extends Controller
             // Note: toOthers() only works for presence channels, not regular channels
             // Since we're using regular channels, we broadcast to both sender and receiver channels
             try {
-                broadcast(new MessageSentEvent($ride, $user, $message));
+                broadcast(new MessageSentEvent((object) ['id' => $chatRideMeta['ride_id']], $user, $message));
                 Log::info('Message broadcasted', [
                     'message_id' => $message->id,
                     'sender' => $message->sender,

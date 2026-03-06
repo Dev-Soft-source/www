@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\Message;
-use App\Models\Ride;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -25,7 +24,7 @@ class MessageSentEvent implements ShouldBroadcastNow
      *
      * @return void
      */
-    public function __construct(Ride $ride, User $user,Message $message)
+    public function __construct($ride, User $user, Message $message)
     {
         $this->ride = $ride;
         $this->user = $user;

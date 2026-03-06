@@ -2009,7 +2009,7 @@
         var errorCityMissing = "{{ $homePage->slider_required_error }}" ?? "Please select a valid city from the dropdown";
 
         // Google Places Autocomplete initialization - Define function before loading Google Maps API
-        let fromAutocomplete, toAutocomplete;
+        let fromAutocomplete, toAutocomplete, geocoder;
         // Store selected place data for validation
         let selectedFromPlace = null;
         let selectedToPlace = null;
@@ -2020,6 +2020,8 @@
 
         // This function will be called by Google Maps API when it loads
         window.initGooglePlaces = function() {
+            geocoder = new google.maps.Geocoder();
+
             // Initialize autocomplete for "From" input - Canada only
             fromAutocomplete = new google.maps.places.Autocomplete(
                 document.getElementById('fromInput'), {
@@ -2118,6 +2120,28 @@
                 }
             });
 
+            document.getElementById('fromInput').addEventListener('keydown', async function(event) {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+
+                const resolved = await resolveTypedCityValue(this.value, 'from');
+                if (resolved) {
+                    event.preventDefault();
+                }
+            });
+
+            document.getElementById('toInput').addEventListener('keydown', async function(event) {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+
+                const resolved = await resolveTypedCityValue(this.value, 'to');
+                if (resolved) {
+                    event.preventDefault();
+                }
+            });
+
             // Detect clicks on autocomplete dropdown to prevent blur from clearing
             document.addEventListener('mousedown', function(e) {
                 // Check if click is on Google's autocomplete dropdown (pac-container)
@@ -2133,18 +2157,25 @@
 
             // Validate and show tooltip on blur if no valid place was selected
             document.getElementById('fromInput').addEventListener('blur', function() {
+                 
+                 
                 // Don't validate if we're programmatically setting the value or selecting from dropdown
                 if (isSettingPlaceValue || isSelectingFromDropdown) {
                     return;
                 }
                 // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(() => {
+                setTimeout(async () => {
                     // Check again if we're setting a place value or selecting from dropdown
                     if (isSettingPlaceValue || isSelectingFromDropdown) {
                         return;
                     }
-                    const currentValue = this.value.trim();
+                    let currentValue = this.value.trim();
                     const fromInputError = document.getElementById('fromInputError');
+
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                        await resolveTypedCityValue(currentValue, 'from');
+                        currentValue = this.value.trim();
+                    }
 
                     // Validate: check if input has value but no valid place is selected
                     if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace
@@ -2180,13 +2211,18 @@
                     return;
                 }
                 // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(() => {
+                setTimeout(async () => {
                     // Check again if we're setting a place value or selecting from dropdown
                     if (isSettingPlaceValue || isSelectingFromDropdown) {
                         return;
                     }
-                    const currentValue = this.value.trim();
+                    let currentValue = this.value.trim();
                     const toInputError = document.getElementById('toInputError');
+
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                        await resolveTypedCityValue(currentValue, 'to');
+                        currentValue = this.value.trim();
+                    }
 
                     // Validate: check if input has value but no valid place is selected
                     if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
@@ -2230,6 +2266,69 @@
                 }
             });
         };
+
+        async function resolveTypedCityValue(rawValue, target) {
+            const value = (rawValue || '').trim();
+            if (!value || !geocoder) {
+                return false;
+            }
+
+            const inputId = target === 'from' ? 'fromInput' : 'toInput';
+            const input = document.getElementById(inputId);
+
+            try {
+                const response = await geocoder.geocode({
+                    address: value,
+                    componentRestrictions: {
+                        country: 'CA'
+                    }
+                });
+                const result = response?.results?.find((item) => item.address_components?.some((component) =>
+                    component.types.includes('locality') ||
+                    component.types.includes('administrative_area_level_2')
+                ));
+
+                if (!result) {
+                    return false;
+                }
+
+                const formattedAddress = formatPlaceAddress(result);
+                if (!formattedAddress) {
+                    return false;
+                }
+
+                isSettingPlaceValue = true;
+
+                const selectedPlace = {
+                    place_id: result.place_id,
+                    formatted_address: formattedAddress,
+                    value: formattedAddress
+                };
+
+                if (target === 'from') {
+                    selectedFromPlace = selectedPlace;
+                } else {
+                    selectedToPlace = selectedPlace;
+                }
+
+                if (input) {
+                    input.value = formattedAddress;
+                }
+
+                const errorEl = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError');
+                if (errorEl) {
+                    errorEl.classList.add('hidden');
+                }
+
+                setTimeout(() => {
+                    isSettingPlaceValue = false;
+                }, 100);
+
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
 
         // Format place address to "City, Province, Canada" format
         function formatPlaceAddress(place) {

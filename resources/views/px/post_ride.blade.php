@@ -8,34 +8,36 @@
 
 @section('content')
     @php
-        // Handle edit mode - populate from ride if exists
+        // Handle edit/copy mode - populate from ride if exists
         $isEditMode = isset($ride) && isset($isEditMode) && $isEditMode;
+        $isCopyMode = isset($ride) && isset($isCopyMode) && $isCopyMode;
+        $prefillRide = ($isEditMode || $isCopyMode) ? $ride : null;
 
-        if ($isEditMode && $ride) {
+        if ($prefillRide) {
             // Populate origin data
-            if (!old('origin.label') && $ride->route) {
-                $oldOriginLabel = $ride->route->origin_label;
-                $oldOriginCityId = $ride->route->origin_city_id;
+            if (!old('origin.label') && $prefillRide->route) {
+                $oldOriginLabel = $prefillRide->route->origin_label;
+                $oldOriginCityId = $prefillRide->route->origin_city_id;
             } else {
                 $oldOriginLabel = old('origin.label');
                 $oldOriginCityId = old('origin.city_id');
             }
 
             // Populate destination data
-            if (!old('destination.label') && $ride->route) {
-                $oldDestinationLabel = $ride->route->destination_label;
-                $oldDestinationCityId = $ride->route->destination_city_id;
+            if (!old('destination.label') && $prefillRide->route) {
+                $oldDestinationLabel = $prefillRide->route->destination_label;
+                $oldDestinationCityId = $prefillRide->route->destination_city_id;
             } else {
                 $oldDestinationLabel = old('destination.label');
                 $oldDestinationCityId = old('destination.city_id');
             }
 
             // Populate pickup/dropoff locations
-            $oldPickupLocation = old('origin.pickup_location', $ride->meta['pickup_location'] ?? '');
-            $oldDropoffLocation = old('destination.dropoff_location', $ride->meta['dropoff_location'] ?? '');
+            $oldPickupLocation = old('origin.pickup_location', $prefillRide->meta['pickup_location'] ?? '');
+            $oldDropoffLocation = old('destination.dropoff_location', $prefillRide->meta['dropoff_location'] ?? '');
 
             // Populate departure_at
-            $oldDepartureAt = old('departure_at', $ride->departure_at);
+            $oldDepartureAt = old('departure_at', $prefillRide->departure_at);
             $oldDepartureAtFormatted = '';
             if ($oldDepartureAt) {
                 try {
@@ -54,45 +56,45 @@
 
             // Populate stops (excluding origin and destination - already filtered in controller)
             $oldStops = old('stops', []);
-            if (empty($oldStops) && isset($ride->intermediate_stops)) {
-                $oldStops = $ride->intermediate_stops;
+            if (empty($oldStops) && isset($prefillRide->intermediate_stops)) {
+                $oldStops = $prefillRide->intermediate_stops;
             }
             $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
-            if ($oldDestinationPriceDeltaMinor === null && isset($ride->stops) && $ride->stops->isNotEmpty()) {
-                $destinationStop = $ride->stops->sortBy('stop_order')->last();
+            if ($oldDestinationPriceDeltaMinor === null && isset($prefillRide->stops) && $prefillRide->stops->isNotEmpty()) {
+                $destinationStop = $prefillRide->stops->sortBy('stop_order')->last();
                 $oldDestinationPriceDeltaMinor = $destinationStop ? $destinationStop->price_delta_minor ?? 0 : 0;
             }
 
             // Populate other fields
-            $oldSeatsTotal = old('seats_total', $ride->seats_total);
-            $oldPriceMinor = old('price_minor', $ride->price_minor);
-            $oldCurrency = old('currency', $ride->currency);
-            $oldVehicleId = old('vehicle_id', $ride->vehicle_id);
-            $oldNotes = old('notes', $ride->notes);
-            $oldStatus = old('status', $ride->status);
-            $oldVisibility = old('visibility', $ride->visibility);
-            $oldBookingMode = old('booking_mode', $ride->booking_mode);
-            $oldBookingMethod = old('booking_method', $ride->booking_method);
-            $oldSmokingAllowed = old('smoking_allowed', $ride->smoking_allowed);
-            $oldPetsAllowed = old('pets_allowed', $ride->pets_allowed);
-            $oldLuggageSize = old('luggage_size', $ride->luggage_size);
-            $oldAcceptMoreLuggage = old('accept_more_luggage', $ride->meta['accept_more_luggage'] ?? false);
+            $oldSeatsTotal = old('seats_total', $prefillRide->seats_total);
+            $oldPriceMinor = old('price_minor', $prefillRide->price_minor);
+            $oldCurrency = old('currency', $prefillRide->currency);
+            $oldVehicleId = old('vehicle_id', $prefillRide->vehicle_id);
+            $oldNotes = old('notes', $prefillRide->notes);
+            $oldStatus = old('status', $isCopyMode ? 'published' : $prefillRide->status);
+            $oldVisibility = old('visibility', $prefillRide->visibility);
+            $oldBookingMode = old('booking_mode', $prefillRide->booking_mode);
+            $oldBookingMethod = old('booking_method', $prefillRide->booking_method);
+            $oldSmokingAllowed = old('smoking_allowed', $prefillRide->smoking_allowed);
+            $oldPetsAllowed = old('pets_allowed', $prefillRide->pets_allowed);
+            $oldLuggageSize = old('luggage_size', $prefillRide->luggage_size);
+            $oldAcceptMoreLuggage = old('accept_more_luggage', $prefillRide->meta['accept_more_luggage'] ?? false);
             $oldIsRecurring = old(
                 'is_recurring',
-                isset($ride->meta['recurring']['enabled']) && $ride->meta['recurring']['enabled'],
+                isset($prefillRide->meta['recurring']['enabled']) && $prefillRide->meta['recurring']['enabled'],
             );
-            $oldRecurringFrequency = old('recurring_frequency', $ride->meta['recurring']['frequency'] ?? '');
-            $oldRecurringTrips = old('recurring_trips', $ride->meta['recurring']['trips'] ?? 0);
+            $oldRecurringFrequency = old('recurring_frequency', $prefillRide->meta['recurring']['frequency'] ?? '');
+            $oldRecurringTrips = old('recurring_trips', $prefillRide->meta['recurring']['trips'] ?? 0);
             $oldPickDropOffDescription = old(
                 'pick_drop_off_description',
-                $ride->meta['pick_drop_off_description'] ?? '',
+                $prefillRide->meta['pick_drop_off_description'] ?? '',
             );
 
             // Populate selected ride options
-            $oldRideOptionIds = old('ride_option_ids', $ride->options->pluck('id')->toArray());
+            $oldRideOptionIds = old('ride_option_ids', $prefillRide->options->pluck('id')->toArray());
 
             // Determine vehicle mode
-            if ($ride->vehicle_id) {
+            if ($prefillRide->vehicle_id) {
                 $oldVehicleMode = old('vehicle_mode', 'existing');
             } else {
                 $oldVehicleMode = old('vehicle_mode', 'skip');
@@ -211,7 +213,7 @@
     @endphp
     <div class="container px-4 mx-auto my-14 page-post_a_ride">
         <div class="flex justify-end md:items-center">
-            <a href="{{ route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+            <a href="{{ route('px.post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
                 class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
                 @isset($postRidePage->post_arrived_again_label)
                     {{ $postRidePage->post_arrived_again_label }}
@@ -222,6 +224,8 @@
             <h1>
                 @if (isset($isEditMode) && $isEditMode)
                     Edit a Ride
+                @elseif (isset($isCopyMode) && $isCopyMode)
+                    {{ $postRidePage->post_ride_again_main_heading ?? 'Post a Ride Again' }}
                 @else
                     {{ $postRidePage->main_heading }}
                 @endif
@@ -830,25 +834,26 @@
                                 @foreach ($group->options as $option)
                                     @php
                                         $checkboxDisabled = '';
-                                        // pink ride
-                                        $pinkRideDisabledCls = '';
-                                        $pinkRideCls = '';
-                                        if (!$isPinkRideDisabled && $option->code === 'pink_rides') {
-                                            $pinkRideDisabledCls = 'line-through';
-                                            $checkboxDisabled = 'disabled';
-                                        }
+                                        $optionClass = '';
+                                        $disabledClass = '';
+                                        $checkboxDisabled = '';
+
                                         if ($option->code === 'pink_rides') {
-                                            $pinkRideCls = 'text-pink-500';
+                                            $optionClass = 'text-pink-500';
+
+                                            if (!$isPinkRideDisabled) {
+                                                $disabledClass = 'line-through';
+                                                $checkboxDisabled = 'disabled';
+                                            }
                                         }
-                                        // extra ride
-                                        $extraRideDisabledCls = '';
-                                        $extraRideCls = '';
-                                        if ($isExtraRideDisabled && $option->code === 'extra_plus_rides') {
-                                            $extraRideDisabledCls = 'line-through';
-                                            $checkboxDisabled = 'disabled';
-                                        }
+
                                         if ($option->code === 'extra_plus_rides') {
-                                            $extraRideCls = 'text-green-500';
+                                            $optionClass = 'text-green-500';
+
+                                            if ($isExtraRideDisabled) {
+                                                $disabledClass = 'line-through';
+                                                $checkboxDisabled = 'disabled';
+                                            }
                                         }
                                     @endphp
                                     <label class="flex items-start gap-2 text-sm">
@@ -880,7 +885,7 @@
                                             @endif
                                         @endif
                                         <span
-                                            class="font-medium text-gray-800 {{ $pinkRideCls }} {{ $extraRideCls }} {{ $pinkRideDisabledCls }} {{ $extraRideDisabledCls }}">{{ $option->display_label }}</span>
+                                            class="font-medium text-gray-800 {{ $optionClass }} {{ $disabledClass }}">{{ $option->display_label }}</span>
                                         <span class="inline-flex cursor-help w-4 h-4"
                                             data-tippy-content="{{ $option->display_description }}">
                                             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -979,7 +984,7 @@
                 </section>
 
                 <div class="pt-2 mt-8">
-                    <button type="submit" class="button-exp-fill">Post PX Ride</button>
+                    <button type="submit" class="button-exp-fill">Post Ride</button>
                 </div>
             </form>
         </div>
@@ -1316,19 +1321,11 @@
 
             // Seat visual selector: highlight all seats up to selected total.
             window.showPxSeatsWarningModal = function() {
-                const modal = document.getElementById('pxSeatsWarningModal');
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.style.display = 'block';
-                }
+                openModalById('pxSeatsWarningModal');
             };
 
             window.closePxSeatsWarningModal = function() {
-                const modal = document.getElementById('pxSeatsWarningModal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                    modal.style.display = 'none';
-                }
+                closeModalById('pxSeatsWarningModal');
             };
 
             window.seat_selected = function(th, showWarning = true) {
@@ -1926,19 +1923,8 @@
                 const isPinkRideChecked = pinkRideCheckbox.checked;
                 const isExtraCareChecked = extraCareCheckbox.checked;
 
-                // Toggle Pink Ride disclaimer
-                if (isPinkRideChecked) {
-                    pinkRideDisclaimer.classList.remove('hidden');
-                } else {
-                    pinkRideDisclaimer.classList.add('hidden');
-                }
-
-                // Toggle Extra+ Ride disclaimer
-                if (isExtraCareChecked) {
-                    extraCareDisclaimer.classList.remove('hidden');
-                } else {
-                    extraCareDisclaimer.classList.add('hidden');
-                }
+                toggleElementHidden(pinkRideDisclaimer, !isPinkRideChecked);
+                toggleElementHidden(extraCareDisclaimer, !isExtraCareChecked);
 
                 // Update numbering: if pink ride is checked, extra+ is 6, otherwise 5
                 if (isExtraCareChecked) {
@@ -1967,17 +1953,7 @@
                     heading: @json(session('validation_heading', 'Validation Failed'))
                 };
                 if (validationError.message && validationError.heading) {
-                    // Show the validation error modal
-                    const modal = document.getElementById('pxValidationErrorModal');
-                    const errorHeading = document.getElementById('pxValidationErrorHeading');
-                    const errorPara = document.getElementById('pxValidationErrorParagraph');
-
-                    if (modal && errorHeading && errorPara) {
-                        errorHeading.textContent = validationError.heading;
-                        errorPara.textContent = validationError.message;
-                        modal.classList.remove('hidden');
-                        modal.style.display = 'block';
-                    }
+                    showPxValidationErrorModal(validationError.heading, validationError.message);
                 }
             @endif
 
@@ -2057,6 +2033,54 @@
         // Store distance globally when available (from Google API calculation)
         window.pxRideDistanceKm = null;
 
+        function setModalVisibility(modalId, isVisible) {
+            const modal = document.getElementById(modalId);
+            if (!modal) {
+                return null;
+            }
+
+            modal.classList.toggle('hidden', !isVisible);
+            modal.style.display = isVisible ? 'block' : 'none';
+            return modal;
+        }
+
+        function openModalById(modalId) {
+            return setModalVisibility(modalId, true);
+        }
+
+        function closeModalById(modalId) {
+            return setModalVisibility(modalId, false);
+        }
+
+        function setElementText(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        function toggleElementHidden(element, isHidden) {
+            if (element) {
+                element.classList.toggle('hidden', isHidden);
+            }
+        }
+
+        function focusPxPriceInput() {
+            const priceInput = document.getElementById('px-price-minor-input');
+            if (!priceInput) {
+                return;
+            }
+
+            priceInput.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            setTimeout(() => {
+                priceInput.focus();
+                priceInput.select();
+            }, 300);
+        }
+
         // Function to validate price per seat
         // Formula: (Distance × Cap) ÷ Seats = Max price per seat
         function validatePxPricePerSeat(priceMinor, distanceKm, seats) {
@@ -2122,18 +2146,16 @@
 
         // Function to show error modal (Price Limit Exceeded)
         function showPxPriceErrorModal(maxPricePerSeat) {
-            const modal = document.getElementById('pxPriceErrorModal');
-            if (modal) {
-                document.getElementById('pxPriceErrorParagraph1').textContent =
-                    'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.';
-                document.getElementById('pxPriceErrorParagraph2').textContent =
-                    'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.';
-                document.getElementById('pxPriceErrorParagraph3').textContent =
-                    'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
-
-                modal.classList.remove('hidden');
-                modal.style.display = 'block';
-            }
+            setElementText('pxPriceErrorParagraph1',
+                'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.'
+            );
+            setElementText('pxPriceErrorParagraph2',
+                'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.'
+            );
+            setElementText('pxPriceErrorParagraph3',
+                'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.'
+            );
+            openModalById('pxPriceErrorModal');
         }
 
         // Function to show warning modal (Recommended Contribution Limit)
@@ -2171,68 +2193,34 @@
 
         // Function to adjust price from error (focus on price input field)
         function adjustPxPriceFromError() {
-            const modal = document.getElementById('pxPriceErrorModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
-            const priceInput = document.getElementById('px-price-minor-input');
-            if (priceInput) {
-                priceInput.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-                setTimeout(() => {
-                    priceInput.focus();
-                    priceInput.select();
-                }, 300);
-            }
+            closeModalById('pxPriceErrorModal');
+            focusPxPriceInput();
         }
 
         // Function to adjust price from warning (focus on price input field)
         function adjustPxPriceFromWarning() {
             console.log('Adjust PX Price clicked - closing modal and focusing on price field');
-            const modal = document.getElementById('pxPriceWarningModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
-            const priceInput = document.getElementById('px-price-minor-input');
-            if (priceInput) {
-                priceInput.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-                setTimeout(() => {
-                    priceInput.focus();
-                    priceInput.select();
-                }, 300);
-            }
+            closeModalById('pxPriceWarningModal');
+            focusPxPriceInput();
             return false;
         }
 
+        function showPxValidationErrorModal(heading, message) {
+            setElementText('pxValidationErrorHeading', heading);
+            setElementText('pxValidationErrorParagraph', message);
+            openModalById('pxValidationErrorModal');
+        }
+
         function closePxPriceErrorModal() {
-            const modal = document.getElementById('pxPriceErrorModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
+            closeModalById('pxPriceErrorModal');
         }
 
         function closePxPriceWarningModal() {
-            const modal = document.getElementById('pxPriceWarningModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
+            closeModalById('pxPriceWarningModal');
         }
 
         function closePxValidationErrorModal() {
-            const modal = document.getElementById('pxValidationErrorModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
+            closeModalById('pxValidationErrorModal');
         }
     </script>
 @endsection

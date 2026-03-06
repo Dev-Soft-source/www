@@ -397,6 +397,11 @@ Route::get('{lang?}/firm-cancellation-policy', [CancellationPolicyController::cl
 Route::get('{lang?}/dispute-policy', [DisputePolicyController::class, 'index'])->name('dispute_policy');
 Route::get('{lang?}/cost-sharing-compliance-policy', [CostSharingCompliancePolicyController::class, 'index'])->name('cost_sharing_compliance_policy');
 Route::get('{lang?}/contact-us', [ContactUsController::class, 'index'])->name('contact_us');
+Route::get('{lang?}/px/chat/{id}/{from_stop_id}/{to_stop_id}', [ChatsController::class, 'pxIndex'])
+    ->whereNumber('id')
+    ->whereNumber('from_stop_id')
+    ->whereNumber('to_stop_id')
+    ->name('px.chat');
 Route::get('{lang?}/chat/{departure}/to/{destination}/{id}/{passenger}', [ChatsController::class, 'index'])->name('chat');
 Route::get('{lang?}/chat-detail/{id}/{passenger}', [ChatsController::class, 'chatDetail'])->name('chat_detail');
 Route::get('/chat-messages/{id}/{userId}', [ChatsController::class, 'fetchMessages']);
@@ -510,6 +515,10 @@ Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
 
 // new logic for px post ride
 Route::get('{lang?}/px/post-ride', [PxRideWebController::class, 'create'])->name('px.post_ride.create')->middleware('auth');
+Route::get('{lang?}/px/post-ride-again', [PxRideWebController::class, 'postRideAgainUpcoming'])->name('px.post_ride_again')->middleware('auth');
+Route::get('{lang?}/px/post-ride-again-completed', [PxRideWebController::class, 'postRideAgainCompleted'])->name('px.post_ride_again_completed')->middleware('auth');
+Route::get('{lang?}/px/post-ride-again-cancelled', [PxRideWebController::class, 'postRideAgainCancelled'])->name('px.post_ride_again_cancelled')->middleware('auth');
+Route::get('{lang?}/px/post-ride/{id}/copy', [PxRideWebController::class, 'copy'])->name('px.post_ride.copy')->middleware('auth');
 Route::get('{lang?}/px/post-ride/{id}/edit', [PxRideWebController::class, 'edit'])->name('px.post_ride.edit')->middleware('auth');
 Route::post('{lang?}/px/post-ride', [PxRideWebController::class, 'store'])->name('px.post_ride.store')->middleware('auth');
 Route::put('{lang?}/px/post-ride/{id}', [PxRideWebController::class, 'update'])->name('px.post_ride.update')->middleware('auth');
@@ -517,7 +526,11 @@ Route::get('{lang?}/px/my-rides', [PxRideWebController::class, 'index'])->name('
 Route::get('{lang?}/px/my-ride/{id}', [PxRideWebController::class, 'show'])->name('px.my_ride_detail')->middleware('auth');
 Route::post('{lang?}/px/my-ride/{id}/booking/{bookingId}/approve', [PxRideWebController::class, 'approveBookingRequest'])->whereNumber('id')->whereNumber('bookingId')->name('px.my_ride_detail.booking.approve')->middleware('auth');
 Route::post('{lang?}/px/my-ride/{id}/booking/{bookingId}/decline', [PxRideWebController::class, 'declineBookingRequest'])->whereNumber('id')->whereNumber('bookingId')->name('px.my_ride_detail.booking.decline')->middleware('auth');
-Route::get('{lang?}/px/ride/{id}', [PxRideWebController::class, 'rideDetail'])->name('px.ride_detail');
+Route::get('{lang?}/px/ride/{id}/{from_stop_id?}/{to_stop_id?}', [PxRideWebController::class, 'rideDetail'])
+    ->whereNumber('id')
+    ->whereNumber('from_stop_id')
+    ->whereNumber('to_stop_id')
+    ->name('px.ride_detail');
 Route::get('{lang?}/px/search-rides', [PxRideWebController::class, 'search'])->name('px.search_ride');
 
 Route::get('{lang?}/px/booking/{id}/edit', [PxBookingWebController::class, 'editBooking'])->whereNumber('id')->name('px.booking.edit')->middleware(['auth', 'nocache']);

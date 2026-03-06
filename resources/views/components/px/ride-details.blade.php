@@ -15,6 +15,7 @@
     'bookingModeLabel' => null,
     'bookingMethodLabel' => null,
     'postRidePage' => null,
+    'type' => 'ride_detail',
 ])
 
 <div class="bg-white rounded-lg shadow-3xl">
@@ -25,11 +26,14 @@
                     @if ($segmentMode)
                         <div class="flex items-center relative">
                             <div class="ml-12 md:ml-20 py-1">
-                                <p class="text-sm text-gray-600">
-                                    <strong>Original route: </strong>
-                                    <span class="text-primary font-medium">{{ $parentOrigin }} →
-                                        {{ $parentDestination }}</span>
-                                </p>
+                                <a href="{{ route('px.ride_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}"
+                                    class="text-gray-600 hover:text-primary transition-colors duration-200">
+                                    <p class="text-xl text-gray-600">
+                                        <strong>Original route: </strong>
+                                        <span class="text-primary font-FuturaMdCnBT">{{ $parentOrigin }} →
+                                            {{ $parentDestination }}</span>
+                                    </p>
+                                </a>
                             </div>
                         </div>
                     @endif
@@ -59,9 +63,7 @@
                         </div>
                     </div>
 
-
-
-                    @if (($segmentMode && $segmentStops->isNotEmpty()) || (!$segmentMode && $ride->stops->isNotEmpty()))
+                    @if (($segmentMode && $segmentStops->isNotEmpty()) || (!$segmentMode && $ride->stops->count() > 2))
                         <div class="flex items-center relative">
                             <div
                                 class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
@@ -72,19 +74,11 @@
                                 <ul class="flex flex-col gap-1 text-sm ml-4 mb-4">
                                     @foreach ($segmentMode ? $segmentStops : $ride->stops->where('is_pickup', true)->where('is_dropoff', true) as $stop)
                                         <li
-                                            class="flex flex-col px-2 py-1 rounded border border-gray-300 bg-gray-50 text-gray-700">
+                                            class="flex flex-col px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
                                             <div class="flex items-center">
                                                 <span class="h-5 w-5 inline-flex mr-2 flex-shrink-0">
-                                                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"
-                                                        fill="#000000">
-                                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                            stroke-linejoin="round"></g>
-                                                        <g id="SVGRepo_iconCarrier">
-                                                            <path fill="#666666"
-                                                                d="M256 17.108c-75.73 0-137.122 61.392-137.122 137.122.055 23.25 6.022 46.107 11.58 56.262L256 494.892l119.982-274.244h-.063c11.27-20.324 17.188-43.18 17.202-66.418C393.122 78.5 331.73 17.108 256 17.108zm0 68.56a68.56 68.56 0 0 1 68.56 68.562A68.56 68.56 0 0 1 256 222.79a68.56 68.56 0 0 1-68.56-68.56A68.56 68.56 0 0 1 256 85.67z">
-                                                            </path>
-                                                        </g>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill="#888888" fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                                                     </svg>
                                                 </span>
                                                 <span
@@ -180,30 +174,65 @@
     </div>
 
 
-
-    <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
-        <div>
-            <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
-                {{ $rideDetailPage->co_passenger_label ?? 'Co-passengers' }} :
-            </h4>
-        </div>
-        <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
-            @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
-                @for ($i = 0; $i < $booking->seats; $i++)
-                    @if ($booking->passenger)
-                        @if ($booking->passenger->profile_image)
-                            <img class="w-10 h-10 rounded-full" src="{{ $booking->passenger->profile_image }}"
-                                alt="">
-                        @else
-                            <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
-                                alt="">
+    @if ($type !== 'my_ride_detail')
+        <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
+            <div>
+                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
+                    {{ $rideDetailPage->co_passenger_label ?? 'Co-passengers' }} :
+                </h4>
+            </div>
+            <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+                @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
+                    @for ($i = 0; $i < $booking->seats; $i++)
+                        @if ($booking->passenger)
+                            @if ($booking->passenger->profile_image)
+                                <img class="w-10 h-10 rounded-full" src="{{ $booking->passenger->profile_image }}"
+                                    alt="">
+                            @else
+                                <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
+                                    alt="">
+                            @endif
                         @endif
-                    @endif
-                @endfor
-            @endforeach
+                    @endfor
+                @endforeach
+            </div>
         </div>
-    </div>
-
+    @else
+        <div
+            class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+            <div class="p-4 flex items-baseline">
+                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                    {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}:
+                </h4>
+                <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">
+                    {{ $ride->seats_total - $ride->seats_available }}
+                    {{ $ride->seats_total - $ride->seats_available == 1 ? $rideDetailPage->seat_on_column_label ?? 'seat' : $rideDetailPage->ride_seat_label ?? 'seats' }}
+                </h4>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                        {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}:
+                    </h4>
+                    <p>
+                        {{ $currency }}{{ number_format(($pricePerSeatMinor * ($ride->seats_total - $ride->seats_available)) / 100, 2) }}
+                    </p>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                        {{ $rideDetailPage->booking_fee_label ?? 'Booking Fee' }}:
+                    </h4>
+                    <p>{{ $currency }}</p>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                        {{ $rideDetailPage->total_amount_label ?? 'Total Amount' }}:
+                    </h4>
+                    <p>{{ $currency }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
@@ -212,17 +241,18 @@
     </h3>
     <div class="bg-white p-4 space-y-3">
         @php
-            $preferenceOptions = $ride->options->filter(function ($option) {
-                return optional($option->group)->code === 'preference';
-            });
+            $allowedGroups = ['preference', 'pets_allowed', 'smoking_allowed', 'luggage_size'];
+            $preferenceOptions = $ride->options->filter(
+                fn($option) => in_array(optional($option->group)->code, $allowedGroups),
+            );
         @endphp
         @if ($preferenceOptions->isNotEmpty())
             @foreach ($preferenceOptions as $option)
                 <div class="flex items-center space-x-2">
-                    @if ($option->icon)
-                        <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $option->icon) }}"
-                            alt="{{ $option->display_label }}">
-                    @endif
+                    {{-- @if ($option->icon) --}}
+                    <img class="w-7 h-7 rounded-full" src="{{ asset('home_page_icons/' . $option->icon) }}"
+                        alt="{{ $option->display_label }}">
+                    {{-- @endif --}}
                     <p>{{ $option->display_label }}</p>
                     <span class="inline-flex cursor-help w-4 h-4"
                         data-tippy-content="{{ $option->display_description }}">

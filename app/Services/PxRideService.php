@@ -394,6 +394,10 @@ class PxRideService
             ->with(['route', 'stops', 'driver', 'vehicle', 'options.translations'])
             ->published();
 
+        if ($user) {
+            $query->where('driver_id', '!=', (int) $user->id);
+        }
+
         $this->applyOrderedStopFilters($query, $filters);
         $this->applyGeoFilters($query, $filters);
         $this->applyDepartureFilters($query, $filters);

@@ -4,6 +4,7 @@
     'detailRoute' => 'px.my_ride_detail',
     'wrapperClass' => 'relative even:bg-gray-200 odd:bg-white',
     'showStatus' => false,
+    'showBookingInfo' => true,
     'showOptions' => true,
     'priceMinor' => null,
     'priceMajor' => null,
@@ -88,6 +89,15 @@
         $destination = $parentDestination;
     }
 
+    $detailFromStopId =
+        isset($ride->matched_from_stop_id) && $ride->matched_from_stop_id !== null
+            ? (int) $ride->matched_from_stop_id
+            : (int) ($orderedStops[$segmentFromIndex]->id ?? 0);
+    $detailToStopId =
+        isset($ride->matched_to_stop_id) && $ride->matched_to_stop_id !== null
+            ? (int) $ride->matched_to_stop_id
+            : (int) ($orderedStops[$segmentToIndex]->id ?? 0);
+
     $showParentRouteHint = $orderedStops->count() >= 2 && ($segmentFromIndex > 0 || $segmentToIndex < $lastStopIndex);
 
     if ($orderedStops->count() >= 2 && $segmentToIndex > $segmentFromIndex) {
@@ -104,7 +114,15 @@
 
 <div class="{{ $wrapperClass }}">
     @php
-        $detailParams = array_merge(['lang' => $lang, 'id' => $ride->id], is_array($detailQuery) ? $detailQuery : []);
+        $detailParams = array_merge(
+            [
+                'lang' => $lang,
+                'id' => $ride->id,
+                'from_stop_id' => $detailFromStopId ?: null,
+                'to_stop_id' => $detailToStopId ?: null,
+            ],
+            is_array($detailQuery) ? $detailQuery : [],
+        );
     @endphp
     <a href="{{ route($detailRoute, $detailParams) }}" class="block">
         <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100"
@@ -223,7 +241,7 @@
                             {{ $resolvedRightInfo }}
                         </p>
                     @endif
-                    @if ($waitingBookingRequestsCount > 0)
+                    @if ($showBookingInfo && $waitingBookingRequestsCount > 0)
                         <div class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
                             <div class="flex items-center gap-2">
                                 <svg class="h-5 w-5 flex-shrink-0 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -237,48 +255,50 @@
                     @endif
                 </div>
             </div>
-            @php
-                $bookedSeats = max(0, (int) (($ride->seats_total ?? 0) - ($ride->seats_available ?? 0)));
-                $bookingPriceMinorTotal = $ride->relationLoaded('bookings')
-                    ? (int) $ride->bookings->where('status', '!=', 'cancelled')->sum('segment_price_minor')
-                    : (int) $ride->bookings()->where('status', '!=', 'cancelled')->sum('segment_price_minor');
-                $bookingPriceTotal = (float) ($bookingPriceMinorTotal / 100);
-                $bookingFeeTotal = (float) ($ride->booking_fee ?? 0);
-                $totalAmount = (float) ($ride->total_amount ?? ($bookingPriceTotal + $bookingFeeTotal));
-            @endphp
-            <div
-                class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                <div class="flex items-center justify-between p-4">
-                    <p class="font-semibold">
-                        Booked:
-                    </p>
-                    <p class="">
-                        {{ $bookedSeats }} {{ $bookedSeats === 1 ? 'seat' : 'seats' }}
-                    </p>
-                </div>
-                <div class="p-4">
-                    <div class="flex items-center justify-between">
-                        <p class="font-semibold">Booking Price (total):</p>
+            @if ($showBookingInfo)
+                @php
+                    $bookedSeats = max(0, (int) (($ride->seats_total ?? 0) - ($ride->seats_available ?? 0)));
+                    $bookingPriceMinorTotal = $ride->relationLoaded('bookings')
+                        ? (int) $ride->bookings->where('status', '!=', 'cancelled')->sum('segment_price_minor')
+                        : (int) $ride->bookings()->where('status', '!=', 'cancelled')->sum('segment_price_minor');
+                    $bookingPriceTotal = (float) ($bookingPriceMinorTotal / 100);
+                    $bookingFeeTotal = (float) ($ride->booking_fee ?? 0);
+                    $totalAmount = (float) ($ride->total_amount ?? ($bookingPriceTotal + $bookingFeeTotal));
+                @endphp
+                <div
+                    class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                    <div class="flex items-center justify-between p-4">
+                        <p class="font-semibold">
+                            Booked:
+                        </p>
                         <p class="">
-                            {{ $resolvedCurrency }}{{ number_format($bookingPriceTotal, 2) }}
+                            {{ $bookedSeats }} {{ $bookedSeats === 1 ? 'seat' : 'seats' }}
                         </p>
                     </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold">Booking Price (total):</p>
+                            <p class="">
+                                {{ $resolvedCurrency }}{{ number_format($bookingPriceTotal, 2) }}
+                            </p>
+                        </div>
 
-                    <div class="flex items-center justify-between">
-                        <p class="font-semibold">Booking Fee (total):</p>
-                        <p class="">
-                            {{ $resolvedCurrency }}{{ number_format($bookingFeeTotal, 2) }}
-                        </p>
-                    </div>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold">Booking Fee (total):</p>
+                            <p class="">
+                                {{ $resolvedCurrency }}{{ number_format($bookingFeeTotal, 2) }}
+                            </p>
+                        </div>
 
-                    <div class="flex items-center justify-between">
-                        <p class="font-semibold">Total Amount:</p>
-                        <p class="">
-                            {{ $resolvedCurrency }}{{ number_format($totalAmount, 2) }}
-                        </p>
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold">Total Amount:</p>
+                            <p class="">
+                                {{ $resolvedCurrency }}{{ number_format($totalAmount, 2) }}
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             @if ($showOptions && $ride->options && $ride->options->isNotEmpty())
                 <div class="border-t border-gray-300 p-3">
