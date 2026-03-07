@@ -616,6 +616,8 @@ class PxRideService
 
         $seatsRequired = (int) Arr::get($filters, 'seats_required', 1);
         $seatsRequired = max(1, $seatsRequired);
+        $hideFullRides = (bool) Arr::get($filters, 'hide_full_rides', false);
+        $shouldApplySeatAvailabilityFilter = $hideFullRides || Arr::has($filters, 'seats_required');
 
         $fromCityId = Arr::get($filters, 'origin_city_id');
         $toCityId = Arr::get($filters, 'destination_city_id');
@@ -624,7 +626,7 @@ class PxRideService
         $hasFrom = !empty($fromCityId) || $fromLabel !== '';
         $hasTo = !empty($toCityId) || $toLabel !== '';
 
-        if ($hasFrom && $hasTo) {
+        if ($hasFrom && $hasTo && $shouldApplySeatAvailabilityFilter) {
             $query->whereExists(function ($sub) use ($fromCityId, $toCityId, $fromLabel, $toLabel, $seatsRequired) {
                 $sub->select(DB::raw(1))
                     ->from('px_ride_stops as s_from')
@@ -655,7 +657,7 @@ class PxRideService
                         ->whereRaw('COALESCE(s_leg.seats_available, px_rides.seats_available) < ?', [$seatsRequired]);
                 });
             });
-        } else {
+        } elseif ($shouldApplySeatAvailabilityFilter) {
             $query->where('seats_available', '>=', $seatsRequired);
         }
 

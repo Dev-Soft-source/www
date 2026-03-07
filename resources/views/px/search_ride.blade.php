@@ -13,6 +13,7 @@
         $smokingGroup = $searchOptionGroups->get('smoking_allowed');
         $petsGroup = $searchOptionGroups->get('pets_allowed');
         $coPassengerOptionCodes = ['min_rating_5', 'min_rating_4', 'min_rating_3', 'existing_reviews_only'];
+        $extraOptionCodes = ['pink_rides', 'extra_plus_rides'];
         $vehicleTypes = [
             'Convertable',
             'Coupe',
@@ -31,29 +32,32 @@
     <div class="container mx-auto my-6 md:px-8 xl:px-0">
 
 
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div class="search-filter-container flex flex-col relative">
-                <button id="search-filter-toggle"
-                    class="search-filter-toggle button-exp-fill flex items-center justify-center ml-auto gap-1 w-40 shadow lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                    </svg>
-                    <span class="text-xl">{{ $siteText['search_filters_btn_text'] ?? 'Search filters' }}</span>
+        <form method="GET" action="{{ $searchRoute }}" id="px-search-form">
+            <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div class="search-filter-container flex flex-col relative">
+                    <button id="search-filter-toggle"
+                        class="search-filter-toggle button-exp-fill flex items-center justify-center ml-auto gap-1 w-40 shadow lg:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                        </svg>
+                        <span class="text-xl">{{ $siteText['search_filters_btn_text'] ?? 'Search filters' }}</span>
                     </button>
 
-                <div id="search-filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden"></div>
-                <div id="search-filter"
-                    class="search-filter fixed top-0 right-0 h-full overflow-y-auto bg-white w-11/12 sm:w-96 lg:w-full transform translate-x-full lg:translate-x-0 lg:static lg:shadow-3xl lg:h-auto transition-transform duration-300 z-40">
-                    <button id="search-filter-close"
-                        class="search-filter-close border w-6 h-6 overflow-hidden flex items-center justify-center border-gray-500 rounded-full text-gray-500 text-3xl absolute top-3 right-4 hover:text-red-500 lg:hidden">
-                        &times;
-                    </button>
+                    <div id="search-filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden">
+                    </div>
+                    <div id="search-filter"
+                        class="search-filter fixed top-0 right-0 h-full overflow-y-auto bg-white w-11/12 sm:w-96 lg:w-full transform translate-x-full lg:translate-x-0 lg:static lg:shadow-3xl lg:h-auto transition-transform duration-300 z-40">
+                        <button id="search-filter-close"
+                            class="search-filter-close border w-6 h-6 overflow-hidden flex items-center justify-center border-gray-500 rounded-full text-gray-500 text-3xl absolute top-3 right-4 hover:text-red-500 lg:hidden">
+                            &times;
+                        </button>
 
-                    <form method="GET"
-                        action="{{ $searchRoute }}"
-                        class="search-filter-menu bg-white border lg:border-none rounded pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
+                        <input type="hidden" name="origin[label]" value="{{ $oldOriginLabel ?? '' }}">
+                        <input type="hidden" name="origin[city_id]" value="{{ $oldOriginCityId ?? '' }}">
+                        <input type="hidden" name="destination[label]" value="{{ $oldDestinationLabel ?? '' }}">
+                        <input type="hidden" name="destination[city_id]" value="{{ $oldDestinationCityId ?? '' }}">
                         <input type="hidden" name="departure_date" value="{{ $oldDepartureDate }}">
                         <input type="hidden" name="keyword" value="{{ $oldKeyword ?? '' }}">
                         <input type="hidden" name="search"
@@ -71,21 +75,38 @@
 
                         <div class="bg-white p-4 space-y-4">
                             <div class="divide-y">
+
+                                @php
+                                    $pinkRideLabel = $findRidePage->search_section_pink_ride_label ?? 'Pink Ride';
+                                    $extraRideLabel = $findRidePage->search_section_extra_care_label ?? 'Extra+ Ride';
+
+                                    $pinkRideLabel =
+                                        $preferenceGroup->options->firstWhere('code', 'pink_rides')->display_label ??
+                                        $pinkRideLabel;
+                                    $extraRideLabel =
+                                        $preferenceGroup->options->firstWhere('code', 'extra_plus_rides')
+                                            ->display_label ?? $extraRideLabel;
+                                @endphp
+
+
                                 <label class="flex items-center justify-between p-3">
-                                    <span
-                                        class="text-pink-500 text-base md:text-lg">{{ $findRidePage->search_section_pink_ride_label ?? 'Pink Ride' }}</span>
+                                    <span class="text-pink-500 text-base md:text-lg">{{ $pinkRideLabel }}</span>
                                     <input type="checkbox" name="women_only" value="1" class="w-4 h-4"
                                         @checked(!empty($searchFilters['women_only']))>
                                 </label>
                                 <label class="flex items-center justify-between p-3">
-                                    <span
-                                        class="text-green-600 text-base md:text-lg">{{ $findRidePage->search_section_extra_care_label ?? 'Extra+ Ride' }}</span>
+                                    <span class="text-green-600 text-base md:text-lg">{{ $extraRideLabel }}</span>
                                     <input type="checkbox" name="extra_care" value="1" class="w-4 h-4"
                                         @checked(!empty($searchFilters['extra_care']))>
                                 </label>
+                                <label class="flex items-center justify-between p-3">
+                                    <span class="text-base md:text-lg text-gray-900">Hide Full Rides</span>
+                                    <input type="checkbox" name="hide_full_rides" value="1" class="w-4 h-4"
+                                        @checked(!empty($searchFilters['hide_full_rides']))>
+                                </label>
                             </div>
 
-                            
+
 
                             <div class="space-y-3">
                                 <h3 class="text-primary text-2xl xl:text-3xl">
@@ -133,10 +154,14 @@
 
                             @if ($preferenceGroup && $preferenceGroup->options->isNotEmpty())
                                 @php
-                                    $coPassengerOptions = $preferenceGroup->options->filter(function ($option) use ($coPassengerOptionCodes) {
-                                        return in_array($option->code, $coPassengerOptionCodes, true);
-                                    })->values();
-                                    $selectedCoPassengerOption = (string) (collect((array) ($searchFilters['ride_option_ids'] ?? []))->first() ?? '');
+                                    $coPassengerOptions = $preferenceGroup->options
+                                        ->filter(function ($option) use ($coPassengerOptionCodes) {
+                                            return in_array($option->code, $coPassengerOptionCodes, true);
+                                        })
+                                        ->values();
+                                    $selectedCoPassengerOption =
+                                        (string) (collect((array) ($searchFilters['ride_option_ids'] ?? []))->first() ??
+                                            '');
                                 @endphp
                                 @if ($coPassengerOptions->isNotEmpty())
                                     <div class="space-y-3">
@@ -147,7 +172,8 @@
                                                 class="block mb-2 font-medium text-gray-900">{{ $findRidePage->passengers_rating_label ?? 'Co-passengers Rating' }}</label>
                                             <select id="coPassengerRating" name="ride_option_ids[]"
                                                 class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
-                                                <option value="">{{ $findRidePage->passengers_rating_placeholder ?? 'All' }}</option>
+                                                <option value="">
+                                                    {{ $findRidePage->passengers_rating_placeholder ?? 'All' }}</option>
                                                 @foreach ($coPassengerOptions as $option)
                                                     <option value="{{ $option->id }}" @selected($selectedCoPassengerOption === (string) $option->id)>
                                                         {{ str_replace('passengers', 'co-passengers', $option->display_label) }}
@@ -200,6 +226,7 @@
                                     <div class="border rounded-md overflow-hidden divide-y">
                                         @foreach ($preferenceGroup->options as $option)
                                             @continue(in_array($option->code, $coPassengerOptionCodes, true))
+                                            @continue(in_array($option->code, $extraOptionCodes, true))
                                             <div class="flex items-start justify-between p-3">
                                                 <label class="flex gap-2 text-base md:text-lg">
                                                     <input type="checkbox" name="ride_option_ids[]"
@@ -292,44 +319,50 @@
                             @endif
 
                             <div class="flex gap-3 pt-2">
-                                <button type="submit" class="button-exp-fill flex-1 text-white rounded px-4 py-3">
-                                    {{ $findRidePage->filter_search_btn_label ?? 'Apply filters' }}
-                                </button>
                                 <a href="{{ route('px.search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                                    class="flex-1 rounded border border-gray-300 px-4 py-3 text-center text-gray-700">
-                                    {{ $findRidePage->filter_close_btn_label ?? 'Clear' }}
+                                    class="button-exp-fill gap-2 w-full flex justify-center items-center">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 text-white">
+                                        <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 32 32"
+                                            id="icon" xmlns="http://www.w3.org/2000/svg" stroke="#000000"
+                                            stroke-width="0.00032">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke="#CCCCCC" stroke-width="0.384"></g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <defs>
+                                                    <style>
+                                                        .cls-1 {
+                                                            fill: none;
+                                                        }
+                                                    </style>
+                                                </defs>
+                                                <polygon
+                                                    points="30 11.414 28.586 10 24 14.586 19.414 10 18 11.414 22.586 16 18 20.585 19.415 22 24 17.414 28.587 22 30 20.587 25.414 16 30 11.414">
+                                                </polygon>
+                                                <path
+                                                    d="M4,4A2,2,0,0,0,2,6V9.1709a2,2,0,0,0,.5859,1.4145L10,18v8a2,2,0,0,0,2,2h4a2,2,0,0,0,2-2V24H16v2H12V17.1709l-.5859-.5855L4,9.1709V6H24V8h2V6a2,2,0,0,0-2-2Z">
+                                                </path>
+                                                <rect id="_Transparent_Rectangle_"
+                                                    data-name="&lt;Transparent Rectangle&gt;" class="cls-1"
+                                                    width="32" height="32"></rect>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                    <span class="text-xl">Clear</span>
                                 </a>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
 
-            <div class="lg:col-span-3">
-                <div class="bg-gray-100 rounded-md p-4 py-6">
-                    <div class="text-center mb-6">
-                        <h1 class="font-FuturaMdCnBT text-2xl md:text-3xl">
-                            {{ $findRidePage->main_heading ?? 'Search PX Rides' }}
-                        </h1>
                     </div>
+                </div>
 
-                    <form method="GET"
-                        action="{{ $searchRoute }}"
-                        id="px-search-form">
-                        
-                        <input type="hidden" name="driver_age" value="{{ $searchFilters['driver_age'] ?? '' }}">
-                        <input type="hidden" name="driver_rating" value="{{ $searchFilters['driver_rating'] ?? '' }}">
-                        <input type="hidden" name="booking_method"
-                            value="{{ $searchFilters['booking_method'] ?? '' }}">
-                        <input type="hidden" name="vehicle_type" value="{{ $searchFilters['vehicle_type'] ?? '' }}">
-                        <input type="hidden" name="luggage_size" value="{{ $searchFilters['luggage_size'] ?? '' }}">
-                        <input type="hidden" name="smoking_allowed"
-                            value="{{ $searchFilters['smoking_allowed'] ?? '' }}">
-                        <input type="hidden" name="pets_allowed" value="{{ $searchFilters['pets_allowed'] ?? '' }}">
-                        <input type="hidden" name="women_only"
-                            value="{{ !empty($searchFilters['women_only']) ? 1 : 0 }}">
-                        <input type="hidden" name="extra_care"
-                            value="{{ !empty($searchFilters['extra_care']) ? 1 : 0 }}">
+                <div class="lg:col-span-3">
+                    <div class="bg-gray-100 rounded-md p-4 py-6 lg:shadow-3xl">
+                        <div class="text-center mb-4">
+                            <h1 class="font-FuturaMdCnBT">
+                                {{ $findRidePage->main_heading ?? 'Search PX Rides' }}
+                            </h1>
+                        </div>
 
                         <div class="px-search-shell flex flex-col md:flex-row md:items-stretch">
                             <div class="w-full md:w-[26.5%] px-search-segment px-search-divider">
@@ -403,69 +436,124 @@
                                 @enderror
                             </div>
 
-                        <div class="w-full md:w-[20%]">
-                            <button type="submit" name="search" value="1"
-                                class="px-search-submit w-full h-full flex items-center justify-center text-base font-semibold text-white transition-colors">
-                                Search
-                            </button>
+                            <div class="w-full md:w-[20%]">
+                                <button type="submit" name="search" value="1"
+                                    class="px-search-submit w-full h-full flex items-center justify-center text-base font-semibold text-white transition-colors">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="flex items-center gap-4 py-4">
+                                <div class="h-px flex-1 bg-gray-300"></div>
+                                <span class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">or</span>
+                                <div class="h-px flex-1 bg-gray-300"></div>
+                            </div>
+                            <div class="relative">
+                                <input name="keyword" type="text"
+                                    class="px-search-shell text-base md:text-lg w-full p-4 pr-12 font-semibold text-slate-900"
+                                    placeholder="{{ $findRidePage->search_section_keyword_placeholder ?? 'Search notes, route, or stops' }}"
+                                    value="{{ $oldKeyword ?? '' }}">
+                                <button type="button" id="keyword-clear-button"
+                                    class="absolute right-4 top-1/2 hidden -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                                    aria-label="Clear keyword">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-4 py-4">
-                            <div class="h-px flex-1 bg-gray-300"></div>
-                            <span class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">or</span>
-                            <div class="h-px flex-1 bg-gray-300"></div>
-                        </div>
-                        <div class="relative">
-                            <input name="keyword" type="text"
-                                class="px-search-shell text-base md:text-lg w-full p-4 pr-12 font-semibold text-slate-900"
-                                placeholder="{{ $findRidePage->search_section_keyword_placeholder ?? 'Search notes, route, or stops' }}" value="{{ $oldKeyword ?? '' }}">
-                            <button type="button" id="keyword-clear-button"
-                                class="absolute right-4 top-1/2 hidden -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
-                                aria-label="Clear keyword">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                    fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd"
-                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="my-0">
-                    @if ($rides && $rides->count() > 0)
-                        <h2 class="text-center font-FuturaMdCnBT text-primary mb-4 text-xl md:text-2xl">
-                            @if ($showSearchResultsHeading)
-                                {{ $findRidePage->heading_ride_card_section ?? 'Available Rides' }}
-                            @else
-                                {{ $defaultResultsHeading }}
-                            @endif
-                            ({{ $rides->total() }})
-                        </h2>
-
-                        <div class="space-y-4">
-                            @foreach ($rides as $ride)
-                                <x-px.ride-card :ride="$ride" :lang="optional($selectedLanguage)->abbreviation" detail-route="px.ride_detail"
-                                    :show-status="false" :show-booking-info="false" :show-options="false" :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
-                            @endforeach
-                        </div>
-                        <div class="mt-6">
-                            {{ $rides->appends(request()->query())->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12 bg-white rounded-lg shadow-md">
-                            <p class="text-xl text-gray-600">
+                    </div>
+                    <div class="my-0">
+                        @if ($rides && $rides->count() > 0)
+                            <h1 class="can-exp-h1 text-center font-FuturaMdCnBT text-primary mb-4 mt-4">
                                 @if ($showSearchResultsHeading)
-                                    {{ $findRidePage->search_result_no_found_message ?? ($findRidePage->no_rides_found_message ?? 'No rides found matching your search criteria.') }}
+                                    {{ $findRidePage->heading_ride_card_section ?? 'Available Rides' }}
                                 @else
-                                    {{ auth()->check() ? 'No recent rides available.' : 'No upcoming rides available.' }}
+                                    {{ $defaultResultsHeading }}
                                 @endif
-                            </p>
-                        </div>
-                    @endif
+                                {{-- ({{ $rides->total() }}) --}}
+                            </h1>
+
+                            <div class="space-y-4">
+                                @foreach ($rides as $ride)
+                                    <x-px.ride-card :ride="$ride" :lang="optional($selectedLanguage)->abbreviation" detail-route="px.ride_detail"
+                                        :show-status="false" :show-booking-info="false" :show-options="true" :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
+                                @endforeach
+                            </div>
+                            <div class="mt-6">
+                                {{ $rides->appends(request()->query())->links() }}
+                            </div>
+                        @else
+                            <div class="text-center py-12 bg-white rounded-lg shadow-md">
+                                <p class="text-xl text-gray-600">
+                                    @if ($showSearchResultsHeading)
+                                        {{ $findRidePage->search_result_no_found_message ?? ($findRidePage->no_rides_found_message ?? 'No rides found matching your search criteria.') }}
+                                    @else
+                                        {{ auth()->check() ? 'No recent rides available.' : 'No upcoming rides available.' }}
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
+
+                        @if (!empty($recentSearches) && $recentSearches->count() > 0)
+                            <div class="mt-10">
+                                <h2 class="font-FuturaMdCnBT text-primary text-2xl md:text-3xl">
+                                    {{ $findRidePage->search_section_recent_searches ?? 'Recent Searches' }}
+                                </h2>
+
+                                <div class="space-y-4 mt-4">
+                                    @foreach ($recentSearches as $index => $recentSearch)
+                                        @php
+                                            $colors = [
+                                                'bg-blue-50',
+                                                'bg-green-50',
+                                                'bg-yellow-50',
+                                                'bg-pink-50',
+                                                'bg-cyan-50',
+                                            ];
+                                            $colorClass = $colors[$index % count($colors)];
+                                        @endphp
+
+                                        <a href="{{ $recentSearch->search_url }}"
+                                            class="{{ $colorClass }} block rounded-lg border border-gray-100 px-4 py-5 shadow-3xl transition-shadow duration-200 hover:shadow-xl">
+                                            <div class="space-y-4">
+                                                <div class="flex items-start gap-3">
+                                                    <span
+                                                        class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white">A</span>
+                                                    <div>
+                                                        <div class="text-sm font-semibold text-gray-700">
+                                                            {{ $findRidePage->search_section_from_placeholder ?? 'Origin' }}
+                                                        </div>
+                                                        <div class="text-primary">{{ $recentSearch->origin_label }}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex items-start gap-3">
+                                                    <span
+                                                        class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-300 text-gray-800">B</span>
+                                                    <div>
+                                                        <div class="text-sm font-semibold text-gray-700">
+                                                            {{ $findRidePage->search_section_to_placeholder ?? 'Destination' }}
+                                                        </div>
+                                                        <div class="text-primary">{{ $recentSearch->destination_label }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -477,8 +565,12 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            const originInput = document.querySelector('input[name="origin[label]"]');
-            const destinationInput = document.querySelector('input[name="destination[label]"]');
+            const getLocationInput = (fieldName) => document.querySelector(
+                `input[name="${fieldName}"]:not([type="hidden"])`
+            );
+
+            const originInput = getLocationInput('origin[label]');
+            const destinationInput = getLocationInput('destination[label]');
             const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
             const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
             const departureDateInput = document.querySelector('#departure_date');
@@ -495,6 +587,10 @@
             const getLivewireComponent = (element) => {
                 const wireId = element?.getAttribute('wire:id');
                 return wireId && window.Livewire ? window.Livewire.find(wireId) : null;
+            };
+
+            const getComponentHiddenCityId = (input) => {
+                return input?.closest('[wire\\:id]')?.querySelector('input[type="hidden"][name$="[city_id]"]') ?? null;
             };
 
             const resetAutocomplete = (input, cityIdInput, component) => {
@@ -514,21 +610,32 @@
                 }
             };
 
-            const focusNextFieldWhenSelected = (cityIdSelector, nextField) => {
-                return () => {
-                    setTimeout(() => {
-                        const cityIdField = document.querySelector(cityIdSelector);
+            const focusField = (field) => {
+                
+                if (!field) {
+                    return;
+                }
 
-                        if (!cityIdField || !nextField || !cityIdField.value) {
-                            return;
-                        }
+                field.focus();
+                if (typeof field.select === 'function') {
+                    field.select();
+                }
+            };
 
-                        nextField.focus();
-                        if (typeof nextField.select === 'function') {
-                            nextField.select();
-                        }
-                    }, 150);
-                };
+            const focusNextFieldWhenSelected = (currentInput, nextFieldSelector, attempts = 6) => {
+                window.setTimeout(() => {
+                    const cityIdField = getComponentHiddenCityId(currentInput);
+                    const nextField = document.querySelector(nextFieldSelector);
+
+                    if (cityIdField?.value && nextField) {
+                        focusField(nextField);
+                        return;
+                    }
+
+                    if (attempts > 1) {
+                        focusNextFieldWhenSelected(currentInput, nextFieldSelector, attempts - 1);
+                    }
+                }, 120);
             };
 
             const clearKeywordInputs = () => {
@@ -572,21 +679,33 @@
 
             if (originInput) {
                 originInput.addEventListener('input', clearKeywordInputs);
-                originInput.addEventListener('keydown', function(event) {
-                    if (event.key === 'Enter') {
-                        focusNextFieldWhenSelected('input[name="origin[city_id]"]', destinationInput)();
-                    }
-                });
             }
 
             if (destinationInput) {
                 destinationInput.addEventListener('input', clearKeywordInputs);
-                destinationInput.addEventListener('keydown', function(event) {
-                    if (event.key === 'Enter') {
-                        focusNextFieldWhenSelected('input[name="destination[city_id]"]', departureDateInput)();
-                    }
-                });
             }
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+
+                const target = event.target;
+
+                if (target?.matches('input[name="origin[label]"]:not([type="hidden"])')) {
+                    focusNextFieldWhenSelected(
+                        target,
+                        'input[name="destination[label]"]:not([type="hidden"])'
+                    );
+                }
+
+                if (target?.matches('input[name="destination[label]"]:not([type="hidden"])')) {
+                    focusNextFieldWhenSelected(
+                        target,
+                        '#departure_date'
+                    );
+                }
+            });
 
             keywordInputs.forEach((input) => {
                 input.addEventListener('input', function() {
@@ -625,12 +744,16 @@
         });
 
         function swapLocations() {
-            const originComponent = document.querySelector('input[name="origin[label]"]')?.closest('[wire\\:id]');
-            const destinationComponent = document.querySelector('input[name="destination[label]"]')?.closest('[wire\\:id]');
-            const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
-            const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
-            const originCityId = originCityIdInput ? parseInt(originCityIdInput.value) : null;
-            const destinationCityId = destinationCityIdInput ? parseInt(destinationCityIdInput.value) : null;
+            const originInput = document.querySelector('input[name="origin[label]"]:not([type="hidden"])');
+            const destinationInput = document.querySelector('input[name="destination[label]"]:not([type="hidden"])');
+            const originComponent = originInput?.closest('[wire\\:id]');
+            const destinationComponent = destinationInput?.closest('[wire\\:id]');
+            const originCityIdInput = originComponent?.querySelector('input[name="origin[city_id]"]');
+            const destinationCityIdInput = destinationComponent?.querySelector('input[name="destination[city_id]"]');
+            const originCityId = originCityIdInput?.value ? parseInt(originCityIdInput.value, 10) : null;
+            const destinationCityId = destinationCityIdInput?.value ? parseInt(destinationCityIdInput.value, 10) : null;
+            const originLabel = originInput?.value ?? '';
+            const destinationLabel = destinationInput?.value ?? '';
 
             if (window.Livewire && originComponent && destinationComponent) {
                 const originWireId = originComponent.getAttribute('wire:id');
@@ -641,31 +764,37 @@
                         const originLivewire = window.Livewire.find(originWireId);
                         const destinationLivewire = window.Livewire.find(destinationWireId);
 
-                        if (destinationCityId && originLivewire) {
-                            originLivewire.call('selectCity', destinationCityId);
-                        }
-                        if (originCityId && destinationLivewire) {
-                            destinationLivewire.call('selectCity', originCityId);
-                        }
-                        if (!destinationCityId && originLivewire) {
-                            originLivewire.set('query', '');
-                            originLivewire.set('cityId', null);
-                            originLivewire.set('suggestions', []);
-                            originLivewire.set('errorMessage', null);
-                        }
-                        if (!originCityId && destinationLivewire) {
-                            destinationLivewire.set('query', '');
-                            destinationLivewire.set('cityId', null);
-                            destinationLivewire.set('suggestions', []);
-                            destinationLivewire.set('errorMessage', null);
+                        if (originLivewire && destinationLivewire) {
+                            if (destinationCityId) {
+                                originLivewire.call('selectCity', destinationCityId);
+                            } else {
+                                originLivewire.set('query', destinationLabel);
+                                originLivewire.set('cityId', null);
+                                originLivewire.set('suggestions', []);
+                                originLivewire.set('errorMessage', null);
+                            }
+
+                            if (originCityId) {
+                                destinationLivewire.call('selectCity', originCityId);
+                            } else {
+                                destinationLivewire.set('query', originLabel);
+                                destinationLivewire.set('cityId', null);
+                                destinationLivewire.set('suggestions', []);
+                                destinationLivewire.set('errorMessage', null);
+                            }
                         }
                     } catch (e) {
-                        const originInput = originComponent.querySelector('input[name="origin[label]"]');
-                        const destinationInput = destinationComponent.querySelector('input[name="destination[label]"]');
                         if (originInput && destinationInput) {
-                            const temp = originInput.value;
-                            originInput.value = destinationInput.value;
-                            destinationInput.value = temp;
+                            originInput.value = destinationLabel;
+                            destinationInput.value = originLabel;
+
+                            if (originCityIdInput) {
+                                originCityIdInput.value = destinationCityId ?? '';
+                            }
+                            if (destinationCityIdInput) {
+                                destinationCityIdInput.value = originCityId ?? '';
+                            }
+
                             originInput.dispatchEvent(new Event('input', {
                                 bubbles: true
                             }));
@@ -676,12 +805,9 @@
                     }
                 }
             } else {
-                const originInput = document.querySelector('input[name="origin[label]"]');
-                const destinationInput = document.querySelector('input[name="destination[label]"]');
                 if (originInput && destinationInput) {
-                    const temp = originInput.value;
-                    originInput.value = destinationInput.value;
-                    destinationInput.value = temp;
+                    originInput.value = destinationLabel;
+                    destinationInput.value = originLabel;
                     originInput.dispatchEvent(new Event('input', {
                         bubbles: true
                     }));

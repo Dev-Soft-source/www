@@ -1,6 +1,55 @@
 @extends('layouts.template')
 
 @section('content')
+    <div id="my-chat-pop-modal" class="hidden relative z-50" aria-labelledby="px-login-modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button onclick="closePopupModal()"
+                        class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center">
+                            <div class="w-full">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                    id="px-login-modal-title">
+                                    {{ $siteText['heading_text'] ?? 'Login required' }}
+                                </h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center" id="px-login-modal-message">
+                                    {{ $rideDetailPage->chat_error_message ?? 'Please log in or sign up to continue.' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
+                        <a href="{{ route('login', ['lang' => optional($selectedLanguage)->abbreviation ?? app()->getLocale()]) }}"
+                            class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
+                            {{ $siteText['login_btn_text'] ?? 'Log in' }}
+                        </a>
+                        <a href="{{ route('signup', ['lang' => optional($selectedLanguage)->abbreviation ?? app()->getLocale()]) }}"
+                            class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
+                            {{ $siteText['signup_btn_text'] ?? 'Sign up' }}
+                        </a>
+                        <button onclick="closePopupModal()"
+                            class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
         @if (($displaySeatsAvailable ?? $ride->seats_available) == 0)
             <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
@@ -202,20 +251,24 @@
                                 <div class="flex justify-center mt-4">
                                     @php
                                         $lang = optional($selectedLanguage)->abbreviation ?? app()->getLocale();
-                                        $chatUrl = Auth::check()
-                                            ? route('px.chat', [
-                                                'lang' => $lang,
-                                                'id' => $ride->id,
-                                                'from_stop_id' => $selectedFromStopId,
-                                                'to_stop_id' => $selectedToStopId,
-                                            ])
-                                            : route('login', ['lang' => $lang]);
+                                        $chatUrl = route('px.chat', [
+                                            'lang' => $lang,
+                                            'id' => $ride->id,
+                                            'from_stop_id' => $selectedFromStopId,
+                                            'to_stop_id' => $selectedToStopId,
+                                        ]);
                                     @endphp
-                                    @if (!Auth::check() || $ride->driver?->id)
+                                    @if (Auth::check() && $ride->driver?->id)
                                         <a href="{{ $chatUrl }}"
                                             class="inline-block bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
                                             {{ $rideDetailPage->driver_chat_button_label ?? '' }}
                                         </a>
+                                    @elseif (!Auth::check())
+                                        <button type="button"
+                                            class="inline-block bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36"
+                                            onclick="openLoginAlert('{{ addslashes(($rideDetailPage->chat_error_message ?? 'Please log in or sign up to chat with the driver.') . ' ' . ($ride->driver?->first_name ?? '')) }}')">
+                                            {{ $rideDetailPage->driver_chat_button_label ?? '' }}
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -250,21 +303,40 @@
                                 $ride->status !== 'cancelled' &&
                                 strtotime($ride->departure_at) > strtotime('now'))
                             <div class="flex justify-center mt-4">
-                                <a href="{{ route('px.booking', ['lang' => optional($selectedLanguage)->abbreviation, 'from_stop_id' => $selectedFromStopId, 'to_stop_id' => $selectedToStopId]) }}"
-                                    class="group flex items-center button-exp-fill rounded cursor-pointer justify-center py-1 px-4 text-lg font-FuturaMdCnBT">
-                                    @if ($bookingModeCode === 'manual')
-                                        <img class="w-10 h-10 rounded-full"
-                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                            alt="">
-                                    @elseif ($bookingModeCode === 'instant')
-                                        <img class="w-10 h-10 rounded-full"
-                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                            alt="">
-                                    @endif
-                                    <span class="font-medium text-xl">
-                                        Book Your Seats
-                                    </span>
-                                </a>
+                                @if (Auth::check())
+                                    <a href="{{ route('px.booking', ['lang' => optional($selectedLanguage)->abbreviation, 'from_stop_id' => $selectedFromStopId, 'to_stop_id' => $selectedToStopId]) }}"
+                                        class="group flex items-center button-exp-fill rounded cursor-pointer justify-center py-1 px-4 text-lg font-FuturaMdCnBT">
+                                        @if ($bookingModeCode === 'manual')
+                                            <img class="w-10 h-10 rounded-full"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                alt="">
+                                        @elseif ($bookingModeCode === 'instant')
+                                            <img class="w-10 h-10 rounded-full"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                alt="">
+                                        @endif
+                                        <span class="font-medium text-xl">
+                                            Book Your Seats
+                                        </span>
+                                    </a>
+                                @else
+                                    <button type="button"
+                                        class="group flex items-center button-exp-fill rounded cursor-pointer justify-center py-1 px-4 text-lg font-FuturaMdCnBT"
+                                        onclick="openLoginAlert('Please log in or sign up to continue with your booking.')">
+                                        @if ($bookingModeCode === 'manual')
+                                            <img class="w-10 h-10 rounded-full"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                alt="">
+                                        @elseif ($bookingModeCode === 'instant')
+                                            <img class="w-10 h-10 rounded-full"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                alt="">
+                                        @endif
+                                        <span class="font-medium text-xl">
+                                            Book Your Seats
+                                        </span>
+                                    </button>
+                                @endif
                             </div>
                         @endif
                     @endif
@@ -297,4 +369,22 @@
         </div>
         <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="px-cancel-booking-modal-backdrop"></div>
     @endif
+@endsection
+
+@section('script')
+    <script>
+        function closePopupModal() {
+            document.getElementById('my-chat-pop-modal').style.display = 'none';
+        }
+
+        function openLoginAlert(message) {
+            var messageElement = document.getElementById('px-login-modal-message');
+
+            if (messageElement && message) {
+                messageElement.innerText = message;
+            }
+
+            document.getElementById('my-chat-pop-modal').style.display = 'flex';
+        }
+    </script>
 @endsection
