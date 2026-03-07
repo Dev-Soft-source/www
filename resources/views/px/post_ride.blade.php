@@ -2498,6 +2498,7 @@
         // Store distance globally when available (from Google API calculation)
         window.pxRideDistanceKm = null;
         let lastPxPriceValidationInput = null;
+        const acknowledgedPxWarningSignatures = new Set();
 
         function setModalVisibility(modalId, isVisible) {
             const modal = document.getElementById(modalId);
@@ -2692,6 +2693,11 @@
                 return;
             }
 
+            if (validation.type === 'warning' && acknowledgedPxWarningSignatures.has(signature)) {
+                lastPxPriceValidationSignature = signature;
+                return;
+            }
+
             lastPxPriceValidationSignature = signature;
 
             if (validation.type === 'error') {
@@ -2749,7 +2755,13 @@
             const continueBtn = document.getElementById('pxPriceWarningContinue');
             if (continueBtn) {
                 continueBtn.onclick = function() {
-                    if (!postRideForm || !postRideForm.querySelector('input[name="bypass_price_validation"]')) {
+                    if (lastPxPriceValidationSignature) {
+                        acknowledgedPxWarningSignatures.add(lastPxPriceValidationSignature);
+                    }
+                    const activePostRideForm = document.querySelector('form[action*="px.post_ride.store"]') ||
+                        document.querySelector('form[action*="px.post_ride.update"]') ||
+                        document.querySelector('form');
+                    if (!activePostRideForm || !activePostRideForm.querySelector('input[name="bypass_price_validation"]')) {
                         focusPxPriceInput(lastPxPriceValidationInput);
                     }
                     if (callback) callback();

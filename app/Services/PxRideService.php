@@ -401,6 +401,7 @@ class PxRideService
         $this->applyOrderedStopFilters($query, $filters);
         $this->applyGeoFilters($query, $filters);
         $this->applyDepartureFilters($query, $filters);
+        $this->applyKeywordSearch($query, trim((string) Arr::get($filters, 'keyword', '')));
         $this->applyRideFilters($query, $filters);
         $this->applySorting($query, Arr::get($filters, 'sort', 'soonest'));
 
@@ -412,6 +413,31 @@ class PxRideService
         }
 
         return $result;
+    }
+
+    protected function applyKeywordSearch(Builder $query, string $keyword): void
+    {
+        if ($keyword === '') {
+            return;
+        }
+
+        $query->where(function (Builder $keywordQuery) use ($keyword) {
+            $keywordQuery
+                ->where('notes', 'like', '%' . $keyword . '%')
+                ->orWhere('meta->pickup_location', 'like', '%' . $keyword . '%')
+                ->orWhere('meta->dropoff_location', 'like', '%' . $keyword . '%')
+                ->orWhere('meta->pick_drop_off_description', 'like', '%' . $keyword . '%')
+                ->orWhereHas('route', function (Builder $routeQuery) use ($keyword) {
+                    $routeQuery
+                        ->where('origin_label', 'like', '%' . $keyword . '%')
+                        ->orWhere('destination_label', 'like', '%' . $keyword . '%');
+                })
+                ->orWhereHas('stops', function (Builder $stopQuery) use ($keyword) {
+                    $stopQuery
+                        ->where('label', 'like', '%' . $keyword . '%')
+                        ->orWhere('pickup_dropoff_location', 'like', '%' . $keyword . '%');
+                });
+        });
     }
 
     protected function applyOrderedStopFilters(Builder $query, array $filters): void
@@ -518,6 +544,76 @@ class PxRideService
 
     protected function applyRideFilters(Builder $query, array $filters): void
     {
+        $excludedDriverIds = array_filter(array_map('intval', (array) Arr::get($filters, 'excluded_driver_ids', [])));
+        if (!empty($excludedDriverIds)) {
+            $query->whereNotIn('driver_id', $excludedDriverIds);
+        }
+
+        if ((bool) Arr::get($filters, 'require_vehicle', false)) {
+            $query->whereNotNull('vehicle_id');
+        }
+
+        if ((bool) Arr::get($filters, 'exclude_admin_deactive', false)) {
+            $query->whereHas('driver', function (Builder $driverQuery) {
+                $driverQuery->where('admin_deactive_account', '!=', '1');
+            });
+        }
+
+        $driverAge = (int) Arr::get($filters, 'driver_age', 0);
+        if ($driverAge > 0) {
+            $query->whereHas('driver', function (Builder $driverQuery) use ($driverAge) {
+                $driverQuery->whereRaw(
+                    'YEAR(CURDATE()) - YEAR(STR_TO_DATE(dob, "%M %d, %Y")) >= ?',
+                    [$driverAge]
+                );
+            });
+        }
+
+        if ((int) Arr::get($filters, 'driver_phone', 0) === 1) {
+            $query->whereHas('driver.phone_numbers', function (Builder $phoneQuery) {
+                $phoneQuery->whereNotNull('phone')->where('phone', '!=', '');
+            });
+        }
+
+        $driverName = trim((string) Arr::get($filters, 'driver_name', ''));
+        if ($driverName !== '') {
+            $query->whereHas('driver', function (Builder $driverQuery) use ($driverName) {
+                $driverQuery->where(function (Builder $nameQuery) use ($driverName) {
+                    $nameQuery
+                        ->where('first_name', 'like', '%' . $driverName . '%')
+                        ->orWhere('last_name', 'like', '%' . $driverName . '%')
+                        ->orWhereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) LIKE ?", ['%' . $driverName . '%']);
+                });
+            });
+        }
+
+        $driverRating = (float) Arr::get($filters, 'driver_rating', 0);
+        if ($driverRating > 0) {
+            $query->whereIn('driver_id', function ($ratingQuery) use ($driverRating) {
+                $ratingQuery->select('rides.added_by')
+                    ->from('ratings')
+                    ->join('rides', 'ratings.ride_id', '=', 'rides.id')
+                    ->where('ratings.type', '1')
+                    ->where('ratings.status', 1)
+                    ->groupBy('rides.added_by')
+                    ->havingRaw('AVG(ratings.average_rating) >= ?', [$driverRating]);
+            });
+        }
+
+        $rideOptionIds = array_filter(array_map('intval', (array) Arr::get($filters, 'ride_option_ids', [])));
+        foreach ($rideOptionIds as $optionId) {
+            $query->whereHas('options', function (Builder $optionQuery) use ($optionId) {
+                $optionQuery->where('px_ride_options.id', $optionId);
+            });
+        }
+
+        $vehicleType = trim((string) Arr::get($filters, 'vehicle_type', ''));
+        if ($vehicleType !== '') {
+            $query->whereHas('vehicle', function (Builder $vehicleQuery) use ($vehicleType) {
+                $vehicleQuery->where('type', $vehicleType);
+            });
+        }
+
         $seatsRequired = (int) Arr::get($filters, 'seats_required', 1);
         $seatsRequired = max(1, $seatsRequired);
 
@@ -570,15 +666,21 @@ class PxRideService
             $query->where('price_minor', '<=', (int) Arr::get($filters, 'price_minor_max'));
         }
 
-        foreach (['booking_mode', 'luggage_size', 'smoking_allowed', 'pets_allowed'] as $field) {
+        foreach (['booking_mode', 'booking_method', 'luggage_size', 'smoking_allowed', 'pets_allowed'] as $field) {
             if (Arr::has($filters, $field)) {
-                $query->where($field, (int) Arr::get($filters, $field));
+                $value = Arr::get($filters, $field);
+                if ($value !== null && $value !== '') {
+                    $query->where($field, (int) $value);
+                }
             }
         }
 
         foreach (['women_only', 'extra_care'] as $field) {
             if (Arr::has($filters, $field)) {
-                $query->where($field, (bool) Arr::get($filters, $field));
+                $value = Arr::get($filters, $field);
+                if ($value !== null && $value !== '') {
+                    $query->where($field, (bool) $value);
+                }
             }
         }
     }

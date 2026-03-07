@@ -23,11 +23,17 @@ class PxBooking extends Model
         'currency',
         'status',
         'booked_at',
+        'removed_permanently',
+        'block_days',
+        'block_date_time',
         'meta',
     ];
 
     protected $casts = [
         'booked_at' => 'datetime',
+        'removed_permanently' => 'boolean',
+        'block_days' => 'integer',
+        'block_date_time' => 'datetime',
         'meta' => 'array',
     ];
 
@@ -66,4 +72,3 @@ class PxBooking extends Model
         return $this->hasMany(PxTransaction::class, 'booking_id');
     }
 }
-

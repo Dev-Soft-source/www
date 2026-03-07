@@ -22,6 +22,7 @@ use App\Models\City;
 use App\Models\State;
 use App\Models\SeatDetail;
 use App\Models\PxRideStop;
+use App\Models\RecentSearch;
 use App\Services\PxRideService;
 use App\Services\FCMService;
 use App\Models\Notification;
@@ -380,8 +381,8 @@ class PxRideWebController extends Controller
 
 
         // Calculate distance and duration from Google Distance Matrix API
-        $originLabel = $payload['origin']['label'] ?? '';
-        $destinationLabel = $payload['destination']['label'] ?? '';
+        // $originLabel = $payload['origin']['label'] ?? '';
+        // $destinationLabel = $payload['destination']['label'] ?? '';
 
         // if (!empty($originLabel) && !empty($destinationLabel)) {
         //     $googleApiData = $this->getDataFromGoogleApi($originLabel, $destinationLabel);
@@ -2311,42 +2312,92 @@ class PxRideWebController extends Controller
     {
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
+        $user = auth()->user();
+        $isGuest = !$user;
+        $per_page = 20;
+        $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
 
         $findRidePage = $this->getFindRidePageWithSettingDetail();
         $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-        $rides = $service->searchRides([
-            'per_page' => 20,
-            'sort' => 'latest_added',
-        ], auth()->user());
-        $hasSearch = false;
+        $searchOptionGroups = $this->getPxSearchOptionGroups($selectedLangId, $defaultLangId);
+        $searchFilters = $this->getPxSearchFilters($request);
+        $keyword = trim((string) $request->input('keyword'));
+        $hasActiveFilters = collect($searchFilters)->contains(function ($value) {
+            return $value !== null && $value !== '' && $value !== false;
+        });
 
         // Check if there are search parameters
-        $originLabel = $request->input('origin.label');
-        $destinationLabel = $request->input('destination.label');
+        $originLabel = trim((string) $request->input('origin.label'));
+        $destinationLabel = trim((string) $request->input('destination.label'));
+        $originCityId = $request->input('origin.city_id');
+        $destinationCityId = $request->input('destination.city_id');
         $departureDate = $request->input('departure_date');
         $isSearchSubmission = $request->boolean('search');
+        $hasSearch = false;
+        $hasOriginSearch = $originLabel !== '' || !empty($originCityId);
+        $hasDestinationSearch = $destinationLabel !== '' || !empty($destinationCityId);
+        $hasLocationSearch = $hasOriginSearch || $hasDestinationSearch;
+        $hasLocationPairSearch = $hasOriginSearch && $hasDestinationSearch;
+        $hasKeywordSearch = $keyword !== '';
+
+        if ($isGuest && !$isSearchSubmission) {
+            $rides = $service->searchRides(array_merge($searchFilters, [
+                'keyword' => $keyword,
+                'per_page' => $per_page,
+                'sort' => 'soonest',
+                'require_vehicle' => true,
+                'exclude_admin_deactive' => true,
+            ]), $user);
+        } else {
+            $rides = $service->searchRides(array_merge($searchFilters, [
+                'keyword' => $keyword,
+                'per_page' => $per_page,
+                'sort' => 'latest_added',
+                'excluded_driver_ids' => $excludedDriverIds,
+                'require_vehicle' => true,
+                'exclude_admin_deactive' => true,
+            ]), $user);
+        }
 
         if ($isSearchSubmission) {
             $validator = Validator::make($request->all(), [
-                'origin.label' => ['required', 'string', 'max:160'],
-                'destination.label' => ['required', 'string', 'max:160'],
+                'origin.label' => ['nullable', 'string', 'max:160'],
+                'destination.label' => ['nullable', 'string', 'max:160'],
                 'departure_date' => ['nullable', 'date'],
-                'origin.city_id' => ['nullable', 'integer', 'exists:cities,id'],
-                'destination.city_id' => ['nullable', 'integer', 'exists:cities,id'],
+                'origin.city_id' => ['nullable', 'integer'],
+                'destination.city_id' => ['nullable', 'integer'],
             ]);
 
             $invalidCityMessage = $this->siteText['invalid_city_error_text']
                 ?? 'Please select a valid city from the dropdown.';
+            $requiredFieldMessage = $this->siteText['required_field_error_text']
+                ?? 'This field is required.';
 
-            $validator->after(function ($validator) use ($request, $invalidCityMessage) {
+            $validator->after(function ($validator) use ($request, $invalidCityMessage, $requiredFieldMessage) {
                 $originLabel = trim((string) $request->input('origin.label'));
                 $destinationLabel = trim((string) $request->input('destination.label'));
+                $keyword = trim((string) $request->input('keyword'));
                 $originCityId = $request->input('origin.city_id');
                 $destinationCityId = $request->input('destination.city_id');
+                $hasValidOrigin = $originLabel !== '' && !empty($originCityId);
+                $hasValidDestination = $destinationLabel !== '' && !empty($destinationCityId);
+
+                if ($keyword === '' && $originLabel === '' && $destinationLabel === '') {
+                    $validator->errors()->add('keyword', 'Enter a keyword or select at least one valid city from the dropdown.');
+                }
+
+                if ($keyword === '') {
+                    if ($hasValidOrigin && $destinationLabel === '') {
+                        $validator->errors()->add('destination.label', $requiredFieldMessage);
+                    }
+
+                    if ($hasValidDestination && $originLabel === '') {
+                        $validator->errors()->add('origin.label', $requiredFieldMessage);
+                    }
+                }
 
                 if ($originLabel !== '' && empty($originCityId)) {
-                    $validator->errors()->add('origin.label', $invalidCityMessage);
+                        $validator->errors()->add('origin.label', $invalidCityMessage);
                 }
 
                 if ($destinationLabel !== '' && empty($destinationCityId)) {
@@ -2357,29 +2408,64 @@ class PxRideWebController extends Controller
             $validator->validate();
         }
 
-        if (!empty($originLabel) && !empty($destinationLabel)) {
+        if ($hasLocationSearch || $hasKeywordSearch) {
             $hasSearch = true;
+
+            if ($user && ($hasLocationSearch || $hasKeywordSearch)) {
+                if ($user->suspand === '1') {
+                    return redirect()
+                        ->route('home', ['lang' => optional($this->selectedLanguage)->abbreviation])
+                        ->with(['message' => 'Your account has been suspended by the admin']);
+                }
+
+                $existingSearch = RecentSearch::query()
+                    ->where('user_id', $user->id)
+                    ->where('page_type', 'px_ride')
+                    ->where('from', 'like', '%' . $originLabel . '%')
+                    ->where('to', 'like', '%' . $destinationLabel . '%')
+                    ->first();
+
+                if ($existingSearch) {
+                    $existingSearch->touch();
+                } else {
+                    RecentSearch::create([
+                        'from' => $originLabel,
+                        'to' => $destinationLabel,
+                        'user_id' => $user->id,
+                        'page_type' => 'px_ride',
+                    ]);
+                }
+            }
 
             // Prepare filters for search
             $filters = [
-                'origin_city_id' => $request->input('origin.city_id'),
-                'destination_city_id' => $request->input('destination.city_id'),
-                'origin_label' => $originLabel,
-                'destination_label' => $destinationLabel,
-                'per_page' => 20,
+                'keyword' => $keyword,
+                'per_page' => $per_page,
                 'sort' => 'latest_added',
+                'excluded_driver_ids' => $excludedDriverIds,
+                'require_vehicle' => true,
+                'exclude_admin_deactive' => true,
             ];
+
+            if ($hasOriginSearch) {
+                $filters['origin_city_id'] = $originCityId;
+                $filters['origin_label'] = $originLabel;
+            }
+
+            if ($hasDestinationSearch) {
+                $filters['destination_city_id'] = $destinationCityId;
+                $filters['destination_label'] = $destinationLabel;
+            }
 
             if (!empty($departureDate)) {
                 $filters['departure_date'] = $departureDate;
             }
 
-            // Perform filtered search
-            $rides = $service->searchRides($filters, auth()->user());
-        }
+            $filters = array_merge($filters, $searchFilters);
 
-        $originCityId = $request->input('origin.city_id');
-        $destinationCityId = $request->input('destination.city_id');
+            // Perform filtered search
+            $rides = $service->searchRides($filters, $user);
+        }
 
         foreach ($rides as $ride) {
             $ride->options->transform(function ($option) use ($selectedLangId, $defaultLangId) {
@@ -2394,8 +2480,8 @@ class PxRideWebController extends Controller
                 ? $ride->stops->sortBy('stop_order')->values()->all()
                 : [];
 
-            if ($hasSearch) {
-                [$matchedFromIndex, $matchedToIndex] = $this->findMatchingStopPair(
+            if ($hasLocationSearch) {
+                [$matchedFromIndex, $matchedToIndex] = $this->findMatchingSegmentIndices(
                     $orderedStops,
                     $originCityId,
                     $destinationCityId,
@@ -2435,14 +2521,85 @@ class PxRideWebController extends Controller
         return view('px.search_ride', [
             'findRidePage' => $findRidePage,
             'postRidePage' => $postRidePage,
+            'searchOptionGroups' => $searchOptionGroups,
             'rides' => $rides,
             'hasSearch' => $hasSearch,
+            'hasActiveFilters' => $hasActiveFilters,
+            'searchFilters' => $searchFilters,
             'oldOriginLabel' => old('origin.label', $originLabel),
             'oldOriginCityId' => old('origin.city_id', $request->input('origin.city_id')),
             'oldDestinationLabel' => old('destination.label', $destinationLabel),
             'oldDestinationCityId' => old('destination.city_id', $request->input('destination.city_id')),
             'oldDepartureDate' => old('departure_date', $departureDate),
+            'oldKeyword' => old('keyword', $request->input('keyword')),
         ]);
+    }
+
+    protected function getPxSearchOptionGroups($selectedLangId, $defaultLangId)
+    {
+        return PxOptionGroup::query()
+            ->whereIn('code', ['booking_method', 'preference', 'luggage_size', 'smoking_allowed', 'pets_allowed'])
+            ->with(['options' => function ($query) use ($selectedLangId, $defaultLangId) {
+                $query->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->with(['translations' => function ($translationQuery) use ($selectedLangId, $defaultLangId) {
+                        $translationQuery->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
+                    }]);
+            }])
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($group) use ($selectedLangId, $defaultLangId) {
+                $group->options = $group->options->map(function ($option) use ($selectedLangId, $defaultLangId) {
+                    $selected = $option->translations->firstWhere('language_id', $selectedLangId);
+                    $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
+                    $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+                    $option->display_description = optional($selected)->description ?: optional($fallback)->description;
+                    return $option;
+                });
+
+                return $group;
+            })
+            ->keyBy('code');
+    }
+
+    protected function getPxSearchFilters(Request $request): array
+    {
+        $filters = [
+            'driver_age' => $request->input('driver_age'),
+            'driver_rating' => $request->input('driver_rating'),
+            'driver_phone' => $request->boolean('driver_phone') ? 1 : null,
+            'driver_name' => trim((string) $request->input('driver_name')),
+            'booking_method' => $request->input('booking_method'),
+            'vehicle_type' => trim((string) $request->input('vehicle_type')),
+            'luggage_size' => $request->input('luggage_size'),
+            'smoking_allowed' => $request->input('smoking_allowed'),
+            'pets_allowed' => $request->input('pets_allowed'),
+            'women_only' => $request->boolean('women_only') ? 1 : null,
+            'extra_care' => $request->boolean('extra_care') ? 1 : null,
+            'ride_option_ids' => array_values(array_filter(array_map('intval', (array) $request->input('ride_option_ids', [])))),
+        ];
+
+        return collect($filters)
+            ->map(function ($value) {
+                return $value === '0' ? null : $value;
+            })
+            ->all();
+    }
+
+    protected function getTemporarilyBlockedDriverIds(int $userId): array
+    {
+        // Future: move this legacy booking-block lookup into a shared search filter service.
+        return PxBooking::query()
+            ->where('passenger_id', $userId)
+            ->where('removed_permanently', 1)
+            ->where('block_date_time', '>', now())
+            ->get()
+            ->pluck('driver_id')
+            ->filter()
+            ->unique()
+            ->map(fn ($driverId) => (int) $driverId)
+            ->values()
+            ->all();
     }
 
     protected function resolveMatchedSegmentPriceMinor(PxRide $ride, $fromCityId, $toCityId, string $fromLabel, string $toLabel, $fromIndex = null, $toIndex = null): int
@@ -2456,7 +2613,7 @@ class PxRideWebController extends Controller
         }
 
         if ($fromIndex === null || $toIndex === null) {
-            [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
+            [$fromIndex, $toIndex] = $this->findMatchingSegmentIndices($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
         }
 
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
@@ -2493,6 +2650,38 @@ class PxRideWebController extends Controller
         }
 
         return max(0, $segmentPriceMinor);
+    }
+
+    protected function findMatchingSegmentIndices(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
+    {
+        [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
+
+        if ($fromIndex !== null && $toIndex !== null) {
+            return [$fromIndex, $toIndex];
+        }
+
+        $lastIndex = count($stops) - 1;
+        if ($lastIndex < 1) {
+            return [null, null];
+        }
+
+        if ($fromIndex === null && (!empty($fromCityId) || trim($fromLabel) !== '')) {
+            foreach ($stops as $idx => $stop) {
+                if ($this->stopMatches($stop, $fromCityId, $fromLabel) && $idx < $lastIndex) {
+                    return [$idx, $lastIndex];
+                }
+            }
+        }
+
+        if ($toIndex === null && (!empty($toCityId) || trim($toLabel) !== '')) {
+            foreach ($stops as $idx => $stop) {
+                if ($this->stopMatches($stop, $toCityId, $toLabel) && $idx > 0) {
+                    return [0, $idx];
+                }
+            }
+        }
+
+        return [null, null];
     }
 
     protected function findMatchingStopPair(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
