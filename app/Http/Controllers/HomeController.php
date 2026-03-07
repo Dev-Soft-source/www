@@ -71,7 +71,6 @@ class HomeController extends Controller
             }
         }
 
-
         $ratings = Rating::all();
 
         $langId = $this->selectedLanguage->id;

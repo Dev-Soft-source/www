@@ -254,6 +254,7 @@
                         alt="{{ $option->display_label }}">
                     {{-- @endif --}}
                     <p>{{ $option->display_label }}</p>
+                    @if(!empty($option->display_description))
                     <span class="inline-flex cursor-help w-4 h-4"
                         data-tippy-content="{{ $option->display_description }}">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -262,6 +263,7 @@
                                 fill="#666666"></path>
                         </svg>
                     </span>
+                    @endif
                 </div>
             @endforeach
         @else

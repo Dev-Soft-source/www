@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use App\Models\Language;
 use App\Models\ChatsPageSettingDetail;
@@ -17,6 +18,8 @@ use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\VideoDetail;
 use App\Models\PxOptionGroup;
+use Stripe\ExchangeRate;
+use Stripe\Stripe;
 
 class Controller extends BaseController
 {
@@ -29,6 +32,7 @@ class Controller extends BaseController
     protected $siteText;
     protected $selectedCurrency;
     protected $availableCurrencies = [];
+    protected $currencyRatesToSelected = [];
 
     public function __construct()
     {
@@ -49,22 +53,25 @@ class Controller extends BaseController
             session(['selectedLanguage' => $lang]);
         }
         $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
-
         $languages = Language::all();
+        
         $this->availableCurrencies = $this->resolveAvailableCurrencies();
+        
         $currencyFromQuery = strtoupper((string) request()->query('currency', ''));
         if ($currencyFromQuery !== '' && array_key_exists($currencyFromQuery, $this->availableCurrencies)) {
             session(['selectedCurrency' => $currencyFromQuery]);
         }
+
         $sessionCurrency = strtoupper((string) session('selectedCurrency', ''));
         if (!array_key_exists($sessionCurrency, $this->availableCurrencies)) {
-            $preferredCurrency = strtoupper((string) env('PX_DEFAULT_CURRENCY', 'CAD'));
-            $sessionCurrency = array_key_exists($preferredCurrency, $this->availableCurrencies)
-                ? $preferredCurrency
-                : (array_key_first($this->availableCurrencies) ?: 'CAD');
+            $sessionCurrency = array_key_first($this->availableCurrencies) ?: 'USD';
             session(['selectedCurrency' => $sessionCurrency]);
         }
         $this->selectedCurrency = $sessionCurrency;
+        $this->currencyRatesToSelected = $this->resolveCurrencyRatesToSelected(
+            $this->selectedCurrency,
+            array_keys($this->availableCurrencies)
+        );
 
         // $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
@@ -175,6 +182,7 @@ class Controller extends BaseController
             'selectedCurrency' => $this->selectedCurrency,
             'availableCurrencies' => $this->availableCurrencies,
             'selectedCurrencySymbol' => $this->availableCurrencies[$this->selectedCurrency]['symbol'] ?? '$',
+            'currencyRatesToSelected' => $this->currencyRatesToSelected,
             // 'ratings' => $ratings,
             // 'notificationPage' => $notificationPage,
         ]);
@@ -229,6 +237,67 @@ class Controller extends BaseController
             return 'C$';
         }
         return $upper . ' ';
+    }
+
+    protected function resolveCurrencyRatesToSelected(string $selectedCurrencyCode, array $availableCurrencyCodes): array
+    {
+        $selectedCurrencyCode = strtoupper($selectedCurrencyCode);
+        $rates = [];
+
+        foreach ($availableCurrencyCodes as $fromCode) {
+            $fromCode = strtoupper((string) $fromCode);
+            if ($fromCode === '') {
+                continue;
+            }
+
+            if ($fromCode === $selectedCurrencyCode) {
+                $rates[$fromCode] = 1.0;
+                continue;
+            }
+
+            $rate = $this->fetchStripeRate($fromCode, $selectedCurrencyCode);
+            if ($rate === null || $rate <= 0) {
+                // Fallback keeps UI functional if Stripe FX is unavailable.
+                $rate = 1.0;
+            }
+            $rates[$fromCode] = (float) $rate;
+        }
+
+        if (!isset($rates[$selectedCurrencyCode])) {
+            $rates[$selectedCurrencyCode] = 1.0;
+        }
+
+        return $rates;
+    }
+
+    protected function fetchStripeRate(string $fromCurrencyCode, string $toCurrencyCode): ?float
+    {
+        $from = strtolower($fromCurrencyCode);
+        $to = strtolower($toCurrencyCode);
+        if ($from === $to) {
+            return 1.0;
+        }
+
+        $secret = (string) env('STRIPE_SECRET', '');
+        if ($secret === '') {
+            return null;
+        }
+
+        $cacheKey = 'stripe_fx_' . $from . '_' . $to;
+
+        try {
+            return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($secret, $from, $to) {
+                Stripe::setApiKey($secret);
+                $exchangeRate = ExchangeRate::retrieve($from);
+                $rates = is_array($exchangeRate->rates ?? null) ? $exchangeRate->rates : [];
+                if (!array_key_exists($to, $rates)) {
+                    return null;
+                }
+                return (float) $rates[$to];
+            });
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**

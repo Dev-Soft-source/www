@@ -298,9 +298,9 @@ Route::get('{lang?}/students', [StudentController::class, 'index'])->name('stude
 Route::get('{lang?}/drivers', [DriverController::class, 'index'])->name('drivers');
 Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('passengers');
 Route::get('{lang?}/search-rides', [RideController::class, 'SearchRide'])->name('search_ride');
-Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
-Route::get('{lang?}/Extra-Care-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
-Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
+// Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
+// Route::get('{lang?}/Extra-Care-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
+// Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
 Route::get('{lang?}/ride/{departure}/to/{destination}/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
 Route::get('{lang?}/my-ride/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyRideDetail'])->name('my_ride_detail');
 Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
@@ -532,7 +532,11 @@ Route::get('{lang?}/px/ride/{id}/{from_stop_id?}/{to_stop_id?}', [PxRideWebContr
     ->whereNumber('from_stop_id')
     ->whereNumber('to_stop_id')
     ->name('px.ride_detail');
+
 Route::get('{lang?}/px/search-rides', [PxRideWebController::class, 'search'])->name('px.search_ride');
+Route::get('{lang?}/px/search-extra-care-rides', [PxRideWebController::class, 'folk_ride_search'])->name('folk_ride');
+Route::get('{lang?}/px/search-pink-rides', [PxRideWebController::class, 'pink_ride_search'])->name('pink_ride');
+Route::get('{lang?}/px/search-proximalocal-ride', [PxRideWebController::class, 'proximalocal_ride_search'])->name('proximalocal_ride');
 
 Route::get('{lang?}/px/booking/{id}/edit', [PxBookingWebController::class, 'editBooking'])->whereNumber('id')->name('px.booking.edit')->middleware(['auth', 'nocache']);
 Route::put('{lang?}/px/booking/{id}', [PxBookingWebController::class, 'updateBooking'])->whereNumber('id')->name('px.booking.update')->middleware(['auth', 'nocache']);

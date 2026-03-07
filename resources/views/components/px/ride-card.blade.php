@@ -316,9 +316,14 @@
                                 });
                         @endphp
                         @foreach ($sortedRideOptions as $option)
+                        @php
+                            $description = $option->display_label;
+                            if(!empty($option->display_description)) $description = $option->display_description;
+                            
+                        @endphp
                             <img src="{{ asset('home_page_icons/' . $option->icon) }}"
                                 alt="{{ $option->display_label ?? $option->code }}"
-                                data-tippy-content="{{ $option->display_description ?? '' }}"
+                                data-tippy-content="{{ $description }}"
                                 class="w-8 h-8 rounded-full object-contain">
                         @endforeach
                     </div>

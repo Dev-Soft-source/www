@@ -23,6 +23,12 @@ use App\Models\State;
 use App\Models\SeatDetail;
 use App\Models\PxRideStop;
 use App\Models\RecentSearch;
+use App\Models\ExtraCareFaq;
+use App\Models\ExtraCareFaqDetail;
+use App\Models\PinkRideFaqDetail;
+use App\Models\ProfilePageSettingDetail;
+use App\Models\ProfileSettingDetail;
+use App\Models\MyReviewSettingDetail;
 use App\Services\PxRideService;
 use App\Services\FCMService;
 use App\Models\Notification;
@@ -135,6 +141,11 @@ class PxRideWebController extends Controller
         $postRidePage = $this->getPostRidePageWithSettingDetail();
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
 
+        $ProfilePage = ProfilePageSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+        $ProfileSetting = ProfileSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+        $reviewSetting = MyReviewSettingDetail::where('language_id', $this->selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
+
+
         return view('px.my_rides', [
             'rides' => $rides,
             'postRidePage' => $postRidePage,
@@ -143,6 +154,9 @@ class PxRideWebController extends Controller
             'upcomingCount' => $upcomingCount,
             'completedCount' => $completedCount,
             'cancelledCount' => $cancelledCount,
+            'reviewSetting' => $reviewSetting, 
+            'ProfilePage' => $ProfilePage, 
+            'ProfileSetting' => $ProfileSetting, 
         ]);
     }
 
@@ -2308,7 +2322,31 @@ class PxRideWebController extends Controller
             ->with('success', 'PX ride updated successfully.');
     }
 
-    public function search(Request $request, PxRideService $service, $lang = null)
+    public function folk_ride_search(Request $request, PxRideService $service, $lang = null)
+    {
+        $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
+        view()->share('extraCareFaqs', $extraCareFaqs);
+
+        return $this->search($request, $service, $lang, 'px.search_folk_ride');
+    }
+
+    public function pink_ride_search(Request $request, PxRideService $service, $lang = null)
+    {
+        $pinkRideFaqs = PinkRideFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
+        view()->share('pinkRideFaqs', $pinkRideFaqs);
+
+        return $this->search($request, $service, $lang, 'px.search_pink_ride');
+    }
+
+    public function proximalocal_ride_search(Request $request, PxRideService $service, $lang = null)
+    {
+        $proximaLocalRideFaqs = [];
+        view()->share('proximaLocalRideFaqs', $proximaLocalRideFaqs);
+
+        return $this->search($request, $service, $lang, 'px.search_proximalocal_ride');
+    }
+
+    public function search(Request $request, PxRideService $service, $lang = null, $view = 'px.search_ride')
     {
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
@@ -2318,9 +2356,27 @@ class PxRideWebController extends Controller
         $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
 
         $findRidePage = $this->getFindRidePageWithSettingDetail();
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+
         $searchOptionGroups = $this->getPxSearchOptionGroups($selectedLangId, $defaultLangId);
         $searchFilters = $this->getPxSearchFilters($request);
+        
+        $searchFilters['proximalocal'] = 0;
+        $page_type = 'px_ride';
+        $action_route = 'px.search_ride';
+        if($view === 'px.search_folk_ride'){
+            $searchFilters['extra_care'] = 1;
+            $page_type = 'px_folk_ride';
+            $action_route = 'folk_ride';
+        } elseif ($view === 'px.search_pink_ride') {
+            $searchFilters['women_only'] = 1;
+            $page_type = 'px_pink_ride';
+            $action_route = 'pink_ride';
+        } elseif ($view === 'px.search_proximalocal_ride') {
+            $searchFilters['proximalocal'] = 1;
+            $page_type = 'px_proximalocal_ride';
+            $action_route = 'proximalocal_ride';
+        }
+
         $keyword = trim((string) $request->input('keyword'));
         $hasActiveFilters = collect($searchFilters)->contains(function ($value) {
             return $value !== null && $value !== '' && $value !== false;
@@ -2437,7 +2493,7 @@ class PxRideWebController extends Controller
                 if($keyword === ''){
                     $existingSearch = RecentSearch::query()
                         ->where('user_id', $user->id)
-                        ->where('page_type', 'px_ride')
+                        ->where('page_type', $page_type)
                         ->where('from', 'like', '%' . $originLabel . '%')
                         ->where('to', 'like', '%' . $destinationLabel . '%')
                         ->first();
@@ -2449,7 +2505,7 @@ class PxRideWebController extends Controller
                             'from' => $originLabel,
                             'to' => $destinationLabel,
                             'user_id' => $user->id,
-                            'page_type' => 'px_ride',
+                            'page_type' => $page_type,
                         ]);
                     }
                 }
@@ -2511,13 +2567,13 @@ class PxRideWebController extends Controller
         if ($user) {
             $recentSearches = RecentSearch::query()
                 ->where('user_id', $user->id)
-                ->where('page_type', 'px_ride')
+                ->where('page_type', $page_type)
                 ->where('from', '!=', '')
                 ->where('to', '!=', '')
                 ->orderByDesc('updated_at')
                 ->limit(3)
                 ->get()
-                ->map(function (RecentSearch $recentSearch) use ($lang) {
+                ->map(function (RecentSearch $recentSearch) use ($lang, $view) {
                     $originLabel = trim((string) $recentSearch->from);
                     $destinationLabel = trim((string) $recentSearch->to);
                     $originCityId = $this->resolveRecentSearchCityId($originLabel);
@@ -2528,7 +2584,7 @@ class PxRideWebController extends Controller
                     $recentSearch->origin_city_id = $originCityId;
                     $recentSearch->destination_city_id = $destinationCityId;
                     $recentSearch->search_url = ($originCityId && $destinationCityId)
-                        ? route('px.search_ride', [
+                        ? route($view, [
                             'lang' => $lang ?? optional($this->selectedLanguage)->abbreviation,
                             'origin' => [
                                 'label' => $originLabel,
@@ -2548,9 +2604,9 @@ class PxRideWebController extends Controller
                 ->values();
         }
 
-        return view('px.search_ride', [
+        return view($view, [
+            'action_route' => $action_route,
             'findRidePage' => $findRidePage,
-            'postRidePage' => $postRidePage,
             'searchOptionGroups' => $searchOptionGroups,
             'rides' => $rides,
             'recentSearches' => $recentSearches,
