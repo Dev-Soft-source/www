@@ -117,7 +117,7 @@
             }
 
             $pricePerSeatMinor = (int) ($displayPriceMinor ?? $ride->price_minor);
-            $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+            $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
             $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
             $currency = $currencyMap[$currencyCode] ?? $currencyCode . ' ';
             $segmentStops = $displaySegmentStops ?? collect();

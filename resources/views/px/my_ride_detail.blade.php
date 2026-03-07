@@ -240,7 +240,7 @@
                     $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
                     $originDepartureAt = $ride->departure_at;
                     $pricePerSeatMinor = (int) $ride->price_minor;
-                    $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+                    $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
                     $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
                     $currency = $currencyMap[$currencyCode] ?? ($currencyCode . ' ');
                 @endphp

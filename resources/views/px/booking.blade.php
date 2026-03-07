@@ -66,7 +66,7 @@
         $fromLabel = $fromStop->label ?? 'N/A';
         $toLabel = $toStop->label ?? 'N/A';
         $perSeatMinor = (int) ($segmentPriceMinor ?? 0);
-        $currencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+        $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
         $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
         $currencySymbol = $currencyMap[$currencyCode] ?? $currencyCode . ' ';
         $currentBookedSeats = $isEditMode ? (int) ($existingBooking->seats ?? 1) : 0;
@@ -153,6 +153,52 @@
             }
         }
     @endphp
+    <div id="student-seat-limit-modal" class="hidden relative z-50" aria-labelledby="student-seat-limit-modal-title"
+        role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            onclick="closeStudentSeatLimitModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closeStudentSeatLimitModal()"
+                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start justify-center">
+                            <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="w-12 h-12 text-yellow-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v3.75m0 3.75h.007v.008H12v-.008zm8.25-3.758c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="text-center sm:mt-0">
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                id="student-seat-limit-modal-title">
+                                Seat Limit
+                            </h3>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center text-gray-700">
+                                    Students are limited to booking a maximum of 2 seats per ride for Cash payment
+                                    rides.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
+                        <button type="button" onclick="closeStudentSeatLimitModal()"
+                            class="button-exp-fill">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
         @if (session('success'))
             <div class="mb-4 rounded-md border border-green-200 bg-green-50 text-green-700 px-4 py-3">
@@ -558,9 +604,7 @@
                                 </div>
                                 @error('firm_agree_terms')
                                     <div class="tooltip-error shadow-lg">
-                                        <div class="tooltip-error shadow-lg">
-                                            <p class="text-sm">{{ $message }}</p>
-                                        </div>
+                                        {{ $message }}
                                     </div>
                                 @enderror
 
@@ -570,8 +614,8 @@
                                             value="1" {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
                                         <span class="ml-2">
-                                            @isset($bookingPage->firm_cancellation_understand_text)
-                                                {!! $bookingPage->firm_cancellation_understand_text !!}
+                                            @isset($bookingPage->firm_discount_label_price_section)
+                                                {!! $bookingPage->firm_discount_label_price_section !!}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </span>
@@ -579,9 +623,7 @@
                                 </div>
                                 @error('firm_cancellation_understand')
                                     <div class="tooltip-error shadow-lg">
-                                        <div class="tooltip-error shadow-lg">
-                                            <p class="text-sm">{{ $message }}</p>
-                                        </div>
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             @endif
@@ -603,7 +645,6 @@
                                 </div>
                                 @error('pink_ride_agree_terms')
                                     <div class="tooltip-error shadow-lg">
-                                        <p class="text-sm">
                                             @isset($bookingPage->pink_ride_tooltip)
                                                 {{ $bookingPage->pink_ride_tooltip }}
                                             @endisset
@@ -629,11 +670,9 @@
                                 </div>
                                 @error('extra_care_ride_agree_terms')
                                     <div class="tooltip-error shadow-lg">
-                                        <p class="text-sm">
-                                            @isset($bookingPage->extra_care_ride_tooltip)
-                                                {{ $bookingPage->extra_care_ride_tooltip }}
-                                            @endisset
-                                        </p>
+                                        @isset($bookingPage->extra_care_ride_tooltip)
+                                            {{ $bookingPage->extra_care_ride_tooltip }}
+                                        @endisset
                                     </div>
                                 @enderror
                             @endif
@@ -684,7 +723,7 @@
                         </div>
                     @endif
 
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-3 mt-4">
                         <button type="submit" class="button-exp-fill">
                             {{ $payButtonLabel }}
                         </button>
@@ -933,6 +972,32 @@
             });
 
             // Seat selection function (if using visual seat selection)
+            function openStudentSeatLimitModal() {
+                var modal = document.getElementById('student-seat-limit-modal');
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeStudentSeatLimitModal() {
+                var modal = document.getElementById('student-seat-limit-modal');
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeStudentSeatLimitModal();
+                }
+            });
+
             function seat_selected(event, clickedSeatId, clickedSeatNumber) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -957,7 +1022,7 @@
                 // Student limit: cap at 2 seats for Cash payment
                 if (isStudent && isCashPayment && seatsToSelect.length > maxSeatsForStudent) {
                     seatsToSelect = seatsToSelect.slice(0, maxSeatsForStudent);
-                    alert('Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.');
+                    openStudentSeatLimitModal();
                 }
 
                 // Check if this is a toggle-off: clicked seat was the rightmost selected

@@ -35,7 +35,7 @@
         ? $priceMinor
         : $ride->price_per_seat_minor ?? ($ride->price_minor ?? 0));
     $normalizedPrice = !is_null($priceMajor) ? (float) $priceMajor : $priceMinorSource / 100;
-    $rideCurrencyCode = strtoupper((string) ($ride->currency ?? ($selectedCurrency ?? 'USD')));
+    $rideCurrencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
     $currencySymbolMap = [
         'USD' => '$',
         'CAD' => 'C$',

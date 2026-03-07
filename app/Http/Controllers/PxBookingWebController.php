@@ -530,7 +530,7 @@ class PxBookingWebController extends Controller
 
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
         $amountMinor = (int) $segmentPriceMinor * (int) $validated['seats'];
-        $rideCurrencyCode = strtoupper((string) ($ride->currency ?: ($this->selectedCurrency ?? 'USD')));
+        $rideCurrencyCode = strtoupper((string) ($ride->currency ?: 'USD'));
         $stripeCurrencyCode = strtolower($rideCurrencyCode);
 
         $bookingMethodGroup = PxOptionGroup::query()
