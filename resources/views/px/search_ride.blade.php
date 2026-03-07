@@ -409,7 +409,7 @@
                                 Search
                             </button>
                         </div>
-                    </div>
+
                         <div class="flex items-center gap-4 py-4">
                             <div class="h-px flex-1 bg-gray-300"></div>
                             <span class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">or</span>
