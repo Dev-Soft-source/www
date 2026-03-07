@@ -120,7 +120,18 @@ class Step3to5Controller extends Controller
             'year' => 'required',
             'car_type' => 'required',
             'image' => 'nullable|file|max:10240',
-        ], [], $niceNames);
+        ], [
+            'make.required' => 'The make is required',
+            'model.required' => 'The model is required',
+            'type.required' => 'The vehicle type is required',
+            'liscense_no.required' => 'The license number is required',
+            'color.required' => 'The color is required',
+            'year.required' => 'The year is required',
+            'car_type.required' => 'The car type is required',
+            'image.nullable' => 'The image may be null',
+            'image.file' => 'The image must be a file',
+            'image.max' => 'The image must be less than 10MB',
+        ], $niceNames);
         
         if ($request->hasFile('image')) {
             $file = $request->file('image');

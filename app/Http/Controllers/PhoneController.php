@@ -235,6 +235,9 @@ class PhoneController extends Controller
 
         $request->validate([
             'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,user_id',
+        ], [
+            'full_phone.max' => 'The phone number must be less than 20 characters',
+            'full_phone.unique' => 'The phone number has already been taken',
         ]);
 
         $phone = PhoneNumber::create([
@@ -569,7 +572,10 @@ class PhoneController extends Controller
         // Combine the code input values into a single string
         $code = implode('', $request->code);
 
-        $request->validate(['code' => 'required|array']);
+        $request->validate(['code' => 'required|array'], [
+            'code.required' => 'The code is required',
+            'code.array' => 'The code must be an array',
+        ]);
 
         // After initial validation, combine the code digits
         if (strlen($code) < 4) {
@@ -801,6 +807,9 @@ class PhoneController extends Controller
         try {
             $request->validate([
                 'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,user_id',
+            ], [
+                'full_phone.max' => 'The phone number must be less than 20 characters',
+                'full_phone.unique' => 'The phone number has already been taken',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([

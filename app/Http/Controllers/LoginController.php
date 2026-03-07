@@ -89,6 +89,8 @@ class LoginController extends Controller
                 'email'    => 'required|string|max:255|email',
                 'password' => 'required',
             ], [
+                'password.required' => 'Password is required',
+                'email.required' => 'Email address is required',
                 'email.email' => 'Please enter a valid email address, such as name@example.com',
             ], $niceNames);
         } catch (ValidationException $e) {

@@ -69,6 +69,9 @@ class PaymentMethodController extends Controller
     {
         $request->validate([
             'payment_method_id' => 'required|string'
+        ], [
+            'payment_method_id.required' => 'The payment method is required',
+            'payment_method_id.string' => 'The payment method must be a string',
         ]);
 
         $user = auth()->user();
@@ -133,6 +136,11 @@ class PaymentMethodController extends Controller
             $request->validate([
                 'payer_id' => 'required|string',
                 'email' => 'required|email'
+            ], [
+                'payer_id.required' => 'The payer id is required',
+                'payer_id.string' => 'The payer id must be a string',
+                'email.required' => 'The email is required',
+                'email.email' => 'The email must be a valid email address',
             ]);
 
             // Check if PayPal account already exists (by payer_id or email)

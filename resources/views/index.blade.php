@@ -2004,7 +2004,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
-        var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This field is required";
+        var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This is required";
         var errorCityMissing = "{{ $homePage->slider_required_error }}" ?? "Please select a valid city from the dropdown";
 
         // Google Places Autocomplete initialization - Define function before loading Google Maps API

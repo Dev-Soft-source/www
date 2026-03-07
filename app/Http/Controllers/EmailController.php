@@ -105,14 +105,14 @@ class EmailController extends Controller
                 'old_email' => 'required|email',
                 'email_confirmation' => 'required|email',
                 'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
-                // 'password' => [
-                //     'required',
-                //     function ($attribute, $value, $fail) {
-                //         if (!Hash::check($value, auth()->user()->password)) {
-                //             $fail(__('validation.password'));
-                //         }
-                //     },
-                // ],
+            ], [
+                'old_email.required' => 'The current email is required',
+                'old_email.email' => 'The current email is not a valid email address',
+                'email_confirmation.required' => 'The confirm email is required',
+                'email_confirmation.email' => 'The confirm email is not a valid email address',
+                'email.required' => 'The new email is required',
+                'email.email' => 'The new email is not a valid email address',
+                'email.unique' => 'The new email is already taken',
             ], $customMessages);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])

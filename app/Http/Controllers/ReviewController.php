@@ -181,7 +181,12 @@ class ReviewController extends Controller
         $request->validate([
             'review' => 'required|string|max_words:500',
             'conscious' => ['required_without_all:comfort,communication,attitude,hygiene,respect,safety,timeliness'],
-        ], $customMessages);
+        ], $customMessages, [
+            'review.required' => 'The review is required',
+            'review.string' => 'The review must be a string',
+            'review.max_words' => 'The review may not be greater than 500 words',
+            'conscious.required_without_all' => 'At least one of the ratings must be filled',
+        ]);
         
         // Initialize variables to store sum and count of non-null values
         $sum = 0;
@@ -431,7 +436,12 @@ class ReviewController extends Controller
         $request->validate([
             'review' => 'required|string|max_words:500',
             'conscious' => ['required_without_all:vehicle_condition,comfort,communication,attitude,hygiene,respect,safety,timeliness'],
-        ], $customMessages);
+        ], $customMessages, [
+            'review.required' => 'The review is required',
+            'review.string' => 'The review must be a string',
+            'review.max_words' => 'The review may not be greater than 500 words',
+            'conscious.required_without_all' => 'At least one of the ratings must be filled',
+        ]);
         
         // Initialize variables to store sum and count of non-null values
         $sum = 0;
@@ -633,6 +643,8 @@ class ReviewController extends Controller
         
         $request->validate([
             'reply' => 'required',
+        ], $customMessages, [
+            'reply.required' => 'The reply is required',
         ]);
 
         $reply = ReviewReply::create([

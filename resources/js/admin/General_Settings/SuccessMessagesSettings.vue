@@ -5126,6 +5126,7 @@
                                             "
                                         ></p>
                                     </div>
+                                    
                                     <div class="relative z-0 w-full group">
                                         <div>
                                             <div class="flex justify-between">
@@ -5160,6 +5161,45 @@
                                             v-text="
                                                 validationErros.get(
                                                     `login_before_booking_message.login_before_booking_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`post_return_ride_label_${activeLanguageId}`"
+                                                    >122. Post return ride label</label
+                                                >
+                                            </div>
+                                        </div>
+                                        <input
+                                                type="text"
+                                                :name="`post_return_ride_label_${activeLanguageId}`"
+                                                :id="`post_return_ride_label_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('post_return_ride_label')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'post_return_ride_label'
+                                                    )
+                                                "
+                                            />
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `post_return_ride_label.post_return_ride_label_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `post_return_ride_label.post_return_ride_label_${activeLanguageId}`
                                                 )
                                             "
                                         ></p>
@@ -5279,6 +5319,7 @@ export default {
                             this.handleInput("", language, "registration_successful_title");
                             this.handleInput("", language, "go_to_homepage");
                             this.handleInput("", language, "overlap_ride_title");
+                            this.handleInput("", language, "post_return_ride_label");
                             this.handleInput("", language, "hey_message");
                             this.handleInput("", language, "complete_profile_message");
                             this.handleInput("", language, "no_user_found_message");
@@ -5544,6 +5585,11 @@ export default {
                                 setting?.overlap_ride_title,
                                 setting?.language,
                                 "overlap_ride_title"
+                            );
+                            this.handleInput(
+                                setting?.post_return_ride_label,
+                                setting?.language,
+                                "post_return_ride_label"
                             );
                             this.handleInput(
                                 setting?.hey_message,

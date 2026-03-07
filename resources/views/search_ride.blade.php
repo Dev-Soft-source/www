@@ -1752,8 +1752,8 @@
         let toAutocomplete = null;
         let isSettingPlaceValue = false;
         let isSelectingFromDropdown = false;
-        const errorFromRequired = 'The origin field is required';
-        const errorToRequired = 'The destination field is required';
+        const errorFromRequired = 'The origin is required';
+        const errorToRequired = 'The destination is required';
         const errorCityMissing = 'We could not find this city name in our records, please double-check the spelling.';
 
         // Function to close the hide ride modal

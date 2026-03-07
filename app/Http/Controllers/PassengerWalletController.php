@@ -365,6 +365,10 @@ class PassengerWalletController extends Controller
             'payment_method' => 'required',
             'card_id' => $request->payment_method == 'credit_card' && $request->gPayApplePayId == '0' ? 'required' : 'nullable',
             'dr_amount' => 'required',
+        ], [
+            'payment_method.required' => 'The payment method is required',
+            'card_id.required' => 'The card is required',
+            'dr_amount.required' => 'The amount is required',
         ]);
 
         

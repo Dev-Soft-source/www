@@ -121,7 +121,13 @@ class ResetPasswordController extends Controller
             // Validate the form data
             $validatedData = $request->validate([
                 'password' => 'required|confirmed|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-            ], [], $niceNames);
+            ], [
+                'password.required' => 'The password is required',
+                'password.confirmed' => 'The password confirmation does not match',
+                'password.string' => 'The password must be a string',
+                'password.min' => 'The password must be at least 8 characters',
+                'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+            ], $niceNames);
 
             $password_resets = DB::table('password_resets')->where('token', $request->token)->where('type', 'user')->first();
             if (!$password_resets) {

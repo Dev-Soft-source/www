@@ -56,6 +56,7 @@ return new class extends Migration
             $table->string('complete_profile_message')->nullable();
             $table->string('go_to_homepage')->nullable();
             $table->string('overlap_ride_title')->nullable();
+            $table->string('post_return_ride_label')->nullable();
             $table->timestamps();
         });
     }

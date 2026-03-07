@@ -197,10 +197,6 @@ function closeErrorModal() {
                                                                 <p class="font-medium">
                                                                     Total {{ $ride->seats }} seats</p>
                                                             </div>
-                                                            {{-- <div class="pr-8">
-                                                                <p class="font-medium">
-                                                                    {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }} seats left</p>
-                                                            </div> --}}
                                                         </div>
                                                         <div class="flex flex-col md:flex-row justify-between px-4">
                                                             <div class="w-full md:w-2/3 order-2 md:order-1">

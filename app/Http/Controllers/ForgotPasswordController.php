@@ -110,7 +110,7 @@ class ForgotPasswordController extends Controller
 
         // Custom validation messages
         $customMessages = [
-            'email.required' => isset($forgotPasswordPage) && isset($forgotPasswordPage->field_require) ? $forgotPasswordPage->field_require : 'The email field is required.',
+            'email.required' =>'The email is required.',
             'email.email' => 'Please enter a valid email address, such as name@example.com',
         ];
         
@@ -118,6 +118,9 @@ class ForgotPasswordController extends Controller
         try {
             $validatedData = $request->validate([
                 'email' => 'required|email',
+            ], [
+                'email.required' => 'The email is required',
+                'email.email' => 'Please enter a valid email address, such as name@example.com',
             ], $customMessages);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {

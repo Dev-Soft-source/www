@@ -111,7 +111,15 @@ class PasswordController extends Controller
             'pass1' => 'required',
             'pass2' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
             'pass3' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-        ], [], $niceNames);
+        ], [
+            'pass1.required' => 'The current password is required',
+            'pass2.required' => 'The new password is required',
+            'pass2.string' => 'The new password must be a string',
+            'pass2.min' => 'The new password must be at least 8 characters',
+            'pass2.regex' => 'The new password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+            'pass3.required' => 'The confirm password is required',
+            'pass3.string' => 'The confirm password must be a string',
+        ], $niceNames);
 
         // Check if the current password is correct
         if (!Hash::check($request->pass1, auth()->user()->password)) {

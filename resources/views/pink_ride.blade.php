@@ -1986,8 +1986,8 @@
         var toAutocompletePinkRide = null;
         var isSettingPlaceValuePinkRide = false;
         var isSelectingFromDropdownPinkRide = false;
-        var errorFromRequiredPinkRide = 'The origin field is required';
-        var errorToRequiredPinkRide = 'The destination field is required';
+        var errorFromRequiredPinkRide = 'The origin is required';
+        var errorToRequiredPinkRide = 'The destination is required';
         var errorCityMissingPinkRide = 'We could not find this city name in our records, please double-check the spelling.';
 
         // Function to close the hide ride modal

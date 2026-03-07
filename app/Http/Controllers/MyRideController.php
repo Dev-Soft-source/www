@@ -439,6 +439,9 @@ class MyRideController extends Controller
         if ($booking) {
             $request->validate([
                 'code' => 'required|max:4',
+            ], [
+                'code.required' => 'The code is required',
+                'code.max' => 'The code must be less than 4 characters',
             ]);
 
             $messageData = "";
@@ -987,6 +990,9 @@ class MyRideController extends Controller
         $request->validate([
             'message' => 'required',
             'reason' => 'required'
+        ],[
+            'message.required' => 'The message is required',
+            'reason.required' => 'The reason is required',
         ]);
 
         $bookings = Booking::where('ride_id', $id)
@@ -1493,7 +1499,12 @@ class MyRideController extends Controller
             'passenger_message' => 'required',
             'remove_type' => $removed_permanently == "1" ? 'required' : 'nullable',
             'block_day' => $remove_type == "temporarily" ? 'required' : 'nullable',
-        ], [], $niceNames);
+        ], [
+            'admin_message.required' => 'The admin message is required',
+            'passenger_message.required' => 'The passenger message is required',
+            'remove_type.required' => 'The remove type is required',
+            'block_day.required' => 'The block day is required',
+        ], $niceNames);
 
         $blockDay = "";
         $blockDateTime = "";

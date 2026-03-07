@@ -108,6 +108,8 @@ class HomeController extends Controller
     {
         $request->validate([
             'token' => 'required|string',
+        ], [
+            'token.required' => 'The token is required',
         ]);
 
         $user_id = auth()->user()->id;
@@ -322,6 +324,15 @@ class HomeController extends Controller
             'terms_privacy' => 'required',
         ], [
             'email.email' => 'Please use a valid email',
+            'package.required' => 'The package is required',
+            'custom_amount.required' => 'The custom amount is required',
+            'name.required' => 'The name is required',
+            'email.required' => 'The email is required',
+            'email.email' => 'Please use a valid email',
+            'payment_method.required' => 'The payment method is required',
+            'payment_method.in' => 'The payment method is invalid',
+            'donation_acknowledgment.required' => 'The donation acknowledgment is required',
+            'terms_privacy.required' => 'The terms and privacy are required',
         ]);
 
         $selectedLanguage = session('selectedLanguage');

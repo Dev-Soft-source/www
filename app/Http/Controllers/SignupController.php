@@ -147,8 +147,12 @@ class SignupController extends Controller
                 'password_confirmation' => 'required|same:password',
                 'rideshare_disclaimer' => 'required|accepted',
             ], [
+                'password.required' => 'Password is required',
+                'first_name.required' => 'First name is required',
+                'last_name.required' => 'Last name is required',
+                'email.required' => 'Email address is required',
                 'remember_me.required' => 'Please confirm you agree to the cost-sharing rule.',
-                'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password field is required',
+                'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password is required',
                 'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
                 'remember_me.accepted' => 'Please confirm you agree to the cost-sharing rule.',
                 'rideshare_disclaimer.required' => $signupPage->rideshare_require,

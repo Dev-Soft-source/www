@@ -53,7 +53,11 @@ class Step4to5Controller extends Controller
 
             $validated = $request->validate([
                 'driver_liscense' => 'required|file|max:10240',
-            ], [], $niceNames);
+            ], [
+                'driver_liscense.required' => 'The driver license is required',
+                'driver_liscense.file' => 'The driver license must be a file',
+                'driver_liscense.max' => 'The driver license must be less than 10MB',
+            ], $niceNames);
 
             if ($request->hasFile('driver_liscense')) {
                 $file = $request->file('driver_liscense');

@@ -57,7 +57,11 @@ class ProfilePhotoController extends Controller
         // Validate file exists and size
         $request->validate([
             'image' => 'required|file|max:10240',
-        ], [], $niceNames);
+        ], [
+            'image.required' => 'The image is required',
+            'image.file' => 'The image must be a file',
+            'image.max' => 'The image must be less than 10MB',
+        ], $niceNames);
         
         // Manual validation for file extension (works without fileinfo extension)
         if ($request->hasFile('image')) {

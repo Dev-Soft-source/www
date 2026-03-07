@@ -90,7 +90,10 @@ class Step5to5Controller extends Controller
 
         $request->validate([
             'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,id,user_id,' . $user_id,
-        ], [], $niceNames);
+        ], [
+            'full_phone.max' => 'The phone number must be less than 20 characters',
+            'full_phone.unique' => 'The phone number has already been taken',
+        ], $niceNames);
 
         // Create phone record
         $phone = PhoneNumber::create([

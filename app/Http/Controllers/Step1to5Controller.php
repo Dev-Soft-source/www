@@ -80,7 +80,30 @@ class Step1to5Controller extends Controller
             'city' => 'nullable',
             'zipcode' => 'required|string|max:' . (request()->input('country') == 39 ? 7 : 10),
             'bio' => 'required|max:300',
-        ], [], $niceNames);
+        ], [
+            'first_name.required' => 'The first name is required',
+            'first_name.string' => 'The first name must be a string',
+            'first_name.max' => 'The first name may not be greater than 25 characters',
+            'first_name.regex' => 'The first name must contain only letters, spaces, and hyphens',
+            'last_name.required' => 'The last name is required',
+            'last_name.string' => 'The last name must be a string',
+            'last_name.max' => 'The last name may not be greater than 25 characters',
+            'last_name.regex' => 'The last name must contain only letters, spaces, and hyphens',
+            'gender.required' => 'The gender is required',
+            'dob.required' => 'The date of birth is required',
+            'dob.date' => 'The date of birth must be a valid date',
+            'country.required' => 'The country is required',
+            'state.nullable' => 'The state may be null',
+            'city.nullable' => 'The city may be null',
+            'zipcode.required' => 'The zip code is required',
+            'zipcode.string' => 'The zip code must be a string',
+            'zipcode.max' => 'The zip code may not be greater than ' . (request()->input('country') == 39 ? 7 : 10) . ' characters',
+            'bio.required' => 'The bio is required',
+            'bio.max' => 'The bio may not be greater than 300 characters',
+            'bio.string' => 'The bio must be a string',
+            'bio.max' => 'The bio may not be greater than 300 characters',
+            'bio.string' => 'The bio must be a string',
+        ], $niceNames);
 
         // Validate state and city existence if provided
         $stateValue = null;

@@ -2033,8 +2033,8 @@
         var toAutocompleteFolkRide = null;
         var isSettingPlaceValueFolkRide = false;
         var isSelectingFromDropdownFolkRide = false;
-        var errorFromRequiredFolkRide = 'The origin field is required';
-        var errorToRequiredFolkRide = 'The destination field is required';
+        var errorFromRequiredFolkRide = 'The origin is required';
+        var errorToRequiredFolkRide = 'The destination is required';
         var errorCityMissingFolkRide = 'We could not find this city name in our records, please double-check the spelling.';
 
         // Function to close the hide ride modal

@@ -65,6 +65,11 @@ class CloseAccountController extends Controller
             'close_account_reason' => 'required',
             'close_account' => 'required'
         ], [], array_merge($niceNames, [
+            'reasons.array' => 'The reasons are required',
+            'reasons.required' => 'The reasons are required',
+            'improve_message.required' => 'The improve message is required',
+            'close_account_reason.required' => 'The close account reason is required',
+            'close_account.required' => 'The close account is required',
             'close_account_reason' => $closeAccountPage->why_closing_account_label ?? 'Reason for closing account',
             'improve_message' => $closeAccountPage->improve_label ?? 'How we can improve',
         ]));

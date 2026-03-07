@@ -136,9 +136,20 @@ class PayoutController extends Controller
             'account_holder_address' => $request->payout_method == 'bank' ? 'required' : 'nullable',
             'paypal_email' => $request->payout_method == 'paypal' ? 'required|email' : 'nullable',
         ], [
-            'institution_number.digits' => 'Institution number must be exactly 3 digits',
-            'branch_number.digits' => 'Branch number must be exactly 5 digits',
-            'account_holder_number.digits_between' => 'Account number must be between 7 and 12 digits',
+            'payout_method.required' => 'The payout method is required',
+            'bank_name.required' => 'The bank name is required',
+            'account_holder_name.required' => 'The account holder name is required',
+            'account_holder_number.required' => 'The account holder number is required',
+            'account_holder_number.digits_between' => 'The account holder number must be between 7 and 12 digits',
+            'branch.required' => 'The branch is required',
+            'branch_number.required' => 'The branch number is required',
+            'branch_number.digits' => 'The branch number must be exactly 5 digits',
+            'branch_address.required' => 'The branch address is required',
+            'institution_number.required' => 'The institution number is required',
+            'institution_number.digits' => 'The institution number must be exactly 3 digits',
+            'account_holder_address.required' => 'The account holder address is required',
+            'paypal_email.required' => 'The paypal email is required',
+            'paypal_email.email' => 'The paypal email must be a valid email address',
         ], $niceNames);
 
         $getBankDetail = BankDetail::where('user_id', $user_id)->first();

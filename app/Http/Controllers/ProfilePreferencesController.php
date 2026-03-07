@@ -100,6 +100,10 @@ class ProfilePreferencesController extends Controller
             'smoke' => 'required',
             'pets' => 'required',
             'features' => 'array',
+        ], [
+            'smoke.required' => 'The smoke is required',
+            'pets.required' => 'The pets is required',
+            'features.array' => 'The features must be an array',
         ], $customMessages);
 
         // Join the selected checkboxes with semicolons.

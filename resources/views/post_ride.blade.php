@@ -241,7 +241,11 @@
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                             @if(session('id'))
                                 <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Post a Return Ride</a>
+                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">
+                                    @isset($postRidePage->post_return_ride_label)
+                                        {{ $postRidePage->post_return_ride_label }}
+                                    @endisset
+                                </a>
                             @endif
                             <a href=""
                                 class="button-exp-fill">Close</a>
@@ -2495,8 +2499,8 @@
     var toAutocompletePostRide = null;
     var isSettingPlaceValuePostRide = false;
     var isSelectingFromDropdownPostRide = false;
-    var errorFromRequiredPostRide = 'The origin field is required';
-    var errorToRequiredPostRide = 'The destination field is required';
+    var errorFromRequiredPostRide = 'The origin is required';
+    var errorToRequiredPostRide = 'The destination is required';
     var errorCityMissingPostRide = 'We could not find this city name in our records, please double-check the spelling.';
 
     // Define the handler function
