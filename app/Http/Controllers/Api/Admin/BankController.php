@@ -93,24 +93,20 @@ class BankController extends Controller
 
     protected function sortingAndLimit($banks)
     {
-        if (isset($_GET['getAll']) && $_GET['getAll'] == '1') {
-            return $banks->orderBy('is_default', 'desc')->orderBy('name', 'asc')->get();
-        }
-
         $sortType = ['ASC', 'asc', 'DESC', 'desc'];
         $sortBy = ['id', 'name'];
         if (isset($_GET['sortBy']) && $_GET['sortBy'] != '' && isset($_GET['sortType']) && $_GET['sortType'] != '' && in_array($_GET['sortBy'], $sortBy) && in_array($_GET['sortType'], $sortType)) {
             $banks = $banks->OrderBy($_GET['sortBy'], $_GET['sortType']);
-        }
-
-
-        if (isset($_GET['limit']) && $_GET['limit'] != '') {
-            $limit = $_GET['limit'];
         } else {
-            $limit = 10;
+            $banks = $banks->orderBy('name', 'asc');
         }
 
-        return $banks->paginate($limit);
+        // Return all records by default; paginate only when limit is explicitly provided
+        if (isset($_GET['limit']) && $_GET['limit'] !== '') {
+            return $banks->paginate((int) $_GET['limit']);
+        }
+
+        return $banks->get();
     }
 
     protected function whereClause($banks)

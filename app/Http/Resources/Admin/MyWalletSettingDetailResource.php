@@ -43,6 +43,7 @@ class MyWalletSettingDetailResource extends JsonResource
             'driver_paid_to_label' => $this->driver_paid_to_label,
             'driver_paid_paid_out_date_label' => $this->driver_paid_paid_out_date_label,
             'driver_paid_total_amount_label' => $this->driver_paid_total_amount_label,
+            'no_paid_out_found' => $this->no_paid_out_found,
             'driver_available_ride_id_label' => $this->driver_available_ride_id_label,
             'driver_available_from_label' => $this->driver_available_from_label,
             'driver_available_to_label' => $this->driver_available_to_label,

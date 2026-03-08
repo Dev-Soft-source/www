@@ -752,50 +752,7 @@
                                                 "
                                             ></p>
                                         </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`no_pending_found_message_${activeLanguageId}`"
-                                                        >No Pending Found Message</label
-                                                    >
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`no_pending_found_message_${activeLanguageId}`"
-                                                    :id="`no_pending_found_message_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'no_pending_found_message'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'no_pending_found_message'
-                                                        )
-                                                    "
-                                                />
-                                            </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -2455,6 +2412,95 @@
                                             ></p>
                                         </div>
 
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`no_paid_out_found_${activeLanguageId}`"
+                                                        >No Paid Out Found</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`no_paid_out_found_${activeLanguageId}`"
+                                                    :id="`no_paid_out_found_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'no_paid_out_found'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'no_paid_out_found'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `no_paid_out_found.no_paid_out_found_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `no_paid_out_found.no_paid_out_found_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`no_pending_found_message_${activeLanguageId}`"
+                                                        >No Paid Out Found</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`no_pending_found_message_${activeLanguageId}`"
+                                                    :id="`no_pending_found_message_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'no_pending_found_message'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'no_pending_found_message'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- Driver / Paid out section end -->
@@ -2919,7 +2965,51 @@
                                                 "
                                             ></p>
                                         </div>
-
+                                        
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`no_pending_found_message_${activeLanguageId}`"
+                                                        >No Pending Found Message</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`no_pending_found_message_${activeLanguageId}`"
+                                                    :id="`no_pending_found_message_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'no_pending_found_message'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'no_pending_found_message'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `no_pending_found_message.no_pending_found_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- Driver / Pending section end -->
@@ -3344,6 +3434,8 @@ export default {
                             this.handleInput("", language, "driver_paid_to_label");
                             this.handleInput("", language, "driver_paid_paid_out_date_label");
                             this.handleInput("", language, "driver_paid_total_amount_label");
+                            this.handleInput("", language, "no_paid_out_found");
+                            this.handleInput("", language, "no_pending_found_message");
                             this.handleInput("", language, "driver_available_ride_id_label");
                             this.handleInput("", language, "driver_available_from_label");
                             this.handleInput("", language, "driver_available_to_label");
@@ -3429,7 +3521,11 @@ export default {
                                 "mobile_indicate_field_label"
                             );
 
-
+                            this.handleInput(
+                                setting?.no_pending_found_message,
+                                setting?.language,
+                                "no_pending_found_message"
+                            );
 
                             this.handleInput(
                                 setting?.passenger_my_ride_heading,
@@ -3581,6 +3677,11 @@ export default {
                                 setting?.driver_reward_description,
                                 setting?.language,
                                 "driver_reward_description"
+                            );
+                            this.handleInput(
+                                setting?.no_paid_out_found,
+                                setting?.language,
+                                "no_paid_out_found"
                             );
                             this.handleInput(
                                 setting?.driver_my_reward_description1,
@@ -3838,6 +3939,12 @@ export default {
                 )||
                 validationErros.has(
                     `driver_paid_total_amount_label.driver_paid_total_amount_label_${language.id}`
+                )||
+                validationErros.has(
+                    `no_paid_out_found.no_paid_out_found_${language.id}`
+                )||
+                validationErros.has(
+                    `no_pending_found_message.no_pending_found_message_${language.id}`
                 )||
                 validationErros.has(
                     `driver_reward_heading.driver_reward_heading_${language.id}`

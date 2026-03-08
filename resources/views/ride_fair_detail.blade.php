@@ -48,7 +48,7 @@
                                             @endforeach
                                         @endforeach
                                     @else
-                                        <p>No paid out found</p>
+                                        <p>@isset($rideFairDetailPage) {{ $rideFairDetailPage->no_paid_out_found }} @else Looks like you haven't received any payouts yet. @endif</p>
                                     @endif
                                 </div>
                             </div>

@@ -1120,7 +1120,17 @@ class RideController extends Controller
             ->delete();
 
         if (isset($request->from_spot) && !empty($request->from_spot)) {
+            $pointsForPairs = [$request->from];
+            $validSegmentPrices = [];
+            $validSegmentDistances = [];
+            $validSegmentDurations = [];
             foreach ($request->from_spot as $key => $from_spot) {
+                if (
+                    empty($request->from_spot[$key]) ||
+                    empty($request->to_spot[$key])
+                ) {
+                    continue;
+                }
                 $duration = 0;
                 $distance = 0;
                 $fromArray = explode(',', $request->from_spot[$key]);
@@ -1153,6 +1163,11 @@ class RideController extends Controller
                 if ($distance != 0) {
                     $distance = round(($distance / 1000), 2);
                 }
+
+                $pointsForPairs[] = $request->to_spot[$key];
+                $validSegmentPrices[] = $request->price_spot[$key] ?? 0;
+                $validSegmentDistances[] = $distance;
+                $validSegmentDurations[] = $duration;
 
                 if (isset($request->ride_detail_ids) && isset($request->ride_detail_ids[$key]) && $request->ride_detail_ids[$key] != "0") {
                     $rideDetail = RideDetail::where('id', $request->ride_detail_ids[$key])->first();
@@ -1208,6 +1223,54 @@ class RideController extends Controller
                     }
                 }
                 $rideDetail->save();
+            }
+
+            // Create RideDetails for every (origin, destination) pair so the ride appears in all segment searches
+            $numPoints = count($pointsForPairs);
+            for ($i = 0; $i < $numPoints; $i++) {
+                for ($j = $i + 2; $j < $numPoints; $j++) {
+                    // Skip full route (origin to destination); it is already the default RideDetail
+                    if ($i === 0 && $j === $numPoints - 1) {
+                        continue;
+                    }
+                    $compositePrice = 0;
+                    $compositeDistance = 0;
+                    $compositeDuration = 0;
+                    for ($k = $i; $k < $j; $k++) {
+                        $compositePrice += $validSegmentPrices[$k] ?? 0;
+                        $compositeDistance += $validSegmentDistances[$k] ?? 0;
+                        $compositeDuration += $validSegmentDurations[$k] ?? 0;
+                    }
+                    $compositeDetail = new RideDetail();
+                    $compositeDetail->ride_id = $ride->id;
+                    $compositeDetail->departure = $pointsForPairs[$i];
+                    $compositeDetail->destination = $pointsForPairs[$j];
+                    $compositeDetail->pickup = null;
+                    $compositeDetail->dropoff = null;
+                    $compositeDetail->default_ride = 0;
+                    $compositeDetail->total_distance = $compositeDistance;
+                    $compositeDetail->total_duration = $compositeDuration;
+                    $compositeDetail->price = $compositePrice;
+                    $compositeDetail->time = $request->time;
+                    $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                    if (isset($adminSetting) && isset($ride->date) && isset($ride->time)) {
+                        $cumulativeDurationToJ = 0;
+                        for ($k = 0; $k < $j; $k++) {
+                            $cumulativeDurationToJ += $validSegmentDurations[$k] ?? 0;
+                        }
+                        $rideDateTime = Carbon::parse("$ride->date $ride->time");
+                        $totalHours = $cumulativeDurationToJ / 3600;
+                        $fullHours = floor($totalHours);
+                        $minutes = round(($totalHours - $fullHours) * 60);
+                        $rideDateTime->addHours($adminSetting->destination_hours + $fullHours)->addMinutes($minutes);
+                        $compositeDetail->destination_time = $rideDateTime->toTimeString();
+                        $compositeDetail->destination_date = $rideDateTime->toDateString();
+                        $rideDateTime->addHours($adminSetting->ride_completed_hours);
+                        $compositeDetail->completed_time = $rideDateTime->toTimeString();
+                        $compositeDetail->completed_date = $rideDateTime->toDateString();
+                    }
+                    $compositeDetail->save();
+                }
             }
         }
 
@@ -1921,6 +1984,64 @@ class RideController extends Controller
             'vehicle_id' => $added_vehicle !== 0 ? 'required' : 'nullable',
             'recurring_type' => $recurring !== 0 ? 'required' : 'nullable',
             'recurring_trips' => $recurring !== 0 ? 'required|numeric|max:10' : 'nullable',
+        ],[
+            'from.required' => 'The from is required',
+            'from.string' => 'The from must be a string',
+            'from.max' => 'The from may not be greater than 25 characters',
+            'from.regex' => 'The from must contain only letters, spaces, and hyphens',
+            'to.required' => 'The to is required',
+            'to.string' => 'The to must be a string',
+            'to.max' => 'The to may not be greater than 25 characters',
+            'to.regex' => 'The to must contain only letters, spaces, and hyphens',
+            'pickup.required' => 'The pickup is required',
+            'pickup.string' => 'The pickup must be a string',
+            'pickup.max' => 'The pickup may not be greater than 25 characters',
+            'pickup.regex' => 'The pickup must contain only letters, spaces, and hyphens',
+            'dropoff.required' => 'The dropoff is required',
+            'dropoff.string' => 'The dropoff must be a string',
+            'dropoff.max' => 'The dropoff may not be greater than 25 characters',
+            'dropoff.regex' => 'The dropoff must contain only letters, spaces, and hyphens',
+            'date.required' => 'The date is required',
+            'date.date' => 'The date must be a valid date',
+            'time.required' => 'The time is required',
+            'time.date_format' => 'The time must be a valid time',
+            'details.required' => 'The details is required',
+            'details.string' => 'The details must be a string',
+            'details.max_words' => 'The details may not be greater than 300 words',
+            'seats.required' => 'The seats is required',
+            'seats.numeric' => 'The seats must be a number',
+            'smoke.required' => 'The smoke is required',
+            'smoke.string' => 'The smoke must be a string',
+            'smoke.max' => 'The smoke may not be greater than 25 characters',
+            'smoke.regex' => 'The smoke must contain only letters, spaces, and hyphens',
+            'animal_friendly.required' => 'The animal friendly is required',
+            'animal_friendly.string' => 'The animal friendly must be a string',
+            'animal_friendly.max' => 'The animal friendly may not be greater than 25 characters',
+            'animal_friendly.regex' => 'The animal friendly must contain only letters, spaces, and hyphens',
+            'features.array' => 'The features must be an array',
+            'booking_method.required' => 'The booking method is required',
+            'booking_method.string' => 'The booking method must be a string',
+            'booking_method.max' => 'The booking method may not be greater than 25 characters',
+            'booking_method.regex' => 'The booking method must contain only letters, spaces, and hyphens',
+            'booking_type.required' => 'The booking type is required',
+            'booking_type.string' => 'The booking type must be a string',
+            'booking_type.max' => 'The booking type may not be greater than 25 characters',
+            'booking_type.regex' => 'The booking type must contain only letters, spaces, and hyphens',
+            'luggage.required' => 'The luggage is required',
+            'luggage.string' => 'The luggage must be a string',
+            'luggage.max' => 'The luggage may not be greater than 25 characters',
+            'luggage.regex' => 'The luggage must contain only letters, spaces, and hyphens',
+            'price.required' => 'The price is required',
+            'price.numeric' => 'The price must be a number',
+            'price.gt' => 'The price must be greater than 0',
+            'payment_method.required' => 'The payment method is required',
+            'payment_method.string' => 'The payment method must be a string',
+            'payment_method.max' => 'The payment method may not be greater than 25 characters',
+            'payment_method.regex' => 'The payment method must contain only letters, spaces, and hyphens',
+            'notes.nullable' => 'The notes may be null',
+            'notes.string' => 'The notes must be a string',
+            'notes.max' => 'The notes may not be greater than 300 characters',
+            'middle_seats.required' => 'The middle seats is required',
         ], $customMessages);
         // $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
 
@@ -2357,6 +2478,12 @@ class RideController extends Controller
         $rideDetail->save();
 
         if (isset($request->from_spot) && !empty($request->from_spot)) {
+            $segmentDistances = [];
+            $segmentDurations = [];
+            $pointsForPairs = [$request->from];
+            $validSegmentPrices = [];
+            $validSegmentDistances = [];
+            $validSegmentDurations = [];
             foreach ($request->from_spot as $key => $from_spot) {
                 if (
                     empty($request->from_spot[$key]) ||
@@ -2397,6 +2524,13 @@ class RideController extends Controller
                 if ($distance != 0) {
                     $distance = round(($distance / 1000), 2);
                 }
+
+                $segmentDistances[$key] = $distance;
+                $segmentDurations[$key] = $duration;
+                $pointsForPairs[] = $request->to_spot[$key];
+                $validSegmentPrices[] = $request->price_spot[$key] ?? 0;
+                $validSegmentDistances[] = $distance;
+                $validSegmentDurations[] = $duration;
 
                 $rideDetail = new RideDetail();
                 $rideDetail->ride_id = $initialRide->id;
@@ -2449,6 +2583,54 @@ class RideController extends Controller
                     }
                 }
                 $rideDetail->save();
+            }
+
+            // Create RideDetails for every (origin, destination) pair so the ride appears in all segment searches
+            $numPoints = count($pointsForPairs);
+            for ($i = 0; $i < $numPoints; $i++) {
+                for ($j = $i + 2; $j < $numPoints; $j++) {
+                    // Skip full route (origin to destination); it is already the default RideDetail
+                    if ($i === 0 && $j === $numPoints - 1) {
+                        continue;
+                    }
+                    $compositePrice = 0;
+                    $compositeDistance = 0;
+                    $compositeDuration = 0;
+                    for ($k = $i; $k < $j; $k++) {
+                        $compositePrice += $validSegmentPrices[$k] ?? 0;
+                        $compositeDistance += $validSegmentDistances[$k] ?? 0;
+                        $compositeDuration += $validSegmentDurations[$k] ?? 0;
+                    }
+                    $compositeDetail = new RideDetail();
+                    $compositeDetail->ride_id = $initialRide->id;
+                    $compositeDetail->departure = $pointsForPairs[$i];
+                    $compositeDetail->destination = $pointsForPairs[$j];
+                    $compositeDetail->pickup = null;
+                    $compositeDetail->dropoff = null;
+                    $compositeDetail->default_ride = 0;
+                    $compositeDetail->total_distance = $compositeDistance;
+                    $compositeDetail->total_duration = $compositeDuration;
+                    $compositeDetail->price = $compositePrice;
+                    $compositeDetail->time = $request->time;
+                    $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                    if (isset($adminSetting) && isset($initialRide->date) && isset($initialRide->time)) {
+                        $cumulativeDurationToJ = 0;
+                        for ($k = 0; $k < $j; $k++) {
+                            $cumulativeDurationToJ += $validSegmentDurations[$k] ?? 0;
+                        }
+                        $rideDateTime = Carbon::parse("$initialRide->date $initialRide->time");
+                        $totalHours = $cumulativeDurationToJ / 3600;
+                        $fullHours = floor($totalHours);
+                        $minutes = round(($totalHours - $fullHours) * 60);
+                        $rideDateTime->addHours($adminSetting->destination_hours + $fullHours)->addMinutes($minutes);
+                        $compositeDetail->destination_time = $rideDateTime->toTimeString();
+                        $compositeDetail->destination_date = $rideDateTime->toDateString();
+                        $rideDateTime->addHours($adminSetting->ride_completed_hours);
+                        $compositeDetail->completed_time = $rideDateTime->toTimeString();
+                        $compositeDetail->completed_date = $rideDateTime->toDateString();
+                    }
+                    $compositeDetail->save();
+                }
             }
         }
 

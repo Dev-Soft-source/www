@@ -53,7 +53,11 @@
                         <div class="tab-content tab-space">
                             <div class="block" id="tab-profile">
                                 <div class="space-y-4">
+                                @if ($driverTotalRewardPoint == 0)
+                                    <p>@isset($walletSettingPage) {{ $walletSettingPage->no_reward_found_message }} @else No reward found @endif</p>
+                                @else
                                     <p>You have {{ $driverTotalRewardPoint }} {{ $walletSettingPage->driver_my_reward_description1 ?? "points as driver" }}</p>
+                                @endif
                                     <div class="relative">
                                         <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                             <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">

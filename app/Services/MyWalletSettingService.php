@@ -57,6 +57,10 @@ class MyWalletSettingService
                 $errorMessages = array_merge($errorMessages, ['driver_paid_paid_out_date_label.driver_paid_paid_out_date_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['driver_paid_total_amount_label.driver_paid_total_amount_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['driver_paid_total_amount_label.driver_paid_total_amount_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['no_paid_out_found.no_paid_out_found_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['no_paid_out_found.no_paid_out_found_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['no_pending_found_message.no_pending_found_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['no_pending_found_message.no_pending_found_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['driver_available_ride_id_label.driver_available_ride_id_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['driver_available_ride_id_label.driver_available_ride_id_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['driver_available_from_label.driver_available_from_label_' . $language->id => ['required', 'string']]);
@@ -134,6 +138,7 @@ class MyWalletSettingService
             'driver_paid_to_label' => $this->data($request, $language, 'driver_paid_to_label'),
             'driver_paid_paid_out_date_label' => $this->data($request, $language, 'driver_paid_paid_out_date_label'),
             'driver_paid_total_amount_label' => $this->data($request, $language, 'driver_paid_total_amount_label'),
+            'no_paid_out_found' => $this->data($request, $language, 'no_paid_out_found'),
             'driver_available_ride_id_label' => $this->data($request, $language, 'driver_available_ride_id_label'),
             'driver_available_from_label' => $this->data($request, $language, 'driver_available_from_label'),
             'driver_available_to_label' => $this->data($request, $language, 'driver_available_to_label'),

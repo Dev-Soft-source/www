@@ -282,25 +282,27 @@
                                                         >Main text</label
                                                     >
                                                 </div>
-                                                <editor
-                                                    @selectionChange="
-                                                        handleSelectionChange(
-                                                            language,
-                                                            'main_text'
-                                                        )
-                                                    "
-                                                    :ref="`main_text_${language.id}`"
-                                                    :id="`main_text_${language.id}`"
-                                                    :initial-value="
-                                                        form[
-                                                            `main_text`
-                                                        ][
-                                                            `main_text_${language?.id}`
-                                                        ]
-                                                    "
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :init="editorConfig"
-                                                />
+                                                <div class="tinymce-editor-wrap max-h-[calc(100vh-220px)] overflow-auto border border-gray-300 rounded">
+                                                    <editor
+                                                        @selectionChange="
+                                                            handleSelectionChange(
+                                                                language,
+                                                                'main_text'
+                                                            )
+                                                        "
+                                                        :ref="`main_text_${language.id}`"
+                                                        :id="`main_text_${language.id}`"
+                                                        :initial-value="
+                                                            form[
+                                                                `main_text`
+                                                            ][
+                                                                `main_text_${language?.id}`
+                                                            ]
+                                                        "
+                                                        :tinymce-script-src="tinymceScriptSrc"
+                                                        :init="editorConfig"
+                                                    />
+                                                </div>
                                             </div>
                                             <p
                                                 class="mt-2 text-sm text-red-400"
@@ -346,13 +348,15 @@ export default {
             loading: false,
             editorConfig: {
                 height: 250,
+                max_height: 600,
                 menubar: false,
                 plugins:
                   "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen code",
                 toolbar:
-                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code | fullscreen",
+                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code ",
                 base_url: "/plugins/tinymce",
                 suffix: ".min",
+                fullscreen_native: false,
             },
             tinymceScriptSrc: "/plugins/tinymce/tinymce.min.js",
         };
@@ -504,3 +508,17 @@ export default {
     },
 };
 </script>
+<style>
+/* Ensure TinyMCE fullscreen appears above admin layout (navbar, sidebar, etc.) */
+.tox-fullscreen,
+body .tox-fullscreen {
+    z-index: 2147483647 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+</style>

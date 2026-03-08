@@ -56,6 +56,7 @@ return new class extends Migration
             $table->string('driver_paid_to_label')->nullable();
             $table->string('driver_paid_paid_out_date_label')->nullable();
             $table->string('driver_paid_total_amount_label')->nullable();
+            $table->string('no_paid_out_found')->nullable();
             $table->string('driver_available_ride_id_label')->nullable();
             $table->string('driver_available_from_label')->nullable();
             $table->string('driver_available_to_label')->nullable();

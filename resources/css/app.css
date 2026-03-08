@@ -598,3 +598,20 @@ body {
 .page-post_a_ride label {
     font-size: 24px;
 }
+
+/* TinyMCE fullscreen: above admin sidebar and topbar */
+.tox-fullscreen,
+body .tox-fullscreen,
+body.tox-fullscreen .tox-tinymce {
+    z-index: 2147483647 !important;
+}
+.tox-fullscreen,
+body .tox-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
