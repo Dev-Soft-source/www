@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Px\PxStoreRideRequest;
 use App\Models\PxBooking;
+use App\Models\PxOption;
 use App\Models\PxOptionGroup;
 use App\Models\PxRide;
 use App\Models\Vehicle;
@@ -154,9 +155,9 @@ class PxRideWebController extends Controller
             'upcomingCount' => $upcomingCount,
             'completedCount' => $completedCount,
             'cancelledCount' => $cancelledCount,
-            'reviewSetting' => $reviewSetting, 
-            'ProfilePage' => $ProfilePage, 
-            'ProfileSetting' => $ProfileSetting, 
+            'reviewSetting' => $reviewSetting,
+            'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,
         ]);
     }
 
@@ -862,7 +863,6 @@ class PxRideWebController extends Controller
                 ]);
             }
         }
-
     }
 
     /**
@@ -1146,21 +1146,11 @@ class PxRideWebController extends Controller
     protected function validateFeatureEligibility(Request $request, User $user)
     {
         // Feature gatekeeping logic for Pink Ride and Extra Care Ride
-        // ride_option_ids: 1 = Pink Ride, 2 = Extra Care Ride
-        $rideOptionIds = $request->input('ride_option_ids', []);
-
-        // Ensure it's an array
-        if (!is_array($rideOptionIds)) {
-            $rideOptionIds = is_string($rideOptionIds) ? explode(',', $rideOptionIds) : [$rideOptionIds];
-        }
-
-        // Convert to integers for comparison
-        $rideOptionIds = array_map('intval', array_filter($rideOptionIds));
+        $selectedFeatureCodes = $this->resolveRideOptionCodes($request);
 
         $pinkRideSetting = PinkRideSetting::first();
 
-        // Check if Pink Ride is selected (ride_option_ids contains 1)
-        if (in_array(1, $rideOptionIds)) {
+        if (in_array('pink_rides', $selectedFeatureCodes, true)) {
             // GENDER VALIDATION: Only female users can post Pink Rides
             if ($pinkRideSetting && $pinkRideSetting->female === '1') {
                 // Check if user has admin override (pink_ride = '1')
@@ -1193,8 +1183,7 @@ class PxRideWebController extends Controller
             }
         }
 
-        // Check if Extra Care Ride is selected (ride_option_ids contains 2)
-        if (in_array(2, $rideOptionIds)) {
+        if (in_array('extra_plus_rides', $selectedFeatureCodes, true)) {
             $extraCareError = $this->validateExtraCareEligibility($user);
             if ($extraCareError) {
                 return back()->with('message', $extraCareError)
@@ -1204,6 +1193,27 @@ class PxRideWebController extends Controller
         }
 
         return null;
+    }
+
+    protected function resolveRideOptionCodes(Request $request): array
+    {
+        $rideOptionIds = $request->input('ride_option_ids', $request->input('preference', []));
+
+        if (!is_array($rideOptionIds)) {
+            $rideOptionIds = is_string($rideOptionIds) ? explode(',', $rideOptionIds) : [$rideOptionIds];
+        }
+
+        $rideOptionIds = array_values(array_filter(array_map('intval', $rideOptionIds)));
+
+        if (empty($rideOptionIds)) {
+            return [];
+        }
+
+        return PxOption::query()
+            ->whereIn('id', $rideOptionIds)
+            ->pluck('code')
+            ->map(fn($code) => (string) $code)
+            ->all();
     }
 
     /**
@@ -1630,6 +1640,7 @@ class PxRideWebController extends Controller
         $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
         $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
+        $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
         $cancelationPolicyLabel = $this->getOptionLabel($optionGroups->get('cancelation_policy'), $ride->cancelation_policy, $selectedLangId, $defaultLangId, 'Standard');
 
         $postRidePage = $this->getPostRidePageWithSettingDetail();
@@ -1644,6 +1655,7 @@ class PxRideWebController extends Controller
             'bookingModeLabel' => $bookingModeLabel,
             'bookingModeCode' => $bookingModeCode,
             'bookingMethodLabel' => $bookingMethodLabel,
+            'bookingMethodCode' => $bookingMethodCode,
             'cancelationPolicyLabel' => $cancelationPolicyLabel,
         ]);
     }
@@ -1788,6 +1800,7 @@ class PxRideWebController extends Controller
         $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
         $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
+        $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
         $cancelationPolicyLabel = $this->getOptionLabel($optionGroups->get('cancelation_policy'), $ride->cancelation_policy, $selectedLangId, $defaultLangId, 'Standard');
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
         $orderedStops = $ride->stops ? $ride->stops->sortBy('stop_order')->values()->all() : [];
@@ -1922,6 +1935,7 @@ class PxRideWebController extends Controller
             'bookingModeLabel' => $bookingModeLabel,
             'bookingModeCode' => $bookingModeCode,
             'bookingMethodLabel' => $bookingMethodLabel,
+            'bookingMethodCode' => $bookingMethodCode,
             'cancelationPolicyLabel' => $cancelationPolicyLabel,
             'displayOrigin' => $displayOrigin,
             'displayDestination' => $displayDestination,
@@ -2060,6 +2074,11 @@ class PxRideWebController extends Controller
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
 
+        $ProfilePage = ProfilePageSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+        $ProfileSetting = ProfileSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+        $reviewSetting = MyReviewSettingDetail::where('language_id', $this->selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
+
+
         return view('px.my_trips', [
             'bookings' => $bookings,
             'tripsPage' => $tripsPage,
@@ -2067,6 +2086,9 @@ class PxRideWebController extends Controller
             'upcomingCount' => $upcomingCount,
             'completedCount' => $completedCount,
             'cancelledCount' => $cancelledCount,
+            'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,
+            'reviewSetting' => $reviewSetting,
         ]);
     }
 
@@ -2359,11 +2381,11 @@ class PxRideWebController extends Controller
 
         $searchOptionGroups = $this->getPxSearchOptionGroups($selectedLangId, $defaultLangId);
         $searchFilters = $this->getPxSearchFilters($request);
-        
+
         $searchFilters['proximalocal'] = 0;
         $page_type = 'px_ride';
         $action_route = 'px.search_ride';
-        if($view === 'px.search_folk_ride'){
+        if ($view === 'px.search_folk_ride') {
             $searchFilters['extra_care'] = 1;
             $page_type = 'px_folk_ride';
             $action_route = 'folk_ride';
@@ -2469,7 +2491,7 @@ class PxRideWebController extends Controller
                 }
 
                 if ($originLabel !== '' && empty($originCityId)) {
-                        $validator->errors()->add('origin.label', $invalidCityMessage);
+                    $validator->errors()->add('origin.label', $invalidCityMessage);
                 }
 
                 if ($destinationLabel !== '' && empty($destinationCityId)) {
@@ -2490,7 +2512,7 @@ class PxRideWebController extends Controller
                         ->with(['message' => 'Your account has been suspended by the admin']);
                 }
 
-                if($keyword === ''){
+                if ($keyword === '') {
                     $existingSearch = RecentSearch::query()
                         ->where('user_id', $user->id)
                         ->where('page_type', $page_type)
@@ -2600,7 +2622,7 @@ class PxRideWebController extends Controller
 
                     return $recentSearch;
                 })
-                ->filter(fn (RecentSearch $recentSearch) => !empty($recentSearch->search_url))
+                ->filter(fn(RecentSearch $recentSearch) => !empty($recentSearch->search_url))
                 ->values();
         }
 
@@ -2681,7 +2703,7 @@ class PxRideWebController extends Controller
             return null;
         }
 
-        $parts = array_values(array_filter(array_map('trim', explode(',', $label)), fn ($part) => $part !== ''));
+        $parts = array_values(array_filter(array_map('trim', explode(',', $label)), fn($part) => $part !== ''));
         $cityName = $parts[0] ?? '';
         $stateAbbreviation = $parts[1] ?? null;
         $countryName = $parts[2] ?? null;
@@ -2727,7 +2749,7 @@ class PxRideWebController extends Controller
             ->pluck('driver_id')
             ->filter()
             ->unique()
-            ->map(fn ($driverId) => (int) $driverId)
+            ->map(fn($driverId) => (int) $driverId)
             ->values()
             ->all();
     }

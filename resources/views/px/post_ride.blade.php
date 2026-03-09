@@ -11,7 +11,7 @@
         // Handle edit/copy mode - populate from ride if exists
         $isEditMode = isset($ride) && isset($isEditMode) && $isEditMode;
         $isCopyMode = isset($ride) && isset($isCopyMode) && $isCopyMode;
-        $prefillRide = ($isEditMode || $isCopyMode) ? $ride : null;
+        $prefillRide = $isEditMode || $isCopyMode ? $ride : null;
 
         if ($prefillRide) {
             // Populate origin data
@@ -60,7 +60,11 @@
                 $oldStops = $prefillRide->intermediate_stops;
             }
             $oldDestinationPriceDeltaMinor = old('destination.price_delta_minor');
-            if ($oldDestinationPriceDeltaMinor === null && isset($prefillRide->stops) && $prefillRide->stops->isNotEmpty()) {
+            if (
+                $oldDestinationPriceDeltaMinor === null &&
+                isset($prefillRide->stops) &&
+                $prefillRide->stops->isNotEmpty()
+            ) {
                 $destinationStop = $prefillRide->stops->sortBy('stop_order')->last();
                 $oldDestinationPriceDeltaMinor = $destinationStop ? $destinationStop->price_delta_minor ?? 0 : 0;
             }
@@ -75,6 +79,7 @@
             $oldVisibility = old('visibility', $prefillRide->visibility);
             $oldBookingMode = old('booking_mode', $prefillRide->booking_mode);
             $oldBookingMethod = old('booking_method', $prefillRide->booking_method);
+            $oldCancelationPolicy = old('cancelation_policy', $prefillRide->cancelation_policy);
             $oldSmokingAllowed = old('smoking_allowed', $prefillRide->smoking_allowed);
             $oldPetsAllowed = old('pets_allowed', $prefillRide->pets_allowed);
             $oldLuggageSize = old('luggage_size', $prefillRide->luggage_size);
@@ -134,6 +139,7 @@
             $oldVisibility = old('visibility', 'public');
             $oldBookingMode = old('booking_mode');
             $oldBookingMethod = old('booking_method');
+            $oldCancelationPolicy = old('cancelation_policy');
             $oldSmokingAllowed = old('smoking_allowed');
             $oldPetsAllowed = old('pets_allowed');
             $oldLuggageSize = old('luggage_size');
@@ -810,98 +816,105 @@
 
 
                 @foreach ($optionGroups as $group)
-                    @continue($group->code === 'booking_method')
-                    @continue($group->code === 'booking_mode')
+                    @continue(in_array($group->code, ['booking_method','booking_mode']))
 
                     <section class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
                         @php
-                            $selectedSingleValue = old($group->code);
-                            if ($selectedSingleValue === null) {
-                                if ($group->code === 'smoking_allowed') {
-                                    $selectedSingleValue = $oldSmokingAllowed;
-                                } elseif ($group->code === 'pets_allowed') {
-                                    $selectedSingleValue = $oldPetsAllowed;
-                                } elseif ($group->code === 'luggage_size') {
-                                    $selectedSingleValue = $oldLuggageSize;
-                                }
-                            }
-                            if ($selectedSingleValue === null) {
-                                $selectedSingleValue = optional($group->options->first())->id;
-                            }
+                            $defaultValues = [
+                                'smoking_allowed' => $oldSmokingAllowed ?? null,
+                                'pets_allowed' => $oldPetsAllowed ?? null,
+                                'luggage_size' => $oldLuggageSize ?? null,
+                                'cancelation_policy' => $oldCancelationPolicy ?? null,
+                            ];
 
+                            $selectedSingleValue =
+                                old($group->code) ??
+                                ($defaultValues[$group->code] ?? null ?? optional($group->options->first())->id);
+
+                            $groupTitle =
+                                $group->code === 'cancelation_policy'
+                                    ? $postRidePage->cancellation_policy_label ?? 'Cancellation Policy'
+                                    : ucwords(str_replace('_', ' ', $group->code));
+
+                            $rideOptionIds = $oldRideOptionIds ?? old('ride_option_ids', []);
+
+                            $luggageIcons = [
+                                'no_luggage' => optional($postRidePage->luggage_option1)->icon,
+                                'small' => optional($postRidePage->luggage_option2)->icon,
+                                'medium' => optional($postRidePage->luggage_option3)->icon,
+                                'large' => optional($postRidePage->luggage_option4)->icon,
+                                'xl_multiple' => optional($postRidePage->luggage_option5)->icon,
+                            ];
                         @endphp
+
                         <h3 class="text-2xl bg-primary text-white py-2 px-4">
-                            {{ ucwords(str_replace('_', ' ', $group->code)) }}
+                            {{ $groupTitle }}
                             <span class="text-white">*</span>
                         </h3>
 
                         <div class="bg-white p-4 space-y-3">
                             <div class="grid grid-cols-1 gap-4">
+
                                 @foreach ($group->options as $option)
                                     @php
-                                        $checkboxDisabled = '';
                                         $optionClass = '';
                                         $disabledClass = '';
-                                        $checkboxDisabled = '';
+                                        $checkboxDisabled = false;
 
                                         if ($option->code === 'pink_rides') {
                                             $optionClass = 'text-pink-500';
-
                                             if (!$isPinkRideDisabled) {
                                                 $disabledClass = 'line-through';
-                                                $checkboxDisabled = 'disabled';
+                                                $checkboxDisabled = true;
                                             }
                                         }
 
                                         if ($option->code === 'extra_plus_rides') {
                                             $optionClass = 'text-green-500';
-
                                             if ($isExtraRideDisabled) {
                                                 $disabledClass = 'line-through';
-                                                $checkboxDisabled = 'disabled';
+                                                $checkboxDisabled = true;
                                             }
                                         }
+
+                                        $luggageIcon = $luggageIcons[$option->code] ?? null;
                                     @endphp
                                     <label class="flex items-start gap-2 text-sm">
+                                        {{-- checkbox / radio --}}
                                         @if ($group->is_checkbox)
                                             <input type="checkbox" name="ride_option_ids[]" value="{{ $option->id }}"
-                                                @checked(in_array($option->id, $oldRideOptionIds ?? old('ride_option_ids', [])))
+                                                @checked(in_array($option->id, $rideOptionIds)) @disabled($checkboxDisabled)
                                                 class="mt-0.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                                data-ride-option-code="{{ $option->code }}" {{ $checkboxDisabled }}>
+                                                data-ride-option-code="{{ $option->code }}">
                                         @else
                                             <input type="radio" name="{{ $group->code }}"
                                                 value="{{ $option->id }}" @checked((string) $selectedSingleValue === (string) $option->id)
                                                 class="mt-0.5 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                         @endif
-                                        {{-- icon --}}
-                                        @if ($group->code === 'luggage_size')
-                                            @php
-                                                $luggageIcons = [
-                                                    'no_luggage' => optional($postRidePage->luggage_option1)->icon,
-                                                    'small' => optional($postRidePage->luggage_option2)->icon,
-                                                    'medium' => optional($postRidePage->luggage_option3)->icon,
-                                                    'large' => optional($postRidePage->luggage_option4)->icon,
-                                                    'xl_multiple' => optional($postRidePage->luggage_option5)->icon,
-                                                ];
-                                                $luggageIcon = $luggageIcons[$option->code] ?? null;
-                                            @endphp
-                                            @if ($luggageIcon)
-                                                <img src="{{ asset('home_page_icons/' . $luggageIcon) }}"
-                                                    class="w-6 h-6 object-contain" alt="">
-                                            @endif
+
+                                        {{-- luggage icon --}}
+                                        @if ($group->code === 'luggage_size' && $luggageIcon)
+                                            <img src="{{ asset('home_page_icons/' . $luggageIcon) }}"
+                                                class="w-6 h-6 object-contain" alt="">
                                         @endif
+
                                         <span
-                                            class="font-medium text-gray-800 {{ $optionClass }} {{ $disabledClass }}">{{ $option->display_label }}</span>
+                                            class="font-medium text-gray-800 {{ $optionClass }} {{ $disabledClass }}">
+                                            {{ $option->display_label }}
+                                        </span>
+
                                         <span class="inline-flex cursor-help w-4 h-4"
                                             data-tippy-content="{{ $option->display_description }}">
-                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none">
                                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                                     d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
                                                     fill="#666666" />
                                             </svg>
                                         </span>
+
                                     </label>
                                 @endforeach
+
                             </div>
 
                             @if ($group->code === 'luggage_size')
@@ -910,8 +923,9 @@
                                         <input type="hidden" name="accept_more_luggage" value="0">
                                         <input type="checkbox" name="accept_more_luggage" value="1"
                                             @checked($oldAcceptMoreLuggage) class="mt-0.5">
-                                        <span class="font-medium text-gray-800">I accept more luggage for extra
-                                            charge</span>
+                                        <span class="font-medium text-gray-800">
+                                            I accept more luggage for extra charge
+                                        </span>
                                     </label>
                                 </div>
                             @endif
@@ -1019,13 +1033,16 @@
                                     id="px-seats-modal-title">Heads up for 5+ seats</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center">Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).</p>
+                                <p class="can-exp-p text-center">Please note that for large vehicles, your total trip
+                                    collection must stay within non-commercial limits. To keep this a standard carpool, we
+                                    suggest a lower price per seat. By law, total contributions cannot exceed the standard
+                                    reimbursement limit ($0.72/km).</p>
                             </div>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 flex items-center space-x-2 justify-center">
-                        <button type="button" onclick="closePxSeatsWarningModal()"
-                            class="button-exp-fill">Got it</button>
+                        <button type="button" onclick="closePxSeatsWarningModal()" class="button-exp-fill">Got
+                            it</button>
                         <button type="button"
                             onclick="window.location.href='{{ route('cost_sharing_compliance_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
                             class="button-exp-no-fill inline-block text-center">Learn more about limits</button>
@@ -1580,7 +1597,8 @@
             function buildLegacyAdjacentPriceMap(validStops, points) {
                 const adjacentPriceMap = new Map();
                 validStops.forEach((stop, idx) => {
-                    adjacentPriceMap.set(getSegmentPriceKey(idx, idx + 1), toMinorInt(stop.priceDeltaMinor));
+                    adjacentPriceMap.set(getSegmentPriceKey(idx, idx + 1), toMinorInt(stop
+                    .priceDeltaMinor));
                 });
 
                 const destinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
@@ -1594,7 +1612,8 @@
                 return adjacentPriceMap;
             }
 
-            function resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices, parentPriceMinor) {
+            function resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices,
+                parentPriceMinor) {
                 const configuredPrice = configuredPrices.get(getSegmentPriceKey(fromIndex, toIndex));
                 if (configuredPrice !== undefined) {
                     return configuredPrice;
@@ -1652,9 +1671,9 @@
             function getSegmentDistanceMeters(fromIndex, toIndex) {
                 const segmentDistancesMeters = segmentDistanceState &&
                     segmentDistanceState.segmentDistancesMeters &&
-                    typeof segmentDistanceState.segmentDistancesMeters === 'object'
-                    ? segmentDistanceState.segmentDistancesMeters
-                    : {};
+                    typeof segmentDistanceState.segmentDistancesMeters === 'object' ?
+                    segmentDistanceState.segmentDistancesMeters :
+                    {};
 
                 return Number.parseInt(segmentDistancesMeters[`${fromIndex}:${toIndex}`] || '0', 10) || 0;
             }
@@ -1686,7 +1705,8 @@
                     const segmentDistanceMeters = getSegmentDistanceMeters(fromIndex, toIndex);
                     input.setAttribute('data-distance-meters', String(segmentDistanceMeters));
                     if (segmentDistanceMeters > 0) {
-                        const priceEstimate = calculateExpectedSegmentPriceMinor(segmentDistanceMeters, seatsTotal);
+                        const priceEstimate = calculateExpectedSegmentPriceMinor(segmentDistanceMeters,
+                            seatsTotal);
                         suggestedMinor = priceEstimate.suggestedMinor;
                         maxMinor = priceEstimate.maxMinor;
                         distanceSuffix = `${(segmentDistanceMeters / 1000).toFixed(1)} km`;
@@ -1694,7 +1714,8 @@
 
                     const suggestedMajor = toMajorFromMinor(suggestedMinor);
                     const maxMajor = toMajorFromMinor(maxMinor);
-                    hint.textContent = `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceSuffix})`;
+                    hint.textContent =
+                        `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceSuffix})`;
                 });
             }
 
@@ -1786,10 +1807,12 @@
                     segmentDistanceState = {
                         key: requestKey,
                         pendingKey: '',
-                        legDistancesMeters: Array.isArray(payload.leg_distances_meters) ? payload.leg_distances_meters : [],
-                        segmentDistancesMeters: payload.segment_distances_meters && typeof payload.segment_distances_meters === 'object'
-                            ? payload.segment_distances_meters
-                            : {},
+                        legDistancesMeters: Array.isArray(payload.leg_distances_meters) ? payload
+                            .leg_distances_meters : [],
+                        segmentDistancesMeters: payload.segment_distances_meters && typeof payload
+                            .segment_distances_meters === 'object' ?
+                            payload.segment_distances_meters :
+                            {},
                         totalDistanceMeters: Number.parseInt(payload.total_distance_meters || '0', 10) || 0,
                     };
 
@@ -1839,7 +1862,8 @@
 
             function syncStopPriceDeltaInputsFromSegmentRows() {
                 if (!priceSegmentsList) return;
-                const segmentInputs = priceSegmentsList.querySelectorAll('.px-segment-price-input[data-adjacent-stop-index]');
+                const segmentInputs = priceSegmentsList.querySelectorAll(
+                    '.px-segment-price-input[data-adjacent-stop-index]');
                 segmentInputs.forEach((input) => {
                     const stopIndex = input.getAttribute('data-adjacent-stop-index');
                     if (stopIndex === null || stopIndex === '') {
@@ -1925,7 +1949,8 @@
                         return;
                     }
                     previousValues.set(
-                        getSegmentPriceKey(Number.parseInt(fromIndex, 10), Number.parseInt(toIndex, 10)),
+                        getSegmentPriceKey(Number.parseInt(fromIndex, 10), Number.parseInt(toIndex,
+                        10)),
                         toMinorFromMajor(input.value)
                     );
                 });
@@ -1950,11 +1975,13 @@
                         const from = points[fromIndex].label || 'Point A';
                         const to = points[toIndex].label || 'Point B';
                         const previousKey = getSegmentPriceKey(fromIndex, toIndex);
-                        let initialMinor = previousValues.has(previousKey)
-                            ? previousValues.get(previousKey)
-                            : resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices, baseTotalMinor);
+                        let initialMinor = previousValues.has(previousKey) ?
+                            previousValues.get(previousKey) :
+                            resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices,
+                                baseTotalMinor);
 
-                        if (fromIndex === 0 && toIndex === points.length - 1 && initialMinor <= 0 && baseTotalMinor > 0) {
+                        if (fromIndex === 0 && toIndex === points.length - 1 && initialMinor <= 0 &&
+                            baseTotalMinor > 0) {
                             initialMinor = baseTotalMinor;
                         }
 
@@ -1984,7 +2011,8 @@
                         priceInput.setAttribute('data-distance-meters', '0');
 
                         if (toIndex === fromIndex + 1 && toIndex <= validStops.length) {
-                            priceInput.setAttribute('data-adjacent-stop-index', String(validStops[toIndex - 1].index));
+                            priceInput.setAttribute('data-adjacent-stop-index', String(validStops[toIndex - 1]
+                                .index));
                         }
 
                         if (fromIndex === 0 && toIndex === points.length - 1) {
@@ -2019,7 +2047,7 @@
                     if (priceMinorHiddenInput) {
                         priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
-                maybeShowPxLivePriceAlert();
+                    maybeShowPxLivePriceAlert();
                 });
                 priceMinorInput.addEventListener('blur', function() {
                     maybeShowPxLivePriceAlert(true);
@@ -2078,75 +2106,38 @@
                         console.log('PX Price validation bypassed - user already confirmed');
                         // Continue with normal form submission
                     } else {
-                        // Validate price per seat before submission
-                        const priceMinorValue = priceMinorHiddenInput ? parseInt(priceMinorHiddenInput
-                                .value) :
-                            (priceMinorInput ? toMinorFromMajor(priceMinorInput.value) : null);
-                        const seatsValue = document.querySelector('input[name="seats_total"]:checked') ?
-                            parseInt(document.querySelector('input[name="seats_total"]:checked').value) :
-                            null;
+                        const submitValidation = getPxSubmitValidationResult();
 
-                        // Get distance - try from hidden input, then global variable
-                        let distanceKm = null;
-                        const distanceMetersInput = postRideForm.querySelector(
-                            'input[name="distance_meters"]');
-                        if (distanceMetersInput && distanceMetersInput.value) {
-                            distanceKm = parseFloat(distanceMetersInput.value) /
-                            1000; // Convert meters to km
-                        } else if (window.pxRideDistanceKm) {
-                            distanceKm = window.pxRideDistanceKm;
+                        console.log('PX Form submission validation:', submitValidation);
+
+                        if (submitValidation.type === 'error') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            event.stopImmediatePropagation();
+                            showPxPriceErrorModal(
+                                submitValidation.maxPricePerSeat,
+                                submitValidation.routeLabel
+                            );
+                            return false;
                         }
 
-                        console.log('PX Form submission validation:', {
-                            priceMinor: priceMinorValue,
-                            distanceKm: distanceKm,
-                            seats: seatsValue,
-                        });
-
-                        // If we have price, distance, and seats, validate
-                        if (priceMinorValue && priceMinorValue > 0 && distanceKm && distanceKm > 0 &&
-                            seatsValue && seatsValue > 0) {
-                            const validation = validatePxPricePerSeat(priceMinorValue, distanceKm,
-                                seatsValue);
-
-                            console.log('PX Price validation result:', validation);
-
-                            if (!validation.valid) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                event.stopImmediatePropagation();
-                                showPxPriceErrorModal(validation.maxPricePerSeat);
-                                return false;
-                            }
-
-                            if (validation.type === 'warning') {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                event.stopImmediatePropagation();
-                                console.log('Showing PX soft warning modal');
-                                showPxPriceWarningModal(function() {
-                                    // User clicked "Keep Current Price" - submit the form with bypass flag
-                                    console.log(
-                                        'User chose to keep current price, submitting PX form');
-                                    const bypassInput = document.createElement('input');
-                                    bypassInput.type = 'hidden';
-                                    bypassInput.name = 'bypass_price_validation';
-                                    bypassInput.value = '1';
-                                    postRideForm.appendChild(bypassInput);
-                                    // Remove the event listener to prevent re-validation
-                                    const newForm = postRideForm.cloneNode(true);
-                                    postRideForm.parentNode.replaceChild(newForm, postRideForm);
-                                    // Submit the form
-                                    newForm.submit();
-                                });
-                                return false;
-                            }
-                        } else {
-                            console.warn('Skipping PX price validation - missing required data:', {
-                                priceMinor: priceMinorValue,
-                                distanceKm: distanceKm,
-                                seats: seatsValue,
-                            });
+                        if (submitValidation.type === 'warning') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            event.stopImmediatePropagation();
+                            console.log('Showing PX soft warning modal');
+                            showPxPriceWarningModal(function() {
+                                console.log('User chose to keep current price, submitting PX form');
+                                const bypassInput = document.createElement('input');
+                                bypassInput.type = 'hidden';
+                                bypassInput.name = 'bypass_price_validation';
+                                bypassInput.value = '1';
+                                postRideForm.appendChild(bypassInput);
+                                const newForm = postRideForm.cloneNode(true);
+                                postRideForm.parentNode.replaceChild(newForm, postRideForm);
+                                newForm.submit();
+                            }, submitValidation.routeLabel, submitValidation.softWarningPrice);
+                            return false;
                         }
                     }
 
@@ -2171,9 +2162,10 @@
                     if (existingDestinationPriceDeltaInput) {
                         existingDestinationPriceDeltaInput.remove();
                     }
-                    postRideForm.querySelectorAll('input[data-generated-segment-price="1"]').forEach((input) => {
-                        input.remove();
-                    });
+                    postRideForm.querySelectorAll('input[data-generated-segment-price="1"]').forEach((
+                        input) => {
+                            input.remove();
+                        });
 
                     const validStops = getValidStopsData().map((stop) => ({
                         label: stop.label,
@@ -2187,23 +2179,28 @@
                     // Map first N segment rows to N intermediate stops (in route order).
                     if (priceSegmentsList && validStops.length > 0) {
                         const adjacentSegmentInputs = Array.from(
-                            priceSegmentsList.querySelectorAll('.px-segment-price-input[data-adjacent-stop-index]')
+                            priceSegmentsList.querySelectorAll(
+                                '.px-segment-price-input[data-adjacent-stop-index]')
                         );
                         adjacentSegmentInputs.forEach((input) => {
                             const stopIndex = input.getAttribute('data-adjacent-stop-index');
                             if (stopIndex === null || stopIndex === '') {
                                 return;
                             }
-                            const matchingStop = validStops.find((stop) => String(stop.index) === String(stopIndex));
+                            const matchingStop = validStops.find((stop) => String(stop.index) ===
+                                String(stopIndex));
                             if (matchingStop) {
                                 matchingStop.priceDeltaMinor = toMinorFromMajor(input.value);
                             }
                         });
 
-                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
+                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll(
+                            '.px-segment-price-input'));
                         const lastAdjacentSegmentInput = allSegmentInputs.find((input) => {
-                            const fromIndex = Number.parseInt(input.getAttribute('data-from-index') || '-1', 10);
-                            const toIndex = Number.parseInt(input.getAttribute('data-to-index') || '-1', 10);
+                            const fromIndex = Number.parseInt(input.getAttribute(
+                                'data-from-index') || '-1', 10);
+                            const toIndex = Number.parseInt(input.getAttribute('data-to-index') ||
+                                '-1', 10);
                             const pointCount = validStops.length + 2;
                             return fromIndex === pointCount - 2 && toIndex === pointCount - 1;
                         });
@@ -2212,7 +2209,8 @@
                             const destinationPriceDeltaInput = document.createElement('input');
                             destinationPriceDeltaInput.type = 'hidden';
                             destinationPriceDeltaInput.name = 'destination[price_delta_minor]';
-                            destinationPriceDeltaInput.value = String(toMinorFromMajor(lastAdjacentSegmentInput
+                            destinationPriceDeltaInput.value = String(toMinorFromMajor(
+                                lastAdjacentSegmentInput
                                 .value));
                             destinationPriceDeltaInput.setAttribute('data-generated', '1');
                             postRideForm.appendChild(destinationPriceDeltaInput);
@@ -2233,9 +2231,11 @@
                             ].forEach(([field, value]) => {
                                 const hiddenInput = document.createElement('input');
                                 hiddenInput.type = 'hidden';
-                                hiddenInput.name = `meta[segment_prices][${index}][${field}]`;
+                                hiddenInput.name =
+                                    `meta[segment_prices][${index}][${field}]`;
                                 hiddenInput.value = value;
-                                hiddenInput.setAttribute('data-generated-segment-price', '1');
+                                hiddenInput.setAttribute('data-generated-segment-price',
+                                    '1');
                                 postRideForm.appendChild(hiddenInput);
                             });
                         });
@@ -2455,7 +2455,7 @@
                         bypassInput.name = 'bypass_price_validation';
                         bypassInput.value = '1';
                         postRideForm.appendChild(bypassInput);
-                        
+
                         // Remove the event listener to prevent re-validation
                         const newForm = postRideForm.cloneNode(true);
                         postRideForm.parentNode.replaceChild(newForm, postRideForm);
@@ -2533,7 +2533,8 @@
         }
 
         function focusPxPriceInput(targetInput = null) {
-            const priceInput = targetInput instanceof HTMLElement ? targetInput : document.getElementById('px-price-minor-input');
+            const priceInput = targetInput instanceof HTMLElement ? targetInput : document.getElementById(
+                'px-price-minor-input');
             if (!priceInput) {
                 return;
             }
@@ -2644,9 +2645,9 @@
             const priceMinorInput = document.getElementById('px-price-minor-input');
             const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
             const distanceMetersInput = document.getElementById('px-distance-meters-input');
-            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor'
-                ? parseInt(priceMinorHiddenInput.value || '0', 10)
-                : (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
+            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor' ?
+                parseInt(priceMinorHiddenInput.value || '0', 10) :
+                (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
 
             let distanceMeters = 0;
             if (distanceMetersInput && distanceMetersInput.value) {
@@ -2659,7 +2660,8 @@
         }
 
         function maybeShowPxLivePriceAlert(force = false, sourceInput = null) {
-            lastPxPriceValidationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById('px-price-minor-input');
+            lastPxPriceValidationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById(
+                'px-price-minor-input');
             const {
                 priceMinor,
                 seatsTotal,
@@ -2700,6 +2702,10 @@
 
             lastPxPriceValidationSignature = signature;
 
+            if (!force) {
+                return;
+            }
+
             if (validation.type === 'error') {
                 showPxPriceErrorModal(validation.maxPricePerSeat, routeLabel);
                 return;
@@ -2710,6 +2716,53 @@
                     closeModalById('pxPriceWarningModal');
                 }, routeLabel, validation.softWarningPrice);
             }
+        }
+
+        function getPxSubmitValidationResult() {
+            const segmentInputs = Array.from(document.querySelectorAll('.px-segment-price-input'));
+            const contexts = [];
+
+            if (segmentInputs.length > 0 && priceSegmentsWrap && !priceSegmentsWrap.classList.contains('hidden')) {
+                segmentInputs.forEach((input) => {
+                    contexts.push(getCurrentPxPriceValidationContext(input));
+                });
+            } else {
+                contexts.push(getCurrentPxPriceValidationContext());
+            }
+
+            let firstWarning = null;
+
+            for (const context of contexts) {
+                if (!context.priceMinor || !context.seatsTotal || !context.distanceKm || context.distanceKm <= 0) {
+                    continue;
+                }
+
+                const validation = validatePxPricePerSeat(
+                    context.priceMinor,
+                    context.distanceKm,
+                    context.seatsTotal
+                );
+
+                if (!validation.valid) {
+                    return {
+                        type: 'error',
+                        routeLabel: context.routeLabel,
+                        maxPricePerSeat: validation.maxPricePerSeat,
+                    };
+                }
+
+                if (validation.type === 'warning' && firstWarning === null) {
+                    firstWarning = {
+                        type: 'warning',
+                        routeLabel: context.routeLabel,
+                        softWarningPrice: validation.softWarningPrice,
+                    };
+                }
+            }
+
+            return firstWarning ?? {
+                type: null,
+            };
         }
 
         // Function to show error modal (Price Limit Exceeded)
@@ -2740,12 +2793,13 @@
 
             if (para1) {
                 para1.textContent =
-                    'The price you entered for ' + routeLabel + ' is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+                    'The price you entered for ' + routeLabel +
+                    ' is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
             }
             if (para2) {
-                para2.textContent = softWarningPrice
-                    ? 'We suggest keeping this segment at or below $' + softWarningPrice + ' per seat.'
-                    : 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+                para2.textContent = softWarningPrice ?
+                    'We suggest keeping this segment at or below $' + softWarningPrice + ' per seat.' :
+                    'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
             }
 
             modal.classList.remove('hidden');
@@ -2761,7 +2815,8 @@
                     const activePostRideForm = document.querySelector('form[action*="px.post_ride.store"]') ||
                         document.querySelector('form[action*="px.post_ride.update"]') ||
                         document.querySelector('form');
-                    if (!activePostRideForm || !activePostRideForm.querySelector('input[name="bypass_price_validation"]')) {
+                    if (!activePostRideForm || !activePostRideForm.querySelector(
+                            'input[name="bypass_price_validation"]')) {
                         focusPxPriceInput(lastPxPriceValidationInput);
                     }
                     if (callback) callback();

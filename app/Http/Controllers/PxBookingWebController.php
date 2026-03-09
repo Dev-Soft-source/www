@@ -83,6 +83,7 @@ class PxBookingWebController extends Controller
 
         $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
         $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
+        $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
         $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $from_stop_id, (int) $to_stop_id);
@@ -126,6 +127,8 @@ class PxBookingWebController extends Controller
             $bookingPage = BookingPageSettingDetail::where('language_id', $defaultLangId)->first();
         }
 
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+
         return view('px.booking', [
             'ride' => $ride,
             'fromStop' => $orderedStops[$fromIndex],
@@ -134,6 +137,7 @@ class PxBookingWebController extends Controller
             'segmentPriceMinor' => $segmentPriceMinor,
             'segmentAvailableSeats' => $segmentAvailableSeats,
             'bookingModeCode' => $bookingModeCode,
+            'bookingModeLabel' => $bookingModeLabel,
             'bookingMethodCode' => $bookingMethodCode,
             'bookingMethodLabel' => $bookingMethodLabel,
             'cards' => $cards,
@@ -141,6 +145,7 @@ class PxBookingWebController extends Controller
             'coffeeBalance' => $coffeeBalance,
             'stateTax' => $stateTax,
             'bookingPage' => $bookingPage,
+            'postRidePage' => $postRidePage,
         ]);
     }
 
@@ -202,6 +207,7 @@ class PxBookingWebController extends Controller
 
         $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
         $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
+        $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
         $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
         $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $booking->from_stop_id, (int) $booking->to_stop_id);
@@ -234,6 +240,8 @@ class PxBookingWebController extends Controller
             $bookingPage = BookingPageSettingDetail::where('language_id', $defaultLangId)->first();
         }
 
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+
         return view('px.booking', [
             'ride' => $ride,
             'fromStop' => $ride->stops->sortBy('stop_order')->values()->get($fromIndex),
@@ -243,6 +251,7 @@ class PxBookingWebController extends Controller
             'segmentAvailableSeats' => $segmentAvailableSeats,
             'bookingModeCode' => $bookingModeCode,
             'bookingMethodCode' => $bookingMethodCode,
+            'bookingModeLabel' => $bookingModeLabel,
             'bookingMethodLabel' => $bookingMethodLabel,
             'cards' => $cards,
             'existingBooking' => $booking,
@@ -251,30 +260,12 @@ class PxBookingWebController extends Controller
             'coffeeBalance' => $coffeeBalance,
             'stateTax' => $stateTax,
             'bookingPage' => $bookingPage,
+            'postRidePage' => $postRidePage,
         ]);
     }
 
     public function updateBooking(Request $request, $lang = null, $id = null)
     {
-        $validated = $request->validate([
-            'seats' => ['required', 'integer', 'min:1', 'max:8'],
-            'card_id' => ['nullable', 'integer', 'exists:cards,id'],
-            'driver_message' => ['required', 'string', 'max:5000'],
-            'agree_terms' => ['required', 'accepted'],
-            'firm_agree_terms' => ['nullable', 'accepted'],
-            'firm_cancellation_understand' => ['nullable', 'accepted'],
-            'pink_ride_agree_terms' => ['nullable', 'accepted'],
-            'extra_care_ride_agree_terms' => ['nullable', 'accepted'],
-        ], [
-            'driver_message.required' => 'The message to driver field is required.',
-            'agree_terms.required' => 'You must agree to the terms and conditions.',
-            'agree_terms.accepted' => 'You must agree to the terms and conditions.',
-            'firm_agree_terms.accepted' => 'You must agree to the Firm Cancellation Policy for this ride.',
-            'firm_cancellation_understand.accepted' => 'Please confirm that you understand the Firm Cancellation Policy.',
-            'pink_ride_agree_terms.accepted' => 'You must agree to the Pink Ride terms before booking.',
-            'extra_care_ride_agree_terms.accepted' => 'You must agree to the Extra+ Ride terms before booking.',
-        ]);
-
         $booking = PxBooking::query()
             ->where('id', (int) $id)
             ->where('passenger_id', (int) auth()->id())
@@ -287,6 +278,8 @@ class PxBookingWebController extends Controller
                 ->route('px.my_trips', ['lang' => optional($this->selectedLanguage)->abbreviation])
                 ->with('error', 'Booking not found.');
         }
+
+        $validated = $this->validateBookingRequest($request, $booking->ride);
 
         $ride = $booking->ride;
         if ($ride->status === 'cancelled' || ($ride->departure_at && $ride->departure_at <= now())) {
@@ -469,20 +462,9 @@ class PxBookingWebController extends Controller
             'card_id' => ['nullable', 'integer', 'exists:cards,id'],
             'seats' => ['required', 'integer', 'min:1', 'max:8'],
             'driver_message' => ['required', 'string', 'max:5000'],
-            'agree_terms' => ['required', 'accepted'],
-            'firm_agree_terms' => ['nullable', 'accepted'],
-            'firm_cancellation_understand' => ['nullable', 'accepted'],
-            'pink_ride_agree_terms' => ['nullable', 'accepted'],
-            'extra_care_ride_agree_terms' => ['nullable', 'accepted'],
             'coffee_wall' => ['nullable', 'boolean'],
         ], [
             'driver_message.required' => 'The message to driver field is required.',
-            'agree_terms.required' => 'You must agree to the terms and conditions.',
-            'agree_terms.accepted' => 'You must agree to the terms and conditions.',
-            'firm_agree_terms.accepted' => 'You must agree to the Firm Cancellation Policy for this ride.',
-            'firm_cancellation_understand.accepted' => 'Please confirm that you understand the Firm Cancellation Policy.',
-            'pink_ride_agree_terms.accepted' => 'You must agree to the Pink Ride terms before booking.',
-            'extra_care_ride_agree_terms.accepted' => 'You must agree to the Extra+ Ride terms before booking.',
         ]);
 
         $fromStop = PxRideStop::query()->find((int) $validated['from_stop_id']);
@@ -514,6 +496,8 @@ class PxBookingWebController extends Controller
                 ])
                 ->with('error', 'Ride not found or unavailable.');
         }
+
+        $validated = array_merge($validated, $this->validateBookingRequest($request, $ride));
 
         [$fromIndex, $toIndex] = $this->resolveRideStopIndexes($ride, (int) $validated['from_stop_id'], (int) $validated['to_stop_id']);
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
@@ -778,6 +762,52 @@ class PxBookingWebController extends Controller
         $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
 
         return optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+    }
+
+    protected function validateBookingRequest(Request $request, PxRide $ride): array
+    {
+        return $request->validate(
+            $this->agreementValidationRules($ride),
+            $this->agreementValidationMessages()
+        );
+    }
+
+    protected function agreementValidationRules(PxRide $ride): array
+    {
+        $rules = [
+            'agree_terms' => ['required', 'accepted'],
+        ];
+
+        if (!empty($ride->cancelation_policy)) {
+            $rules['firm_agree_terms'] = ['required', 'accepted'];
+            $rules['firm_cancellation_understand'] = ['required', 'accepted'];
+        }
+
+        if (!empty($ride->women_only)) {
+            $rules['pink_ride_agree_terms'] = ['required', 'accepted'];
+        }
+
+        if (!empty($ride->extra_care)) {
+            $rules['extra_care_ride_agree_terms'] = ['required', 'accepted'];
+        }
+
+        return $rules;
+    }
+
+    protected function agreementValidationMessages(): array
+    {
+        return [
+            'agree_terms.required' => 'You must agree to the terms and conditions.',
+            'agree_terms.accepted' => 'You must agree to the terms and conditions.',
+            'firm_agree_terms.required' => 'You must agree to the Firm Cancellation Policy for this ride.',
+            'firm_agree_terms.accepted' => 'You must agree to the Firm Cancellation Policy for this ride.',
+            'firm_cancellation_understand.required' => 'Please confirm that you understand the Firm Cancellation Policy.',
+            'firm_cancellation_understand.accepted' => 'Please confirm that you understand the Firm Cancellation Policy.',
+            'pink_ride_agree_terms.required' => 'You must agree to the Pink Ride terms before booking.',
+            'pink_ride_agree_terms.accepted' => 'You must agree to the Pink Ride terms before booking.',
+            'extra_care_ride_agree_terms.required' => 'You must agree to the Extra+ Ride terms before booking.',
+            'extra_care_ride_agree_terms.accepted' => 'You must agree to the Extra+ Ride terms before booking.',
+        ];
     }
 
     protected function getOptionCode($group, $optionId, $defaultCode = ''): string

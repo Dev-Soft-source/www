@@ -14,6 +14,8 @@
     'segmentMode',
     'bookingModeLabel' => null,
     'bookingMethodLabel' => null,
+    'bookingModeCode' => null,
+    'bookingMethodCode' => null,
     'postRidePage' => null,
     'type' => 'ride_detail',
 ])
@@ -77,8 +79,11 @@
                                             class="flex flex-col px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
                                             <div class="flex items-center">
                                                 <span class="h-5 w-5 inline-flex mr-2 flex-shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                        <path fill="#888888" fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill="#888888" fill-rule="evenodd"
+                                                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                                            clip-rule="evenodd" />
                                                     </svg>
                                                 </span>
                                                 <span
@@ -158,17 +163,34 @@
     <div
         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
         <div class="p-4 items-baseline">
+            @php
+                $bookingMethodTooltip = '';
+                if ($bookingMethodCode == 'cash') {
+                    $bookingMethodTooltip = optional($postRidePage)->payment_methods_option1_tooltip ?? '';
+                } elseif ($bookingMethodCode == 'online_payment') {
+                    $bookingMethodTooltip = optional($postRidePage)->payment_methods_option2_tooltip ?? '';
+                } elseif ($bookingMethodCode == 'secured_cash') {
+                    $bookingMethodTooltip = optional($postRidePage)->payment_methods_option3_tooltip ?? '';
+                }
+            @endphp
             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                 {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                 <span class="text-primary font-normal text-lg"
-                    style="font-family: 'Roboto', sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
+                    data-tippy-content="{{ $bookingMethodTooltip }}"
+                    style="font-family: 'Roboto', sans-serif;">{{ $bookingMethodLabel ?? 'N/A' }}</span>
             </h4>
         </div>
         <div class="p-4 items-baseline">
+            @php
+                $bookingModeTooltip =
+                    $bookingModeCode == 'manual'
+                        ? optional($postRidePage)->booking_option2_tooltip ?? ''
+                        : optional($postRidePage)->booking_option1_tooltip ?? '';
+            @endphp
             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                 {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
-                <span class="text-primary font-normal text-lg"
-                    style="font-family: 'Roboto', sans-serif;">{{ $bookingMethodLabel ?? 'N/A' }}</span>
+                <span class="text-primary font-normal text-lg" data-tippy-content="{{ $bookingModeTooltip }}"
+                    style="font-family: 'Roboto', sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
             </h4>
         </div>
     </div>
@@ -253,16 +275,16 @@
                     <img class="w-7 h-7 rounded-full" src="{{ asset('home_page_icons/' . $option->icon) }}"
                         alt="{{ $option->display_label }}">
                     {{-- @endif --}}
-                    <p>{{ $option->display_label }}</p>
-                    @if(!empty($option->display_description))
-                    <span class="inline-flex cursor-help w-4 h-4"
-                        data-tippy-content="{{ $option->display_description }}">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
-                                fill="#666666"></path>
-                        </svg>
-                    </span>
+                    <p class="font-semibold">{{ $option->display_label }}</p>
+                    @if (!empty($option->display_description))
+                        <span class="inline-flex cursor-help w-4 h-4"
+                            data-tippy-content="{{ $option->display_description }}">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM12 17.75C12.4142 17.75 12.75 17.4142 12.75 17V11C12.75 10.5858 12.4142 10.25 12 10.25C11.5858 10.25 11.25 10.5858 11.25 11V17C11.25 17.4142 11.5858 17.75 12 17.75ZM12 7C12.5523 7 13 7.44772 13 8C13 8.55228 12.5523 9 12 9C11.4477 9 11 8.55228 11 8C11 7.44772 11.4477 7 12 7Z"
+                                    fill="#666666"></path>
+                            </svg>
+                        </span>
                     @endif
                 </div>
             @endforeach

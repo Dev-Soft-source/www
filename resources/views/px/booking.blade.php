@@ -211,13 +211,21 @@
                 {{ session('error') }}
             </div>
         @endif
+
+        @if ($errors->any())
+            <div class="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 px-4 py-3">
+                {{ $errors->first() }}
+            </div>
+        @endif
         <h1>{{ $bookingPage->main_heading ?? 'Ride detail' }}</h1>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
                 <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$parentOrigin" :parentDestination="$parentDestination" :origin="$origin"
                     :destination="$destination" :pickupLocation="$pickupLocation" :dropoffLocation="$dropoffLocation" :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
-                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" :bookingModeLabel="$bookingModeCode ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
-                    :postRidePage="null" />
+                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" 
+                    :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
+                    :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
+                    :postRidePage="$postRidePage ?? null" />
             </div>
 
             <div class="col-span-1">
@@ -302,7 +310,8 @@
                                         <div class="tooltip-error shadow-lg mt-2">{{ $message }}</div>
                                     @enderror
                                     <!-- Hidden input to store count -->
-                                    <input type="hidden" id="seat-count" name="seats" value="">
+                                    <input type="hidden" id="seat-count" name="seats"
+                                        value="{{ old('seats', count(old('seats_id', []))) }}">
                                 @else
                                     {{-- Fallback to number input if seatDetail is not available --}}
                                     <div>
@@ -645,10 +654,7 @@
                                 </div>
                                 @error('pink_ride_agree_terms')
                                     <div class="tooltip-error shadow-lg">
-                                            @isset($bookingPage->pink_ride_tooltip)
-                                                {{ $bookingPage->pink_ride_tooltip }}
-                                            @endisset
-                                        </p>
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             @endif
@@ -670,9 +676,7 @@
                                 </div>
                                 @error('extra_care_ride_agree_terms')
                                     <div class="tooltip-error shadow-lg">
-                                        @isset($bookingPage->extra_care_ride_tooltip)
-                                            {{ $bookingPage->extra_care_ride_tooltip }}
-                                        @endisset
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             @endif
@@ -746,7 +750,19 @@
 
     @section('script')
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            function updateSeatCount() {
+                const seatCountInput = document.getElementById('seat-count');
+                if (!seatCountInput) {
+                    return 0;
+                }
+
+                const selectedCount = document.querySelectorAll('input.seat-checkbox:checked').length;
+                seatCountInput.value = selectedCount;
+
+                return selectedCount;
+            }
+
+            function syncTotals() {
                 const seatsInput = document.getElementById('px-booking-seats');
                 const perSeatMinor = {{ (int) $perSeatMinor }};
                 const perSeatMajor = perSeatMinor / 100;
@@ -776,111 +792,111 @@
                     return (seatPriceMajor * 0.1) * seats;
                 }
 
-                function syncTotals() {
-                    // Get seats count - either from number input or from seat checkboxes
-                    let seats = 1;
-                    if (seatsInput) {
-                        seats = Math.max(1, parseInt(seatsInput.value || '1', 10) || 1);
+                // Get seats count - either from number input or from seat checkboxes
+                let seats = 1;
+                if (seatsInput) {
+                    seats = Math.max(1, parseInt(seatsInput.value || '1', 10) || 1);
+                } else {
+                    seats = Math.max(1, updateSeatCount() || 1);
+                }
+
+                const seatsAmount = perSeatMajor * seats;
+                const bookingFee = calculateBookingFee(perSeatMajor, seats);
+                const taxAmount = hasTax ? (bookingFee * settingTaxPercentage / 100) : 0;
+
+                // Check if Coffee from the Wall is selected
+                const coffeeWallCheckbox = document.getElementById('px-coffee-wall');
+                const useCoffeeWall = coffeeWallCheckbox && coffeeWallCheckbox.checked;
+
+                let totalDue = seatsAmount + bookingFee + taxAmount;
+                let totalAmountIn = bookingFee;
+                let totalSumIn = totalDue;
+
+                if (useCoffeeWall) {
+                    totalDue = seatsAmount + taxAmount; // Booking fee is paid with coffee
+                    totalSumIn = totalDue;
+                    totalAmountIn = 0;
+                }
+
+                // Update display elements
+                const seatsBookedEl = document.getElementById('px-seats-booked');
+                const seatsLabelEl = document.getElementById('px-seats-label');
+                const seatsAmountEl = document.getElementById('px-seats-amount');
+                const bookingFeeEl = document.getElementById('px-booking-fee');
+                const taxAmountEl = document.getElementById('px-tax-amount');
+                const totalDueEl = document.getElementById('px-total-due');
+                const coffeeDeductionEl = document.getElementById('px-coffee-deduction');
+                const coffeeDeductionAmountEl = document.getElementById('px-coffee-deduction-amount');
+                const hideBookingFeeDiv = document.getElementById('hideBookingFee');
+
+                if (seatsBookedEl) seatsBookedEl.textContent = seats;
+                if (seatsLabelEl) seatsLabelEl.textContent = seats === 1 ? 'seat' : 'seats';
+                if (seatsAmountEl) seatsAmountEl.textContent = formatMajor(seatsAmount * 100);
+                if (bookingFeeEl) bookingFeeEl.textContent = formatMajor(bookingFee * 100);
+                if (taxAmountEl) taxAmountEl.textContent = formatMajor(taxAmount * 100);
+                if (totalDueEl) totalDueEl.textContent = formatMajor(totalDue * 100);
+
+                // Update hidden inputs
+                const totalSeatsAmountInput = document.querySelector('.totalSeatsAmountInput');
+                const totalAmountInput = document.querySelector('.totalAmountInput');
+                const totalTaxAmountInput = document.querySelector('.totalTaxAmountInput');
+                const totalSumInput = document.querySelector('.totalSumInput');
+                const totalAmountInInput = document.querySelector('.totalAmountIn');
+                const totalSumInInput = document.querySelector('.totalSumIn');
+                const totalSeatsAmountDisplay = document.querySelector('.totalSeatsAmount');
+                const totalAmountDisplay = document.querySelector('.totalAmount');
+                const totalSumDisplay = document.querySelector('.totalSum');
+
+                if (totalSeatsAmountInput) totalSeatsAmountInput.value = seatsAmount.toFixed(2);
+                if (totalAmountInput) totalAmountInput.value = bookingFee.toFixed(2);
+                if (totalTaxAmountInput) totalTaxAmountInput.value = taxAmount.toFixed(2);
+                if (totalSumInput) totalSumInput.value = totalDue.toFixed(2);
+                if (totalAmountInInput) totalAmountInInput.value = totalAmountIn.toFixed(2);
+                if (totalSumInInput) totalSumInInput.value = totalSumIn.toFixed(2);
+                if (totalSeatsAmountDisplay) totalSeatsAmountDisplay.textContent = currencySymbol + seatsAmount.toFixed(2);
+                if (totalAmountDisplay) totalAmountDisplay.textContent = currencySymbol + bookingFee.toFixed(2);
+                if (totalSumDisplay) totalSumDisplay.textContent = currencySymbol + totalDue.toFixed(2);
+
+                // Show/hide coffee deduction
+                if (coffeeDeductionEl && coffeeDeductionAmountEl) {
+                    if (useCoffeeWall && bookingFee > 0) {
+                        coffeeDeductionEl.classList.remove('hidden');
+                        coffeeDeductionEl.classList.add('flex');
+                        coffeeDeductionAmountEl.textContent = formatMajor(bookingFee * 100);
                     } else {
-                        // Count selected seats from checkboxes
-                        const selectedSeats = document.querySelectorAll('input.seat-checkbox:checked');
-                        seats = Math.max(1, selectedSeats.length || 1);
-                    }
-                    
-                    const seatsAmount = perSeatMajor * seats;
-                    const bookingFee = calculateBookingFee(perSeatMajor, seats);
-                    const taxAmount = hasTax ? (bookingFee * settingTaxPercentage / 100) : 0;
-
-                    // Check if Coffee from the Wall is selected
-                    const coffeeWallCheckbox = document.getElementById('px-coffee-wall');
-                    const useCoffeeWall = coffeeWallCheckbox && coffeeWallCheckbox.checked;
-
-                    let totalDue = seatsAmount + bookingFee + taxAmount;
-                    let totalAmountIn = bookingFee;
-                    let totalSumIn = totalDue;
-                    
-                    if (useCoffeeWall) {
-                        totalDue = seatsAmount + taxAmount; // Booking fee is paid with coffee
-                        totalSumIn = totalDue;
-                        totalAmountIn = 0;
-                    }
-
-                    // Update display elements
-                    const seatsBookedEl = document.getElementById('px-seats-booked');
-                    const seatsLabelEl = document.getElementById('px-seats-label');
-                    const seatsAmountEl = document.getElementById('px-seats-amount');
-                    const bookingFeeEl = document.getElementById('px-booking-fee');
-                    const taxAmountEl = document.getElementById('px-tax-amount');
-                    const totalDueEl = document.getElementById('px-total-due');
-                    const coffeeDeductionEl = document.getElementById('px-coffee-deduction');
-                    const coffeeDeductionAmountEl = document.getElementById('px-coffee-deduction-amount');
-                    const hideBookingFeeDiv = document.getElementById('hideBookingFee');
-
-                    if (seatsBookedEl) seatsBookedEl.textContent = seats;
-                    if (seatsLabelEl) seatsLabelEl.textContent = seats === 1 ? 'seat' : 'seats';
-                    if (seatsAmountEl) seatsAmountEl.textContent = formatMajor(seatsAmount * 100);
-                    if (bookingFeeEl) bookingFeeEl.textContent = formatMajor(bookingFee * 100);
-                    if (taxAmountEl) taxAmountEl.textContent = formatMajor(taxAmount * 100);
-                    if (totalDueEl) totalDueEl.textContent = formatMajor(totalDue * 100);
-
-                    // Update hidden inputs
-                    const totalSeatsAmountInput = document.querySelector('.totalSeatsAmountInput');
-                    const totalAmountInput = document.querySelector('.totalAmountInput');
-                    const totalTaxAmountInput = document.querySelector('.totalTaxAmountInput');
-                    const totalSumInput = document.querySelector('.totalSumInput');
-                    const totalAmountInInput = document.querySelector('.totalAmountIn');
-                    const totalSumInInput = document.querySelector('.totalSumIn');
-                    const totalSeatsAmountDisplay = document.querySelector('.totalSeatsAmount');
-                    const totalAmountDisplay = document.querySelector('.totalAmount');
-                    const totalSumDisplay = document.querySelector('.totalSum');
-
-                    if (totalSeatsAmountInput) totalSeatsAmountInput.value = seatsAmount.toFixed(2);
-                    if (totalAmountInput) totalAmountInput.value = bookingFee.toFixed(2);
-                    if (totalTaxAmountInput) totalTaxAmountInput.value = taxAmount.toFixed(2);
-                    if (totalSumInput) totalSumInput.value = totalDue.toFixed(2);
-                    if (totalAmountInInput) totalAmountInInput.value = totalAmountIn.toFixed(2);
-                    if (totalSumInInput) totalSumInInput.value = totalSumIn.toFixed(2);
-                    if (totalSeatsAmountDisplay) totalSeatsAmountDisplay.textContent = currencySymbol + seatsAmount.toFixed(2);
-                    if (totalAmountDisplay) totalAmountDisplay.textContent = currencySymbol + bookingFee.toFixed(2);
-                    if (totalSumDisplay) totalSumDisplay.textContent = currencySymbol + totalDue.toFixed(2);
-
-                    // Show/hide coffee deduction
-                    if (coffeeDeductionEl && coffeeDeductionAmountEl) {
-                        if (useCoffeeWall && bookingFee > 0) {
-                            coffeeDeductionEl.classList.remove('hidden');
-                            coffeeDeductionEl.classList.add('flex');
-                            coffeeDeductionAmountEl.textContent = formatMajor(bookingFee * 100);
-                        } else {
-                            coffeeDeductionEl.classList.add('hidden');
-                            coffeeDeductionEl.classList.remove('flex');
-                        }
-                    }
-
-                    // Show/hide booking fee deduction in coffee wall section
-                    if (hideBookingFeeDiv) {
-                        if (useCoffeeWall && bookingFee > 0) {
-                            hideBookingFeeDiv.classList.remove('hidden');
-                            hideBookingFeeDiv.classList.add('flex');
-                            const hideBookingFeeAmount = hideBookingFeeDiv.querySelector('.totalAmount');
-                            if (hideBookingFeeAmount) hideBookingFeeAmount.textContent = currencySymbol + bookingFee.toFixed(2);
-                        } else {
-                            hideBookingFeeDiv.classList.add('hidden');
-                            hideBookingFeeDiv.classList.remove('flex');
-                        }
-                    }
-
-                    // Update Stripe charge amount if needed
-                    const stripeChargeAmountInput = document.getElementById('stripeChargeAmount');
-                    const checkPaymentMethod = document.getElementById('check_payment_method');
-                    if (stripeChargeAmountInput && checkPaymentMethod) {
-                        if (checkPaymentMethod.value === 'cash') {
-                            const chargeAmount = totalAmountIn + taxAmount;
-                            stripeChargeAmountInput.value = chargeAmount.toFixed(2);
-                        } else {
-                            stripeChargeAmountInput.value = totalSumIn.toFixed(2);
-                        }
+                        coffeeDeductionEl.classList.add('hidden');
+                        coffeeDeductionEl.classList.remove('flex');
                     }
                 }
+
+                // Show/hide booking fee deduction in coffee wall section
+                if (hideBookingFeeDiv) {
+                    if (useCoffeeWall && bookingFee > 0) {
+                        hideBookingFeeDiv.classList.remove('hidden');
+                        hideBookingFeeDiv.classList.add('flex');
+                        const hideBookingFeeAmount = hideBookingFeeDiv.querySelector('.totalAmount');
+                        if (hideBookingFeeAmount) hideBookingFeeAmount.textContent = currencySymbol + bookingFee.toFixed(2);
+                    } else {
+                        hideBookingFeeDiv.classList.add('hidden');
+                        hideBookingFeeDiv.classList.remove('flex');
+                    }
+                }
+
+                // Update Stripe charge amount if needed
+                const stripeChargeAmountInput = document.getElementById('stripeChargeAmount');
+                const checkPaymentMethod = document.getElementById('check_payment_method');
+                if (stripeChargeAmountInput && checkPaymentMethod) {
+                    if (checkPaymentMethod.value === 'cash') {
+                        const chargeAmount = totalAmountIn + taxAmount;
+                        stripeChargeAmountInput.value = chargeAmount.toFixed(2);
+                    } else {
+                        stripeChargeAmountInput.value = totalSumIn.toFixed(2);
+                    }
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const seatsInput = document.getElementById('px-booking-seats');
 
                 if (seatsInput) {
                     seatsInput.addEventListener('input', syncTotals);
@@ -960,15 +976,13 @@
                 if (seatCheckboxes.length > 0) {
                     seatCheckboxes.forEach(function(checkbox) {
                         checkbox.addEventListener('change', function() {
-                            const selectedCount = document.querySelectorAll('input.seat-checkbox:checked').length;
-                            const seatCountInput = document.getElementById('seat-count');
-                            if (seatCountInput) {
-                                seatCountInput.value = selectedCount;
-                            }
+                            updateSeatCount();
                             syncTotals();
                         });
                     });
                 }
+
+                updateSeatCount();
             });
 
             // Seat selection function (if using visual seat selection)
@@ -1067,15 +1081,10 @@
                 });
 
                 // Update seat count
-                const seatCountInput = document.getElementById('seat-count');
-                if (seatCountInput) {
-                    seatCountInput.value = newSelectionIds.length;
-                }
+                updateSeatCount();
 
                 // Update totals
-                if (typeof syncTotals === 'function') {
-                    syncTotals();
-                }
+                syncTotals();
             }
         </script>
     @endsection

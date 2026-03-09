@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Px;
 
+use App\Models\PxOption;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\View;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,8 @@ class PxStoreRideRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->normalizeRideFeatureFlags();
+
         // Handle departure_at - use directly if provided, otherwise combine from date/time (backward compatibility)
         $departureAt = $this->input('departure_at');
         if (!$departureAt) {
@@ -56,6 +59,28 @@ class PxStoreRideRequest extends FormRequest
             }
             $this->merge(['stops' => $processedStops]);
         }
+    }
+
+    protected function normalizeRideFeatureFlags(): void
+    {
+        $rideOptionIds = $this->input('ride_option_ids', $this->input('preference', []));
+
+        if (!is_array($rideOptionIds)) {
+            $rideOptionIds = is_string($rideOptionIds) ? explode(',', $rideOptionIds) : [$rideOptionIds];
+        }
+
+        $rideOptionIds = array_values(array_filter(array_map('intval', $rideOptionIds)));
+        $featureCodes = PxOption::query()
+            ->whereIn('id', $rideOptionIds)
+            ->pluck('code')
+            ->map(fn ($code) => (string) $code)
+            ->all();
+
+        $this->merge([
+            'ride_option_ids' => $rideOptionIds,
+            'women_only' => in_array('pink_rides', $featureCodes, true),
+            'extra_care' => in_array('extra_plus_rides', $featureCodes, true),
+        ]);
     }
 
     public function rules(): array

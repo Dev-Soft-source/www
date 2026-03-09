@@ -251,6 +251,7 @@
                     :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
                     :currency="$currency" :segmentStops="collect()" :segmentMode="false"
                     :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
+                    :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
                     :postRidePage="$postRidePage ?? null"
                     :type="'my_ride_detail'" />
 

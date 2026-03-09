@@ -64,6 +64,43 @@
         @endif
 
         <h1>{{ $rideDetailPage->main_heading ?? 'Ride detail' }}</h1>
+        @php
+            $isPinkRide = $ride->women_only === true || $ride->women_only === 1;
+            $isExtraCareRide = $ride->extra_care === true || $ride->extra_care === 1;
+        @endphp
+        @if($isPinkRide && $isExtraCareRide)
+            <div class="col-span-3 w-full">
+                <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
+                    <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="text-lg">This is a Pink Ride and Extra+ Ride</span>
+                </div>
+            </div>
+        @else
+            @if($isExtraCareRide)
+                <div class="col-span-3 w-full">
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
+                        <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="text-lg">This is a Extra+ Ride</span>
+                    </div>
+                </div>
+            @elseif($isPinkRide)
+                <div class="col-span-3 w-full">
+                    <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
+                        <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="text-lg">This is a Pink Ride</span>
+                    </div>
+                </div>
+            @endif
+        @endif
 
         @php
             $parentOrigin = $ride->route->origin_label ?? 'N/A';
@@ -128,7 +165,9 @@
             <div class="col-span-2">
                 <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$parentOrigin" :parentDestination="$parentDestination" :origin="$origin"
                     :destination="$destination" :pickupLocation="$pickupLocation" :dropoffLocation="$dropoffLocation" :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
-                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
+                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" 
+                    :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
+                    :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
                     :postRidePage="$postRidePage ?? null" />
             </div>
 
@@ -387,4 +426,12 @@
             document.getElementById('my-chat-pop-modal').style.display = 'flex';
         }
     </script>
+@endsection
+
+@section('style')
+<style>
+p {
+    font-family: 'Roboto', sans-serif;
+}
+</style>
 @endsection
