@@ -308,11 +308,22 @@
                             $moreDetails = $ride->rideDetail->where('default_ride', 0)->sortBy('id');
                             $origin = $defaultDetail && $defaultDetail->departure ? $defaultDetail->departure : ($ride->rideDetail->first() ? $ride->rideDetail->first()->departure : '');
                             $destination = $defaultDetail && $defaultDetail->destination ? $defaultDetail->destination : ($ride->rideDetail->last() ? $ride->rideDetail->last()->destination : '');
-                            $stops = $moreDetails->isEmpty() ? collect() : (
-                                $moreDetails->last()->destination == $destination
-                                    ? $moreDetails->slice(0, -1)->pluck('destination')->values()
-                                    : $moreDetails->pluck('destination')->values()
-                            );
+                            // Build ordered route points (origin → stops → destination) from segment chain to avoid duplicates and exclude destination from stops list
+                            $orderedPoints = collect([$origin]);
+                            $current = $origin;
+                            $remaining = $moreDetails->values();
+                            while ($current !== $destination && $remaining->isNotEmpty()) {
+                                $nextSegment = $remaining->first(fn($d) => (string) $d->departure === (string) $current);
+                                if (!$nextSegment) {
+                                    break;
+                                }
+                                $orderedPoints->push($nextSegment->destination);
+                                $current = $nextSegment->destination;
+                                $remaining = $remaining->filter(fn($d) => $d->id != $nextSegment->id);
+                            }
+                            $stops = $orderedPoints->count() > 2
+                                ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
+                                : collect();
                         @endphp
                         <div class="w-full md:w-2/3 order-2 md:order-1">
                             @if ($origin || $destination)
@@ -867,7 +878,7 @@
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                 onclick="closeBookingModal('declineConfirmModal')"></div>
             <div
-                class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border">
+                class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg mx-auto modal-border1">
                 <button type="button" onclick="closeBookingModal('declineConfirmModal')"
                     class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"

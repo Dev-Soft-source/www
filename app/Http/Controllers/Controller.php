@@ -81,7 +81,8 @@ class Controller extends BaseController
                     }
                 }
                 
-                if ($routeName === 'my_rides' || $routeName === 'post_ride') { // || $routeName === 'ride_detail' 
+                // Only require vehicle/license/phone completion when posting a ride, not when viewing My Rides
+                if ($routeName === 'post_ride') {
                     if ($user->step3 !== 1) {
                         // vehicle information
                         return redirect()->route('profile.vehicle', ['lang' => $lang]);

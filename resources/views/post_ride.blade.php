@@ -643,9 +643,13 @@
                             </div>
                         </div>
 
-                        {{-- Stops Along the Way (Optional) – repopulate from old() so segment price UI shows after validation redirect --}}
+                        {{-- Stops Along the Way (Optional) – repopulate from old() or ride data (for repost/copy) so segment price UI shows correctly --}}
                         @php
                             $stopsForDisplayPost = [];
+                            $segmentPricesForPost = [];
+                            $stopPickupDropoffForDisplayPost = [];
+                            $routeTypeLocal = $routeType ?? '';
+                            $chainSegmentsPost = [];
                             if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
                                 $stopsForDisplayPost = old('stop_spot_display');
                             } elseif (null !== old('to_spot') && is_array(old('to_spot')) && count(old('to_spot')) > 0) {
@@ -654,8 +658,64 @@
                                 for ($i = 0; $i < $nPost; $i++) {
                                     $stopsForDisplayPost[] = $toSpotsPost[$i];
                                 }
+                            } elseif (in_array($routeTypeLocal, ['repost', 'copy'], true) && isset($ride) && $ride && $ride->MoreRideDetail && $ride->MoreRideDetail->count() > 0) {
+                                // Build ordered chain from origin to destination for repost/copy using only actual route segments
+                                $defaultDetail = $ride->defaultRideDetail->first();
+                                $originText = $defaultDetail && $defaultDetail->departure ? $defaultDetail->departure : ($ride->rideDetail->first()->departure ?? '');
+                                $destinationText = $defaultDetail && $defaultDetail->destination ? $defaultDetail->destination : ($ride->rideDetail->last()->destination ?? '');
+
+                                $details = $ride->MoreRideDetail->sortBy('id')->values();
+                                $orderedPoints = collect([$originText]);
+                                $current = $originText;
+                                $remaining = $details;
+                                $chainSegmentsPost = [];
+
+                                while ($current !== $destinationText && $remaining->isNotEmpty()) {
+                                    $nextSegment = $remaining->first(function ($d) use ($current) {
+                                        return (string) $d->departure === (string) $current;
+                                    });
+                                    if (!$nextSegment) {
+                                        break;
+                                    }
+                                    $chainSegmentsPost[] = $nextSegment;
+                                    $orderedPoints->push($nextSegment->destination);
+                                    $current = $nextSegment->destination;
+                                    $remaining = $remaining->filter(function ($d) use ($nextSegment) {
+                                        return $d->id != $nextSegment->id;
+                                    });
+                                }
+
+                                // Intermediate stops (exclude origin and destination)
+                                $chainStops = $orderedPoints->count() > 2
+                                    ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
+                                    : collect();
+
+                                foreach ($chainStops as $stop) {
+                                    $stopsForDisplayPost[] = $stop;
+                                }
+
+                                // Consecutive segment prices
+                                foreach ($chainSegmentsPost as $seg) {
+                                    $segmentPricesForPost[] = $seg->price ?? '';
+                                }
                             }
+
+                            // Build pickup/dropoff notes for each stop
+                            if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
+                                $stopPickupDropoffForDisplayPost = old('stop_pickup_dropoff');
+                            } elseif (in_array($routeTypeLocal, ['repost', 'copy'], true) && !empty($chainSegmentsPost)) {
+                                foreach ($chainSegmentsPost as $index => $seg) {
+                                    if ($index >= count($stopsForDisplayPost)) {
+                                        break;
+                                    }
+                                    $stopPickupDropoffForDisplayPost[] = $seg->dropoff ?? '';
+                                }
+                            }
+                            // Normalize lengths
                             $realStopsPost = array_values(array_filter($stopsForDisplayPost, function ($s) { return trim((string)$s) !== ''; }));
+                            if (count($stopPickupDropoffForDisplayPost) !== count($stopsForDisplayPost)) {
+                                $stopPickupDropoffForDisplayPost = array_pad($stopPickupDropoffForDisplayPost, count($stopsForDisplayPost), '');
+                            }
                             $hasStopsPost = count($realStopsPost) > 0;
                         @endphp
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4" id="stops-section-wrapper" data-segment-ids="[]">
@@ -687,7 +747,7 @@
                                                             placeholder="">
                                                     </div>
                                                     <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
-                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>
+                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
                                                 </div>
                                                 <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -944,7 +1004,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
+                        <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0" data-initial-segment-prices='@json($segmentPricesForPost ?? [])'>
                             <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
                             <div class="relative">
                                 <div class="relative mt-2 mb-2">
@@ -2788,7 +2848,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Form not found!');
             return;
         }
-        
+
+        // Prevent Enter key from submitting the form (allow Enter in textareas for new lines)
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
         // Add our submit handler with capture phase to run first
         form.addEventListener('submit', function(e) {
         console.log('Form submit event triggered - starting validation');
@@ -3857,12 +3924,11 @@ document.addEventListener('DOMContentLoaded', function() {
             dynFullRouteInput.id = 'priceData0';
         }
         dynamicBlock.style.display = '';
+        var points = [origin].concat(stops).concat([destination]);
+        var numPoints = points.length;
         var segments = [];
-        for (var i = 0; i <= stops.length; i++) {
-            segments.push({
-                from: i === 0 ? origin : stops[i - 1],
-                to: i === stops.length ? destination : stops[i]
-            });
+        for (var i = 0; i < numPoints - 1; i++) {
+            segments.push({ from: points[i], to: points[i + 1] });
         }
         var rowsEl = document.getElementById('segment-price-rows-dynamic');
         if (!rowsEl) return;
@@ -3870,16 +3936,33 @@ document.addEventListener('DOMContentLoaded', function() {
         var existingValues = [];
         existingInputs.forEach(function(inp) { existingValues.push(inp.value); });
         rowsEl.innerHTML = '';
+
+        // Initial per-segment prices from server (used on first load for repost/copy)
+        var initialPrices = [];
+        var initialAttr = dynamicBlock.getAttribute('data-initial-segment-prices');
+        if (initialAttr) {
+            try {
+                initialPrices = JSON.parse(initialAttr);
+            } catch (e) {
+                initialPrices = [];
+            }
+        }
         var svgPath = 'M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z';
         for (var j = 0; j < segments.length; j++) {
             var seg = segments[j];
             var row = document.createElement('div');
             row.className = 'mt-4 segment-price-row-dynamic';
+            var defaultValue = mainPrice;
+            if (existingValues[j] !== undefined && existingValues[j] !== '') {
+                defaultValue = existingValues[j];
+            } else if (initialPrices[j] !== undefined && initialPrices[j] !== null && initialPrices[j] !== '') {
+                defaultValue = initialPrices[j];
+            }
             row.innerHTML = '<p class="text-gray-700 font-medium mb-1 segment-label">' + (seg.from + ' \u2192 ' + seg.to) + '</p>' +
                 '<div class="relative mt-2">' +
                 '<span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
                 '<svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"><path d="' + svgPath + '"/></svg></span>' +
-                '<input type="number" step="any" name="price_spot_display[]" placeholder="" value="' + (existingValues[j] !== undefined ? existingValues[j] : mainPrice) + '" ' +
+                '<input type="number" step="any" name="price_spot_display[]" placeholder="" value="' + defaultValue + '" ' +
                 'class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>' +
                 '</div>';
             rowsEl.appendChild(row);

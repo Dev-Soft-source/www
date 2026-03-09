@@ -426,6 +426,7 @@
                             $stopsForDisplay = [];
                             $pricesForDisplay = [];
                             $segmentIdsForStops = [];
+                            $chainSegments = [];
                             if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
                                 $stopsForDisplay = old('stop_spot_display');
                                 $pricesForDisplay = null !== old('price_spot_display') && is_array(old('price_spot_display')) ? old('price_spot_display') : array_fill(0, count($stopsForDisplay), '');
@@ -437,22 +438,47 @@
                                 }
                                 $pricesForDisplay = (null !== old('price_spot') && is_array(old('price_spot'))) ? array_slice(old('price_spot'), 0, $n) : array_fill(0, count($stopsForDisplay), '');
                             } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
-                                $details = $ride->moreRideDetail;
-                                $k = count($details);
-                                for ($i = 0; $i < $k - 1; $i++) {
-                                    $stopsForDisplay[] = $details[$i]->destination;
-                                    $pricesForDisplay[] = $details[$i]->price ?? '';
+                                // Build ordered chain from origin to destination using only the actual route segments.
+                                $details = $ride->moreRideDetail->sortBy('id')->values();
+                                $orderedPoints = collect([$originText]);
+                                $current = $originText;
+                                $remaining = $details;
+                                while ($current !== $destinationText && $remaining->isNotEmpty()) {
+                                    $nextSegment = $remaining->first(function ($d) use ($current) {
+                                        return (string) $d->departure === (string) $current;
+                                    });
+                                    if (!$nextSegment) {
+                                        break;
+                                    }
+                                    $chainSegments[] = $nextSegment;
+                                    $orderedPoints->push($nextSegment->destination);
+                                    $current = $nextSegment->destination;
+                                    $remaining = $remaining->filter(function ($d) use ($nextSegment) {
+                                        return $d->id != $nextSegment->id;
+                                    });
                                 }
-                                $segmentIdsForStops = $details->pluck('id')->values()->all();
+                                $segmentIdsForStops = collect($chainSegments)->pluck('id')->values()->all();
+                                $chainStops = $orderedPoints->count() > 2
+                                    ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
+                                    : collect();
+                                foreach ($chainStops as $index => $stop) {
+                                    $stopsForDisplay[] = $stop;
+                                    if (isset($chainSegments[$index])) {
+                                        $pricesForDisplay[] = $chainSegments[$index]->price ?? '';
+                                    } else {
+                                        $pricesForDisplay[] = '';
+                                    }
+                                }
                             }
                             $stopPickupDropoffForDisplay = [];
                             if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
                                 $stopPickupDropoffForDisplay = old('stop_pickup_dropoff');
-                            } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
-                                $details = $ride->moreRideDetail;
-                                $k = count($details);
-                                for ($i = 0; $i < $k - 1; $i++) {
-                                    $stopPickupDropoffForDisplay[] = $details[$i]->dropoff ?? '';
+                            } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 && !empty($chainSegments)) {
+                                foreach ($chainSegments as $index => $segment) {
+                                    if ($index >= count($stopsForDisplay)) {
+                                        break;
+                                    }
+                                    $stopPickupDropoffForDisplay[] = $segment->dropoff ?? '';
                                 }
                             }
                             if (empty($stopsForDisplay)) {
@@ -468,9 +494,17 @@
                             $segmentsForPrice = [];
                             $realStops = array_values(array_filter($stopsForDisplay, function ($s) { return trim((string)$s) !== ''; }));
                             if (count($realStops) > 0) {
-                                if (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
-                                    foreach ($ride->moreRideDetail as $d) {
-                                        $segmentsForPrice[] = ['from' => $d->departure ?? '', 'to' => $d->destination ?? '', 'price' => $d->price ?? ''];
+                                // Always show only the consecutive segments (origin → stop1, stop1 → stop2, ..., lastStop → destination)
+                                if (!empty($chainSegments)) {
+                                    $n = count($chainSegments);
+                                    for ($i = 0; $i < $n; $i++) {
+                                        $from = $chainSegments[$i]->departure ?? '';
+                                        $to = $chainSegments[$i]->destination ?? '';
+                                        $segmentsForPrice[] = [
+                                            'from' => $from,
+                                            'to' => $to,
+                                            'price' => $chainSegments[$i]->price ?? '',
+                                        ];
                                     }
                                 } elseif (null !== old('from_spot') && is_array(old('from_spot')) && null !== old('to_spot') && is_array(old('to_spot')) && count(old('from_spot')) > 0) {
                                     $fromSpot = old('from_spot');
@@ -479,8 +513,8 @@
                                     for ($i = 0; $i < count($fromSpot); $i++) {
                                         $segmentsForPrice[] = [
                                             'from' => $fromSpot[$i] ?? '',
-                                            'to' => isset($toSpot[$i]) ? $toSpot[$i] : '',
-                                            'price' => isset($prices[$i]) ? $prices[$i] : ''
+                                            'to' => $toSpot[$i] ?? '',
+                                            'price' => $prices[$i] ?? '',
                                         ];
                                     }
                                 } else {
@@ -492,7 +526,7 @@
                                         $segmentsForPrice[] = [
                                             'from' => $from,
                                             'to' => $to,
-                                            'price' => isset($pricesFromOld[$i]) ? $pricesFromOld[$i] : ''
+                                            'price' => isset($pricesFromOld[$i]) ? $pricesFromOld[$i] : '',
                                         ];
                                     }
                                 }

@@ -1245,8 +1245,14 @@ class RideController extends Controller
                     $compositeDetail->ride_id = $ride->id;
                     $compositeDetail->departure = $pointsForPairs[$i];
                     $compositeDetail->destination = $pointsForPairs[$j];
-                    $compositeDetail->pickup = null;
-                    $compositeDetail->dropoff = null;
+                    $pickupNote = $i === 0
+                        ? ($request->pickup ?? null)
+                        : (isset($request->stop_pickup_dropoff[$i - 1]) ? trim((string) $request->stop_pickup_dropoff[$i - 1]) : null);
+                    $dropoffNote = $j === $numPoints - 1
+                        ? ($request->dropoff ?? null)
+                        : (isset($request->stop_pickup_dropoff[$j - 1]) ? trim((string) $request->stop_pickup_dropoff[$j - 1]) : null);
+                    $compositeDetail->pickup = ($pickupNote !== '' && $pickupNote !== null) ? $pickupNote : ($request->pickup ?? null);
+                    $compositeDetail->dropoff = ($dropoffNote !== '' && $dropoffNote !== null) ? $dropoffNote : ($request->dropoff ?? null);
                     $compositeDetail->default_ride = 0;
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
@@ -2605,8 +2611,14 @@ class RideController extends Controller
                     $compositeDetail->ride_id = $initialRide->id;
                     $compositeDetail->departure = $pointsForPairs[$i];
                     $compositeDetail->destination = $pointsForPairs[$j];
-                    $compositeDetail->pickup = null;
-                    $compositeDetail->dropoff = null;
+                    $pickupNote = $i === 0
+                        ? ($request->pickup ?? null)
+                        : (isset($request->stop_pickup_dropoff[$i - 1]) ? trim((string) $request->stop_pickup_dropoff[$i - 1]) : null);
+                    $dropoffNote = $j === $numPoints - 1
+                        ? ($request->dropoff ?? null)
+                        : (isset($request->stop_pickup_dropoff[$j - 1]) ? trim((string) $request->stop_pickup_dropoff[$j - 1]) : null);
+                    $compositeDetail->pickup = ($pickupNote !== '' && $pickupNote !== null) ? $pickupNote : ($request->pickup ?? null);
+                    $compositeDetail->dropoff = ($dropoffNote !== '' && $dropoffNote !== null) ? $dropoffNote : ($request->dropoff ?? null);
                     $compositeDetail->default_ride = 0;
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
