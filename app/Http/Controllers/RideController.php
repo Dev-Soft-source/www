@@ -450,6 +450,13 @@ class RideController extends Controller
         $pinkRideSetting = PinkRideSetting::first();
         $setting = FolkRideSetting::first();
         $vehicles = Vehicle::where('user_id', $user_id)->get();
+        // Ensure the ride's selected vehicle is in the list so it can be shown as selected
+        if ($ride->vehicle_id) {
+            $rideVehicle = Vehicle::where('id', $ride->vehicle_id)->where('user_id', $user_id)->first();
+            if ($rideVehicle && $vehicles->where('id', $ride->vehicle_id)->isEmpty()) {
+                $vehicles->push($rideVehicle);
+            }
+        }
         $rides = Ride::where('added_by', $user_id)->get();
 
         if ($rides->isNotEmpty()) {

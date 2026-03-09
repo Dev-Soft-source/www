@@ -443,9 +443,9 @@
                                             @isset($postRidePage->from_placeholder)
                                                 placeholder="{{ $postRidePage->from_placeholder }}"
                                             @endisset>
-                                    </div>
-                                    <div class="absolute hidden mt-1 z-50" id="fromInputError">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="fromInputError">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        </div>
                                     </div>
                                     @error('from')
                                     <div class="absolute mt-1 z-10">
@@ -477,9 +477,9 @@
                                             @isset($postRidePage->to_placeholder)
                                                 placeholder="{{ $postRidePage->to_placeholder }}"
                                             @endisset>
-                                    </div>
-                                    <div class="absolute hidden mt-1 z-50" id="toInputError">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="toInputError">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        </div>
                                     </div>
                                     @error('to')
                                     <div class="absolute mt-1 z-10">
@@ -556,16 +556,6 @@
                                 </div>
                                 @enderror
                             </div>
-                            {{-- <div class="map-container w-full h-64 block md:hidden">
-                                <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.452697041917!2d78.39076592375736!3d17.43803374982052!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9144cdba8c47%3A0x937fe346f411a645!2sTutorials%20Point%20(India)%20Ltd.!5e0!3m2!1sen!2sin!4v1673629212535!5m2!1sen!2sin"
-                                width="100%"
-                                height="100%"
-                                style="border:0;"
-                                allowfullscreen="" loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade">
-                                </iframe>
-                            </div> --}}
                         </div>
                         
                         <div>
@@ -731,31 +721,34 @@
                                         <h4 class="text-gray-900 text-xl font-medium">From: </h4>
                                         <span id="stops-origin-label" class="text-gray-900 text-primary lg:text-lg"></span>
                                     </div>
-                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way:</h4>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way: <span class="text-red-500">*</span></h4>
                                     <div class="space-y-3 mb-4" id="stops-rows-container">
                                         @if ($hasStopsPost)
-                                        @foreach ($stopsForDisplayPost as $idx => $stopValue)
-                                            @php $renderIndex = $idx + 1; @endphp
-                                            <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
-                                                <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
-                                                    <div class="relative flex-1 min-w-0">
-                                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                            @foreach ($stopsForDisplayPost as $idx => $stopValue)
+                                                @php $renderIndex = $idx + 1; @endphp
+                                                <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
+                                                    <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
+                                                        <div class="relative flex-1 min-w-0">
+                                                            <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                                <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                                            </div>
+                                                            <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" autocomplete="off"
+                                                                class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                                placeholder="">
+                                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_{{ $renderIndex }}">
+                                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
                                                         </div>
-                                                        <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" autocomplete="off"
-                                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                            placeholder="">
+                                                        </div>
+                                                        <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                            class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
                                                     </div>
-                                                    <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
-                                                        class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
+                                                    <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
-                                                <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
                                         @endif
                                     </div>
                                     <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
@@ -1524,7 +1517,7 @@
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
                                                 {{ (string)$selectedVehicleId === (string)$vehicle->id ? 'selected' : '' }}>
-                                                {{$vehicle->make}} / {{ $vehicle->model }} / {{ $vehicle->year }} / {{ $vehicle->type }}
+                                                {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}@if($vehicle->vehicle_type) / {{ $vehicle->vehicle_type }}@endif
                                             </option>
                                         @endforeach
                                     </select>
@@ -2858,86 +2851,92 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add our submit handler with capture phase to run first
         form.addEventListener('submit', function(e) {
-        console.log('Form submit event triggered - starting validation');
-        var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
-        var toVal = (document.getElementById('to_spot_0') || {}).value || '';
-        var fromInputError = document.getElementById('fromInputError');
-        var toInputError = document.getElementById('toInputError');
-        var fromInvalid = !fromVal.trim() || !selectedFromPlace || fromVal.trim() !== (selectedFromPlace.value || '').trim();
-        var toInvalid = !toVal.trim() || !selectedToPlace || toVal.trim() !== (selectedToPlace.value || '').trim();
-        if (fromInvalid || toInvalid) {
-            e.preventDefault();
+            console.log('Form submit event triggered - starting validation');
+            var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
+            var toVal = (document.getElementById('to_spot_0') || {}).value || '';
+            var fromInputError = document.getElementById('fromInputError');
+            var toInputError = document.getElementById('toInputError');
+            // Only require non-empty origin/destination; do not require autocomplete selection (allows pre-filled/typed addresses)
+            var fromInvalid = !fromVal.trim();
+            var toInvalid = !toVal.trim();
+            var hasOriginDestErrors = fromInvalid || toInvalid;
+            if (fromInputError) fromInputError.classList.toggle('hidden', !fromInvalid);
             if (fromInvalid && fromInputError) {
                 var te = fromInputError.querySelector('.tooltip-error');
-                if (te) te.textContent = !fromVal.trim() ? errorFromRequiredPostRide : errorCityMissingPostRide;
-                fromInputError.classList.remove('hidden');
+                if (te) te.textContent = errorFromRequiredPostRide;
             }
+            if (toInputError) toInputError.classList.toggle('hidden', !toInvalid);
             if (toInvalid && toInputError) {
                 var te2 = toInputError.querySelector('.tooltip-error');
-                if (te2) te2.textContent = !toVal.trim() ? errorToRequiredPostRide : errorCityMissingPostRide;
-                toInputError.classList.remove('hidden');
+                if (te2) te2.textContent = errorToRequiredPostRide;
             }
-            var firstField = document.getElementById('from_spot_0');
-            if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-        if (fromInputError) fromInputError.classList.add('hidden');
-        if (toInputError) toInputError.classList.add('hidden');
 
-        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-        var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
-        if (tooltipDyn) tooltipDyn.classList.add('hidden');
-        if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
-            if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
-        }
-        if (typeof buildStopsSegmentsForSubmitPostRide === 'function') {
-            buildStopsSegmentsForSubmitPostRide();
-        }
-        var priceClientErr = document.getElementById('price-client-error');
-        if (priceClientErr) priceClientErr.classList.add('hidden');
-        var singleBlock = document.getElementById('single-price-block');
-        // if (singleBlock && singleBlock.style.display !== 'none' && singleBlock.offsetParent !== null) {
-        //     var singlePriceInput = singleBlock.querySelector('input[type="number"]');
-        //     if (singlePriceInput && (!singlePriceInput.value || singlePriceInput.value.trim() === '' || parseFloat(singlePriceInput.value) <= 0)) {
-        //         e.preventDefault();
-        //         if (priceClientErr) {
-        //             var priceTe = priceClientErr.querySelector('.tooltip-error');
-        //             if (priceTe) priceTe.textContent = 'Please enter the price per seat.';
-        //             priceClientErr.classList.remove('hidden');
-        //         }
-        //         var priceSection = document.getElementById('post-ride-price-section');
-        //         if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        //         if (singlePriceInput) singlePriceInput.focus();
-        //         return;
-        //     }
-        // }
-        var priceTe = priceClientErr ? priceClientErr.querySelector('.tooltip-error') : null;
-        if (priceTe) priceTe.textContent = 'Please enter the full route price.';
-        if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
-            var fullRouteInput = dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input');
-            var totalInput = dynamicBlock.querySelector('#segment-total-price-input-dynamic');
-            if (!fullRouteInput || !fullRouteInput.value || fullRouteInput.value.trim() === '' || parseFloat(fullRouteInput.value) <= 0) {
-                e.preventDefault();
-                if (priceClientErr) priceClientErr.classList.remove('hidden');
-                var priceSection = document.getElementById('post-ride-price-section');
-                if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                if (fullRouteInput) fullRouteInput.focus();
-                return;
+            var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+            var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
+            if (tooltipDyn) tooltipDyn.classList.add('hidden');
+            if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
+                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
             }
-            if (fullRouteInput && totalInput) {
-                var fullVal = parseFloat(fullRouteInput.value);
-                var totalVal = parseFloat(totalInput.value);
-                if (isNaN(fullVal)) fullVal = 0;
-                if (isNaN(totalVal)) totalVal = 0;
-                if (fullVal > totalVal) {
-                    e.preventDefault();
-                    if (tooltipDyn) tooltipDyn.classList.remove('hidden');
-                    var priceSection = document.getElementById('post-ride-price-section');
-                    if (priceSection) priceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    return;
+            if (typeof buildStopsSegmentsForSubmitPostRide === 'function') {
+                buildStopsSegmentsForSubmitPostRide();
+            }
+            var priceClientErr = document.getElementById('price-client-error');
+            if (priceClientErr) priceClientErr.classList.add('hidden');
+            var priceInvalid = false;
+            if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
+                var fullRouteInput = dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input');
+                var totalInput = dynamicBlock.querySelector('#segment-total-price-input-dynamic');
+                if (!fullRouteInput || !fullRouteInput.value || fullRouteInput.value.trim() === '' || parseFloat(fullRouteInput.value) <= 0) {
+                    priceInvalid = true;
+                    if (priceClientErr) {
+                        var priceTe = priceClientErr.querySelector('.tooltip-error');
+                        if (priceTe) priceTe.textContent = 'Please enter the full route price.';
+                        priceClientErr.classList.remove('hidden');
+                    }
+                } else if (fullRouteInput && totalInput) {
+                    var fullVal = parseFloat(fullRouteInput.value);
+                    var totalVal = parseFloat(totalInput.value);
+                    if (isNaN(fullVal)) fullVal = 0;
+                    if (isNaN(totalVal)) totalVal = 0;
+                    if (fullVal > totalVal) {
+                        priceInvalid = true;
+                        if (tooltipDyn) tooltipDyn.classList.remove('hidden');
+                    }
                 }
             }
-        }
+
+            // Validate stop inputs: each stop must have a value (same behaviour as origin/destination)
+            var stopsContainer = document.getElementById('stops-rows-container');
+            var stopInputs = stopsContainer ? stopsContainer.querySelectorAll('input[name="stop_spot_display[]"]') : [];
+            var firstInvalidStop = null;
+            var stopInvalid = false;
+            stopInputs.forEach(function(inp) {
+                var err = typeof getStopErrorElementPostRide === 'function' ? getStopErrorElementPostRide(inp) : null;
+                if (err) err.classList.add('hidden');
+                if (!inp.value || !inp.value.trim()) {
+                    stopInvalid = true;
+                    if (err) {
+                        var te = err.querySelector('.tooltip-error');
+                        if (te) te.textContent = 'Please enter or select a city.';
+                        err.classList.remove('hidden');
+                    }
+                    if (!firstInvalidStop) firstInvalidStop = inp;
+                }
+            });
+
+            if (hasOriginDestErrors || priceInvalid || stopInvalid) {
+                e.preventDefault();
+                var scrollTarget = null;
+                if (fromInvalid) scrollTarget = document.getElementById('from_spot_0');
+                else if (toInvalid) scrollTarget = document.getElementById('to_spot_0');
+                else if (firstInvalidStop) scrollTarget = firstInvalidStop;
+                else if (priceInvalid) scrollTarget = document.getElementById('post-ride-price-section');
+                if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: scrollTarget === document.getElementById('post-ride-price-section') ? 'start' : 'center' });
+                return;
+            }
+            if (fromInputError) fromInputError.classList.add('hidden');
+            if (toInputError) toInputError.classList.add('hidden');
+
         // Check if validation should be bypassed (user clicked "Keep Current Price")
         const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
         if (bypassInput && bypassInput.value === '1') {
@@ -3278,6 +3277,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
+    function getStopErrorElementPostRide(inputEl) {
+        if (!inputEl) return null;
+        var id = inputEl.id || '';
+        var dataIndex = inputEl.getAttribute('data-stop-index');
+        var index = dataIndex || (id.indexOf('stop_spot_') === 0 ? id.replace('stop_spot_', '') : null);
+        return index ? document.getElementById('stopInputError_' + index) : null;
+    }
+
     function attachStopAutocompletePostRide(inputElement) {
         if (!inputElement || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
         if (inputElement.getAttribute('data-autocomplete-attached')) return;
@@ -3293,9 +3300,31 @@ document.addEventListener('DOMContentLoaded', function() {
             if (place.address_components && place.place_id) {
                 var formatted = typeof formatPlaceAddressPostRide === 'function' ? formatPlaceAddressPostRide(place) : (place.formatted_address || place.name || '');
                 if (formatted) inputElement.value = formatted;
+                var err = getStopErrorElementPostRide(inputElement);
+                if (err) err.classList.add('hidden');
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
                 if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
             }
+        });
+        inputElement.addEventListener('focus', function() {
+            var err = getStopErrorElementPostRide(inputElement);
+            if (err) err.classList.add('hidden');
+        });
+        inputElement.addEventListener('blur', function() {
+            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
+                var currentValue = self.value.trim();
+                var err = getStopErrorElementPostRide(self);
+                if (currentValue === '') {
+                    if (err) err.classList.add('hidden');
+                    return;
+                }
+                if (typeof resolveTypedCityValueForStopPostRide === 'function') {
+                    resolveTypedCityValueForStopPostRide(self);
+                }
+            }, 200);
         });
     }
 
@@ -3334,6 +3363,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (target === 'from') selectedFromPlace = sel; else selectedToPlace = sel;
                 if (input) input.value = formatted;
                 var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
+                setTimeout(function() { isSettingPlaceValuePostRide = false; }, 100);
+                resolve(true);
+            });
+        });
+    }
+
+    function resolveTypedCityValueForStopPostRide(inputElement) {
+        var value = (inputElement && inputElement.value) ? inputElement.value.trim() : '';
+        var err = getStopErrorElementPostRide(inputElement);
+        if (!value) {
+            if (err) err.classList.add('hidden');
+            return Promise.resolve(true);
+        }
+        if (!geocoderPostRide) {
+            if (err) {
+                var te = err.querySelector('.tooltip-error');
+                if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ? errorCityMissingPostRide : 'We could not find this city. Please double-check the spelling.';
+                err.classList.remove('hidden');
+            }
+            return Promise.resolve(false);
+        }
+        return new Promise(function(resolve) {
+            geocoderPostRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                if (status !== 'OK' || !response || !response.length) {
+                    if (err) {
+                        var te = err.querySelector('.tooltip-error');
+                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ? errorCityMissingPostRide : 'We could not find this city. Please double-check the spelling.';
+                        err.classList.remove('hidden');
+                    }
+                    resolve(false);
+                    return;
+                }
+                var result = null;
+                for (var i = 0; i < response.length; i++) {
+                    var item = response[i];
+                    if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                }
+                if (!result) {
+                    if (err) {
+                        var te = err.querySelector('.tooltip-error');
+                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ? errorCityMissingPostRide : 'We could not find this city. Please double-check the spelling.';
+                        err.classList.remove('hidden');
+                    }
+                    resolve(false);
+                    return;
+                }
+                var formatted = formatPlaceAddressPostRide(result);
+                if (!formatted) {
+                    if (err) {
+                        var te = err.querySelector('.tooltip-error');
+                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ? errorCityMissingPostRide : 'We could not find this city. Please double-check the spelling.';
+                        err.classList.remove('hidden');
+                    }
+                    resolve(false);
+                    return;
+                }
+                isSettingPlaceValuePostRide = true;
+                inputElement.value = formatted;
+                if (err) err.classList.add('hidden');
+                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
                 setTimeout(function() { isSettingPlaceValuePostRide = false; }, 100);
                 resolve(true);
             });
@@ -3787,6 +3877,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '<div class="relative flex-1 min-w-0">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
             '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex + '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
             '</div>' +
             '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '</div>' +

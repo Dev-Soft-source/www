@@ -207,9 +207,6 @@
             Edit Ride
         </h1>
     </div>
-    @php
-        $bookings_count = $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats');
-    @endphp
     <form method="POST" action="{{ route('update_ride', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}" enctype="multipart/form-data" id="edit-ride-form">
         @csrf
         @method('PUT')
@@ -225,7 +222,7 @@
                     <input type="hidden" value="{{$ride->defaultRideDetail[0]->id}}" name="default_ride_detail_id">
                     <div class="bg-white p-4">
                         <div class="flex flex-col md:flex-row justify-between items-start">
-                            <div class="w-full md:w-[45%] mb-4">
+                            <div class="w-full md:w-[45%] mb-4 relative">
                                 <div>
                                     <label for="from_spot_0"
                                         class="block mb-2 text-gray-900">
@@ -244,13 +241,14 @@
                                             $destination = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->destination : "";
                                         @endphp
 
-                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" oninput="fromInput('0')" autocomplete="off"
+                                        <input type="text" id="from_spot_0" name="from" value="{{ old('from', $departure) }}" autocomplete="off"
                                             class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
                                             @isset($postRidePage->from_placeholder)
                                                 placeholder="{{ $postRidePage->from_placeholder }}"
                                             @endisset>
-
-                                        <div id="from_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="fromInputError">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        </div>
                                     </div>
                                     @error('from')
                                     <div class="relative tooltip -bottom-4 flex mt-1" role="alert">
@@ -270,7 +268,7 @@
                                     <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
                                 </button>
                             </div>
-                            <div class="w-full md:w-[45%] mb-4">
+                            <div class="w-full md:w-[45%] mb-4 relative">
                                 <div>
                                     <label for="to_spot_0"
                                         class="block mb-2 text-gray-900">
@@ -283,13 +281,14 @@
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                             <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6" alt="">
                                         </div>
-                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" oninput="toInput('0')" autocomplete="off"
+                                        <input type="text" id="to_spot_0" name="to" value="{{ old('to', $destination) }}" autocomplete="off"
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900 rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             @isset($postRidePage->to_placeholder)
                                                 placeholder="{{ $postRidePage->to_placeholder }}"
                                             @endisset>
-
-                                        <div id="to_spot_suggestions0" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
+                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="toInputError">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                        </div>
                                     </div>
                                     @error('to')
                                     <div class="relative tooltip -bottom-4 flex mt-1" role="alert">
@@ -313,8 +312,7 @@
                                         {{ $postRidePage->pick_up_label }}
                                     @endisset
                                 </label>
-                                <textarea id="pickup_location" rows="5" name="pickup" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                <textarea id="pickup_location" rows="5" name="pickup" class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 @isset($postRidePage->pick_up_placeholder)
                                     placeholder="{{ $postRidePage->pick_up_placeholder }}"
                                 @endisset
@@ -333,8 +331,7 @@
                                         {{ $postRidePage->drop_off_label }}
                                     @endisset
                                 </label>
-                                <textarea id="dropoff_location" rows="5" name="dropoff" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                                <textarea id="dropoff_location" rows="5" name="dropoff" class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 @isset($postRidePage->drop_off_placeholder)
                                     placeholder="{{ $postRidePage->drop_off_placeholder }}"
                                 @endisset
@@ -405,7 +402,19 @@
                                                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
+                                        @php
+                                            $timeValue = old('time');
+                                            if ($timeValue === null && $ride && !empty($ride->time)) {
+                                                try {
+                                                    $timeValue = \Carbon\Carbon::parse($ride->time)->format('H:i');
+                                                } catch (\Exception $e) {
+                                                    $timeValue = is_string($ride->time) ? substr($ride->time, 0, 5) : '';
+                                                }
+                                            }
+                                            $timeValue = $timeValue ?? '';
+                                        @endphp
                                         <input type="text" id="timeInput" name="time"
+                                            value="{{ $timeValue ?? '' }}"
                                             class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             placeholder="">
                                     </div>
@@ -546,24 +555,27 @@
                                         <h4 class="text-gray-900 text-xl font-medium ">From: </h4>
                                         <p class="text-gray-900 text-primary lg:text-lg ">{{ $originText }}</p>
                                     </div>
-                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way:</h4>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way:<span class="text-red-500">*</span></h4>
                                     <div class="space-y-3 mb-4" id="stops-rows-container">
                                         @if ($hasStops)
                                         @foreach ($stopsForDisplay as $idx => $stopValue)
                                             @php $renderIndex = $idx + 1; @endphp
                                             <div class="flex items-center gap-3 stop-row" data-stop-index="{{ $renderIndex }}">
+                                                <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
                                                 <div class="relative flex-1 min-w-0">
                                                     <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                                         <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
                                                     </div>
-                                                    <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" oninput="stopInput('{{ $renderIndex }}')"
+                                                    <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" autocomplete="off"
                                                         class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                         placeholder="">
-                                                    <div id="stop_spot_suggestions{{ $renderIndex }}" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>
-                                                    
+                                                    <div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_{{ $renderIndex }}">
+                                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                                    </div>
                                                 </div>
-                                                <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                    <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
                                                         class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
+                                                </div>
                                                 <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -675,11 +687,7 @@
                         
                         <div class="mt-6">
                             <div class="flex items-center mb-4">
-                                <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    @if ($bookings_count > 0)
-                                        <input type="hidden" name="recurring" value="{{ $ride->recurring }}">
-                                    @endif
+                                <input id="recurring_trip" type="checkbox" name="recurring" value="1" {{ old('recurring') === '1' ? 'checked' : '' }}                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                 <label for="recurring_trip" class="ml-2 text-gray-900">
                                     @isset($postRidePage->recurring_label)
                                         {{ $postRidePage->recurring_label }}
@@ -758,8 +766,7 @@
                                 {{ $postRidePage->meeting_drop_off_description_label }}
                               @endisset
                             </label>
-                            <textarea id="meeting" rows="5" name="details" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                              class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
+                            <textarea id="meeting" rows="5" name="details" class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                 @isset($postRidePage->meeting_drop_off_description_placeholder)
                                     placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}"
                                 @endisset>{{ old('details', $ride->details) }}</textarea>
@@ -790,10 +797,7 @@
                                 @for ($i = 1; $i <= 7; $i++)
                                 <div class="relative">
                                     <label for="number-of-seat-{{ $i }}">
-                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ $bookings_count > 0 ? 'disabled' : '' }} {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        @if ($bookings_count > 0)
-                                            <input type="hidden" name="seats" value="{{ $ride->seats }}">
-                                        @endif
+                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', $ride->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
                                         <img src="{{ old('seats', $ride->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-10 h-10 mt-0.5 cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
                                         <span class="absolute left-4 top-3 seat-number seat-number-{{ $i }} {{ old('seats', $ride->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
                                     </label>
@@ -816,7 +820,7 @@
                                     </label>
                                     <ul class="grid gap-2 grid-cols-2 mt-2">
                                         <li>
-                                            <input type="radio" id="2-seats" name="middle_seats" value="2" {{ $bookings_count > 0 ? 'disabled' : '' }} class="hidden peer"
+                                            <input type="radio" id="2-seats" name="middle_seats" value="2"  class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '2' ? 'checked' : '' }}>
                                             <label for="2-seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-base">
@@ -825,15 +829,12 @@
                                             </label>
                                         </li>
                                         <li>
-                                            <input type="radio" id="3-seats" name="middle_seats" value="3" {{ $bookings_count > 0 ? 'disabled' : '' }} class="hidden peer"
+                                            <input type="radio" id="3-seats" name="middle_seats" value="3"  class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '3' ? 'checked' : '' }}>
                                             <label for="3-seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-base">3 seats</span>
                                             </label>
                                         </li>
-                                        @if ($bookings_count > 0)
-                                            <input type="hidden" name="middle_seats" value="{{ $ride->middle_seats }}">
-                                        @endif
                                     </ul>
                                     @error('middle_seats')
                                       <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -851,7 +852,7 @@
                                     </label>
                                     <ul class="grid gap-2 grid-cols-2 mt-2">
                                         <li>
-                                            <input type="radio" id="2-back_seats" name="back_seats" value="2" {{ $bookings_count > 0 ? 'disabled' : '' }} class="hidden peer"
+                                            <input type="radio" id="2-back_seats" name="back_seats" value="2"  class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '2' ? 'checked' : '' }}>
                                             <label for="2-back_seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-base">
@@ -860,15 +861,12 @@
                                             </label>
                                         </li>
                                         <li>
-                                            <input type="radio" id="3-back_seats" name="back_seats" value="3" {{ $bookings_count > 0 ? 'disabled' : '' }} class="hidden peer"
+                                            <input type="radio" id="3-back_seats" name="back_seats" value="3"  class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '3' ? 'checked' : '' }}>
                                             <label for="3-back_seats" class="inline-flex items-center justify-center w-full p-3 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-base">3 seats</span>
                                             </label>
                                         </li>
-                                        @if ($bookings_count > 0)
-                                            <input type="hidden" name="back_seats" value="{{ $ride->back_seats }}">
-                                        @endif
                                     </ul>
                                     @error('back_seats')
                                       <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -901,9 +899,6 @@
                                             {{ $postRidePage->price_per_seat_label }}
                                         @endisset
                                     </label>
-                                    @if ($bookings_count > 0)
-                                        <p class="text-sm text-gray-500 mt-1 mb-2">Price cannot be changed once passengers have booked this ride.</p>
-                                    @endif
                                     <div class="relative mt-2">
                                         <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                             <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
@@ -912,8 +907,7 @@
                                         </span>
                                         <input type="number" step="any" name="price" id="priceData0" placeholder=""
                                             value="{{ old('price', $ride->defaultRideDetail[0]->price) }}"
-                                            {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 {{ $bookings_count > 0 ? 'cursor-not-allowed opacity-60' : '' }}"/>
+                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 "/>
                                     </div>
                                     @error('price')
                                       <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -924,10 +918,7 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="{{ $bookings_count > 0 ? '1' : '0' }}">
-                                @if ($bookings_count > 0)
-                                    <p class="text-sm text-gray-500 mt-1 mb-2">Price cannot be changed once passengers have booked this ride.</p>
-                                @endif
+                            <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0">
                                 <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
                                 <div class="relative">
                                     <div class="relative mt-2 mb-2">
@@ -937,8 +928,7 @@
                                             </svg>
                                         </span>
                                         <input type="number" step="any" id="priceData0DynamicInput" placeholder="" value="{{ old('price', $ride->defaultRideDetail[0]->price) }}"
-                                            {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 {{ $bookings_count > 0 ? 'cursor-not-allowed opacity-60' : '' }}"/>
+                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 "/>
                                     </div>
                                     <div id="full-route-tooltip-container-dynamic" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
                                         <div class="tooltip-error">
@@ -960,7 +950,7 @@
                                 <div id="segment-price-rows-dynamic"></div>
                             </div>
                             @else
-                            <div id="stops-segment-prices-container" data-bookings-readonly="{{ $bookings_count > 0 ? '1' : '0' }}">
+                            <div id="stops-segment-prices-container" data-bookings-readonly="0">
                                 <label for="" class="text-gray-700 font-medium">
                                     @isset($postRidePage->price_per_seat_label)
                                         {{ $postRidePage->price_per_seat_label }} (by Route Section)
@@ -968,9 +958,6 @@
                                         Price per Seat (by Route Section)
                                     @endisset
                                 </label>
-                                @if ($bookings_count > 0)
-                                    <p class="text-sm text-gray-500 mt-1 mb-2">Price cannot be changed once passengers have booked this ride.</p>
-                                @endif
                                 @php
                                     $totalSegmentPrice = collect($segmentsForPrice)->sum(function ($s) { return is_numeric($s['price']) ? (float)$s['price'] : 0; });
                                     $fullRoutePrice = count($segmentsForPrice) > 0 ? min((float)($segmentsForPrice[0]['price'] ?? 0), $totalSegmentPrice) : $totalSegmentPrice;
@@ -986,8 +973,7 @@
                                         </span>
                                         <input type="number" step="any" name="price" id="priceData0" placeholder=""
                                             value="{{ $fullRoutePrice }}"
-                                            {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 {{ $bookings_count > 0 ? 'cursor-not-allowed opacity-60' : '' }}"/>
+                                            class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 "/>
                                     </div>
                                     <div id="full-route-tooltip-container" class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
                                         <div class="tooltip-error">
@@ -1018,8 +1004,7 @@
                                             </span>
                                             <input type="number" step="any" name="price_spot_display[]" placeholder=""
                                                 value="{{ $seg['price'] }}"
-                                                {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 {{ $bookings_count > 0 ? 'cursor-not-allowed opacity-60' : '' }}"/>
+                                                class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2 "/>
                                         </div>
                                         @error('price_spot_display.'.$segIdx)
                                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -1037,8 +1022,7 @@
                                 <div class="space-y-2 mt-2">
                                     @isset($postRidePage->payment_methods_option1->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                            <input id="cash" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
                                                 class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                             <label for="cash"
                                                 class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1056,8 +1040,7 @@
                                     @endisset
                                     @isset($postRidePage->payment_methods_option2->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
+                                            <input id="online" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
                                                 class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                             <label for="online"
                                                 class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1075,8 +1058,7 @@
                                     @endisset
                                     @isset($postRidePage->payment_methods_option3->features_setting_id)
                                         <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
+                                            <input id="secured" name="payment_method" type="radio" value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"                                                 {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
                                                 class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                             <label for="secured"
                                                 class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1092,9 +1074,6 @@
                                         </div>
                                     @endisset
                                 </div>
-                                @if ($bookings_count > 0)
-                                    <input type="hidden" name="payment_method" value="{{ $ride->payment_method }}">
-                                @endif
                                 @error('payment_method')
                                   <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1120,8 +1099,7 @@
                             <ul class="grid w-full gap-6 md:grid-cols-2">
                                 @isset($postRidePage->booking_option1->features_setting_id)
                                     <li>
-                                        <input type="radio" id="instant-booking" name="booking_method" value="{{ $postRidePage->booking_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }} class="hidden peer">
+                                        <input type="radio" id="instant-booking" name="booking_method" value="{{ $postRidePage->booking_option1->features_setting_id }}"                                             {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }} class="hidden peer">
                                         <label for="instant-booking" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                             <img class="w-12 h-12" src="{{ asset('assets/instant.png') }}" alt="">
                                             <span class="font-medium text-xl">
@@ -1132,8 +1110,7 @@
                                 @endisset
                                 @isset($postRidePage->booking_option2->features_setting_id)
                                     <li>
-                                        <input type="radio" id="manual-approval" name="booking_method" value="{{ $postRidePage->booking_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }} class="hidden peer">
+                                        <input type="radio" id="manual-approval" name="booking_method" value="{{ $postRidePage->booking_option2->features_setting_id }}"                                             {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }} class="hidden peer">
                                         <label for="manual-approval" class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                             <img class="w-12 h-12" src="{{ asset('assets/manual.png') }}" alt="">
                                             <span class="font-medium text-xl">
@@ -1143,9 +1120,6 @@
                                     </li>
                                 @endisset
                             </ul>
-                            @if ($bookings_count > 0)
-                                <input type="hidden" name="booking_method" value="{{ $ride->booking_method }}">
-                            @endif
                             @error('booking_method')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1168,14 +1142,11 @@
                             </h3>
                         </div>
                         <div class="bg-white p-4">
-                            <div class="flex justify-between mb-4">
+                            <div class="flex flex-col sm:flex-col md:flex-row justify-between mb-4">
                                 <div>
                                     <input id="skip" type="checkbox" name="skip_vehicle" value="1"
-                                        {{ old('skip_vehicle', $ride->skip_vehicle) == '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('skip_vehicle', $ride->skip_vehicle) == '1' ? 'checked' : '' }}
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    @if ($bookings_count > 0)
-                                        <input type="hidden" name="skip_vehicle" value="{{ $ride->skip_vehicle }}">
-                                    @endif
                                     <label for="skip" class="ml-2  text-gray-900">
                                         @isset($postRidePage->skip_label)
                                             {{ $postRidePage->skip_label }}
@@ -1184,41 +1155,24 @@
                                 </div>
                                 <div>
                                     <input id="add" type="checkbox" name="add_vehicle" value="1"
-                                        {{ old('add_vehicle', $ride->add_vehicle) == '1' ? 'checked' : '' }} {{ $bookings_count > 0 ? 'disabled' : '' }}
+                                        {{ old('add_vehicle', $ride->add_vehicle) == '1' ? 'checked' : '' }}
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    @if ($bookings_count > 0)
-                                        <input type="hidden" name="add_vehicle" value="{{ $ride->add_vehicle }}">
-                                    @endif
                                     <label for="add" class="ml-2  text-gray-900">
                                         @isset($postRidePage->add_vehicle_label)
                                             {{ $postRidePage->add_vehicle_label }}
                                         @endisset
                                     </label>
                                 </div>
-                                <div class="{{ $vehicles->count() > '1' ? '' : 'hidden' }}">
-                                    @php
-                                        // Check if any vehicle has primary_vehicle = 1
-                                        $hasPrimaryVehicle = false;
-                                        foreach ($vehicles as $vehicle) {
-                                            if (isset($vehicle->primary_vehicle) && ($vehicle->primary_vehicle == '1' || $vehicle->primary_vehicle == 1)) {
-                                                $hasPrimaryVehicle = true;
-                                                break;
-                                            }
-                                        }
-                                        // Check if ride already has added_vehicle checked, or if there's a primary vehicle available
-                                        $currentAddedVehicle = old('added_vehicle');
-                                        if ($currentAddedVehicle === null) {
-                                            $currentAddedVehicle = $ride->added_vehicle ?? null;
-                                        }
-                                        // Check the box if: already checked, OR if there's a primary vehicle (and not explicitly unchecked)
-                                        $shouldCheckAddedVehicle = ($currentAddedVehicle == '1') || ($hasPrimaryVehicle && $currentAddedVehicle !== '0');
-                                    @endphp
-                                    <input id="added" type="checkbox" name="added_vehicle" value="1" {{ $bookings_count > 0 ? '' : 'disabled' }}
-                                        {{ $shouldCheckAddedVehicle ? 'checked' : '' }}
+                                @php
+                                    // Check "Existing" when ride was saved with an existing vehicle (added_vehicle=1 or vehicle_id set)
+                                    $savedAsExisting = !empty($ride->vehicle_id) || (string)($ride->added_vehicle ?? '') === '1';
+                                    $savedAsAddNew = (string)($ride->add_vehicle ?? '') === '1';
+                                    $defaultAddedVehicle = $savedAsExisting ? '1' : ($savedAsAddNew ? '0' : ($vehicles->firstWhere('primary_vehicle', '1') ? '1' : '0'));
+                                @endphp
+                                <div class="{{ $vehicles->count() > 0 ? '' : 'hidden' }}">
+                                    <input id="added" type="checkbox" name="added_vehicle" value="1"
+                                        {{ old('added_vehicle', $defaultAddedVehicle) === '1' ? 'checked' : '' }}
                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    @if ($bookings_count > 0)
-                                        <input type="hidden" name="added_vehicle" value="{{ $ride->added_vehicle }}">
-                                    @endif
                                     <label for="added" class="ml-2  text-gray-900">
                                         Existing
                                     </label>
@@ -1241,8 +1195,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="make" id="" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                @if ($errors->count() > 0)
+                                            <input type="text" name="make" id=""                                                 @if ($errors->count() > 0)
                                                     value="{{ old('make', $ride->make) }}"
                                                 @else
                                                     value="{{ $ride->make }}"
@@ -1265,8 +1218,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="model" id="" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                @if ($errors->count() > 0)
+                                            <input type="text" name="model" id=""                                                 @if ($errors->count() > 0)
                                                     value="{{ old('model', $ride->model) }}"
                                                 @else
                                                     value="{{ $ride->model }}"
@@ -1288,8 +1240,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <select id="type" name="vehicle_type" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
+                                            <select id="type" name="vehicle_type"                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                                 <option {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }} value="">
                                                     @isset($postRidePage->vehicle_type_placeholder)
                                                         {{ $postRidePage->vehicle_type_placeholder }}
@@ -1334,9 +1285,6 @@
                                                 </option>
                                             </select>
                                         </div>
-                                        @if ($bookings_count > 0)
-                                            <input type="hidden" name="vehicle_type" value="{{ $ride->vehicle_type }}">
-                                        @endif
                                         @error('vehicle_type')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1352,8 +1300,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="year" id="" placeholder="" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                @if ($errors->count() > 0)
+                                            <input type="text" name="year" id="" placeholder=""                                                 @if ($errors->count() > 0)
                                                     value="{{ old('year', $ride->year) }}"
                                                 @else
                                                     value="{{ $ride->year }}"
@@ -1376,8 +1323,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="color" id="" placeholder="" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                @if ($errors->count() > 0)
+                                            <input type="text" name="color" id="" placeholder=""                                                 @if ($errors->count() > 0)
                                                     value="{{ old('color', $ride->color) }}"
                                                 @else
                                                     value="{{ $ride->color }}"
@@ -1399,8 +1345,7 @@
                                             @endisset
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" name="license_no" id="" placeholder="" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                                                @if ($errors->count() > 0)
+                                            <input type="text" name="license_no" id="" placeholder=""                                                 @if ($errors->count() > 0)
                                                     value="{{ old('license_no', $ride->license_no) }}"
                                                 @else
                                                     value="{{ $ride->license_no }}"
@@ -1420,8 +1365,7 @@
                                         <div class=" flex items-center">
                                             @isset($postRidePage->electric_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->electric_car_label }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->electric_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->electric_car_label }}"                                                         {{ old('car_type', $ride->car_type) == $postRidePage->electric_car_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
                                                         {{ $postRidePage->electric_car_label }}
@@ -1430,8 +1374,7 @@
                                             @endisset
                                             @isset($postRidePage->hybrid_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->hybrid_car_label }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->hybrid_car_label }}"                                                         {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
                                                         {{ $postRidePage->hybrid_car_label }}
@@ -1440,8 +1383,7 @@
                                             @endisset
                                             @isset($postRidePage->gas_car_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->gas_car_label }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->gas_car_label }}"                                                         {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
                                                         {{ $postRidePage->gas_car_label }}
@@ -1449,9 +1391,6 @@
                                                 </div>
                                             @endisset
                                         </div>
-                                        @if ($bookings_count > 0)
-                                            <input type="hidden" name="car_type" value="{{ $ride->car_type }}">
-                                        @endif
                                         @error('car_type')
                                             <div class="relative tooltip -bottom-4 group-hover:flex">
                                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1483,7 +1422,7 @@
                                                             Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max.
                                                         </p>
                                                     </div>
-                                                    <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" {{ $bookings_count > 0 ? 'disabled' : '' }} />
+                                                    <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden"  />
                                                     @if (session('uploaded_image'))
                                                         <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
                                                     @elseif ($ride->car_image)
@@ -1503,29 +1442,31 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="showVehicles" class="md:col-span-2">
-                                <label for="type" class="text-gray-900 mb-2">
-                                    Select vehicle
+                            <div id="showVehicles" class="md:col-span-2 group">
+                                <label for="vehicle_id_select" class="text-gray-900 mb-2">
+                                    Select vehicle <span class="text-red-500">*</span>
                                 </label>
                                 <div class="mt-2">
                                     @php
-                                        $primaryVehicle = collect($vehicles)->firstWhere('primary_vehicle', 1);
-                                        $defaultVehicleId = old('vehicle_id', $ride->vehicle_id);
-                                        // If no vehicle is selected and there's a primary vehicle, use primary vehicle
-                                        if (empty($defaultVehicleId) && $primaryVehicle) {
-                                            $defaultVehicleId = $primaryVehicle->id;
+                                        $selectedVehicleId = old('vehicle_id', $ride->vehicle_id);
+                                        // Treat empty string, null, and 0 as "no selection"
+                                        if ($selectedVehicleId === '' || $selectedVehicleId === null || $selectedVehicleId === 0) {
+                                            $primaryVehicle = $vehicles->firstWhere('primary_vehicle', '1');
+                                            $selectedVehicleId = $primaryVehicle ? $primaryVehicle->id : null;
                                         }
+                                        // Normalize to string for reliable option comparison (int/string from DB)
+                                        $selectedVehicleIdStr = $selectedVehicleId !== null && $selectedVehicleId !== '' ? (string)$selectedVehicleId : null;
                                     @endphp
-                                    <select id="type" name="vehicle_id" {{ $bookings_count > 0 ? 'readonly' : '' }}
+                                    <select id="vehicle_id_select" name="vehicle_id"
                                         class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         <option value=""
-                                            {{ empty($defaultVehicleId) ? 'selected' : '' }}>
+                                            {{ $selectedVehicleIdStr === null ? 'selected' : '' }}>
                                             Select
                                         </option>
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
-                                                {{ $defaultVehicleId == $vehicle->id ? 'selected' : '' }}>
-                                                {{ $vehicle->year }} / {{ $vehicle->model }} / {{ $vehicle->type }}
+                                                {{ $selectedVehicleIdStr !== null && (string)$vehicle->id === $selectedVehicleIdStr ? 'selected' : '' }}>
+                                                {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}@if($vehicle->vehicle_type) / {{ $vehicle->vehicle_type }}@endif
                                             </option>
                                         @endforeach
                                     </select>
@@ -1554,8 +1495,7 @@
                         <div class="border rounded-md divide-y">
                             @isset($postRidePage->luggage_option1)
                                 <div class="flex items-center justify-start p-3">
-                                    <input type="radio" id="no-luggage" name="luggage" value="0" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == 0 ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <input type="radio" id="no-luggage" name="luggage" value="0"                                         {{ old('luggage', $ride->luggage) == 0 ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="no-luggage" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/noluggage.png') }}" alt="">
                                         <span>
@@ -1566,8 +1506,7 @@
                             @endisset
                             @isset($postRidePage->luggage_option2)
                                 <div class="flex items-center justify-start p-3">
-                                    <input type="radio" id="small" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <input type="radio" id="small" name="luggage" value="{{ $postRidePage->luggage_option2->features_setting_id }}"                                         {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="small" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/luggage.png') }}" alt="">
                                         <span>
@@ -1578,8 +1517,7 @@
                             @endisset
                             @isset($postRidePage->luggage_option3)
                                 <div class="flex items-center justify-start p-3">
-                                    <input type="radio" id="medium" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <input type="radio" id="medium" name="luggage" value="{{ $postRidePage->luggage_option3->features_setting_id }}"                                         {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="medium" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/mediumluggage.png') }}" alt="">
                                         <span>
@@ -1590,8 +1528,7 @@
                             @endisset
                             @isset($postRidePage->luggage_option4)
                                 <div class="flex items-center justify-start p-3">
-                                    <input type="radio" id="large" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <input type="radio" id="large" name="luggage" value="{{ $postRidePage->luggage_option4->features_setting_id }}"                                         {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="large" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/largeluggage.png') }}" alt="">
                                         <span>
@@ -1602,8 +1539,7 @@
                             @endisset
                             @isset($postRidePage->luggage_option5)
                                 <div class="flex items-center justify-start p-3">
-                                    <input type="radio" id="xl-multiple" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    <input type="radio" id="xl-multiple" name="luggage" value="{{ $postRidePage->luggage_option5->features_setting_id }}"                                         {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }} class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="xl-multiple" class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
                                         <img class="w-10 h-10" src="{{ asset('assets/extralargeluggage.png') }}" alt="">
                                         <div>
@@ -1623,9 +1559,6 @@
                                 </div>
                             @endisset
                         </div>
-                        @if ($bookings_count > 0)
-                            <input type="hidden" name="luggage" value="{{ $ride->luggage }}">
-                        @endif
                         @error('luggage')
                             <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1635,12 +1568,8 @@
                         @enderror
                         <div class="mt-6 space-y-2">
                             <div class="flex items-start">
-                                <input id="heating" type="checkbox" name="accept_more_luggage" value="1" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                    {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
+                                <input id="heating" type="checkbox" name="accept_more_luggage" value="1"                                     {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
                                     class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                @if ($bookings_count > 0)
-                                    <input type="hidden" name="accept_more_luggage" value="{{ $ride->accept_more_luggage }}">
-                                @endif
                                 <label for="heating"
                                     class="ml-2 font-normal text-gray-900 flex space-x-1">
                                     <span class="">
@@ -1666,8 +1595,7 @@
                         <div class="border rounded-md overflow-hidden divide-y">
                             @isset($postRidePage->smoking_option1->features_setting_id)
                                 <div class="flex items-center justify-start p-3">
-                                    <input id="smoke-1" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '' }}
+                                    <input id="smoke-1" name="smoke" type="radio" value="{{ $postRidePage->smoking_option1->features_setting_id }}"                                         {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '' }}
                                         class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="smoke-1" class="font-normal text-gray-900 flex space-x-1 ml-4">
                                         <span>
@@ -1678,8 +1606,7 @@
                             @endisset
                             @isset($postRidePage->smoking_option2->features_setting_id)
                                 <div class="flex items-center justify-start p-3">
-                                    <input id="smoke-2" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '' }}
+                                    <input id="smoke-2" name="smoke" type="radio" value="{{ $postRidePage->smoking_option2->features_setting_id }}"                                         {{ old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '' }}
                                         class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="smoke-2" class="font-normal text-gray-900 flex space-x-1 ml-4">
                                         <span>
@@ -1689,9 +1616,6 @@
                                 </div>
                             @endisset
                         </div>
-                        @if ($bookings_count > 0)
-                            <input type="hidden" name="smoke" value="{{ $ride->smoke }}">
-                        @endif
                         @error('smoke')
                             <div class="relative tooltip -bottom-4 group-hover:flex">
                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1714,8 +1638,7 @@
                         <div class="border rounded-md overflow-hidden divide-y">
                             @isset($postRidePage->animals_option1->features_setting_id)
                                 <div class="flex items-center justify-start p-3">
-                                    <input id="animal-1" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '' }}
+                                    <input id="animal-1" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option1->features_setting_id }}"                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '' }}
                                         class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="animal-1" class="font-normal text-gray-900 flex space-x-1 ml-4">
                                         <span>
@@ -1726,8 +1649,7 @@
                             @endisset
                             @isset($postRidePage->animals_option2->features_setting_id)
                                 <div class="flex items-center justify-start p-3">
-                                    <input id="animal-2" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '' }}
+                                    <input id="animal-2" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option2->features_setting_id }}"                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '' }}
                                         class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="animal-2" class="font-normal text-gray-900 flex space-x-1 ml-4">
                                         <span>
@@ -1738,8 +1660,7 @@
                             @endisset
                             @isset($postRidePage->animals_option3->features_setting_id)
                                 <div class="flex items-center justify-start p-3">
-                                    <input id="animal-3" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                        {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '' }}
+                                    <input id="animal-3" name="animal_friendly" type="radio" value="{{ $postRidePage->animals_option3->features_setting_id }}"                                         {{ old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '' }}
                                         class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     <label for="animal-3" class="font-normal text-gray-900 flex space-x-1 ml-4">
                                         <span>
@@ -1749,9 +1670,6 @@
                                 </div>
                             @endisset
                         </div>
-                        @if ($bookings_count > 0)
-                            <input type="hidden" name="animal_friendly" value="{{ $ride->animal_friendly }}">
-                        @endif
                         @error('animal_friendly')
                             <div class="relative tooltip -bottom-4 group-hover:flex">
                                 <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -1775,8 +1693,7 @@
                             <div class="space-y-2">
                                 @isset($postRidePage->features_option1)
                                     <div class="flex items-center">
-                                        <input id="pink-ride" type="checkbox" name="features[]" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            @php $disabled = false; @endphp
+                                        <input id="pink-ride" type="checkbox" name="features[]" @php $disabled = false; @endphp
                                             @if ($user->pink_ride == '0')
                                                 @php $disabled = true; @endphp
                                             @elseif ($user->pink_ride == '')
@@ -1860,8 +1777,7 @@
                                         $age = $dob->diffInYears(\Carbon\Carbon::now());
                                     @endphp
                                     <div class="flex items-center">
-                                        <input id="Extra+" type="checkbox" name="features[]" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            @php $disabled = false; @endphp
+                                        <input id="Extra+" type="checkbox" name="features[]" @php $disabled = false; @endphp
                                             @if ($user->folks_ride == '0')
                                                 @php $disabled = true; @endphp
                                             @elseif ($user->folks_ride == '')
@@ -1939,8 +1855,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option3)
                                     <div class="flex items-center">
-                                        <input id="wi-fi" type="checkbox" name="features[]" value="{{ $postRidePage->features_option3->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="wi-fi" type="checkbox" name="features[]" value="{{ $postRidePage->features_option3->features_setting_id }}"                                             {{ in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="wi-fi"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -1952,8 +1867,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option4)
                                     <div class="flex items-center">
-                                        <input id="rating-passengers" type="checkbox" name="features[]" value="{{ $postRidePage->features_option4->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="rating-passengers" type="checkbox" name="features[]" value="{{ $postRidePage->features_option4->features_setting_id }}"                                             {{ in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="rating-passengers"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -1965,8 +1879,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option5)
                                     <div class="flex items-center">
-                                        <input id="provide-babyseats" type="checkbox" name="features[]" value="{{ $postRidePage->features_option5->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="provide-babyseats" type="checkbox" name="features[]" value="{{ $postRidePage->features_option5->features_setting_id }}"                                             {{ in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="provide-babyseats"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -1978,8 +1891,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option6)
                                     <div class="flex items-center">
-                                        <input id="passenger-provide" type="checkbox" name="features[]" value="{{ $postRidePage->features_option6->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="passenger-provide" type="checkbox" name="features[]" value="{{ $postRidePage->features_option6->features_setting_id }}"                                             {{ in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="passenger-provide"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -1991,8 +1903,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option7)
                                     <div class="flex items-center">
-                                        <input id="take-children" type="checkbox" name="features[]" value="{{ $postRidePage->features_option7->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="take-children" type="checkbox" name="features[]" value="{{ $postRidePage->features_option7->features_setting_id }}"                                             {{ in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="take-children"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2004,8 +1915,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option8)
                                     <div class="flex items-center">
-                                        <input id="passenger-provide1" type="checkbox" name="features[]" value="{{ $postRidePage->features_option8->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="passenger-provide1" type="checkbox" name="features[]" value="{{ $postRidePage->features_option8->features_setting_id }}"                                             {{ in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="passenger-provide1"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2017,8 +1927,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option9)
                                     <div class="flex items-center">
-                                        <input id="bike-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option9->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="bike-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option9->features_setting_id }}"                                             {{ in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="bike-rack"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2030,8 +1939,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option10)
                                     <div class="flex items-center">
-                                        <input id="ski-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option10->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="ski-rack" type="checkbox" name="features[]" value="{{ $postRidePage->features_option10->features_setting_id }}"                                             {{ in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="ski-rack"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2043,8 +1951,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option11)
                                     <div class="flex items-center">
-                                        <input id="winter-tires" type="checkbox" name="features[]" value="{{ $postRidePage->features_option11->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="winter-tires" type="checkbox" name="features[]" value="{{ $postRidePage->features_option11->features_setting_id }}"                                             {{ in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="winter-tires"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2056,8 +1963,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option12)
                                     <div class="flex items-center">
-                                        <input id="air-conditioning" type="checkbox" name="features[]" value="{{ $postRidePage->features_option12->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="air-conditioning" type="checkbox" name="features[]" value="{{ $postRidePage->features_option12->features_setting_id }}"                                             {{ in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="air-conditioning"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2069,8 +1975,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option13)
                                     <div class="flex items-center">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option13->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option13->features_setting_id }}"                                             {{ in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2082,8 +1987,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option14)
                                     <div class="flex items-center">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option14->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option14->features_setting_id }}"                                             {{ in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2095,8 +1999,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option15)
                                     <div class="flex items-center">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option15->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option15->features_setting_id }}"                                             {{ in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2108,8 +2011,7 @@
                                 @endisset
                                 @isset($postRidePage->features_option16)
                                     <div class="flex items-center">
-                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option16->features_setting_id }}" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                                            {{ in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
+                                        <input id="heating" type="checkbox" name="features[]" value="{{ $postRidePage->features_option16->features_setting_id }}"                                             {{ in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features)) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         <label for="heating"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -2120,14 +2022,6 @@
                                     </div>
                                 @endisset
                             </div>
-                            @if ($bookings_count > 0)
-                                @php
-                                    $features = !empty($ride->features) ? explode('=', $ride->features) : [];
-                                @endphp
-                                @foreach ($features as $feature)
-                                    <input type="hidden" name="features[]" value="{{ $feature }}">
-                                @endforeach
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -2191,8 +2085,7 @@
                           </label>
                         </div>
                         <div class="bg-white p-4">
-                            <textarea id="more" rows="5" name="notes" {{ $bookings_count > 0 ? 'readonly' : '' }}
-                              class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                            <textarea id="more" rows="5" name="notes" class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                                 @isset($postRidePage->anything_to_add_placeholder)
                                     placeholder="{{ $postRidePage->anything_to_add_placeholder }}"
                                 @endisset>{{ old('notes', $ride->notes) }}</textarea>
@@ -2225,12 +2118,8 @@
                 </div>
                 
                 <div class="flex items-start my-4">
-                    <input id="agree_checkbox" type="checkbox" name="agree_terms" value="1" {{ $bookings_count > 0 ? 'disabled' : '' }}
-                        checked
+                    <input id="agree_checkbox" type="checkbox" name="agree_terms" value="1" checked
                         class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-1 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    @if ($bookings_count > 0)
-                        <input type="hidden" name="agree_terms" value="1">
-                    @endif
                     <label for="agree_checkbox" class="ml-2 font-normal text-gray-900">
                         @isset($postRidePage->agree_terms_label)
                             {!! $postRidePage->agree_terms_label !!}
@@ -2270,6 +2159,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initMapEditRide" async defer></script>
 
 <script>
     function debounce(func, delay) {
@@ -2336,59 +2226,356 @@ document.addEventListener('keydown', function(event) {
         const toValue = toEl.value;
         fromEl.value = toValue;
         toEl.value = fromValue;
+        var t = selectedFromPlaceEditRide;
+        selectedFromPlaceEditRide = selectedToPlaceEditRide;
+        selectedToPlaceEditRide = t;
+    }
+
+    var geocoderEditRide = null;
+    var selectedFromPlaceEditRide = null;
+    var selectedToPlaceEditRide = null;
+    var isSettingPlaceValueEditRide = false;
+    var isSelectingFromDropdownEditRide = false;
+    var errorFromRequiredEditRide = 'The origin is required';
+    var errorToRequiredEditRide = 'The destination is required';
+    var errorCityMissingEditRide = 'We could not find this city name in our records, please double-check the spelling.';
+
+    window.initMapEditRide = function initMapEditRide() {
+        if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+        geocoderEditRide = new google.maps.Geocoder();
+        var fromInput = document.getElementById('from_spot_0');
+        var toInput = document.getElementById('to_spot_0');
+        if (!fromInput || !toInput) return;
+        var fromAutocomplete = new google.maps.places.Autocomplete(fromInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+        var toAutocomplete = new google.maps.places.Autocomplete(toInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+        fromAutocomplete.addListener('place_changed', function() {
+            var place = fromAutocomplete.getPlace();
+            if (place.address_components && place.place_id) {
+                isSettingPlaceValueEditRide = true;
+                isSelectingFromDropdownEditRide = true;
+                var formatted = formatPlaceAddressEditRide(place);
+                selectedFromPlaceEditRide = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                fromInput.value = formatted;
+                var err = document.getElementById('fromInputError'); if (err) err.classList.add('hidden');
+                if (typeof fetchDistance === 'function') setTimeout(function() { fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {}); }, 300);
+                setTimeout(function() { isSettingPlaceValueEditRide = false; isSelectingFromDropdownEditRide = false; }, 100);
+            }
+        });
+        toAutocomplete.addListener('place_changed', function() {
+            var place = toAutocomplete.getPlace();
+            if (place.address_components && place.place_id) {
+                isSettingPlaceValueEditRide = true;
+                isSelectingFromDropdownEditRide = true;
+                var formatted = formatPlaceAddressEditRide(place);
+                selectedToPlaceEditRide = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                toInput.value = formatted;
+                var err = document.getElementById('toInputError'); if (err) err.classList.add('hidden');
+                if (typeof fetchDistance === 'function') setTimeout(function() { fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {}); }, 300);
+                setTimeout(function() { isSettingPlaceValueEditRide = false; isSelectingFromDropdownEditRide = false; }, 100);
+            }
+        });
+        fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
+        toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+        fromInput.addEventListener('blur', function() {
+            if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+                var currentValue = self.value.trim();
+                var fromInputError = document.getElementById('fromInputError');
+                if (currentValue !== '' && (!selectedFromPlaceEditRide || currentValue !== (selectedFromPlaceEditRide.value || '').trim())) {
+                    resolveTypedCityValueEditRide(currentValue, 'from').then(function() {
+                        currentValue = self.value.trim();
+                        if (currentValue === '' || !selectedFromPlaceEditRide || currentValue !== (selectedFromPlaceEditRide.value || '').trim()) {
+                            selectedFromPlaceEditRide = null;
+                            if (currentValue !== '' && fromInputError) {
+                                var te = fromInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = errorCityMissingEditRide;
+                                fromInputError.classList.remove('hidden');
+                            } else if (fromInputError) fromInputError.classList.add('hidden');
+                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                        if (typeof fetchDistance === 'function' && toInput && toInput.value) fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {});
+                    });
+                } else {
+                    if (currentValue === '' || !selectedFromPlaceEditRide || currentValue !== (selectedFromPlaceEditRide.value || '').trim()) {
+                        selectedFromPlaceEditRide = null;
+                        if (currentValue !== '' && fromInputError) {
+                            var te = fromInputError.querySelector('.tooltip-error');
+                            if (te) te.textContent = currentValue === '' ? errorFromRequiredEditRide : errorCityMissingEditRide;
+                            fromInputError.classList.remove('hidden');
+                        }
+                    } else if (fromInputError) fromInputError.classList.add('hidden');
+                    if (typeof fetchDistance === 'function' && toInput && toInput.value) fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {});
+                }
+            }, 200);
+        });
+        toInput.addEventListener('blur', function() {
+            if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+                var currentValue = self.value.trim();
+                var toInputError = document.getElementById('toInputError');
+                if (currentValue !== '' && (!selectedToPlaceEditRide || currentValue !== (selectedToPlaceEditRide.value || '').trim())) {
+                    resolveTypedCityValueEditRide(currentValue, 'to').then(function() {
+                        currentValue = self.value.trim();
+                        if (currentValue === '' || !selectedToPlaceEditRide || currentValue !== (selectedToPlaceEditRide.value || '').trim()) {
+                            selectedToPlaceEditRide = null;
+                            if (currentValue !== '' && toInputError) {
+                                var te = toInputError.querySelector('.tooltip-error');
+                                if (te) te.textContent = errorCityMissingEditRide;
+                                toInputError.classList.remove('hidden');
+                            } else if (toInputError) toInputError.classList.add('hidden');
+                        } else if (toInputError) toInputError.classList.add('hidden');
+                        if (typeof fetchDistance === 'function' && fromInput && fromInput.value) fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {});
+                    });
+                } else {
+                    if (currentValue === '' || !selectedToPlaceEditRide || currentValue !== (selectedToPlaceEditRide.value || '').trim()) {
+                        selectedToPlaceEditRide = null;
+                        if (currentValue !== '' && toInputError) {
+                            var te = toInputError.querySelector('.tooltip-error');
+                            if (te) te.textContent = currentValue === '' ? errorToRequiredEditRide : errorCityMissingEditRide;
+                            toInputError.classList.remove('hidden');
+                        }
+                    } else if (toInputError) toInputError.classList.add('hidden');
+                    if (typeof fetchDistance === 'function' && fromInput && fromInput.value) fetchDistance(fromInput.value.trim(), toInput.value.trim()).then(function() {});
+                }
+            }, 200);
+        });
+        document.addEventListener('mousedown', function(e) { if (e.target.closest('.pac-container')) isSelectingFromDropdownEditRide = true; else setTimeout(function() { isSelectingFromDropdownEditRide = false; }, 50); });
+
+        document.querySelectorAll('input[name="stop_spot_display[]"]').forEach(function(inp) {
+            if (inp.id && inp.id.indexOf('stop_spot_') === 0 && !inp.getAttribute('data-autocomplete-attached')) {
+                attachStopAutocompleteEditRide(inp);
+            }
+        });
+    }
+
+    function formatPlaceAddressEditRide(place) {
+        var city = '', province = '', country = 'Canada';
+        if (!place.address_components) return place.name || place.formatted_address || '';
+        for (var i = 0; i < place.address_components.length; i++) {
+            var c = place.address_components[i], t = c.types;
+            if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+            if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
+            if (t.indexOf('country') !== -1) country = c.long_name;
+        }
+        if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
+        if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
+        var out = city || ''; if (province) out += (out ? ', ' : '') + province; if (country && out) out += ', ' + country;
+        return out || place.name || place.formatted_address || '';
+    }
+
+    function resolveTypedCityValueEditRide(rawValue, target) {
+        var value = (rawValue || '').trim();
+        if (!value || !geocoderEditRide) return Promise.resolve(false);
+        var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
+        var input = document.getElementById(inputId);
+        return new Promise(function(resolve) {
+            geocoderEditRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                var result = null;
+                for (var i = 0; i < response.length; i++) {
+                    var item = response[i];
+                    if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                }
+                if (!result) { resolve(false); return; }
+                var formatted = formatPlaceAddressEditRide(result);
+                if (!formatted) { resolve(false); return; }
+                isSettingPlaceValueEditRide = true;
+                var sel = { place_id: result.place_id, formatted_address: formatted, value: formatted };
+                if (target === 'from') selectedFromPlaceEditRide = sel; else selectedToPlaceEditRide = sel;
+                if (input) input.value = formatted;
+                var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
+                setTimeout(function() { isSettingPlaceValueEditRide = false; }, 100);
+                resolve(true);
+            });
+        });
+    }
+
+    function getStopErrorElementEditRide(inputEl) {
+        if (!inputEl) return null;
+        var id = inputEl.id || '';
+        var dataIndex = inputEl.getAttribute('data-stop-index');
+        var index = dataIndex || (id.indexOf('stop_spot_') === 0 ? id.replace('stop_spot_', '') : null);
+        return index ? document.getElementById('stopInputError_' + index) : null;
+    }
+
+    function resolveTypedCityValueForStopEditRide(inputElement) {
+        var value = (inputElement && inputElement.value) ? inputElement.value.trim() : '';
+        var err = getStopErrorElementEditRide(inputElement);
+        if (!value) { if (err) err.classList.add('hidden'); return Promise.resolve(true); }
+        if (!geocoderEditRide) {
+            if (err) { var te = err.querySelector('.tooltip-error'); if (te) te.textContent = errorCityMissingEditRide; err.classList.remove('hidden'); }
+            return Promise.resolve(false);
+        }
+        return new Promise(function(resolve) {
+            geocoderEditRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
+                if (status !== 'OK' || !response || !response.length) {
+                    if (err) { var te = err.querySelector('.tooltip-error'); if (te) te.textContent = errorCityMissingEditRide; err.classList.remove('hidden'); }
+                    resolve(false); return;
+                }
+                var result = null;
+                for (var i = 0; i < response.length; i++) {
+                    var item = response[i];
+                    if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                }
+                if (!result) { if (err) { var te = err.querySelector('.tooltip-error'); if (te) te.textContent = errorCityMissingEditRide; err.classList.remove('hidden'); } resolve(false); return; }
+                var formatted = formatPlaceAddressEditRide(result);
+                if (!formatted) { if (err) { var te = err.querySelector('.tooltip-error'); if (te) te.textContent = errorCityMissingEditRide; err.classList.remove('hidden'); } resolve(false); return; }
+                isSettingPlaceValueEditRide = true;
+                inputElement.value = formatted;
+                if (err) err.classList.add('hidden');
+                if (typeof syncSegmentPricesUI === 'function') syncSegmentPricesUI();
+                setTimeout(function() { isSettingPlaceValueEditRide = false; }, 100);
+                resolve(true);
+            });
+        });
+    }
+
+    function attachStopAutocompleteEditRide(inputElement) {
+        if (!inputElement || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+        if (inputElement.getAttribute('data-autocomplete-attached')) return;
+        inputElement.setAttribute('data-autocomplete-attached', '1');
+        inputElement.setAttribute('autocomplete', 'off');
+        var autocomplete = new google.maps.places.Autocomplete(inputElement, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (place.address_components && place.place_id) {
+                var formatted = formatPlaceAddressEditRide(place);
+                if (formatted) inputElement.value = formatted;
+                var err = getStopErrorElementEditRide(inputElement);
+                if (err) err.classList.add('hidden');
+                if (typeof syncSegmentPricesUI === 'function') syncSegmentPricesUI();
+            }
+        });
+        inputElement.addEventListener('focus', function() { var err = getStopErrorElementEditRide(inputElement); if (err) err.classList.add('hidden'); });
+        inputElement.addEventListener('blur', function() {
+            if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+            var self = this;
+            setTimeout(function() {
+                if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
+                if (!self.value || !self.value.trim()) { var e = getStopErrorElementEditRide(self); if (e) e.classList.add('hidden'); return; }
+                if (typeof resolveTypedCityValueForStopEditRide === 'function') resolveTypedCityValueForStopEditRide(self);
+            }, 200);
+        });
     }
 
     const dateInput = document.getElementById('dateInput');
     const timeInput = document.getElementById('timeInput');
+    if (!dateInput || !timeInput) {
+        console.warn('edit_ride: dateInput or timeInput not found');
+    } else {
 
-    // Retrieve old values from Laravel's old() function
+    @php
+        $projectTimezone = config('app.timezone');
+        $projectOffset = \Carbon\Carbon::now($projectTimezone)->offsetHours;
+        $jsOldTime = old('time');
+        if ($jsOldTime === null && $ride && !empty($ride->time)) {
+            try {
+                $jsOldTime = \Carbon\Carbon::parse($ride->time)->format('H:i');
+            } catch (\Exception $e) {
+                $jsOldTime = is_string($ride->time) ? substr($ride->time, 0, 5) : '';
+            }
+        }
+        $jsOldTime = $jsOldTime ?? '';
+    @endphp
+    const projectOffset = {{ $projectOffset }};
+
+    function getCurrentProjectTime() {
+        const now = new Date();
+        const localOffset = now.getTimezoneOffset();
+        const laravelOffsetMinutes = projectOffset * 60;
+        now.setMinutes(now.getMinutes() + localOffset + laravelOffsetMinutes);
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
     const oldDate = '{{ old('date', $ride->date ? date('F d, Y', strtotime($ride->date)) : '') }}';
-    const oldTime = '{{ old('time', $ride->time) }}';
-    console.log(oldDate);
+    const oldTime = '{{ $jsOldTime }}';
 
-    // Initialize the date picker
+    function isDefaultDateToday() {
+        if (!oldDate || oldDate === 'today') return true;
+        try {
+            const d = new Date(oldDate);
+            return !isNaN(d.getTime()) && d.toDateString() === new Date().toDateString();
+        } catch (e) {
+            return true;
+        }
+    }
+    const initialMinTime = isDefaultDateToday() ? getCurrentProjectTime() : '00:00';
+
     flatpickr(dateInput, {
         dateFormat: 'F d, Y',
-        minDate: 'today',   // Restrict to future dates only
-        defaultDate: oldDate || 'today', // Set default date to today
+        minDate: 'today',
+        defaultDate: oldDate || 'today',
         disableMobile: true,
         onChange: function(selectedDates, dateStr, instance) {
-            // Update minTime based on whether the selected date is today or a future date
+            if (!timeInput._flatpickr) return;
             const isToday = instance.latestSelectedDateObj ? instance.latestSelectedDateObj.toDateString() === new Date().toDateString() : false;
-
-            const minTime = isToday ? new Date().getHours() + ':' + (new Date().getMinutes()) : '00:00';
-
-            // Update minTime dynamically without destroying the entire instance
+            const minTime = isToday ? getCurrentProjectTime() : '00:00';
             timeInput._flatpickr.set('minTime', minTime);
-
-            // If the date is today, set the time input value to the current time
             if (isToday) {
-                const currentTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                timeInput._flatpickr.setDate(currentTime, true, 'H:i');
+                const utcTime = getCurrentProjectTime();
+                const [hours, minutes] = utcTime.split(':');
+                const date = new Date();
+                date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                timeInput._flatpickr.setDate(date, true);
             }
         },
     });
 
-    // Initialize the date picker for time input
-    flatpickr(timeInput, {
+    function formatTimeDisplay(date) {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const mins = minutes < 10 ? '0' + minutes : String(minutes);
+        if (hours < 12) {
+            const h = hours === 0 ? 12 : hours;
+            return h + ':' + mins + ' am';
+        } else {
+            const h = hours < 10 ? '0' + hours : String(hours);
+            return h + ':' + mins;
+        }
+    }
+    const timePicker = flatpickr(timeInput, {
         enableTime: true,
         noCalendar: true,
         dateFormat: 'H:i',
+        altInput: true,
+        altFormat: 'H:i',
+        time_24hr: false,
         disableMobile: true,
-        // minTime: oldTime || new Date().getHours() + ':' + (new Date().getMinutes()), // Set min time to current time
-        defaultDate: oldTime || '',
-        minuteIncrement: 1, // Set minute increment to 1
-    });
-
-    // Add a click event listener to the time input field
-    timeInput.addEventListener('click', function() {
-        debugger;
-        // Check if the time input field is empty before setting the default time
-        if (!timeInput._flatpickr.input.value) {
-            // Set the default time to the current time when the field is clicked
-            timeInput._flatpickr.setDate(new Date(), true, 'H:i');
+        minTime: initialMinTime,
+        defaultDate: (oldTime && oldTime.length >= 4) ? oldTime : '',
+        minuteIncrement: 1,
+        onChange: function(selectedDates) {
+            if (selectedDates.length && timeInput._flatpickr.altInput) {
+                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
+            }
+        },
+        onClose: function(selectedDates) {
+            if (selectedDates.length && timeInput._flatpickr.altInput) {
+                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
+            }
         }
     });
+    if (timePicker.selectedDates.length && timePicker.altInput) {
+        timePicker.altInput.value = formatTimeDisplay(timePicker.selectedDates[0]);
+    }
+
+    timeInput.addEventListener('click', function() {
+        if (!timeInput._flatpickr || !timeInput._flatpickr.input) return;
+        if (!timeInput._flatpickr.input.value) {
+            const projectTime = getCurrentProjectTime();
+            const [hours, minutes] = projectTime.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            timeInput._flatpickr.setDate(date, true);
+        }
+    });
+
+    }
 
     function seat_selected(th) {
         var seat = $(th).val();
@@ -2426,57 +2613,88 @@ document.addEventListener('keydown', function(event) {
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Get the checkbox element
+        // Get the checkbox elements
         var skipCheckbox = document.getElementById('skip');
         var addCheckbox = document.getElementById('add');
         var addedCheckbox = document.getElementById('added');
         var recurringTripCheckbox = document.getElementById('recurring_trip');
 
-        // Get the disclaimer div
+        // Get the vehicle panel divs
         var skipVehicle = document.getElementById('skipVehicle');
         var showVehicles = document.getElementById('showVehicles');
         var recurringtripDetails = document.getElementById('recurringtripDetails');
 
-        // Array of all checkboxes for mutual exclusivity
-        var checkboxes = [skipCheckbox, addCheckbox, addedCheckbox];
+        // Array of all checkboxes for mutual exclusivity (only include existing elements)
+        var checkboxes = [skipCheckbox, addCheckbox, addedCheckbox].filter(Boolean);
 
         // Function to uncheck other checkboxes when one is checked
         function handleCheckboxChange(checkedCheckbox) {
             checkboxes.forEach(function (checkbox) {
-                if (checkbox !== checkedCheckbox) {
-                    checkbox.checked = false; // Uncheck all other checkboxes
+                if (checkbox && checkbox !== checkedCheckbox) {
+                    checkbox.checked = false;
                 }
             });
         }
 
-        // Add an event listener to the checkbox
-        skipCheckbox.addEventListener('change', function () {
-            handleCheckboxChange(skipCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            skipVehicle.style.display = 'none';
-            showVehicles.style.display = 'none';
-        });
-        addCheckbox.addEventListener('change', function () {
-            handleCheckboxChange(addCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            skipVehicle.style.display = this.checked ? 'block' : 'none';
-            showVehicles.style.display = 'none';
-        });
-        addedCheckbox.addEventListener('change', function () {
-            handleCheckboxChange(addedCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            showVehicles.style.display = this.checked ? 'block' : 'none';
-            skipVehicle.style.display = 'none';
-        });
-        recurringTripCheckbox.addEventListener('change', function () {
-            // If the checkbox is checked, show the recurring details; otherwise, hide it
-            recurringtripDetails.style.display = this.checked ? 'block' : 'none';
-        });
+        if (skipCheckbox && skipVehicle) {
+            skipCheckbox.addEventListener('change', function () {
+                handleCheckboxChange(skipCheckbox);
+                skipVehicle.style.display = 'none';
+                if (showVehicles) showVehicles.style.display = 'none';
+            });
+        }
+        if (addCheckbox && skipVehicle) {
+            addCheckbox.addEventListener('change', function () {
+                handleCheckboxChange(addCheckbox);
+                skipVehicle.style.display = this.checked ? 'block' : 'none';
+                if (showVehicles) showVehicles.style.display = 'none';
+                var vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+                vehicleFields.forEach(function(field) {
+                    if (this.checked) {
+                        field.removeAttribute('disabled');
+                        field.setAttribute('required', 'required');
+                    } else {
+                        field.removeAttribute('required');
+                    }
+                }.bind(this));
+            });
+        }
+        if (addedCheckbox && showVehicles) {
+            addedCheckbox.addEventListener('change', function () {
+                handleCheckboxChange(addedCheckbox);
+                showVehicles.style.display = this.checked ? 'block' : 'none';
+                if (skipVehicle) skipVehicle.style.display = 'none';
+                if (skipVehicle) {
+                    var vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+                    vehicleFields.forEach(function(field) {
+                        field.removeAttribute('required');
+                    });
+                }
+            });
+        }
+        if (recurringTripCheckbox && recurringtripDetails) {
+            recurringTripCheckbox.addEventListener('change', function () {
+                recurringtripDetails.style.display = this.checked ? 'block' : 'none';
+            });
+        }
 
-        // Initial check when the page loads
-        skipVehicle.style.display = addCheckbox.checked ? 'block' : 'none';
-        showVehicles.style.display = addedCheckbox.checked ? 'block' : 'none';
-        recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
+        // Initial visibility when the page loads
+        if (skipVehicle) skipVehicle.style.display = addCheckbox && addCheckbox.checked ? 'block' : 'none';
+        if (showVehicles) showVehicles.style.display = addedCheckbox && addedCheckbox.checked ? 'block' : 'none';
+        if (recurringtripDetails) recurringtripDetails.style.display = recurringTripCheckbox && recurringTripCheckbox.checked ? 'block' : 'none';
+
+        // Set initial required state for vehicle fields (when "Add vehicle" is checked)
+        if (skipVehicle && addCheckbox) {
+            var vehicleFields = skipVehicle.querySelectorAll('input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]');
+            vehicleFields.forEach(function(field) {
+                if (addCheckbox.checked) {
+                    field.removeAttribute('disabled');
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                }
+            });
+        }
     });
     
     document.getElementById('delete-stop-yes').addEventListener('click', function() { deleteStopRowConfirmed(); });
@@ -2743,8 +2961,56 @@ document.addEventListener('keydown', function(event) {
         }
     }
 
+    // Prevent form submit on Enter (allow Enter in textareas for new lines)
+    var editRideForm = document.getElementById('edit-ride-form');
+    if (editRideForm) {
+        editRideForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+    }
+
     // Ensure all form fields are submitted, especially disabled/readonly ones
     document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+        var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
+        var toVal = (document.getElementById('to_spot_0') || {}).value || '';
+        var fromInputError = document.getElementById('fromInputError');
+        var toInputError = document.getElementById('toInputError');
+        var fromInvalid = !fromVal.trim();
+        var toInvalid = !toVal.trim();
+        if (fromInputError) fromInputError.classList.toggle('hidden', !fromInvalid);
+        if (fromInvalid && fromInputError) { var te = fromInputError.querySelector('.tooltip-error'); if (te) te.textContent = errorFromRequiredEditRide || 'The origin is required'; }
+        if (toInputError) toInputError.classList.toggle('hidden', !toInvalid);
+        if (toInvalid && toInputError) { var te2 = toInputError.querySelector('.tooltip-error'); if (te2) te2.textContent = errorToRequiredEditRide || 'The destination is required'; }
+
+        var stopsContainer = document.getElementById('stops-rows-container');
+        var stopInputs = stopsContainer ? stopsContainer.querySelectorAll('input[name="stop_spot_display[]"]') : [];
+        var firstInvalidStop = null;
+        var stopInvalid = false;
+        stopInputs.forEach(function(inp) {
+            var err = typeof getStopErrorElementEditRide === 'function' ? getStopErrorElementEditRide(inp) : null;
+            if (err) err.classList.add('hidden');
+            if (!inp.value || !inp.value.trim()) {
+                stopInvalid = true;
+                if (err) {
+                    var te = err.querySelector('.tooltip-error');
+                    if (te) te.textContent = 'Please enter or select a city.';
+                    err.classList.remove('hidden');
+                }
+                if (!firstInvalidStop) firstInvalidStop = inp;
+            }
+        });
+
+        if (fromInvalid || toInvalid || stopInvalid) {
+            e.preventDefault();
+            var scrollTarget = fromInvalid ? document.getElementById('from_spot_0') : (toInvalid ? document.getElementById('to_spot_0') : firstInvalidStop);
+            if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (fromInputError) fromInputError.classList.add('hidden');
+        if (toInputError) toInputError.classList.add('hidden');
+
         buildStopsSegmentsForSubmit();
         // When segment prices are shown: full-route must be <= total; if not, scroll to price section and prevent submit
         var segmentContainer = document.getElementById('stops-segment-prices-container');
@@ -3089,16 +3355,20 @@ document.addEventListener('keydown', function(event) {
         var row = document.createElement('div');
         row.className = 'flex items-center gap-3 stop-row';
         row.setAttribute('data-stop-index', nextIndex);
-        row.innerHTML = '<div class="relative flex-1 min-w-0">' +
+        row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">' +
+            '<div class="relative flex-1 min-w-0">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
-            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" oninput="stopInput(\'' + nextIndex + '\')" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
-            '<div id="stop_spot_suggestions' + nextIndex + '" class="absolute left-0 right-0 bg-white shadow-lg mt-1 max-h-60 overflow-y-auto z-50"></div>' +
+            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex + '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
             '</div>' +
             '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '</div>' +
             '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
             '</button>';
         container.appendChild(row);
+        var newStopInput = document.getElementById('stop_spot_' + nextIndex);
+        if (newStopInput && typeof attachStopAutocompleteEditRide === 'function') attachStopAutocompleteEditRide(newStopInput);
         var wrapper = document.getElementById('stops-section-wrapper');
         if (wrapper) {
             var segIds = [];
@@ -3165,10 +3435,14 @@ document.addEventListener('keydown', function(event) {
             if (input) {
                 input.setAttribute('data-stop-index', idx);
                 input.id = 'stop_spot_' + idx;
-                input.setAttribute('oninput', 'stopInput("' + idx + '")');
             }
-            var sug = r.querySelector('[id^="stop_spot_suggestions"]');
-            if (sug) sug.id = 'stop_spot_suggestions' + idx;
+            var errDiv = r.querySelector('[id^="stopInputError_"]');
+            if (errDiv) errDiv.id = 'stopInputError_' + idx;
+            var textarea = r.querySelector('textarea[name="stop_pickup_dropoff[]"]');
+            if (textarea) {
+                textarea.setAttribute('data-stop-index', idx);
+                textarea.id = 'stop_pickup_dropoff_' + idx;
+            }
         });
     }
 
