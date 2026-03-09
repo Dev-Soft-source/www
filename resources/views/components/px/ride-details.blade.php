@@ -57,7 +57,7 @@
                                         {{ $origin }}.
                                     </h3>
                                     @if ($pickupLocation)
-                                        <p class="text-gray-600 text-sm"><strong>Pick up:</strong>
+                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->pickup_label ?? 'Pick up' }}:</strong>
                                             {{ $pickupLocation }}</p>
                                     @endif
                                 </div>
@@ -90,7 +90,7 @@
                                                     class="text-primary font-FuturaMdCnBT text-xl md:text-lg ">{{ $stop->label }}</span>
                                                 @if ($stop->pickup_dropoff_location)
                                                     <div class="ml-6 text-xs text-gray-600">
-                                                        <strong>Pick up/Drop off:</strong>
+                                                        <strong>{{ $rideDetailPage->pickup_dropoff_info_heading ?? 'Pick up/Drop off' }}:</strong>
                                                         {{ $stop->pickup_dropoff_location }}
                                                     </div>
                                                 @endif
@@ -119,7 +119,7 @@
                                         {{ $destination }}.
                                     </h3>
                                     @if ($dropoffLocation)
-                                        <p class="text-gray-600 text-sm"><strong>Drop off:</strong>
+                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->dropoff_label ?? 'Drop off' }}:</strong>
                                             {{ $dropoffLocation }}</p>
                                     @endif
                                 </div>
@@ -148,12 +148,12 @@
             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                 {{ $rideDetailPage->seats_left_label ?? 'Seats left' }}:
             </h4>
-            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">
+            <p class="text-xl text-primary font-normal ml-2">
                 {{ $ride->seats_available }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
-            <h4 class="text-black text-xl xl:text-2xl">Booking Price:</h4>
-            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+            <h4 class="text-black text-xl xl:text-2xl">{{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:</h4>
+            <p class="text-lg text-primary font-normal">
                 {{ $currency }}{{ number_format($pricePerSeatMinor / 100, 2) }}
                 {{ $rideDetailPage->per_seat_label ?? 'per seat' }}
             </p>
@@ -188,7 +188,7 @@
                         : optional($postRidePage)->booking_option1_tooltip ?? '';
             @endphp
             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
-                {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
+                {{ $rideDetailPage->booking_type_label ?? 'Booking method' }}:
                 <span class="text-primary font-normal text-lg" data-tippy-content="{{ $bookingModeTooltip }}"
                     style="font-family: 'Roboto', sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
             </h4>

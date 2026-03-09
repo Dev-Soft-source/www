@@ -17,6 +17,7 @@ use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\VideoDetail;
 use App\Models\PxOptionGroup;
+use App\Models\PxRide;
 
 class Controller extends BaseController
 {
@@ -213,6 +214,267 @@ class Controller extends BaseController
             return 'C$';
         }
         return $upper . ' ';
+    }
+
+    protected function getOptionLabel($group, $optionId, $selectedLangId, $defaultLangId, $defaultLabel = 'N/A'): string
+    {
+        if (!$optionId || !$group) {
+            return $defaultLabel;
+        }
+
+        $option = $group->options->firstWhere('id', $optionId);
+        if (!$option) {
+            return $defaultLabel;
+        }
+
+        $selected = $option->translations->firstWhere('language_id', $selectedLangId);
+        $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
+
+        return optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+    }
+
+    protected function getOptionCode($group, $optionId, $defaultCode = ''): string
+    {
+        if (!$optionId || !$group) {
+            return (string) $defaultCode;
+        }
+
+        $option = $group->options->firstWhere('id', $optionId);
+        if (!$option) {
+            return (string) $defaultCode;
+        }
+
+        return (string) ($option->code ?? $defaultCode);
+    }
+
+    protected function resolvePxOptionDisplayData(
+        PxRide $ride,
+        $selectedLangId,
+        $defaultLangId,
+        array $groupCodes = ['booking_mode', 'booking_method']
+    ): array {
+        $optionGroups = PxOptionGroup::query()
+            ->whereIn('code', $groupCodes)
+            ->with(['options' => function ($query) use ($selectedLangId, $defaultLangId) {
+                $query->where('is_active', true)
+                    ->with(['translations' => function ($translationQuery) use ($selectedLangId, $defaultLangId) {
+                        $translationQuery->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
+                    }]);
+            }])
+            ->get()
+            ->keyBy('code');
+
+        $display = [
+            'bookingModeLabel' => $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A'),
+            'bookingModeCode' => $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, ''),
+            'bookingMethodLabel' => $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A'),
+            'bookingMethodCode' => $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, ''),
+        ];
+
+        if (in_array('cancelation_policy', $groupCodes, true)) {
+            $display['cancelationPolicyLabel'] = $this->getOptionLabel(
+                $optionGroups->get('cancelation_policy'),
+                $ride->cancelation_policy,
+                $selectedLangId,
+                $defaultLangId,
+                'Standard'
+            );
+        }
+
+        return $display;
+    }
+
+    protected function translatePxRideOptions(PxRide $ride, $selectedLangId, $defaultLangId): PxRide
+    {
+        if (!$ride->relationLoaded('options') || !$ride->options) {
+            return $ride;
+        }
+
+        $ride->options->transform(function ($option) use ($selectedLangId, $defaultLangId) {
+            $selected = $option->translations->firstWhere('language_id', $selectedLangId);
+            $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
+            $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
+            $option->display_description = optional($selected)->description ?: optional($fallback)->description;
+            return $option;
+        });
+
+        return $ride;
+    }
+
+    protected function translatePxRideOptionCollection($rides, $selectedLangId, $defaultLangId)
+    {
+        foreach ($rides as $ride) {
+            $this->translatePxRideOptions($ride, $selectedLangId, $defaultLangId);
+        }
+
+        return $rides;
+    }
+
+    protected function resolveMatchedSegmentPriceMinor(
+        PxRide $ride,
+        $fromCityId,
+        $toCityId,
+        string $fromLabel,
+        string $toLabel,
+        $fromIndex = null,
+        $toIndex = null
+    ): int {
+        $stops = $ride->stops
+            ? $ride->stops->sortBy('stop_order')->values()->all()
+            : [];
+
+        if (count($stops) < 2) {
+            return (int) ($ride->price_minor ?? 0);
+        }
+
+        if ($fromIndex === null || $toIndex === null) {
+            [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
+        }
+
+        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
+            return (int) ($ride->price_minor ?? 0);
+        }
+
+        $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
+        if ($configuredSegmentPriceMinor !== null) {
+            return $configuredSegmentPriceMinor;
+        }
+
+        $lastIndex = count($stops) - 1;
+        $totalPriceMinor = (int) ($ride->price_minor ?? 0);
+        $intermediateLegsSum = 0;
+
+        foreach ($stops as $idx => $stop) {
+            if ($idx === 0 || $idx === $lastIndex) {
+                continue;
+            }
+            $intermediateLegsSum += (int) ($stop->price_delta_minor ?? 0);
+        }
+
+        $storedFinalLegPrice = (int) ($stops[$lastIndex]->price_delta_minor ?? 0);
+        $finalLegPrice = $storedFinalLegPrice > 0
+            ? $storedFinalLegPrice
+            : max(0, $totalPriceMinor - $intermediateLegsSum);
+        $segmentPriceMinor = 0;
+
+        for ($i = $fromIndex; $i < $toIndex; $i++) {
+            $destIdx = $i + 1;
+            $segmentPriceMinor += ($destIdx === $lastIndex)
+                ? $finalLegPrice
+                : (int) ($stops[$destIdx]->price_delta_minor ?? 0);
+        }
+
+        return max(0, $segmentPriceMinor);
+    }
+
+    protected function findMatchingStopPair(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
+    {
+        $fromCandidates = [];
+        $toCandidates = [];
+
+        foreach ($stops as $idx => $stop) {
+            if ($this->stopMatches($stop, $fromCityId, $fromLabel)) {
+                $fromCandidates[] = $idx;
+            }
+            if ($this->stopMatches($stop, $toCityId, $toLabel)) {
+                $toCandidates[] = $idx;
+            }
+        }
+
+        foreach ($fromCandidates as $fromIdx) {
+            foreach ($toCandidates as $toIdx) {
+                if ($toIdx > $fromIdx) {
+                    return [$fromIdx, $toIdx];
+                }
+            }
+        }
+
+        return [null, null];
+    }
+
+    protected function stopMatches($stop, $cityId, string $label): bool
+    {
+        if (!empty($cityId)) {
+            return (int) ($stop->city_id ?? 0) === (int) $cityId;
+        }
+
+        $needle = mb_strtolower(trim($label));
+        if ($needle === '') {
+            return false;
+        }
+
+        $haystack = mb_strtolower((string) ($stop->label ?? ''));
+        return str_contains($haystack, $needle);
+    }
+
+    protected function buildPxRideDetailsData(PxRide $ride, array $overrides = []): array
+    {
+        $parentOrigin = (string) ($ride->route->origin_label ?? 'N/A');
+        $parentDestination = (string) ($ride->route->destination_label ?? 'N/A');
+        $origin = (string) ($overrides['origin'] ?? $parentOrigin);
+        $destination = (string) ($overrides['destination'] ?? $parentDestination);
+
+        $orderedStops = $ride->stops ? $ride->stops->sortBy('stop_order')->values() : collect();
+        $firstStop = $orderedStops->first();
+        $lastStop = $orderedStops->last();
+
+        $originStop = $orderedStops->first(function ($stop) use ($origin) {
+            return trim((string) ($stop->label ?? '')) === trim($origin);
+        });
+        $destinationStop = $orderedStops->first(function ($stop) use ($destination) {
+            return trim((string) ($stop->label ?? '')) === trim($destination);
+        });
+
+        $pickupLocation = $overrides['pickupLocation'] ?? null;
+        if ($pickupLocation === null) {
+            if ($originStop && $originStop->pickup_dropoff_location) {
+                $pickupLocation = $originStop->pickup_dropoff_location;
+            } elseif ($firstStop && $firstStop->pickup_dropoff_location) {
+                $pickupLocation = $firstStop->pickup_dropoff_location;
+            } else {
+                $pickupLocation = $ride->meta['pickup_location'] ?? null;
+            }
+        }
+
+        $dropoffLocation = $overrides['dropoffLocation'] ?? null;
+        if ($dropoffLocation === null) {
+            if ($destinationStop && $destinationStop->pickup_dropoff_location) {
+                $dropoffLocation = $destinationStop->pickup_dropoff_location;
+            } elseif ($lastStop && $lastStop->pickup_dropoff_location) {
+                $dropoffLocation = $lastStop->pickup_dropoff_location;
+            } else {
+                $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
+            }
+        }
+
+        $originDepartureAt = $overrides['originDepartureAt'] ?? null;
+        if ($originDepartureAt === null) {
+            if ($originStop && $originStop->eta_at) {
+                $originDepartureAt = $originStop->eta_at;
+            } elseif ($firstStop && $firstStop->eta_at) {
+                $originDepartureAt = $firstStop->eta_at;
+            } else {
+                $originDepartureAt = $ride->departure_at;
+            }
+        }
+
+        $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
+        $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
+        $segmentStops = collect($overrides['segmentStops'] ?? []);
+
+        return [
+            'parentOrigin' => $parentOrigin,
+            'parentDestination' => $parentDestination,
+            'origin' => $origin,
+            'destination' => $destination,
+            'pickupLocation' => $pickupLocation,
+            'dropoffLocation' => $dropoffLocation,
+            'originDepartureAt' => $originDepartureAt,
+            'pricePerSeatMinor' => (int) ($overrides['pricePerSeatMinor'] ?? $ride->price_minor ?? 0),
+            'currency' => $currencyMap[$currencyCode] ?? ($currencyCode . ' '),
+            'segmentStops' => $segmentStops,
+            'segmentMode' => (bool) ($overrides['segmentMode'] ?? $segmentStops->isNotEmpty()),
+        ];
     }
 
     /**

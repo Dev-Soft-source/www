@@ -67,105 +67,45 @@
         @php
             $isPinkRide = $ride->women_only === true || $ride->women_only === 1;
             $isExtraCareRide = $ride->extra_care === true || $ride->extra_care === 1;
+            $rideTypeAlert = null;
+
+            if ($isPinkRide && $isExtraCareRide) {
+                $rideTypeAlert = [
+                    'wrapper' => 'bg-purple-100 border-purple-500 text-purple-800',
+                    'icon' => 'text-purple-500',
+                    'message' => 'This is a Pink Ride and Extra+ Ride',
+                ];
+            } elseif ($isExtraCareRide) {
+                $rideTypeAlert = [
+                    'wrapper' => 'bg-green-100 border-green-500 text-green-800',
+                    'icon' => 'text-green-500',
+                    'message' => 'This is a Extra+ Ride',
+                ];
+            } elseif ($isPinkRide) {
+                $rideTypeAlert = [
+                    'wrapper' => 'bg-pink-100 border-pink-500 text-pink-800',
+                    'icon' => 'text-pink-500',
+                    'message' => 'This is a Pink Ride',
+                ];
+            }
         @endphp
-        @if($isPinkRide && $isExtraCareRide)
+        @if ($rideTypeAlert)
             <div class="col-span-3 w-full">
-                <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 px-4 py-2 rounded flex items-center" role="alert">
-                    <svg class="w-6 h-6 mr-2 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <div class="{{ $rideTypeAlert['wrapper'] }} border-l-4 px-4 py-2 rounded flex items-center" role="alert">
+                    <svg class="w-6 h-6 mr-2 {{ $rideTypeAlert['icon'] }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                        <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <span class="text-lg">This is a Pink Ride and Extra+ Ride</span>
+                    <span class="text-lg">{{ $rideTypeAlert['message'] }}</span>
                 </div>
             </div>
-        @else
-            @if($isExtraCareRide)
-                <div class="col-span-3 w-full">
-                    <div class="bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-2 rounded flex items-center" role="alert">
-                        <svg class="w-6 h-6 mr-2 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span class="text-lg">This is a Extra+ Ride</span>
-                    </div>
-                </div>
-            @elseif($isPinkRide)
-                <div class="col-span-3 w-full">
-                    <div class="bg-pink-100 border-l-4 border-pink-500 text-pink-800 px-4 py-2 rounded flex items-center" role="alert">
-                        <svg class="w-6 h-6 mr-2 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span class="text-lg">This is a Pink Ride</span>
-                    </div>
-                </div>
-            @endif
         @endif
 
-        @php
-            $parentOrigin = $ride->route->origin_label ?? 'N/A';
-            $parentDestination = $ride->route->destination_label ?? 'N/A';
-            $origin = $displayOrigin ?? ($ride->route->origin_label ?? 'N/A');
-            $destination = $displayDestination ?? ($ride->route->destination_label ?? 'N/A');
-
-            // Get pickup/dropoff locations from stops
-            $orderedStops = $ride->stops->sortBy('stop_order');
-            $firstStop = $orderedStops->first(); // First stop (origin)
-            $lastStop = $orderedStops->last(); // Last stop (destination)
-
-            // Find the stop that matches the displayed origin (could be a middle stop in segment view)
-            $originStop = $orderedStops->first(function ($stop) use ($origin) {
-                return trim($stop->label ?? '') === trim($origin);
-            });
-
-            // Find the stop that matches the displayed destination (could be a middle stop in segment view)
-            $destinationStop = $orderedStops->first(function ($stop) use ($destination) {
-                return trim($stop->label ?? '') === trim($destination);
-            });
-
-            // Use pickup_dropoff_location from the matching origin stop, otherwise fall back to first stop or meta
-            $pickupLocation = null;
-            if ($originStop && $originStop->pickup_dropoff_location) {
-                $pickupLocation = $originStop->pickup_dropoff_location;
-            } elseif ($firstStop && $firstStop->pickup_dropoff_location) {
-                $pickupLocation = $firstStop->pickup_dropoff_location;
-            } else {
-                $pickupLocation = $ride->meta['pickup_location'] ?? null;
-            }
-
-            // Use pickup_dropoff_location from the matching destination stop, otherwise fall back to last stop or meta
-            $dropoffLocation = null;
-            if ($destinationStop && $destinationStop->pickup_dropoff_location) {
-                $dropoffLocation = $destinationStop->pickup_dropoff_location;
-            } elseif ($lastStop && $lastStop->pickup_dropoff_location) {
-                $dropoffLocation = $lastStop->pickup_dropoff_location;
-            } else {
-                $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
-            }
-
-            // Get departure date/time from origin stop (could be a middle stop in segment view)
-            $originDepartureAt = null;
-            if ($originStop && $originStop->eta_at) {
-                $originDepartureAt = $originStop->eta_at;
-            } elseif ($firstStop && $firstStop->eta_at) {
-                $originDepartureAt = $firstStop->eta_at;
-            } else {
-                $originDepartureAt = $ride->departure_at;
-            }
-
-            $pricePerSeatMinor = (int) ($displayPriceMinor ?? $ride->price_minor);
-            $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
-            $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
-            $currency = $currencyMap[$currencyCode] ?? $currencyCode . ' ';
-            $segmentStops = $displaySegmentStops ?? collect();
-            $segmentMode = (bool) ($isSegmentView ?? false);
-        @endphp
-
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4 ride-detail-page">
             <div class="col-span-2">
-                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$parentOrigin" :parentDestination="$parentDestination" :origin="$origin"
-                    :destination="$destination" :pickupLocation="$pickupLocation" :dropoffLocation="$dropoffLocation" :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
-                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" 
+                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$rideDetailsData['parentOrigin']" :parentDestination="$rideDetailsData['parentDestination']" :origin="$rideDetailsData['origin']"
+                    :destination="$rideDetailsData['destination']" :pickupLocation="$rideDetailsData['pickupLocation']" :dropoffLocation="$rideDetailsData['dropoffLocation']" :originDepartureAt="$rideDetailsData['originDepartureAt']" :pricePerSeatMinor="$rideDetailsData['pricePerSeatMinor']"
+                    :currency="$rideDetailsData['currency']" :segmentStops="$rideDetailsData['segmentStops']" :segmentMode="$rideDetailsData['segmentMode']" 
                     :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
                     :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
                     :postRidePage="$postRidePage ?? null" />
@@ -334,7 +274,7 @@
                                 </a>
                                 <button type="button" onclick="toggleModal('px-cancel-booking-modal')"
                                     class="group flex items-center button-exp-no-fill rounded cursor-pointer justify-center py-2 px-4 text-lg font-FuturaMdCnBT">
-                                    <span class="font-medium text-xl">{{ $rideDetailPage->cancel_button_label ?? 'Cancel Booking' }}</span>
+                                    <span class="font-medium text-xl">{{ $rideDetailPage->cancel_booking_btn_label ?? 'Cancel Booking' }}</span>
                                 </button>
                             </div>
                         @elseif (
@@ -430,7 +370,7 @@
 
 @section('style')
 <style>
-p {
+.ride-detail-page p {
     font-family: 'Roboto', sans-serif;
 }
 </style>

@@ -63,12 +63,11 @@
     @php
         $isEditMode = (bool) ($isEditMode ?? false);
         $existingBooking = $existingBooking ?? null;
+        $rideDetailsData = $rideDetailsData ?? [];
         $fromLabel = $fromStop->label ?? 'N/A';
         $toLabel = $toStop->label ?? 'N/A';
         $perSeatMinor = (int) ($segmentPriceMinor ?? 0);
-        $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
-        $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
-        $currencySymbol = $currencyMap[$currencyCode] ?? $currencyCode . ' ';
+        $currencySymbol = (string) ($rideDetailsData['currency'] ?? '$');
         $currentBookedSeats = $isEditMode ? (int) ($existingBooking->seats ?? 1) : 0;
         $segmentAvailableSeats = (int) ($segmentAvailableSeats ?? $ride->seats_available);
         $maxSeatsAllowed = $isEditMode
@@ -84,61 +83,6 @@
         } else {
             $payButtonLabel = $bookingModeCodeValue === 'manual' ? 'Pay and Request to Book' : 'Pay and Book Seats';
         }
-
-        // Prepare data for ride-details component
-        $parentOrigin = $ride->route->origin_label ?? 'N/A';
-        $parentDestination = $ride->route->destination_label ?? 'N/A';
-        $origin = $fromLabel;
-        $destination = $toLabel;
-
-        // Get pickup/dropoff locations from stops
-        $orderedStops = $ride->stops->sortBy('stop_order');
-        $firstStop = $orderedStops->first();
-        $lastStop = $orderedStops->last();
-
-        // Find the stop that matches the displayed origin
-        $originStop = $orderedStops->first(function ($stop) use ($origin) {
-            return trim($stop->label ?? '') === trim($origin);
-        });
-
-        // Find the stop that matches the displayed destination
-        $destinationStop = $orderedStops->first(function ($stop) use ($destination) {
-            return trim($stop->label ?? '') === trim($destination);
-        });
-
-        // Use pickup_dropoff_location from the matching origin stop, otherwise fall back to first stop or meta
-        $pickupLocation = null;
-        if ($originStop && $originStop->pickup_dropoff_location) {
-            $pickupLocation = $originStop->pickup_dropoff_location;
-        } elseif ($firstStop && $firstStop->pickup_dropoff_location) {
-            $pickupLocation = $firstStop->pickup_dropoff_location;
-        } else {
-            $pickupLocation = $ride->meta['pickup_location'] ?? null;
-        }
-
-        // Use pickup_dropoff_location from the matching destination stop, otherwise fall back to last stop or meta
-        $dropoffLocation = null;
-        if ($destinationStop && $destinationStop->pickup_dropoff_location) {
-            $dropoffLocation = $destinationStop->pickup_dropoff_location;
-        } elseif ($lastStop && $lastStop->pickup_dropoff_location) {
-            $dropoffLocation = $lastStop->pickup_dropoff_location;
-        } else {
-            $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
-        }
-
-        // Get departure date/time from origin stop
-        $originDepartureAt = null;
-        if ($originStop && $originStop->eta_at) {
-            $originDepartureAt = $originStop->eta_at;
-        } elseif ($firstStop && $firstStop->eta_at) {
-            $originDepartureAt = $firstStop->eta_at;
-        } else {
-            $originDepartureAt = $ride->departure_at;
-        }
-
-        $pricePerSeatMinor = $perSeatMinor;
-        $currency = $currencySymbol;
-        $segmentMode = $segmentStops->isNotEmpty();
 
         // Fetch rideDetailPage if not available
         $rideDetailPage = null;
@@ -220,9 +164,9 @@
         <h1>{{ $bookingPage->main_heading ?? 'Ride detail' }}</h1>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
-                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$parentOrigin" :parentDestination="$parentDestination" :origin="$origin"
-                    :destination="$destination" :pickupLocation="$pickupLocation" :dropoffLocation="$dropoffLocation" :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
-                    :currency="$currency" :segmentStops="$segmentStops" :segmentMode="$segmentMode" 
+                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$rideDetailsData['parentOrigin']" :parentDestination="$rideDetailsData['parentDestination']" :origin="$rideDetailsData['origin']"
+                    :destination="$rideDetailsData['destination']" :pickupLocation="$rideDetailsData['pickupLocation']" :dropoffLocation="$rideDetailsData['dropoffLocation']" :originDepartureAt="$rideDetailsData['originDepartureAt']" :pricePerSeatMinor="$rideDetailsData['pricePerSeatMinor']"
+                    :currency="$rideDetailsData['currency']" :segmentStops="$rideDetailsData['segmentStops']" :segmentMode="$rideDetailsData['segmentMode']" 
                     :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
                     :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
                     :postRidePage="$postRidePage ?? null" />

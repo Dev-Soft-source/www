@@ -71,20 +71,7 @@ class PxBookingWebController extends Controller
             $option->display_description = optional($selected)->description ?: optional($fallback)->description;
             return $option;
         });
-        $optionGroups = PxOptionGroup::whereIn('code', ['booking_mode', 'booking_method'])
-            ->with(['options' => function ($q) use ($selectedLangId, $defaultLangId) {
-                $q->where('is_active', true)
-                    ->with(['translations' => function ($tq) use ($selectedLangId, $defaultLangId) {
-                        $tq->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
-                    }]);
-            }])
-            ->get()
-            ->keyBy('code');
-
-        $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
-        $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
-        $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
-        $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
+        $rideOptionDisplay = $this->resolvePxOptionDisplayData($ride, $selectedLangId, $defaultLangId);
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
         $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $from_stop_id, (int) $to_stop_id);
 
@@ -99,53 +86,33 @@ class PxBookingWebController extends Controller
                 ->with('error', 'Not enough available seats for this route section.');
         }
 
-        $cards = Card::query()
-            ->where('user_id', auth()->id())
-            ->orderByDesc('primary_card')
-            ->orderByDesc('id')
-            ->get();
-
-        // Fetch booking fee related data
-        $setting = SiteSetting::first();
-        $getCoffeeCrBalance = CoffeeWallet::where('user_id', auth()->id())->sum('cr_amount');
-        $getCoffeeDrBalance = CoffeeWallet::where('user_id', auth()->id())->sum('dr_amount');
-        $coffeeBalance = $getCoffeeDrBalance - $getCoffeeCrBalance;
-
-        $stateTax = 0;
-        if ($setting && isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger" && $setting->tax_type == "state_wise_tax") {
-            $fromCityId = $fromStop->city_id;
-            if ($fromCityId) {
-                $getFromState = City::with('state:id,tax')->where('id', $fromCityId)->where('status', '1')->first();
-                if ($getFromState && $getFromState->state) {
-                    $stateTax = $getFromState->state->tax ?? 0;
-                }
-            }
-        }
-
-        $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLangId)->first();
-        if (!$bookingPage && $defaultLangId) {
-            $bookingPage = BookingPageSettingDetail::where('language_id', $defaultLangId)->first();
-        }
-
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $bookingSupportData = $this->buildBookingSupportData($selectedLangId, $defaultLangId, $fromStop->city_id);
+        $rideDetailsData = $this->buildPxRideDetailsData($ride, [
+            'origin' => (string) ($orderedStops[$fromIndex]->label ?? 'N/A'),
+            'destination' => (string) ($orderedStops[$toIndex]->label ?? 'N/A'),
+            'pricePerSeatMinor' => $segmentPriceMinor,
+            'segmentStops' => collect($orderedStops)->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
+            'segmentMode' => true,
+        ]);
 
         return view('px.booking', [
             'ride' => $ride,
             'fromStop' => $orderedStops[$fromIndex],
             'toStop' => $orderedStops[$toIndex],
-            'segmentStops' => collect($orderedStops)->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
+            'segmentStops' => $rideDetailsData['segmentStops'],
             'segmentPriceMinor' => $segmentPriceMinor,
             'segmentAvailableSeats' => $segmentAvailableSeats,
-            'bookingModeCode' => $bookingModeCode,
-            'bookingModeLabel' => $bookingModeLabel,
-            'bookingMethodCode' => $bookingMethodCode,
-            'bookingMethodLabel' => $bookingMethodLabel,
-            'cards' => $cards,
-            'setting' => $setting,
-            'coffeeBalance' => $coffeeBalance,
-            'stateTax' => $stateTax,
-            'bookingPage' => $bookingPage,
-            'postRidePage' => $postRidePage,
+            'bookingModeCode' => $rideOptionDisplay['bookingModeCode'],
+            'bookingModeLabel' => $rideOptionDisplay['bookingModeLabel'],
+            'bookingMethodCode' => $rideOptionDisplay['bookingMethodCode'],
+            'bookingMethodLabel' => $rideOptionDisplay['bookingMethodLabel'],
+            'cards' => $bookingSupportData['cards'],
+            'setting' => $bookingSupportData['setting'],
+            'coffeeBalance' => $bookingSupportData['coffeeBalance'],
+            'stateTax' => $bookingSupportData['stateTax'],
+            'bookingPage' => $bookingSupportData['bookingPage'],
+            'postRidePage' => $bookingSupportData['postRidePage'],
+            'rideDetailsData' => $rideDetailsData,
         ]);
     }
 
@@ -195,72 +162,40 @@ class PxBookingWebController extends Controller
             return $option;
         });
 
-        $optionGroups = PxOptionGroup::whereIn('code', ['booking_mode', 'booking_method'])
-            ->with(['options' => function ($q) use ($selectedLangId, $defaultLangId) {
-                $q->where('is_active', true)
-                    ->with(['translations' => function ($tq) use ($selectedLangId, $defaultLangId) {
-                        $tq->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
-                    }]);
-            }])
-            ->get()
-            ->keyBy('code');
-
-        $bookingModeCode = $this->getOptionCode($optionGroups->get('booking_mode'), $ride->booking_mode, '');
-        $bookingMethodCode = $this->getOptionCode($optionGroups->get('booking_method'), $ride->booking_method, '');
-        $bookingModeLabel = $this->getOptionLabel($optionGroups->get('booking_mode'), $ride->booking_mode, $selectedLangId, $defaultLangId, 'N/A');
-        $bookingMethodLabel = $this->getOptionLabel($optionGroups->get('booking_method'), $ride->booking_method, $selectedLangId, $defaultLangId, 'N/A');
+        $rideOptionDisplay = $this->resolvePxOptionDisplayData($ride, $selectedLangId, $defaultLangId);
         $segmentPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, null, null, '', '', $fromIndex, $toIndex);
         $segmentAvailableSeats = $ride->resolveSegmentAvailableSeats((int) $booking->from_stop_id, (int) $booking->to_stop_id);
 
-        $cards = Card::query()
-            ->where('user_id', auth()->id())
-            ->orderByDesc('primary_card')
-            ->orderByDesc('id')
-            ->get();
-
-        // Fetch booking fee related data
-        $setting = SiteSetting::first();
-        $getCoffeeCrBalance = CoffeeWallet::where('user_id', auth()->id())->sum('cr_amount');
-        $getCoffeeDrBalance = CoffeeWallet::where('user_id', auth()->id())->sum('dr_amount');
-        $coffeeBalance = $getCoffeeDrBalance - $getCoffeeCrBalance;
-
-        $stateTax = 0;
-        if ($setting && isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger" && $setting->tax_type == "state_wise_tax") {
-            $fromCityId = $ride->stops->sortBy('stop_order')->values()->get($fromIndex)->city_id;
-            if ($fromCityId) {
-                $getFromState = City::with('state:id,tax')->where('id', $fromCityId)->where('status', '1')->first();
-                if ($getFromState && $getFromState->state) {
-                    $stateTax = $getFromState->state->tax ?? 0;
-                }
-            }
-        }
-
-        $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLangId)->first();
-        if (!$bookingPage && $defaultLangId) {
-            $bookingPage = BookingPageSettingDetail::where('language_id', $defaultLangId)->first();
-        }
-
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $fromCityId = $ride->stops->sortBy('stop_order')->values()->get($fromIndex)->city_id ?? null;
+        $bookingSupportData = $this->buildBookingSupportData($selectedLangId, $defaultLangId, $fromCityId);
+        $rideDetailsData = $this->buildPxRideDetailsData($ride, [
+            'origin' => (string) ($ride->stops->sortBy('stop_order')->values()->get($fromIndex)->label ?? 'N/A'),
+            'destination' => (string) ($ride->stops->sortBy('stop_order')->values()->get($toIndex)->label ?? 'N/A'),
+            'pricePerSeatMinor' => $segmentPriceMinor,
+            'segmentStops' => $ride->stops->sortBy('stop_order')->values()->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
+            'segmentMode' => true,
+        ]);
 
         return view('px.booking', [
             'ride' => $ride,
             'fromStop' => $ride->stops->sortBy('stop_order')->values()->get($fromIndex),
             'toStop' => $ride->stops->sortBy('stop_order')->values()->get($toIndex),
-            'segmentStops' => $ride->stops->sortBy('stop_order')->values()->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
+            'segmentStops' => $rideDetailsData['segmentStops'],
             'segmentPriceMinor' => $segmentPriceMinor,
             'segmentAvailableSeats' => $segmentAvailableSeats,
-            'bookingModeCode' => $bookingModeCode,
-            'bookingMethodCode' => $bookingMethodCode,
-            'bookingModeLabel' => $bookingModeLabel,
-            'bookingMethodLabel' => $bookingMethodLabel,
-            'cards' => $cards,
+            'bookingModeCode' => $rideOptionDisplay['bookingModeCode'],
+            'bookingMethodCode' => $rideOptionDisplay['bookingMethodCode'],
+            'bookingModeLabel' => $rideOptionDisplay['bookingModeLabel'],
+            'bookingMethodLabel' => $rideOptionDisplay['bookingMethodLabel'],
+            'cards' => $bookingSupportData['cards'],
             'existingBooking' => $booking,
             'isEditMode' => true,
-            'setting' => $setting,
-            'coffeeBalance' => $coffeeBalance,
-            'stateTax' => $stateTax,
-            'bookingPage' => $bookingPage,
-            'postRidePage' => $postRidePage,
+            'setting' => $bookingSupportData['setting'],
+            'coffeeBalance' => $bookingSupportData['coffeeBalance'],
+            'stateTax' => $bookingSupportData['stateTax'],
+            'bookingPage' => $bookingSupportData['bookingPage'],
+            'postRidePage' => $bookingSupportData['postRidePage'],
+            'rideDetailsData' => $rideDetailsData,
         ]);
     }
 
@@ -747,23 +682,6 @@ class PxBookingWebController extends Controller
         }
     }
 
-    protected function getOptionLabel($group, $optionId, $selectedLangId, $defaultLangId, $defaultLabel = 'N/A'): string
-    {
-        if (!$optionId || !$group) {
-            return $defaultLabel;
-        }
-
-        $option = $group->options->firstWhere('id', $optionId);
-        if (!$option) {
-            return $defaultLabel;
-        }
-
-        $selected = $option->translations->firstWhere('language_id', $selectedLangId);
-        $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
-
-        return optional($selected)->label ?: optional($fallback)->label ?: $option->code;
-    }
-
     protected function validateBookingRequest(Request $request, PxRide $ride): array
     {
         return $request->validate(
@@ -810,18 +728,65 @@ class PxBookingWebController extends Controller
         ];
     }
 
-    protected function getOptionCode($group, $optionId, $defaultCode = ''): string
+    protected function buildBookingSupportData($selectedLangId, $defaultLangId, $fromCityId = null): array
     {
-        if (!$optionId || !$group) {
-            return (string) $defaultCode;
+        $setting = SiteSetting::first();
+
+        return [
+            'cards' => $this->getPassengerCards(),
+            'setting' => $setting,
+            'coffeeBalance' => $this->getPassengerCoffeeBalance(),
+            'stateTax' => $this->resolvePassengerStateTax($setting, $fromCityId),
+            'bookingPage' => $this->getBookingPageWithFallback($selectedLangId, $defaultLangId),
+            'postRidePage' => $this->getPostRidePageWithSettingDetail(),
+        ];
+    }
+
+    protected function getPassengerCards()
+    {
+        return Card::query()
+            ->where('user_id', auth()->id())
+            ->orderByDesc('primary_card')
+            ->orderByDesc('id')
+            ->get();
+    }
+
+    protected function getPassengerCoffeeBalance(): float
+    {
+        $credit = CoffeeWallet::where('user_id', auth()->id())->sum('cr_amount');
+        $debit = CoffeeWallet::where('user_id', auth()->id())->sum('dr_amount');
+
+        return (float) ($debit - $credit);
+    }
+
+    protected function resolvePassengerStateTax($setting, $fromCityId = null): float
+    {
+        if (
+            !$setting
+            || $setting->deduct_tax != 'deduct_from_passenger'
+            || $setting->tax_type != 'state_wise_tax'
+            || empty($fromCityId)
+        ) {
+            return 0;
         }
 
-        $option = $group->options->firstWhere('id', $optionId);
-        if (!$option) {
-            return (string) $defaultCode;
+        $city = City::with('state:id,tax')
+            ->where('id', $fromCityId)
+            ->where('status', '1')
+            ->first();
+
+        return (float) ($city?->state?->tax ?? 0);
+    }
+
+    protected function getBookingPageWithFallback($selectedLangId, $defaultLangId)
+    {
+        $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLangId)->first();
+
+        if (!$bookingPage && $defaultLangId) {
+            $bookingPage = BookingPageSettingDetail::where('language_id', $defaultLangId)->first();
         }
 
-        return (string) ($option->code ?? $defaultCode);
+        return $bookingPage;
     }
 
     protected function resolveRideStopIndexes(PxRide $ride, int $fromStopId, int $toStopId): array
@@ -1052,93 +1017,4 @@ class PxBookingWebController extends Controller
         return $query->first();
     }
 
-    protected function resolveMatchedSegmentPriceMinor(PxRide $ride, $fromCityId, $toCityId, string $fromLabel, string $toLabel, $fromIndex = null, $toIndex = null): int
-    {
-        $stops = $ride->stops
-            ? $ride->stops->sortBy('stop_order')->values()->all()
-            : [];
-
-        if (count($stops) < 2) {
-            return (int) ($ride->price_minor ?? 0);
-        }
-
-        if ($fromIndex === null || $toIndex === null) {
-            [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
-        }
-
-        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
-            return (int) ($ride->price_minor ?? 0);
-        }
-
-        $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
-        if ($configuredSegmentPriceMinor !== null) {
-            return $configuredSegmentPriceMinor;
-        }
-
-        $lastIndex = count($stops) - 1;
-        $totalPriceMinor = (int) ($ride->price_minor ?? 0);
-        $intermediateLegsSum = 0;
-
-        foreach ($stops as $idx => $stop) {
-            if ($idx === 0 || $idx === $lastIndex) {
-                continue;
-            }
-            $intermediateLegsSum += (int) ($stop->price_delta_minor ?? 0);
-        }
-
-        $storedFinalLegPrice = (int) ($stops[$lastIndex]->price_delta_minor ?? 0);
-        $finalLegPrice = $storedFinalLegPrice > 0
-            ? $storedFinalLegPrice
-            : max(0, $totalPriceMinor - $intermediateLegsSum);
-        $segmentPriceMinor = 0;
-
-        for ($i = $fromIndex; $i < $toIndex; $i++) {
-            $destIdx = $i + 1;
-            $segmentPriceMinor += ($destIdx === $lastIndex)
-                ? $finalLegPrice
-                : (int) ($stops[$destIdx]->price_delta_minor ?? 0);
-        }
-
-        return max(0, $segmentPriceMinor);
-    }
-
-    protected function findMatchingStopPair(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
-    {
-        $fromCandidates = [];
-        $toCandidates = [];
-
-        foreach ($stops as $idx => $stop) {
-            if ($this->stopMatches($stop, $fromCityId, $fromLabel)) {
-                $fromCandidates[] = $idx;
-            }
-            if ($this->stopMatches($stop, $toCityId, $toLabel)) {
-                $toCandidates[] = $idx;
-            }
-        }
-
-        foreach ($fromCandidates as $fromIdx) {
-            foreach ($toCandidates as $toIdx) {
-                if ($toIdx > $fromIdx) {
-                    return [$fromIdx, $toIdx];
-                }
-            }
-        }
-
-        return [null, null];
-    }
-
-    protected function stopMatches($stop, $cityId, string $label): bool
-    {
-        if (!empty($cityId)) {
-            return (int) ($stop->city_id ?? 0) === (int) $cityId;
-        }
-
-        $needle = mb_strtolower(trim($label));
-        if ($needle === '') {
-            return false;
-        }
-
-        $haystack = mb_strtolower((string) ($stop->label ?? ''));
-        return str_contains($haystack, $needle);
-    }
 }

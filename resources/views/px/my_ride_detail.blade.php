@@ -231,25 +231,11 @@
 
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
-                @php
-                    $parentOrigin = $ride->route->origin_label ?? 'N/A';
-                    $parentDestination = $ride->route->destination_label ?? 'N/A';
-                    $origin = $parentOrigin;
-                    $destination = $parentDestination;
-                    $pickupLocation = $ride->meta['pickup_location'] ?? null;
-                    $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
-                    $originDepartureAt = $ride->departure_at;
-                    $pricePerSeatMinor = (int) $ride->price_minor;
-                    $currencyCode = strtoupper((string) ($ride->currency ?? 'USD'));
-                    $currencyMap = ['USD' => '$', 'CAD' => 'C$'];
-                    $currency = $currencyMap[$currencyCode] ?? ($currencyCode . ' ');
-                @endphp
-
-                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$parentOrigin"
-                    :parentDestination="$parentDestination" :origin="$origin" :destination="$destination"
-                    :pickupLocation="$pickupLocation" :dropoffLocation="$dropoffLocation"
-                    :originDepartureAt="$originDepartureAt" :pricePerSeatMinor="$pricePerSeatMinor"
-                    :currency="$currency" :segmentStops="collect()" :segmentMode="false"
+                <x-px.ride-details :ride="$ride" :rideDetailPage="$rideDetailPage" :parentOrigin="$rideDetailsData['parentOrigin']"
+                    :parentDestination="$rideDetailsData['parentDestination']" :origin="$rideDetailsData['origin']" :destination="$rideDetailsData['destination']"
+                    :pickupLocation="$rideDetailsData['pickupLocation']" :dropoffLocation="$rideDetailsData['dropoffLocation']"
+                    :originDepartureAt="$rideDetailsData['originDepartureAt']" :pricePerSeatMinor="$rideDetailsData['pricePerSeatMinor']"
+                    :currency="$rideDetailsData['currency']" :segmentStops="$rideDetailsData['segmentStops']" :segmentMode="$rideDetailsData['segmentMode']"
                     :bookingModeLabel="$bookingModeLabel ?? null" :bookingMethodLabel="$bookingMethodLabel ?? null"
                     :bookingModeCode="$bookingModeCode ?? null" :bookingMethodCode="$bookingMethodCode ?? null"
                     :postRidePage="$postRidePage ?? null"
