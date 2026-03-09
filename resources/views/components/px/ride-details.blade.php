@@ -130,15 +130,31 @@
             </div>
         </div>
         <div class="mt-4 order-1 md:order-2">
+            @php
+                $dateLocale = optional($selectedLanguage)->locale
+                    ?? optional($selectedLanguage)->abbreviation
+                    ?? app()->getLocale();
+
+                $departureAt = $originDepartureAt
+                    ? \Carbon\Carbon::parse($originDepartureAt)->locale($dateLocale)
+                    : null;
+
+                $departureDateLabel = $departureAt
+                    ? $departureAt->translatedFormat('F d, Y')
+                    : 'N/A';
+
+                $departureTime = $departureAt
+                    ? $departureAt->format('h:i A')
+                    : null;
+
+                $departureTimeLabel = $departureTime === '12:00 PM'
+                    ? $rideDetailPage->noon_label
+                    : ($departureTime === '12:00 AM' ? $rideDetailPage->midnight_label : $departureTime);
+            @endphp
             <p class="whitespace-nowrap font-semibold">
-                {{ $originDepartureAt ? \Carbon\Carbon::parse($originDepartureAt)->format('F d, Y') : 'N/A' }}
-                at
-                @if ($originDepartureAt)
-                    @php $departureTime = \Carbon\Carbon::parse($originDepartureAt)->format('h:i A'); @endphp
-                    {{ $departureTime === '12:00 PM' ? '12 noon' : ($departureTime === '12:00 AM' ? '12 midnight' : $departureTime) }}
-                @else
-                    N/A
-                @endif
+                {{ $departureDateLabel }}
+                {{ $rideDetailPage->at_label }}
+                {{ $departureTimeLabel ?? 'N/A' }}
             </p>
         </div>
     </div>
@@ -204,7 +220,7 @@
                 </h4>
             </div>
             <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
-                @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
+                @foreach ($ride->bookings->where('status', '<>', 'cancelled') as $booking)
                     @for ($i = 0; $i < $booking->seats; $i++)
                         @if ($booking->passenger)
                             @if ($booking->passenger->profile_image)

@@ -540,6 +540,7 @@ Route::get('{lang?}/px/search-proximalocal-ride', [PxRideWebController::class, '
 
 Route::get('{lang?}/px/booking/{id}/edit', [PxBookingWebController::class, 'editBooking'])->whereNumber('id')->name('px.booking.edit')->middleware(['auth', 'nocache']);
 Route::put('{lang?}/px/booking/{id}', [PxBookingWebController::class, 'updateBooking'])->whereNumber('id')->name('px.booking.update')->middleware(['auth', 'nocache']);
+Route::get('{lang?}/px/booking/{id}/cancel', [PxBookingWebController::class, 'cancel'])->whereNumber('id')->name('px.booking.cancel_page')->middleware(['auth', 'nocache']);
 Route::post('{lang?}/px/booking/{id}/cancel', [PxBookingWebController::class, 'cancelBooking'])->whereNumber('id')->name('px.booking.cancel')->middleware(['auth', 'nocache']);
 Route::get('{lang?}/px/booking/{from_stop_id}/{to_stop_id}', [PxBookingWebController::class, 'booking'])->whereNumber('from_stop_id')->whereNumber('to_stop_id')->name('px.booking')->middleware(['auth', 'nocache']);
 Route::post('{lang?}/px/booking/pay', [PxBookingWebController::class, 'payBooking'])->name('px.booking.pay')->middleware(['auth', 'nocache']);

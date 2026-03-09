@@ -272,10 +272,10 @@
                                     class="group flex items-center button-exp-fill rounded cursor-pointer justify-center py-2 px-4 text-lg font-FuturaMdCnBT">
                                     <span class="font-medium text-xl">{{ $rideDetailPage->edit_button_actions_label ?? 'Update Booking' }}</span>
                                 </a>
-                                <button type="button" onclick="toggleModal('px-cancel-booking-modal')"
+                                <a href="{{ route('px.booking.cancel_page', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $existingBooking->id]) }}"
                                     class="group flex items-center button-exp-no-fill rounded cursor-pointer justify-center py-2 px-4 text-lg font-FuturaMdCnBT">
                                     <span class="font-medium text-xl">{{ $rideDetailPage->cancel_booking_btn_label ?? 'Cancel Booking' }}</span>
-                                </button>
+                                </a>
                             </div>
                         @elseif (
                             (int) ($displaySeatsAvailable ?? $ride->seats_available) > 0 &&
@@ -323,31 +323,6 @@
             </div>
         </div>
     </div>
-
-    @if (!empty($existingBooking))
-        <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
-            id="px-cancel-booking-modal">
-            <div class="relative w-auto my-6 mx-auto max-w-lg">
-                <div
-                    class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                    <div class="p-6 text-center">
-                        <h3 class="text-xl font-FuturaMdCnBT text-gray-900 mb-3">Cancel Booking</h3>
-                        <p class="text-gray-600 mb-6">Are you sure you want to cancel this booking?</p>
-                        <div class="flex justify-center gap-3">
-                            <form method="POST"
-                                action="{{ route('px.booking.cancel', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $existingBooking->id]) }}">
-                                @csrf
-                                <button type="submit" class="button-exp-fill">Yes, cancel</button>
-                            </form>
-                            <button type="button" onclick="toggleModal('px-cancel-booking-modal')"
-                                class="button-exp-no-fill">No</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="px-cancel-booking-modal-backdrop"></div>
-    @endif
 @endsection
 
 @section('script')

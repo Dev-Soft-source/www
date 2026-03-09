@@ -77,25 +77,13 @@
         $bookingMethodCode = strtolower((string) ($bookingMethodCode ?? ''));
         $isCashBookingMethod = $bookingMethodCode === 'cash';
         if ($isEditMode) {
-            $payButtonLabel = 'Update Booking';
+            $payButtonLabel = $rideDetailPage->edit_button_actions_label ?? 'Update Booking';
         } elseif ($isCashBookingMethod) {
-            $payButtonLabel = $bookingModeCodeValue === 'manual' ? 'Request to Book' : 'Book Seats';
+            $payButtonLabel = $bookingModeCodeValue === 'manual' ? ($bookingPage->booking_btn1_manual_label ?? 'Request to Book') : ($bookingPage->booking_btn1_instant ?? 'Book Seats');
         } else {
-            $payButtonLabel = $bookingModeCodeValue === 'manual' ? 'Pay and Request to Book' : 'Pay and Book Seats';
+            $payButtonLabel = $bookingModeCodeValue === 'manual' ? ($bookingPage->booking_btn2_manual_label ?? 'Pay and Request to Book') : ($bookingPage->booking_btn2_instant_label ?? 'Pay and Book Seats');
         }
 
-        // Fetch rideDetailPage if not available
-        $rideDetailPage = null;
-        if (isset($selectedLanguage) && $selectedLanguage) {
-            $selectedLangId = $selectedLanguage->id ?? null;
-            $defaultLangId = isset($defaultLang) && $defaultLang ? $defaultLang->id : null;
-            if ($selectedLangId || $defaultLangId) {
-                $rideDetailPage = \App\Models\RideDetailPageSettingDetail::getByLanguageWithFallback(
-                    $selectedLangId,
-                    $defaultLangId,
-                );
-            }
-        }
     @endphp
     <div id="student-seat-limit-modal" class="hidden relative z-50" aria-labelledby="student-seat-limit-modal-title"
         role="dialog" aria-modal="true">
@@ -216,22 +204,40 @@
                                 @if (auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') && $isCashBookingMethod)
                                     <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                         <p class="text-yellow-800 text-sm">
-                                            <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
+                                             {!! $bookingPage->seats_available_note ?? '<strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.' !!}
                                         </p>
                                     </div>
                                 @endif
 
                                 @if ($hasSeatDetail)
+                                    @php
+                                        $selectedSeatIds = collect(old('seats_id', []))->map(fn($id) => (int) $id)->all();
+                                        $hasOldSeatSelection = !empty($selectedSeatIds);
+                                        $hasPreselectedSeat = false;
+                                    @endphp
                                     <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
                                         @foreach ($ride->seatDetail as $detail)
                                             @php
-                                                $isBooked = $detail->status === 'booked';
+                                                $isMyBookedSeat = $isEditMode && (int) ($detail->booking_id ?? 0) === (int) ($existingBooking->id ?? 0);
+                                                $isBooked = $detail->status === 'booked' && !$isMyBookedSeat;
                                                 $isHeldByOthers = $detail->status === 'hold' && $detail->user_id != optional(auth()->user())->id;
                                                 $isUnavailable = $isBooked || $isHeldByOthers;
-                                                $isSelectedByMe = !$isUnavailable && ($detail->user_id == optional(auth()->user())->id || in_array($detail->id, old('seats_id', [])));
+                                                $shouldAutoSelectFirstSeat = !$isEditMode && !$hasOldSeatSelection && !$hasPreselectedSeat && !$isUnavailable;
+                                                $isSelectedByMe = $isMyBookedSeat || (!$isUnavailable && ($detail->user_id == optional(auth()->user())->id || in_array((int) $detail->id, $selectedSeatIds))) || $shouldAutoSelectFirstSeat;
+                                                if ($shouldAutoSelectFirstSeat) {
+                                                    $hasPreselectedSeat = true;
+                                                }
                                             @endphp
                                             <div class="relative seat-item" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}" data-is-booked="{{ $isUnavailable ? '1' : '0' }}">
-                                                @if ($isUnavailable)
+                                                @if ($isMyBookedSeat)
+                                                    <div>
+                                                        <input id="number-of-seat-{{ $detail->id }}" name="seats_id[]" type="checkbox" value="{{ $detail->id }}" class="hidden seat-checkbox seat-checkbox-locked" checked readonly tabindex="-1" data-seat-id="{{ $detail->id }}" data-seat-number="{{ $detail->seat_number ?? $loop->iteration }}">
+                                                        <span class="relative inline-block w-8 md:w-12">
+                                                            <img src="{{ asset('assets/seat-hover-1.png') }}" class="w-8 md:w-12 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
+                                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $detail->id }} text-green-300">{{ $detail->seat_number ?? $loop->iteration }}</span>
+                                                        </span>
+                                                    </div>
+                                                @elseif ($isUnavailable)
                                                     <div class="opacity-50 cursor-not-allowed pointer-events-none">
                                                         <span class="relative inline-block w-8 md:w-12">
                                                             <img src="{{ asset('assets/seat.png') }}" class="w-8 md:w-12 object-cover seat-image seat-unselect-{{ $detail->id }}" alt="">
@@ -290,7 +296,7 @@
                             <div class="flex items-center justify-between gap-2">
                                 <div class="flex items-center gap-2">
                                     <p class="text-black">
-                                        <span id="px-seats-booked">1</span>
+                                        <span id="px-seats-booked">0</span>
                                         @isset($bookingPage->seat_label)
                                             {{ $bookingPage->seat_label }}
                                         @endisset
@@ -703,6 +709,7 @@
                 const selectedCount = document.querySelectorAll('input.seat-checkbox:checked').length;
                 seatCountInput.value = selectedCount;
 
+
                 return selectedCount;
             }
 
@@ -741,7 +748,7 @@
                 if (seatsInput) {
                     seats = Math.max(1, parseInt(seatsInput.value || '1', 10) || 1);
                 } else {
-                    seats = Math.max(1, updateSeatCount() || 1);
+                    seats = Math.max(0, parseInt(updateSeatCount(), 10) || 0);
                 }
 
                 const seatsAmount = perSeatMajor * seats;

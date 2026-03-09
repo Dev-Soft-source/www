@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BookingPageSettingDetail;
+use App\Models\RideDetailPageSettingDetail;
 use App\Models\Card;
 use App\Models\City;
 use App\Models\CoffeeWallet;
@@ -11,7 +12,9 @@ use App\Models\PxOptionGroup;
 use App\Models\PxRide;
 use App\Models\PxRideStop;
 use App\Models\PxTransaction;
+use App\Models\SeatDetail;
 use App\Models\SiteSetting;
+use App\Models\TripsPageSettingDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Stripe\PaymentIntent;
@@ -87,13 +90,16 @@ class PxBookingWebController extends Controller
         }
 
         $bookingSupportData = $this->buildBookingSupportData($selectedLangId, $defaultLangId, $fromStop->city_id);
+        $isSegmentView = $this->isPxSegmentView($ride, $fromIndex, $toIndex);
         $rideDetailsData = $this->buildPxRideDetailsData($ride, [
             'origin' => (string) ($orderedStops[$fromIndex]->label ?? 'N/A'),
             'destination' => (string) ($orderedStops[$toIndex]->label ?? 'N/A'),
             'pricePerSeatMinor' => $segmentPriceMinor,
             'segmentStops' => collect($orderedStops)->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
-            'segmentMode' => true,
+            'segmentMode' => $isSegmentView,
         ]);
+
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
 
         return view('px.booking', [
             'ride' => $ride,
@@ -113,6 +119,7 @@ class PxBookingWebController extends Controller
             'bookingPage' => $bookingSupportData['bookingPage'],
             'postRidePage' => $bookingSupportData['postRidePage'],
             'rideDetailsData' => $rideDetailsData,
+            'rideDetailPage' => $rideDetailPage,
         ]);
     }
 
@@ -168,13 +175,18 @@ class PxBookingWebController extends Controller
 
         $fromCityId = $ride->stops->sortBy('stop_order')->values()->get($fromIndex)->city_id ?? null;
         $bookingSupportData = $this->buildBookingSupportData($selectedLangId, $defaultLangId, $fromCityId);
+        $orderedStops = $ride->stops->sortBy('stop_order')->values();
+        $isSegmentView = $this->isPxSegmentView($ride, $fromIndex, $toIndex);
         $rideDetailsData = $this->buildPxRideDetailsData($ride, [
-            'origin' => (string) ($ride->stops->sortBy('stop_order')->values()->get($fromIndex)->label ?? 'N/A'),
-            'destination' => (string) ($ride->stops->sortBy('stop_order')->values()->get($toIndex)->label ?? 'N/A'),
+            'origin' => (string) ($orderedStops->get($fromIndex)->label ?? 'N/A'),
+            'destination' => (string) ($orderedStops->get($toIndex)->label ?? 'N/A'),
             'pricePerSeatMinor' => $segmentPriceMinor,
-            'segmentStops' => $ride->stops->sortBy('stop_order')->values()->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
-            'segmentMode' => true,
+            'segmentStops' => $orderedStops->slice($fromIndex + 1, max(0, $toIndex - $fromIndex - 1))->values(),
+            'segmentMode' => $isSegmentView,
         ]);
+
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
+
 
         return view('px.booking', [
             'ride' => $ride,
@@ -196,6 +208,65 @@ class PxBookingWebController extends Controller
             'bookingPage' => $bookingSupportData['bookingPage'],
             'postRidePage' => $bookingSupportData['postRidePage'],
             'rideDetailsData' => $rideDetailsData,
+            'rideDetailPage' => $rideDetailPage,
+        ]);
+    }
+
+    public function cancel($lang = null, $id = null)
+    {
+        $booking = PxBooking::query()
+            ->where('id', (int) $id)
+            ->where('passenger_id', (int) auth()->id())
+            ->with(['ride.route', 'ride.stops', 'ride.driver', 'ride.vehicle', 'fromStop', 'toStop'])
+            ->first();
+
+        if (!$booking || !$booking->ride) {
+            return redirect()
+                ->route('px.my_trips', ['lang' => optional($this->selectedLanguage)->abbreviation])
+                ->with('error', 'Booking not found.');
+        }
+
+        if (in_array((string) $booking->status, ['cancelled', 'refunded', 'failed'], true)) {
+            return redirect()
+                ->route('px.ride_detail', [
+                    'lang' => optional($this->selectedLanguage)->abbreviation,
+                    'id' => $booking->ride_id,
+                    'from_stop_id' => (int) $booking->from_stop_id,
+                    'to_stop_id' => (int) $booking->to_stop_id,
+                ])
+                ->with('error', 'Booking is already cancelled.');
+        }
+
+        if ($booking->ride->status === 'cancelled' || ($booking->ride->departure_at && $booking->ride->departure_at <= now())) {
+            return redirect()
+                ->route('px.ride_detail', [
+                    'lang' => optional($this->selectedLanguage)->abbreviation,
+                    'id' => $booking->ride_id,
+                    'from_stop_id' => (int) $booking->from_stop_id,
+                    'to_stop_id' => (int) $booking->to_stop_id,
+                ])
+                ->with('error', 'This booking can no longer be cancelled.');
+        }
+
+        $selectedLangId = optional($this->selectedLanguage)->id;
+        $defaultLangId = optional($this->defaultLang)->id;
+        $ride = $this->translatePxRideOptions($booking->ride, $selectedLangId, $defaultLangId);
+        $rideOptionDisplay = $this->resolvePxOptionDisplayData($ride, $selectedLangId, $defaultLangId, ['booking_mode', 'booking_method', 'cancelation_policy']);
+        [$fromIndex, $toIndex] = $this->resolveRideStopIndexes($ride, (int) $booking->from_stop_id, (int) $booking->to_stop_id);
+        $rideDetailsData = $this->buildPxRideDetailsData($ride, [
+            'origin' => (string) ($booking->fromStop?->label ?? 'N/A'),
+            'destination' => (string) ($booking->toStop?->label ?? 'N/A'),
+            'pricePerSeatMinor' => (int) ($booking->segment_price_minor ?? 0),
+            'segmentMode' => $this->isPxSegmentView($ride, $fromIndex, $toIndex),
+        ]);
+
+        return view('px.cancel_booking', [
+            'booking' => $booking,
+            'ride' => $ride,
+            'rideDetailsData' => $rideDetailsData,
+            'rideOptionDisplay' => $rideOptionDisplay,
+            'tripsPage' => $this->getTripsPageWithFallback($selectedLangId, $defaultLangId),
+            'rideDetailPage' => RideDetailPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId),
         ]);
     }
 
@@ -215,6 +286,7 @@ class PxBookingWebController extends Controller
         }
 
         $validated = $this->validateBookingRequest($request, $booking->ride);
+        $selectedSeatIds = $this->resolveRequestedSeatIds($request, $booking->ride, (int) $request->input('seats', $booking->seats));
 
         $ride = $booking->ride;
         if ($ride->status === 'cancelled' || ($ride->departure_at && $ride->departure_at <= now())) {
@@ -244,7 +316,7 @@ class PxBookingWebController extends Controller
 
         $updatedBooking = null;
 
-        DB::transaction(function () use (&$updatedBooking, $booking, $ride, $validated, $fromIndex, $toIndex) {
+        DB::transaction(function () use (&$updatedBooking, $booking, $ride, $validated, $fromIndex, $toIndex, $selectedSeatIds) {
             $bookingForUpdate = PxBooking::query()
                 ->where('id', (int) $booking->id)
                 ->lockForUpdate()
@@ -308,6 +380,13 @@ class PxBookingWebController extends Controller
             $bookingForUpdate->meta = $meta;
 
             $bookingForUpdate->save();
+            $this->syncSeatDetailsForBooking(
+                (int) $ride->id,
+                (int) $bookingForUpdate->id,
+                (int) auth()->id(),
+                $selectedSeatIds,
+                $requestedSeats
+            );
             $updatedBooking = $bookingForUpdate;
         });
 
@@ -323,6 +402,10 @@ class PxBookingWebController extends Controller
 
     public function cancelBooking(Request $request, $lang = null, $id = null)
     {
+        $validated = $request->validate([
+            'message' => ['nullable', 'string', 'max:2000'],
+        ]);
+
         $booking = PxBooking::query()
             ->where('id', (int) $id)
             ->where('passenger_id', (int) auth()->id())
@@ -346,7 +429,7 @@ class PxBookingWebController extends Controller
                 ->with('error', 'Booking is already cancelled.');
         }
 
-        DB::transaction(function () use ($booking) {
+        DB::transaction(function () use ($booking, $validated) {
             $bookingForUpdate = PxBooking::query()
                 ->where('id', (int) $booking->id)
                 ->lockForUpdate()
@@ -371,12 +454,16 @@ class PxBookingWebController extends Controller
                 -(int) $bookingForUpdate->seats
             );
 
-            $meta = is_array($bookingForUpdate->meta) ? $bookingForUpdate->meta : [];
-            $meta['cancelled_at'] = now()->toDateTimeString();
-            $meta['cancelled_by'] = 'passenger_web';
-            $bookingForUpdate->meta = $meta;
-            $bookingForUpdate->status = 'cancelled';
-            $bookingForUpdate->save();
+              $meta = is_array($bookingForUpdate->meta) ? $bookingForUpdate->meta : [];
+              $meta['cancelled_at'] = now()->toDateTimeString();
+              $meta['cancelled_by'] = 'passenger_web';
+              if (!empty($validated['message'])) {
+                  $meta['cancellation_message'] = trim((string) $validated['message']);
+              }
+              $bookingForUpdate->meta = $meta;
+              $bookingForUpdate->status = 'cancelled';
+              $bookingForUpdate->save();
+              $this->releaseSeatDetailsForBooking((int) $bookingForUpdate->id);
         });
 
         return redirect()
@@ -433,6 +520,7 @@ class PxBookingWebController extends Controller
         }
 
         $validated = array_merge($validated, $this->validateBookingRequest($request, $ride));
+        $selectedSeatIds = $this->resolveRequestedSeatIds($request, $ride, (int) $validated['seats']);
 
         [$fromIndex, $toIndex] = $this->resolveRideStopIndexes($ride, (int) $validated['from_stop_id'], (int) $validated['to_stop_id']);
         if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
@@ -523,11 +611,12 @@ class PxBookingWebController extends Controller
                     $seatsRequested,
                     $segmentPriceMinor,
                     $amountMinor,
-                    $rideCurrencyCode,
-                    $bookingMethodCode,
-                    $cashBookingStatus,
-                    $validated['driver_message'] ?? ''
-                );
+                $rideCurrencyCode,
+                $bookingMethodCode,
+                $cashBookingStatus,
+                $validated['driver_message'] ?? '',
+                $selectedSeatIds
+            );
 
                 $successMessage = $cashBookingStatus === 'approved'
                     ? 'Booking confirmed.'
@@ -649,17 +738,27 @@ class PxBookingWebController extends Controller
                 $amountMinor,
                 $rideCurrencyCode,
                 $paymentIntent,
-                $paymentIntentId
+                $paymentIntentId,
+                $validated['driver_message'] ?? '',
+                $selectedSeatIds
             );
 
-            return response()->json([
-                'status' => 'succeeded',
-                'payment_intent_id' => $paymentIntentId,
-                'amount_minor' => $amountMinor,
-                'currency' => $rideCurrencyCode,
-                'booking_id' => (int) ($booking->id ?? 0),
-                'transaction_id' => (int) ($transaction->id ?? 0),
-            ]);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'succeeded',
+                    'payment_intent_id' => $paymentIntentId,
+                    'amount_minor' => $amountMinor,
+                    'currency' => $rideCurrencyCode,
+                    'booking_id' => (int) ($booking->id ?? 0),
+                    'transaction_id' => (int) ($transaction->id ?? 0),
+                ]);
+            }
+
+            return redirect()
+                ->route('px.my_trips', [
+                    'lang' => optional($this->selectedLanguage)->abbreviation,
+                ])
+                ->with('success', 'Booking confirmed.');
         } catch (\RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
@@ -789,6 +888,11 @@ class PxBookingWebController extends Controller
         return $bookingPage;
     }
 
+    protected function getTripsPageWithFallback($selectedLangId, $defaultLangId)
+    {
+        return TripsPageSettingDetail::getByLanguageWithFallback($selectedLangId, $defaultLangId);
+    }
+
     protected function resolveRideStopIndexes(PxRide $ride, int $fromStopId, int $toStopId): array
     {
         return $ride->resolveStopIndexes($fromStopId, $toStopId);
@@ -817,7 +921,8 @@ class PxBookingWebController extends Controller
         string $rideCurrencyCode,
         string $bookingMethodCode,
         string $bookingStatus = 'waiting',
-        string $driverMessage = ''
+        string $driverMessage = '',
+        array $seatIds = []
     ): PxBooking {
         $booking = null;
 
@@ -833,7 +938,8 @@ class PxBookingWebController extends Controller
             $rideCurrencyCode,
             $bookingMethodCode,
             $bookingStatus,
-            $driverMessage
+            $driverMessage,
+            $seatIds
         ) {
             $rideForUpdate = PxRide::query()
                 ->with('stops')
@@ -886,6 +992,13 @@ class PxBookingWebController extends Controller
             ]);
 
             $rideForUpdate->adjustSegmentSeatAvailability((int) $fromStop->id, (int) $toStop->id, $seatsRequested);
+            $this->syncSeatDetailsForBooking(
+                (int) $ride->id,
+                (int) $booking->id,
+                (int) $user->id,
+                $seatIds,
+                $seatsRequested
+            );
         });
 
         return $booking;
@@ -903,7 +1016,8 @@ class PxBookingWebController extends Controller
         string $rideCurrencyCode,
         $paymentIntent,
         string $paymentIntentId,
-        string $driverMessage = ''
+        string $driverMessage = '',
+        array $seatIds = []
     ): array {
         $booking = null;
         $transaction = null;
@@ -922,7 +1036,8 @@ class PxBookingWebController extends Controller
             $rideCurrencyCode,
             $paymentIntent,
             $paymentIntentId,
-            $driverMessage
+            $driverMessage,
+            $seatIds
         ) {
             $rideForUpdate = PxRide::query()
                 ->with('stops')
@@ -990,6 +1105,13 @@ class PxBookingWebController extends Controller
             ]);
 
             $rideForUpdate->adjustSegmentSeatAvailability((int) $fromStop->id, (int) $toStop->id, $seatsRequested);
+            $this->syncSeatDetailsForBooking(
+                (int) $ride->id,
+                (int) $booking->id,
+                (int) $user->id,
+                $seatIds,
+                $seatsRequested
+            );
         });
 
         return [$booking, $transaction];
@@ -1015,6 +1137,133 @@ class PxBookingWebController extends Controller
         }
 
         return $query->first();
+    }
+
+    protected function isPxSegmentView(PxRide $ride, ?int $fromIndex, ?int $toIndex): bool
+    {
+        if ($fromIndex === null || $toIndex === null) {
+            return false;
+        }
+
+        $stopCount = $ride->relationLoaded('stops')
+            ? $ride->stops->count()
+            : $ride->stops()->count();
+
+        if ($stopCount < 2) {
+            return false;
+        }
+
+        return !($fromIndex === 0 && $toIndex === $stopCount - 1) && $fromIndex < $toIndex;
+    }
+
+    protected function resolveRequestedSeatIds(Request $request, PxRide $ride, int $expectedSeats): array
+    {
+        $seatIds = collect((array) $request->input('seats_id', []))
+            ->map(fn ($seatId) => (int) $seatId)
+            ->filter(fn ($seatId) => $seatId > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!$ride->seatDetail()->exists()) {
+            return [];
+        }
+
+        if (count($seatIds) !== $expectedSeats) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'seats' => 'Please select the available seats.',
+            ]);
+        }
+
+        return $seatIds;
+    }
+
+    protected function syncSeatDetailsForBooking(
+        int $rideId,
+        int $bookingId,
+        int $userId,
+        array $seatIds,
+        int $expectedSeats
+    ): void {
+        if ($expectedSeats <= 0) {
+            $this->releaseSeatDetailsForBooking($bookingId);
+            return;
+        }
+
+        if (!SeatDetail::query()->where('ride_id', $rideId)->exists()) {
+            return;
+        }
+
+        $seatIds = collect($seatIds)
+            ->map(fn ($seatId) => (int) $seatId)
+            ->filter(fn ($seatId) => $seatId > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (count($seatIds) !== $expectedSeats) {
+            throw new \RuntimeException('Please select the available seats.');
+        }
+
+        $selectedSeatDetails = SeatDetail::query()
+            ->where('ride_id', $rideId)
+            ->whereIn('id', $seatIds)
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        if ($selectedSeatDetails->count() !== count($seatIds)) {
+            throw new \RuntimeException('One or more selected seats are invalid.');
+        }
+
+        foreach ($selectedSeatDetails as $seatDetail) {
+            $belongsToCurrentBooking = (int) ($seatDetail->booking_id ?? 0) === $bookingId;
+            $heldByCurrentUser = $seatDetail->status === 'hold' && (int) ($seatDetail->user_id ?? 0) === $userId;
+            $isAvailable = $seatDetail->status === 'pending' || $belongsToCurrentBooking || $heldByCurrentUser;
+
+            if (!$isAvailable) {
+                throw new \RuntimeException('One or more selected seats are no longer available.');
+            }
+        }
+
+        $currentSeatDetails = SeatDetail::query()
+            ->where('ride_id', $rideId)
+            ->where('booking_id', $bookingId)
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($currentSeatDetails as $seatDetail) {
+            if (in_array((int) $seatDetail->id, $seatIds, true)) {
+                continue;
+            }
+
+            $seatDetail->status = 'pending';
+            $seatDetail->booking_id = null;
+            $seatDetail->user_id = null;
+            $seatDetail->save();
+        }
+
+        foreach ($selectedSeatDetails as $seatDetail) {
+            $seatDetail->status = 'booked';
+            $seatDetail->booking_id = $bookingId;
+            $seatDetail->user_id = $userId;
+            $seatDetail->save();
+        }
+    }
+
+    protected function releaseSeatDetailsForBooking(int $bookingId): void
+    {
+        $seatDetails = SeatDetail::query()
+            ->where('booking_id', $bookingId)
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($seatDetails as $seatDetail) {
+            $seatDetail->status = 'pending';
+            $seatDetail->booking_id = null;
+            $seatDetail->user_id = null;
+            $seatDetail->save();
+        }
     }
 
 }
