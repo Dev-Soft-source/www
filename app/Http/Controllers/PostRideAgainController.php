@@ -142,24 +142,9 @@ class PostRideAgainController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $notifications = null;
         if (auth()->user()) {
@@ -188,6 +173,8 @@ class PostRideAgainController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         }
-        return view('post_ride_again',['rides' => $rides,'tripsPage' => $tripsPage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('post_ride_again',['rides' => $rides,
+        'tripsPage' => $tripsPage,'notifications' => $notifications,
+        'postRidePage' => $postRidePage]);
     }
 }

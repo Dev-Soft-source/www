@@ -29,6 +29,8 @@ class RideDetailPageSettingDetailResource extends JsonResource
             'ride_co_passenger_heading' => $this->ride_co_passenger_heading,
             'trip_co_passenger_heading' => $this->trip_co_passenger_heading,
             'payment_method_label' => $this->payment_method_label,
+            'booking_price_label' => $this->booking_price_label,
+            'booking_method_label' => $this->booking_method_label,
             'booking_type_label' => $this->booking_type_label,
             'cancellation_policy_label' => $this->cancellation_policy_label,
             'luggage_label' => $this->luggage_label,

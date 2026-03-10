@@ -26,6 +26,7 @@ use App\Models\Ride;
 use App\Models\RideDetail;
 use App\Models\City;
 use App\Models\FCMToken;
+use App\Models\MyVehicleSettingDetail;
 use App\Models\NoShowHistory;
 use App\Models\RideDetailPageSettingDetail;
 use App\Models\SiteSetting;
@@ -1776,6 +1777,8 @@ class RideController extends Controller
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
+        $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         return view('post_ride', [
             'totalRides' => $totalNoOfRides,
             'noShowsCount' => $noShowsCount,
@@ -1787,6 +1790,7 @@ class RideController extends Controller
             'ride' => $ride,
             'user' => $user,
             'vehicles' => $vehicles,
+            'vehiclePage' => $vehiclePage,
             'pinkRideSetting' => $pinkRideSetting,
             'setting' => $setting,
             'overallRating' => $overallRating,

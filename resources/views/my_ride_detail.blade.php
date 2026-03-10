@@ -412,7 +412,7 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl">
-                                Booking Price:
+                                {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
                             <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail[0]->price }}
                                 @isset($rideDetailPage->per_seat_label)
@@ -436,7 +436,7 @@
                         <div class="p-4 items-baseline">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
-                                    Booking method:
+                                     {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">

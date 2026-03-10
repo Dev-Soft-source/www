@@ -174,6 +174,8 @@ class Controller extends BaseController
                 $this->selectedLanguage->id,
                 $this->defaultLang->id
             );
+
+            $postRidePage = $this->mapVehicleTypeFields($postRidePage, $postRidePage);
         }
 
         return $postRidePage;
@@ -229,7 +231,7 @@ class Controller extends BaseController
             $valueField = str_replace('_text', '_value', $field);
             $featureId = $sourcePage->{$field} ?? null;
 
-            $targetPage->{$valueField} = $featureId;
+            // $targetPage->{$valueField} = $featureId;
             $targetPage->{$field} = $featureId
                 ? $vehicleTypeDetails->get($featureId)?->name
                 : null;
