@@ -183,6 +183,22 @@ return
 				'required' => 'Confirm password is required.',
 				'same' => 'The passwords do not match.',
 			],
+			'old_email' =>
+			[
+				'required' => 'The current email is required.',
+				'email' => 'The current email is not a valid email address.',
+			],
+			'email_confirmation' =>
+			[
+				'required' => 'The confirm email is required.',
+				'email' => 'The confirm email is not a valid email address.',
+			],
+			'email' =>
+			[
+				'required' => 'The new email is required.',
+				'email' => 'The new email is not a valid email address.',
+				'unique' => 'The new email is already taken.',
+			],
 			'pass1' =>
 			[
 				'required' => 'The current password is required.',

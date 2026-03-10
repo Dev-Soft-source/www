@@ -277,7 +277,7 @@
                                         class="text-red-500">*</span></label>
                                 <input type="tel"
                                     pattern="[0-9]+" name="phone" value="{{ old('phone') }}"
-                                    placeholder="Numbers only, with area code"
+                                    placeholder="{{ $phoneSetting->phone_number_placeholder ?? 'Numbers only, with area code' }}"
                                     maxlength="15"
                                     inputmode="numeric"
                                     class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}">

@@ -476,8 +476,7 @@
                                                 @endforeach
                                                 {{ $bookings->links() }}
                                             @else
-                                                <p>You have no booked trips</p>
-                                                {{-- <p>No booked ride. You can search for a ride <a href="{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}">here</a></p> --}}
+                                                <p>{{ $tripsPage->no_upcoming_trips_label ?? 'You have no upcoming trips scheduled.' }}</p>
                                             @endif
                                         </div>
                                     </div>

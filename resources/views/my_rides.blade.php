@@ -463,8 +463,7 @@ function closeErrorModal() {
                                         @endforeach
                                         {{ $rides->links() }}
                                     @else
-                                        <p>You have no upcoming rides </p>
-                                        {{-- <p>No rides posted. You can post a ride <a href="{{ route('post_ride', ['lang' => $selectedLanguage->abbreviation]) }}">here</a></p> --}}
+                                        <p>{{ $tripsPage->no_upcoming_rides_label ?? 'You have no upcoming rides scheduled.' }}</p>
                                     @endif
                                 </div>
                             </div>

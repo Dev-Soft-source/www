@@ -302,7 +302,7 @@
                                         @endforeach
                                         {{ $bookings->links() }}
                                     @else
-                                        <p>You have no cancelled trips</p>
+                                        <p>{{ $tripsPage->no_cancelled_trips_label ?? 'You have no cancelled trips' }}</p>
                                     @endif
                                 </div>
                             </div>

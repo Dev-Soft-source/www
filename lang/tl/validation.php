@@ -150,6 +150,14 @@ return [
             'email' => 'Mangyaring maglagay ng wastong email address, tulad ng name@example.com.',
             'unique' => 'May umiiral nang account gamit ang email address na ito.',
         ],
+        'old_email' => [
+            'required' => 'Kinakailangan ang kasalukuyang email.',
+            'email' => 'Ang kasalukuyang email ay hindi isang wastong email address.',
+        ],
+        'email_confirmation' => [
+            'required' => 'Kinakailangan ang kumpirmasyon ng email.',
+            'email' => 'Ang kumpirmasyon ng email ay hindi isang wastong email address.',
+        ],
         'first_name' => [
             'required' => 'Kinakailangan ang unang pangalan.',
             'regex' => 'Ang unang pangalan ay maaari lamang maglaman ng mga titik, espasyo, at gitling.',

@@ -47,11 +47,24 @@
                         </tr>
                     </thead>
                     <tbody class="">
+                        @php
+                            $dateLocale = optional($selectedLanguage)->locale
+                                ?? optional($selectedLanguage)->abbreviation
+                                ?? app()->getLocale();
+
+                        @endphp
                         @foreach ($referrals as $referral)
+                        @php
+                            $referral_at = $referral->created_at ? \Carbon\Carbon::parse($referral->created_at)->locale($dateLocale)
+                                : null;
+                            $referral_at_label = $referral_at
+                                ? $referral_at->translatedFormat('F d, Y')
+                                : 'N/A';
+                        @endphp
                             <tr>
                                 <td class="p-2 border text-lg">{{ $referral->id }}</td>
                                 <td class="p-2 border text-lg">{{ $referral->user->first_name ?? '' }} {{ $referral->user->last_name ?? '' }}</td>
-                                <td class="p-2 border text-lg">{{ \Carbon\Carbon::parse($referral->created_at)->format('M d, Y') }}</td>
+                                <td class="p-2 border text-lg">{{ $referral_at_label }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -59,7 +72,7 @@
             </div>
         @else
             <div class="mt-6 text-center text-gray-500 py-8">
-                <p>You haven't referred anyone yet. Share your referral URL to get started!</p>
+                <p>{{ $referralSettingPage->no_referral_user_found_message ?? 'No referrals yet'}}</p>
             </div>
         @endif
     </div>

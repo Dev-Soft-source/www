@@ -297,7 +297,7 @@
                                         @endforeach
                                         {{ $cancelledRides->links() }}
                                     @else
-                                        <p>You have no cancelled rides</p>
+                                        <p>{{ $tripsPage->no_cancelled_rides_label ?? 'You have no cancelled rides' }}</p>
                                     @endif
                                 </div>
                             </div>

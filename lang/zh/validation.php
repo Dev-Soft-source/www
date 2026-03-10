@@ -150,6 +150,14 @@ return [
             'email' => '请输入有效的电子邮箱地址，例如 name@example.com。',
             'unique' => '该电子邮箱地址已存在账户。',
         ],
+        'old_email' => [
+            'required' => '当前电子邮箱为必填项。',
+            'email' => '当前电子邮箱不是有效的电子邮箱地址。',
+        ],
+        'email_confirmation' => [
+            'required' => '确认电子邮箱为必填项。',
+            'email' => '确认电子邮箱不是有效的电子邮箱地址。',
+        ],
         'first_name' => [
             'required' => '名字为必填项。',
             'regex' => '名字只能包含字母、空格和连字符。',

@@ -305,7 +305,7 @@
                                         @endforeach
                                         {{ $pastRides->links() }}
                                     @else
-                                        <p>You have no completed rides</p>
+                                        <p>{{ $tripsPage->no_completed_rides_label ?? 'You have no completed rides' }}</p>
                                     @endif
                                 </div>
                             </div>

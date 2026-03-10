@@ -174,6 +174,14 @@ return [
             'email' => 'Introduce una dirección de correo electrónico válida, por ejemplo, name@example.com.',
             'unique' => 'Ya existe una cuenta con esta dirección de correo electrónico.',
         ],
+        'old_email' => [
+            'required' => 'El correo electrónico actual es obligatorio.',
+            'email' => 'El correo electrónico actual no es una dirección de correo electrónico válida.',
+        ],
+        'email_confirmation' => [
+            'required' => 'La confirmación del correo electrónico es obligatoria.',
+            'email' => 'La confirmación del correo electrónico no es una dirección de correo electrónico válida.',
+        ],
         'first_name' => [
             'required' => 'El nombre es obligatorio.',
             'regex' => 'El nombre solo puede contener letras, espacios y guiones.',

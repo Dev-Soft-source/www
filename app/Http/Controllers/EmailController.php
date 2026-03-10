@@ -90,30 +90,12 @@ class EmailController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
 
-        // dd($request->all());
-        $customMessages = [
-            // 'email_confirmation.required' => 'Confirm email is required',
-            // 'confirmed' => 'Confirm email does not match',
-            // // 'password' => 'Password is wrong',
-            // 'password.required' => 'Current password is required',
-            // 'email' => 'Please use a valid email address',
-            // 'email.required' => 'Email address is required',
-        ];
-
         try {
             $validated = $request->validate([
                 'old_email' => 'required|email',
                 'email_confirmation' => 'required|email',
                 'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
-            ], [
-                'old_email.required' => 'The current email is required',
-                'old_email.email' => 'The current email is not a valid email address',
-                'email_confirmation.required' => 'The confirm email is required',
-                'email_confirmation.email' => 'The confirm email is not a valid email address',
-                'email.required' => 'The new email is required',
-                'email.email' => 'The new email is not a valid email address',
-                'email.unique' => 'The new email is already taken',
-            ], $customMessages);
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
                 ->withErrors($e->errors())

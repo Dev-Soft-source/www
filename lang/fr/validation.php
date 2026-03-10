@@ -150,6 +150,14 @@ return [
             'email' => 'Veuillez saisir une adresse e-mail valide, par exemple name@example.com.',
             'unique' => 'Un compte avec cette adresse e-mail existe déjà.',
         ],
+        'old_email' => [
+            'required' => "L'adresse e-mail actuelle est obligatoire.",
+            'email' => "L'adresse e-mail actuelle n'est pas une adresse e-mail valide.",
+        ],
+        'email_confirmation' => [
+            'required' => "La confirmation de l'adresse e-mail est obligatoire.",
+            'email' => "La confirmation de l'adresse e-mail n'est pas une adresse e-mail valide.",
+        ],
         'first_name' => [
             'required' => 'Le prénom est obligatoire.',
             'regex' => 'Le prénom ne peut contenir que des lettres, des espaces et des tirets.',

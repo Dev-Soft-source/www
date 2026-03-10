@@ -358,7 +358,7 @@
                                         @endforeach
                                         {{ $bookings->links() }}
                                     @else
-                                        <p>You have no completed trips</p>
+                                        <p>{{ $tripsPage->no_completed_trips_label ?? 'You have no completed trips' }}</p>
                                     @endif
                                 </div>
                             </div>
