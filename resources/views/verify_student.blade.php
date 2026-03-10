@@ -255,6 +255,21 @@
 @section('script')
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+@php
+    $flatpickrLocale = match(app()->getLocale()) {
+        'ar' => 'ar',
+        'es' => 'es',
+        'fr' => 'fr',
+        'hi' => 'hi',
+        'ru' => 'ru',
+        'uk' => 'uk',
+        'zh' => 'zh',
+        default => null,
+    };
+@endphp
+@if($flatpickrLocale)
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ $flatpickrLocale }}.js"></script>
+@endif
 @if ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) > now())
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <script>
@@ -353,6 +368,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
+    const appLocale = @json(app()->getLocale());
+    const flatpickrLocaleKey = @json($flatpickrLocale);
+
 
     function getLastDateOfMonth(year, monthIndex) {
         return new Date(year, monthIndex + 1, 0).getDate();
@@ -367,9 +385,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const months = Array.from({ length: 12 }, (_, i) => {
-        return new Date(2000, i, 1).toLocaleString('default', { month: 'long' });
-    });
+    const flatpickrLocale =
+        (flatpickrLocaleKey && window.flatpickr?.l10ns?.[flatpickrLocaleKey]) ||
+        window.flatpickr?.l10ns?.default;
+
+    const months = flatpickrLocale?.months?.longhand
+        ? [...flatpickrLocale.months.longhand]
+        : Array.from({ length: 12 }, (_, i) => {
+            return new Intl.DateTimeFormat(appLocale, { month: 'long' }).format(
+                new Date(2000, i, 1)
+            );
+        });
 
     const years = Array.from({ length: 5 }, (_, i) => currentYear + i + 1); // Start from next year, add 5 years (currentYear+1 to currentYear+5)
 

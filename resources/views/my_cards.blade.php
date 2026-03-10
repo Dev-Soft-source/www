@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            <a href="#" onclick="closeNotificationModal()" class="button-exp-fill w-28">Close </a>
+                            <a href="#" onclick="closeNotificationModal()" class="button-exp-fill w-28">{{ $siteText['close_btn_text'] }} </a>
                         </div>
                     </div>
                 </div>
@@ -352,8 +352,8 @@
             </button>
             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                 <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                    <div class="">
-                        <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">Delete Payment Method?</h3>
+                    <div class="sm:flex sm:items-start justify-center">
+                        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#db0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                     </div>
                     <div class="mt-2 w-full">
                         <p class="can-exp-p text-center">{{$paymentSettingDetail->delete_card_message ?? "Are you sure you want to delete this payment method?"}}</p>
@@ -361,8 +361,8 @@
                 </div>
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-28">Yes, remove it</a>
-                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill w-42">No, take me back</button>
+                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-28">{{ $siteText['remove_btn_text'] }}</a>
+                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill w-42">{{ $siteText['cancel_btn_text'] }}</button>
             </div>
         </div>
     </div>
