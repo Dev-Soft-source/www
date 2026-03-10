@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
@@ -52,7 +51,10 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
-        $niceNames = [];
+        $niceNames = [
+            'email' => __('validation.attributes.email'),
+            'password' => __('validation.attributes.password'),
+        ];
         $message = null;
         $selectedLanguage = session('selectedLanguage');
 
@@ -62,11 +64,10 @@ class LoginController extends Controller
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
                     ->select('no_user_match_message', 'no_password_match_message', 'verified_email_message', 'admin_block_account_message')
                     ->first();
-
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email'    => isset($loginPage->email_error) ? $loginPage->email_error : '',
-                    'password' => isset($loginPage->password_error) ? $loginPage->password_error : '',
+                    'email'    => $loginPage->email_label ?? __('validation.attributes.email'),
+                    'password' => $loginPage->password_label ?? __('validation.attributes.password'),
                 ];
             }
         } else {
@@ -78,46 +79,27 @@ class LoginController extends Controller
 
                 $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'email'    => isset($loginPage->email_error) ? $loginPage->email_error : '',
-                    'password' => isset($loginPage->password_error) ? $loginPage->password_error : '',
+                    'email'    => $loginPage->email_label ?? __('validation.attributes.email'),
+                    'password' => $loginPage->password_label ?? __('validation.attributes.password'),
                 ];
             }
         }
-        // Validate the form data with AJAX support
-        try {
-            $validatedData = $request->validate([
-                'email'    => 'required|string|max:255|email',
-                'password' => 'required',
-            ], [
-                'password.required' => 'Password is required',
-                'email.required' => 'Email address is required',
-                'email.email' => 'Please enter a valid email address, such as name@example.com',
-            ], $niceNames);
-        } catch (ValidationException $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'errors'  => $e->errors(),
-                ], 422);
-            }
-            throw $e;
-        }
-        
+
+        // Validate the form data
+        $validatedData = $request->validate([
+            'email'    => 'required|string|max:255|email',
+            'password' => 'required',
+        ], [], $niceNames);
+
         // Auth logic
         $credentials = $request->only('email', 'password');
         $user        = User::where('email', $credentials['email'])->first();
         
         if ($user) {
             if ($user->closed === '1') {
-                $closeModalErrorMessage = "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.";
-
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error'   => $closeModalErrorMessage,
-                        'redirect_to_signup' => true,
-                    ], 422);
-                }
+                $closeModalErrorMessage = $message->account_closed_message
+                    ?? $loginPage->close_modal_error_message
+                    ?? 'It looks like this account has been closed. We\'d love to have you back! You can sign up for a new account using this email address anytime.';
 
                 return back()->with(['error' => $closeModalErrorMessage])->withInput();
             }
@@ -125,13 +107,6 @@ class LoginController extends Controller
             if ($user->admin_deactive_account === '1') {
                 $adminMsg = $message->admin_block_account_message
                     ?? 'Your account is suspended. Please contact us if you feel it should be reinstated';
-
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error'   => $adminMsg,
-                    ], 422);
-                }
 
                 return back()->with(['error' => $adminMsg])->withInput();
             }
@@ -142,12 +117,12 @@ class LoginController extends Controller
         $rememberValue = $request->input('remember', '0');
         $remember = ($rememberValue == '1' || $rememberValue == 'on' || $rememberValue === true || $rememberValue === 1);
         
-        Log::info('Login attempt with remember me', [
-            'email' => $request->email,
-            'remember_input' => $rememberValue,
-            'remember_input_type' => gettype($rememberValue),
-            'remember_boolean' => $remember
-        ]);
+        // Log::info('Login attempt with remember me', [
+        //     'email' => $request->email,
+        //     'remember_input' => $rememberValue,
+        //     'remember_input_type' => gettype($rememberValue),
+        //     'remember_boolean' => $remember
+        // ]);
         
         // Attempt authentication with remember me
         if ($user && !$user->trashed() && $user->email_verified != 0) {
@@ -161,13 +136,13 @@ class LoginController extends Controller
             $authenticatedUser = auth()->user();
             
             // Log successful authentication
-            Log::info('Login successful', [
-                'user_id' => $authenticatedUser->id,
-                'email' => $request->email,
-                'remember' => $remember,
-                'remember_token_exists' => $authenticatedUser->remember_token ? 'yes' : 'no',
-                'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0
-            ]);
+            // Log::info('Login successful', [
+            //     'user_id' => $authenticatedUser->id,
+            //     'email' => $request->email,
+            //     'remember' => $remember,
+            //     'remember_token_exists' => $authenticatedUser->remember_token ? 'yes' : 'no',
+            //     'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0
+            // ]);
             
             // IP & user_details tracking (unchanged)
             $ipAddress = null;
@@ -210,57 +185,18 @@ class LoginController extends Controller
                 $redirectUrl = route('home', ['lang' => $selectedLanguage->abbreviation]);
             }
 
-            if ($request->ajax() || $request->wantsJson()) {
-                $response = response()->json([
-                    'success'      => true,
-                    'redirect_url' => $redirectUrl,
-                    'remember_set' => $remember
-                ]);
-                
-                // Log cookie information for debugging
-                if ($remember) {
-                    // Note: Cookies are queued by middleware, so they may not appear in response headers here
-                    // The AddQueuedCookiesToResponse middleware will add them after this response
-                    $cookieName = Auth::getRecallerName();
-                    
-                    Log::info('Remember me authentication completed', [
-                        'user_id' => $authenticatedUser->id,
-                        'remember_token' => $authenticatedUser->remember_token ? 'exists' : 'missing',
-                        'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0,
-                        'expected_cookie_name' => $cookieName,
-                        'note' => 'Cookie will be set by AddQueuedCookiesToResponse middleware'
-                    ]);
-                }
-                
-                return $response;
-            }
-
             return redirect()->intended($redirectUrl);
         } else {
             // Error branches
             if ($user && $user->trashed()) {
-                $errorMsg = 'Account is not available anymore';
+                $errorMsg = $message->account_closed_message
+                    ?? $loginPage->close_modal_error_message
+                    ?? 'Account is not available anymore.';
 
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error'   => $errorMsg,
-                    ], 422);
-                }
-
-                return back()->with(['message' => $errorMsg])->withInput();
+                return back()->with(['error' => $errorMsg])->withInput();
             } elseif ($user && $user->email_verified == 0) {
                 $errorMsg = ($message->verified_email_message ?? null)
-                    . '<a href="' . route('sendEmailVerify', ['email' => $user->email]) . '">Request a new verification email</a>';
-
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success'     => false,
-                        'error'       => $errorMsg,
-                        'verify_email'=> true,
-                        'email'       => $user->email,
-                    ], 422);
-                }
+                    . '<a href="' . route('sendEmailVerify', ['email' => $user->email]) . '">' . ($loginPage->new_verification_email_btn_label ?? 'Request a new verification email') . '</a>';
 
                 return back()->with([
                     'error'        => $errorMsg,
@@ -271,24 +207,13 @@ class LoginController extends Controller
                 // User exists but password is incorrect
                 $errorMsg = $message->no_password_match_message ?? 'The password you entered is incorrect.';
 
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'errors'  => ['password' => [$errorMsg]],
-                    ], 422);
-                }
-
                 return back()->withErrors(['password' => $errorMsg])->withInput();
             } else {
                 // User doesn't exist - email is incorrect
                 $errorEmailMsg =  'We couldn’t find an account with this email address. Please check the spelling and try again.';
 
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'errors'  => ['email' => [$errorEmailMsg]],
-                    ], 422);
-                }
+                $errorEmailMsg = $message->no_user_match_message
+                    ?? 'We couldn\'t find an account with this email address. Please check the spelling and try again.';
 
                 return back()->withErrors(['email' => $errorEmailMsg])->withInput();
             }
