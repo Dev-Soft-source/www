@@ -200,9 +200,9 @@
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <a id="delete-card-link" href="#"
-                    class="button-exp-red-fill sm:ml-3">Remove</a>
+                    class="button-exp-red-fill sm:ml-3">{{$siteText['remove_btn_text']}}</a>
                 <button type="button" onclick="toggleModalCard('card-modal')"
-                    class="button-exp-fill">Cancel</button>
+                    class="button-exp-fill">{{$siteText['cancel_btn_text']}}</button>
             </div>
         </div>
     </div>
