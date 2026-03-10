@@ -108,38 +108,38 @@
                 </tr>
             </table>
             <table style="width: 100%;margin-top: 24px;" cellpadding="0" cellspacing="0" role="none">
-                <tr>
+            <tr>
                     <td class="sm-px-6"
                         style="background-color: #f3f4f6; padding: 16px 48px; text-align: left; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05)">
                         <table style="margin-bottom: 24px; margin-top: 16px; width: 100%" cellpadding="0" cellspacing="0"
                             role="none">
                             <tr>
-                                <td align="center" style="display: flex;">
-                                    <div style="display: flex; margin: 0 auto;">
+                                <td align="center" style="text-align: center;">
+                                    <div style="text-align: center;">
                                         <a aria-label="ProximaRide" target="_blank" href="https://facebook.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
+                                            style="border: 1px solid #d1d5db; display: inline-block; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin: 0 8px; vertical-align: middle; line-height: 40px; text-align: center;">
                                             <img src="{{ asset('assets/images/facebook.png') }}" alt="facebook icon" width="20" height="20"
-                                                style="max-width: 100%; vertical-align: middle; height: 20px;margin-top: 10px;margin-left: 13px;">
+                                                style="display: inline-block; vertical-align: middle; max-width: 20px; max-height: 20px;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://twitter.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/twitter.png') }}" alt="twiiter icon" width="20" height="20"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 11px;margin-left: 10px;">
+                                            style="border: 1px solid #d1d5db; display: inline-block; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin: 0 8px; vertical-align: middle; line-height: 40px; text-align: center;">
+                                            <img src="{{ asset('assets/images/twitter.png') }}" alt="twitter icon" width="20" height="20"
+                                                style="display: inline-block; vertical-align: middle; max-width: 20px; max-height: 20px;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://www.instagram.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
-                                            <img src="{{ asset('assets/images/instagram.png') }}" alt="google icon" width="20" height="20"
-                                                style="max-width: 100%; vertical-align: middle; height: 20px;margin-top: 9px;margin-left: 9px;">
+                                            style="border: 1px solid #d1d5db; display: inline-block; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin: 0 8px; vertical-align: middle; line-height: 40px; text-align: center;">
+                                            <img src="{{ asset('assets/images/instagram.png') }}" alt="instagram icon" width="20" height="20"
+                                                style="display: inline-block; vertical-align: middle; max-width: 20px; max-height: 20px;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://youtube.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;margin-right: 16px;">
+                                            style="border: 1px solid #d1d5db; display: inline-block; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin: 0 8px; vertical-align: middle; line-height: 40px; text-align: center;">
                                             <img src="{{ asset('assets/images/youtube.png') }}" alt="youtube icon" width="20" height="20"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 11px;margin-left: 8px;">
+                                                style="display: inline-block; vertical-align: middle; max-width: 20px; max-height: 20px;">
                                         </a>
                                         <a aria-label="ProximaRide" target="_blank" href="https://www.linkedin.com"
-                                            style="border: 1px solid #d1d5db; display: flex; height: 40px; width: 40px; border-radius: 9999px; background-color: #fffffe;">
+                                            style="border: 1px solid #d1d5db; display: inline-block; height: 40px; width: 40px; border-radius: 50%; background-color: #fffffe; overflow: hidden; text-decoration: none; margin: 0 8px; vertical-align: middle; line-height: 40px; text-align: center;">
                                             <img src="{{ asset('assets/images/linkedin.png') }}" alt="linkedin icon" width="20" height="20"
-                                                style="max-width: 100%; vertical-align: middle; height: 16px;margin-top: 10px;margin-left: 12px;">
+                                                style="display: inline-block; vertical-align: middle; max-width: 20px; max-height: 20px;">
                                         </a>
                                     </div>
                                 </td>
