@@ -147,7 +147,7 @@
                 <div class="bg-white rounded-md p-1 h-16 w-16 flex justify-center items-center">
                     <img class="" src="{{asset('/images/heart.png')}}" alt="">
                 </div>
-                <h1 class="">
+                <h1 class="text-indigo-600">
                     {{ $findRidePage->extra_care_ride_page_label ?? 'Search for Extra+ Rides' }}
                 </h1>
             </div>
@@ -1983,32 +1983,34 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
-                    <div class="folk-ride-faq">
-                        <div class="flex flex-col items-center justify-center folk-ride-faq__header">
-                            <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                                {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra+ Rides' }}
-                            </h3>
-                            <!-- <h4 class="text-sm font-FuturaMdCnBT text-center text-black mb-0 mt-1 opacity-90">
-                                (for your peace of mind)
-                            </h4> -->
-                        </div>
-                        <div class="folk-ride-faq__body">
-                            @foreach ($extraCareFaqs as $extraCareFaq)
-                                <div class="folk-ride-faq__item">
-                                    <button type="button" class="folk-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="toggleFolkRideFaq(this)">
-                                        {{ $extraCareFaq->question }}
-                                    </button>
-                                    <div class="folk-ride-faq__answer" role="region" aria-hidden="true">
-                                        <div class="folk-ride-faq__answer-inner">
-                                            {!! $extraCareFaq->answer !!}
-                                        </div>
+        @if (empty($request->from) && empty($request->to) && empty($request->date))
+            <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
+                <div class="folk-ride-faq">
+                    <div class="flex flex-col items-center justify-center folk-ride-faq__header">
+                        <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
+                            {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra+ Rides' }}
+                        </h3>
+                        <!-- <h4 class="text-sm font-FuturaMdCnBT text-center text-black mb-0 mt-1 opacity-90">
+                            (for your peace of mind)
+                        </h4> -->
+                    </div>
+                    <div class="folk-ride-faq__body">
+                        @foreach ($extraCareFaqs as $extraCareFaq)
+                            <div class="folk-ride-faq__item">
+                                <button type="button" class="folk-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="toggleFolkRideFaq(this)">
+                                    {{ $extraCareFaq->question }}
+                                </button>
+                                <div class="folk-ride-faq__answer" role="region" aria-hidden="true">
+                                    <div class="folk-ride-faq__answer-inner">
+                                        {!! $extraCareFaq->answer !!}
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
+            </div>
+        @endif
             </div>
         </div>
     </div>
