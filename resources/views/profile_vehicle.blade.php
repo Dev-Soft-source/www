@@ -127,7 +127,15 @@
                                             <p class="text-gray-900">
                                                 {{ $vehicle->liscense_no }}
                                             </p>
-                                            <p>{{ $vehicle->car_type }}</p>
+                                            @php
+                                                if($vehicle->car_type == 'Gas')
+                                                    $car_type = $myVehiclePage->gas_checkbox_label;
+                                                elseif($vehicle->car_type == 'Hybrid')
+                                                    $car_type = $myVehiclePage->hybrid_checkbox_label;
+                                                elseif($vehicle->car_type == 'Electric')
+                                                    $car_type = $myVehiclePage->electric_checkbox_label;
+                                            @endphp
+                                            <p>{{ $car_type }}</p>
                                         </div>
                                     </div>
                                     <div

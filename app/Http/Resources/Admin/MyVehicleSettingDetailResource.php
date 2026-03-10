@@ -48,6 +48,7 @@ class MyVehicleSettingDetailResource extends JsonResource
             'hybrid_checkbox_label' => $this->hybrid_checkbox_label,
             'gas_checkbox_label' => $this->gas_checkbox_label,
             'set_primary_vehicle_label' => $this->set_primary_vehicle_label,
+            'primary_vehicle_label' => $this->primary_vehicle_label,
             'set_primary_error' => $this->set_primary_error,
             'yes_checkbox_label' => $this->yes_checkbox_label,
             'no_checkbox_label' => $this->no_checkbox_label,

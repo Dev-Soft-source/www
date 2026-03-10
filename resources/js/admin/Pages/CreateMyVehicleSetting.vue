@@ -441,6 +441,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`primary_vehicle_label_${activeLanguageId}`"
+                                                        >Primary badge label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`primary_vehicle_label_${activeLanguageId}`"
+                                                    :id="`primary_vehicle_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'primary_vehicle_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'primary_vehicle_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `primary_vehicle_label.primary_vehicle_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `primary_vehicle_label.primary_vehicle_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`make_error_${activeLanguageId}`"
                                                         >Make error</label
                                                     >
@@ -2179,6 +2223,7 @@ export default {
                             this.handleInput("", language, "hybrid_checkbox_label");
                             this.handleInput("", language, "gas_checkbox_label");
                             this.handleInput("", language, "set_primary_vehicle_label");
+                            this.handleInput("", language, "primary_vehicle_label");
                             this.handleInput("", language, "set_primary_error");
                             this.handleInput("", language, "yes_checkbox_label");
                             this.handleInput("", language, "no_checkbox_label");
@@ -2357,6 +2402,11 @@ export default {
                                 setting?.set_primary_vehicle_label,
                                 setting?.language,
                                 "set_primary_vehicle_label"
+                            );
+                            this.handleInput(
+                                setting?.primary_vehicle_label,
+                                setting?.language,
+                                "primary_vehicle_label"
                             );
                             this.handleInput(
                                 setting?.set_primary_error,
@@ -2541,6 +2591,9 @@ export default {
                 )||
                 validationErros.has(
                     `set_primary_vehicle_label.set_primary_vehicle_label_${language.id}`
+                )||
+                validationErros.has(
+                    `primary_vehicle_label.primary_vehicle_label_${language.id}`
                 )||
                 validationErros.has(
                     `set_primary_error.set_primary_error_${language.id}`

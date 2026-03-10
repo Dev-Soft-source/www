@@ -49,6 +49,8 @@ class MyVehicleSettingService
                 $errorMessages = array_merge($errorMessages, ['gas_checkbox_label.gas_checkbox_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['set_primary_vehicle_label.set_primary_vehicle_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['set_primary_vehicle_label.set_primary_vehicle_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['primary_vehicle_label.primary_vehicle_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['primary_vehicle_label.primary_vehicle_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['set_primary_error.set_primary_error_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['set_primary_error.set_primary_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['yes_checkbox_label.yes_checkbox_label_' . $language->id => ['required', 'string']]);
@@ -121,6 +123,7 @@ class MyVehicleSettingService
             'hybrid_checkbox_label' => $this->data($request, $language, 'hybrid_checkbox_label'),
             'gas_checkbox_label' => $this->data($request, $language, 'gas_checkbox_label'),
             'set_primary_vehicle_label' => $this->data($request, $language, 'set_primary_vehicle_label'),
+            'primary_vehicle_label' => $this->data($request, $language, 'primary_vehicle_label'),
             'set_primary_error' => $this->data($request, $language, 'set_primary_error'),
             'yes_checkbox_label' => $this->data($request, $language, 'yes_checkbox_label'),
             'no_checkbox_label' => $this->data($request, $language, 'no_checkbox_label'),
