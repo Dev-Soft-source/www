@@ -51,7 +51,7 @@
                                                                             </span>
                                                                         </div>
                                                                         <div class="ml-20">
-                                                                            <div class="font-bold text-black">From</div>
+                                                                            <div class="font-bold text-black">{{ $postRidePage->from_label ?? 'From' }}</div>
                                                                             <div class="text-primary md:mb-4">{{ $from }} </div>
                                                                         </div>
                                                                     </div>
@@ -64,7 +64,7 @@
                                                                             </span>
                                                                         </div>
                                                                         <div class="ml-20">
-                                                                            <div class="font-bold text-black">To</div>
+                                                                            <div class="font-bold text-black">{{ $postRidePage->to_label ?? 'To' }}</div>
                                                                             <div class="text-primary md:mb-4">{{ $to }}</div>
                                                                         </div>
                                                                     </div>

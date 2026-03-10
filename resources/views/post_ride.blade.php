@@ -742,7 +742,7 @@
                             <div id="add-more-spots-panel" class="add-more-spots-panel" role="region" aria-labelledby="add-more-spots-toggle" style="{{ $hasStopsPost ? 'height: auto;' : 'height: 0;' }}">
                                 <div class="add-more-spots-panel-inner bg-white p-4">
                                     <div class="flex items-center gap-2 mb-3">
-                                        <h4 class="text-gray-900 text-xl font-medium">From: </h4>
+                                        <h4 class="text-gray-900 text-xl font-medium">{{ $postRidePage->from_label ?? 'From' }}: </h4>
                                         <span id="stops-origin-label" class="text-gray-900 text-primary lg:text-lg"></span>
                                     </div>
                                     <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way: <span class="text-red-500">*</span></h4>
@@ -777,7 +777,7 @@
                                     </div>
                                     <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
                                     <div class="flex items-center gap-2 mb-3">
-                                        <h4 class="text-gray-900 text-xl font-medium">To: </h4>
+                                        <h4 class="text-gray-900 text-xl font-medium">{{ $postRidePage->to_label ?? 'To' }}: </h4>
                                         <span id="stops-destination-label" class="text-gray-900 text-primary lg:text-lg"></span>
                                     </div>
                                     <div id="stops-segments-hidden" class="hidden"></div>
@@ -924,7 +924,7 @@
                                                 {{ old('middle_seats', $ride->middle_seats) == '2' ? 'checked' : '' }}>
                                             <label for="2-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">
-                                                    2 seats
+                                                    2 {{ $postRidePage->seats_text ?? 'seats' }}
                                                 </span>
                                             </label>
                                         </li>
@@ -932,7 +932,7 @@
                                             <input type="radio" id="3-seats" name="middle_seats" value="3" class="hidden peer"
                                                 {{ old('middle_seats', $ride->middle_seats) == '3' ? 'checked' : '' }}>
                                             <label for="3-seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-md">3 seats</span>
+                                                <span class="font-medium text-md">3 {{ $postRidePage->seats_text ?? 'seats' }}</span>
                                             </label>
                                         </li>
                                     </ul>
@@ -955,7 +955,7 @@
                                                 {{ old('back_seats', $ride->back_seats) == '2' ? 'checked' : '' }}>
                                             <label for="2-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                                 <span class="font-medium text-md">
-                                                    2 seats
+                                                    2 {{ $postRidePage->seats_text ?? 'seats' }}
                                                 </span>
                                             </label>
                                         </li>
@@ -963,7 +963,7 @@
                                             <input type="radio" id="3-back_seats" name="back_seats" value="3" class="hidden peer"
                                                 {{ old('back_seats', $ride->back_seats) == '3' ? 'checked' : '' }}>
                                             <label for="3-back_seats" class="inline-flex items-center justify-center w-full p-1 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <span class="font-medium text-md">3 seats</span>
+                                                <span class="font-medium text-md">3 {{ $postRidePage->seats_text ?? 'seats' }}</span>
                                             </label>
                                         </li>
                                     </ul>
@@ -1477,9 +1477,9 @@
                                     </div>
                                     <div class="md:col-span-4">
                                         <div id="">
-                                            <label for="car-photo" class="text-gray-900 mb-2">
+                                            {{-- <label for="car-photo" class="text-gray-900 mb-2">
                                                 Car Photo
-                                            </label>
+                                            </label> --}}
                                             <div class="md:col-span-2 mt-2">
                                                 <label for="dropzone-file"
                                                     class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
@@ -1491,11 +1491,11 @@
                                                         @else
                                                             <img id="profile-image" class="w-12 h-12 object-contain mb-4 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}">
                                                         @endif
-                                                        <p class="text-sm lg:text-lg text-gray-900">Upload car photo.
+                                                        <p class="text-sm lg:text-lg text-gray-900">{{ $vehiclePage->image_description_label ?? 'Upload car photo' }}
                                                             <!-- <span class="font-semibold text-primary">Choose file</span> -->
                                                         </p>
                                                         <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                        JPEG, JPG, PNG, GIF - 10MB max.
+                                                        {{ $vehiclePage->images_option_placeholder ?? 'JPEG, JPG, PNG, GIF - 10MB max.' }}
                                                         </p>
                                                     </div>
                                                     <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
@@ -1520,7 +1520,7 @@
                             </div>
                             <div id="showVehicles" class="md:col-span-2 group">
                                 <label for="type" class="text-gray-900 mb-2">
-                                    Select vehicle <span class="text-red-500">*</span>
+                                    {{ $vehiclePage->vehicle_type_label ?? 'Select vehicle' }} <span class="text-red-500">*</span>
                                 </label>
                                 <div class="mt-2">
                                     @php
@@ -1536,7 +1536,7 @@
                                         class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         <option value=""
                                             {{ $selectedVehicleId === '' || $selectedVehicleId === null ? 'selected' : '' }}>
-                                            Select
+                                            {{ $vehiclePage->vehicle_type_placeholder ?? 'Select' }}
                                         </option>
                                         @foreach ($vehicles as $vehicle)
                                             <option value="{{ $vehicle->id }}"
