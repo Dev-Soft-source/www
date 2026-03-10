@@ -195,7 +195,7 @@
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
-                                            <h3 class=" text-2xl">Your Contact Information</h3>
+                                            <h3 class=" text-2xl">{{ $coffeeWallPage->contact_infomation_label }}</h3>
                                         </div>
                                         <div class="w-full mt-4">
                                             <label for="anonymous" class="flex items-center justify-between w-full mb-1">
@@ -431,7 +431,7 @@
                 <button
                     class="w-full bg-blue-600 text-white px-6 py-4 text-left text-xl font-FuturaMdCnBT flex items-center justify-between hover:bg-blue-700 focus:outline-none"
                     onclick="toggleFAQ('donors')">
-                    <span>FAQ for the Donors</span>
+                    <span>{{ $coffeeWallPage->faq_donors_label }}</span>
                     <svg id="donors-icon" class="w-6 h-6 transform transition-transform duration-200" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -440,25 +440,20 @@
                 <div id="donors-faq" class="hidden p-6 bg-gray-50 border-t">
                     <div class="space-y-4 text-gray-700">
                         <div>
-                            <h4 class="font-semibold mb-2">What is "Coffee on the Wall"?</h4>
-                            <p>Coffee on the Wall is a tradition that started in cafes where customers could buy an extra
-                                coffee for someone in need. We've digitized this concept to help provide rides for those who
-                                cannot afford them.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_1_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_donors_1_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">How does my donation work?</h4>
-                            <p>When you make a donation, your contribution goes directly toward providing free or discounted
-                                rides for people in need in your community.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_2_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_donors_2_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">Will I get updates on how my donation is used?</h4>
-                            <p>If you check "Notify me when my Coffee is used", you'll receive an email when your donation
-                                helps someone get a ride.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_3_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_donors_3_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">Is my donation tax-deductible?</h4>
-                            <p>Please consult with your tax advisor regarding the deductibility of your donation in your
-                                jurisdiction.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_4_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_donors_4_answer }}</p>
                         </div>
                     </div>
                 </div>
@@ -469,7 +464,7 @@
                 <button
                     class="w-full bg-blue-600 text-white px-6 py-4 text-left text-xl font-FuturaMdCnBT flex items-center justify-between hover:bg-blue-700 focus:outline-none"
                     onclick="toggleFAQ('beneficiary')">
-                    <span>FAQ for the Beneficiary</span>
+                    <span>{{ $coffeeWallPage->faq_beneficiary_label }}</span>
                     <svg id="beneficiary-icon" class="w-6 h-6 transform transition-transform duration-200" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -478,24 +473,20 @@
                 <div id="beneficiary-faq" class="hidden p-6 bg-gray-50 border-t">
                     <div class="space-y-4 text-gray-700">
                         <div>
-                            <h4 class="font-semibold mb-2">How do I qualify for a free ride?</h4>
-                            <p>Free rides are available for students, female passengers, visible minorities, and others in
-                                need. Contact us to learn about qualification requirements.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_1_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_beneficiary_1_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">How do I request a sponsored ride?</h4>
-                            <p>You can request a sponsored ride through our app when booking. Look for the "Coffee on the
-                                Wall" option during the booking process.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_2_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_beneficiary_2_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">Are there limits on how many free rides I can get?</h4>
-                            <p>Limits may apply based on donation availability and community guidelines. We aim to help as
-                                many people as possible while being fair to all users.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_3_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_beneficiary_3_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">Is my information kept private?</h4>
-                            <p>Yes, your information is kept confidential. Donors will not see your personal details, and we
-                                respect your privacy throughout the process.</p>
+                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_4_question }}</h4>
+                            <p>{{ $coffeeWallPage->faq_beneficiary_4_answer }}</p>
                         </div>
                     </div>
                 </div>
