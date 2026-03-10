@@ -203,7 +203,7 @@
                                 @isset($findRidePage->ride_features_option1->features_setting_id)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="pink-ride" class="text-gray-900 flex space-x-1">
-                                        <span class="text-pink-500 text-lg">
+                                        <span class="text-pink-600 text-lg">
                                             {{ $findRidePage->ride_features_option1->name }}
                                         </span>
                                         <!-- <div class="sups relative">
@@ -230,7 +230,7 @@
                                 </div>
                                 @endisset
                                 <div class="flex items-start justify-between p-3">
-                                    <span class="text-green-500 text-lg font-medium">
+                                    <span class="text-green-600 text-lg font-medium">
                                         ProximaLocal Rides — Under $15 per seat (no booking fee)
                                     </span>
                                     <span class="text-sm text-gray-500">✓</span>

@@ -31,7 +31,6 @@
                     </button>
                     <button onclick="closeModal()" class="button-exp-fill whitespace-nowrap">
                         {{ $successMessage->cancel_button?? 'Cancel'}} 
-                        
                     </button>
                 </div>
             </div>

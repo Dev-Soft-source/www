@@ -566,7 +566,7 @@
                                         <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid border-gray-100"
                                             id="ride-{{ $ride->id }}">
                                             <div
-                                                class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
+                                                class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 px-4">
                                                 <p class="flex items-center space-x-2 font-semibold">
                                                     {{ \Carbon\Carbon::parse($ride->date)->format('l, F d, Y') }}
                                                     @isset($findRidePage->card_section_at_label)
@@ -574,8 +574,8 @@
                                                     @endisset
                                                     {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
                                                 </p>
-                                                <div class="pr-8">
-                                                    <div class="pr-8">
+                                                <div class="mt-8">
+                                                    <div>
                                                         <p class="font-medium">
                                                             Total {{ $ride->seats }} seats</p>
                                                     </div>
@@ -640,7 +640,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
-                                                    <p class="text-sm md:text-base whitespace-nowrap font-medium">
+                                                    <p class="text-sm md:text-base font-medium mr-2">
                                                         {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                                         @isset($findRidePage->card_section_seats_left)
                                                             {{ $findRidePage->card_section_seats_left }}
@@ -649,7 +649,7 @@
                                                 </div>
                                             </div>
                                             <div
-                                                class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300">
+                                                class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300 mt-4">
                                                 {{-- <div class="flex items-center justify-between p-4">
                                                 <p class="font-semibold">
                                                     @isset($findRidePage->card_section_booked)
@@ -667,7 +667,7 @@
                                                     @endisset
                                                 </p>
                                             </div> --}}
-                                                @php
+                                                <!-- @php
                                                     $iconPlaceholder =
                                                         'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
                                                     $iconSrc = function ($detail) use ($iconPlaceholder) {
@@ -893,18 +893,18 @@
                                                                     alt=""></span>
                                                         @endif
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             <div
                                                 class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
                                                 <div class="flex items-center justify-between p-4 w-full">
                                                     <div class="flex items-center space-x-2">
-                                                        <div class="w-12 h-12 rounded-full overflow-hidden">
+                                                        <!-- <div class="w-12 h-12 rounded-full overflow-hidden">
                                                             <img class="w-full h-full object-contain"
                                                                 src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}"
                                                                 alt="">
-                                                        </div>
-                                                        <div class="text-center">
+                                                        </div> -->
+                                                        <div class="text-center ml-4">
                                                             <p class="font-semibold">
                                                                 {{-- @isset($findRidePage->card_section_driver)
                                                                 {{ $findRidePage->card_section_driver }}
@@ -954,19 +954,24 @@
 
                                                                 $totalAverage =
                                                                     $filteredRatings->avg('average_rating') ?? 0;
+                                                                $driverHasReviews = $filteredRatings->isNotEmpty();
                                                             @endphp
                                                         </div>
                                                     </div>
                                                     <div class="">
-                                                        <span
-                                                            class="font-semibold text-gray-800">{{ number_format($totalAverage, 1) }}</span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                            class="w-6 h-6 text-yellow-500 stroke-gray-600">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                                                                clip-rule="evenodd"></path>
-                                                        </svg>
+                                                        @if ($driverHasReviews)
+                                                            <span
+                                                                class="font-semibold text-gray-800">{{ number_format($totalAverage, 1) }}</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                                class="w-6 h-6 text-yellow-500 stroke-gray-600">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                        @else
+                                                            <span class="font-semibold text-gray-800">{{ $findRidePage->card_section_no_reviews ?? 'No Reviews' }}</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>

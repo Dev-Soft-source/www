@@ -148,6 +148,9 @@
                     <img class="" src="{{asset('/images/heart.png')}}" alt="">
                 </div>
                 <h1 class="text-indigo-600">
+                    Extra+ Rides
+                </h1>
+                <h1 class="text-primary">
                     {{ $findRidePage->extra_care_ride_page_label ?? 'Search for Extra+ Rides' }}
                 </h1>
             </div>
@@ -156,12 +159,13 @@
             @isset($findRidePage->extra_care_ride_page_label)
                 {{ $findRidePage->extra_care_ride_page_label }}
             @endisset
+            <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
         </p> -->
-        <!-- <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
-            <p class="text-gray-900 font-medium">
+        <div class="mt-4">
+            <p class="text-gray-800 font-medium">
                 {{ $findRidePage->extra_ride_description ?? 'I understand that Extra+ Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.' }}
             </p>
-        </div> -->
+        </div>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
             <div>
             <div class="search-filter-container flex flex-col relative">
@@ -204,7 +208,7 @@
                                 @isset($findRidePage->ride_features_option1->features_setting_id)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="pink-ride" class="text-gray-900 flex space-x-1">
-                                        <span class="text-pink-500 text-lg">
+                                        <span class="text-pink-600 text-lg">
                                             {{ $findRidePage->ride_features_option1->name }}
                                         </span>
                                         <!-- <div class="sups relative">
@@ -233,7 +237,7 @@
                                 @isset($findRidePage->ride_features_option2->features_setting_id)
                                 <div class="flex items-start justify-between p-3">
                                     <label for="Extra+" class="text-gray-900 flex space-x-1">
-                                        <span class="text-green-500 text-lg">
+                                        <span class="text-indigo-600 text-lg">
                                             {{ $findRidePage->ride_features_option2->name }}
                                         </span>
                                         <!-- <div class="sups">

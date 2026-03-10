@@ -329,8 +329,9 @@ class RideController extends Controller
                 $q->where('departure', 'like', '%' . $from . '%')
                     ->where('destination', 'like', '%' . $to . '%')
                     ->where('ride_id', $id);
-            }])->first();
-
+            }, 'vehicle'])
+            ->first();
+        Log::info($ride);
         if (!isset($ride) && empty($ride)) {
             $lang = $lang ?? "en";
             return redirect(route('home', ['lang' => $lang]));
