@@ -190,39 +190,51 @@ class Controller extends BaseController
                 $this->defaultLang->id
             );
 
-            // todo : there is not bellow fields in the table find_ride_page_setting_detail ???
-            // Optimize vehicle type fields loading - batch load in a single query
-            $vehicleTypeIds = [
-                $findRidePage->vehicle_type_convertible_text,
-                $findRidePage->vehicle_type_hatchback_text,
-                $findRidePage->vehicle_type_coupe_text,
-                $findRidePage->vehicle_type_minivan_text,
-                $findRidePage->vehicle_type_sedan_text,
-                $findRidePage->vehicle_type_station_wagon_text,
-                $findRidePage->vehicle_type_suv_text,
-                $findRidePage->vehicle_type_truck_text,
-                $findRidePage->vehicle_type_van_text,
-            ];
-
-            $vehicleTypeIds = array_filter($vehicleTypeIds);
-            if (!empty($vehicleTypeIds)) {
-                $vehicleTypeDetails = FeaturesSettingDetail::whereIn('features_setting_id', $vehicleTypeIds)
-                    ->where('language_id', $this->selectedLanguage->id)
-                    ->get()
-                    ->keyBy('features_setting_id');
-
-                $findRidePage->vehicle_type_convertible_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_convertible_text)?->name;
-                $findRidePage->vehicle_type_hatchback_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_hatchback_text)?->name;
-                $findRidePage->vehicle_type_coupe_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_coupe_text)?->name;
-                $findRidePage->vehicle_type_minivan_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_minivan_text)?->name;
-                $findRidePage->vehicle_type_sedan_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_sedan_text)?->name;
-                $findRidePage->vehicle_type_station_wagon_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_station_wagon_text)?->name;
-                $findRidePage->vehicle_type_suv_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_suv_text)?->name;
-                $findRidePage->vehicle_type_truck_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_truck_text)?->name;
-                $findRidePage->vehicle_type_van_text = $vehicleTypeDetails->get($findRidePage->vehicle_type_van_text)?->name;
-            }
+            $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $findRidePage = $this->mapVehicleTypeFields($findRidePage, $postRidePage);
         }
 
         return $findRidePage;
+    }
+
+    protected function mapVehicleTypeFields($targetPage, $sourcePage)
+    {
+        if (!$targetPage || !$sourcePage) {
+            return $targetPage;
+        }
+
+        $vehicleTypeFields = [
+            'vehicle_type_convertible_text',
+            'vehicle_type_hatchback_text',
+            'vehicle_type_coupe_text',
+            'vehicle_type_minivan_text',
+            'vehicle_type_sedan_text',
+            'vehicle_type_station_wagon_text',
+            'vehicle_type_suv_text',
+            'vehicle_type_truck_text',
+            'vehicle_type_van_text',
+        ];
+
+        $vehicleTypeIds = array_filter(array_map(
+            fn ($field) => $sourcePage->{$field} ?? null,
+            $vehicleTypeFields
+        ));
+
+        $vehicleTypeDetails = FeaturesSettingDetail::whereIn('features_setting_id', $vehicleTypeIds)
+            ->where('language_id', $this->selectedLanguage->id)
+            ->get()
+            ->keyBy('features_setting_id');
+
+        foreach ($vehicleTypeFields as $field) {
+            $valueField = str_replace('_text', '_value', $field);
+            $featureId = $sourcePage->{$field} ?? null;
+
+            $targetPage->{$valueField} = $featureId;
+            $targetPage->{$field} = $featureId
+                ? $vehicleTypeDetails->get($featureId)?->name
+                : null;
+        }
+
+        return $targetPage;
     }
 }
