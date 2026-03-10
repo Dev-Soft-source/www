@@ -99,12 +99,13 @@ class SignupController extends Controller
                 $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
                 $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'first_name' => ($signupPage && isset($signupPage->first_name_error)) ? $signupPage->first_name_error : '',
-                    'last_name' => ($signupPage && isset($signupPage->last_name_error)) ? $signupPage->last_name_error : '',
-                    'email' => ($signupPage && isset($signupPage->email_error)) ? $signupPage->email_error : '',
-                    'password' => ($signupPage && isset($signupPage->password_error)) ? $signupPage->password_error : '',
-                    'password_confirmation' => ($signupPage && isset($signupPage->confirm_password_error)) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => ($signupPage && isset($signupPage->agree_terms_error)) ? $signupPage->agree_terms_error : '',
+                    'first_name' => $signupPage->first_name_label ?? __('validation.attributes.first_name'),
+                    'last_name' => $signupPage->last_name_label ?? __('validation.attributes.last_name'),
+                    'email' => $signupPage->email_label ?? __('validation.attributes.email'),
+                    'password' => $signupPage->password_label ?? __('validation.attributes.password'),
+                    'password_confirmation' => $signupPage->confirm_password_label ?? __('validation.attributes.password'),
+                    'remember_me' => __('validation.attributes.remember_me'),
+                    'rideshare_disclaimer' => __('validation.attributes.rideshare_disclaimer'),
                 ];
             }
         } else {
@@ -113,12 +114,13 @@ class SignupController extends Controller
                 $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
                 $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $niceNames = [
-                    'first_name' => ($signupPage && isset($signupPage->first_name_error)) ? $signupPage->first_name_error : '',
-                    'last_name' => ($signupPage && isset($signupPage->last_name_error)) ? $signupPage->last_name_error : '',
-                    'email' => ($signupPage && isset($signupPage->email_error)) ? $signupPage->email_error : '',
-                    'password' => ($signupPage && isset($signupPage->password_error)) ? $signupPage->password_error : '',
-                    'password_confirmation' => ($signupPage && isset($signupPage->confirm_password_error)) ? $signupPage->confirm_password_error : '',
-                    'remember-me' => ($signupPage && isset($signupPage->agree_terms_error)) ? $signupPage->agree_terms_error : '',
+                    'first_name' => $signupPage->first_name_label ?? __('validation.attributes.first_name'),
+                    'last_name' => $signupPage->last_name_label ?? __('validation.attributes.last_name'),
+                    'email' => $signupPage->email_label ?? __('validation.attributes.email'),
+                    'password' => $signupPage->password_label ?? __('validation.attributes.password'),
+                    'password_confirmation' => $signupPage->confirm_password_label ?? __('validation.attributes.password'),
+                    'remember_me' => __('validation.attributes.remember_me'),
+                    'rideshare_disclaimer' => __('validation.attributes.rideshare_disclaimer'),
                 ];
             }
         }
@@ -146,18 +148,7 @@ class SignupController extends Controller
                 'remember_me' => 'required|accepted',
                 'password_confirmation' => 'required|same:password',
                 'rideshare_disclaimer' => 'required|accepted',
-            ], [
-                'password.required' => 'Password is required',
-                'first_name.required' => 'First name is required',
-                'last_name.required' => 'Last name is required',
-                'email.required' => 'Email address is required',
-                'remember_me.required' => 'Please confirm you agree to the cost-sharing rule.',
-                'password_confirmation.required' => isset($signupPage->confirm_password_error) ? $signupPage->confirm_password_error : 'Confirm password is required',
-                'password_confirmation.same' => isset($signupPage->password_mismatch_error) ? $signupPage->password_mismatch_error : 'The passwords do not match',
-                'remember_me.accepted' => 'Please confirm you agree to the cost-sharing rule.',
-                'rideshare_disclaimer.required' => $signupPage->rideshare_require,
-                'rideshare_disclaimer.accepted' => $signupPage->rideshare_require,
-            ], $niceNames);
+            ], [], $niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([

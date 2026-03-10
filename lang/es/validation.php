@@ -169,8 +169,35 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'email' => [
+            'required' => 'La dirección de correo electrónico es obligatoria.',
+            'email' => 'Introduce una dirección de correo electrónico válida, por ejemplo, name@example.com.',
+            'unique' => 'Ya existe una cuenta con esta dirección de correo electrónico.',
+        ],
+        'first_name' => [
+            'required' => 'El nombre es obligatorio.',
+            'regex' => 'El nombre solo puede contener letras, espacios y guiones.',
+        ],
+        'last_name' => [
+            'required' => 'El apellido es obligatorio.',
+            'regex' => 'El apellido solo puede contener letras, espacios y guiones.',
+        ],
+        'password' => [
+            'required' => 'La contraseña es obligatoria.',
+            'min' => 'La contraseña debe tener al menos :min caracteres.',
+            'regex' => 'La contraseña debe incluir una letra mayúscula, una minúscula, un número y un símbolo.',
+        ],
+        'password_confirmation' => [
+            'required' => 'La confirmación de la contraseña es obligatoria.',
+            'same' => 'Las contraseñas no coinciden.',
+        ],
+        'remember_me' => [
+            'required' => 'Confirma que aceptas la regla de reparto de costos.',
+            'accepted' => 'Confirma que aceptas la regla de reparto de costos.',
+        ],
+        'rideshare_disclaimer' => [
+            'required' => 'Confirma el aviso de viaje compartido.',
+            'accepted' => 'Confirma el aviso de viaje compartido.',
         ],
     ],
 
