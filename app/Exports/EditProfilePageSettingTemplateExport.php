@@ -40,7 +40,8 @@ class EditProfilePageSettingTemplateExport implements FromCollection, WithHeadin
         $fields = [
             'name', 'min_bio_label', 'passenger_driven_label', 'main_heading', 'rides_taken_label',
             'km_shared_label', 'review_label', 'reply_label', 'link_review_label', 'review_heading',
-            'edit_profile_text', 'first_name_label', 'first_name_placeholder', 'last_name_label', 'last_name_placeholder',
+            'edit_profile_text', 'first_name_label', 'first_name_placeholder', 'last_name_label', 'last_name_placeholder', 'email_label',
+            'notification_label', 'email_notification_label', 'sms_notification_label',
             'gender_label', 'male_label', 'female_label', 'prefer_no_to_say_label', 'dob_label', 'dob_placeholder',
             'country_label', 'country_placeholder', 'state_label', 'state_placeholder', 'city_label', 'city_placeholder',
             'address_label', 'address_placeholder', 'zip_label', 'mini_bio_label', 'mini_bio_placeholder',

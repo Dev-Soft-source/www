@@ -88,13 +88,14 @@
                 </div>
 
                 <div>
-                    <label for="">Email <span class="text-red-500">*</span></label>
+                    <label for="">{{ $editProfilePage->email_label ?? 'Email' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="email" value="{{ old('email', $user->email) }}" disabled class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('email') ? 'border-red-500' : '' }}">
                 </div>
 
                 <div>
                     <label for="">{{ $editProfilePage->dob_label ?? 'Date of birth' }} <span class="text-red-500">*</span></label>
-                    <input type="text" id="dateInput" name="dob" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('F d, Y') : '' }}"
+                    <input type="text" id="dateInput" name="dob" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('Y-m-d') : '' }}"
+                        placeholder="{{ $editProfilePage->dob_placeholder ?? 'Select date of birth' }}"
                         class="block mt-1 border p-1.5 w-full rounded text-base lg:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('dob') ? 'border-red-500' : '' }}">
                     @error('dob')
                       <div class="relative tooltip -bottom-4 group-hover:flex">
@@ -200,7 +201,7 @@
                 </div>
 
                 <div class="col-span-2">
-                    <label for="">Notifications</label>
+                    <label for="">{{ $editProfilePage->notification_label ?? 'Notifications' }}</label>
                     <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center gap-6 mt-2">
                         @php
                             $emailNotifChecked = old('email_notification') !== null ? (old('email_notification') === 'on' || old('email_notification') == 1) : ($user->email_notification == 1);
@@ -208,11 +209,11 @@
                         @endphp
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="email_notification" name="email_notification" value="1" {{ $emailNotifChecked ? 'checked' : '' }}>
-                            <label for="email_notification">Email Notification</label>
+                            <label for="email_notification">{{ $editProfilePage->email_notification_label ?? 'Email Notification' }}</label>
                         </div>
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="sms_notification" name="sms_notification" value="1" {{ $smsNotifChecked ? 'checked' : '' }}>
-                            <label for="sms_notification">Sms Notification</label>
+                            <label for="sms_notification">{{ $editProfilePage->sms_notification_label ?? 'Sms Notification' }}</label>
                         </div>
                     </div>
 
@@ -300,7 +301,21 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+@php
+    $flatpickrLocale = match(app()->getLocale()) {
+        'ar' => 'ar',
+        'es' => 'es',
+        'fr' => 'fr',
+        'hi' => 'hi',
+        'ru' => 'ru',
+        'uk' => 'uk',
+        'zh' => 'zh',
+        default => null,
+    };
+@endphp
+@if($flatpickrLocale)
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ $flatpickrLocale }}.js"></script>
+@endif
 <script>
     function previewImage(input) {
         const profileImage = document.getElementById('profile-image');
@@ -316,17 +331,28 @@
     }
 
     const dateInput = document.getElementById('dateInput');
-    // Initialize the date picker
-    flatpickr(dateInput, {
-            dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
-            altInput: true,
-            altFormat: 'F d, Y',
-            maxDate: 'today', // Restrict to past dates only (for date of birth)
-            disableMobile: true, // Disable mobile-friendly mode for consistent experience
-            allowInput: true, // Allow manual input
-            clickOpens: true, // Open calendar on click
-            theme: 'default' // Use default theme
-        });
+    const profileLocale = @json(app()->getLocale());
+    const flatpickrLocaleKey = @json($flatpickrLocale);
+    const flatpickrOptions = {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        maxDate: 'today',
+        disableMobile: true,
+        allowInput: true,
+        clickOpens: true,
+        theme: 'default'
+    };
+
+    if (
+        flatpickrLocaleKey &&
+        window.flatpickr &&
+        window.flatpickr.l10ns &&
+        window.flatpickr.l10ns[flatpickrLocaleKey]
+    ) {
+        flatpickrOptions.locale = window.flatpickr.l10ns[flatpickrLocaleKey];
+    }
+
+    flatpickr(dateInput, flatpickrOptions);
 
     $(document).ready(function() {
         function loadStatesByCountry(countryId, selectedState) {
