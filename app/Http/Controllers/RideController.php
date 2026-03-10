@@ -1720,9 +1720,10 @@ class RideController extends Controller
             return redirect()->route('phone', ['lang' => $lang]);
         }
 
-        $driver_license_verified = User::where('id', $user_id)->where('driver', '1')->first();
-        if (!$driver_license_verified) {
-            // driver license not verified, redirect to driver license verification page
+        // Require driver's license on file (uploaded). Allow access once uploaded; admin approval (driver === '1') is not required to view/post ride form.
+        $driver_license_on_file = User::where('id', $user_id)->whereNotNull('driver_license_upload')->where('driver_license_upload', '!=', '')->first();
+        if (!$driver_license_on_file) {
+            // driver license not on file, redirect to driver license verification page
             return redirect()->route('driver.verify', ['lang' => $lang]);
         }
 

@@ -250,6 +250,46 @@
         </div>
     </div>
 
+    <!-- Phone Number Required (any phone) for Regular Ride Booking -->
+    <div id="phoneOnFileRequiredModal" class="hidden fixed z-50 inset-0 overflow-y-auto"
+        aria-labelledby="phone-on-file-required-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePhoneOnFileRequiredModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border"
+                    onclick="event.stopPropagation()">
+                    <button type="button" onclick="closePhoneOnFileRequiredModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
+                                    id="phone-on-file-required-modal-title">{{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">{{ $siteText['phone_on_file_required_text'] ?? 'To book a ride, you must have a phone number on file. Add it in Dashboard → My Phone Number.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="goToPhoneNumberSettings()"
+                            class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                            {{ $siteText['go_to_my_phone_number_btn_text'] ?? 'Go to My Phone Number' }}
+                        </button>
+                        <button type="button" onclick="closePhoneOnFileRequiredModal()"
+                            class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="verified_email_phone" class="hidden relative z-50" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -316,6 +356,19 @@
                 // Short-Distance Ride: price per seat is on RideDetail, not Ride; no booking fee when < $15
                 $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
                 $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
+                // Phone numbers on file
+                $hasAnyPhoneNumber = auth()->check() && \App\Models\PhoneNumber::where('user_id', auth()->id())->exists();
+                $hasVerifiedPhone = auth()->check() && \App\Models\PhoneNumber::where('user_id', auth()->id())->where('verified', '1')->exists();
+                // Phone verification required before booking (same logic as search_ride)
+                $needsPhoneVerification = auth()->check() && $hasAnyPhoneNumber && !$hasVerifiedPhone;
+                // For REGULAR rides, require at least one phone number on file (verified or unverified)
+                $needsPhoneOnFileForRegularRide = auth()->check() && !$hasAnyPhoneNumber && !$isPinkRide && !$isExtraCareRide;
+                // Pink or Extra+ Ride: verified phone required
+                $needsVerifiedPhoneForPinkExtra = auth()->check() && ($isPinkRide || $isExtraCareRide) && !$hasVerifiedPhone;
+                // Government-issued photo ID required to book Pink or Extra+ Ride
+                $user = auth()->user();
+                $hasGovernmentId = $user && (!empty($user->government_issued_id ?? null));
+                $showPhotoIdRequiredForBooking = auth()->check() && ($isPinkRide || $isExtraCareRide) && !$hasGovernmentId;
             @endphp
             @if($isShortDistanceRide)
                 <div class="col-span-3 w-full">
@@ -476,12 +529,38 @@
                                         0)
                                     @if ($ride->status !== '2')
                                         <div class="flex items-baseline">
-                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                                class="text-black text-xl xl:text-2xl">
-                                                @isset($rideDetailPage->seats_left_label)
-                                                    {{ $rideDetailPage->seats_left_label }}:
-                                                @endisset                                                
-                                            </a>
+                                            @if ($needsPhoneOnFileForRegularRide)
+                                                <button type="button" onclick="showPhoneOnFileRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                    @isset($rideDetailPage->seats_left_label)
+                                                        {{ $rideDetailPage->seats_left_label }}:
+                                                    @endisset
+                                                </button>
+                                            @elseif ($needsVerifiedPhoneForPinkExtra)
+                                                <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                    @isset($rideDetailPage->seats_left_label)
+                                                        {{ $rideDetailPage->seats_left_label }}:
+                                                    @endisset
+                                                </button>
+                                            @elseif ($needsPhoneVerification)
+                                                <button type="button" onclick="showPhoneVerificationModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                    @isset($rideDetailPage->seats_left_label)
+                                                        {{ $rideDetailPage->seats_left_label }}:
+                                                    @endisset
+                                                </button>
+                                            @elseif ($showPhotoIdRequiredForBooking)
+                                                <button type="button" onclick="showPhotoIdRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                    @isset($rideDetailPage->seats_left_label)
+                                                        {{ $rideDetailPage->seats_left_label }}:
+                                                    @endisset
+                                                </button>
+                                            @else
+                                                <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                    class="text-black text-xl xl:text-2xl">
+                                                    @isset($rideDetailPage->seats_left_label)
+                                                        {{ $rideDetailPage->seats_left_label }}:
+                                                    @endisset
+                                                </a>
+                                            @endif
                                             <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                                         </div>
                                     @endif
@@ -759,9 +838,9 @@
                                 @if ($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->exists())
                                     <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
                                 @endif
-                                @if ($ride->vehicle_type)
+                                <!-- @if ($ride->vehicle_type)
                                     <p class="text-md">{{ $ride->vehicle_type }} </p>
-                                @endif
+                                @endif -->
                             </div>
                         </div>
                     </div>
@@ -847,17 +926,7 @@
                                             @endif
                                         </span>
                                     </p>
-                                    {{-- @php
-                                            // Calculate the age based on the driver's date of birth
-                                            $dob = \Carbon\Carbon::parse($ride->driver?->dob);
-                                            $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                        @endphp --}}
-                                    {{-- <p class="mb-0">
-                                            @isset($rideDetailPage->driver_age_label)
-                                                {{ $rideDetailPage->driver_age_label }}
-                                            @endisset
-                                            {{ $age }}
-                                        </p> --}}
+
                                     <p class="font-semibold text-lg">
                                         @isset($rideDetailPage->passengers_driven_label)
                                             {{ $rideDetailPage->passengers_driven_label }}
@@ -1192,10 +1261,9 @@
                                 0)
                             @if ($ride->status !== '2')
                                 <div class="flex justify-end">
-                                    <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
-                                        class="">
-                                        <label for="instant-booking"
-                                            class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                    @if ($needsPhoneOnFileForRegularRide)
+                                        <button type="button" onclick="showPhoneOnFileRequiredModal()"
+                                            class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
                                             @isset($ride->booking_method->features_setting_id)
                                                 @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
                                                     <img class="w-10 h-10 rounded-full"
@@ -1206,13 +1274,80 @@
                                                         src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
                                                         alt="">
                                                 @endif
-                                                <span class="font-medium text-xl">
-                                                    Book Your Seats
-                                                    <!-- {{ $ride->booking_method->name }} -->
-                                                </span>
                                             @endisset
-                                        </label>
-                                    </a>
+                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                        </button>
+                                    @elseif ($needsVerifiedPhoneForPinkExtra)
+                                        <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()"
+                                            class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
+                                            @isset($ride->booking_method->features_setting_id)
+                                                @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                        alt="">
+                                                @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                        alt="">
+                                                @endif
+                                            @endisset
+                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                        </button>
+                                    @elseif ($needsPhoneVerification)
+                                        <button type="button" onclick="showPhoneVerificationModal()"
+                                            class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
+                                            @isset($ride->booking_method->features_setting_id)
+                                                @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                        alt="">
+                                                @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                        alt="">
+                                                @endif
+                                            @endisset
+                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                        </button>
+                                    @elseif ($showPhotoIdRequiredForBooking)
+                                        <button type="button" onclick="showPhotoIdRequiredModal()"
+                                            class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
+                                            @isset($ride->booking_method->features_setting_id)
+                                                @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                        alt="">
+                                                @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                        alt="">
+                                                @endif
+                                            @endisset
+                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                        </button>
+                                    @else
+                                        <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                            class="">
+                                            <label for="instant-booking"
+                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
+                                                @isset($ride->booking_method->features_setting_id)
+                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
+                                                        <img class="w-10 h-10 rounded-full"
+                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                            alt="">
+                                                    @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
+                                                        <img class="w-10 h-10 rounded-full"
+                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                            alt="">
+                                                    @endif
+                                                    <span class="font-medium text-xl">
+                                                        Book Your Seats
+                                                        <!-- {{ $ride->booking_method->name }} -->
+                                                    </span>
+                                                @endisset
+                                            </label>
+                                        </a>
+                                    @endif
                                 </div>
                             @endif
                         @endif
@@ -1230,6 +1365,127 @@
             </p>
         </div> --}}
     </div>
+
+    <!-- Phone Verification Required Modal (same as search_ride) -->
+    <div id="phoneVerificationModal" class="hidden fixed z-50 inset-0 overflow-y-auto"
+        aria-labelledby="phone-verification-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePhoneVerificationModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border"
+                    onclick="event.stopPropagation()">
+                    <button type="button" onclick="closePhoneVerificationModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
+                                    id="phone-verification-modal-title">{{ $siteText['phone_verification_required_text'] ?? 'Phone Verification Required' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">{{ $siteText['phone_verification_description_text'] ?? 'To maintain a safe and reliable community, you must have a verified phone number before booking or posting a ride.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="goToPhoneVerification()"
+                            class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                            {{ $siteText['verify_my_number_btn_text'] ?? 'Verify My Number' }}
+                        </button>
+                        <button type="button" onclick="closePhoneVerificationModal()"
+                            class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verified phone required for Pink/Extra+ Ride Booking -->
+    <div id="verifiedPhoneForPinkExtraModal" class="hidden fixed z-50 inset-0 overflow-y-auto"
+        aria-labelledby="verified-phone-pink-extra-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closeVerifiedPhoneForPinkExtraModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border"
+                    onclick="event.stopPropagation()">
+                    <button type="button" onclick="closeVerifiedPhoneForPinkExtraModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
+                                    id="verified-phone-pink-extra-modal-title">{{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">{{ $siteText['verified_phone_required_for_pink_extra_text'] ?? 'You must verify your phone number to book Pink or Extra+ Rides. Please do this in Dashboard → My Phone Number.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="goToPhoneVerification()"
+                            class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                            {{ $siteText['go_to_my_phone_number_btn_text'] ?? 'My Phone Number' }}
+                        </button>
+                        <button type="button" onclick="closeVerifiedPhoneForPinkExtraModal()"
+                            class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo ID Required for Pink/Extra+ Ride Booking -->
+    <div id="photoIdRequiredModal" class="hidden fixed z-50 inset-0 overflow-y-auto"
+        aria-labelledby="photo-id-required-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePhotoIdRequiredModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border"
+                    onclick="event.stopPropagation()">
+                    <button type="button" onclick="closePhotoIdRequiredModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
+                                    id="photo-id-required-modal-title">{{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">{{ $siteText['photo_id_required_for_pink_extra_text'] ?? 'To book a Pink or Extra+ Ride, you must have a government-issued photo ID on file. Please add it in Dashboard → Edit Profile.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="goToEditProfile()"
+                            class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                            {{ $siteText['edit_profile_btn_text'] ?? 'Edit Profile' }}
+                        </button>
+                        <button type="button" onclick="closePhotoIdRequiredModal()"
+                            class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
         id="chat-modal">
         <div class="relative w-auto my-6 mx-auto max-w-2xl">
@@ -1462,6 +1718,51 @@
 
         function closePopupModal() {
             document.getElementById('my-chat-pop-modal').style.display = 'none';
+        }
+
+        function showPhoneVerificationModal() {
+            var modal = document.getElementById('phoneVerificationModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closePhoneVerificationModal() {
+            var modal = document.getElementById('phoneVerificationModal');
+            if (modal) modal.classList.add('hidden');
+        }
+        function goToPhoneVerification() {
+            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+        }
+
+        function showVerifiedPhoneForPinkExtraModal() {
+            var modal = document.getElementById('verifiedPhoneForPinkExtraModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closeVerifiedPhoneForPinkExtraModal() {
+            var modal = document.getElementById('verifiedPhoneForPinkExtraModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function showPhoneOnFileRequiredModal() {
+            var modal = document.getElementById('phoneOnFileRequiredModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closePhoneOnFileRequiredModal() {
+            var modal = document.getElementById('phoneOnFileRequiredModal');
+            if (modal) modal.classList.add('hidden');
+        }
+        function goToPhoneNumberSettings() {
+            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+        }
+
+        function showPhotoIdRequiredModal() {
+            var modal = document.getElementById('photoIdRequiredModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closePhotoIdRequiredModal() {
+            var modal = document.getElementById('photoIdRequiredModal');
+            if (modal) modal.classList.add('hidden');
+        }
+        function goToEditProfile() {
+            window.location.href = '{{ route('profile.edit', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
         }
 
         function toggleModal1(modalID, message) {

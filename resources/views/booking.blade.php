@@ -782,29 +782,13 @@
                                         @endisset
                                     </p>
                                     @if (auth()->user() && auth()->user()->student == 2)
-                                        <div class="relative sups inline-flex items-center group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                            </svg>
-                                            <!-- Tooltip -->
-                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
-                                                <div class="student-verification-tooltip">
-                                                    <p class="text-white text-sm">Your student verification is pending. Pay the Booking Fee now to secure your seat, and we will refund it automatically once your status is approved (usually within 72 hours).</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-block" data-tippy-content="Your student verification is pending. Pay the Booking Fee now to secure your seat, and we will refund it automatically once your status is approved (usually within 72 hours)." viewBox="0 0 16 16">
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        </svg>
                                     @elseif (auth()->user() && auth()->user()->charge_booking == '2')
-                                        <div class="relative sups inline-flex items-center group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                            </svg>
-                                            <!-- Tooltip -->
-                                            <div class="absolute tooltip hidden left-full bottom-full mb-2 z-50 shift-left group-hover:flex peer-hover:flex">
-                                                <div class="student-verification-tooltip bg-green-500">
-                                                    <p class="text-white text-md">As a verified student, your booking fee is waived. You only pay the booking price.</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-block" data-tippy-content="As a verified student, your booking fee is waived. You only pay the booking price." viewBox="0 0 16 16">
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        </svg>
                                     @endif
                                 </div>
                                 <p class="totalAmount text-black"></p>
@@ -849,46 +833,29 @@
                                                 {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                             </span>
                                         </label>
-                                        <div class="sups relative inline-flex ml-2 group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
+                                        @php
+                                            $coffeePaymentOption1Id = is_object($postRidePage->payment_methods_option1 ?? null) ? ($postRidePage->payment_methods_option1->features_setting_id ?? null) : ($postRidePage->payment_methods_option1 ?? null);
+                                            $coffeePaymentOption3Id = isset($postRidePage->payment_methods_option3) ? (is_object($postRidePage->payment_methods_option3) ? ($postRidePage->payment_methods_option3->features_setting_id ?? null) : $postRidePage->payment_methods_option3) : null;
+                                            $coffeeRidePaymentId = is_object($ride->payment_method ?? null) ? ($ride->payment_method->features_setting_id ?? null) : ($ride->payment_method ?? null);
+                                            $paymentMethodTooltipText = ($coffeeRidePaymentId !== null && $coffeeRidePaymentId == $coffeePaymentOption1Id)
+                                                ? 'To be paid in cash directly to the driver at the time of the ride.'
+                                                : (($coffeePaymentOption3Id !== null && $coffeeRidePaymentId == $coffeePaymentOption3Id)
+                                                    ? 'This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.'
+                                                    : 'ProximaRide will transfer this amount to the driver only after the ride is completed.');
+                                        @endphp
+                                        <div class="flex items-center gap-1 ml-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ $paymentMethodTooltipText }}" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
-                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
-                                                    @php
-                                                        $coffeePaymentOption1Id = is_object($postRidePage->payment_methods_option1 ?? null) ? ($postRidePage->payment_methods_option1->features_setting_id ?? null) : ($postRidePage->payment_methods_option1 ?? null);
-                                                        $coffeePaymentOption3Id = isset($postRidePage->payment_methods_option3) ? (is_object($postRidePage->payment_methods_option3) ? ($postRidePage->payment_methods_option3->features_setting_id ?? null) : $postRidePage->payment_methods_option3) : null;
-                                                        $coffeeRidePaymentId = is_object($ride->payment_method ?? null) ? ($ride->payment_method->features_setting_id ?? null) : ($ride->payment_method ?? null);
-                                                    @endphp
-                                                    @if ($coffeeRidePaymentId !== null && $coffeeRidePaymentId == $coffeePaymentOption1Id)
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">To be paid in cash directly to the driver at the time of the ride.</p>
-                                                    @elseif ($coffeePaymentOption3Id !== null && $coffeeRidePaymentId == $coffeePaymentOption3Id)
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.</p>
-                                                    @else
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">ProximaRide will transfer this amount to the driver only after the ride is completed.</p>
-                                                    @endif
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div id="hideBookingFee" class="hidden items-center space-x-1">
                                         <p class="text-black">-</p>
                                         <p class="totalAmount text-black"></p>
-                                        <div class="sups relative inline-flex ml-2 group">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help peer" viewBox="0 0 16 16">
+                                        <div class="flex items-center gap-1 ml-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-block" data-tippy-content="{{ $paymentMethodTooltipText }}" viewBox="0 0 16 16">
                                                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                                             </svg>
-                                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 hidden group-hover:flex peer-hover:flex flex-col items-center">
-                                                <div role="tooltip" class="payment-method-tooltip tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem]">
-                                                    @if ($coffeeRidePaymentId !== null && $coffeeRidePaymentId == $coffeePaymentOption1Id)
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">To be paid in cash directly to the driver at the time of the ride.</p>
-                                                    @elseif ($coffeePaymentOption3Id !== null && $coffeeRidePaymentId == $coffeePaymentOption3Id)
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.</p>
-                                                    @else
-                                                        <p class="text-white font-semibold text-start text-sm lg:text-base">ProximaRide will transfer this amount to the driver only after the ride is completed.</p>
-                                                    @endif
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -1,4 +1,50 @@
 <div class="hideheader ">
+    {{-- Modal: Driver license required to post a regular ride --}}
+    <div class="relative z-50 hidden" id="driver_license_required_modal" aria-labelledby="driver-license-modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                    <button type="button" onclick="closeDriverLicenseModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <h3 class="font-FuturaMdCnBT text-gray-700 mb-4" id="driver-license-modal-title">Action Required</h3>
+                        <p class="text-gray-800 text-base text-left">To post a ride, you must have your driver's license on file. Upload it in Dashboard → Edit Profile.</p>
+                        <div class="mt-6 flex flex-wrap gap-2 justify-center">
+                            <button type="button" onclick="closeDriverLicenseModal()" class="button-exp-fill font-FuturaMdCnBT">{{ $successMessage->cancel_button ?? 'Close' }}</button>
+                            <a href="{{ route('driver.verify', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="button-exp-fill bg-primary hover:bg-primary font-FuturaMdCnBT no-underline">Edit Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- Modal: Phone number must be verified to post a ride --}}
+    <div class="relative z-50 hidden" id="phone_required_modal" aria-labelledby="phone-required-modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closePhoneRequiredModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                    <button type="button" onclick="closePhoneRequiredModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <h3 class="font-FuturaMdCnBT text-gray-700 mb-4" id="phone-required-modal-title">Action Required</h3>
+                        <p class="text-gray-800 text-base text-left">You must verify your phone number before posting any ride. Please do this in <a href="{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="underline font-medium hover:no-underline text-blue-600">Dashboard → My Phone Number</a>.</p>
+                        <div class="mt-6 flex flex-wrap gap-2 justify-center">
+                            <button type="button" onclick="closePhoneRequiredModal()" class="button-exp-fill font-FuturaMdCnBT">{{ $successMessage->cancel_button ?? 'Close' }}</button>
+                            <a href="{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="button-exp-fill bg-primary hover:bg-primary font-FuturaMdCnBT no-underline">My Phone Number</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="relative z-50 hidden" id="delete_message_confirmation" aria-labelledby="modal-title" role="dialog"
         aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -64,6 +110,7 @@
                             $selectedLanguage->id,
                         )->first();
                         $langAbbr = optional($selectedLanguage)->abbreviation ?? 'en';
+                        $hasVerifiedPhone = auth()->check() && \App\Models\PhoneNumber::where('user_id', auth()->id())->where('verified', '1')->exists();
                     @endphp
                     <ul
                         class="inline-flex space-x-3 lg:space-x-6 text-blue-600 text-base xl:text-lg mt-2 font-FuturaMdCnBT">
@@ -82,17 +129,45 @@
                                 }
                             @endphp
                             @if ($link && \Illuminate\Support\Facades\Route::has($link))
+                                @php
+                                    $isPostRideWithoutLicense = $link === 'post_ride' && auth()->check() && empty(auth()->user()->driver_license_upload);
+                                    $isPostRideWithoutVerifiedPhone = $link === 'post_ride' && auth()->check() && $hasVerifiedPhone === false;
+                                @endphp
                                 <li class="flex gap-x-1 items-center">
-                                    <a href="{{ route($link, ['lang' => $langAbbr]) }}"
-                                        class="flex gap-x-1 group items-center whitespace-nowrap">
-                                        <div>
-                                            @if ($iconUrl)
-                                                <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
-                                                    src="{{ $iconUrl }}" alt="">
-                                            @endif
-                                        </div>
-                                        <p class="text-blue-600">{{ $name }}</p>
-                                    </a>
+                                    @if ($isPostRideWithoutLicense)
+                                        <button type="button" onclick="openDriverLicenseModal()"
+                                            class="flex gap-x-1 group items-center whitespace-nowrap bg-transparent border-0 p-0 cursor-pointer text-inherit">
+                                            <div>
+                                                @if ($iconUrl)
+                                                    <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                                        src="{{ $iconUrl }}" alt="">
+                                                @endif
+                                            </div>
+                                            <p class="text-blue-600">{{ $name }}</p>
+                                        </button>
+                                    @elseif ($isPostRideWithoutVerifiedPhone)
+                                        <button type="button" onclick="openPhoneRequiredModal()"
+                                            class="flex gap-x-1 group items-center whitespace-nowrap bg-transparent border-0 p-0 cursor-pointer text-inherit">
+                                            <div>
+                                                @if ($iconUrl)
+                                                    <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                                        src="{{ $iconUrl }}" alt="">
+                                                @endif
+                                            </div>
+                                            <p class="text-blue-600">{{ $name }}</p>
+                                        </button>
+                                    @else
+                                        <a href="{{ route($link, ['lang' => $langAbbr]) }}"
+                                            class="flex gap-x-1 group items-center whitespace-nowrap">
+                                            <div>
+                                                @if ($iconUrl)
+                                                    <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                                        src="{{ $iconUrl }}" alt="">
+                                                @endif
+                                            </div>
+                                            <p class="text-blue-600">{{ $name }}</p>
+                                        </a>
+                                    @endif
                                 </li>
                             @endif
                         @endforeach
@@ -432,15 +507,39 @@
                         }
                     @endphp
                     @if ($link && \Illuminate\Support\Facades\Route::has($link))
+                        @php
+                            $isPostRideWithoutLicenseMobile = $link === 'post_ride' && auth()->check() && empty(auth()->user()->driver_license_upload);
+                            $isPostRideWithoutVerifiedPhoneMobile = $link === 'post_ride' && auth()->check() && $hasVerifiedPhone === false;
+                        @endphp
                         <li>
-                            <a href="{{ route($link, ['lang' => $langAbbr]) }}"
-                                class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
-                                @if ($iconUrl)
-                                    <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
-                                        src="{{ $iconUrl }}" alt="">
-                                @endif
-                                <p>{{ $name }}</p>
-                            </a>
+                            @if ($isPostRideWithoutLicenseMobile)
+                                <button type="button" onclick="openDriverLicenseModal()"
+                                    class="w-full text-left flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md bg-transparent border-0 cursor-pointer font-FuturaMdCnBT text-blue-600">
+                                    @if ($iconUrl)
+                                        <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                            src="{{ $iconUrl }}" alt="">
+                                    @endif
+                                    <p>{{ $name }}</p>
+                                </button>
+                            @elseif ($isPostRideWithoutVerifiedPhoneMobile)
+                                <button type="button" onclick="openPhoneRequiredModal()"
+                                    class="w-full text-left flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md bg-transparent border-0 cursor-pointer font-FuturaMdCnBT text-blue-600">
+                                    @if ($iconUrl)
+                                        <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                            src="{{ $iconUrl }}" alt="">
+                                    @endif
+                                    <p>{{ $name }}</p>
+                                </button>
+                            @else
+                                <a href="{{ route($link, ['lang' => $langAbbr]) }}"
+                                    class="flex gap-x-1 group items-center px-4 py-2 hover:bg-blue-600 hover:text-white rounded-md">
+                                    @if ($iconUrl)
+                                        <img class="w-5 h-5 object-contain {{ $link === 'students' ? 'mt-1' : '' }}"
+                                            src="{{ $iconUrl }}" alt="">
+                                    @endif
+                                    <p>{{ $name }}</p>
+                                </a>
+                            @endif
                         </li>
                     @endif
                 @endforeach
@@ -551,5 +650,20 @@
                 id: notificationId
             }
         });
+    }
+
+    function openDriverLicenseModal() {
+        document.getElementById('driver_license_required_modal').classList.remove('hidden');
+    }
+    function closeDriverLicenseModal() {
+        document.getElementById('driver_license_required_modal').classList.add('hidden');
+    }
+    function openPhoneRequiredModal() {
+        var el = document.getElementById('phone_required_modal');
+        if (el) el.classList.remove('hidden');
+    }
+    function closePhoneRequiredModal() {
+        var el = document.getElementById('phone_required_modal');
+        if (el) el.classList.add('hidden');
     }
 </script>

@@ -297,6 +297,30 @@
             </div>
         </div>
     </div>
+
+    {{-- Modal: Address required for Pink or Extra+ Ride --}}
+    <div id="pink-extra-address-required-modal" class="hidden fixed inset-0 z-50" aria-labelledby="pink-extra-address-modal-title" role="dialog" aria-modal="true">
+        <div onclick="closePinkExtraAddressRequiredModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePinkExtraAddressRequiredModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <h3 class="font-FuturaMdCnBT text-gray-800 mb-4" id="pink-extra-address-modal-title">Action Required</h3>
+                        <p class="text-gray-800 text-base text-left">To post a Pink or Extra+ Ride, we need your residential address on file. Please add it in <a href="{{ route('profile.edit', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="underline font-medium hover:no-underline text-blue-600">Dashboard → Edit Profile</a>.</p>
+                        <div class="mt-6 flex flex-wrap gap-2 justify-center">
+                            <button type="button" onclick="closePinkExtraAddressRequiredModal()" class="button-exp-fill font-FuturaMdCnBT">Close</button>
+                            <a href="{{ route('profile.edit', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="button-exp-fill bg-primary hover:bg-primary font-FuturaMdCnBT no-underline">Edit Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Modal for 5+ seats warning -->
     <div id="seatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="seats-modal-title" role="dialog" aria-modal="true">
@@ -1786,9 +1810,14 @@
                             </h3>
                         </div>
                         <div class="bg-white p-4">
+                            @php
+                                $hasDriverLicenseOnFile = !empty($user->driver_license_upload);
+                                $hasNoAddress = empty($user->address);
+                                $showPinkOrExtraAddressNotice = $hasDriverLicenseOnFile && $hasNoAddress && ($postRidePage->features_option1?->features_setting_id || $postRidePage->features_option2?->features_setting_id);
+                            @endphp
                             <div class="space-y-2">
                                 @if($postRidePage->features_option1?->features_setting_id)
-                                    <div class="flex items-center">
+                                    <div class="flex items-center {{ $showPinkOrExtraAddressNotice ? 'cursor-pointer' : '' }}" @if($showPinkOrExtraAddressNotice) onclick="event.preventDefault(); showPinkExtraAddressRequiredModal();" role="button" tabindex="0" @endif>
                                         <input id="pink-ride" type="checkbox" name="features[]"
                                             @php $disabled = false; @endphp
                                             @if ($user->pink_ride == '0')
@@ -1903,7 +1932,7 @@
                                             $ride_limit=$setting->extra_rides_trip_limit;
                                         };
                                     @endphp
-                                    <div class="flex items-center">
+                                    <div class="flex items-center {{ $showPinkOrExtraAddressNotice ? 'cursor-pointer' : '' }}" @if($showPinkOrExtraAddressNotice) onclick="event.preventDefault(); event.stopPropagation(); showPinkExtraAddressRequiredModal();" role="button" tabindex="0" @endif>
                                         <input id="Extra+" type="checkbox" name="features[]"
                                             @php $disabled = false; @endphp
                                             @if ($user->folks_ride == '0')
@@ -1971,8 +2000,7 @@
                                                     @endif
                                                     "
                                                     @if ($disabled)
-                                                    onclick="extraCareRideModal()"
-
+                                                    onclick="event.preventDefault(); {{ $showPinkOrExtraAddressNotice ? 'showPinkExtraAddressRequiredModal' : 'extraCareRideModal' }}();"
                                                     @endif
                                                     >
                                                 {{ $postRidePage->features_option2->name }}
@@ -2509,7 +2537,7 @@
                     </div>
                     @enderror
                     <div class="hidden lg:flex justify-center items-center mt-8">
-                        <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
+                        <button class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed" type="submit">
                             @isset($postRidePage->submit_button_label)
                                 {{ $postRidePage->submit_button_label }}
                             @endisset
@@ -2518,7 +2546,7 @@
                 </div>
             </div>
         <div class="flex lg:hidden justify-center items-center mt-8">
-            <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
+            <button class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed" type="submit">
                 @isset($postRidePage->submit_button_label)
                     {{ $postRidePage->submit_button_label }}
                 @endisset
@@ -2562,6 +2590,14 @@
     }
     function closeExtraCareRideModal(parms) {
         document.getElementById('Extra+-ride-modal').classList.add('hidden');
+    }
+    function showPinkExtraAddressRequiredModal() {
+        var el = document.getElementById('pink-extra-address-required-modal');
+        if (el) el.classList.remove('hidden');
+    }
+    function closePinkExtraAddressRequiredModal() {
+        var el = document.getElementById('pink-extra-address-required-modal');
+        if (el) el.classList.add('hidden');
     }
     
     
@@ -2849,8 +2885,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Prevent double submit: disable submit buttons on submit, re-enable only if validation fails
+        function disablePostRideSubmitButtons() {
+            form.querySelectorAll('.post-ride-submit-btn').forEach(function(btn) {
+                btn.disabled = true;
+            });
+        }
+        function enablePostRideSubmitButtons() {
+            form.querySelectorAll('.post-ride-submit-btn').forEach(function(btn) {
+                btn.disabled = false;
+            });
+        }
+
         // Add our submit handler with capture phase to run first
         form.addEventListener('submit', function(e) {
+            disablePostRideSubmitButtons();
+            try {
             console.log('Form submit event triggered - starting validation');
             var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
             var toVal = (document.getElementById('to_spot_0') || {}).value || '';
@@ -3151,6 +3201,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+            } finally {
+                if (e.defaultPrevented) enablePostRideSubmitButtons();
+            }
         }, true); // Use capture phase to run before other handlers
     });
     function swapLocations() {

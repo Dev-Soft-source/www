@@ -152,12 +152,7 @@
                                     class="block w-full rounded text-lg border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600"
                                     type="text" name="first_name" value="{{ old('first_name') }}" autofocus />
                                 @error('first_name')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -178,12 +173,7 @@
                                     class="block w-full rounded border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg"
                                     type="text" name="last_name" value="{{ old('last_name') }}" autofocus />
                                 @error('last_name')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -205,11 +195,7 @@
                                     type="text" name="email" value="{{ old('email') }}" autofocus />
                                 @if(!$errors->has('remember-me'))
                                     @error('email')
-                                        <div class="mt-2 w-full">
-                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-md rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 @endif
                             </div>
@@ -253,12 +239,7 @@
                                     </svg>
                                 </span>
                                 @error('password')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -284,12 +265,7 @@
                                     </svg>
                                 </span>
                                 @error('password_confirmation')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -327,13 +303,7 @@
                                 </label>
 
                                 @error('remember_me')
-                                    <div class="">
-                                        <div class="relative tooltip group-hover:flex">
-                                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base"> {{ $message }}</p>
-                                            </div>
-                                        </div> 
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -351,13 +321,7 @@
                                 @endisset
                             </div>
                             @error('rideshare_disclaimer')
-                                <div class="mt-2">
-                                    <div class="relative tooltip group-hover:flex">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -588,10 +552,14 @@
             }, 200); // Match CSS transition duration
         }
 
-        // Function to clear all error messages
+        // Function to clear all error messages (tooltip-error like login, and legacy .tooltip)
         function clearAllErrors() {
+            document.querySelectorAll('.tooltip-error').forEach(function(el) {
+                el.style.display = 'none';
+                el.style.opacity = '0';
+                el.style.visibility = 'hidden';
+            });
             document.querySelectorAll('.tooltip').forEach(function(tooltip) {
-                // Immediately hide and remove classes (synchronous)
                 tooltip.classList.remove('show');
                 tooltip.classList.add('hidden');
                 tooltip.style.display = 'none';
@@ -601,6 +569,15 @@
             });
             document.querySelectorAll('#signupForm input').forEach(function(input) {
                 input.classList.remove('ring-red-500', 'ring-2');
+            });
+        }
+
+        // Hide tooltip-error when any form input has focus (like login)
+        function hideTooltipErrors() {
+            document.querySelectorAll('.tooltip-error').forEach(function(tooltip) {
+                tooltip.style.display = 'none';
+                tooltip.style.opacity = '0';
+                tooltip.style.visibility = 'hidden';
             });
         }
 
@@ -623,47 +600,25 @@
                             var errorContainer = null;
 
                             if (fieldContainer) {
-                                errorContainer = fieldContainer.querySelector('.tooltip');
+                                errorContainer = fieldContainer.querySelector('.tooltip-error');
                             }
-
                             if (!errorContainer && fieldContainer && fieldContainer.parentElement) {
-                                errorContainer = fieldContainer.parentElement.querySelector('.tooltip');
+                                errorContainer = fieldContainer.parentElement.querySelector('.tooltip-error');
                             }
 
                             if (errorContainer) {
-                                // Update existing error message
-                                var errorText = errorContainer.querySelector('p');
-                                if (errorText) {
-                                    errorText.textContent = errors[fieldName][0];
-                                }
-                                // Reset and show
-                                errorContainer.classList.remove('hidden');
-                                errorContainer.style.display = 'flex';
+                                errorContainer.textContent = errors[fieldName][0];
+                                errorContainer.style.display = '';
                                 errorContainer.style.opacity = '';
                                 errorContainer.style.visibility = '';
-                                errorContainer.style.transform = '';
-
-                                // Show with animation
-                                showTooltip(errorContainer);
                             } else {
-                                // Create new error container
                                 var errorDiv = document.createElement('div');
-                                errorDiv.className = 'relative tooltip -bottom-4 hidden';
-                                errorDiv.innerHTML =
-                                    '<div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded"><p class="text-white leading-none text-sm lg:text-base">' +
-                                    errors[fieldName][0] + '</p></div>';
-
+                                errorDiv.className = 'tooltip-error shadow-lg';
+                                errorDiv.textContent = errors[fieldName][0];
                                 if (fieldContainer) {
                                     fieldContainer.appendChild(errorDiv);
-                                    // Animate after DOM insertion
-                                    setTimeout(function() {
-                                        showTooltip(errorDiv);
-                                    }, 50);
                                 } else if (field.parentElement) {
                                     field.parentElement.appendChild(errorDiv);
-                                    setTimeout(function() {
-                                        showTooltip(errorDiv);
-                                    }, 50);
                                 }
                             }
                         }
@@ -978,17 +933,26 @@
             var inputs = document.querySelectorAll('#signupForm input');
             var rememberMeCheckbox = document.getElementById('remember-me');
 
+            // Hide tooltip-error when any input has focus (like login)
+            inputs.forEach(function(input) {
+                input.addEventListener('focus', hideTooltipErrors);
+            });
+
             function hideErrorMessage(element) {
                 if (!element) return;
-
                 var parentDiv = element.closest('div');
                 if (parentDiv) {
-                    var errorMessage = parentDiv.parentElement ? parentDiv.parentElement.querySelector('.tooltip') :
-                        null;
+                    var errorMessage = parentDiv.parentElement ? parentDiv.parentElement.querySelector('.tooltip') : null;
+                    var tooltipError = parentDiv.querySelector('.tooltip-error') || (parentDiv.parentElement ? parentDiv.parentElement.querySelector('.tooltip-error') : null);
                     if (errorMessage) {
                         hideTooltip(errorMessage);
-                        element.classList.remove('ring-red-500', 'ring-2');
                     }
+                    if (tooltipError) {
+                        tooltipError.style.display = 'none';
+                        tooltipError.style.opacity = '0';
+                        tooltipError.style.visibility = 'hidden';
+                    }
+                    element.classList.remove('ring-red-500', 'ring-2');
                 }
             }
 
@@ -1007,14 +971,7 @@
             var passwordInput = document.getElementById('password');
             if (passwordInput) {
                 passwordInput.addEventListener('input', function() {
-                    var passwordContainer = passwordInput.closest('.relative');
-                    if (passwordContainer) {
-                        var errorMessage = passwordContainer.querySelector('.tooltip');
-                        if (errorMessage) {
-                            hideTooltip(errorMessage);
-                            passwordInput.classList.remove('ring-red-500', 'ring-2');
-                        }
-                    }
+                    hideErrorMessage(passwordInput);
                 });
             }
         });

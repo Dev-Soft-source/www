@@ -35,8 +35,8 @@
 
                                 <div class="mt-6">
                                     <div class="mt-6">
-                                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                                            <div class="text-2xl bg-primary text-white py-2 px-4">
+                                        <div class="bg-white rounded-lg overflow-visible shadow-3xl">
+                                            <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
                                                 <h3 class="text-2xl">
                                                     @isset($coffeeWallPage->frequency_label)
                                                         {!! $coffeeWallPage->frequency_label !!}
@@ -97,25 +97,15 @@
                                                                     </li>
                                                                 @endforeach
                                                             </ul>
-                                                            @error('package')
-                                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                                    <div role="tooltip"
-                                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                                            {{ $message }}</p>
-                                                                    </div>
-                                                                </div>
-                                                            @enderror
-                                                            <div id="package-errors-div"
-                                                                class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                                                <div role="tooltip"
-                                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                                    <p id="package-errors"
-                                                                        class="text-white leading-none text-sm lg:text-base">
-                                                                    </p>
+                                                            <div class="mt-2 min-h-[2.5rem]">
+                                                                @error('package')
+                                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                                @enderror
+                                                                <div id="package-errors-div" class="hidden">
+                                                                    <div id="package-errors" class="tooltip-error shadow-lg"></div>
                                                                 </div>
                                                             </div>
-                                                            <div class="w-full">
+                                                            <div class="w-full mt-4">
                                                                 <div id="custom_field" class="">
                                                                     <div class="relative flex items-center gap-2">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -133,24 +123,12 @@
                                                                             class="block mt-1 border-2 p-2.5 w-full rounded border-blue-500 focus:ring-1 focus:outline-none focus:border-green-500 pl-10 h-20 text-lg"
                                                                             placeholder="{{ $coffeeWallPage->custom_amount_label }}">
                                                                     </div>
-                                                                    @error('custom_amount')
-                                                                        <div
-                                                                            class="relative tooltip -bottom-4 group-hover:flex">
-                                                                            <div role="tooltip"
-                                                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                                                <p
-                                                                                    class="text-white leading-none text-sm lg:text-base">
-                                                                                    {{ $message }}</p>
-                                                                            </div>
-                                                                        </div>
-                                                                    @enderror
-                                                                    <div id="amount-errors-div"
-                                                                        class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                                                        <div role="tooltip"
-                                                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                                            <p id="amount-errors"
-                                                                                class="text-white leading-none text-sm lg:text-base">
-                                                                            </p>
+                                                                    <div class="mt-2 min-h-[2.5rem]">
+                                                                        @error('custom_amount')
+                                                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                                        @enderror
+                                                                        <div id="amount-errors-div" class="hidden">
+                                                                            <div id="amount-errors" class="tooltip-error shadow-lg"></div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -246,21 +224,10 @@
                                                 value="{{ old('name') }}"
                                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('name') ? 'border-red-500' : '' }}">
                                             @error('name')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
-                                            <div id="name-errors-div"
-                                                class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p id="name-errors"
-                                                        class="text-white leading-none text-sm lg:text-base"></p>
-                                                </div>
+                                            <div id="name-errors-div" class="hidden">
+                                                <div id="name-errors" class="tooltip-error shadow-lg"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -276,21 +243,10 @@
                                             <input type="text" name="email" value="{{ old('email') }}"
                                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('email') ? 'border-red-500' : '' }}">
                                             @error('email')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
-                                            <div id="email-errors-div"
-                                                class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p id="email-errors"
-                                                        class="text-white leading-none text-sm lg:text-base"></p>
-                                                </div>
+                                            <div id="email-errors-div" class="hidden">
+                                                <div id="email-errors" class="tooltip-error shadow-lg"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -305,13 +261,7 @@
                                             <input type="text" name="phone" value="{{ old('phone') }}"
                                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}">
                                             @error('phone')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -349,13 +299,7 @@
                                                 </div>
                                             </div>
                                             @error('payment_method')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
@@ -377,13 +321,7 @@
                                                 value="{{ old('name_on_card') }}"
                                                 class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                             @error('name_on_card')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
                                         </div>
                                         <!-- Single row for Card Number, Expiry Date, and CVV -->
@@ -395,13 +333,7 @@
                                                 <div id="card-number-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('card_number')
-                                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                        <div role="tooltip"
-                                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                            <p class="text-white leading-none text-sm lg:text-base">
-                                                                {{ $message }}</p>
-                                                        </div>
-                                                    </div>
+                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                                 @enderror
                                             </div>
 
@@ -411,20 +343,10 @@
                                                 <div id="card-expiry-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('expiry_date')
-                                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                        <div role="tooltip"
-                                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                            <p class="text-white leading-none text-sm lg:text-base">
-                                                                {{ $message }}</p>
-                                                        </div>
-                                                    </div>
+                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                                 @enderror
-                                                <div id="expiry-error-div"
-                                                    class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p id="expiry-error" class="text-white leading-none text-sm lg:text-base"></p>
-                                                    </div>
+                                                <div id="expiry-error-div" class="hidden">
+                                                    <div id="expiry-error" class="tooltip-error shadow-lg"></div>
                                                 </div>
                                             </div>
 
@@ -435,13 +357,7 @@
                                                     class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
                                                 </div>
                                                 @error('cvv_code')
-                                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                        <div role="tooltip"
-                                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                            <p class="text-white leading-none text-sm lg:text-base">
-                                                                {{ $message }}</p>
-                                                        </div>
-                                                    </div>
+                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
@@ -449,11 +365,8 @@
                                 </div>
                                 
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
-                                    <div id="card-errors-div" class="hidden relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p id="card-errors" class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
+                                    <div id="card-errors-div" class="hidden">
+                                        <div id="card-errors" class="tooltip-error shadow-lg"></div>
                                     </div>
                                 </div>
                                 <!-- Disclaimer Checkboxes -->
@@ -468,19 +381,10 @@
                                             <span class="text-base md:text-lg">@isset($coffeeWallPage->donation_acknowledgment_label) {{$coffeeWallPage->donation_acknowledgment_label}} @endisset</span>
                                         </div>
                                         @error('donation_acknowledgment')
-                                            <div class="mt-2 w-full relative" id="donation-acknowledgment-error-wrap">
-                                                <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
-                                                <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded ">
-                                                    <p class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
-                                                </div>
-                                            </div>
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                         @enderror
-                                        <!-- Error div for JavaScript validation - arrow points to checkbox -->
-                                        <div id="donation-acknowledgment-div" class="hidden mt-4 w-full relative">
-                                            <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
-                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded">
-                                                <p id="donation-acknowledgment-error" class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
-                                            </div>
+                                        <div id="donation-acknowledgment-div" class="hidden">
+                                            <div id="donation-acknowledgment-error" class="tooltip-error shadow-lg">Please check this box if you want to proceed</div>
                                         </div>
                                     </div>
 
@@ -493,19 +397,10 @@
                                             <span class="text-base md:text-lg">@isset($coffeeWallPage->agree_terms_label) {!! $coffeeWallPage->agree_terms_label !!} @endisset</span>
                                         </div>
                                         @error('terms_privacy')
-                                        <div class="mt-2 w-full relative" id="terms-privacy-error-wrap">
-                                                <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
-                                                <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded ">
-                                                    <p class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
-                                                </div>
-                                            </div>
+                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                         @enderror
-                                        <!-- Error div for JavaScript validation - arrow points to checkbox -->
-                                        <div id="terms-privacy-div" class="hidden mt-4 w-full relative">
-                                            <span class="absolute left-1 top-0 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500 -translate-y-full" aria-hidden="true" style="margin-top: 0px;"></span>
-                                            <div role="alert" class="relative z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full max-w-xs rounded">
-                                                <p id="terms-privacy-error" class="text-white leading-none text-sm lg:text-base">Please check this box if you want to proceed</p>
-                                            </div>
+                                        <div id="terms-privacy-div" class="hidden">
+                                            <div id="terms-privacy-error" class="tooltip-error shadow-lg">Please check this box if you want to proceed</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1156,18 +1051,6 @@
 
                         var hasValidationErrors = false;
 
-                        // Check if the `package` field is filled
-                        var packageDropdown = $("input[name='package']:checked").val();
-                        var amountValue = $("input[name='custom_amount']").val();
-                        if (!packageDropdown && !amountValue) {
-                            hasValidationErrors = true;
-                            var errorElementDiv = document.getElementById('package-errors-div');
-                            errorElementDiv.classList.remove('hidden');
-
-                            var errorElement = document.getElementById('package-errors');
-                            errorElement.textContent = 'Please select at least one package';
-                        }
-
                         // Check if anonymous donation
                         var isAnonymous = $('#anonymous').is(':checked');
 
@@ -1234,20 +1117,8 @@
                         }
                         // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
 
-                        // Stop form submission if there are validation errors - show popup
+                        // Stop form submission if there are validation errors (inline tooltips only)
                         if (hasValidationErrors) {
-                            var popupMessage = '';
-                            var packageErr = document.getElementById('package-errors');
-                            if (packageErr && packageErr.textContent) popupMessage = packageErr.textContent;
-                            var amountErr = document.getElementById('amount-errors');
-                            if (!popupMessage && amountErr && amountErr.textContent) popupMessage = amountErr.textContent;
-                            var nameErr = document.getElementById('name-errors');
-                            if (!popupMessage && nameErr && nameErr.textContent) popupMessage = nameErr.textContent;
-                            var emailErr = document.getElementById('email-errors');
-                            if (!popupMessage && emailErr && emailErr.textContent) popupMessage = emailErr.textContent;
-                            if (!popupMessage && donationAckCheckbox && !donationAckCheckbox.checked) popupMessage = 'Please check this box if you want to proceed';
-                            if (!popupMessage && termsPrivacyCheckbox && !termsPrivacyCheckbox.checked) popupMessage = 'Please check this box if you want to proceed';
-                            if (popupMessage) alert(popupMessage);
                             return;
                         }
 
@@ -1326,20 +1197,8 @@
 
                     CreditCardDiv.classList.add('hidden');
 
-                    // Same validation as GPay: package, name, email, donation ack, terms
+                    // Same validation as GPay: name, email, donation ack, terms
                     var isValid = true;
-                    var packageDropdown = $("input[name='package']:checked").val();
-                    var amountValue = $("input[name='custom_amount']").val();
-                    if (!packageDropdown && !amountValue) {
-                        isValid = false;
-                        var errorElementDiv = document.getElementById('package-errors-div');
-                        if (errorElementDiv) {
-                            errorElementDiv.classList.remove('hidden');
-                            var errorElement = document.getElementById('package-errors');
-                            if (errorElement) errorElement.textContent = 'Please select at least one package';
-                        }
-                    }
-
                     var isAnonymous = $('#anonymous').is(':checked');
                     if (!isAnonymous) {
                         var nameValue = $("input[name='name']").val();

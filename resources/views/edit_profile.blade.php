@@ -21,39 +21,45 @@
             $user->zipcode !== null && $user->zipcode !== '' &&
             $user->about !== null && $user->about !== '' &&
             $user->government_issued_id !== null && $user->government_issued_id !== '')
-            <div class="pt-1">
-                <p class="text-gray-900">
-                    {{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}
-                </p>
+            <div class="flex justify-between">
+                <div class="pt-4">
+                    <p class="text-gray-900">
+                        {{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}
+                    </p>
+                    <p class="text-base md:text-lg font-medium text-red-500">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
+                </div>
             </div>
         @else
             <div class="">
                 <h1 class="mb-0">Welcome onboard {{ $user->first_name }}</h1>
             </div>
-            <div class="pb-4">
-                @if ($user->gender == 'female' && in_array('Extra care rides', explode(';', $user->features)) && in_array('Pink rides', explode(';', $user->features)))
-                    <p class="text-gray-900">You have selected the "ProximaRide" and the "My Extra+ Rides"</p>
-                    <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
-                        a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
-                        yourself</p>
-                    <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
-                @elseif ($user->gender == 'female' && in_array('Pink rides', explode(';', $user->features)))
-                    <p class="text-gray-900">You have selected the "ProximaRide"</p>
-                    <p class="text-gray-900">To be eligible to use them, you must upload a valid Government-issued photo
-                        ID*, and you must fill in a small bio about yourself</p>
-                    <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
-                @elseif (in_array('Extra care rides', explode(';', $user->features)))
-                    <p class="text-gray-900">You have selected the "My Extra+ Rides"</p>
-                    <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
-                        a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
-                        yourself</p>
-                    <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
-                @else
-                    <p class="text-gray-900">{{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}</p>
-                @endif
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pt-4">
+                <div class="flex-1 min-w-0">
+                    @if ($user->gender == 'female' && in_array('Extra care rides', explode(';', $user->features)) && in_array('Pink rides', explode(';', $user->features)))
+                        <p class="text-gray-900">You have selected the "ProximaRide" and the "My Extra+ Rides"</p>
+                        <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
+                            a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
+                            yourself</p>
+                        <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
+                    @elseif ($user->gender == 'female' && in_array('Pink rides', explode(';', $user->features)))
+                        <p class="text-gray-900">You have selected the "ProximaRide"</p>
+                        <p class="text-gray-900">To be eligible to use them, you must upload a valid Government-issued photo
+                            ID*, and you must fill in a small bio about yourself</p>
+                        <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
+                    @elseif (in_array('Extra care rides', explode(';', $user->features)))
+                        <p class="text-gray-900">You have selected the "My Extra+ Rides"</p>
+                        <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
+                            a valid Government-issued photo ID, and a proof of address, and you must fill in a small bio about
+                            yourself</p>
+                        <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
+                    @else
+                        <p class="text-gray-900">{{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}</p>
+                    @endif
+                </div>
+                <p class="text-base md:text-lg font-medium text-red-500 sm:flex-shrink-0">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
             </div>
+            
         @endif
-            <p class="text-base md:text-lg font-medium text-red-500">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
         <form method="POST" action="{{ route('profile.update',$user->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
