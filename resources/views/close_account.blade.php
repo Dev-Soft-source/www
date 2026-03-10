@@ -213,48 +213,13 @@
                             </div>
                         </div>
                     @enderror
-                    <div id="package-errors-div" class="hidden relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p id="package-errors" class="text-white leading-none text-sm lg:text-base"></p>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="md:col-span-2 flex justify-center">
-                    <button type="button" id="show-modal" class="inline-flex justify-center rounded bg-red-500 border border-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-600 hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">{{ $closeAccountPage->close_account_button_text ?? "Close my account"}}</button>
+                    <button type="submit" class="inline-flex justify-center rounded bg-red-500 border border-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-600 hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">{{ $closeAccountPage->close_account_button_text ?? "Close my account"}}</button>
                 </div>
             </div>
 
-            <div id="modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-backdrop"></div>
-                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-lg bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md modal-border1">
-                            <button id="hide-modal-btn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none">
-                                <span class="sr-only">Close</span>
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                <div class="mt-4 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                    <div class="mt-2">
-                                        <h3 class="text-2xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{{ $closeAccountPage->web_irreversible_label ?? "This action is irreversible"}}</h3>
-                                    </div>
-                                    <div class="mt-2 w-full">
-                                        <p class="text-lg text-center text-black">{{ $closeAccountPage->close_account_sure_message_text ?? "Are you sure to you want to close your account?"}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                <button type="submit" class="button-exp-fill">{{ $closeAccountPage->close_it_button_label ?? "Yes, close it"}}</button>
-                                <button id="hide-modal-btn" type="button" class="button-exp-fill mr-1">{{ $closeAccountPage->take_me_back_button_label ?? "No, take me back"}}</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </form>
     </div>
     </div>
@@ -262,94 +227,11 @@
 @endsection
 
 
-@php
-    $messageData = $closeAccountPage->check_box_validation_message ?? "Check the box";
-    $requiredFieldMessage = "This field is required.";
-@endphp
-
 @section('script')
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    document.getElementById('show-modal').addEventListener('click', function() {
-        var checkbox = $("input[name='close_account']:checked").val();
-        var closeAccountReason = document.getElementById('close_account_reason').value.trim();
-        var improveMessage = document.getElementById('improve_message').value.trim();
-        var requiredMessage = "{{ $requiredFieldMessage }}";
-
-        // Hide client-side error divs first
-        var reasonErrorDiv = document.getElementById('close_account_reason_error_client');
-        var improveErrorDiv = document.getElementById('improve_message_error_client');
-        if (reasonErrorDiv) reasonErrorDiv.classList.add('hidden');
-        if (improveErrorDiv) improveErrorDiv.classList.add('hidden');
-        document.getElementById('close_account_reason').classList.remove('border-red-500');
-        document.getElementById('improve_message').classList.remove('border-red-500');
-
-        if (!checkbox) {
-            var errorElementDiv = document.getElementById('package-errors-div');
-            errorElementDiv.classList.remove('hidden');
-            var errorElement = document.getElementById('package-errors');
-            errorElement.textContent = "{{ $messageData }}";
-            errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        var hasError = false;
-        if (!closeAccountReason) {
-            if (reasonErrorDiv) {
-                reasonErrorDiv.querySelector('.error-text').textContent = requiredMessage;
-                reasonErrorDiv.classList.remove('hidden');
-            }
-            document.getElementById('close_account_reason').classList.add('border-red-500');
-            hasError = true;
-        }
-        if (!improveMessage) {
-            if (improveErrorDiv) {
-                improveErrorDiv.querySelector('.error-text').textContent = requiredMessage;
-                improveErrorDiv.classList.remove('hidden');
-            }
-            document.getElementById('improve_message').classList.add('border-red-500');
-            hasError = true;
-        }
-
-        if (hasError) {
-            var firstError = document.querySelector('.border-red-500');
-            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-
-        var errorElementDiv = document.getElementById('package-errors-div');
-        if (!errorElementDiv.classList.contains('hidden')) {
-            errorElementDiv.classList.add('hidden');
-        }
-        document.getElementById('modal').style.display = 'block';
-    });
-
-    // Hide tooltip when checkbox is checked
-    document.getElementById('close_account_checkbox').addEventListener('change', function() {
-        var errorElementDiv = document.getElementById('package-errors-div');
-        if (this.checked && !errorElementDiv.classList.contains('hidden')) {
-            errorElementDiv.classList.add('hidden');
-        }
-    });
-
-    // Handle "No, take me back" button click
-    document.querySelectorAll('#hide-modal-btn').forEach(function(button) {
-        button.addEventListener('click', function() {
-            document.getElementById('modal').style.display = 'none';
-        });
-    });
-
-    // Handle click outside modal to close
     document.addEventListener('DOMContentLoaded', function() {
-        const modalBackdrop = document.querySelector('#modal .modal-backdrop');
-        if (modalBackdrop) {
-            modalBackdrop.addEventListener('click', function(event) {
-                if (event.target === this) {
-                    document.getElementById('modal').style.display = 'none';
-                }
-            });
-        }
-
         // Scroll to first validation error when page loads with server-side errors
         @if($errors->any())
         var firstErrorElement = document.querySelector('.tooltip');
@@ -357,18 +239,6 @@
             firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         @endif
-    });
-
-    // Clear client-side errors when user types in textareas
-    ['close_account_reason', 'improve_message'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', function() {
-                this.classList.remove('border-red-500');
-                var errorDiv = document.getElementById(id + '_error_client');
-                if (errorDiv) errorDiv.classList.add('hidden');
-            });
-        }
     });
 
     function closeModal() {
