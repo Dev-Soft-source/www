@@ -269,27 +269,18 @@
                                         alt="">
                                 </div>
                                 <div>
-                                    <h3 class="mt-4 text-center text-pink-700 font-FuturaMdCnBT hover:text-black">
+                                    <h3 class="my-4 text-center text-pink-700 font-FuturaMdCnBT hover:text-black">
                                         @isset($homePage->section1_pink_rides_label)
                                             {{ $homePage->section1_pink_rides_label }}
                                         @endisset
                                     </h3>
+                                    
                                     <p
                                         class="text-black text-justify font-semibold mt-4 lg:text-lg md:text-base text-base">
                                         @isset($homePage->section1_pink_rides_description)
                                             {!! $homePage->section1_pink_rides_description !!}
                                         @endisset
-                                    </p>
-                                    <p class="text-black text-justify lg:text-lg md:text-base text-base mt-4">
-                                        @isset($homePage->section1_pink_rides_description1)
-                                            {!! $homePage->section1_pink_rides_description1 !!}
-                                        @endisset
-                                    </p>
-                                    <p class="text-black text-justify lg:text-lg md:text-base text-base mt-4">
-                                        @isset($homePage->section1_pink_rides_description2)
-                                            {!! $homePage->section1_pink_rides_description2 !!}
-                                        @endisset
-                                    </p>
+                                    </p>                                    
                                 </div>
                             </div>
                         </a>
@@ -307,16 +298,15 @@
                                         alt="">
                                 </div>
                                 <div>
-                                    <h3 class="mt-4 text-center">
+                                    <h3 class="my-4 text-center text-indigo-600 hover:text-black">
                                         @isset($homePage->section1_folks_rides_label)
                                             {{ $homePage->section1_folks_rides_label }}
                                         @endisset
                                     </h3>
-                                    <p class="text-justify mt-4 lg:text-lg md:text-base text-base">
-                                        @isset($homePage->section1_folks_rides_description)
-                                            {!! $homePage->section1_folks_rides_description !!}
-                                        @endisset
-                                    </p>
+
+                                    @isset($homePage->section1_folks_rides_description)
+                                        {!! $homePage->section1_folks_rides_description !!}
+                                    @endisset
                                 </div>
                             </div>
                         </a>

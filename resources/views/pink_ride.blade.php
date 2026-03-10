@@ -147,7 +147,10 @@
                 <div class="bg-white rounded-md p-1 h-16 w-16 flex justify-center items-center">
                     <img class="" src="{{asset('/images/pinkrider.png')}}" alt="">
                 </div>
-                <h1 class="text-pink-500">
+                <h1 class="text-pink-600">
+                    Pink Rides
+                </h1>
+                <h1 class="text-primary">
                     {{ $findRidePage->pink_ride_page_heading ?? 'Search for ProximaRide' }}
                 </h1>
             </div>
@@ -1936,31 +1939,33 @@
                     </div>
                 </div>
 
-                <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
-                    <div class="pink-ride-faq">
-                        <div class="pink-ride-faq__header">
-                            <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                                @isset($findRidePage->pink_ride_page_faq_heading)
-                                    {{ $findRidePage->pink_ride_page_faq_heading }}
-                                @endisset
-                            </h3>
-                        </div>
-                        <div class="pink-ride-faq__body">
-                            @foreach ($pinkRideFaqs as $pinkRideFaq)
-                                <div class="pink-ride-faq__item">
-                                    <button type="button" class="pink-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="togglePinkRideFaq(this)">
-                                        {{ $pinkRideFaq->question }}
-                                    </button>
-                                    <div class="pink-ride-faq__answer" role="region" aria-hidden="true">
-                                        <div class="pink-ride-faq__answer-inner">
-                                            {!! $pinkRideFaq->answer !!}
-                                        </div>
+        @if (empty($request->from) && empty($request->to) && empty($request->date))
+            <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
+                <div class="pink-ride-faq">
+                    <div class="pink-ride-faq__header">
+                        <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
+                            @isset($findRidePage->pink_ride_page_faq_heading)
+                                {{ $findRidePage->pink_ride_page_faq_heading }}
+                            @endisset
+                        </h3>
+                    </div>
+                    <div class="pink-ride-faq__body">
+                        @foreach ($pinkRideFaqs as $pinkRideFaq)
+                            <div class="pink-ride-faq__item">
+                                <button type="button" class="pink-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="togglePinkRideFaq(this)">
+                                    {{ $pinkRideFaq->question }}
+                                </button>
+                                <div class="pink-ride-faq__answer" role="region" aria-hidden="true">
+                                    <div class="pink-ride-faq__answer-inner">
+                                        {!! $pinkRideFaq->answer !!}
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
+            </div>
+        @endif
             </div>
         </div>
 
@@ -2614,7 +2619,7 @@
             const petsValue = selectedPets.join(';');
             const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
             let searchUrl =
-                `{{ route('proximalocal_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
+                `{{ route('pink_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}&date=${dateValue}&driver_age=${driverAge}&driver_rating=${driverRating}&driver_phone=${driverPhone}&driver_name=${driverName}&passenger_rating=${passengerRating}&payment_method=${paymentMethod}&vehicle_type=${VehicleType}&features=${featuresParam}&luggage=${luggage}&smoking=${smokingValue}&pets=${petsValue}&hide_full_rides=${hideFullRides}`;
 
             window.location.href = searchUrl;
         }
