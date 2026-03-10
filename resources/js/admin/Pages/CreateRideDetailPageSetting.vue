@@ -276,6 +276,94 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`booking_price_label_${activeLanguageId}`"
+                                                        >Booking price label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`booking_price_label_${activeLanguageId}`"
+                                                    :id="`booking_price_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'booking_price_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'booking_price_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `booking_price_label.booking_price_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `booking_price_label.booking_price_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`booking_method_label_${activeLanguageId}`"
+                                                        >Booking method label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`booking_method_label_${activeLanguageId}`"
+                                                    :id="`booking_method_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'booking_method_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'booking_method_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `booking_method_label.booking_method_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `booking_method_label.booking_method_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`from_label_${activeLanguageId}`"
                                                         >From label</label
                                                     >
@@ -4405,6 +4493,8 @@ export default {
                             this.handleInput("", language, "ride_co_passenger_heading");
                             this.handleInput("", language, "trip_co_passenger_heading");
                             this.handleInput("", language, "payment_method_label");
+                            this.handleInput("", language, "booking_price_label");
+                            this.handleInput("", language, "booking_method_label");
                             this.handleInput("", language, "booking_type_label");
                             this.handleInput("", language, "cancellation_policy_label");
                             this.handleInput("", language, "luggage_label");
@@ -4556,6 +4646,16 @@ export default {
                                 setting?.payment_method_label,
                                 setting?.language,
                                 "payment_method_label"
+                            );
+                            this.handleInput(
+                                setting?.booking_price_label,
+                                setting?.language,
+                                "booking_price_label"
+                            );
+                            this.handleInput(
+                                setting?.booking_method_label,
+                                setting?.language,
+                                "booking_method_label"
                             );
                             this.handleInput(
                                 setting?.booking_type_label,
@@ -5046,6 +5146,12 @@ export default {
                 ) ||
                 validationErros.has(
                     `payment_method_label.payment_method_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `booking_price_label.booking_price_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `booking_method_label.booking_method_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `booking_type_label.booking_type_label_${language.id}`
