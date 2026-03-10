@@ -204,7 +204,7 @@
                                         @isset($findRidePage->ride_features_option1->features_setting_id)
                                             <div class="flex items-start justify-between p-3">
                                                 <label for="pink-ride" class="text-gray-900 flex space-x-1">
-                                                    <span class="text-pink-500 text-base md:text-lg">
+                                                    <span class="text-pink-600 text-base md:text-lg">
                                                         {{ $findRidePage->ride_features_option1->name }}
                                                     </span>
 
@@ -218,7 +218,7 @@
                                         @isset($findRidePage->ride_features_option2->features_setting_id)
                                             <div class="flex items-start justify-between p-3">
                                                 <label for="Extra+" class="text-gray-900 flex space-x-1">
-                                                    <span class="text-green-500 text-base md:text-lg">
+                                                    <span class="text-indigo-600 text-base md:text-lg">
                                                         {{ $findRidePage->ride_features_option2->name }}
                                                     </span>
                                                     <!-- <div class="sups">

@@ -821,20 +821,32 @@
                                     </div>
                                 </div>
                             @endif
+                            @php
+                                $vehicleYear = $ride->year ?: optional($ride->vehicle)->year;
+                                $vehicleMake = $ride->make ?: optional($ride->vehicle)->make;
+                                $vehicleModel = $ride->model ?: optional($ride->vehicle)->model;
+                                $vehicleColor = $ride->color ?: optional($ride->vehicle)->color;
+                            @endphp
                             <div class="text-center">
-                                <div class="flex items-center space-x-2 text-md text-black">
-                                    @if ($ride->year)
-                                        <p class="text-md font-semibold">{{ $ride->year }}</p>
-                                    @endif
-                                    <span>|</span> 
-                                    <p class="text-md font-semibold">{{ $ride->make }}</p>
-                                    <span>|</span>
-                                    <p class="text-md font-semibold">{{ $ride->model }}</p>
-                                    <span>|</span> 
-                                    @if ($ride->color)
-                                        <p class="text-md font-semibold">{{ $ride->color }}</p>
-                                    @endif
-                                </div>
+                                @if ($vehicleYear || $vehicleMake || $vehicleModel || $vehicleColor)
+                                    <div class="flex items-center flex-wrap justify-center gap-x-2 text-md text-black">
+                                        @if ($vehicleYear)
+                                            <p class="text-md font-semibold">{{ $vehicleYear }}</p>
+                                            @if ($vehicleMake || $vehicleModel || $vehicleColor)<span>|</span>@endif
+                                        @endif
+                                        @if ($vehicleMake)
+                                            <p class="text-md font-semibold">{{ $vehicleMake }}</p>
+                                            @if ($vehicleModel || $vehicleColor)<span>|</span>@endif
+                                        @endif
+                                        @if ($vehicleModel)
+                                            <p class="text-md font-semibold">{{ $vehicleModel }}</p>
+                                            @if ($vehicleColor)<span>|</span>@endif
+                                        @endif
+                                        @if ($vehicleColor)
+                                            <p class="text-md font-semibold">{{ $vehicleColor }}</p>
+                                        @endif
+                                    </div>
+                                @endif
                                 @if ($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->exists())
                                     <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
                                 @endif
@@ -952,14 +964,19 @@
                                                     });
 
                                                 $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                                $driverHasReviews = $filteredRatings->isNotEmpty();
                                             @endphp
-                                            <p class="font-medium text-black">{{ number_format($totalAverage, 1) }}</p>
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                fill="currentColor" class="w-6 h-6 text-yellow-500">
-                                                <path fill-rule="evenodd"
-                                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
+                                            @if ($driverHasReviews)
+                                                <p class="font-medium text-black">{{ number_format($totalAverage, 1) }}</p>
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                    fill="currentColor" class="w-6 h-6 text-yellow-500">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @else
+                                                <p class="text-sm text-black">{{ $rideDetailPage->no_reviews_label ?? $siteText['no_reviews_label'] ?? 'No Reviews' }}</p>
+                                            @endif
                                         </div>
                                         @php
                                             $hasVerifiedPhone = App\Models\PhoneNumber::where(
