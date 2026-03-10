@@ -175,6 +175,45 @@ return [
             'required' => '请确认拼车免责声明。',
             'accepted' => '请确认拼车免责声明。',
         ],
+        'gender' => [
+            'required' => '性别为必填项。',
+        ],
+        'dob' => [
+            'required' => '出生日期为必填项。',
+            'date' => '出生日期必须是有效日期。',
+        ],
+        'country' => [
+            'required' => '国家为必填项。',
+        ],
+        'address' => [
+            'string' => '地址必须是字符串。',
+            'max' => '地址不能超过 :max 个字符。',
+        ],
+        'state' => [
+            'required' => '州/省为必填项。',
+            'string' => '州/省必须是字符串。',
+            'max' => '州/省不能超过 :max 个字符。',
+        ],
+        'city' => [
+            'required' => '城市为必填项。',
+            'string' => '城市必须是字符串。',
+            'max' => '城市不能超过 :max 个字符。',
+        ],
+        'zipcode' => [
+            'required' => '邮政编码为必填项。',
+            'string' => '邮政编码必须是字符串。',
+            'max' => '邮政编码不能超过 :max 个字符。',
+        ],
+        'government_issued_id' => [
+            'file' => '政府签发的身份证明必须是文件。',
+            'mimes' => '政府签发的身份证明必须是以下类型的文件：:values。',
+            'max' => '政府签发的身份证明必须小于 10MB。',
+        ],
+        'bio' => [
+            'required' => '个人简介为必填项。',
+            'string' => '个人简介必须是字符串。',
+            'max' => '个人简介不能超过 :max 个字符。',
+        ],
     ],
     'attributes' => [
         'make' => '品牌',
@@ -190,6 +229,15 @@ return [
         'password' => '密码',
         'first_name' => '名字',
         'last_name' => '姓氏',
+        'gender' => '性别',
+        'dob' => '出生日期',
+        'country' => '国家',
+        'address' => '地址',
+        'state' => '州/省',
+        'city' => '城市',
+        'zipcode' => '邮政编码',
+        'government_issued_id' => '政府签发的身份证明',
+        'bio' => '个人简介',
         'phone' => '电话号码',
         'name' => '名称',
         'title' => '标题',

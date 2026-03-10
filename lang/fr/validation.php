@@ -175,6 +175,45 @@ return [
             'required' => 'Veuillez confirmer l’avertissement de covoiturage.',
             'accepted' => 'Veuillez confirmer l’avertissement de covoiturage.',
         ],
+        'gender' => [
+            'required' => 'Le genre est obligatoire.',
+        ],
+        'dob' => [
+            'required' => 'La date de naissance est obligatoire.',
+            'date' => 'La date de naissance doit etre une date valide.',
+        ],
+        'country' => [
+            'required' => 'Le pays est obligatoire.',
+        ],
+        'address' => [
+            'string' => 'L adresse doit etre une chaine de caracteres.',
+            'max' => 'L adresse ne doit pas depasser :max caracteres.',
+        ],
+        'state' => [
+            'required' => 'L etat est obligatoire.',
+            'string' => 'L etat doit etre une chaine de caracteres.',
+            'max' => 'L etat ne doit pas depasser :max caracteres.',
+        ],
+        'city' => [
+            'required' => 'La ville est obligatoire.',
+            'string' => 'La ville doit etre une chaine de caracteres.',
+            'max' => 'La ville ne doit pas depasser :max caracteres.',
+        ],
+        'zipcode' => [
+            'required' => 'Le code postal est obligatoire.',
+            'string' => 'Le code postal doit etre une chaine de caracteres.',
+            'max' => 'Le code postal ne doit pas depasser :max caracteres.',
+        ],
+        'government_issued_id' => [
+            'file' => 'La piece d identite doit etre un fichier.',
+            'mimes' => 'La piece d identite doit etre un fichier de type : :values.',
+            'max' => 'La piece d identite doit etre inferieure a 10 Mo.',
+        ],
+        'bio' => [
+            'required' => 'La bio est obligatoire.',
+            'string' => 'La bio doit etre une chaine de caracteres.',
+            'max' => 'La bio ne doit pas depasser :max caracteres.',
+        ],
     ],
     'attributes' => [
         'make' => 'Marque',
@@ -190,6 +229,15 @@ return [
         'password' => 'Mot de passe',
         'first_name' => 'Prénom',
         'last_name' => 'Nom',
+        'gender' => 'Genre',
+        'dob' => 'Date de Naissance',
+        'country' => 'Pays',
+        'address' => 'Adresse',
+        'state' => 'Etat',
+        'city' => 'Ville',
+        'zipcode' => 'Code Postal',
+        'government_issued_id' => 'Piece d Identite',
+        'bio' => 'Bio',
         'phone' => 'Numéro de téléphone',
         'name' => 'Nom',
         'title' => 'Titre',

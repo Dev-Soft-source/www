@@ -193,6 +193,54 @@ return
 				'required' => 'Please confirm the rideshare disclaimer.',
 				'accepted' => 'Please confirm the rideshare disclaimer.',
 			],
+			'gender' =>
+			[
+				'required' => 'The gender is required.',
+			],
+			'dob' =>
+			[
+				'required' => 'The date of birth is required.',
+				'date' => 'The date of birth must be a valid date.',
+			],
+			'country' =>
+			[
+				'required' => 'The country is required.',
+			],
+			'address' =>
+			[
+				'string' => 'The address must be a string.',
+				'max' => 'The address may not be greater than :max characters.',
+			],
+			'state' =>
+			[
+				'required' => 'The state is required.',
+				'string' => 'The state must be a string.',
+				'max' => 'The state may not be greater than :max characters.',
+			],
+			'city' =>
+			[
+				'required' => 'The city is required.',
+				'string' => 'The city must be a string.',
+				'max' => 'The city may not be greater than :max characters.',
+			],
+			'zipcode' =>
+			[
+				'required' => 'The zip code is required.',
+				'string' => 'The zip code must be a string.',
+				'max' => 'The zip code may not be greater than :max characters.',
+			],
+			'government_issued_id' =>
+			[
+				'file' => 'The government issued id must be a file.',
+				'mimes' => 'The government issued id must be a file of type: :values.',
+				'max' => 'The government issued id must be less than 10MB.',
+			],
+			'bio' =>
+			[
+				'required' => 'The bio is required.',
+				'string' => 'The bio must be a string.',
+				'max' => 'The bio may not be greater than :max characters.',
+			],
 		],
 		'attributes' =>
 		[
@@ -209,6 +257,15 @@ return
 			'password' => 'Password',
 			'first_name' => 'First Name',
 			'last_name' => 'Last Name',
+			'gender' => 'Gender',
+			'dob' => 'Date of Birth',
+			'country' => 'Country',
+			'address' => 'Address',
+			'state' => 'State',
+			'city' => 'City',
+			'zipcode' => 'Zip Code',
+			'government_issued_id' => 'Government Issued ID',
+			'bio' => 'Bio',
 			'phone' => 'Phone Number',
 			'name' => 'Name',
 			'title' => 'Title',

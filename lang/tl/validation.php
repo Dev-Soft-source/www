@@ -175,6 +175,45 @@ return [
             'required' => 'Pakikumpirma ang rideshare disclaimer.',
             'accepted' => 'Pakikumpirma ang rideshare disclaimer.',
         ],
+        'gender' => [
+            'required' => 'Kailangan ang kasarian.',
+        ],
+        'dob' => [
+            'required' => 'Kailangan ang petsa ng kapanganakan.',
+            'date' => 'Ang petsa ng kapanganakan ay dapat na wastong petsa.',
+        ],
+        'country' => [
+            'required' => 'Kailangan ang bansa.',
+        ],
+        'address' => [
+            'string' => 'Ang address ay dapat isang string.',
+            'max' => 'Ang address ay hindi maaaring lumampas sa :max na mga character.',
+        ],
+        'state' => [
+            'required' => 'Kailangan ang estado.',
+            'string' => 'Ang estado ay dapat isang string.',
+            'max' => 'Ang estado ay hindi maaaring lumampas sa :max na mga character.',
+        ],
+        'city' => [
+            'required' => 'Kailangan ang lungsod.',
+            'string' => 'Ang lungsod ay dapat isang string.',
+            'max' => 'Ang lungsod ay hindi maaaring lumampas sa :max na mga character.',
+        ],
+        'zipcode' => [
+            'required' => 'Kailangan ang zip code.',
+            'string' => 'Ang zip code ay dapat isang string.',
+            'max' => 'Ang zip code ay hindi maaaring lumampas sa :max na mga character.',
+        ],
+        'government_issued_id' => [
+            'file' => 'Ang government issued ID ay dapat isang file.',
+            'mimes' => 'Ang government issued ID ay dapat file na may uri: :values.',
+            'max' => 'Ang government issued ID ay dapat mas mababa sa 10MB.',
+        ],
+        'bio' => [
+            'required' => 'Kailangan ang bio.',
+            'string' => 'Ang bio ay dapat isang string.',
+            'max' => 'Ang bio ay hindi maaaring lumampas sa :max na mga character.',
+        ],
     ],
     'attributes' => [
         'make' => 'Gawa',
@@ -190,6 +229,15 @@ return [
         'password' => 'Password',
         'first_name' => 'Pangalan',
         'last_name' => 'Apelyido',
+        'gender' => 'Kasarian',
+        'dob' => 'Petsa ng Kapanganakan',
+        'country' => 'Bansa',
+        'address' => 'Address',
+        'state' => 'Estado',
+        'city' => 'Lungsod',
+        'zipcode' => 'Zip Code',
+        'government_issued_id' => 'Government Issued ID',
+        'bio' => 'Bio',
         'phone' => 'Numero ng Telepono',
         'name' => 'Pangalan',
         'title' => 'Pamagat',

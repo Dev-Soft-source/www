@@ -199,6 +199,45 @@ return [
             'required' => 'Confirma el aviso de viaje compartido.',
             'accepted' => 'Confirma el aviso de viaje compartido.',
         ],
+        'gender' => [
+            'required' => 'El genero es obligatorio.',
+        ],
+        'dob' => [
+            'required' => 'La fecha de nacimiento es obligatoria.',
+            'date' => 'La fecha de nacimiento debe ser una fecha valida.',
+        ],
+        'country' => [
+            'required' => 'El pais es obligatorio.',
+        ],
+        'address' => [
+            'string' => 'La direccion debe ser una cadena de texto.',
+            'max' => 'La direccion no debe superar los :max caracteres.',
+        ],
+        'state' => [
+            'required' => 'El estado es obligatorio.',
+            'string' => 'El estado debe ser una cadena de texto.',
+            'max' => 'El estado no debe superar los :max caracteres.',
+        ],
+        'city' => [
+            'required' => 'La ciudad es obligatoria.',
+            'string' => 'La ciudad debe ser una cadena de texto.',
+            'max' => 'La ciudad no debe superar los :max caracteres.',
+        ],
+        'zipcode' => [
+            'required' => 'El codigo postal es obligatorio.',
+            'string' => 'El codigo postal debe ser una cadena de texto.',
+            'max' => 'El codigo postal no debe superar los :max caracteres.',
+        ],
+        'government_issued_id' => [
+            'file' => 'La identificacion oficial debe ser un archivo.',
+            'mimes' => 'La identificacion oficial debe ser un archivo de tipo: :values.',
+            'max' => 'La identificacion oficial debe ser inferior a 10 MB.',
+        ],
+        'bio' => [
+            'required' => 'La biografia es obligatoria.',
+            'string' => 'La biografia debe ser una cadena de texto.',
+            'max' => 'La biografia no debe superar los :max caracteres.',
+        ],
     ],
 
     /*
@@ -226,6 +265,15 @@ return [
         'password' => 'Contraseña',
         'first_name' => 'Nombre',
         'last_name' => 'Apellido',
+        'gender' => 'Genero',
+        'dob' => 'Fecha de Nacimiento',
+        'country' => 'Pais',
+        'address' => 'Direccion',
+        'state' => 'Estado',
+        'city' => 'Ciudad',
+        'zipcode' => 'Codigo Postal',
+        'government_issued_id' => 'Identificacion Oficial',
+        'bio' => 'Biografia',
         'phone' => 'Número de Teléfono',
         'name' => 'Nombre',
         'title' => 'Título',
