@@ -157,11 +157,11 @@
                 {{ $findRidePage->extra_care_ride_page_label }}
             @endisset
         </p> -->
-        <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
+        <!-- <div class="mt-4 p-4 bg-[#d4f3d4] border-l-4 border-green-500 rounded">
             <p class="text-gray-900 font-medium">
                 {{ $findRidePage->extra_ride_description ?? 'I understand that Extra+ Rides are for our most respectful drivers and passengers. I promise to be courteous, polite, and considerate in order to maintain the high standard of these rides.' }}
             </p>
-        </div>
+        </div> -->
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
             <div>
             <div class="search-filter-container flex flex-col relative">
