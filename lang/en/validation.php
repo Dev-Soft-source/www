@@ -183,6 +183,23 @@ return
 				'required' => 'Confirm password is required.',
 				'same' => 'The passwords do not match.',
 			],
+			'pass1' =>
+			[
+				'required' => 'The current password is required.',
+			],
+			'pass2' =>
+			[
+				'required' => 'The new password is required.',
+				'string' => 'The new password must be a string.',
+				'min' => 'The new password must be at least :min characters.',
+				'regex' => 'The new password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+			],
+			'pass3' =>
+			[
+				'required' => 'The confirm password is required.',
+				'string' => 'The confirm password must be a string.',
+				'same' => 'The confirm password does not match the new password.',
+			],
 			'remember_me' =>
 			[
 				'required' => 'Please confirm you agree to the cost-sharing rule.',
@@ -270,5 +287,8 @@ return
 			'name' => 'Name',
 			'title' => 'Title',
 			'description' => 'Description',
+			'pass1' => 'Current password',
+			'pass2' => 'New password',
+			'pass3' => 'Confirm password',
 		],
 	];

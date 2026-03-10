@@ -42,6 +42,7 @@ class MyPhoneSettingDetailResource extends JsonResource
             'resend_code_btn_label' => $this->resend_code_btn_label,
             'set_as_default_label' => $this->set_as_default_label,
             'primary_number_label' => $this->primary_number_label,
+            'remove_description' => $this->remove_description,
             'default_verified_number_label' => $this->default_verified_number_label,
             'verified_number_label' => $this->verified_number_label,
             'phone_no_description_text1' => $this->phone_no_description_text1,

@@ -365,21 +365,21 @@
 
                                     <div class="sm:flex sm:items-start justify-center">
                                         <div class="text-3xl text-center font-FuturaMdCnBT text-black">
-                                            Alert
+                                            <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#db0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                                         </div>
                                     </div>
                                     <div class="mt-2 w-full">
-                                        <p class="text-center can-exp-p">Are you sure you want to remove this phone number from your profile? </p>
+                                        <p class="text-center can-exp-p">{{ $phoneSetting->remove_description }}</p>
                                     </div>
                                 </div>
                                 <!--footer-->
                                 <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button type="button" id="hide-modal"
-                                        class="no-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">No,
-                                        go back</button>
+                                        class="no-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">
+                                        {{ $siteText['cancel_btn_text'] }}</button>
                                     <a id="delete-card-link"
-                                        class="cursor-pointer button-exp-red-fill inline-flex w-full justinline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm sm:ml-3 sm:w-auto">Yes,
-                                        remove it</a>
+                                        class="cursor-pointer button-exp-red-fill inline-flex w-full justinline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm sm:ml-3 sm:w-auto">
+                                        {{ $siteText['remove_btn_text'] }}</a>
                                 </div>
                             </div>
                         </div>

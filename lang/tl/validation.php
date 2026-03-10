@@ -167,6 +167,20 @@ return [
             'required' => 'Kinakailangan ang kumpirmasyon ng password.',
             'same' => 'Hindi magkatugma ang mga password.',
         ],
+        'pass1' => [
+            'required' => 'Kinakailangan ang kasalukuyang password.',
+        ],
+        'pass2' => [
+            'required' => 'Kinakailangan ang bagong password.',
+            'string' => 'Ang bagong password ay dapat isang string.',
+            'min' => 'Ang bagong password ay dapat may hindi bababa sa :min na karakter.',
+            'regex' => 'Ang bagong password ay dapat may hindi bababa sa isang malaking titik, isang maliit na titik, isang numero, at isang espesyal na karakter.',
+        ],
+        'pass3' => [
+            'required' => 'Kinakailangan ang kumpirmasyon ng bagong password.',
+            'string' => 'Ang kumpirmasyon ng bagong password ay dapat isang string.',
+            'same' => 'Ang kumpirmasyon ng password ay hindi tumutugma sa bagong password.',
+        ],
         'remember_me' => [
             'required' => 'Pakikumpirma na sumasang-ayon ka sa patakaran sa paghahati ng gastos.',
             'accepted' => 'Pakikumpirma na sumasang-ayon ka sa patakaran sa paghahati ng gastos.',
@@ -242,5 +256,8 @@ return [
         'name' => 'Pangalan',
         'title' => 'Pamagat',
         'description' => 'Paglalarawan',
+        'pass1' => 'Kasalukuyang password',
+        'pass2' => 'Bagong password',
+        'pass3' => 'Kumpirmasyon ng password',
     ],
 ];

@@ -33,6 +33,8 @@ class MyPhoneSettingService
                 $errorMessages = array_merge($errorMessages, ['send_verification_code_button_text.send_verification_code_button_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['primary_number_label.primary_number_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['primary_number_label.primary_number_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['remove_description.remove_description_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['remove_description.remove_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
 
                 $validationRule = array_merge($validationRule, ['add_another_phone_number_title.add_another_phone_number_title_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['add_another_phone_number_title.add_another_phone_number_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -68,6 +70,7 @@ class MyPhoneSettingService
             'resend_code_btn_label' => $this->data($request, $language, 'resend_code_btn_label'),
             'set_as_default_label' => $this->data($request, $language, 'set_as_default_label'),
             'primary_number_label' => $this->data($request, $language, 'primary_number_label'),
+            'remove_description' => $this->data($request, $language, 'remove_description'),
             'default_verified_number_label' => $this->data($request, $language, 'default_verified_number_label'),
             'verified_number_label' => $this->data($request, $language, 'verified_number_label'),
             'phone_no_description_text1' => $this->data($request, $language, 'phone_no_description_text1'),

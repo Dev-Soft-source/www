@@ -1302,6 +1302,50 @@
                                                 "
                                             ></p>
                                         </div>
+                                         <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`remove_description_${activeLanguageId}`"
+                                                        >Remove Description</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`remove_description_${activeLanguageId}`"
+                                                    :id="`remove_description_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'remove_description'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'remove_description'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `remove_description.remove_description_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `remove_description.remove_description_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
 
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -1466,6 +1510,7 @@ export default {
                             this.handleInput("", language, "resend_code_btn_label");
                             this.handleInput("", language, "set_as_default_label");
                             this.handleInput("", language, "primary_number_label");
+                            this.handleInput("", language, "remove_description");
                             this.handleInput("", language, "default_verified_number_label");
                             this.handleInput("", language, "verified_number_label");
                             this.handleInput("", language, "phone_no_description_text1");
@@ -1593,6 +1638,11 @@ export default {
                                 setting?.primary_number_label,
                                 setting?.language,
                                 "primary_number_label"
+                            );
+                            this.handleInput(
+                                setting?.remove_description,
+                                setting?.language,
+                                "remove_description"
                             );
                             this.handleInput(
                                 setting?.default_verified_number_label,
@@ -1726,6 +1776,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `primary_number_label.primary_number_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `remove_description.remove_description_${language.id}`
                 ) ||
                 validationErros.has(
                     `resend_code_btn_label.resend_code_btn_label_${language.id}`

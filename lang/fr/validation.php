@@ -167,6 +167,20 @@ return [
             'required' => 'La confirmation du mot de passe est obligatoire.',
             'same' => 'Les mots de passe ne correspondent pas.',
         ],
+        'pass1' => [
+            'required' => 'Le mot de passe actuel est obligatoire.',
+        ],
+        'pass2' => [
+            'required' => 'Le nouveau mot de passe est obligatoire.',
+            'string' => 'Le nouveau mot de passe doit être une chaîne de caractères.',
+            'min' => 'Le nouveau mot de passe doit contenir au moins :min caractères.',
+            'regex' => 'Le nouveau mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.',
+        ],
+        'pass3' => [
+            'required' => 'La confirmation du nouveau mot de passe est obligatoire.',
+            'string' => 'La confirmation du nouveau mot de passe doit être une chaîne de caractères.',
+            'same' => 'La confirmation du mot de passe ne correspond pas au nouveau mot de passe.',
+        ],
         'remember_me' => [
             'required' => 'Veuillez confirmer que vous acceptez la règle de partage des frais.',
             'accepted' => 'Veuillez confirmer que vous acceptez la règle de partage des frais.',
@@ -242,5 +256,8 @@ return [
         'name' => 'Nom',
         'title' => 'Titre',
         'description' => 'Description',
+        'pass1' => 'Mot de passe actuel',
+        'pass2' => 'Nouveau mot de passe',
+        'pass3' => 'Confirmation du mot de passe',
     ],
 ];

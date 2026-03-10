@@ -110,25 +110,13 @@ class PasswordController extends Controller
         $request->validate([
             'pass1' => 'required',
             'pass2' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-            'pass3' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-        ], [
-            'pass1.required' => 'The current password is required',
-            'pass2.required' => 'The new password is required',
-            'pass2.string' => 'The new password must be a string',
-            'pass2.min' => 'The new password must be at least 8 characters',
-            'pass2.regex' => 'The new password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-            'pass3.required' => 'The confirm password is required',
-            'pass3.string' => 'The confirm password must be a string',
-        ], $niceNames);
+            'pass3' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/|same:pass2',
+        ], [], $niceNames);
 
         // Check if the current password is correct
         if (!Hash::check($request->pass1, auth()->user()->password)) {
             throw ValidationException::withMessages(['pass1' => $messages->incorrect_password_message]);
         }
-        if ($request->pass2 != $request->pass3) {
-            throw ValidationException::withMessages(['pass3' => 'The confirm password does not match the new password.']);
-        }
-
         // Update the user's password
         User::whereId($id)->update([
             'password' => bcrypt($request->pass2),

@@ -191,6 +191,20 @@ return [
             'required' => 'La confirmación de la contraseña es obligatoria.',
             'same' => 'Las contraseñas no coinciden.',
         ],
+        'pass1' => [
+            'required' => 'La contraseña actual es obligatoria.',
+        ],
+        'pass2' => [
+            'required' => 'La nueva contraseña es obligatoria.',
+            'string' => 'La nueva contraseña debe ser una cadena de texto.',
+            'min' => 'La nueva contraseña debe tener al menos :min caracteres.',
+            'regex' => 'La nueva contraseña debe contener al menos una letra mayúscula, una minúscula, un número y un carácter especial.',
+        ],
+        'pass3' => [
+            'required' => 'La confirmación de la nueva contraseña es obligatoria.',
+            'string' => 'La confirmación de la nueva contraseña debe ser una cadena de texto.',
+            'same' => 'La confirmación de la contraseña no coincide con la nueva contraseña.',
+        ],
         'remember_me' => [
             'required' => 'Confirma que aceptas la regla de reparto de costos.',
             'accepted' => 'Confirma que aceptas la regla de reparto de costos.',
@@ -278,6 +292,9 @@ return [
         'name' => 'Nombre',
         'title' => 'Título',
         'description' => 'Descripción',
+        'pass1' => 'Contraseña actual',
+        'pass2' => 'Nueva contraseña',
+        'pass3' => 'Confirmación de contraseña',
     ],
 
 ];
