@@ -56,6 +56,10 @@ class ChatsPageSettingTemplateExport implements FromCollection, WithHeadings, Wi
             'notification_confirm_message' => 'Are you sure?',
             'notification_delete_text' => 'Delete',
             'type_message_placeholder' => 'Type a message...',
+            'driver_chat_with' => 'Chat with',
+            'empty_chat_placeholder' => 'No messages yet',
+            'ride_detail_header' => 'Ride Detail',
+            'chat_start_mark' => 'This marks the start of your chat with the driver.',
             'delete_messages_label' => 'Delete messages',
         ];
     }

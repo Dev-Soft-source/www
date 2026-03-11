@@ -246,6 +246,122 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`driver_chat_with_${activeLanguageId}`">Driver chat with</label>
+                                                </div>
+                                                <input type="text" :name="`driver_chat_with_${activeLanguageId}`"
+                                                    :id="`driver_chat_with_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'driver_chat_with'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'driver_chat_with'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `driver_chat_with.driver_chat_with_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `driver_chat_with.driver_chat_with_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`empty_chat_placeholder_${activeLanguageId}`">Empty chat placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`empty_chat_placeholder_${activeLanguageId}`"
+                                                    :id="`empty_chat_placeholder_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'empty_chat_placeholder'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'empty_chat_placeholder'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `empty_chat_placeholder.empty_chat_placeholder_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `empty_chat_placeholder.empty_chat_placeholder_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`ride_detail_header_${activeLanguageId}`">Ride detail header</label>
+                                                </div>
+                                                <input type="text" :name="`ride_detail_header_${activeLanguageId}`"
+                                                    :id="`ride_detail_header_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'ride_detail_header'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'ride_detail_header'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `ride_detail_header.ride_detail_header_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `ride_detail_header.ride_detail_header_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`chat_start_mark_${activeLanguageId}`">Chat start mark</label>
+                                                </div>
+                                                <input type="text" :name="`chat_start_mark_${activeLanguageId}`"
+                                                    :id="`chat_start_mark_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'chat_start_mark'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'chat_start_mark'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `chat_start_mark.chat_start_mark_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `chat_start_mark.chat_start_mark_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`delete_messages_label_${activeLanguageId}`">Delete
                                                         message confirmation text</label>
                                                 </div>
@@ -786,6 +902,10 @@ export default {
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "old_messages_heading");
                             this.handleInput("", language, "no_messages_label");
+                            this.handleInput("", language, "driver_chat_with");
+                            this.handleInput("", language, "empty_chat_placeholder");
+                            this.handleInput("", language, "ride_detail_header");
+                            this.handleInput("", language, "chat_start_mark");
                             this.handleInput("", language, "old_chat_page_main_heading");
                             this.handleInput("", language, "old_chat_page_no_messages_label");
                             this.handleInput("", language, "delete_messages_label");
@@ -841,6 +961,26 @@ export default {
                                 setting?.no_messages_label,
                                 setting?.language,
                                 "no_messages_label"
+                            );
+                            this.handleInput(
+                                setting?.driver_chat_with,
+                                setting?.language,
+                                "driver_chat_with"
+                            );
+                            this.handleInput(
+                                setting?.empty_chat_placeholder,
+                                setting?.language,
+                                "empty_chat_placeholder"
+                            );
+                            this.handleInput(
+                                setting?.ride_detail_header,
+                                setting?.language,
+                                "ride_detail_header"
+                            );
+                            this.handleInput(
+                                setting?.chat_start_mark,
+                                setting?.language,
+                                "chat_start_mark"
                             );
                             this.handleInput(
                                 setting?.old_chat_page_no_messages_label,
@@ -957,6 +1097,18 @@ export default {
                 ) ||
                 validationErros.has(
                     `no_messages_label.no_messages_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `driver_chat_with.driver_chat_with_${language.id}`
+                ) ||
+                validationErros.has(
+                    `empty_chat_placeholder.empty_chat_placeholder_${language.id}`
+                ) ||
+                validationErros.has(
+                    `ride_detail_header.ride_detail_header_${language.id}`
+                ) ||
+                validationErros.has(
+                    `chat_start_mark.chat_start_mark_${language.id}`
                 ) ||
                 validationErros.has(
                     `old_chat_page_main_heading.old_chat_page_main_heading_${language.id}`

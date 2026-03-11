@@ -36,6 +36,10 @@ class ChatsPageSettingDetailResource extends JsonResource
             'notification_confirm_message' => $this->notification_confirm_message,
             'notification_delete_text' => $this->notification_delete_text,
             'type_message_placeholder' => $this->type_message_placeholder,
+            'driver_chat_with' => $this->driver_chat_with,
+            'empty_chat_placeholder' => $this->empty_chat_placeholder,
+            'ride_detail_header' => $this->ride_detail_header,
+            'chat_start_mark' => $this->chat_start_mark,
             'delete_messages_label' => $this->delete_messages_label,
             'language' => $this->when($this->relationLoaded('language'), function() {
                 return [

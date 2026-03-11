@@ -44,6 +44,18 @@ class ChatsPageSettingService
 
                 $validationRule = array_merge($validationRule, ['type_message_placeholder.type_message_placeholder_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['type_message_placeholder.type_message_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+
+                $validationRule = array_merge($validationRule, ['driver_chat_with.driver_chat_with_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['driver_chat_with.driver_chat_with_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+
+                $validationRule = array_merge($validationRule, ['empty_chat_placeholder.empty_chat_placeholder_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['empty_chat_placeholder.empty_chat_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+
+                $validationRule = array_merge($validationRule, ['ride_detail_header.ride_detail_header_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['ride_detail_header.ride_detail_header_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+
+                $validationRule = array_merge($validationRule, ['chat_start_mark.chat_start_mark_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['chat_start_mark.chat_start_mark_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 
                 $validationRule = array_merge($validationRule, ['delete_messages_label.delete_messages_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['delete_messages_label.delete_messages_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -75,6 +87,10 @@ class ChatsPageSettingService
             'notification_confirm_message' => $this->data($request, $language, 'notification_confirm_message'),
             'notification_delete_text' => $this->data($request, $language, 'notification_delete_text'),
             'type_message_placeholder' => $this->data($request, $language, 'type_message_placeholder'),
+            'driver_chat_with' => $this->data($request, $language, 'driver_chat_with'),
+            'empty_chat_placeholder' => $this->data($request, $language, 'empty_chat_placeholder'),
+            'ride_detail_header' => $this->data($request, $language, 'ride_detail_header'),
+            'chat_start_mark' => $this->data($request, $language, 'chat_start_mark'),
             'delete_messages_label' => $this->data($request, $language, 'delete_messages_label'),
         ];
     }

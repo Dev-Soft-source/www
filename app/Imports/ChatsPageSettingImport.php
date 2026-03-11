@@ -146,6 +146,10 @@ class ChatsPageSettingImport implements ToCollection, WithHeadingRow, WithValida
             'notification_confirm_message' => $row['notification_confirm_message'] ?? null,
             'notification_delete_text' => $row['notification_delete_text'] ?? null,
             'type_message_placeholder' => $row['type_message_placeholder'] ?? null,
+            'driver_chat_with' => $row['driver_chat_with'] ?? null,
+            'empty_chat_placeholder' => $row['empty_chat_placeholder'] ?? null,
+            'ride_detail_header' => $row['ride_detail_header'] ?? null,
+            'chat_start_mark' => $row['chat_start_mark'] ?? null,
             'delete_messages_label' => $row['delete_messages_label'] ?? null,
         ];
 
@@ -183,6 +187,10 @@ class ChatsPageSettingImport implements ToCollection, WithHeadingRow, WithValida
             'notification_confirm_message' => 'required|string',
             'notification_delete_text' => 'required|string',
             'type_message_placeholder' => 'required|string',
+            'driver_chat_with' => 'required|string',
+            'empty_chat_placeholder' => 'required|string',
+            'ride_detail_header' => 'required|string',
+            'chat_start_mark' => 'required|string',
             'delete_messages_label' => 'required|string',
         ];
     }
