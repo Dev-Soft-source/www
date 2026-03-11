@@ -482,22 +482,17 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div class="mt-4 order-1 md:order-2">
-                            <p class="whitespace-nowrap font-semibold">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                @isset($rideDetailPage->at_label)
-                                    {{ $rideDetailPage->at_label }}
-                                @endisset
-                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
-                            </p>
-                        </div> --}}
+
                         <div class="mt-4 order-1 md:order-2">
+                            @php
+                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                            @endphp
                             <p class="whitespace-nowrap font-semibold">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }}
-                                @isset($rideDetailPage->at_label)
-                                    {{ $rideDetailPage->at_label }}
-                                @endisset
-                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                {{ $departureDateLabel }}
+                                {{ $rideDetailPage->at_label }}
+                                {{ $departureTimeLabel ?? 'N/A' }}
                             </p>
                         </div>
                     </div>

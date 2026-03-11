@@ -186,13 +186,18 @@ function closeErrorModal() {
                                                             <span class="bg-red-100 text-red-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Not live</span>
                                                         @endif
                                                         <div class="flex items-center justify-between pb-0 p-4">
+                                                            @php
+                                                            @php
+                                                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                            @endphp
                                                             <p class="flex items-center space-x-2 font-semibold">
-                                                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                                                @isset($rideDetailPage->card_section_at_label)
-                                                                    {{ $rideDetailPage->card_section_at_label }}
-                                                                @endisset
-                                                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                                {{ $departureDateLabel }}
+                                                                {{ $rideDetailPage->at_label }}
+                                                                {{ $departureTimeLabel ?? 'N/A' }}
                                                             </p>
+
                                                             <div class="pr-8">
                                                                 <p class="font-medium">
                                                                     Total {{ $ride->seats }} seats</p>

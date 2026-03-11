@@ -35,12 +35,15 @@
                                                 <a href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
                                                     <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 " id="ride-29">
                                                         <div class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
+                                                            @php
+                                                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                            @endphp
                                                             <p class="flex items-center space-x-2 w-full font-semibold text-left">
-                                                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                                                @isset($rideDetailPage->card_section_at_label)
-                                                                    {{ $rideDetailPage->card_section_at_label }}
-                                                                @endisset
-                                                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                                {{ $departureDateLabel }}
+                                                                {{ $rideDetailPage->at_label }}
+                                                                {{ $departureTimeLabel ?? 'N/A' }}
                                                             </p>
                                                             <div class="flex items-center justify-end w-full gap-2">
 

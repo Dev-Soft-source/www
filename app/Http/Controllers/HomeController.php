@@ -21,7 +21,7 @@ use App\Models\BillingAddressSettingDetail;
 use App\Models\ChatsPageSettingDetail;
 use App\Models\RideDetail;
 use App\Models\Message;
-use App\Models\FindRidePageSettingDetail;
+use App\Models\RideDetailPageSettingDetail;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
@@ -81,12 +81,13 @@ class HomeController extends Controller
             $query->where('language_id', $langId);
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
-        
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         return view(
             'index',
             [
                 'token' => $token,
+                'rideDetailPage' => $rideDetailPage,
                 'rides' => $rides,
                 'video' => $videoDetails,
                 'articles' => $articles,

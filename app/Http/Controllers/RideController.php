@@ -55,6 +55,7 @@ class RideController extends Controller
 
         $findRidePage = $this->getFindRidePageWithSettingDetail();
         $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         if (!auth()->user()) {
             $rides = Ride::where('status', '!=', 2)
@@ -306,8 +307,9 @@ class RideController extends Controller
         $pinkRideSetting = PinkRideSetting::first();
         $firm_cancellation_discount = SiteSetting::first();
         $firm_cancellation_discount = $firm_cancellation_discount->frim_discount;
-        Log::info($rides);
+
         return view('search_ride', [
+            'rideDetailPage' => $rideDetailPage,
             'pinkRideSetting' => $pinkRideSetting,
             'postRidePage' => $postRidePage,
             'findRidePage' => $findRidePage,

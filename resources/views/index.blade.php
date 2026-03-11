@@ -567,12 +567,15 @@
                                             id="ride-{{ $ride->id }}">
                                             <div
                                                 class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 px-4">
+                                                @php
+                                                    $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                                    $departureDateLabel = $departureDateTime['dateLabel'];
+                                                    $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                @endphp
                                                 <p class="flex items-center space-x-2 font-semibold">
-                                                    {{ \Carbon\Carbon::parse($ride->date)->format('l, F d, Y') }}
-                                                    @isset($findRidePage->card_section_at_label)
-                                                        {{ $findRidePage->card_section_at_label }}
-                                                    @endisset
-                                                    {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                    {{ $departureDateLabel }}
+                                                    {{ $rideDetailPage->at_label }}
+                                                    {{ $departureTimeLabel ?? 'N/A' }}
                                                 </p>
                                                 <div class="mt-8">
                                                     <div>
