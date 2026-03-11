@@ -52,24 +52,6 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['skip_label.skip_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['add_vehicle_label.add_vehicle_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['add_vehicle_label.add_vehicle_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['make_label.make_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['make_label.make_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['model_label.model_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['model_label.model_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['type_label.type_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['type_label.type_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['year_label.year_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['year_label.year_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['color_label.color_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['color_label.color_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['liscense_label.liscense_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['liscense_label.liscense_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['electric_car_label.electric_car_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['electric_car_label.electric_car_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['hybrid_car_label.hybrid_car_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['hybrid_car_label.hybrid_car_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['gas_car_label.gas_car_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['gas_car_label.gas_car_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['preferences_label.preferences_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['preferences_label.preferences_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['smoking_label.smoking_label_' . $language->id => ['required', 'string']]);
@@ -111,8 +93,6 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['recurring_trips_label.recurring_trips_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['existing_label.existing_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['existing_label.existing_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['car_type_label.car_type_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['car_type_label.car_type_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['cancellation_policy_label.cancellation_policy_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['cancellation_policy_label.cancellation_policy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['app_disclaimers_description1.app_disclaimers_description1_' . $language->id => ['required', 'string']]);
@@ -173,6 +153,11 @@ class PostRidePageSettingService
             'pick_up_placeholder' => $this->data($request, $language, 'pick_up_placeholder'),
             'drop_off_label' => $this->data($request, $language, 'drop_off_label'),
             'drop_off_placeholder' => $this->data($request, $language, 'drop_off_placeholder'),
+            'stop_along_the_way_label' => $this->data($request, $language, 'stop_along_the_way_label'),
+            'add_stop_btn_label' => $this->data($request, $language, 'add_stop_btn_label'),
+            'stop_placeholder' => $this->data($request, $language, 'stop_placeholder'),
+            'pickup_off_placeholder' => $this->data($request, $language, 'pickup_off_placeholder'),
+            'delete_stop_text' => $this->data($request, $language, 'delete_stop_text'),
             'date_time_label' => $this->data($request, $language, 'date_time_label'),
             'at_label' => $this->data($request, $language, 'at_label'),
             'recurring_label' => $this->data($request, $language, 'recurring_label'),
@@ -188,18 +173,8 @@ class PostRidePageSettingService
             'skip_label' => $this->data($request, $language, 'skip_label'),
             'add_vehicle_label' => $this->data($request, $language, 'add_vehicle_label'),
             'existing_label' => $this->data($request, $language, 'existing_label'),
-            'make_label' => $this->data($request, $language, 'make_label'),
             'make_placeholder' => $this->data($request, $language, 'make_placeholder'),
-            'model_label' => $this->data($request, $language, 'model_label'),
             'model_placeholder' => $this->data($request, $language, 'model_placeholder'),
-            'type_label' => $this->data($request, $language, 'type_label'),
-            'year_label' => $this->data($request, $language, 'year_label'),
-            'color_label' => $this->data($request, $language, 'color_label'),
-            'liscense_label' => $this->data($request, $language, 'liscense_label'),
-            'car_type_label' => $this->data($request, $language, 'car_type_label'),
-            'electric_car_label' => $this->data($request, $language, 'electric_car_label'),
-            'hybrid_car_label' => $this->data($request, $language, 'hybrid_car_label'),
-            'gas_car_label' => $this->data($request, $language, 'gas_car_label'),
             'preferences_label' => $this->data($request, $language, 'preferences_label'),
             'smoking_label' => $this->data($request, $language, 'smoking_label'),
             'animals_label' => $this->data($request, $language, 'animals_label'),

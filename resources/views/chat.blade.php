@@ -91,7 +91,6 @@
                 </div>
                 <div class="p-4 sm:p-6">
                     <div class="panel-body">
-                        {{-- <div class="ride-details-heading" style="font-weight: bold; color: #2563eb; margin-bottom:4px;">Ride Detail</div> --}}
                         <chat-messages 
                             :messages="messages" 
                             :logged_in_user_id="{{ auth()->id() }}"

@@ -528,13 +528,13 @@
                                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                             <div class="text-center sm:mt-0 sm:text-left">
                                                 <div class="mt-2 w-full">
-                                                    <p id="delete-stop-modal-title-post" class="can-exp-p text-center text-xl">Delete Stop?</p>
+                                                    <p id="delete-stop-modal-title-post" class="can-exp-p text-center text-xl">{{ $postRidePage->delete_stop_text ?? 'Delete Stop?' }}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                            <button type="button" id="delete-stop-no-post" class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">No</button>
-                                            <button type="button" id="delete-stop-yes-post" class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">Yes</button>
+                                            <button type="button" id="delete-stop-no-post" class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">{{ $siteText['cancel_btn_text'] }}</button>
+                                            <button type="button" id="delete-stop-yes-post" class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">{{ $siteText['remove_btn_text'] }}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -734,7 +734,7 @@
                         @endphp
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4" id="stops-section-wrapper" data-segment-ids="[]">
                             <button type="button" id="add-more-spots-toggle" class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4 w-full" aria-expanded="{{ $hasStopsPost ? 'true' : 'false' }}" aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
-                                <h3 class="text-2xl">@isset($postRidePage->add_more_from_to){{ $postRidePage->add_more_from_to }}@else Stops Along the Way (Optional) @endisset</h3>
+                                <h3 class="text-2xl">@if(isset($postRidePage->stop_along_the_way_label)){{ $postRidePage->stop_along_the_way_label }}@elseif(isset($postRidePage->add_more_from_to)){{ $postRidePage->add_more_from_to }}@else Stops Along the Way (Optional) @endif</h3>
                                 <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -745,7 +745,7 @@
                                         <h4 class="text-gray-900 text-xl font-medium">{{ $postRidePage->from_label ?? 'From' }}: </h4>
                                         <span id="stops-origin-label" class="text-gray-900 text-primary lg:text-lg"></span>
                                     </div>
-                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way: <span class="text-red-500">*</span></h4>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">{{ $postRidePage->stop_along_the_way_label ?? 'Stops Along the Way' }}: <span class="text-red-500">*</span></h4>
                                     <div class="space-y-3 mb-4" id="stops-rows-container">
                                         @if ($hasStopsPost)
                                             @foreach ($stopsForDisplayPost as $idx => $stopValue)
@@ -758,15 +758,15 @@
                                                             </div>
                                                             <input type="text" name="stop_spot_display[]" data-stop-index="{{ $renderIndex }}" id="stop_spot_{{ $renderIndex }}" value="{{ $stopValue }}" autocomplete="off"
                                                                 class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                                placeholder="">
+                                                                placeholder="{{ $postRidePage->stop_placeholder ?? '' }}">
                                                         <div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_{{ $renderIndex }}">
                                                             <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
                                                         </div>
                                                         </div>
-                                                        <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                        <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}" id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="{{ $postRidePage->pickup_off_placeholder ?? 'pick up / drop off' }}"
                                                             class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.'.$idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
                                                     </div>
-                                                    <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">
+                                                    <button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="{{ $postRidePage->delete_stop_text ?? 'Delete stop' }}" aria-label="{{ $postRidePage->delete_stop_text ?? 'Delete stop' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
@@ -775,7 +775,7 @@
                                             @endforeach
                                         @endif
                                     </div>
-                                    <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
+                                    <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">{{ $postRidePage->add_stop_btn_label ?? '+ Add Stop' }}</button>
                                     <div class="flex items-center gap-2 mb-3">
                                         <h4 class="text-gray-900 text-xl font-medium">{{ $postRidePage->to_label ?? 'To' }}: </h4>
                                         <span id="stops-destination-label" class="text-gray-900 text-primary lg:text-lg"></span>
@@ -1255,8 +1255,8 @@
                                     <div class="md:col-span-2">
                                         <label for="make"
                                             class="text-gray-900 mb-2">
-                                            @isset($postRidePage->make_label)
-                                                {{ $postRidePage->make_label }}
+                                            @isset($vehiclePage->make_label)
+                                                {{ $vehiclePage->make_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1281,8 +1281,8 @@
                                     <div class="md:col-span-2">
                                         <label for="modal"
                                             class="text-gray-900 mb-2">
-                                            @isset($postRidePage->model_label)
-                                                {{ $postRidePage->model_label }}
+                                            @isset($vehiclePage->model_label)
+                                                {{ $vehiclePage->model_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1293,8 +1293,8 @@
                                                 @else
                                                     value="{{ $ride->model }}"
                                                 @endif
-                                                @isset($postRidePage->model_placeholder)
-                                                    placeholder="{{ $postRidePage->model_placeholder }}"
+                                                @isset($vehiclePage->model_placeholder)
+                                                    placeholder="{{ $vehiclePage->model_placeholder }}"
                                                 @endisset
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
@@ -1306,8 +1306,8 @@
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="type" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->type_label)
-                                                {{ $postRidePage->type_label }}
+                                            @isset($vehiclePage->vehicle_type_label)
+                                                {{ $vehiclePage->vehicle_type_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1316,8 +1316,8 @@
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
 
                                                 <option {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }} value="">
-                                                    @isset($postRidePage->vehicle_type_placeholder)
-                                                        {{ $postRidePage->vehicle_type_placeholder }}
+                                                    @isset($vehiclePage->vehicle_type_placeholder)
+                                                        {{ $vehiclePage->vehicle_type_placeholder }}
                                                     @endisset
                                                 </option>
 
@@ -1367,8 +1367,8 @@
                                     </div>
                                     <div class="">
                                         <label for="type" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->year_label)
-                                                {{ $postRidePage->year_label }}
+                                            @isset($vehiclePage->year_label)
+                                                {{ $vehiclePage->year_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1390,8 +1390,8 @@
                                     <div class="">
                                         <label for="color"
                                             class="text-gray-900 mb-2">
-                                            @isset($postRidePage->color_label)
-                                                {{ $postRidePage->color_label }}
+                                            @isset($vehiclePage->color_label)
+                                                {{ $vehiclePage->color_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1412,8 +1412,8 @@
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->liscense_label)
-                                                {{ $postRidePage->liscense_label }}
+                                            @isset($vehiclePage->license_plate_number_label)
+                                                {{ $vehiclePage->license_plate_number_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1434,39 +1434,37 @@
                                     </div>
                                     <div class="md:col-span-4">
                                         <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->car_type_label)
-                                                {{ $postRidePage->car_type_label }}
-                                            @endisset
+                                            {{ $vehiclePage->fuel_label }}
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class=" flex items-center">
-                                            @isset($postRidePage->electric_car_label)
+                                            @isset($vehiclePage->electric_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->electric_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->electric_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->electric_checkbox_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->electric_checkbox_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->electric_car_label }}
+                                                        {{ $vehiclePage->electric_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
-                                            @isset($postRidePage->hybrid_car_label)
+                                            @isset($vehiclePage->hybrid_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{  $postRidePage->hybrid_car_label }}"
-                                                    {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{  $vehiclePage->hybrid_checkbox_label }}"
+                                                    {{ old('car_type', $ride->car_type) == $vehiclePage->hybrid_checkbox_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->hybrid_car_label }}
+                                                        {{ $vehiclePage->hybrid_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
-                                            @isset($postRidePage->gas_car_label)
+                                            @isset($vehiclePage->gas_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $postRidePage->gas_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label || ( empty(old('car_type'))) ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->gas_checkbox_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->gas_checkbox_label || ( empty(old('car_type'))) ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->gas_car_label }}
+                                                        {{ $vehiclePage->gas_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
@@ -3916,12 +3914,12 @@ document.addEventListener('DOMContentLoaded', function() {
         row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">' +
             '<div class="relative flex-1 min-w-0">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
-            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' + nextIndex + '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="' + @json($postRidePage->stop_placeholder ?? '') + '">' +
             '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex + '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
             '</div>' +
-            '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' + nextIndex + '" rows="1" placeholder="' + @json($postRidePage->pickup_off_placeholder ?? 'pick up / drop off') + '" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
             '</div>' +
-            '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
+            '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="' + @json($postRidePage->delete_stop_text ?? 'Delete stop') + '" aria-label="' + @json($postRidePage->delete_stop_text ?? 'Delete stop') + '">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
             '</button>';
         container.appendChild(row);
