@@ -103,13 +103,13 @@
                         @endif
 
                         <div>
-                            <div class="">
+                            <div class="form-group">
                                 <label for="email"></label>
                                 <input id="email" placeholder=""
                                     class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                                     type="text" name="email" value="{{ old('email') }}" autofocus />
                                 @error('email')
-                                    <div class="tooltip-error">{{ $message }}</div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -406,38 +406,7 @@
     </script>
 
     <style>
-        /* Tooltip Animation Styles */
-        .tooltip-error {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            pointer-events: auto;
-            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
-            display: block;
-        }
-
-        /* Initial hidden state for dynamically created tooltips */
-        .tooltip-error.tooltip-init {
-            opacity: 0;
-            transform: scale(0.95) translateY(-5px);
-            pointer-events: none;
-        }
-
-        .tooltip-error.tooltip-show {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            pointer-events: auto;
-        }
-
-        .tooltip-error.tooltip-hide {
-            opacity: 0;
-            transform: scale(0.95) translateY(-5px);
-            pointer-events: none;
-        }
-
-        /* Ensure tooltips are visible when they have the show class */
-        .tooltip-error.tooltip-show .tooltiptext {
-            display: flex !important;
-        }
+        
 
         /* Loading spinner styles */
         .spinner-border-sm {

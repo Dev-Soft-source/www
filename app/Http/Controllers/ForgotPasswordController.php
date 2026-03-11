@@ -108,20 +108,11 @@ class ForgotPasswordController extends Controller
             }
         }
 
-        // Custom validation messages
-        $customMessages = [
-            'email.required' =>'The email is required.',
-            'email.email' => 'Please enter a valid email address, such as name@example.com',
-        ];
-        
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
                 'email' => 'required|email',
-            ], [
-                'email.required' => 'The email is required',
-                'email.email' => 'Please enter a valid email address, such as name@example.com',
-            ], $customMessages);
+            ], [], $niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
