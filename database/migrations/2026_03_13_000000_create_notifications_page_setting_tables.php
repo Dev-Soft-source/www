@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('unread_label')->nullable()->comment('unread');
             $table->string('no_notifications_found_label')->nullable()->comment('No notifications found.');
             $table->string('caught_up_label')->nullable()->comment('You\'re all caught up!');
-
+            $table->string('delete_button_label')->nullable()->comment('Delete');
             $table->timestamps();
         });
     }

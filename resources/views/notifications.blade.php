@@ -44,6 +44,38 @@
       </div>
   </div>
 </div>
+
+{{-- Modal: open general ProximaRide message --}}
+<div id="general-message-modal" class="relative z-50 hidden" aria-labelledby="general-message-modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeGeneralMessageModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6">
+                    <button type="button" onclick="closeGeneralMessageModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 sm:mx-0 sm:h-10 sm:w-10">
+                            <img src="{{ asset('assets/favicon.png') }}" alt="" class="h-6 w-6 w-8 h-8 object-contain">
+                        </div>
+                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left flex-1">
+                            <h3 id="general-message-modal-title" class="text-xl font-semibold leading-6 text-gray-700">{{ config('app.name') }}</h3>
+                            <p id="general-message-modal-date" class="text-sm text-gray-500 mt-1"></p>
+                            <div class="mt-3">
+                                <p id="general-message-modal-body" class="text-gray-700 whitespace-pre-wrap"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeGeneralMessageModal()" class="button-exp-fill w-full sm:ml-3 sm:w-auto">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="container mx-auto p-4">
         <div class="flex items-center justify-between">
             <h1 class="font-FuturaMdCnBT text-primary mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
@@ -54,9 +86,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            Mark all as read
+                            {{ $notificationsPageSetting->mark_all_as_read_button_label }}
                         </button>
-                        <span class="text-gray-800 text-[1.3125rem] bg-blue-600 text-white px-2 py-1 rounded-lg font-medium">{{ $notifications->where('is_read', 0)->count() }} unread</span>
+                        <span class="text-gray-800 text-[1.3125rem] bg-blue-600 text-white px-2 py-1 rounded-lg font-medium">{{ $notifications->where('is_read', 0)->count() }} {{ $notificationsPageSetting->unread_label }}</span>
                     </div>
                 @endif
             </div>
@@ -64,7 +96,7 @@
 
         <div id="notifications-info-bar" class="mb-4 rounded-lg overflow-hidden transition-all duration-300 ease-in-out">
             <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 text-left transition-colors cursor-pointer" aria-expanded="false" aria-controls="notifications-info-bar-content">
-                <span class="font-medium">Stay connected – your chats live here</span>
+                <span class="font-medium">{{ $notificationsPageSetting->info_bar_title }}</span>
                 <svg id="notifications-info-bar-icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -79,7 +111,7 @@
                                     <path d="M2.52 3.515A2.5 2.5 0 0 1 4.82 2h6.362c1 0 1.904.596 2.298 1.515l.792 1.848c.075.175.21.319.38.404.5.25.855.715.965 1.262l.335 1.679c.033.161.049.325.049.49v.413c0 .814-.39 1.543-1 1.997V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.338c-1.292.048-2.745.088-4 .088s-2.708-.04-4-.088V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.892c-.61-.454-1-1.183-1-1.997v-.413a2.5 2.5 0 0 1 .049-.49l.335-1.68c.11-.546.465-1.012.964-1.261a.807.807 0 0 0 .381-.404l.792-1.848ZM4.82 3a1.5 1.5 0 0 0-1.379.91l-.792 1.847a1.8 1.8 0 0 1-.853.904.807.807 0 0 0-.43.564L1.03 8.904a1.5 1.5 0 0 0-.03.294v.413c0 .796.62 1.448 1.408 1.484 1.555.07 3.786.155 5.592.155 1.806 0 4.037-.084 5.592-.155A1.479 1.479 0 0 0 15 9.611v-.413c0-.099-.01-.197-.03-.294l-.335-1.68a.807.807 0 0 0-.43-.563 1.807 1.807 0 0 1-.853-.904l-.792-1.848A1.5 1.5 0 0 0 11.18 3H4.82Z"/>
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">If the message is about a ride, tapping it will take you straight to that ride's details.</p>
+                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_ride }}</p>
                         </div>
                         <div class="flex items-start gap-3">
                             <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
@@ -87,7 +119,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">If it's from another member (a driver or passenger), you'll be directed to the conversation in your Inbox.</p>
+                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_inbox }}</p>
                         </div>
                         <div class="flex items-start gap-3">
                             <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
@@ -95,7 +127,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0018 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 00-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">If it's a general update from ProximaRide, it will open right here for you to read.</p>
+                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_general }}</p>
                         </div>
                     </div>
                 </div>
@@ -115,7 +147,7 @@
                                         @endphp
                                         <li class="relative {{ $rowBg }} hover:bg-gray-100 transition-colors">
                                             <button type="button" onclick="openModal('{{ $notification->id }}')" class="button-exp-fill absolute top-4 right-4 text-sm py-2 px-3">
-                                                Delete
+                                                {{ $notificationsPageSetting->delete_button_label }}
                                             </button>
                                             @php
                                                 // 1. Ride details: type 1 = my ride, type 2 = other's ride
@@ -136,7 +168,7 @@
                                                         : route('my_chats', ['lang' => optional($selectedLanguage)->abbreviation]);
                                                 }
                                             @endphp
-                                            <a href="javascript:void(0);" class="block notification-link" data-id="{{ $notification->id }}" data-general="{{ $isGeneralUpdate ? '1' : '0' }}" data-target="{{ $targetUrl }}">
+                                            <a href="javascript:void(0);" class="block notification-link" data-id="{{ $notification->id }}" data-general="{{ $isGeneralUpdate ? '1' : '0' }}" data-target="{{ $targetUrl }}" @if($isGeneralUpdate) data-message="{{ e($notification->message) }}" data-added-on="{{ $notification->added_on ? \Carbon\Carbon::parse($notification->added_on)->format('M d, Y \a\t h:i A') : '' }}" @endif>
                                                 <div class="flex gap-3 items-start px-4 py-4 pr-24">
                                                     <div class="flex-shrink-0 relative">
                                                         @php
@@ -184,8 +216,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
-                        <p class="mt-4 text-gray-500 font-medium">No notifications found.</p>
-                        <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
+                        <p class="mt-4 text-gray-500 font-medium">{{ $notificationsPageSetting->no_notifications_found_label }}</p>
+                        <p class="text-sm text-gray-400 mt-1">{{ $notificationsPageSetting->caught_up_label }}</p>
                     </div>
                 @endif
             </div>
@@ -259,27 +291,49 @@
             });
         }
 
-        function markNotificationAsReadOnly(notificationId) {
+        function openGeneralMessageModal(message, addedOn) {
+            document.getElementById('general-message-modal-body').textContent = message || '';
+            document.getElementById('general-message-modal-date').textContent = addedOn || '';
+            document.getElementById('general-message-modal').classList.remove('hidden');
+        }
+
+        function closeGeneralMessageModal() {
+            document.getElementById('general-message-modal').classList.add('hidden');
+        }
+
+        function markNotificationAsReadOnly(notificationId, callback) {
             $.ajax({
                 url: "{{ route('web.read_notifications') }}",
                 type: 'GET',
                 data: { id: notificationId },
                 success: function(response) {
-                    window.location.reload();
+                    if (typeof callback === 'function') callback();
+                    else window.location.reload();
                 },
                 error: function(xhr) {
-                    window.location.reload();
+                    if (typeof callback === 'function') callback();
+                    else window.location.reload();
                 }
             });
         }
 
         $(document).on('click', '.notification-link', function(e) {
             e.preventDefault();
-            const id = $(this).data('id');
-            const isGeneral = $(this).data('general') === 1 || $(this).data('general') === '1';
-            const target = $(this).data('target');
+            var $link = $(this);
+            const id = $link.data('id');
+            const isGeneral = $link.data('general') === 1 || $link.data('general') === '1';
+            const target = $link.data('target');
             if (isGeneral) {
-                markNotificationAsReadOnly(id);
+                var message = $link.attr('data-message') || '';
+                var addedOn = $link.attr('data-added-on') || '';
+                openGeneralMessageModal(message, addedOn);
+                markNotificationAsReadOnly(id, function() {
+                    var $li = $link.closest('li');
+                    $li.removeClass('bg-blue-50 border-l-4 border-l-primary').addClass('bg-gray-50');
+                    $li.find('.font-semibold').removeClass('font-semibold');
+                    $li.find('.text-gray-800').removeClass('text-gray-800');
+                    $li.find('.absolute.-top-1.-right-1').remove();
+                });
             } else {
                 markNotificationAsReadAndRedirect(id, target);
             }

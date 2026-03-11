@@ -15,6 +15,9 @@ use App\Models\User;
 use App\Traits\StatusResponser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\NotificationsPageSettingDetail;
+use App\Models\NotificationsPageSetting;
+use Log;
 
 class NotificationController extends Controller
 {
@@ -131,6 +134,21 @@ class NotificationController extends Controller
         $bookingType = $request->input('booking_type', '');
         $paymentMethod = $request->input('payment_method', '');
 
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+            if ($selectedLanguage) {
+                $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+            }
+        }
+        else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+            }
+        }
+
         if ($bookingType === "" && $paymentMethod === "") {
             $notifications->where(function ($query) use ($user_id) {
                 $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
@@ -203,18 +221,18 @@ class NotificationController extends Controller
             ->whereLanguageId($selectedLanguage->id)
             ->first();
 
-        return view('notifications', compact('successMessage','notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions'));
+        return view('notifications', compact('successMessage','notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions', 'notificationsPageSetting'));
     }
 
     public function readNotification(Request $request){
-        $user = Auth::guard('sanctum')->user();
-        $user_id = $user->id;
+        $user = Auth::guard('sanctum')->user() ?? Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         $notification = Notification::where('is_delete', '0')->whereId($request->id)->first();
         if ($notification) {
-            $notification->update([
-                'is_read' => '1',
-            ]);
+            $notification->update(['is_read' => '1']);
         }
 
         $data = ['notification' => $notification];
