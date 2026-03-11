@@ -1756,7 +1756,7 @@
                     </a>
                 </div>
             </div>
-            <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 mt-4 md:mt-6 xl:mt-10">
+            <!-- <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 mt-4 md:mt-6 xl:mt-10">
                 @foreach ($articles as $article)
                     <div class="rounded bg-white shadow-3xl p-5">
                         <div class="p-4">
@@ -1774,7 +1774,7 @@
                         </div>
                     </div>
                 @endforeach
-            </div>
+            </div> -->
         </div>
     </section>
 

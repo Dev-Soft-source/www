@@ -472,8 +472,8 @@
                                         </div>
                                     </div>
                                     @error('from')
-                                    <div class="absolute mt-1 z-10">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div id="from-error-laravel" class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                     </div>
                                     @enderror
                                 </div>
@@ -506,8 +506,8 @@
                                         </div>
                                     </div>
                                     @error('to')
-                                    <div class="absolute mt-1 z-10">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div id="to-error-laravel" class="absolute mt-1 z-10">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                     </div>
                                     @enderror
                                 </div>
@@ -557,7 +557,7 @@
                                 >{{ old('pickup', optional($ride)->pickup) }}</textarea>
                                 @error('pickup')
                                 <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
                             </div>
@@ -576,7 +576,7 @@
                                 >{{ old('dropoff', optional($ride)->dropoff) }}</textarea>
                                 @error('dropoff')
                                 <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                 </div>
                                 @enderror
                             </div>
@@ -892,20 +892,22 @@
                             </label>
                         </div>
                         <div class="bg-white p-4">
-                            <div class="flex items-center flex-wrap gap-2 mt-2">
-                                @for ($i = 1; $i <= 7; $i++)
-                                <div class="relative">
-                                    <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                            <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
-                                        </span>
-                                    </label>
+                            <div class="relative">
+                                <div class="flex items-center flex-wrap gap-2 mt-2">
+                                    @for ($i = 1; $i <= 7; $i++)
+                                    <div class="relative">
+                                        <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
+                                            <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
+                                            <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    @endfor
                                 </div>
-                                @endfor
                                 @error('seats')
-                                <div class="absolute mt-1 z-10">
+                                <div id="seats-error-laravel" class="absolute left-0 top-full mt-1 z-10">
                                     <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
@@ -1568,10 +1570,11 @@
                     <div class="bg-white p-4">
                         <div class="border rounded-md divide-y">
                             @if($postRidePage->luggage_option1?->features_setting_id)
+                                @php $luggageVal = old('luggage', $ride->luggage); $luggageFirstId = $postRidePage->luggage_option1->features_setting_id; @endphp
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option1->features_setting_id }}" class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                         <input id="{{ $postRidePage->luggage_option1->features_setting_id }}" type="radio" name="luggage" value="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option1->features_setting_id ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            {{ ($luggageVal && $luggageVal == $luggageFirstId) || !$luggageVal ? 'checked' : '' }} class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option1->icon)
                                             <img class="w-10 h-10" src="{{asset('home_page_icons/' . $postRidePage->luggage_option1->icon)}}" alt="">
                                         @endisset
@@ -2531,6 +2534,9 @@
                             <span class="text-red-500">*</span>
                         </label>
                     </div>
+                    <div id="agree_terms_client_error" class="hidden absolute mt-1 z-10">
+                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">Please check this box to continue.</div>
+                    </div>
                     @error('agree_terms')
                     <div class="absolute mt-1 z-10">
                         <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
@@ -2902,60 +2908,11 @@ document.addEventListener('DOMContentLoaded', function() {
             disablePostRideSubmitButtons();
             try {
             console.log('Form submit event triggered - starting validation');
-            var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
-            var toVal = (document.getElementById('to_spot_0') || {}).value || '';
-            var fromInputError = document.getElementById('fromInputError');
-            var toInputError = document.getElementById('toInputError');
-            // Only require non-empty origin/destination; do not require autocomplete selection (allows pre-filled/typed addresses)
-            var fromInvalid = !fromVal.trim();
-            var toInvalid = !toVal.trim();
-            var hasOriginDestErrors = fromInvalid || toInvalid;
-            if (fromInputError) fromInputError.classList.toggle('hidden', !fromInvalid);
-            if (fromInvalid && fromInputError) {
-                var te = fromInputError.querySelector('.tooltip-error');
-                if (te) te.textContent = errorFromRequiredPostRide;
-            }
-            if (toInputError) toInputError.classList.toggle('hidden', !toInvalid);
-            if (toInvalid && toInputError) {
-                var te2 = toInputError.querySelector('.tooltip-error');
-                if (te2) te2.textContent = errorToRequiredPostRide;
-            }
+            var hasAnyValidationError = false;
+            var firstErrorElement = null;
 
-            var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-            var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
-            if (tooltipDyn) tooltipDyn.classList.add('hidden');
-            if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
-                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
-            }
-            if (typeof buildStopsSegmentsForSubmitPostRide === 'function') {
-                buildStopsSegmentsForSubmitPostRide();
-            }
-            var priceClientErr = document.getElementById('price-client-error');
-            if (priceClientErr) priceClientErr.classList.add('hidden');
-            var priceInvalid = false;
-            if (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) {
-                var fullRouteInput = dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector('.full-route-price-input');
-                var totalInput = dynamicBlock.querySelector('#segment-total-price-input-dynamic');
-                if (!fullRouteInput || !fullRouteInput.value || fullRouteInput.value.trim() === '' || parseFloat(fullRouteInput.value) <= 0) {
-                    priceInvalid = true;
-                    if (priceClientErr) {
-                        var priceTe = priceClientErr.querySelector('.tooltip-error');
-                        if (priceTe) priceTe.textContent = 'Please enter the full route price.';
-                        priceClientErr.classList.remove('hidden');
-                    }
-                } else if (fullRouteInput && totalInput) {
-                    var fullVal = parseFloat(fullRouteInput.value);
-                    var totalVal = parseFloat(totalInput.value);
-                    if (isNaN(fullVal)) fullVal = 0;
-                    if (isNaN(totalVal)) totalVal = 0;
-                    if (fullVal > totalVal) {
-                        priceInvalid = true;
-                        if (tooltipDyn) tooltipDyn.classList.remove('hidden');
-                    }
-                }
-            }
-
-            // Validate stop inputs: each stop must have a value (same behaviour as origin/destination)
+            
+            // 3. Validate stop inputs
             var stopsContainer = document.getElementById('stops-rows-container');
             var stopInputs = stopsContainer ? stopsContainer.querySelectorAll('input[name="stop_spot_display[]"]') : [];
             var firstInvalidStop = null;
@@ -2973,233 +2930,246 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!firstInvalidStop) firstInvalidStop = inp;
                 }
             });
+            if (stopInvalid) { hasAnyValidationError = true; if (!firstErrorElement) firstErrorElement = firstInvalidStop; }
 
-            if (hasOriginDestErrors || priceInvalid || stopInvalid) {
+            // 4. Check HTML5 validation (date, time, seats, required fields, etc.) so we show all errors
+            var firstHtml5Invalid = this.querySelector(':invalid');
+            if (firstHtml5Invalid) hasAnyValidationError = true;
+            if (firstHtml5Invalid && !firstErrorElement) firstErrorElement = firstHtml5Invalid;
+
+            // 5. If any validation failed: prevent submit, scroll to first error, re-enable will happen in finally
+            if (hasAnyValidationError) {
                 e.preventDefault();
-                var scrollTarget = null;
-                if (fromInvalid) scrollTarget = document.getElementById('from_spot_0');
-                else if (toInvalid) scrollTarget = document.getElementById('to_spot_0');
-                else if (firstInvalidStop) scrollTarget = firstInvalidStop;
-                else if (priceInvalid) scrollTarget = document.getElementById('post-ride-price-section');
-                if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: scrollTarget === document.getElementById('post-ride-price-section') ? 'start' : 'center' });
+                var scrollTarget = firstErrorElement || document.getElementById('from_spot_0');
+                if (scrollTarget) {
+                    scrollTarget.scrollIntoView({ behavior: 'smooth', block: scrollTarget === document.getElementById('post-ride-price-section') ? 'start' : 'center' });
+                    if (firstHtml5Invalid && scrollTarget === firstHtml5Invalid) scrollTarget.focus();
+                }
                 return;
             }
-            if (fromInputError) fromInputError.classList.add('hidden');
-            if (toInputError) toInputError.classList.add('hidden');
+            if (typeof hideFromTooltipErrorsPostRide === 'function') hideFromTooltipErrorsPostRide();
+            if (typeof hideToTooltipErrorsPostRide === 'function') hideToTooltipErrorsPostRide();
+            if (agreeTermsError) agreeTermsError.classList.add('hidden');
 
-        // Check if validation should be bypassed (user clicked "Keep Current Price")
-        const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
-        if (bypassInput && bypassInput.value === '1') {
-            console.log('Bypassing price validation - user chose to keep current price');
-            return; // Allow form to submit normally
-        }
-        
-        // First check HTML5 validation
-        const firstInvalid = this.querySelector(':invalid');
-        if (firstInvalid) {
-            e.preventDefault();
-            firstInvalid.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-            firstInvalid.focus();
-            return;
-        }
-        
-        // Validate price per seat before submission
-        const priceInput = document.getElementById('priceData0');
-        const price = priceInput ? parseFloat(priceInput.value) : null;
-        
-        // Get distance - try from data attribute first, then global variable
-        let distance = null;
-        if (priceInput && typeof $ !== 'undefined') {
-            distance = $(priceInput).data('distance') || window.rideDistance;
-        } else {
-            distance = window.rideDistance;
-        }
-        
-        // If distance is not available, try to get it from hidden input or calculate it
-        if (!distance || distance <= 0) {
-            // Try to get from hidden input if available
-            const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
-            if (distanceInput && distanceInput.value) {
-                distance = parseFloat(distanceInput.value);
+            // Build hidden from_spot[] / to_spot[] / price_spot[] for stops so backend can save segments
+            if (typeof buildStopsSegmentsForSubmitPostRide === 'function') {
+                buildStopsSegmentsForSubmitPostRide();
             }
-        }
-        
-        // Get number of seats
-        let seats = null;
-        const seatsInput = document.querySelector('input[name="seats"]:checked');
-        if (seatsInput) {
-            seats = parseInt(seatsInput.value);
-        }
-        
-        // Debug logging
-        console.log('Form submission validation:', {
-            price: price,
-            distance: distance,
-            seats: seats,
-            hasPriceInput: !!priceInput,
-            hasSeatsInput: !!seatsInput,
-            windowRideDistance: window.rideDistance
-        });
-        
-        // If we have price, distance, and seats, validate
-        if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
-            const validation = validatePricePerSeat(price, distance, seats);
-            
-            console.log('Price validation result:', validation);
-            
-            if (!validation.valid) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                showPriceErrorModal(validation.maxPricePerSeat);
-                return false;
+
+            // Check if validation should be bypassed (user clicked "Keep Current Price")
+            const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
+            if (bypassInput && bypassInput.value === '1') {
+                console.log('Bypassing price validation - user chose to keep current price');
+                return; // Allow form to submit normally
             }
             
-            if (validation.type === 'warning') {
+            // First check HTML5 validation
+            const firstInvalid = this.querySelector(':invalid');
+            if (firstInvalid) {
                 e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                console.log('Showing soft warning modal - validation type is warning');
-                showPriceWarningModal(function() {
-                    // User clicked "Keep Current Price" - submit the form
-                    console.log('User chose to keep current price, submitting form');
-                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                    if (formElement) {
-                        // Create a hidden input to bypass validation on next submit
-                        const bypassInput = document.createElement('input');
-                        bypassInput.type = 'hidden';
-                        bypassInput.name = 'bypass_price_validation';
-                        bypassInput.value = '1';
-                        formElement.appendChild(bypassInput);
-                        // Remove the event listener to prevent re-validation
-                        const newForm = formElement.cloneNode(true);
-                        formElement.parentNode.replaceChild(newForm, formElement);
-                        // Submit the form
-                        newForm.submit();
-                    }
+                firstInvalid.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
                 });
-                return false;
+                firstInvalid.focus();
+                return;
             }
-        } else {
-            console.warn('Skipping price validation - missing required data:', {
-                hasPrice: !!price && price > 0,
-                hasDistance: !!distance && distance > 0,
-                hasSeats: !!seats && seats > 0,
-                priceValue: price,
-                distanceValue: distance,
-                seatsValue: seats
+            
+            // Validate price per seat before submission
+            const priceInput = document.getElementById('priceData0');
+            const price = priceInput ? parseFloat(priceInput.value) : null;
+            
+            // Get distance - try from data attribute first, then global variable
+            let distance = null;
+            if (priceInput && typeof $ !== 'undefined') {
+                distance = $(priceInput).data('distance') || window.rideDistance;
+            } else {
+                distance = window.rideDistance;
+            }
+            
+            // If distance is not available, try to get it from hidden input or calculate it
+            if (!distance || distance <= 0) {
+                // Try to get from hidden input if available
+                const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
+                if (distanceInput && distanceInput.value) {
+                    distance = parseFloat(distanceInput.value);
+                }
+            }
+            
+            // Get number of seats
+            let seats = null;
+            const seatsInput = document.querySelector('input[name="seats"]:checked');
+            if (seatsInput) {
+                seats = parseInt(seatsInput.value);
+            }
+            
+            // Debug logging
+            console.log('Form submission validation:', {
+                price: price,
+                distance: distance,
+                seats: seats,
+                hasPriceInput: !!priceInput,
+                hasSeatsInput: !!seatsInput,
+                windowRideDistance: window.rideDistance
             });
             
-            // If we have price and seats but no distance, we need to fetch it before allowing submission
-            if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
-                const fromInput = document.getElementById('from_spot_0') || document.querySelector('input[name="from"]');
-                const toInput = document.getElementById('to_spot_0') || document.querySelector('input[name="to"]');
+            // If we have price, distance, and seats, validate
+            if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
+                const validation = validatePricePerSeat(price, distance, seats);
                 
-                if (fromInput && toInput && fromInput.value && toInput.value) {
-                    console.log('Distance missing - attempting to fetch before validation');
-                    // Prevent form submission and fetch distance
+                console.log('Price validation result:', validation);
+                
+                if (!validation.valid) {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    showPriceErrorModal(validation.maxPricePerSeat);
+                    return false;
+                }
+                
+                if (validation.type === 'warning') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log('Showing soft warning modal - validation type is warning');
+                    showPriceWarningModal(function() {
+                        // User clicked "Keep Current Price" - submit the form
+                        console.log('User chose to keep current price, submitting form');
+                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                        if (formElement) {
+                            // Create a hidden input to bypass validation on next submit
+                            const bypassInput = document.createElement('input');
+                            bypassInput.type = 'hidden';
+                            bypassInput.name = 'bypass_price_validation';
+                            bypassInput.value = '1';
+                            formElement.appendChild(bypassInput);
+                            // Remove the event listener to prevent re-validation
+                            const newForm = formElement.cloneNode(true);
+                            formElement.parentNode.replaceChild(newForm, formElement);
+                            // Submit the form
+                            newForm.submit();
+                        }
+                    });
+                    return false;
+                }
+            } else {
+                console.warn('Skipping price validation - missing required data:', {
+                    hasPrice: !!price && price > 0,
+                    hasDistance: !!distance && distance > 0,
+                    hasSeats: !!seats && seats > 0,
+                    priceValue: price,
+                    distanceValue: distance,
+                    seatsValue: seats
+                });
+                
+                // If we have price and seats but no distance, we need to fetch it before allowing submission
+                if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
+                    const fromInput = document.getElementById('from_spot_0') || document.querySelector('input[name="from"]');
+                    const toInput = document.getElementById('to_spot_0') || document.querySelector('input[name="to"]');
                     
-                    // Fetch distance asynchronously
-                    if (typeof $ !== 'undefined') {
-                        $.ajax({
-                            url: "{{ url('get-cities-distance') }}",
-                            type: "POST",
-                            data: {
-                                search: fromInput.value,
-                                searchData: toInput.value,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            dataType: 'json',
-                            success: function(result) {
-                                console.log('Distance fetch response:', result);
-                                // Check if distance exists in response (could be result.distance or result.data.distance)
-                                const distanceValue = result.distance || (result.data && result.data.distance) || null;
-                                
-                                if (distanceValue) {
-                                    const distanceKm = parseFloat(distanceValue);
-                                    if (!isNaN(distanceKm) && distanceKm > 0) {
-                                        window.rideDistance = distanceKm;
-                                        // Store in price input data attribute as well
-                                        if (priceInput && typeof $ !== 'undefined') {
-                                            $(priceInput).data('distance', distanceKm);
-                                        }
-                                        console.log('Distance fetched successfully:', distanceKm, 'km');
-                                        
-                                        // Now validate with the fetched distance
-                                        const validation = validatePricePerSeat(price, distanceKm, seats);
-                                        console.log('Price validation result after fetching distance:', validation);
-                                        
-                                        if (!validation.valid) {
-                                            showPriceErrorModal(validation.maxPricePerSeat);
-                                            return;
-                                        }
-                                        
-                                        if (validation.type === 'warning') {
-                                            showPriceWarningModal(function() {
-                                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                                if (formElement) {
-                                                    const bypassInput = document.createElement('input');
-                                                    bypassInput.type = 'hidden';
-                                                    bypassInput.name = 'bypass_price_validation';
-                                                    bypassInput.value = '1';
-                                                    formElement.appendChild(bypassInput);
-                                                    formElement.submit();
-                                                }
-                                            });
-                                            return;
-                                        }
-                                        
-                                        // No warning/error - submit form
-                                        const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                        if (formElement) {
-                                            formElement.submit();
+                    if (fromInput && toInput && fromInput.value && toInput.value) {
+                        console.log('Distance missing - attempting to fetch before validation');
+                        // Prevent form submission and fetch distance
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Fetch distance asynchronously
+                        if (typeof $ !== 'undefined') {
+                            $.ajax({
+                                url: "{{ url('get-cities-distance') }}",
+                                type: "POST",
+                                data: {
+                                    search: fromInput.value,
+                                    searchData: toInput.value,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                dataType: 'json',
+                                success: function(result) {
+                                    console.log('Distance fetch response:', result);
+                                    // Check if distance exists in response (could be result.distance or result.data.distance)
+                                    const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                                    
+                                    if (distanceValue) {
+                                        const distanceKm = parseFloat(distanceValue);
+                                        if (!isNaN(distanceKm) && distanceKm > 0) {
+                                            window.rideDistance = distanceKm;
+                                            // Store in price input data attribute as well
+                                            if (priceInput && typeof $ !== 'undefined') {
+                                                $(priceInput).data('distance', distanceKm);
+                                            }
+                                            console.log('Distance fetched successfully:', distanceKm, 'km');
+                                            
+                                            // Now validate with the fetched distance
+                                            const validation = validatePricePerSeat(price, distanceKm, seats);
+                                            console.log('Price validation result after fetching distance:', validation);
+                                            
+                                            if (!validation.valid) {
+                                                showPriceErrorModal(validation.maxPricePerSeat);
+                                                return;
+                                            }
+                                            
+                                            if (validation.type === 'warning') {
+                                                showPriceWarningModal(function() {
+                                                    const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                                    if (formElement) {
+                                                        const bypassInput = document.createElement('input');
+                                                        bypassInput.type = 'hidden';
+                                                        bypassInput.name = 'bypass_price_validation';
+                                                        bypassInput.value = '1';
+                                                        formElement.appendChild(bypassInput);
+                                                        formElement.submit();
+                                                    }
+                                                });
+                                                return;
+                                            }
+                                            
+                                            // No warning/error - submit form
+                                            const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                            if (formElement) {
+                                                formElement.submit();
+                                            }
+                                        } else {
+                                            console.error('Invalid distance value received:', distanceValue);
+                                            // If distance is invalid, let backend handle it
+                                            const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
+                                            if (formElement) {
+                                                alert(formElement.value);
+                                                formElement.submit();
+                                            }
                                         }
                                     } else {
-                                        console.error('Invalid distance value received:', distanceValue);
-                                        // If distance is invalid, let backend handle it
+                                        // Distance might be 0 or missing - check the actual value
+                                        const distanceValue = result.distance || (result.data && result.data.distance);
+                                        if (distanceValue === 0 || distanceValue === null || distanceValue === undefined) {
+                                            console.warn('Distance is 0 or missing in API response. This might indicate invalid locations or API error.');
+                                            console.log('Full API response:', result);
+                                        } else {
+                                            console.error('Distance fetch failed - unexpected response structure. Response:', result);
+                                        }
+                                        // If we can't get valid distance, let backend handle validation
                                         const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
                                         if (formElement) {
                                             formElement.submit();
                                         }
                                     }
-                                } else {
-                                    // Distance might be 0 or missing - check the actual value
-                                    const distanceValue = result.distance || (result.data && result.data.distance);
-                                    if (distanceValue === 0 || distanceValue === null || distanceValue === undefined) {
-                                        console.warn('Distance is 0 or missing in API response. This might indicate invalid locations or API error.');
-                                        console.log('Full API response:', result);
-                                    } else {
-                                        console.error('Distance fetch failed - unexpected response structure. Response:', result);
-                                    }
-                                    // If we can't get valid distance, let backend handle validation
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Error fetching distance:', error);
+                                    // On error, let backend handle validation
                                     const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
                                     if (formElement) {
                                         formElement.submit();
                                     }
                                 }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error fetching distance:', error);
-                                // On error, let backend handle validation
-                                const formElement = document.getElementById('post-ride-form') || document.querySelector('form');
-                                if (formElement) {
-                                    formElement.submit();
-                                }
-                            }
-                        });
-                    } else {
-                        console.error('jQuery not available - cannot fetch distance. Allowing backend validation.');
-                        // If jQuery is not available, let backend handle it
+                            });
+                        } else {
+                            console.error('jQuery not available - cannot fetch distance. Allowing backend validation.');
+                            // If jQuery is not available, let backend handle it
+                        }
+                        return false;
                     }
-                    return false;
                 }
             }
-        }
 
             } finally {
                 if (e.defaultPrevented) enablePostRideSubmitButtons();
@@ -3214,6 +3184,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var tempPlace = selectedFromPlace;
         selectedFromPlace = selectedToPlace;
         selectedToPlace = tempPlace;
+    }
+
+    function hideFromTooltipErrorsPostRide() {
+        var a = document.getElementById('fromInputError'); if (a) a.classList.add('hidden');
+        var b = document.getElementById('from-error-laravel'); if (b) b.classList.add('hidden');
+    }
+    function hideToTooltipErrorsPostRide() {
+        var a = document.getElementById('toInputError'); if (a) a.classList.add('hidden');
+        var b = document.getElementById('to-error-laravel'); if (b) b.classList.add('hidden');
     }
 
     window.initPostRidePlaces = function() {
@@ -3231,7 +3210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var formatted = formatPlaceAddressPostRide(place);
                 selectedFromPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
                 fromInput.value = formatted;
-                var err = document.getElementById('fromInputError'); if (err) err.classList.add('hidden');
+                hideFromTooltipErrorsPostRide();
                 if (typeof fetchAndStoreDistance === 'function') setTimeout(function() { fetchAndStoreDistance(0); }, 300);
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
                 setTimeout(function() { isSettingPlaceValuePostRide = false; isSelectingFromDropdownPostRide = false; }, 100);
@@ -3244,16 +3223,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 var formatted = formatPlaceAddressPostRide(place);
                 selectedToPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
                 toInput.value = formatted;
-                var err = document.getElementById('toInputError'); if (err) err.classList.add('hidden');
+                hideToTooltipErrorsPostRide();
                 if (typeof fetchAndStoreDistance === 'function') setTimeout(function() { fetchAndStoreDistance(0); }, 300);
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
                 setTimeout(function() { isSettingPlaceValuePostRide = false; isSelectingFromDropdownPostRide = false; }, 100);
             }
         });
-        fromInput.addEventListener('input', function() { if (!isSettingPlaceValuePostRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null; if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide(); });
-        toInput.addEventListener('input', function() { if (!isSettingPlaceValuePostRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null; if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide(); });
-        fromInput.addEventListener('focus', function() { var el = document.getElementById('fromInputError'); if (el) el.classList.add('hidden'); });
-        toInput.addEventListener('focus', function() { var el = document.getElementById('toInputError'); if (el) el.classList.add('hidden'); });
+        fromInput.addEventListener('input', function() {
+            if (!isSettingPlaceValuePostRide && selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+            if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+            if (this.value.trim() !== '') hideFromTooltipErrorsPostRide();
+        });
+        toInput.addEventListener('input', function() {
+            if (!isSettingPlaceValuePostRide && selectedToPlace && this.value.trim() !== selectedToPlace.value) selectedToPlace = null;
+            if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+            if (this.value.trim() !== '') hideToTooltipErrorsPostRide();
+        });
         fromInput.addEventListener('blur', function() {
             if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
             var self = this;
@@ -3270,8 +3255,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 var te = fromInputError.querySelector('.tooltip-error');
                                 if (te) te.textContent = errorCityMissingPostRide;
                                 fromInputError.classList.remove('hidden');
-                            } else if (fromInputError) fromInputError.classList.add('hidden');
-                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                            } else { hideFromTooltipErrorsPostRide(); }
+                        } else { hideFromTooltipErrorsPostRide(); }
                         if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value) fetchAndStoreDistance(0);
                     });
                 } else {
@@ -3281,8 +3266,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             var te = fromInputError.querySelector('.tooltip-error');
                             if (te) te.textContent = currentValue === '' ? errorFromRequiredPostRide : errorCityMissingPostRide;
                             fromInputError.classList.remove('hidden');
-                        }
-                    } else if (fromInputError) fromInputError.classList.add('hidden');
+                        } else { hideFromTooltipErrorsPostRide(); }
+                    } else { hideFromTooltipErrorsPostRide(); }
                     if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value) fetchAndStoreDistance(0);
                 }
             }, 200);
@@ -3303,8 +3288,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 var te = toInputError.querySelector('.tooltip-error');
                                 if (te) te.textContent = errorCityMissingPostRide;
                                 toInputError.classList.remove('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        } else if (toInputError) toInputError.classList.add('hidden');
+                            } else { hideToTooltipErrorsPostRide(); }
+                        } else { hideToTooltipErrorsPostRide(); }
                         if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value) fetchAndStoreDistance(0);
                     });
                 } else {
@@ -3314,8 +3299,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             var te = toInputError.querySelector('.tooltip-error');
                             if (te) te.textContent = currentValue === '' ? errorToRequiredPostRide : errorCityMissingPostRide;
                             toInputError.classList.remove('hidden');
-                        }
-                    } else if (toInputError) toInputError.classList.add('hidden');
+                        } else { hideToTooltipErrorsPostRide(); }
+                    } else { hideToTooltipErrorsPostRide(); }
                     if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value) fetchAndStoreDistance(0);
                 }
             }, 200);
@@ -3415,7 +3400,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var sel = { place_id: result.place_id, formatted_address: formatted, value: formatted };
                 if (target === 'from') selectedFromPlace = sel; else selectedToPlace = sel;
                 if (input) input.value = formatted;
-                var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
+                if (target === 'from') hideFromTooltipErrorsPostRide(); else hideToTooltipErrorsPostRide();
                 setTimeout(function() { isSettingPlaceValuePostRide = false; }, 100);
                 resolve(true);
             });
@@ -3613,6 +3598,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function seat_selected(th) {
+        var seatsErr = document.getElementById('seats-error-laravel');
+        if (seatsErr) seatsErr.classList.add('hidden');
         var seat = parseInt($(th).val());
 
         for (i = 1; i <= seat; i++) {
@@ -4247,7 +4234,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             fromInput0.addEventListener('input', function() {
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                if (this.value.trim() !== '' && typeof hideFromTooltipErrorsPostRide === 'function') hideFromTooltipErrorsPostRide();
             });
+            
         }
         
         if (toInput0) {
@@ -4260,7 +4249,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             toInput0.addEventListener('input', function() {
                 if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
+                if (this.value.trim() !== '' && typeof hideToTooltipErrorsPostRide === 'function') hideToTooltipErrorsPostRide();
             });
+            
         }
         if (typeof updateStopsOriginDestinationLabelsPostRide === 'function') updateStopsOriginDestinationLabelsPostRide();
         if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();

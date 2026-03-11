@@ -31,6 +31,7 @@ use App\Models\NoShowHistory;
 use App\Models\RideDetailPageSettingDetail;
 use App\Models\SiteSetting;
 use App\Models\SuccessMessagesSettingDetail;
+use App\Models\SiteTextDetail;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\SeatDetail;
@@ -333,7 +334,7 @@ class RideController extends Controller
                     ->where('ride_id', $id);
             }, 'vehicle'])
             ->first();
-        Log::info($ride);
+
         if (!isset($ride) && empty($ride)) {
             $lang = $lang ?? "en";
             return redirect(route('home', ['lang' => $lang]));
@@ -1129,6 +1130,46 @@ class RideController extends Controller
             ->where('default_ride', 0)
             ->whereNotIn('id', $submittedExtraIds)
             ->delete();
+        // If JS did not build from_spot[] / to_spot[] but stop_spot_display[] exists, build them server-side
+        if ((!$request->has('from_spot') || empty($request->from_spot))
+            && $request->has('stop_spot_display')
+            && is_array($request->stop_spot_display)
+        ) {
+            $stops = array_values(array_filter($request->stop_spot_display, function ($v) {
+                return trim((string) $v) !== '';
+            }));
+            if (!empty($stops) && $request->filled('from') && $request->filled('to')) {
+                $origin = $request->from;
+                $destination = $request->to;
+                $fromSpot = [];
+                $toSpot = [];
+                $priceSpot = [];
+                $mainPrice = $request->price;
+                $segmentPrices = (array) $request->input('price_spot_display', []);
+                $n = count($stops);
+                for ($i = 0; $i <= $n; $i++) {
+                    $fromVal = ($i === 0) ? $origin : ($stops[$i - 1] ?? null);
+                    $toVal = ($i === $n) ? $destination : ($stops[$i] ?? null);
+                    if (!$fromVal || !$toVal) {
+                        continue;
+                    }
+                    $segPrice = $mainPrice;
+                    if (isset($segmentPrices[$i]) && $segmentPrices[$i] !== '') {
+                        $segPrice = $segmentPrices[$i];
+                    }
+                    $fromSpot[] = $fromVal;
+                    $toSpot[] = $toVal;
+                    $priceSpot[] = $segPrice;
+                }
+                if (!empty($fromSpot)) {
+                    $request->merge([
+                        'from_spot' => $fromSpot,
+                        'to_spot' => $toSpot,
+                        'price_spot' => $priceSpot,
+                    ]);
+                }
+            }
+        }
 
         if (isset($request->from_spot) && !empty($request->from_spot)) {
             $pointsForPairs = [$request->from];
@@ -1723,7 +1764,7 @@ class RideController extends Controller
             // phone number not verified, redirect to phone verification page
             return redirect()->route('phone', ['lang' => $lang]);
         }
-
+        Log::info("sldkfsdlkfjlsdkfjlsdfk");
         // Require driver's license on file (uploaded). Allow access once uploaded; admin approval (driver === '1') is not required to view/post ride form.
         $driver_license_on_file = User::where('id', $user_id)->whereNotNull('driver_license_upload')->where('driver_license_upload', '!=', '')->first();
         if (!$driver_license_on_file) {
@@ -1817,16 +1858,18 @@ class RideController extends Controller
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'profile_photo_required_message', 'overlap_ride_message', 'ride_dead_time_text')->first();
                 $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
+                $defaultLang = Language::where('is_default', 1)->first();
+                $siteTextErrorMessage = SiteTextDetail::getByLanguageKeyedBySlug($selectedLanguage->id, $defaultLang ? $defaultLang->id : 1);
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
-
+                $siteTextErrorMessage = SiteTextDetail::getByLanguageKeyedBySlug($selectedLanguage->id, $selectedLanguage->id);
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'overlap_ride_message', 'profile_photo_required_message', 'ride_dead_time_text')->first();
             }
         }
-
+        $siteTextErrorMessage = $siteTextErrorMessage ?? [];
         if ($user->block_post_ride == '1') {
             return back()->with('message', $message->block_post_ride_message);
         }
@@ -1884,65 +1927,6 @@ class RideController extends Controller
             }
         }
 
-        // Safely get from_spot and to_spot values with null checks
-        $fromSpot = $request->from_spot[0] ?? null;
-        $from_city = $fromSpot ? trim(explode(',', $fromSpot)[0]) : null;
-
-        $toSpot = $request->to_spot[0] ?? null;
-        $to_city = $toSpot ? trim(explode(',', $toSpot)[0]) : null;
-
-
-        if (!empty($fromSpot) && !empty($toSpot)) {
-            $validator = Validator::make($request->all(), [
-                'from_spot' => 'required|exists:cities,name',
-                'to_spot' => 'required|exists:cities,name',
-                'price_spot' => 'required',
-
-            ], [
-                'from_spot.exists' => $cityErrorMessage->city_not_in_record,
-                'to_spot.exists' => $cityErrorMessage->city_not_in_record,
-            ]);
-            // dd($request->price_spot);
-            // dd(count(array_filter($request->price_spot, fn($value) => $value == null))>0);
-            $priceSpotHasNull = is_array($request->price_spot) && count(array_filter($request->price_spot, fn($value) => $value === null || $value === '')) > 0;
-            $cityNotInRecord = $cityErrorMessage->city_not_in_record ?? 'City not found in records';
-
-            if ((!$from_city || !DB::table('cities')->where('name', $from_city)->exists()) && (!$to_city || !DB::table('cities')->where('name', $to_city)->exists()) || $priceSpotHasNull) {
-                $errors = [
-                    'from_spot' => $cityNotInRecord,
-                    'to_spot' => $cityNotInRecord,
-                ];
-                if ($priceSpotHasNull) {
-                    $errors = [
-                        'price' => __('validation.required', ['attribute' => 'price'])
-                    ];
-                }
-                return back()
-                    ->with('custom_errors', $errors)
-                    ->withInput();
-            }
-
-
-            if ($from_city && !DB::table('cities')->where('name', $from_city)->exists()) {
-                $errors = [
-                    'from_spot' => $cityNotInRecord,
-                ];
-                return back()
-                    ->with('custom_errors', $errors)
-                    ->withInput();
-            }
-
-            if ($to_city && !DB::table('cities')->where('name', $to_city)->exists()) {
-                $errors = [
-                    'to_spot' => $cityNotInRecord,
-                ];
-                return back()
-                    ->with('custom_errors', $errors)
-                    ->withInput();
-            }
-        }
-
-
         $customMessages = [
             'date' => 'Invalid date format',
             // 'time' => 'Invalid time format',
@@ -1970,7 +1954,7 @@ class RideController extends Controller
         } elseif ($skip_vehicle !== 0) {
             $filename = '';
         }
-
+        
         $recurring = $request->filled('recurring') ? $request->recurring : 0;
 
         $validator = Validator::make($request->all(), [
@@ -1993,7 +1977,7 @@ class RideController extends Controller
             'notes' => 'nullable|string|max:300',
             'middle_seats' => 'required',
             'back_seats' => 'required',
-            'agree_terms' => 'required',
+            'agree_terms' => 'accepted',
             'image' => $request->has('existing_image') || $add_vehicle !== 0 ? 'nullable|mimes:jpeg,png,jpg,gif|max:10240' : 'required|mimes:jpeg,png,jpg,gif|max:10240',
             'make' => $add_vehicle !== 0 ? 'required' : 'nullable',
             'model' => $add_vehicle !== 0 ? 'required' : 'nullable',
@@ -2006,63 +1990,22 @@ class RideController extends Controller
             'recurring_type' => $recurring !== 0 ? 'required' : 'nullable',
             'recurring_trips' => $recurring !== 0 ? 'required|numeric|max:10' : 'nullable',
         ],[
-            'from.required' => 'The from is required',
-            'from.string' => 'The from must be a string',
-            'from.max' => 'The from may not be greater than 25 characters',
-            'from.regex' => 'The from must contain only letters, spaces, and hyphens',
-            'to.required' => 'The to is required',
-            'to.string' => 'The to must be a string',
-            'to.max' => 'The to may not be greater than 25 characters',
-            'to.regex' => 'The to must contain only letters, spaces, and hyphens',
-            'pickup.required' => 'The pickup is required',
-            'pickup.string' => 'The pickup must be a string',
-            'pickup.max' => 'The pickup may not be greater than 25 characters',
-            'pickup.regex' => 'The pickup must contain only letters, spaces, and hyphens',
-            'dropoff.required' => 'The dropoff is required',
-            'dropoff.string' => 'The dropoff must be a string',
-            'dropoff.max' => 'The dropoff may not be greater than 25 characters',
-            'dropoff.regex' => 'The dropoff must contain only letters, spaces, and hyphens',
-            'date.required' => 'The date is required',
-            'date.date' => 'The date must be a valid date',
-            'time.required' => 'The time is required',
-            'time.date_format' => 'The time must be a valid time',
-            'details.required' => 'The details is required',
-            'details.string' => 'The details must be a string',
-            'details.max_words' => 'The details may not be greater than 300 words',
-            'seats.required' => 'The seats is required',
-            'seats.numeric' => 'The seats must be a number',
-            'smoke.required' => 'The smoke is required',
-            'smoke.string' => 'The smoke must be a string',
-            'smoke.max' => 'The smoke may not be greater than 25 characters',
-            'smoke.regex' => 'The smoke must contain only letters, spaces, and hyphens',
-            'animal_friendly.required' => 'The animal friendly is required',
-            'animal_friendly.string' => 'The animal friendly must be a string',
-            'animal_friendly.max' => 'The animal friendly may not be greater than 25 characters',
-            'animal_friendly.regex' => 'The animal friendly must contain only letters, spaces, and hyphens',
-            'features.array' => 'The features must be an array',
-            'booking_method.required' => 'The booking method is required',
-            'booking_method.string' => 'The booking method must be a string',
-            'booking_method.max' => 'The booking method may not be greater than 25 characters',
-            'booking_method.regex' => 'The booking method must contain only letters, spaces, and hyphens',
-            'booking_type.required' => 'The booking type is required',
-            'booking_type.string' => 'The booking type must be a string',
-            'booking_type.max' => 'The booking type may not be greater than 25 characters',
-            'booking_type.regex' => 'The booking type must contain only letters, spaces, and hyphens',
-            'luggage.required' => 'The luggage is required',
-            'luggage.string' => 'The luggage must be a string',
-            'luggage.max' => 'The luggage may not be greater than 25 characters',
-            'luggage.regex' => 'The luggage must contain only letters, spaces, and hyphens',
-            'price.required' => 'The price is required',
-            'price.numeric' => 'The price must be a number',
-            'price.gt' => 'The price must be greater than 0',
-            'payment_method.required' => 'The payment method is required',
-            'payment_method.string' => 'The payment method must be a string',
-            'payment_method.max' => 'The payment method may not be greater than 25 characters',
-            'payment_method.regex' => 'The payment method must contain only letters, spaces, and hyphens',
-            'notes.nullable' => 'The notes may be null',
-            'notes.string' => 'The notes must be a string',
-            'notes.max' => 'The notes may not be greater than 300 characters',
-            'middle_seats.required' => 'The middle seats is required',
+            'from.required' => ($siteTextErrorMessage['from_required'] ?? null) ?: 'The origin field is required.',
+            'to.required' => ($siteTextErrorMessage['to_required'] ?? null) ?: 'The destination field is required.',
+            'pickup.required' => ($siteTextErrorMessage['pickup_required'] ?? null) ?: 'The pickup field is required.',
+            'dropoff.required' => ($siteTextErrorMessage['dropoff_required'] ?? null) ?: 'The dropoff field is required.',
+            'time.required' => ($siteTextErrorMessage['time_required'] ?? null) ?: 'The time field is required.',
+            'details.required' => ($siteTextErrorMessage['details_required'] ?? null) ?: 'The details field is required.',
+            'seats.required' => ($siteTextErrorMessage['seats_required'] ?? null) ?: 'Please select the number of seats.',
+            'smoke.required' => ($siteTextErrorMessage['smoke_required'] ?? null) ?: 'Please select a smoking option.',
+            'animal_friendly.required' => ($siteTextErrorMessage['animal_friendly_required'] ?? null) ?: 'Please select an animal-friendly option.',
+            'booking_method.required' => ($siteTextErrorMessage['booking_method_required'] ?? null) ?: 'Please select a booking method.',
+            'luggage.required' => ($siteTextErrorMessage['luggage_required'] ?? null) ?: 'Please select a luggage option.',
+            'price.required' => ($siteTextErrorMessage['price_required'] ?? null) ?: 'The price field is required.',
+            'payment_method.required' => ($siteTextErrorMessage['payment_method_required'] ?? null) ?: 'Please select a payment method.',
+            'middle_seats.required' => ($siteTextErrorMessage['middle_seats_required'] ?? null) ?: 'Please select middle seats.',
+            'back_seats.required' => ($siteTextErrorMessage['back_seats_required'] ?? null) ?: 'Please select back seats.',
+            'agree_terms.accepted' => ($siteTextErrorMessage['agree_terms_required'] ?? $siteTextErrorMessage['firm_agree_terms_required'] ?? null) ?: 'You must agree to the terms to continue.',
         ], $customMessages);
         // $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
 
@@ -2083,9 +2026,9 @@ class RideController extends Controller
             'from.exists' => $cityErrorMessage->city_not_in_record,
             'to.exists' => $cityErrorMessage->city_not_in_record,
         ]);
-        if ($cityValidator->fails()) {
-            return back()->withErrors($cityValidator)->withInput(); // Pass errors and old input back to the view
-        }
+        // if ($cityValidator->fails()) {
+        //     return back()->withErrors($cityValidator)->withInput(); // Pass errors and old input back to the view
+        // }
 
         $nowDate = date('Y-m-d');
         $getRideCount = RideDetail::whereRaw('LOWER(`departure`) LIKE ? ', ['%' . $request->from . '%'])->where('date', $nowDate)->where('default_ride', '1')->whereHas('ride', function ($q) use ($nowDate, $user_id) {
@@ -2497,6 +2440,47 @@ class RideController extends Controller
             }
         }
         $rideDetail->save();
+
+        // If JS did not build from_spot[] / to_spot[] but stop_spot_display[] exists, build them server-side
+        if ((!$request->has('from_spot') || empty($request->from_spot))
+            && $request->has('stop_spot_display')
+            && is_array($request->stop_spot_display)
+        ) {
+            $stops = array_values(array_filter($request->stop_spot_display, function ($v) {
+                return trim((string) $v) !== '';
+            }));
+            if (!empty($stops) && $request->filled('from') && $request->filled('to')) {
+                $origin = $request->from;
+                $destination = $request->to;
+                $fromSpot = [];
+                $toSpot = [];
+                $priceSpot = [];
+                $mainPrice = $request->price;
+                $segmentPrices = (array) $request->input('price_spot_display', []);
+                $n = count($stops);
+                for ($i = 0; $i <= $n; $i++) {
+                    $fromVal = ($i === 0) ? $origin : ($stops[$i - 1] ?? null);
+                    $toVal = ($i === $n) ? $destination : ($stops[$i] ?? null);
+                    if (!$fromVal || !$toVal) {
+                        continue;
+                    }
+                    $segPrice = $mainPrice;
+                    if (isset($segmentPrices[$i]) && $segmentPrices[$i] !== '') {
+                        $segPrice = $segmentPrices[$i];
+                    }
+                    $fromSpot[] = $fromVal;
+                    $toSpot[] = $toVal;
+                    $priceSpot[] = $segPrice;
+                }
+                if (!empty($fromSpot)) {
+                    $request->merge([
+                        'from_spot' => $fromSpot,
+                        'to_spot' => $toSpot,
+                        'price_spot' => $priceSpot,
+                    ]);
+                }
+            }
+        }
 
         if (isset($request->from_spot) && !empty($request->from_spot)) {
             $segmentDistances = [];

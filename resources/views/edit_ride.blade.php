@@ -2134,7 +2134,7 @@
                   </div>
                 @enderror
                 <div class="hidden lg:flex justify-center items-center mt-8">
-                    <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
+                    <button class="edit-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed" type="submit">
                         @isset($postRidePage->submit_button_label)
                             {{ $postRidePage->submit_button_label }}
                         @endisset
@@ -2144,7 +2144,7 @@
             
         </div>
         <div class="flex lg:hidden justify-center items-center mt-8">
-            <button class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
+            <button class="edit-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed" type="submit">
                 @isset($postRidePage->submit_button_label)
                     {{ $postRidePage->submit_button_label }}
                 @endisset
@@ -2973,6 +2973,9 @@ document.addEventListener('keydown', function(event) {
 
     // Ensure all form fields are submitted, especially disabled/readonly ones
     document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+        var form = document.getElementById('edit-ride-form');
+        if (form) form.querySelectorAll('.edit-ride-submit-btn').forEach(function(btn) { btn.disabled = true; });
+        try {
         var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
         var toVal = (document.getElementById('to_spot_0') || {}).value || '';
         var fromInputError = document.getElementById('fromInputError');
@@ -3297,6 +3300,12 @@ document.addEventListener('keydown', function(event) {
                     field.removeAttribute('disabled');
                 }
             });
+        }
+        } finally {
+            if (e.defaultPrevented) {
+                var f = document.getElementById('edit-ride-form');
+                if (f) f.querySelectorAll('.edit-ride-submit-btn').forEach(function(btn) { btn.disabled = false; });
+            }
         }
     });
 
