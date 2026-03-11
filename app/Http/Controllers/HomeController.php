@@ -322,6 +322,8 @@ class HomeController extends Controller
             'payment_method' => 'required|in:stripe,paypal',
             'donation_acknowledgment' => 'required',
             'terms_privacy' => 'required',
+            'name_on_card' => 'required_if:payment_method,stripe',
+            'card_element' => 'required_if:payment_method,stripe',
         ]);
 
         $selectedLanguage = session('selectedLanguage');
@@ -457,12 +459,10 @@ class HomeController extends Controller
             }
         }
 
-        if ($package->price > 0) {
-            if (isset($request->payment_method) && $request->payment_method == 'stripe') {
-                $request->validate([
-                    'stripeToken' => !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
-                ]);
-            }
+        if ($package->price > 0 && $request->payment_method === 'stripe') {
+            $request->validate([
+                'stripeToken' => 'required',
+            ]);
         }
 
         $package_price = $package->price;
@@ -473,92 +473,88 @@ class HomeController extends Controller
 
         try {
             if ($request->payment_method == 'stripe' && $package_price > 0) {
-                if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
-                    $subscription_id = $request->gPayApplePayId;
-                } else {
-                    $interval = null;
+                $interval = null;
 
-                    if ($request->frequency == 'weekly') {
-                        $interval = 'week';
-                        $interval_count = 1; // Charge every 1 week
-                    } else if ($request->frequency == 'monthly') {
-                        $interval = 'month';
-                    } else if ($request->frequency == 'quarterly') {
-                        $interval = 'month';
-                        $interval_count = 3;
-                    } else if ($request->frequency == 'semi_annually') {
-                        $interval = 'month';
-                        $interval_count = 6;
-                    } else if ($request->frequency == 'annually') {
-                        $interval = 'year';
-                    }
-
-                    // Create a PaymentMethod with Stripe using the token
-                    $paymentMethods = PaymentMethod::create([
-                        'type' => 'card',
-                        'card' => ['token' => $request->stripeToken],
-                        'billing_details' => [
-                            'name' => $request->name_on_card,
-                            'address' => [
-                                'line1' => $request->address,
-                            ],
-                        ],
-                    ]);
-
-                    $stripeCustomer = Customer::create([
-                        'name' => $request->name,
-                        'email' => $request->email,
-                    ]);
-
-                    $stripe_customer_id = $stripeCustomer->id;
-
-                    // Attach a payment method to the customer
-                    $paymentMethods->attach(['customer' => $stripe_customer_id]);
-
-                    // Set the attached payment method as the default for the customer
-                    $stripeCustomer->update(
-                        $stripe_customer_id,
-                        ['invoice_settings' => ['default_payment_method' => $paymentMethods->id]]
-                    );
-
-                    $subscription_items = [
-                        ['price' => $package->stripe_price_id],
-                    ];
-
-                    $subscription_params = [
-                        'customer' => $stripe_customer_id,
-                        'items' => $subscription_items,
-                        'cancel_at_period_end' => false,
-                    ];
-
-                    // Add the interval and interval_count if applicable
-                    if ($interval) {
-
-                        $timeStamp = now()->timestamp;
-                        if ($interval == "week") {
-                            $timeStamp = now()->addDays(7)->timestamp;
-                        } elseif ($interval == 'month') {
-                            $timeStamp = now()->addMonth(1)->timestamp;
-                        } elseif ($interval == 'year') {
-                            $timeStamp = now()->addMonth(12)->timestamp;
-                        } else {
-                            $timeStamp = now()->addMonth($interval_count)->timestamp;
-                        }
-
-                        $subscription_params['billing_cycle_anchor'] = $timeStamp; // Anchor the subscription
-                        $subscription_items[0]['plan'] = [
-                            'interval' => $interval,
-                        ];
-                        if (isset($interval_count)) {
-                            $subscription_items[0]['plan']['interval_count'] = $interval_count;
-                        }
-                    }
-
-                    $subscription = Subscription::create($subscription_params);
-
-                    $subscription_id = $subscription->id;
-                    $stripe_item_id = isset($subscription->items->data[0]) ? $subscription->items->data[0]->id : null;
+                if ($request->frequency == 'weekly') {
+                    $interval = 'week';
+                    $interval_count = 1; // Charge every 1 week
+                } else if ($request->frequency == 'monthly') {
+                    $interval = 'month';
+                } else if ($request->frequency == 'quarterly') {
+                    $interval = 'month';
+                    $interval_count = 3;
+                } else if ($request->frequency == 'semi_annually') {
+                    $interval = 'month';
+                    $interval_count = 6;
+                } else if ($request->frequency == 'annually') {
+                    $interval = 'year';
                 }
+
+                // Create a PaymentMethod with Stripe using the token
+                $paymentMethods = PaymentMethod::create([
+                    'type' => 'card',
+                    'card' => ['token' => $request->stripeToken],
+                    'billing_details' => [
+                        'name' => $request->name_on_card,
+                        'address' => [
+                            'line1' => $request->address,
+                        ],
+                    ],
+                ]);
+
+                $stripeCustomer = Customer::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                ]);
+
+                $stripe_customer_id = $stripeCustomer->id;
+
+                // Attach a payment method to the customer
+                $paymentMethods->attach(['customer' => $stripe_customer_id]);
+
+                // Set the attached payment method as the default for the customer
+                $stripeCustomer->update(
+                    $stripe_customer_id,
+                    ['invoice_settings' => ['default_payment_method' => $paymentMethods->id]]
+                );
+
+                $subscription_items = [
+                    ['price' => $package->stripe_price_id],
+                ];
+
+                $subscription_params = [
+                    'customer' => $stripe_customer_id,
+                    'items' => $subscription_items,
+                    'cancel_at_period_end' => false,
+                ];
+
+                // Add the interval and interval_count if applicable
+                if ($interval) {
+
+                    $timeStamp = now()->timestamp;
+                    if ($interval == "week") {
+                        $timeStamp = now()->addDays(7)->timestamp;
+                    } elseif ($interval == 'month') {
+                        $timeStamp = now()->addMonth(1)->timestamp;
+                    } elseif ($interval == 'year') {
+                        $timeStamp = now()->addMonth(12)->timestamp;
+                    } else {
+                        $timeStamp = now()->addMonth($interval_count)->timestamp;
+                    }
+
+                    $subscription_params['billing_cycle_anchor'] = $timeStamp; // Anchor the subscription
+                    $subscription_items[0]['plan'] = [
+                        'interval' => $interval,
+                    ];
+                    if (isset($interval_count)) {
+                        $subscription_items[0]['plan']['interval_count'] = $interval_count;
+                    }
+                }
+
+                $subscription = Subscription::create($subscription_params);
+
+                $subscription_id = $subscription->id;
+                $stripe_item_id = isset($subscription->items->data[0]) ? $subscription->items->data[0]->id : null;
             } else if ($request->payment_method == 'paypal' && $package_price > 0) {
                 $paypal = new PayPalClient;
                 $paypal->setApiCredentials(config('paypal'));

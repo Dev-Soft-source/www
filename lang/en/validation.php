@@ -187,6 +187,14 @@ return
 			[
 				'required' => 'The terms and privacy are required.',
 			],
+			'name_on_card' =>
+			[
+				'required_if' => 'The cardholder’s name is required when paying by credit card.',
+			],
+			'card_element' =>
+			[
+				'required_if' => 'The card details are required when paying by credit card.',
+			],
 			'first_name' =>
 			[
 				'required' => 'First name is required.',
@@ -326,6 +334,8 @@ return
 			'bio' => 'Bio',
 			'phone' => 'Phone Number',
 			'name' => 'Name',
+			'name_on_card' => 'Cardholder’s name',
+			'card_element' => 'Card details',
 			'title' => 'Title',
 			'description' => 'Description',
 			'pass1' => 'Current password',

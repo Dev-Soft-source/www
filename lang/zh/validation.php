@@ -169,6 +169,12 @@ return [
         'terms_privacy' => [
             'required' => '必须同意条款和隐私政策。',
         ],
+        'name_on_card' => [
+            'required_if' => '使用信用卡支付时，持卡人姓名为必填项。',
+        ],
+        'card_element' => [
+            'required_if' => '使用信用卡支付时，银行卡信息为必填项。',
+        ],
         'old_email' => [
             'required' => '当前电子邮箱为必填项。',
             'email' => '当前电子邮箱不是有效的电子邮箱地址。',
@@ -286,5 +292,7 @@ return [
         'pass1' => '当前密码',
         'pass2' => '新密码',
         'pass3' => '确认密码',
+        'name_on_card' => '持卡人姓名',
+        'card_element' => '银行卡信息',
     ],
 ];

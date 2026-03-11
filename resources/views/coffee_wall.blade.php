@@ -31,8 +31,6 @@
                             enctype="multipart/form-data">
                             @csrf
                             <div class="space-y-4">
-                                <input type="hidden" name="gPayApplePayId" value="">
-
                                 <div class="mt-6">
                                     <div class="mt-6">
                                         <div class="bg-white rounded-lg overflow-visible shadow-3xl">
@@ -41,7 +39,7 @@
                                                     @isset($coffeeWallPage->frequency_label)
                                                         {!! $coffeeWallPage->frequency_label !!}
                                                     @endisset
-                                                    <span class="text-red-500">*</span>
+                                                    <span class="">*</span>
                                                 </h3>
                                             </div>
                                             <div class="p-4">
@@ -101,9 +99,6 @@
                                                                 @error('package')
                                                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                                                 @enderror
-                                                                <div id="package-errors-div" class="hidden">
-                                                                    <div id="package-errors" class="tooltip-error shadow-lg"></div>
-                                                                </div>
                                                             </div>
                                                             <div class="w-full mt-4">
                                                                 <div id="custom_field" class="">
@@ -127,9 +122,6 @@
                                                                         @error('custom_amount')
                                                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                                                         @enderror
-                                                                        <div id="amount-errors-div" class="hidden">
-                                                                            <div id="amount-errors" class="tooltip-error shadow-lg"></div>
-                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -226,9 +218,6 @@
                                             @error('name')
                                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
-                                            <div id="name-errors-div" class="hidden">
-                                                <div id="name-errors" class="tooltip-error shadow-lg"></div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div id="email_field"
@@ -245,9 +234,6 @@
                                             @error('email')
                                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
-                                            <div id="email-errors-div" class="hidden">
-                                                <div id="email-errors" class="tooltip-error shadow-lg"></div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div id="phone_field"
@@ -305,12 +291,6 @@
                                     </div>
                                 </div>
 
-                                <div id="paymentSectionGPay" class="hidden min-h-[60px]">
-                                    <div id="payment-request-button" class="min-h-[48px]"></div>
-                                    <p id="gpay-unavailable-message" class="hidden mt-3 p-3 text-base text-amber-700 bg-amber-50 rounded border border-amber-200">Apple Pay / Google Pay is not available on this device or browser. Please use a supported device (e.g. iPhone with Safari, or Android with Chrome) or choose another payment method.</p>
-                                    <p id="gpay-submit-hint" class="hidden mt-2 text-sm text-amber-600">Use the Apple Pay / Google Pay button above to complete your payment.</p>
-                                </div>
-
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                                     <div id="credit-card-div"
                                         class="hidden mt-4 p-4 bg-white border border-gray-400 rounded">
@@ -320,55 +300,33 @@
                                             <input type="text" id="name_on_card" name="name_on_card"
                                                 value="{{ old('name_on_card') }}"
                                                 class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                                            @error('name_on_card')
-                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                            @enderror
+                                            <div id="card-name-error" class="{{ $errors->has('name_on_card') ? '' : 'hidden' }}">
+                                                <div class="tooltip-error shadow-lg mt-2">
+                                                    @error('name_on_card')
+                                                        {{ $message }}
+                                                    @enderror
+                                                </div>
+                                            </div>
                                         </div>
-                                        <!-- Single row for Card Number, Expiry Date, and CVV -->
-                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4">
-                                            <!-- Card Number - takes more space -->
-                                            <div class="md:col-span-6">
-                                                <label
-                                                    for="card_number" class="font-normal text-gray-700">{{ $paymentSettingDetail->card_number_label ?? 'Card number' }}</label>
-                                                <div id="card-number-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
-                                                </div>
-                                                @error('card_number')
-                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                                @enderror
+                                        <div class="mt-4">
+                                            <label class="font-normal text-gray-700">
+                                                {{ $paymentSettingDetail->card_number_label ?? 'Card details' }}
+                                            </label>
+                                            <div id="card-element" name="card_element"
+                                                class="block mt-1 border p-2.5 w-full rounded text-base md:text-lg border-gray-300">
                                             </div>
-
-                                            <!-- Expiry Date -->
-                                            <div class="md:col-span-3">
-                                                <label for="exp_month" class="font-normal text-gray-700">{{ $paymentSettingDetail->mobile_expiry_date_label ?? 'Expiry date' }} (MM / YY)</label>
-                                                <div id="card-expiry-element" class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
+                                            <div id="card-errors" class="{{ $errors->has('card_element') ? '' : 'hidden' }}">
+                                                <div class="tooltip-error shadow-lg mt-2">
+                                                    @error('card_element')
+                                                        {{ $message }}
+                                                    @enderror
                                                 </div>
-                                                @error('expiry_date')
-                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                                @enderror
-                                                <div id="expiry-error-div" class="hidden">
-                                                    <div id="expiry-error" class="tooltip-error shadow-lg"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- CVV -->
-                                            <div class="md:col-span-3">
-                                                <label for="cvv_code" class="font-normal text-gray-700">{{ $paymentSettingDetail->security_code_label ?? 'Security code (CVV / CVC)' }}</label>
-                                                <div id="card-cvc-element"
-                                                    class="block mt-1 border p-1.5 py-[11px] w-full rounded text-base md:text-lg border-gray-300">
-                                                </div>
-                                                @error('cvv_code')
-                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                                @enderror
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                                 
-                                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
-                                    <div id="card-errors-div" class="hidden">
-                                        <div id="card-errors" class="tooltip-error shadow-lg"></div>
-                                    </div>
-                                </div>
                                 <!-- Disclaimer Checkboxes -->
                                 <div class="grid grid-cols-1 gap-4 mt-6">
                                     <!-- First Disclaimer -->
@@ -378,14 +336,11 @@
                                                 name="donation_acknowledgment" value="1"
                                                 {{ old('donation_acknowledgment') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <span class="text-base md:text-lg">@isset($coffeeWallPage->donation_acknowledgment_label) {{$coffeeWallPage->donation_acknowledgment_label}} @endisset</span>
+                                            <label for="donation_acknowledgment" class="text-base md:text-lg">@isset($coffeeWallPage->donation_acknowledgment_label) {{$coffeeWallPage->donation_acknowledgment_label}} @endisset</label>
                                         </div>
                                         @error('donation_acknowledgment')
                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                         @enderror
-                                        <div id="donation-acknowledgment-div" class="hidden">
-                                            <div id="donation-acknowledgment-error" class="tooltip-error shadow-lg">Please check this box if you want to proceed</div>
-                                        </div>
                                     </div>
 
                                     <!-- Second Disclaimer -->
@@ -394,24 +349,17 @@
                                             <input id="terms_privacy" type="checkbox" name="terms_privacy" value="1"
                                                 {{ old('terms_privacy') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <span class="text-base md:text-lg">@isset($coffeeWallPage->agree_terms_label) {!! $coffeeWallPage->agree_terms_label !!} @endisset</span>
+                                            <label for="terms_privacy" class="text-base md:text-lg">@isset($coffeeWallPage->agree_terms_label) {!! $coffeeWallPage->agree_terms_label !!} @endisset</label>
                                         </div>
                                         @error('terms_privacy')
                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                         @enderror
-                                        <div id="terms-privacy-div" class="hidden">
-                                            <div id="terms-privacy-error" class="tooltip-error shadow-lg">Please check this box if you want to proceed</div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                                     <div class="md:col-span-2 flex justify-center mt-4">
                                         <button type="submit" class="button-exp-fill px-6 py-3">
-                                            @isset($coffeeWallPage->pay_button_label)
-                                                {!! $coffeeWallPage->pay_button_label !!}
-                                            @else
-                                                Make Someone's Day
-                                            @endisset
+                                            {{ $coffeeWallPage->pay_button_label ?? 'Make Someone\'s Day' }}
                                         </button>
                                     </div>
                                 </div>
@@ -546,634 +494,8 @@
 @endsection
 
 @section('script')
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Expiry date validation and formatting functions
-        function validateExpiryDate(expiryDate) {
-            // Remove all whitespace
-            var cleanDate = expiryDate.replace(/\s/g, '');
-
-            // Check if the format matches MM/YYYY or M/YYYY or MM/YY or M/YY
-            var regex = /^(\d{1,2})\/(\d{2,4})$/;
-            var match = cleanDate.match(regex);
-
-            if (!match) {
-                showExpiryError(
-                    'Please enter the expiry date in this exact format: MM/YYYY. Use two digits for the month and four digits for the year, even if the month is a single digit. For example, enter April as "04", not "4".'
-                    );
-                return false;
-            }
-
-            var month = parseInt(match[1], 10);
-            var year = parseInt(match[2], 10);
-
-            // Validate month (1-12)
-            if (month < 1 || month > 12) {
-                showExpiryError('Please enter a valid month (01-12).');
-                return false;
-            }
-
-            // Handle 2-digit years by converting to 4-digit
-            if (year < 100) {
-                // Assume years 00-30 are 20xx, years 31-99 are 19xx
-                if (year <= 30) {
-                    year += 2000;
-                } else {
-                    year += 1900;
-                }
-            }
-
-            // Check if year is valid (current year or future, but not too far in future)
-            var currentDate = new Date();
-            var currentYear = currentDate.getFullYear();
-            var currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
-
-            if (year < currentYear || (year === currentYear && month < currentMonth)) {
-                showExpiryError('Please enter a valid expiry date. The card appears to be expired.');
-                return false;
-            }
-
-            if (year > currentYear + 20) {
-                showExpiryError('Please enter a valid expiry date. The year seems too far in the future.');
-                return false;
-            }
-
-            // Hide error if validation passes
-            hideExpiryError();
-            return true;
-        }
-
-        function parseExpiryDate(expiryDate) {
-            var cleanDate = expiryDate.replace(/\s/g, '');
-            var match = cleanDate.match(/^(\d{1,2})\/(\d{2,4})$/);
-
-            if (!match) return null;
-
-            var month = parseInt(match[1], 10);
-            var year = parseInt(match[2], 10);
-
-            // Handle 2-digit years
-            if (year < 100) {
-                if (year <= 30) {
-                    year += 2000;
-                } else {
-                    year += 1900;
-                }
-            }
-
-            // Ensure month is two digits
-            var monthStr = month.toString().padStart(2, '0');
-
-            return {
-                month: monthStr,
-                year: year.toString()
-            };
-        }
-
-        function showExpiryError(message) {
-            var errorDiv = document.getElementById('expiry-error-div');
-            var errorElement = document.getElementById('expiry-error');
-
-            if (errorDiv && errorElement) {
-                errorElement.textContent = message;
-                errorDiv.classList.remove('hidden');
-            }
-
-            // Add red border to input
-            var expiryInput = document.getElementById('card-expiry-element');
-            if (expiryInput) {
-                expiryInput.classList.add('border-red-500');
-                expiryInput.classList.remove('border-gray-300');
-            }
-        }
-
-        function hideExpiryError() {
-            var errorDiv = document.getElementById('expiry-error-div');
-            if (errorDiv) {
-                errorDiv.classList.add('hidden');
-            }
-
-            // Remove red border from input
-            var expiryInput = document.getElementById('card-expiry-element');
-            if (expiryInput) {
-                expiryInput.classList.remove('border-red-500');
-                expiryInput.classList.add('border-gray-300');
-            }
-        }
-
-        // Email validation helper function
-        function isValidEmail(email) {
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        // Format expiry date as user types
-        function formatExpiryDate(input) {
-            var value = input.value.replace(/\D/g, ''); // Remove non-digits
-
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2, 6);
-            }
-
-            input.value = value;
-        }
-    </script>
-    <script>
-        function hideTooltip(parms) {
-            if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-                $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-            }
-        }
-
-        const inputs = document.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', hideTooltip); // no parameter on input typing
-        });
-
-        const labels = document.querySelectorAll('label');
-        labels.forEach(input => {
-            input.addEventListener('click', function(e) {
-                hideTooltip.call(this, 'label'); // pass 'testing' on label click
-            });
-        });
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all input fields that might show validation errors
-            const inputs = [{
-                    element: document.querySelector('input[name="name"]'),
-                    errorDiv: document.getElementById('name-errors-div')
-                },
-                {
-                    element: document.querySelector('input[name="email"]'),
-                    errorDiv: document.getElementById('email-errors-div')
-                },
-                {
-                    element: document.querySelector('input[name="custom_amount"]'),
-                    errorDiv: document.getElementById('amount-errors-div')
-                },
-                {
-                    element: document.querySelector('input[name="package"]:checked'),
-                    errorDiv: document.getElementById('package-errors-div')
-                },
-                {
-                    element: document.querySelector('input[name="name_on_card"]'),
-                    errorDiv: document.querySelector('[for="name_on_card"] + .tooltip')
-                },
-                {
-                    element: document.getElementById('card-number-element'),
-                    errorDiv: document.querySelector('[for="card_number"] + .tooltip')
-                },
-                {
-                    element: document.getElementById('card-expiry-element'),
-                    errorDiv: document.querySelector('[for="exp_month"] + .tooltip')
-                },
-                {
-                    element: document.getElementById('card-cvc-element'),
-                    errorDiv: document.querySelector('[for="cvv_code"] + .tooltip')
-                },
-                {
-                    element: document.getElementById('donation_acknowledgment'),
-                    errorDiv: document.getElementById('donation-acknowledgment-div')
-                },
-                {
-                    element: document.getElementById('terms_privacy'),
-                    errorDiv: document.getElementById('terms-privacy-div')
-                }
-            ];
-
-            // Add input event listeners to each field
-            inputs.forEach(input => {
-                if (input.element && input.errorDiv) {
-                    input.element.addEventListener('input', function() {
-                        // Hide the error message
-                        input.errorDiv.classList.add('hidden');
-
-                        // Remove error styling from input
-                        if (input.element.classList.contains('border-red-500')) {
-                            input.element.classList.remove('border-red-500');
-                            input.element.classList.add('border-gray-300');
-                        }
-                    });
-                }
-            });
-
-            // For radio buttons (package selection)
-            const packageRadios = document.querySelectorAll('input[name="package"]');
-            packageRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    document.getElementById('package-errors-div').classList.add('hidden');
-                });
-            });
-
-            // For custom amount field specifically - hide errors as soon as user types
-            const customAmountField = document.querySelector('input[name="custom_amount"]');
-            if (customAmountField) {
-                function hideCustomAmountErrors() {
-                    var amountDiv = document.getElementById('amount-errors-div');
-                    var packageDiv = document.getElementById('package-errors-div');
-                    if (amountDiv) amountDiv.classList.add('hidden');
-                    if (packageDiv) packageDiv.classList.add('hidden');
-                    document.querySelectorAll('input[name="package"]').forEach(radio => {
-                        radio.checked = false;
-                    });
-                }
-                customAmountField.addEventListener('input', hideCustomAmountErrors);
-                customAmountField.addEventListener('change', hideCustomAmountErrors);
-                customAmountField.addEventListener('keyup', hideCustomAmountErrors);
-            }
-
-            // For frequency selection
-            const frequencyRadios = document.querySelectorAll('input[name="frequency"]');
-            frequencyRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-
-                });
-            });
-
-            // For designation selection
-            const designationRadios = document.querySelectorAll('input[name="designation"]');
-            designationRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-
-                });
-            });
-        });
-    </script>
-    <script>
-        // Event listener for dropdown change
-        const radioButtons = document.querySelectorAll('input[name="frequency"]');
-
-        // Add change event listener to all radio buttons
-        radioButtons.forEach(radio => {
-            radio.addEventListener('change', updatePayoutFields);
-        });
-
-        // Initialize fields visibility on page load
-        document.addEventListener('DOMContentLoaded', updatePayoutFields);
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const customAmountInput = document.querySelector('input[name="custom_amount"]');
-
-            customAmountInput.addEventListener("keydown", function(event) {
-                if (event.key === "e" || event.key === "E" || event.key === "+" || event.key === "-") {
-                    event.preventDefault();
-                }
-            });
-
-            customAmountInput.addEventListener("input", function(event) {
-                this.value = this.value.replace(/[eE]/g, ''); // Remove "e" if pasted
-            });
-
-            // ============================================
-            // DESIGNATION MULTI-SELECT WITH "ALL" TOGGLE
-            // ============================================
-            const designationAll = document.getElementById('designation-1');
-            const designationIndividuals = document.querySelectorAll('.designation-individual');
-
-            function updateDesignationStyles() {
-                // Update "All" checkbox label
-                const allLabel = document.getElementById('designation-label-1');
-                if (designationAll.checked) {
-                    allLabel.classList.add('border-green-500', 'border-2', 'text-green-500');
-                    allLabel.classList.remove('border-gray-100');
-                } else {
-                    allLabel.classList.remove('border-green-500', 'border-2', 'text-green-500');
-                    allLabel.classList.add('border-gray-100');
-                }
-
-                // Update individual checkbox labels
-                designationIndividuals.forEach((checkbox, index) => {
-                    const label = document.getElementById(`designation-label-${index + 2}`);
-                    if (checkbox.checked) {
-                        label.classList.add('border-green-500', 'border-2', 'text-green-500');
-                        label.classList.remove('border-gray-100');
-                    } else {
-                        label.classList.remove('border-green-500', 'border-2', 'text-green-500');
-                        label.classList.add('border-gray-100');
-                    }
-                });
-            }
-
-            // When "All" is selected, deselect individual options
-            designationAll.addEventListener('change', function() {
-                if (this.checked) {
-                    designationIndividuals.forEach(checkbox => {
-                        checkbox.checked = false;
-                    });
-                }
-                updateDesignationStyles();
-            });
-
-            // When any individual option is selected, deselect "All"
-            designationIndividuals.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        designationAll.checked = false;
-                    }
-                    // If no individual options are checked, check "All"
-                    const anyIndividualChecked = Array.from(designationIndividuals).some(cb => cb.checked);
-                    if (!anyIndividualChecked) {
-                        designationAll.checked = true;
-                    }
-                    updateDesignationStyles();
-                });
-            });
-
-            // Initialize styles on page load
-            updateDesignationStyles();
-
-            // ============================================
-            // CUSTOM AMOUNT FIELD STYLING
-            // ============================================
-            const customAmountField = document.getElementById('custom_amount_input');
-            const packageRadios = document.querySelectorAll('input[name="package"]');
-
-            function updateCustomAmountStyle() {
-                if (customAmountField.value.trim() !== '') {
-                    customAmountField.classList.remove('border-blue-500');
-                    customAmountField.classList.add('border-green-500');
-                } else {
-                    customAmountField.classList.remove('border-green-500');
-                    customAmountField.classList.add('border-blue-500');
-                }
-            }
-
-            customAmountField.addEventListener('input', updateCustomAmountStyle);
-            customAmountField.addEventListener('focus', function() {
-                // Deselect all packages when typing custom amount
-                packageRadios.forEach(radio => radio.checked = false);
-            });
-
-            // Reset custom amount border when package is selected
-            packageRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    customAmountField.value = '';
-                    customAmountField.classList.remove('border-green-500');
-                    customAmountField.classList.add('border-blue-500');
-                });
-            });
-
-            // Initialize on page load
-            updateCustomAmountStyle();
-
-            // ============================================
-            // CHECKBOX TOOLTIP FIX - INDEPENDENT DISMISSAL
-            // ============================================
-            const donationAckCheckbox = document.getElementById('donation_acknowledgment');
-            const termsPrivacyCheckbox = document.getElementById('terms_privacy');
-            const donationAckDiv = document.getElementById('donation-acknowledgment-div');
-            const termsPrivacyDiv = document.getElementById('terms-privacy-div');
-
-            // Hide donation acknowledgment tooltip only when its checkbox is checked
-            donationAckCheckbox.addEventListener('change', function() {
-                if (this.checked && donationAckDiv) {
-                    donationAckDiv.classList.add('hidden');
-                }
-            });
-
-            // Hide terms/privacy tooltip only when its checkbox is checked
-            termsPrivacyCheckbox.addEventListener('change', function() {
-                if (this.checked && termsPrivacyDiv) {
-                    termsPrivacyDiv.classList.add('hidden');
-                }
-            });
-
-        });
-
-        function updatePayoutFields() {
-            const selectedRadio = document.querySelector('input[name="frequency"]:checked');
-            const selectedValue = selectedRadio ? selectedRadio.value : null;
-            const monthlyLabel = document.getElementById('monthly_label');
-            const quaterlyLabel = document.getElementById('quarterly_label');
-            const oneTimeLabel = document.getElementById('one_time_label');
-
-            if (selectedValue === 'monthly') {
-                quaterlyLabel.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                quaterlyLabel.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                one_time_label.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                one_time_label.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                monthlyLabel.classList.add('bg-blue-600', 'border-blue-600', 'text-white');
-                monthlyLabel.classList.remove('bg-white', 'border-gray-100', 'text-blue-600');
-            } else if (selectedValue === 'weekly') {
-                monthlyLabel.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                monthlyLabel.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                one_time_label.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                one_time_label.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                quaterlyLabel.classList.add('bg-blue-600', 'border-blue-600', 'text-white');
-                quaterlyLabel.classList.remove('bg-white', 'border-gray-100', 'text-blue-600');
-            } else if (selectedValue === '') {
-                quaterlyLabel.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                quaterlyLabel.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                monthlyLabel.classList.add('bg-white', 'border-gray-100', 'text-blue-600');
-                monthlyLabel.classList.remove('bg-blue-600', 'border-blue-600', 'text-white');
-                one_time_label.classList.add('bg-blue-600', 'border-blue-600', 'text-white');
-                one_time_label.classList.remove('bg-white', 'border-gray-100', 'text-blue-600');
-            }
-        }
-
-        $(document).ready(function() {
-            const creditCardCheckbox = document.getElementById('credit-card');
-            const paypalCheckbox = document.getElementById('paypal');
-            const CreditCardDiv = document.getElementById('credit-card-div');
-
-            // Stripe variables to prevent re-initialization
-            let stripe = null;
-            let elements = null;
-            let cardNumberElement = null;
-            let cardExpiryElement = null;
-            let cardCvcElement = null;
-            let stripeInitialized = false;
-
-            function checkCheckboxes() {
-                $("#paymentSectionGPay").addClass('hidden');
-                if (creditCardCheckbox.checked) {
-                    CreditCardDiv.classList.remove('hidden');
-                    
-                    // Initialize Stripe only once
-                    if (!stripeInitialized) {
-                        stripe = Stripe('{{ $stripeKey }}');
-                        elements = stripe.elements();
-
-                        cardNumberElement = elements.create('cardNumber', {
-                            placeholder: "{{ $paymentSettingDetail->card_number_placeholder ?? '' }}",
-                            style: {
-                                base: {
-                                    fontStyle: 'italic'
-                                }
-                            }
-                        });
-                        cardNumberElement.mount('#card-number-element');
-
-                        cardExpiryElement = elements.create('cardExpiry', {
-                            placeholder: "MM / YY",
-                            style: {
-                                base: {
-                                    fontStyle: 'italic'
-                                }
-                            }
-                        });
-                        cardExpiryElement.mount('#card-expiry-element');
-                        
-                        cardCvcElement = elements.create('cardCvc', {
-                            placeholder: "{{ $paymentSettingDetail->cvc_placeholder ?? '' }}",
-                            style: {
-                                base: {
-                                    fontStyle: 'italic'
-                                }
-                            }
-                        });
-                        cardCvcElement.mount('#card-cvc-element');
-                        
-                        stripeInitialized = true;
-                    }
-
-                    // Add form submit listener only once
-                    if (!window.formSubmitListenerAdded) {
-                        var form = document.getElementById('payment-form');
-                        form.addEventListener('submit', function(event) {
-                            event.preventDefault();
-
-                            var selectedPaymentMethod = $("input[name='payment_method']:checked").val();
-
-                            if (selectedPaymentMethod === 'paypal') {
-                                form.submit();
-                                return;
-                            }
-
-                            if (selectedPaymentMethod === 'gpay') {
-                                var gpayHint = document.getElementById('gpay-submit-hint');
-                                var gpaySection = document.getElementById('paymentSectionGPay');
-                                if (gpayHint) gpayHint.classList.remove('hidden');
-                                if (gpaySection) {
-                                    gpaySection.classList.remove('hidden');
-                                    gpaySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                }
-                                return;
-                            }
-
-                            // For credit card, create Stripe token and then submit.
-                            stripe.createToken(cardNumberElement, {
-                                name: document.getElementById('name_on_card').value
-                            }).then(function(result) {
-                                if (result.error) {
-                                    if (creditCardCheckbox.checked) {
-                                        var errorElementDiv = document.getElementById('card-errors-div');
-                                        errorElementDiv.classList.remove('hidden');
-                                        var errorElement = document.getElementById('card-errors');
-                                        if (errorElement) {
-                                            errorElement.textContent = result.error.message;
-                                        }
-                                        errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    }
-                                } else {
-                                    stripeTokenHandler(result.token);
-                                }
-                            });
-                        });
-                        
-                        window.formSubmitListenerAdded = true;
-                    }
-
-                    function stripeTokenHandler(token) {
-                        var form = document.getElementById('payment-form');
-                        var hiddenInput = document.createElement('input');
-                        hiddenInput.setAttribute('type', 'hidden');
-                        hiddenInput.setAttribute('name', 'stripeToken');
-                        hiddenInput.setAttribute('value', token.id);
-                        form.appendChild(hiddenInput);
-                        form.submit();
-                    }
-                } else {
-                    // Switching to PayPal: hide card section and clear card-related errors;
-                    // server-side validation (Laravel) will handle form fields and multilingual messages.
-                    var cardErrorsDiv = document.getElementById('card-errors-div');
-                    if (cardErrorsDiv) {
-                        cardErrorsDiv.classList.add('hidden');
-                        var cardErrors = document.getElementById('card-errors');
-                        if (cardErrors) cardErrors.textContent = '';
-                    }
-                    var expiryErrorDiv = document.getElementById('expiry-error-div');
-                    if (expiryErrorDiv) {
-                        expiryErrorDiv.classList.add('hidden');
-                        var expiryError = document.getElementById('expiry-error');
-                        if (expiryError) expiryError.textContent = '';
-                    }
-                    var cvvErrorDiv = document.getElementById('cvv-error-div');
-                    if (cvvErrorDiv) {
-                        cvvErrorDiv.classList.add('hidden');
-                        var cvvError = document.getElementById('cvv-error');
-                        if (cvvError) cvvError.textContent = '';
-                    }
-                    var cardTooltips = CreditCardDiv.querySelectorAll('.tooltip');
-                    cardTooltips.forEach(function(el) { el.classList.add('hidden'); });
-
-                    CreditCardDiv.classList.add('hidden');
-                }
-            }
-
-            const customAmountField = document.querySelector('input[name="custom_amount"]');
-            const packageRadios = document.querySelectorAll('input[name="package"]');
-
-            customAmountField.addEventListener("input", function() {
-                checkCheckboxes();
-                packageRadios.forEach(radio => {
-                    radio.checked = false;
-                });
-            });
-
-            packageRadios.forEach(radio => {
-                radio.addEventListener("change", function() {
-                    customAmountField.value = "";
-                    checkCheckboxes();
-                });
-            });
-
-            creditCardCheckbox.addEventListener('change', checkCheckboxes);
- //           paypalCheckbox.addEventListener('change', checkCheckboxes);
-
-            // Initial check
-            checkCheckboxes();
-
-            var anonymous = document.getElementById('anonymous');
-            anonymous.addEventListener('change', function() {
-                checkFields(this);
-            });
-
-            const nameField = document.getElementById('name_field');
-            const emailField = document.getElementById('email_field');
-            const phoneField = document.getElementById('phone_field');
-            const notifyField = document.getElementById('notify_field');
-
-            function checkFields(checkbox) {
-                if (checkbox.checked) {
-                    nameField.classList.add('hidden');
-                    emailField.classList.add('hidden');
-                    phoneField.classList.add('hidden');
-                    notifyField.classList.add('hidden');
-                } else {
-                    nameField.classList.remove('hidden');
-                    emailField.classList.remove('hidden');
-                    phoneField.classList.remove('hidden');
-                    notifyField.classList.remove('hidden');
-                }
-            }
-
-            // Check on page load
-            if (anonymous.checked) {
-                nameField.classList.add('hidden');
-                emailField.classList.add('hidden');
-                phoneField.classList.add('hidden');
-                notifyField.classList.add('hidden');
-            }
-        });
-
         function closeModal() {
             const modal = document.querySelector('[aria-modal="true"]');
             if (modal) {
@@ -1182,16 +504,347 @@
         }
 
         function toggleFAQ(section) {
-            const faq = document.getElementById(section + '-faq');
-            const icon = document.getElementById(section + '-icon');
+            const faq = document.getElementById(`${section}-faq`);
+            const icon = document.getElementById(`${section}-icon`);
 
-            if (faq.classList.contains('hidden')) {
-                faq.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                faq.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
+            if (!faq || !icon) {
+                return;
             }
+
+            faq.classList.toggle('hidden');
+            icon.style.transform = faq.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('payment-form');
+            const customAmountField = document.getElementById('custom_amount_input');
+            const packageRadios = document.querySelectorAll('input[name="package"]');
+            const frequencyRadios = document.querySelectorAll('input[name="frequency"]');
+            const designationAll = document.getElementById('designation-1');
+            const designationIndividuals = document.querySelectorAll('.designation-individual');
+            const donationAckCheckbox = document.getElementById('donation_acknowledgment');
+            const termsPrivacyCheckbox = document.getElementById('terms_privacy');
+            const donationAckDiv = document.getElementById('donation-acknowledgment-div');
+            const termsPrivacyDiv = document.getElementById('terms-privacy-div');
+            const creditCardRadio = document.getElementById('credit-card');
+            const paypalRadio = document.getElementById('paypal');
+            const creditCardDiv = document.getElementById('credit-card-div');
+            const anonymousCheckbox = document.getElementById('anonymous');
+            const nameField = document.getElementById('name_field');
+            const emailField = document.getElementById('email_field');
+            const phoneField = document.getElementById('phone_field');
+            const notifyField = document.getElementById('notify_field');
+            let stripe = null;
+            let cardElement = null;
+
+            function toggleClasses(element, active, activeClasses, inactiveClasses) {
+                if (!element) {
+                    return;
+                }
+
+                activeClasses.forEach((className) => element.classList.toggle(className, active));
+                inactiveClasses.forEach((className) => element.classList.toggle(className, !active));
+            }
+
+            function updateFrequencyStyles() {
+                const selectedValue = document.querySelector('input[name="frequency"]:checked')?.value ?? '';
+                const monthlyLabel = document.getElementById('monthly_label');
+                const quarterlyLabel = document.getElementById('quarterly_label');
+                const oneTimeLabel = document.getElementById('one_time_label');
+                const activeClasses = ['bg-blue-600', 'border-blue-600', 'text-white'];
+                const inactiveClasses = ['bg-white', 'border-gray-100', 'text-blue-600'];
+
+                toggleClasses(monthlyLabel, selectedValue === 'monthly', activeClasses, inactiveClasses);
+                toggleClasses(quarterlyLabel, selectedValue === 'weekly', activeClasses, inactiveClasses);
+                toggleClasses(oneTimeLabel, selectedValue === '', activeClasses, inactiveClasses);
+            }
+
+            function updateDesignationStyles() {
+                const allLabel = document.getElementById('designation-label-1');
+                if (allLabel) {
+                    allLabel.classList.toggle('border-green-500', !!designationAll?.checked);
+                    allLabel.classList.toggle('border-2', !!designationAll?.checked);
+                    allLabel.classList.toggle('text-green-500', !!designationAll?.checked);
+                    allLabel.classList.toggle('border-gray-100', !designationAll?.checked);
+                }
+
+                designationIndividuals.forEach((checkbox, index) => {
+                    const label = document.getElementById(`designation-label-${index + 2}`);
+                    if (!label) {
+                        return;
+                    }
+
+                    label.classList.toggle('border-green-500', checkbox.checked);
+                    label.classList.toggle('border-2', checkbox.checked);
+                    label.classList.toggle('text-green-500', checkbox.checked);
+                    label.classList.toggle('border-gray-100', !checkbox.checked);
+                });
+            }
+
+            function updateCustomAmountStyle() {
+                if (!customAmountField) {
+                    return;
+                }
+
+                customAmountField.classList.toggle('border-green-500', customAmountField.value.trim() !== '');
+                customAmountField.classList.toggle('border-blue-500', customAmountField.value.trim() === '');
+            }
+
+            function syncAnonymousFields() {
+                const hidden = !!anonymousCheckbox?.checked;
+                [nameField, emailField, phoneField, notifyField].forEach((field) => {
+                    if (field) {
+                        field.classList.toggle('hidden', hidden);
+                    }
+                });
+            }
+
+            function ensureStripe() {
+                if (cardElement || !creditCardDiv) {
+                    return;
+                }
+
+                stripe = Stripe('{{ $stripeKey }}');
+                const elements = stripe.elements();
+                cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontStyle: 'italic'
+                        }
+                    }
+                });
+                cardElement.mount('#card-element');
+            }
+
+            function togglePaymentSection() {
+                if (!creditCardDiv) {
+                    return;
+                }
+
+                const useStripe = !!creditCardRadio?.checked;
+                creditCardDiv.classList.toggle('hidden', !useStripe);
+
+                if (useStripe) {
+                    ensureStripe();
+                    return;
+                }
+
+                const cardErrors = document.getElementById('card-errors');
+                if (cardErrors) {
+                    cardErrors.classList.add('hidden');
+                }
+            }
+
+            function hideTooltipOnCheck(checkbox, container) {
+                checkbox?.addEventListener('change', function() {
+                    if (this.checked && container) {
+                        container.classList.add('hidden');
+                    }
+                });
+            }
+
+            frequencyRadios.forEach((radio) => {
+                radio.addEventListener('change', updateFrequencyStyles);
+            });
+
+            designationAll?.addEventListener('change', function() {
+                if (this.checked) {
+                    designationIndividuals.forEach((checkbox) => {
+                        checkbox.checked = false;
+                    });
+                }
+                updateDesignationStyles();
+            });
+
+            designationIndividuals.forEach((checkbox) => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked && designationAll) {
+                        designationAll.checked = false;
+                    }
+
+                    const anyChecked = Array.from(designationIndividuals).some((item) => item.checked);
+                    if (!anyChecked && designationAll) {
+                        designationAll.checked = true;
+                    }
+
+                    updateDesignationStyles();
+                });
+            });
+
+            if (customAmountField) {
+                customAmountField.addEventListener('keydown', function(event) {
+                    if (['e', 'E', '+', '-'].includes(event.key)) {
+                        event.preventDefault();
+                    }
+                });
+
+                customAmountField.addEventListener('input', function() {
+                    this.value = this.value.replace(/[eE]/g, '');
+                    packageRadios.forEach((radio) => {
+                        radio.checked = false;
+                    });
+                    updateCustomAmountStyle();
+                });
+
+                customAmountField.addEventListener('focus', function() {
+                    packageRadios.forEach((radio) => {
+                        radio.checked = false;
+                    });
+                });
+            }
+
+            packageRadios.forEach((radio) => {
+                radio.addEventListener('change', function() {
+                    if (customAmountField) {
+                        customAmountField.value = '';
+                    }
+                    updateCustomAmountStyle();
+                });
+            });
+
+            [creditCardRadio, paypalRadio].forEach((radio) => {
+                radio?.addEventListener('change', togglePaymentSection);
+            });
+
+            anonymousCheckbox?.addEventListener('change', syncAnonymousFields);
+            hideTooltipOnCheck(donationAckCheckbox, donationAckDiv);
+            hideTooltipOnCheck(termsPrivacyCheckbox, termsPrivacyDiv);
+
+            // Hide field tooltip error when user clicks/focuses inside its parent container.
+            function hideTooltipInParent(eventTarget) {
+                if (!(eventTarget instanceof HTMLElement) || !form) return;
+                let node = eventTarget.closest('div, section, label');
+
+                // Walk up until form root and remove tooltips that belong to the current field
+                while (node && node !== form) {
+                    // Check for tooltip as a direct child
+                    const tooltipInChildren = Array.from(node.children).find((child) =>
+                        child instanceof HTMLElement && child.classList.contains('tooltip-error')
+                    );
+                    if (tooltipInChildren) {
+                        tooltipInChildren.remove();
+                        return;
+                    }
+
+                    // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
+                    if (node.parentElement) {
+                        const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
+                            sibling instanceof HTMLElement &&
+                            sibling.classList.contains('tooltip-error') &&
+                            sibling !== node
+                        );
+                        if (tooltipSibling) {
+                            tooltipSibling.remove();
+                            return;
+                        }
+                    }
+                    node = node.parentElement?.closest('div, section') || null;
+                }
+            }
+
+            if (form) {
+                form.addEventListener('click', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+                form.addEventListener('focusin', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+            }
+
+            // On submit, create Stripe token when paying by card
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+
+                    // For PayPal (or no method), let the form submit normally
+                    if (selectedPaymentMethod !== 'stripe') {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    ensureStripe();
+
+                    const nameOnCardInput = document.getElementById('name_on_card');
+                    const nameError = document.getElementById('card-name-error');
+                    const nameErrorText = nameError?.querySelector('.tooltip-error');
+                    const cardErrors = document.getElementById('card-errors');
+                    const cardErrorsText = cardErrors?.querySelector('.tooltip-error');
+
+                    // Clear previous errors
+                    if (nameError) {
+                        nameError.classList.add('hidden');
+                    }
+                    if (cardErrors) {
+                        cardErrors.classList.add('hidden');
+                    }
+
+                    // Validate cardholder name before calling Stripe
+                    if (!nameOnCardInput || nameOnCardInput.value.trim() === '') {
+                        if (nameError && nameErrorText) {
+                            nameError.classList.remove('hidden');
+                            nameErrorText.textContent = @json(__('validation.custom.name_on_card.required_if'));
+                            nameError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return;
+                    }
+
+                    stripe.createToken(cardElement, {
+                        name: nameOnCardInput.value
+                    }).then(function(result) {
+                        if (result.error) {
+                            if (cardErrors && cardErrorsText) {
+                                cardErrors.classList.remove('hidden');
+                                cardErrorsText.textContent = result.error.message;
+                                cardErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            return;
+                        }
+
+                        // Inject stripeToken and a dummy card_element value for backend validation
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'stripeToken';
+                        tokenInput.value = result.token.id;
+                        form.appendChild(tokenInput);
+
+                        const cardElementInput = document.createElement('input');
+                        cardElementInput.type = 'hidden';
+                        cardElementInput.name = 'card_element';
+                        cardElementInput.value = 'card_provided';
+                        form.appendChild(cardElementInput);
+
+                        form.submit();
+                    });
+                });
+            }
+
+            // On page load, scroll to the first *visible* tooltip with an error (server-side validation)
+            const allTooltips = document.querySelectorAll('.tooltip-error');
+            for (const tooltip of allTooltips) {
+                let node = tooltip;
+                let hiddenByAncestor = false;
+
+                // Skip tooltips inside any container that has the 'hidden' class
+                while (node && node !== document.body) {
+                    if (node.classList && node.classList.contains('hidden')) {
+                        hiddenByAncestor = true;
+                        break;
+                    }
+                    node = node.parentElement;
+                }
+
+                if (!hiddenByAncestor) {
+                    const wrapper = tooltip.parentElement || tooltip;
+                    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    break;
+                }
+            }
+
+            updateFrequencyStyles();
+            updateDesignationStyles();
+            updateCustomAmountStyle();
+            syncAnonymousFields();
+            togglePaymentSection();
+        });
     </script>
 @endsection

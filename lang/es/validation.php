@@ -193,6 +193,12 @@ return [
         'terms_privacy' => [
             'required' => 'Los términos y la privacidad son obligatorios.',
         ],
+        'name_on_card' => [
+            'required_if' => 'El nombre del titular de la tarjeta es obligatorio cuando se paga con tarjeta.',
+        ],
+        'card_element' => [
+            'required_if' => 'Los datos de la tarjeta son obligatorios cuando se paga con tarjeta.',
+        ],
         'old_email' => [
             'required' => 'El correo electrónico actual es obligatorio.',
             'email' => 'El correo electrónico actual no es una dirección de correo electrónico válida.',
@@ -319,6 +325,8 @@ return [
         'name' => 'Nombre',
         'title' => 'Título',
         'description' => 'Descripción',
+        'name_on_card' => 'Nombre del titular de la tarjeta',
+        'card_element' => 'Datos de la tarjeta',
         'pass1' => 'Contraseña actual',
         'pass2' => 'Nueva contraseña',
         'pass3' => 'Confirmación de contraseña',

@@ -169,6 +169,12 @@ return [
         'terms_privacy' => [
             'required' => 'Les conditions et la politique de confidentialité sont obligatoires.',
         ],
+        'name_on_card' => [
+            'required_if' => 'Le nom du titulaire de la carte est obligatoire pour un paiement par carte.',
+        ],
+        'card_element' => [
+            'required_if' => 'Les détails de la carte sont obligatoires pour un paiement par carte.',
+        ],
         'old_email' => [
             'required' => "L'adresse e-mail actuelle est obligatoire.",
             'email' => "L'adresse e-mail actuelle n'est pas une adresse e-mail valide.",
@@ -286,5 +292,7 @@ return [
         'pass1' => 'Mot de passe actuel',
         'pass2' => 'Nouveau mot de passe',
         'pass3' => 'Confirmation du mot de passe',
+        'name_on_card' => 'Nom du titulaire de la carte',
+        'card_element' => 'Détails de la carte',
     ],
 ];

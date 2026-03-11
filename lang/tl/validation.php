@@ -169,6 +169,12 @@ return [
         'terms_privacy' => [
             'required' => 'Kinakailangan ang pagsang-ayon sa mga tuntunin at privacy.',
         ],
+        'name_on_card' => [
+            'required_if' => 'Kinakailangan ang pangalan ng cardholder kapag nagbabayad gamit ang credit card.',
+        ],
+        'card_element' => [
+            'required_if' => 'Kinakailangan ang mga detalye ng card kapag nagbabayad gamit ang credit card.',
+        ],
         'old_email' => [
             'required' => 'Kinakailangan ang kasalukuyang email.',
             'email' => 'Ang kasalukuyang email ay hindi isang wastong email address.',
@@ -286,5 +292,7 @@ return [
         'pass1' => 'Kasalukuyang password',
         'pass2' => 'Bagong password',
         'pass3' => 'Kumpirmasyon ng password',
+        'name_on_card' => 'Pangalan ng cardholder',
+        'card_element' => 'Mga detalye ng card',
     ],
 ];
