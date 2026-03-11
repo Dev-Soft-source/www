@@ -11,6 +11,7 @@
         </div>
         
         <div class="pb-2">
+            
             @isset($coffeeWallPage->main_text)
                 @php
                     $storyUrl = route('coffee_on_wall_story', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
@@ -47,14 +48,14 @@
                                             <div class="p-4">
                                                 <div class="">
                                                     <ul
-                                                        class="text-sm font-medium text-center text-gray-500 rounded-md md:rounded-lg shadow-sm grid grid-cols-3 dark:divide-gray-700 dark:text-gray-400 border">
+                                                        class="text-sm font-medium text-center text-gray-500 rounded-md md:rounded-lg shadow-sm grid grid-cols-3 border-2 dark:divide-gray-700 dark:text-gray-400">
                                                         <li class="focus-within:z-10">
                                                             <input type="radio" id="one_time" name="frequency"
                                                                 value=""
                                                                 {{ old('frequency', 'monthly') == '' ? 'checked' : '' }}
                                                                 class="hidden peer">
                                                             <label for="one_time" id="one_time_label"
-                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg rounded-l-md flex items-center justify-center h-16 border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
+                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg rounded-l-md flex items-center justify-center h-16 bg-gray-50 border border-gray-100 leading-normal cursor-pointer hover:shadow-md hover:border-2 hover:border-green-500 peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500">
                                                                 {{ $coffeeWallPage->quarterly_label ?? 'One time' }}
                                                             </label>
                                                         </li>
@@ -64,7 +65,7 @@
                                                                 {{ old('frequency', 'monthly') == 'weekly' ? 'checked' : '' }}
                                                                 class="hidden peer">
                                                             <label for="quarterly" id="quarterly_label"
-                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg flex items-center justify-center h-16 border-gray-100 border leading-normal text-blue-600 bg-white cursor-pointer">
+                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg flex items-center justify-center h-16 bg-gray-50 border border-gray-100 leading-normal cursor-pointer hover:shadow-md hover:border-2 hover:border-green-500 peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500">
                                                                 {{ $coffeeWallPage->semi_annually_label ?? 'Weekly' }}
                                                             </label>
                                                         </li>
@@ -74,7 +75,7 @@
                                                                 {{ old('frequency', 'monthly') == 'monthly' ? 'checked' : '' }}
                                                                 class="hidden peer">
                                                             <label for="monthly" id="monthly_label"
-                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg rounded-r-md flex items-center justify-center h-16 border-gray-100 border leading-normal text-white bg-blue-600 cursor-pointer">
+                                                                class="text-lg md:text-2xl font-FuturaMdCnBT font-medium py-4 shadow-lg rounded-r-md flex items-center justify-center h-16 bg-gray-50 border border-gray-100 leading-normal cursor-pointer hover:shadow-md hover:border-2 hover:border-green-500 peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500">
                                                                 {{ $coffeeWallPage->monthly_label ?? 'Monthly' }}
                                                             </label>
                                                         </li>

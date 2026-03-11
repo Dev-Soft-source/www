@@ -530,25 +530,25 @@
                                     @if ($ride->status !== '2')
                                         <div class="flex items-baseline">
                                             @if ($needsPhoneOnFileForRegularRide)
-                                                <button type="button" onclick="showPhoneOnFileRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                <button type="button" onclick="showPhoneOnFileRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
                                                     @isset($rideDetailPage->seats_left_label)
                                                         {{ $rideDetailPage->seats_left_label }}:
                                                     @endisset
                                                 </button>
                                             @elseif ($needsVerifiedPhoneForPinkExtra)
-                                                <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
                                                     @isset($rideDetailPage->seats_left_label)
                                                         {{ $rideDetailPage->seats_left_label }}:
                                                     @endisset
                                                 </button>
                                             @elseif ($needsPhoneVerification)
-                                                <button type="button" onclick="showPhoneVerificationModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                <button type="button" onclick="showPhoneVerificationModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
                                                     @isset($rideDetailPage->seats_left_label)
                                                         {{ $rideDetailPage->seats_left_label }}:
                                                     @endisset
                                                 </button>
                                             @elseif ($showPhotoIdRequiredForBooking)
-                                                <button type="button" onclick="showPhotoIdRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer underline">
+                                                <button type="button" onclick="showPhotoIdRequiredModal()" class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
                                                     @isset($rideDetailPage->seats_left_label)
                                                         {{ $rideDetailPage->seats_left_label }}:
                                                     @endisset
