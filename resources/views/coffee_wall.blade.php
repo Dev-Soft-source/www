@@ -1038,116 +1038,43 @@
                     if (!window.formSubmitListenerAdded) {
                         var form = document.getElementById('payment-form');
                         form.addEventListener('submit', function(event) {
-                        event.preventDefault();
+                            event.preventDefault();
 
-                        var hasValidationErrors = false;
+                            var selectedPaymentMethod = $("input[name='payment_method']:checked").val();
 
-                        // Check if anonymous donation
-                        var isAnonymous = $('#anonymous').is(':checked');
+                            if (selectedPaymentMethod === 'paypal') {
+                                form.submit();
+                                return;
+                            }
 
-                        if (!isAnonymous) {
-                            var nameValue = $("input[name='name']").val();
-                            if (!nameValue) {
-                                hasValidationErrors = true;
-                                var errorElementDiv = document.getElementById('name-errors-div');
-                                errorElementDiv.classList.remove('hidden');
-
-                                var errorElement = document.getElementById('name-errors');
-                                errorElement.textContent = 'Please enter your name';
-                            } else {
-                                var errorElementDiv = document.getElementById('name-errors-div');
-                                if (!errorElementDiv.classList.contains('hidden')) {
-                                    errorElementDiv.classList.add('hidden');
+                            if (selectedPaymentMethod === 'gpay') {
+                                var gpayHint = document.getElementById('gpay-submit-hint');
+                                var gpaySection = document.getElementById('paymentSectionGPay');
+                                if (gpayHint) gpayHint.classList.remove('hidden');
+                                if (gpaySection) {
+                                    gpaySection.classList.remove('hidden');
+                                    gpaySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 }
+                                return;
                             }
 
-                            var emailValue = $("input[name='email']").val();
-                            if (!emailValue) {
-                                hasValidationErrors = true;
-                                var errorElementDiv = document.getElementById('email-errors-div');
-                                errorElementDiv.classList.remove('hidden');
-
-                                var errorElement = document.getElementById('email-errors');
-                                errorElement.textContent = 'Please enter your email';
-                            } else if (!isValidEmail(emailValue)) {
-                                hasValidationErrors = true;
-                                var errorElementDiv = document.getElementById('email-errors-div');
-                                errorElementDiv.classList.remove('hidden');
-
-                                var errorElement = document.getElementById('email-errors');
-                                errorElement.textContent = 'Please use a valid email';
-                            } else {
-                                var errorElementDiv = document.getElementById('email-errors-div');
-                                if (!errorElementDiv.classList.contains('hidden')) {
-                                    errorElementDiv.classList.add('hidden');
-                                }
-                            }
-                        }
-
-                        // Check donation acknowledgment checkbox
-                        var donationAckCheckbox = document.getElementById('donation_acknowledgment');
-                        if (!donationAckCheckbox.checked) {
-                            hasValidationErrors = true;
-                            var donationAckDiv = document.getElementById('donation-acknowledgment-div');
-                            donationAckDiv.classList.remove('hidden');
-
-                            var donationAckError = document.getElementById('donation-acknowledgment-error');
-                            donationAckError.textContent = 'Please check this box if you want to proceed';
-                        }
-                        // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
-
-                        // Check terms and privacy checkbox
-                        var termsPrivacyCheckbox = document.getElementById('terms_privacy');
-                        if (!termsPrivacyCheckbox.checked) {
-                            hasValidationErrors = true;
-                            var termsPrivacyDiv = document.getElementById('terms-privacy-div');
-                            termsPrivacyDiv.classList.remove('hidden');
-
-                            var termsPrivacyError = document.getElementById('terms-privacy-error');
-                            termsPrivacyError.textContent = 'Please check this box if you want to proceed';
-                        }
-                        // Note: Tooltip is now only hidden when its specific checkbox is checked (handled in separate event listener)
-
-                        // Stop form submission if there are validation errors (inline tooltips only)
-                        if (hasValidationErrors) {
-                            return;
-                        }
-
-                        var selectedPaymentMethod = $("input[name='payment_method']:checked").val();
-                        if (selectedPaymentMethod === 'paypal') {
-                            form.submit();
-                            return;
-                        }
-                        if (selectedPaymentMethod === 'gpay') {
-                            var gpayHint = document.getElementById('gpay-submit-hint');
-                            var gpaySection = document.getElementById('paymentSectionGPay');
-                            if (gpayHint) gpayHint.classList.remove('hidden');
-                            if (gpaySection) {
-                                gpaySection.classList.remove('hidden');
-                                gpaySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }
-                            return;
-                        }
-
-                        stripe.createToken(cardNumberElement, {name: document.getElementById('name_on_card').value}).then(function(result) {
-                            if (result.error) {
-                                if (creditCardCheckbox.checked) {
-                                    var errorElementDiv = document.getElementById('card-errors-div');
-                                    var nameOnCardValue = $("input[name='name_on_card']").val();
-                                    if (!nameOnCardValue) {
+                            // For credit card, create Stripe token and then submit.
+                            stripe.createToken(cardNumberElement, {
+                                name: document.getElementById('name_on_card').value
+                            }).then(function(result) {
+                                if (result.error) {
+                                    if (creditCardCheckbox.checked) {
+                                        var errorElementDiv = document.getElementById('card-errors-div');
                                         errorElementDiv.classList.remove('hidden');
                                         var errorElement = document.getElementById('card-errors');
-                                        if (errorElement) errorElement.textContent = "Please enter cardholder's name";
-                                    } else {
-                                        errorElementDiv.classList.remove('hidden');
-                                        var errorElement = document.getElementById('card-errors');
-                                        if (errorElement) errorElement.textContent = result.error.message;
+                                        if (errorElement) {
+                                            errorElement.textContent = result.error.message;
+                                        }
+                                        errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     }
-                                    errorElementDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                } else {
+                                    stripeTokenHandler(result.token);
                                 }
-                            } else {
-                                stripeTokenHandler(result.token);
-                            }
                             });
                         });
                         
@@ -1164,7 +1091,8 @@
                         form.submit();
                     }
                 } else {
-                    // PayPal: same flow as GPay - hide card section, clear card errors, then run same validation
+                    // Switching to PayPal: hide card section and clear card-related errors;
+                    // server-side validation (Laravel) will handle form fields and multilingual messages.
                     var cardErrorsDiv = document.getElementById('card-errors-div');
                     if (cardErrorsDiv) {
                         cardErrorsDiv.classList.add('hidden');
@@ -1187,77 +1115,6 @@
                     cardTooltips.forEach(function(el) { el.classList.add('hidden'); });
 
                     CreditCardDiv.classList.add('hidden');
-
-                    // Same validation as GPay: name, email, donation ack, terms
-                    var isValid = true;
-                    var isAnonymous = $('#anonymous').is(':checked');
-                    if (!isAnonymous) {
-                        var nameValue = $("input[name='name']").val();
-                        if (!nameValue) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('name-errors-div');
-                            if (errorElementDiv) {
-                                errorElementDiv.classList.remove('hidden');
-                                var errorElement = document.getElementById('name-errors');
-                                if (errorElement) errorElement.textContent = 'Please enter your name';
-                            }
-                        } else {
-                            var errorElementDiv = document.getElementById('name-errors-div');
-                            if (errorElementDiv && !errorElementDiv.classList.contains('hidden')) {
-                                errorElementDiv.classList.add('hidden');
-                            }
-                        }
-
-                        var emailValue = $("input[name='email']").val();
-                        if (!emailValue) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            if (errorElementDiv) {
-                                errorElementDiv.classList.remove('hidden');
-                                var errorElement = document.getElementById('email-errors');
-                                if (errorElement) errorElement.textContent = 'Please enter your email';
-                            }
-                        } else if (!isValidEmail(emailValue)) {
-                            isValid = false;
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            if (errorElementDiv) {
-                                errorElementDiv.classList.remove('hidden');
-                                var errorElement = document.getElementById('email-errors');
-                                if (errorElement) errorElement.textContent = 'Please use a valid email';
-                            }
-                        } else {
-                            var errorElementDiv = document.getElementById('email-errors-div');
-                            if (errorElementDiv && !errorElementDiv.classList.contains('hidden')) {
-                                errorElementDiv.classList.add('hidden');
-                            }
-                        }
-                    }
-
-                    var donationAckCheckbox = document.getElementById('donation_acknowledgment');
-                    if (donationAckCheckbox && !donationAckCheckbox.checked) {
-                        isValid = false;
-                        var donationAckDiv = document.getElementById('donation-acknowledgment-div');
-                        if (donationAckDiv) {
-                            donationAckDiv.classList.remove('hidden');
-                            var donationAckError = document.getElementById('donation-acknowledgment-error');
-                            if (donationAckError) donationAckError.textContent = 'Please check this box if you want to proceed';
-                        }
-                    }
-
-                    var termsPrivacyCheckbox = document.getElementById('terms_privacy');
-                    if (termsPrivacyCheckbox && !termsPrivacyCheckbox.checked) {
-                        isValid = false;
-                        var termsPrivacyDiv = document.getElementById('terms-privacy-div');
-                        if (termsPrivacyDiv) {
-                            termsPrivacyDiv.classList.remove('hidden');
-                            var termsPrivacyError = document.getElementById('terms-privacy-error');
-                            if (termsPrivacyError) termsPrivacyError.textContent = 'Please check this box if you want to proceed';
-                        }
-                    }
-
-                    if (!isValid) {
-                        paypalCheckbox.checked = false;
-                    }
                 }
             }
 

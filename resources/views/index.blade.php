@@ -610,7 +610,7 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">From</div>
+                                                                <div class="font-bold text-black">{{$rideDetailPage->from_label ?? 'From'}}</div>
                                                                 <div
                                                                     class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $from }}.
@@ -634,7 +634,7 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">To</div>
+                                                                <div class="font-bold text-black">{{$rideDetailPage->to_label ?? 'To'}}</div>
                                                                 <div
                                                                     class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $to }}.

@@ -313,7 +313,6 @@ class HomeController extends Controller
 
     public function coffeeOnWallStore(Request $request)
     {
-        // dd($request->all());
         // Validate the form data
         $validatedData = $request->validate([
             'package' => $request->custom_amount ? 'nullable' : 'required',
@@ -323,17 +322,6 @@ class HomeController extends Controller
             'payment_method' => 'required|in:stripe,paypal',
             'donation_acknowledgment' => 'required',
             'terms_privacy' => 'required',
-        ], [
-            'email.email' => 'Please use a valid email',
-            'package.required' => 'The package is required',
-            'custom_amount.required' => 'The custom amount is required',
-            'name.required' => 'The name is required',
-            'email.required' => 'The email is required',
-            'email.email' => 'Please use a valid email',
-            'payment_method.required' => 'The payment method is required',
-            'payment_method.in' => 'The payment method is invalid',
-            'donation_acknowledgment.required' => 'The donation acknowledgment is required',
-            'terms_privacy.required' => 'The terms and privacy are required',
         ]);
 
         $selectedLanguage = session('selectedLanguage');

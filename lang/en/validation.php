@@ -162,6 +162,31 @@ return
 				'email' => 'Please enter a valid email address, such as name@example.com.',
 				'unique' => 'An account with this email address already exists.',
 			],
+			'package' =>
+			[
+				'required' => 'The package is required.',
+			],
+			'custom_amount' =>
+			[
+				'required' => 'The custom amount is required.',
+			],
+			'name' =>
+			[
+				'required' => 'The name is required.',
+			],
+			'payment_method' =>
+			[
+				'required' => 'The payment method is required.',
+				'in' => 'The payment method is invalid.',
+			],
+			'donation_acknowledgment' =>
+			[
+				'required' => 'The donation acknowledgment is required.',
+			],
+			'terms_privacy' =>
+			[
+				'required' => 'The terms and privacy are required.',
+			],
 			'first_name' =>
 			[
 				'required' => 'First name is required.',

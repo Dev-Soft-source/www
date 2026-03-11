@@ -174,6 +174,25 @@ return [
             'email' => 'Introduce una dirección de correo electrónico válida, por ejemplo, name@example.com.',
             'unique' => 'Ya existe una cuenta con esta dirección de correo electrónico.',
         ],
+        'package' => [
+            'required' => 'El paquete es obligatorio.',
+        ],
+        'custom_amount' => [
+            'required' => 'El importe personalizado es obligatorio.',
+        ],
+        'name' => [
+            'required' => 'El nombre es obligatorio.',
+        ],
+        'payment_method' => [
+            'required' => 'El método de pago es obligatorio.',
+            'in' => 'El método de pago no es válido.',
+        ],
+        'donation_acknowledgment' => [
+            'required' => 'El reconocimiento de la donación es obligatorio.',
+        ],
+        'terms_privacy' => [
+            'required' => 'Los términos y la privacidad son obligatorios.',
+        ],
         'old_email' => [
             'required' => 'El correo electrónico actual es obligatorio.',
             'email' => 'El correo electrónico actual no es una dirección de correo electrónico válida.',
