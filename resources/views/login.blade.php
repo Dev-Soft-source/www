@@ -3,10 +3,10 @@
 @section('content')
 
 <div class="mx-auto max-w-2xl lg:max-w-4xl">
-    <div class="flex min-h-full flex-col justify-center my-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex min-h-full flex-col justify-center my-4 px-4 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-100 p-4 shadow rounded-md sm:px-10">
             <div class="sm:mx-auto sm:w-full ">
-                <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary mt-10">
+                <h1 class="text-center font-FuturaMdCnBT can-exp-h1 text-primary mt-6">
                     @isset($loginPage->main_heading)
                         {{ $loginPage->main_heading }}
                     @endisset
@@ -193,7 +193,7 @@
             </div>
 
             <div class="sm:mx-auto sm:w-full sm:max-w-md flex justify-center border-b border-black mb-8">
-                <p class="mt-6 text-center bg-white w-fit px-2 text-2xl md:text-3xl font-FuturaMdCnBT -mb-4">
+                <p class="mt-4 text-center bg-white w-fit px-2 text-2xl md:text-3xl font-FuturaMdCnBT -mb-4">
                     @isset($loginPage->or_label)
                         {{ $loginPage->or_label }}
                     @endisset
@@ -247,14 +247,6 @@
                     </svg>
                 </a>
             </div>
-
-            <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <p class="mt-3 text-center">
-
-                </p>
-            </div>
-
-
 
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
                 <div class="mt-6 text_center Signup-bottom  ">
