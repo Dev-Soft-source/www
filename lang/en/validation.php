@@ -260,7 +260,7 @@ return
 			[
 				'required' => 'Password is required.',
 				'min' => 'Password must be at least :min characters.',
-				'regex' => 'Password must include an uppercase letter, a lowercase letter, a number, and a symbol.',
+				'regex' => 'Your password must be at least 8 characters long, including a lowercase letter, an uppercase letter, a number, and a special character.',
 			],
 			'password_confirmation' =>
 			[

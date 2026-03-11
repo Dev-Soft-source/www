@@ -272,17 +272,18 @@
 
                         <!-- Cost-sharing information paragraphs -->
                         <div class="mt-6 space-y-3">
-                            <p class="text-sm text-gray-800">
-                                {{ $signupPage->ride_description1 }}
-                                <br>
-                                {{ $signupPage->ride_description2 }}
-                                <br>
-                                {{ $signupPage->ride_description3 }}
-                            </p>
+                            
+                            <div class="text-sm text-gray-800 border border-gray-300 p-4 space-y-1 border-shadow-lg">
+                                <span class="font-FuturaMdCnBT text-lg text-black">{{ $signupPage->ride_description1 }}</span>
+                                <ul class="list-disc ml-4 space-y-1">
+                                    <li class="font-FuturaMdCnBT text-base">{!! $signupPage->ride_description2 !!}</li>
+                                    <li class="font-FuturaMdCnBT text-base">{!! $signupPage->ride_description3 !!}</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div class="">
-                            <div class="mt-2 relative">
+                            <div class="mt-6 relative">
                                 <label for="remember-me" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
                                     <input id="remember-me" name="remember_me" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
                                     <div class="text_base -mt-2">
@@ -313,7 +314,7 @@
                                 @isset($signupPage->rideshare_label)
                                     <label for="rideshare-disclaimer" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
                                         <input id="rideshare-disclaimer" name="rideshare_disclaimer" type="checkbox"
-                                            class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
+                                            class=" mr-2 h-4 w-4 mt-1 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
                                         <div class="text_base">
                                             <p>{{ $signupPage->rideshare_label }}</p>
                                         </div>
@@ -466,11 +467,11 @@
                                 @endif
                             </h3>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center" id="modal-welcome-message">
+                                <div class="text-center" id="modal-welcome-message">
                                     @if ($successMessage && $user)
                                         {{ $successMessage->welcome_message }} {{ $user->first_name }},
                                     @endif
-                                </p>
+                                </div>
                                 <div id="modal-email-message">
                                     @if ($successMessage)
                                         {!! $successMessage->email_sent_message !!}

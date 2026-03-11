@@ -137,7 +137,7 @@ class SignupController extends Controller
             // Email doesn't exist - allow registration
             $emailRule = 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL';
         }
-
+Log::info($signupPage);
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
@@ -148,7 +148,9 @@ class SignupController extends Controller
                 'remember_me' => 'required|accepted',
                 'password_confirmation' => 'required|same:password',
                 'rideshare_disclaimer' => 'required|accepted',
-            ], [], $niceNames);
+            ], [
+                'password.min' => $signupPage->password_placeholder ?? 'The password must be at least 8 characters long',
+            ], $niceNames);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
