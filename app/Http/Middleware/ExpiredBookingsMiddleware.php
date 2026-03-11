@@ -36,7 +36,12 @@ class ExpiredBookingsMiddleware
                 'ride_id' => $booking->ride_id,
                 'posted_to' => $booking->id,
                 'posted_by' => $booking->ride->added_by,
-                'message' =>  'Booking request expired',
+                'message' => getNotificationMessageText(
+                    'booking_request_expired',
+                    $user,
+                    [],
+                    'Booking request expired'
+                ),
                 'status' => 'reject',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $booking->ride_detail_id,

@@ -121,23 +121,7 @@ class ProfileVehicleController extends Controller
             'car_type' => 'required',
             'primary_vehicle' => 'required',
             'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240',
-        ], [
-            'make.required' => 'The make is required',
-            'model.required' => 'The model is required',
-            'type.required' => 'The vehicle type is required',
-            'liscense_no.required' => 'The license number is required',
-            'liscense_no.max' => 'The license number must be less than 8 characters',
-            'color.required' => 'The color is required',
-            'color.max' => 'The color must be less than 15 characters',
-            'year.required' => 'The year is required',
-            'year.max' => 'The year must be less than 4 characters',
-            'car_type.required' => 'The car type is required',
-            'primary_vehicle.required' => 'The primary vehicle is required',
-            'image.required_without' => 'The image is required',
-            'image.image' => 'The image must be an image',
-            'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif',
-            'image.max' => 'The image must be less than 10MB',
-        ], $niceNames);
+        ], [], $niceNames);
 
         if ($validator->fails()) {
             // Check if there are validation errors for the 'uploaded' attribute
@@ -208,7 +192,12 @@ class ProfileVehicleController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' => 'A new vehicle added to your profile',
+            'message' => getNotificationMessageText(
+                'vehicle_added_to_profile',
+                $user,
+                [],
+                'A new vehicle added to your profile'
+            ),
             'status' => 'completed',
             'notification_type' => 'vehicle'
         ]);
@@ -454,7 +443,12 @@ class ProfileVehicleController extends Controller
                 'type' => null,
                 'receiver_id' => $user->id,
                 'posted_by' => $user->id,
-                'message' => ' Vehicle removed from your profile',
+                'message' => getNotificationMessageText(
+                    'vehicle_removed_from_profile',
+                    $user,
+                    [],
+                    'Vehicle removed from your profile'
+                ),
                 'status' => 'completed',
                 'notification_type' => 'vehicle'
             ]);

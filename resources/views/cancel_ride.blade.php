@@ -1,63 +1,72 @@
 @extends('layouts.template')
 
 @section('content')
-@if(session('failure'))
-<div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div
-                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
-                <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                    <div class="sm:flex sm:items-start justify-center">
-                        <!-- <div
-                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+    @if (session('failure'))
+        <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        <button type="button" onclick="closeModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                        </div> -->
-                    </div>
-                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                        <div class="">
-                            <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
+                        </button>
+                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <!-- <div
+                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                </svg>
+                            </div> -->
+                            </div>
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                        id="modal-title">{!! session('heading') !!}</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center">{!! session('failure') !!}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-2 w-full">
-                            <p class="can-exp-p text-center">{!! session('failure') !!}</p>
+                        <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                            <a href='' id="close-modal"
+                                class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">
+                                Close
+                            </a>
+                            {{-- <a href=""
+                        class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a> --}}
                         </div>
                     </div>
-                </div>
-                <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                    <a href='' id="close-modal" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">
-                        Close
-                    </a>
-                    {{-- <a href=""
-                        class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a> --}}
                 </div>
             </div>
         </div>
-    </div>
-</div>
-@endif
+    @endif
     {{-- Confirmation modal for cancel ride --}}
-    <div id="cancelConfirmModal" class="relative z-50 hidden" aria-labelledby="cancel-confirm-title" role="dialog" aria-modal="true">
+    <div id="cancelConfirmModal" class="relative z-50 hidden" aria-labelledby="cancel-confirm-title" role="dialog"
+        aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
-                    <button type="button" onclick="closeCancelConfirmModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                    <button type="button" onclick="closeCancelConfirmModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                     <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="cancel-confirm-title">Are you sure?</h3>
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                    id="cancel-confirm-title">Are you sure?</h3>
                             </div>
                             <div class="mt-2 w-full">
                                 <p class="can-exp-p text-center">Canceling a ride may inconvenience your passengers.</p>
@@ -65,10 +74,14 @@
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
-                        <button type="button" onclick="closeCancelConfirmModal()" class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto" style="background-color: #3085d6;">
+                        <button type="button" onclick="closeCancelConfirmModal()"
+                            class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto"
+                            style="background-color: #3085d6;">
                             No, take me back
                         </button>
-                        <button type="button" onclick="confirmCancelRide()" class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto" style="background-color: #d33;">
+                        <button type="button" onclick="confirmCancelRide()"
+                            class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto"
+                            style="background-color: #d33;">
                             Yes, cancel it
                         </button>
                     </div>
@@ -87,8 +100,9 @@
                         <div class="bg-white p-4">
                             <div class="space-y-4 mb-4">
                                 <div class="mt-6">
-                                    <label for="meeting" class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->cancel_ride_label ?? 'Tell us why' }}</label>
-                                   
+                                    <label for="meeting"
+                                        class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->cancel_ride_label ?? 'Tell us why' }}</label>
+
                                     <textarea id="meeting" rows="6" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2">{{ old('message') }}</textarea>
 
@@ -98,7 +112,8 @@
                                     @enderror
                                 </div>
                                 <div class="mt-6">
-                                    <label for="reason" class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->tell_passenger_why_label ?? 'Tell your passenger why' }}</label>
+                                    <label for="reason"
+                                        class="text-gray-900 font-medium text-lg mb-2">{{ $tripsPage->tell_passenger_why_label ?? 'Tell your passenger why' }}</label>
                                     <textarea id="reason" rows="6" name="reason"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2">{{ old('reason') }}</textarea>
 
@@ -107,11 +122,12 @@
                                     @enderror
                                 </div>
 
-                                
+
                             </div>
                             <div class="flex items-center mt-4">
                                 <input type="checkbox" id="confirmCancel" class="display ml-4">
-                                <label for="confirmCancel">&nbsp;&nbsp; {{ $tripsPage->Confirm_cancel_ride ?? 'I confirm that I want to cancel this ride' }}</label>
+                                <label for="confirmCancel">&nbsp;&nbsp;
+                                    {{ $tripsPage->Confirm_cancel_ride ?? 'I confirm that I want to cancel this ride' }}</label>
                             </div>
                             <div class="flex justify-center items-center mt-4">
                                 <button id="cancelRideBtn" class="button-exp-fill" type="submit">
@@ -135,11 +151,9 @@
         function hideTooltip(parms) {
             if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
                 $(this).parent().find('.tooltip').addClass('hidden');
-            }
-            else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
+            } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
                 $(this).parent().parent().find('.tooltip').addClass('hidden');
-            }
-            else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
+            } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
                 $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
             }
         }
@@ -151,13 +165,13 @@
 
         const labels = document.querySelectorAll('label');
         labels.forEach(input => {
-            input.addEventListener('click', function (e) {
+            input.addEventListener('click', function(e) {
                 hideTooltip.call(this, 'label'); // pass 'testing' on label click
             });
         });
-        
+
         document.getElementById('cancelRideBtn').addEventListener('click', function(e) {
-            e.preventDefault(); 
+            e.preventDefault();
             let checkbox = document.getElementById('confirmCancel');
 
             if (!checkbox.checked) {

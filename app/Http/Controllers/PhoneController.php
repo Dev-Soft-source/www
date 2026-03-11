@@ -257,7 +257,12 @@ class PhoneController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' =>  'A new phone number added to your profile',
+            'message' => getNotificationMessageText(
+                'phone_added_to_profile',
+                $user,
+                [],
+                'A new phone number added to your profile'
+            ),
             'status' => 'phone',
             'notification_type' => 'phone',
         ]);
@@ -380,7 +385,12 @@ class PhoneController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' =>  'Phone number removed from your profile',
+                'message' => getNotificationMessageText(
+                    'phone_removed_from_profile',
+                    $user,
+                    [],
+                    'Phone number removed from your profile'
+                ),
             'status' => 'phone',
             'notification_type' => 'phone',
         ]);

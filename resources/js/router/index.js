@@ -34,6 +34,7 @@ import RegistrationRewardSettings from '../admin/General_Settings/RegistrationRe
 import CreateSuccessMessagesSetting from '../admin/General_Settings/SuccessMessagesSettings.vue'
 import CreateErrorHandlingSetting from '../admin/General_Settings/ErrorHandlingSettings.vue'
 import SiteTextSetting from '../admin/General_Settings/SiteTextSettings.vue'
+import NotificationMessageSetting from '../admin/General_Settings/NotificationMessageSettings.vue'
 import ContactMessages from '../admin/Form_Submissions/ContactMessages.vue'
 import ClosedAccountMessages from '../admin/Form_Submissions/ClosedAccountMessages.vue'
 import CreateLoginSetting from '../admin/Mobile_Screens/CreateLoginSetting.vue'
@@ -531,6 +532,14 @@ const routes = [
         component: SiteTextSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Setting site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/notification-message-setting',
+        name: 'admin.notification-message-setting.index',
+        component: NotificationMessageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Notification messages', 'routeName': 'admin.notification-message-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

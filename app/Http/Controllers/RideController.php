@@ -2776,10 +2776,30 @@ class RideController extends Controller
         $features = explode('=', $initialRide->features);
 
         $hasVehicle = !empty($initialRide->vehicle_id);
-        $liveMessage = $hasVehicle ? 'Your ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
-        $pinkLiveMessage = $hasVehicle ? 'Your Pink Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
-        $extraCareLiveMessage = $hasVehicle ? 'Your Extra+ Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
-        $pinkExtraCareLiveMessage = $hasVehicle ? 'Your Pink and Extra+ ride is now live on ProximaRide' : 'Add your vehicle to make your ride live';
+        $liveMessage = getNotificationMessageText(
+            $hasVehicle ? 'ride_live_standard' : 'ride_live_requires_vehicle',
+            $user,
+            [],
+            $hasVehicle ? 'Your ride is now live on ProximaRide' : 'Add your vehicle to make your ride live'
+        );
+        $pinkLiveMessage = getNotificationMessageText(
+            $hasVehicle ? 'ride_live_pink' : 'ride_live_requires_vehicle',
+            $user,
+            [],
+            $hasVehicle ? 'Your Pink Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live'
+        );
+        $extraCareLiveMessage = getNotificationMessageText(
+            $hasVehicle ? 'ride_live_extra_care' : 'ride_live_requires_vehicle',
+            $user,
+            [],
+            $hasVehicle ? 'Your Extra+ Ride is now live on ProximaRide' : 'Add your vehicle to make your ride live'
+        );
+        $pinkExtraCareLiveMessage = getNotificationMessageText(
+            $hasVehicle ? 'ride_live_pink_extra_care' : 'ride_live_requires_vehicle',
+            $user,
+            [],
+            $hasVehicle ? 'Your Pink and Extra+ ride is now live on ProximaRide' : 'Add your vehicle to make your ride live'
+        );
 
         if (in_array('1', $features) && in_array('2', $features)) {
             // Both Pink and Extra+

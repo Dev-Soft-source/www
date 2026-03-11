@@ -276,6 +276,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`no_reviews_label_${activeLanguageId}`"
+                                                        >No reviews label (App)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`no_reviews_label_${activeLanguageId}`"
+                                                    :id="`no_reviews_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'no_reviews_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'no_reviews_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `no_reviews_label.no_reviews_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `no_reviews_label.no_reviews_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`booking_price_label_${activeLanguageId}`"
                                                         >Booking price label</label
                                                     >
@@ -4701,6 +4745,7 @@ export default {
                             this.handleInput("", language, "cancel_ride_no_btn");
                             this.handleInput("", language, "edit_ride_btn_label");
                             this.handleInput("", language, "review_label");
+                            this.handleInput("", language, "no_reviews_label");
                             this.handleInput("", language, "booking_request_heading");
                             this.handleInput("", language, "seat_requested_label");
                             this.handleInput("", language, "request_accept_label");
@@ -5007,6 +5052,11 @@ export default {
                                 setting?.review_label,
                                 setting?.language,
                                 "review_label"
+                            );
+                            this.handleInput(
+                                setting?.no_reviews_label,
+                                setting?.language,
+                                "no_reviews_label"
                             );
                             this.handleInput(
                                 setting?.booking_request_heading,
@@ -5453,6 +5503,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `review_label.review_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `no_reviews_label.no_reviews_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `booking_request_heading.booking_request_heading_${language.id}`

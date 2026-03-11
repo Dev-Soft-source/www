@@ -987,7 +987,7 @@
                                                             </svg>
                                                         @else
                                                             <span
-                                                                class="font-semibold text-gray-800">{{ $findRidePage->card_section_no_reviews ?? 'No Reviews' }}</span>
+                                                                class="font-semibold text-gray-800">{{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}</span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -2014,6 +2014,21 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @php
+        $flatpickrLocale = match(app()->getLocale()) {
+            'ar' => 'ar',
+            'es' => 'es',
+            'fr' => 'fr',
+            'hi' => 'hi',
+            'ru' => 'ru',
+            'uk' => 'uk',
+            'zh' => 'zh',
+            default => null,
+        };
+    @endphp
+    @if($flatpickrLocale)
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ $flatpickrLocale }}.js"></script>
+    @endif
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
         var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This is required";
@@ -2413,8 +2428,9 @@
     <script>
         const dateInput = document.getElementById('dateInput');
 
-        // Initialize the date picker
-        flatpickr(dateInput, {
+        const profileLocale = @json(app()->getLocale());
+        const flatpickrLocaleKey = @json($flatpickrLocale);
+        const flatpickrOptions = {
             dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
             altInput: true,
             altFormat: 'F d, Y',
@@ -2422,8 +2438,20 @@
             disableMobile: true, // Disable mobile-friendly mode for consistent experience
             allowInput: true, // Allow manual input
             clickOpens: true, // Open calendar on click
-            theme: 'default' // Use default theme
-        });
+            theme: 'default', // Use default theme
+        };
+
+        if (
+            flatpickrLocaleKey &&
+            window.flatpickr &&
+            window.flatpickr.l10ns &&
+            window.flatpickr.l10ns[flatpickrLocaleKey]
+        ) {
+            flatpickrOptions.locale = window.flatpickr.l10ns[flatpickrLocaleKey];
+        }
+
+        flatpickr(dateInput, flatpickrOptions);
+
         const mobileCloseRedirectUrl = "{{ route('mobile_close_redirect') }}";
 
         function isMobileClient() {

@@ -9,26 +9,32 @@
             @if (session('message'))
                 <div id="my-modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <!-- Backdrop with transition -->
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-0 transition-opacity duration-300 ease-in-out z-10" id="modal-backdrop"></div>
-                
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-0 transition-opacity duration-300 ease-in-out z-10"
+                        id="modal-backdrop"></div>
+
                     <!-- Modal container with transition -->
-                    <div class="fixed inset-0 flex items-center justify-center p-4 z-20 opacity-0 scale-95 transition-all duration-300 ease-in-out" id="modal-container">
-                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div class="fixed inset-0 flex items-center justify-center p-4 z-20 opacity-0 scale-95 transition-all duration-300 ease-in-out"
+                        id="modal-container">
+                        <div
+                            class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                             <!-- Modal content with transition -->
-                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                                <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                            <div
+                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                                <button type="button" onclick="closeModal()"
+                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div class="mx-auto h-16 w-16 flex-shrink-0 flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
-                                        </div> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                            </div> -->
                                     </div>
                                     <div class="mt-2 w-full">
                                         <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -36,7 +42,7 @@
                                 </div>
                                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button onclick="closeModal()"
-                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">Close</button>
+                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">{{ $siteText['close_btn_text'] }}</button>
                                 </div>
                             </div>
                         </div>
@@ -49,38 +55,38 @@
                         const modal = document.getElementById('my-modal');
                         const backdrop = document.getElementById('modal-backdrop');
                         const container = document.getElementById('modal-container');
-                
+
                         modal.classList.remove('hidden');
-                
+
                         // Trigger reflow to enable transitions
                         void modal.offsetWidth;
-                
+
                         backdrop.classList.remove('bg-opacity-0');
                         backdrop.classList.add('bg-opacity-75');
-                
+
                         container.classList.remove('opacity-0', 'scale-95');
                         container.classList.add('opacity-100', 'scale-100');
                     }
-                
+
                     // Function to close modal with transitions
                     function closeModal() {
                         const backdrop = document.getElementById('modal-backdrop');
                         const container = document.getElementById('modal-container');
-                
+
                         backdrop.classList.remove('bg-opacity-75');
                         backdrop.classList.add('bg-opacity-0');
-                
+
                         container.classList.remove('opacity-100', 'scale-100');
                         container.classList.add('opacity-0', 'scale-95');
-                
+
                         // Wait for transition to complete before hiding
                         setTimeout(() => {
                             document.getElementById('my-modal').classList.add('hidden');
                         }, 300);
                     }
-                
+
                     // Auto-show modal if there's a message
-                    @if(session('message'))
+                    @if (session('message'))
                         document.addEventListener('DOMContentLoaded', showModal);
                     @endif
                 </script>
@@ -111,8 +117,8 @@
                 <div class="w-full md:w-3/4 flex justify-center items-center">
                     <div class="flex flex-col justify-center items-center w-48 my-4">
                         @isset($editProfilePage->passenger_driven_icon)
-                            <img class="w-12 h-12 object-contain" src="{{ asset('home_page_icons/' . $editProfilePage->passenger_driven_icon) }}"
-                                alt="">
+                            <img class="w-12 h-12 object-contain"
+                                src="{{ asset('home_page_icons/' . $editProfilePage->passenger_driven_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
                             {{ $user->rides()->where('status', '!=', 2)->where(function ($query) {
@@ -132,7 +138,8 @@
                     <div class="bg-gray-500 w-0.5 h-20"></div>
                     <div class="flex flex-col justify-center items-center w-48 my-4">
                         @isset($editProfilePage->rides_taken_icon)
-                            <img class="w-12 h-12 object-contain" src="{{ asset('home_page_icons/' . $editProfilePage->rides_taken_icon) }}" alt="">
+                            <img class="w-12 h-12 object-contain"
+                                src="{{ asset('home_page_icons/' . $editProfilePage->rides_taken_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
                             {{ $user->rides()->where('status', '!=', 2)->where(function ($query) {
@@ -150,21 +157,18 @@
                     <div class="bg-gray-500 w-0.5 h-20"></div>
                     <div class="flex flex-col justify-center items-center w-48 my-4">
                         @isset($editProfilePage->km_shared_icon)
-                            <img class="w-12 h-12 object-contain" src="{{ asset('home_page_icons/' . $editProfilePage->km_shared_icon) }}" alt="">
+                            <img class="w-12 h-12 object-contain"
+                                src="{{ asset('home_page_icons/' . $editProfilePage->km_shared_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
-                            {{ number_format($user->rides()
-                                ->where('status', '!=', 2)
-                                ->where(function ($query) {
-                                    $query->whereDate('rides.date', '<', now()->toDateString())
-                                        ->orWhere(function ($query) {
-                                            $query->whereDate('rides.date', '=', now()->toDateString())
-                                                ->whereTime('rides.time', '<=', now()->toTimeString());
+                            {{ number_format(
+                                $user->rides()->where('status', '!=', 2)->where(function ($query) {
+                                        $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
+                                            $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
                                         });
-                                })
-                                ->with('rideDetail')
-                                ->get()
-                                ->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))), 0) }}
+                                    })->with('rideDetail')->get()->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))),
+                                0,
+                            ) }}
                         </p>
                         <h4 class="text-black">
                             @isset($editProfilePage->km_shared_label)
@@ -193,14 +197,16 @@
                                         class='card-title leading-7 m-0'>
                                         <div class='flex items-start justify-center space-x-4'>
                                             <div class="flex-initial">
-                                                <div class="mt-1 w-16 h-16 bg-gray-50 border mx-auto rounded-full overflow-hidden">
+                                                <div
+                                                    class="mt-1 w-16 h-16 bg-gray-50 border mx-auto rounded-full overflow-hidden">
                                                     <img class="w-full h-full object-contain rounded-full"
                                                         src="{{ $rating->from->profile_image }}" alt="">
                                                 </div>
                                             </div>
                                             <div class="flex-auto">
                                                 <div class="flex justify-between">
-                                                    <h6 class='card-title leading-7 m-0 text-2xl'>{{ $rating->from->first_name }}
+                                                    <h6 class='card-title leading-7 m-0 text-2xl'>
+                                                        {{ $rating->from->first_name }}
                                                     </h6>
                                                 </div>
                                                 <div class="flex justify-between">

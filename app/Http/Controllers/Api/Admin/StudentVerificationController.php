@@ -65,7 +65,12 @@ class StudentVerificationController extends Controller
                 'category' => 'system',
                 'receiver_id' => $user->id,
                 'posted_by' => $user->id,
-                'message' =>  'Student card approved',
+                'message' => getNotificationMessageText(
+                    'student_card_approved',
+                    $user,
+                    [],
+                    'Student card approved'
+                ),
                 'status' => 'student_card',
                 'notification_type' => 'student_card',
             ]);
@@ -252,7 +257,12 @@ class StudentVerificationController extends Controller
             'type' => null,
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' => ' You are now eligible to post Extra+ Rides',
+            'message' => getNotificationMessageText(
+                'eligible_to_post_extra_plus_rides',
+                $user,
+                [],
+                'You are now eligible to post Extra+ Rides'
+            ),
             'status' => 'completed',
             'notification_type' => 'upcoming'
         ]);

@@ -81,6 +81,7 @@ use App\Http\Controllers\Api\Admin\{
     SuccessMessagesSettingController,ErrorController,BillingAdressSettingController, ClaimRewardsController, CoffeeWallPageSettingController, ExtraCareFaqController, FirmCancellationPolicyPageSettingController, ProfileSettingController,
     SecuredCashBookingController,
     SiteTextSettingController,
+    NotificationMessageSettingController,
     VerifyPhonesController,MyPassengerSettingController,
     NoShowController,
     PackageController,
@@ -128,6 +129,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/store-site-text-setting', [SiteTextSettingController::class, 'store']);
     Route::post('/update-site-text-setting/{id}', [SiteTextSettingController::class, 'update']);
     Route::delete('/delete-site-text-setting/{id}', [SiteTextSettingController::class, 'destroy']);
+    Route::get('/get-notification-message-setting', [NotificationMessageSettingController::class, 'index']);
+    Route::post('/store-notification-message-setting', [NotificationMessageSettingController::class, 'store']);
+    Route::post('/update-notification-message-setting/{id}', [NotificationMessageSettingController::class, 'update']);
+    Route::delete('/delete-notification-message-setting/{id}', [NotificationMessageSettingController::class, 'destroy']);
     Route::post('/update-home-page-setting', [HomePageSettingController::class, 'update']);
     Route::get('/get-home-page-setting', [HomePageSettingController::class, 'show']);
     Route::post('/upload-home-page-setting-excel', [HomePageSettingController::class, 'uploadExcel']);

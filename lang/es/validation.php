@@ -169,6 +169,39 @@ return [
     */
 
     'custom' => [
+        'make' => [
+            'required' => 'La marca es obligatoria.',
+        ],
+        'model' => [
+            'required' => 'El modelo es obligatorio.',
+        ],
+        'type' => [
+            'required' => 'El tipo de vehículo es obligatorio.',
+        ],
+        'liscense_no' => [
+            'required' => 'El número de placa es obligatorio.',
+            'max' => 'El número de placa debe tener menos de 8 caracteres.',
+        ],
+        'color' => [
+            'required' => 'El color es obligatorio.',
+            'max' => 'El color debe tener menos de 15 caracteres.',
+        ],
+        'year' => [
+            'required' => 'El año es obligatorio.',
+            'max' => 'El año debe tener menos de 4 caracteres.',
+        ],
+        'car_type' => [
+            'required' => 'La fuente de energía es obligatoria.',
+        ],
+        'primary_vehicle' => [
+            'required' => 'El vehículo principal es obligatorio.',
+        ],
+        'image' => [
+            'required_without' => 'La foto del vehículo es obligatoria.',
+            'image' => 'La foto del vehículo debe ser una imagen.',
+            'mimes' => 'La foto del vehículo debe ser un archivo de tipo: jpeg, png, jpg, gif.',
+            'max' => 'La foto del vehículo debe ser inferior a 10MB.',
+        ],
         'city_not_in_record' => [
             'message' => 'No hemos encontrado este nombre de ciudad en nuestros registros, por favor verifica la ortografía.',
         ],

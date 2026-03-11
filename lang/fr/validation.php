@@ -145,6 +145,39 @@ return [
     'ulid' => 'Le champ :attribute doit être un ULID valide.',
     'uuid' => 'Le champ :attribute doit être un UUID valide.',
     'custom' => [
+        'make' => [
+            'required' => 'La marque est obligatoire.',
+        ],
+        'model' => [
+            'required' => 'Le modèle est obligatoire.',
+        ],
+        'type' => [
+            'required' => 'Le type de véhicule est obligatoire.',
+        ],
+        'liscense_no' => [
+            'required' => 'Le numéro de plaque est obligatoire.',
+            'max' => 'Le numéro de plaque doit contenir moins de 8 caractères.',
+        ],
+        'color' => [
+            'required' => 'La couleur est obligatoire.',
+            'max' => 'La couleur doit contenir moins de 15 caractères.',
+        ],
+        'year' => [
+            'required' => "L'année est obligatoire.",
+            'max' => "L'année doit contenir moins de 4 caractères.",
+        ],
+        'car_type' => [
+            'required' => 'La source d’énergie est obligatoire.',
+        ],
+        'primary_vehicle' => [
+            'required' => 'Le véhicule principal est obligatoire.',
+        ],
+        'image' => [
+            'required_without' => 'La photo du véhicule est obligatoire.',
+            'image' => 'La photo du véhicule doit être une image.',
+            'mimes' => 'La photo du véhicule doit être un fichier de type : jpeg, png, jpg, gif.',
+            'max' => 'La photo du véhicule doit être inférieure à 10 Mo.',
+        ],
         'city_not_in_record' => [
             'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l’orthographe.",
         ],

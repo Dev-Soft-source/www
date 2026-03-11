@@ -276,7 +276,12 @@ class MyChatsController extends Controller
                     'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
                     'posted_by' => $user->id,
                     'receiver_id' => $receiver->id,
-                    'message' =>  'New message received from ' . $user->first_name,
+                    'message' => getNotificationMessageText(
+                        'chat_new_message_received',
+                        $receiver,
+                        ['first_name' => $user->first_name],
+                        'New message received from {first_name}'
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'chat'
                 ]);
@@ -300,7 +305,12 @@ class MyChatsController extends Controller
                 'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
                 'posted_by' => $user->id,
                 'receiver_id' => $receiver->id,
-                'message' =>  'New message received from ' . $user->first_name,
+                'message' => getNotificationMessageText(
+                    'chat_new_message_received',
+                    $receiver,
+                    ['first_name' => $user->first_name],
+                    'New message received from {first_name}'
+                ),
                 'status' => 'completed',
                 'notification_type' => 'chat'
             ]);
@@ -321,7 +331,12 @@ class MyChatsController extends Controller
                 'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
                 'posted_by' => $user->id,
                 'receiver_id' => $receiver->id,
-                'message' =>  'New message received from ' . $user->first_name,
+                'message' => getNotificationMessageText(
+                    'chat_new_message_received',
+                    $receiver,
+                    ['first_name' => $user->first_name],
+                    'New message received from {first_name}'
+                ),
                 'status' => 'completed',
                 'notification_type' => 'chat'
             ]);

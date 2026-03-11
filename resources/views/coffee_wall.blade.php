@@ -9,13 +9,17 @@
                 @endisset
             </h1>
         </div>
-        
+
         <div class="pb-2">
-            
+
             @isset($coffeeWallPage->main_text)
                 @php
                     $storyUrl = route('coffee_on_wall_story', ['lang' => $selectedLanguage->abbreviation ?? 'en']);
-                    $mainText = preg_replace('/\{\{\s*route\s*\(\s*[\'"]coffee_on_wall_story[\'"].*?\}\}\s*/s', $storyUrl, $coffeeWallPage->main_text);
+                    $mainText = preg_replace(
+                        '/\{\{\s*route\s*\(\s*[\'"]coffee_on_wall_story[\'"].*?\}\}\s*/s',
+                        $storyUrl,
+                        $coffeeWallPage->main_text,
+                    );
                 @endphp
                 {!! $mainText !!}
             @endisset
@@ -81,7 +85,8 @@
 
                                                     <div class="">
                                                         <div class="bg-white p-4">
-                                                            <ul id="packages-dropdown" class="my-8 grid grid-cols-2 md:grid-cols-6 gap-4">
+                                                            <ul id="packages-dropdown"
+                                                                class="my-8 grid grid-cols-2 md:grid-cols-6 gap-4">
                                                                 @foreach ($packages as $package)
                                                                     <li>
                                                                         <input type="radio"
@@ -98,7 +103,8 @@
                                                             </ul>
                                                             <div class="mt-2 min-h-[2.5rem]">
                                                                 @error('package')
-                                                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                                    <div class="tooltip-error shadow-lg">{{ $message }}
+                                                                    </div>
                                                                 @enderror
                                                             </div>
                                                             <div class="w-full mt-4">
@@ -113,15 +119,15 @@
                                                                                 d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                                         </svg>
                                                                         <input type="number" name="custom_amount"
-                                                                            id="custom_amount_input"
-                                                                            min="1"
+                                                                            id="custom_amount_input" min="1"
                                                                             value="{{ old('custom_amount') }}"
                                                                             class="block mt-1 border-2 p-2.5 w-full rounded border-blue-500 focus:ring-1 focus:outline-none focus:border-green-500 pl-10 h-20 text-lg"
                                                                             placeholder="{{ $coffeeWallPage->custom_amount_label }}">
                                                                     </div>
                                                                     <div class="mt-2 min-h-[2.5rem]">
                                                                         @error('custom_amount')
-                                                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                                            <div class="tooltip-error shadow-lg">
+                                                                                {{ $message }}</div>
                                                                         @enderror
                                                                     </div>
                                                                 </div>
@@ -139,7 +145,8 @@
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
                                             <h3 class=" text-2xl">
                                                 {{ $coffeeWallPage->designation_label ?? 'Designation' }}
-                                                <span class="text-white">*</span></h3>
+                                                <span class="text-white">*</span>
+                                            </h3>
                                         </div>
                                         <div class="mt-1">
                                             <ul id="designation-dropdown"
@@ -190,7 +197,8 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
                                             <h3 class=" text-2xl">{{ $coffeeWallPage->contact_infomation_label }}
-                                            <span class="text-white">*</span></h3>
+                                                <span class="text-white">*</span>
+                                            </h3>
                                         </div>
                                         <div class="w-full mt-4">
                                             <label for="anonymous" class="flex items-center justify-between w-full mb-1">
@@ -254,33 +262,52 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div id="notify_field" class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+                                    <div id="notify_field"
+                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mt-4">
                                             <label for="notify_coffee_used" class="flex items-center gap-2">
                                                 <input type="checkbox" name="notify_coffee_used" value="1"
                                                     id="notify_coffee_used"
                                                     {{ old('notify_coffee_used') == '1' ? 'checked' : '' }}
                                                     class="h-5 w-5">
-                                                <span class="text-base md:text-lg">@isset($coffeeWallPage->notify_coffee_used_label) {{$coffeeWallPage->notify_coffee_used_label}} @endisset</span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black cursor-help inline-block ml-1 align-middle flex-shrink-0" data-tippy-content="{{ $coffeeWallPage->notify_coffee_used_tooltip ?? '' }}" viewBox="0 0 16 16">
-                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                                <span class="text-base md:text-lg">
+                                                    @isset($coffeeWallPage->notify_coffee_used_label)
+                                                        {{ $coffeeWallPage->notify_coffee_used_label }}
+                                                    @endisset
+                                                </span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor"
+                                                    class="bi bi-exclamation-circle-fill text-black cursor-help inline-block ml-1 align-middle flex-shrink-0"
+                                                    data-tippy-content="{{ $coffeeWallPage->notify_coffee_used_tooltip ?? '' }}"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                                                 </svg>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
-                                            <h3 class=" text-2xl">@isset($coffeeWallPage->select_payment_method_label) {{$coffeeWallPage->select_payment_method_label}} @endisset
-                                            <span class="text-white">*</span></h3>
+                                            <h3 class=" text-2xl">
+                                                @isset($coffeeWallPage->select_payment_method_label)
+                                                    {{ $coffeeWallPage->select_payment_method_label }}
+                                                @endisset
+                                                <span class="text-white">*</span>
+                                            </h3>
                                         </div>
                                         <div>
-                                            <div class="flex flex-col md:flex-row gap-4 md:justify-normal justify-between md:gap-x-8 items-start md:items-center mt-2 p-1.5">
+                                            <div
+                                                class="flex flex-col md:flex-row gap-4 md:justify-normal justify-between md:gap-x-8 items-start md:items-center mt-2 p-1.5">
                                                 <div class="flex items-center gap-2">
                                                     <input id="credit-card" type="radio" value="stripe"
                                                         name="payment_method"
                                                         class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
                                                         checked>
-                                                    <label for="credit-card" class="text-base md:text-lg cursor-pointer">@isset($coffeeWallPage->credit_card_label) {{$coffeeWallPage->credit_card_label}} @endisset</label>
+                                                    <label for="credit-card" class="text-base md:text-lg cursor-pointer">
+                                                        @isset($coffeeWallPage->credit_card_label)
+                                                            {{ $coffeeWallPage->credit_card_label }}
+                                                        @endisset
+                                                    </label>
                                                 </div>
 
                                                 <div class="flex items-center gap-2">
@@ -288,7 +315,11 @@
                                                         name="payment_method"
                                                         class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 accent-blue-600"
                                                         {{ old('payment_method') === 'paypal' ? 'checked' : '' }}>
-                                                    <label for="paypal" class="text-base md:text-lg cursor-pointer">@isset($coffeeWallPage->paypal_label) {{$coffeeWallPage->paypal_label}} @endisset</label>
+                                                    <label for="paypal" class="text-base md:text-lg cursor-pointer">
+                                                        @isset($coffeeWallPage->paypal_label)
+                                                            {{ $coffeeWallPage->paypal_label }}
+                                                        @endisset
+                                                    </label>
                                                 </div>
                                             </div>
                                             @error('payment_method')
@@ -307,7 +338,8 @@
                                             <input type="text" id="name_on_card" name="name_on_card"
                                                 value="{{ old('name_on_card') }}"
                                                 class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                                            <div id="card-name-error" class="{{ $errors->has('name_on_card') ? '' : 'hidden' }}">
+                                            <div id="card-name-error"
+                                                class="{{ $errors->has('name_on_card') ? '' : 'hidden' }}">
                                                 <div class="tooltip-error shadow-lg mt-2">
                                                     @error('name_on_card')
                                                         {{ $message }}
@@ -322,7 +354,8 @@
                                             <div id="card-element" name="card_element"
                                                 class="block mt-1 border p-2.5 w-full rounded text-base md:text-lg border-gray-300">
                                             </div>
-                                            <div id="card-errors" class="{{ $errors->has('card_element') ? '' : 'hidden' }}">
+                                            <div id="card-errors"
+                                                class="{{ $errors->has('card_element') ? '' : 'hidden' }}">
                                                 <div class="tooltip-error shadow-lg mt-2">
                                                     @error('card_element')
                                                         {{ $message }}
@@ -333,7 +366,7 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <!-- Disclaimer Checkboxes -->
                                 <div class="grid grid-cols-1 gap-4 mt-6">
                                     <!-- First Disclaimer -->
@@ -343,7 +376,11 @@
                                                 name="donation_acknowledgment" value="1"
                                                 {{ old('donation_acknowledgment') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <label for="donation_acknowledgment" class="text-base md:text-lg">@isset($coffeeWallPage->donation_acknowledgment_label) {{$coffeeWallPage->donation_acknowledgment_label}} @endisset</label>
+                                            <label for="donation_acknowledgment" class="text-base md:text-lg">
+                                                @isset($coffeeWallPage->donation_acknowledgment_label)
+                                                    {{ $coffeeWallPage->donation_acknowledgment_label }}
+                                                @endisset
+                                            </label>
                                         </div>
                                         @error('donation_acknowledgment')
                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -353,10 +390,14 @@
                                     <!-- Second Disclaimer -->
                                     <div class="disclaimer-container group">
                                         <div class="flex items-start gap-2">
-                                            <input id="terms_privacy" type="checkbox" name="terms_privacy" value="1"
-                                                {{ old('terms_privacy') == '1' ? 'checked' : '' }}
+                                            <input id="terms_privacy" type="checkbox" name="terms_privacy"
+                                                value="1" {{ old('terms_privacy') == '1' ? 'checked' : '' }}
                                                 class="h-5 w-5 mt-1 flex-shrink-0 accent-blue-600" required>
-                                            <label for="terms_privacy" class="text-base md:text-lg">@isset($coffeeWallPage->agree_terms_label) {!! $coffeeWallPage->agree_terms_label !!} @endisset</label>
+                                            <label for="terms_privacy" class="text-base md:text-lg">
+                                                @isset($coffeeWallPage->agree_terms_label)
+                                                    {!! $coffeeWallPage->agree_terms_label !!}
+                                                @endisset
+                                            </label>
                                         </div>
                                         @error('terms_privacy')
                                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -466,11 +507,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                        </svg>
-                                    </div> -->
+                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                            </svg>
+                                        </div> -->
                             </div>
                             <div class="text-center">
                                 <div class="">
@@ -491,7 +532,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                             <a href=""
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">Close</a>
+                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
                         </div>
                     </div>
                 </div>
@@ -669,7 +710,8 @@
                         designationAll.checked = false;
                     }
 
-                    const anyChecked = Array.from(designationIndividuals).some((item) => item.checked);
+                    const anyChecked = Array.from(designationIndividuals).some((item) => item
+                        .checked);
                     if (!anyChecked && designationAll) {
                         designationAll.checked = true;
                     }
@@ -761,7 +803,8 @@
             // On submit, create Stripe token when paying by card
             if (form) {
                 form.addEventListener('submit', function(event) {
-                    const selectedPaymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+                    const selectedPaymentMethod = document.querySelector(
+                        'input[name="payment_method"]:checked')?.value;
 
                     // For PayPal (or no method), let the form submit normally
                     if (selectedPaymentMethod !== 'stripe') {
@@ -790,7 +833,10 @@
                         if (nameError && nameErrorText) {
                             nameError.classList.remove('hidden');
                             nameErrorText.textContent = @json(__('validation.custom.name_on_card.required_if'));
-                            nameError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            nameError.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
                         }
                         return;
                     }
@@ -802,7 +848,10 @@
                             if (cardErrors && cardErrorsText) {
                                 cardErrors.classList.remove('hidden');
                                 cardErrorsText.textContent = result.error.message;
-                                cardErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                cardErrors.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
                             }
                             return;
                         }
@@ -842,7 +891,10 @@
 
                 if (!hiddenByAncestor) {
                     const wrapper = tooltip.parentElement || tooltip;
-                    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    wrapper.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                     break;
                 }
             }

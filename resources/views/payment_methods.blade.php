@@ -29,7 +29,8 @@
                                     </div>
                                 </div>
                                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                    <a href="#" onclick="closeNotificationModal()" class="button-exp-fill w-28">Close
+                                    <a href="#" onclick="closeNotificationModal()"
+                                        class="button-exp-fill w-28">{{ $siteText['close_btn_text'] }}
                                     </a>
                                 </div>
                             </div>
@@ -214,7 +215,7 @@
                                 @endif
                             @elseif($method->gateway === 'paypal')
                                 <div class="flex items-center space-x-3">
-                                
+
                                     <div class="w-12 h-8 flex items-center justify-center p-1">
                                         <svg id="uuid-b27e1cd4-82a8-41c1-8e0b-cc5053329b51"
                                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -253,14 +254,19 @@
                                 <form action="{{ route('payment.methods.default', $method->id) }}" method="POST"
                                     class="inline">
                                     @csrf
-                                    <button type="submit" class="bg-greenXS hover:bg-greenXS text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">Make Primary</button>
+                                    <button type="submit"
+                                        class="bg-greenXS hover:bg-greenXS text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">Make
+                                        Primary</button>
                                 </form>
                             @endif
-                            <form id="delete-payment-form-{{ $method->id }}" action="{{ route('payment.methods.delete', $method->id) }}" method="POST" class="inline">
+                            <form id="delete-payment-form-{{ $method->id }}"
+                                action="{{ route('payment.methods.delete', $method->id) }}" method="POST"
+                                class="inline">
                                 @csrf
                                 @method('DELETE')
                             </form>
-                            <button type="button" onclick="showDeleteConfirmation({{ $method->id }})" class="bg-red-500 hover:bg-red-500 text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-red-500 focus:text-white active:text-white active:bg-red-500">Delete</button>
+                            <button type="button" onclick="showDeleteConfirmation({{ $method->id }})"
+                                class="bg-red-500 hover:bg-red-500 text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 hover:text-white text-center focus:bg-red-500 focus:text-white active:text-white active:bg-red-500">Delete</button>
                         </div>
                     </div>
                 @empty
@@ -286,15 +292,19 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="deleteConfirmationModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="deleteConfirmationModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeDeleteConfirmationModal()"></div>
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                onclick="closeDeleteConfirmationModal()"></div>
             <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 modal-border1">
                 <!-- Modal Header -->
                 <div class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                    <button type="button" onclick="closeDeleteConfirmationModal()" class="text-gray-400 hover:text-gray-500">
+                    <button type="button" onclick="closeDeleteConfirmationModal()"
+                        class="text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
@@ -306,11 +316,10 @@
 
                 <!-- Modal Footer -->
                 <div class="px-4 py-2 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                    <button type="button" onclick="closeDeleteConfirmationModal()" 
-                        class="button-exp-fill">
+                    <button type="button" onclick="closeDeleteConfirmationModal()" class="button-exp-fill">
                         Cancel
                     </button>
-                    <button type="button" id="confirmDeleteButton" onclick="confirmDelete()" 
+                    <button type="button" id="confirmDeleteButton" onclick="confirmDelete()"
                         class="button-exp-red-fill">
                         Delete
                     </button>
@@ -367,7 +376,8 @@
                 <!-- Payment Method Buttons -->
                 <div id="payment-method-buttons" class="space-y-3">
                     <!-- Apple Pay Button (only on macOS) -->
-                    <button type="button" id="apple-pay-button" onclick="hideNotification(); showPaymentForm('applepay')"
+                    <button type="button" id="apple-pay-button"
+                        onclick="hideNotification(); showPaymentForm('applepay')"
                         class="hidden w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="white"
                             xmlns="http://www.w3.org/2000/svg">
@@ -378,7 +388,8 @@
                     </button>
 
                     <!-- Google Pay Button -->
-                    <button type="button" id="google-pay-button" onclick="hideNotification(); checkGooglePayAndShowForm()"
+                    <button type="button" id="google-pay-button"
+                        onclick="hideNotification(); checkGooglePayAndShowForm()"
                         class="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors">
                         <span class="text-white"></span>
                         <div class="flex items-center">
@@ -525,7 +536,8 @@
                 const googlePayButton = document.getElementById('google-pay-button');
                 if (googlePayButton && !result.available && result.reason === 'account') {
                     // Optionally add a tooltip or visual indicator
-                    googlePayButton.title = 'Google Pay requires a Google account with payment methods saved in Google Wallet';
+                    googlePayButton.title =
+                        'Google Pay requires a Google account with payment methods saved in Google Wallet';
                 }
             });
         }
@@ -664,19 +676,28 @@
             const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
             const isEdge = /Edg/.test(navigator.userAgent);
             const isOpera = /OPR/.test(navigator.userAgent);
-            
+
             if (!isChrome && !isEdge && !isOpera) {
-                return { available: false, reason: 'browser' };
+                return {
+                    available: false,
+                    reason: 'browser'
+                };
             }
 
             // Check if Payment Request API is available
             if (!window.PaymentRequest) {
-                return { available: false, reason: 'api' };
+                return {
+                    available: false,
+                    reason: 'api'
+                };
             }
 
             // Check if Stripe is loaded
             if (typeof Stripe === 'undefined') {
-                return { available: false, reason: 'stripe' };
+                return {
+                    available: false,
+                    reason: 'stripe'
+                };
             }
 
             try {
@@ -697,41 +718,50 @@
 
                 const canMakePayment = await paymentRequest.canMakePayment();
                 if (canMakePayment && canMakePayment.googlePay === true) {
-                    return { available: true };
+                    return {
+                        available: true
+                    };
                 } else {
-                    return { available: false, reason: 'account' };
+                    return {
+                        available: false,
+                        reason: 'account'
+                    };
                 }
             } catch (error) {
                 console.error('Error checking Google Pay availability:', error);
-                return { available: false, reason: 'error' };
+                return {
+                    available: false,
+                    reason: 'error'
+                };
             }
         }
 
         async function checkGooglePayAndShowForm() {
             // Show loading notification
             showNotification('Checking Google Pay availability...', 'info');
-            
+
             const result = await checkGooglePayAvailability();
-            
+
             if (result.available) {
                 hideNotification();
                 showPaymentForm('googlepay');
             } else {
                 // Show specific error message based on reason
                 let errorMessage = 'Google Pay is not available. ';
-                
+
                 if (result.reason === 'browser') {
                     errorMessage += 'Please use Google Chrome, Microsoft Edge, or Opera browser.';
                 } else if (result.reason === 'api') {
                     errorMessage += 'Your browser does not support Payment Request API.';
                 } else if (result.reason === 'account') {
-                    errorMessage += 'Please make sure you have a Google account with a payment method saved in Google Wallet (wallet.google.com), and that you are signed in to Chrome.';
+                    errorMessage +=
+                        'Please make sure you have a Google account with a payment method saved in Google Wallet (wallet.google.com), and that you are signed in to Chrome.';
                 } else if (result.reason === 'stripe') {
                     errorMessage += 'Payment system is loading. Please try again in a moment.';
                 } else {
                     errorMessage += 'Unable to verify Google Pay availability. Please try again.';
                 }
-                
+
                 showNotification(errorMessage, 'error');
             }
         }
@@ -739,10 +769,10 @@
         function showPaymentForm(method) {
             // Hide payment method buttons
             document.getElementById('payment-method-buttons').classList.add('hidden');
-            
+
             // Show payment form container
             document.getElementById('payment-form-container').classList.remove('hidden');
-            
+
             if (method === 'card' || method === 'googlepay' || method === 'applepay') {
                 // Show Stripe Payment Element container
                 const stripeContainer = document.getElementById('stripe-payment-container');
@@ -1049,7 +1079,8 @@
                                 payment_method_id: setupIntent.payment_method
                             })
                         }).then(() => {
-                            window.location.href = "{{ route('payment.methods', ['lang' => request()->route('lang') ?? app()->getLocale()]) }}";
+                            window.location.href =
+                                "{{ route('payment.methods', ['lang' => request()->route('lang') ?? app()->getLocale()]) }}";
                         });
                     }
                 });
@@ -1152,7 +1183,8 @@
                                 .then(data => {
                                     if (data.success) {
                                         console.log('PayPal payment method saved:', data);
-                                        window.location.href = "{{ route('payment.methods', ['lang' => request()->route('lang') ?? app()->getLocale()]) }}";
+                                        window.location.href =
+                                            "{{ route('payment.methods', ['lang' => request()->route('lang') ?? app()->getLocale()]) }}";
                                     }
                                 })
                                 .catch(error => {
