@@ -208,7 +208,12 @@ class ProfileVehicleController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' => 'A new vehicle added to your profile',
+            'message' => getNotificationMessageText(
+                'vehicle_added_to_profile',
+                $user,
+                [],
+                'A new vehicle added to your profile'
+            ),
             'status' => 'completed',
             'notification_type' => 'vehicle'
         ]);
@@ -454,7 +459,12 @@ class ProfileVehicleController extends Controller
                 'type' => null,
                 'receiver_id' => $user->id,
                 'posted_by' => $user->id,
-                'message' => ' Vehicle removed from your profile',
+                'message' => getNotificationMessageText(
+                    'vehicle_removed_from_profile',
+                    $user,
+                    [],
+                    'Vehicle removed from your profile'
+                ),
                 'status' => 'completed',
                 'notification_type' => 'vehicle'
             ]);

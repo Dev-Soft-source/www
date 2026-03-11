@@ -207,7 +207,12 @@ class VerifyStudentController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' =>  'A new student card added to your profile',
+            'message' => getNotificationMessageText(
+                'student_card_added_to_profile',
+                $user,
+                [],
+                'A new student card added to your profile'
+            ),
             'status' => 'student_card',
             'notification_type' => 'student_card',
         ]);

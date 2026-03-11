@@ -668,7 +668,12 @@ class CardController extends Controller
                 'category' => 'system',
                 'receiver_id' => $user->id,
                 'posted_by' => $user->id,
-                'message' =>  'Card removed from your profile',
+                'message' => getNotificationMessageText(
+                    'card_removed_from_profile',
+                    $user,
+                    [],
+                    'Card removed from your profile'
+                ),
                 'status' => 'payment_option',
                 'notification_type' => 'payment_option',
             ]);

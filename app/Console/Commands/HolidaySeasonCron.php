@@ -76,7 +76,12 @@ class HolidaySeasonCron extends Command
                             'type' => null,
                             'receiver_id' => $user->id,
                             'posted_by' => $user->id,
-                            'message' =>  'Merry Christmas and Happy New Year!',
+                            'message' => getNotificationMessageText(
+                                'holiday_christmas_new_year',
+                                $user,
+                                [],
+                                'Merry Christmas and Happy New Year!'
+                            ),
                             'status' => 'christmas',
                             'notification_type' => 'christmas',
                         ]);

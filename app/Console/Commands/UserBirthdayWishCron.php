@@ -84,7 +84,12 @@ class UserBirthdayWishCron extends Command
                                 'type' => null,
                                 'receiver_id' => $user->id,
                                 'posted_by' => $user->id,
-                                'message' =>  'Happy Birthday to our BEST member!',
+                                'message' => getNotificationMessageText(
+                                    'birthday_best_member',
+                                    $user,
+                                    [],
+                                    'Happy Birthday to our BEST member!'
+                                ),
                                 'status' => 'birthday',
                                 'notification_type' => 'birthday',
                             ]);

@@ -2098,7 +2098,12 @@ class MyRideController extends Controller
                 'ride_id' => $booking->ride_id,
                 'posted_to' => $booking->id,
                 'posted_by' => $booking->ride->added_by,
-                'message' =>  'Driver cancelled your booking',
+                'message' => getNotificationMessageText(
+                    'driver_cancelled_your_booking',
+                    $booking->passenger,
+                    [],
+                    'Driver cancelled your booking'
+                ),
                 'status' => 'cancelled',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $booking->ride_detail_id,
@@ -2888,7 +2893,12 @@ class MyRideController extends Controller
                 $notification = Notification::create([
                     'ride_id' => $booking->ride_id,
                     'posted_by' => $booking->user_id,
-                    'message' =>  'Secured-cash payment code successful',
+                    'message' => getNotificationMessageText(
+                        'secured_cash_payment_code_successful',
+                        $booking->ride->driver,
+                        [],
+                        'Secured-cash payment code successful'
+                    ),
                     'status' => 'upcoming',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -2910,7 +2920,12 @@ class MyRideController extends Controller
                     'ride_id' => $booking->ride_id,
                     'posted_to' => $booking->id,
                     'posted_by' => $booking->ride->added_by,
-                    'message' =>  'Secured-cash payment code successful',
+                    'message' => getNotificationMessageText(
+                        'secured_cash_payment_code_successful',
+                        $booking->passenger,
+                        [],
+                        'Secured-cash payment code successful'
+                    ),
                     'status' => 'upcoming',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -3166,7 +3181,12 @@ class MyRideController extends Controller
                 'ride_id' => $ride->id,
                 'posted_to' => $booking->id,
                 'posted_by' => $ride->added_by,
-                'message' =>  'Your ride has been cancelled',
+                'message' => getNotificationMessageText(
+                    'your_ride_has_been_cancelled',
+                    $user,
+                    [],
+                    'Your ride has been cancelled'
+                ),
                 'status' => 'completed',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $booking->ride_detail_id,

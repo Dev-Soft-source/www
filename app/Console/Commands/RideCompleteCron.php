@@ -254,7 +254,12 @@ class RideCompleteCron extends Command
                     'posted_to' => $booking->id,
                     'posted_by' => $getRide->added_by,
                     // 'message' =>  'Review your driver',
-                    'message' =>  'How did your ride go?',
+                    'message' => getNotificationMessageText(
+                        'ride_review_prompt',
+                        $booking->passenger,
+                        [],
+                        'How did your ride go?'
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'review',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -285,7 +290,12 @@ class RideCompleteCron extends Command
                     'ride_id' => $getRide->id,
                     'posted_by' => $booking->user_id,
                     // 'message' =>  'Review your passenger',
-                    'message' =>  'How did your ride go?',
+                    'message' => getNotificationMessageText(
+                        'ride_review_prompt',
+                        $getRide->driver,
+                        [],
+                        'How did your ride go?'
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'review',
                     'ride_detail_id' => $booking->ride_detail_id,

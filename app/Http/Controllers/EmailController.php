@@ -109,7 +109,12 @@ class EmailController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' => 'A new email address added to your profile',
+            'message' => getNotificationMessageText(
+                'email_added_to_profile',
+                $user,
+                [],
+                'A new email address added to your profile'
+            ),
             'status' => 'completed',
             'notification_type' => 'upcoming'
         ]);

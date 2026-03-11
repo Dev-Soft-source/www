@@ -364,6 +364,21 @@
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Setting site text</span>
                     </router-link>
                 </li>
+                <li>
+                    <router-link :to="{ name: 'admin.notification-message-setting.index' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.notification-message-setting.index' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-white">
+                                <path d="M4 5.25A2.25 2.25 0 016.25 3h11.5A2.25 2.25 0 0120 5.25v13.5A2.25 2.25 0 0117.75 21H6.25A2.25 2.25 0 014 18.75V5.25zm3 1.5a.75.75 0 000 1.5h10a.75.75 0 000-1.5H7zm0 4a.75.75 0 000 1.5h10a.75.75 0 000-1.5H7zm0 4a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7z" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Notification messages</span>
+                    </router-link>
+                </li>
                 
                 <li>
                     <router-link :to="{ name: 'admin.success-messages-setting.index' }"
@@ -2021,7 +2036,7 @@ export default {
             // Settings
             else if ([
                 'admin.review-settings.index', 'admin.folk-ride-settings.index', 'admin.cancel-ride-settings.index',
-                'admin.pink-ride-settings.index', 'admin.referral-system-settings.index', 'admin.success-messages-setting.index', 'admin.site-text-setting.index',
+                'admin.pink-ride-settings.index', 'admin.referral-system-settings.index', 'admin.success-messages-setting.index', 'admin.site-text-setting.index', 'admin.notification-message-setting.index',
                 'admin.error-messages-setting.index', 'admin.registration-reward-settings.index'
             ].includes(routeName)) {
                 this.updateSubMenuName('settings');

@@ -3,6 +3,7 @@
 use App\Models\FooterSetting;
 use App\Models\Language;
 use App\Models\MenuDetail;
+use App\Models\NotificationMessage;
 use App\Models\SiteText;
 use Illuminate\Support\Facades\Session;
 
@@ -491,5 +492,48 @@ if (!function_exists('formatDepartureDateTime')) {
             'date' => $departureAt,
             'time' => $departureTime,
         ];
+    }
+}
+
+if (!function_exists('getNotificationMessageText')) {
+    /**
+     * Resolve a notification message template by slug for the given user/language.
+     * Stored templates can contain placeholders like {first_name}, {seats}, {code}.
+     */
+    function getNotificationMessageText(string $slug, $langOrUser = null, array $replacements = [], string $default = ''): string
+    {
+        $language = null;
+
+        if (is_object($langOrUser) && isset($langOrUser->lang)) {
+            $language = Language::where('abbreviation', $langOrUser->lang)->first();
+        } elseif (is_object($langOrUser) && isset($langOrUser->id) && get_class($langOrUser) === Language::class) {
+            $language = $langOrUser;
+        } elseif (is_numeric($langOrUser)) {
+            $language = Language::find((int) $langOrUser);
+        } elseif (is_string($langOrUser) && $langOrUser !== '') {
+            $language = Language::where('abbreviation', $langOrUser)->first();
+        }
+
+        if (!$language) {
+            $language = getDefaultLanguage(true);
+        }
+
+        $defaultLanguage = Language::where('is_default', 1)->first() ?: $language;
+        $template = NotificationMessage::with('details')
+            ->where('slug', $slug)
+            ->first();
+
+        $text = $default;
+        if ($template) {
+            $detail = $template->details->firstWhere('language_id', $language->id)
+                ?: $template->details->firstWhere('language_id', $defaultLanguage?->id);
+            $text = trim((string) ($detail?->message ?? '')) ?: $default;
+        }
+
+        foreach ($replacements as $key => $value) {
+            $text = str_replace('{' . $key . '}', (string) $value, $text);
+        }
+
+        return $text;
     }
 }

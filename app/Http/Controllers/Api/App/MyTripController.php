@@ -2464,7 +2464,12 @@ class MyTripController extends Controller
                 $notification = Notification::create([
                     'ride_id' => $booking->ride_id,
                     'posted_by' => $booking->user_id,
-                    'message' =>  'Booking cancelled',
+                    'message' => getNotificationMessageText(
+                        'booking_cancelled',
+                        $booking->ride->driver,
+                        [],
+                        'Booking cancelled'
+                    ),
                     'status' => 'cancelled',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,

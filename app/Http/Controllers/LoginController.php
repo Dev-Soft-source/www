@@ -388,7 +388,12 @@ class LoginController extends Controller
                 'category' => 'system',
                 'receiver_id' => $user->id,
                 'posted_by' => $user->id,
-                'message' =>  'Welcome to ProximaRide',
+                'message' => getNotificationMessageText(
+                    'welcome_to_proximaride',
+                    $user,
+                    [],
+                    'Welcome to ProximaRide'
+                ),
                 'status' => 'welcome',
                 'notification_type' => 'welcome',
             ]);

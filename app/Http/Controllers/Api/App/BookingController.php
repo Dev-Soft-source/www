@@ -712,8 +712,15 @@ class BookingController extends Controller
                     $notification = Notification::create([
                         'ride_id' => $request->id,
                         'posted_by' => $user->id,
-                        'message' => 'You have a new instant booking from ' . $user->first_name . "\n" . 
-                        'Seats booked: ' . numberToWords($request->seats),
+                        'message' => getNotificationMessageText(
+                            'instant_booking_new',
+                            $ride->driver,
+                            [
+                                'first_name' => $user->first_name,
+                                'seats' => numberToWords($request->seats),
+                            ],
+                            "You have a new instant booking from {first_name}\nSeats booked: {seats}"
+                        ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
                         'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -736,7 +743,12 @@ class BookingController extends Controller
                         'ride_id' => $request->id,
                         'posted_to' => $booking->id,
                         'posted_by' => $ride->added_by,
-                        'message' => 'Your booking details' . "\n" . 'Seats booked: ' . numberToWords($request->seats),
+                        'message' => getNotificationMessageText(
+                            'booking_details_with_seats',
+                            $user,
+                            ['seats' => numberToWords($request->seats)],
+                            "Your booking details\nSeats booked: {seats}"
+                        ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
                         'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -1107,8 +1119,15 @@ class BookingController extends Controller
                         $notification = Notification::create([
                             'ride_id' => $request->id,
                             'posted_by' => $user->id,
-                            'message' => 'You have a new instant booking from ' . $user->first_name . "\n" . 
-                            'Seats booked: ' . numberToWords($request->seats),
+                            'message' => getNotificationMessageText(
+                                'instant_booking_new',
+                                $ride->driver,
+                                [
+                                    'first_name' => $user->first_name,
+                                    'seats' => numberToWords($request->seats),
+                                ],
+                                "You have a new instant booking from {first_name}\nSeats booked: {seats}"
+                            ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
                             'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -1131,7 +1150,12 @@ class BookingController extends Controller
                             'ride_id' => $request->id,
                             'posted_to' => $booking->id,
                             'posted_by' => $ride->added_by,
-                            'message' => 'Your booking details' . "\n" . 'Seats booked: ' . numberToWords($request->seats),
+                            'message' => getNotificationMessageText(
+                                'booking_details_with_seats',
+                                $user,
+                                ['seats' => numberToWords($request->seats)],
+                                "Your booking details\nSeats booked: {seats}"
+                            ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
                             'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -1447,8 +1471,15 @@ class BookingController extends Controller
                 $notification = Notification::create([
                     'ride_id' => $request->id,
                     'posted_by' => $user->id,
-                    'message' => 'You have a new instant booking from ' . $user->first_name . "\n" . 
-                    'Seats booked: ' . numberToWords($request->seats),
+                    'message' => getNotificationMessageText(
+                        'instant_booking_new',
+                        $ride->driver,
+                        [
+                            'first_name' => $user->first_name,
+                            'seats' => numberToWords($request->seats),
+                        ],
+                        "You have a new instant booking from {first_name}\nSeats booked: {seats}"
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -1471,7 +1502,12 @@ class BookingController extends Controller
                     'ride_id' => $request->id,
                     'posted_to' => $booking->id,
                     'posted_by' => $ride->added_by,
-                    'message' => 'Your booking details' . "\n" . 'Seats booked: ' . numberToWords($request->seats),
+                    'message' => getNotificationMessageText(
+                        'booking_details_with_seats',
+                        $user,
+                        ['seats' => numberToWords($request->seats)],
+                        "Your booking details\nSeats booked: {seats}"
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $ride->rideDetail[0]->id,
@@ -1799,7 +1835,12 @@ class BookingController extends Controller
                         $notification = Notification::create([
                             'ride_id' => $ride->id,
                             'posted_by' => $user->id,
-                            'message' =>  $request->seats . ' seats booked',
+                            'message' => getNotificationMessageText(
+                                'seats_booked_count',
+                                $ride->driver,
+                                ['seats' => $request->seats],
+                                '{seats} seats booked'
+                            ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
                             'ride_detail_id' => $booking->ride_detail_id,
@@ -1822,7 +1863,12 @@ class BookingController extends Controller
                             'ride_id' => $ride->id,
                             'posted_to' => $booking->id,
                             'posted_by' => $ride->added_by,
-                            'message' =>  $request->seats . ' booked successfully',
+                            'message' => getNotificationMessageText(
+                                'booking_success_count',
+                                $user,
+                                ['seats' => $request->seats],
+                                '{seats} booked successfully'
+                            ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
                             'ride_detail_id' => $booking->ride_detail_id,
@@ -1976,7 +2022,12 @@ class BookingController extends Controller
                             $notification = Notification::create([
                                 'ride_id' => $ride->id,
                                 'posted_by' => $user->id,
-                                'message' =>  $request->seats . ' seats booked',
+                                'message' => getNotificationMessageText(
+                                    'seats_booked_count',
+                                    $ride->driver,
+                                    ['seats' => $request->seats],
+                                    '{seats} seats booked'
+                                ),
                                 'status' => 'completed',
                                 'notification_type' => 'upcoming',
                             'ride_detail_id' => $booking->ride_detail_id,
@@ -1999,7 +2050,12 @@ class BookingController extends Controller
                                 'ride_id' => $ride->id,
                                 'posted_to' => $booking->id,
                                 'posted_by' => $ride->added_by,
-                                'message' =>  $request->seats . ' booked successfully',
+                                'message' => getNotificationMessageText(
+                                    'booking_success_count',
+                                    $user,
+                                    ['seats' => $request->seats],
+                                    '{seats} booked successfully'
+                                ),
                                 'status' => 'completed',
                                 'notification_type' => 'upcoming',
                             'ride_detail_id' => $booking->ride_detail_id,
@@ -2080,7 +2136,12 @@ class BookingController extends Controller
                     $notification = Notification::create([
                         'ride_id' => $ride->id,
                         'posted_by' => $user->id,
-                        'message' =>  $request->seats . ' seats booked',
+                        'message' => getNotificationMessageText(
+                            'seats_booked_count',
+                            $ride->driver,
+                            ['seats' => $request->seats],
+                            '{seats} seats booked'
+                        ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
                         'ride_detail_id' => $booking->ride_detail_id,
@@ -2103,7 +2164,12 @@ class BookingController extends Controller
                         'ride_id' => $ride->id,
                         'posted_to' => $booking->id,
                         'posted_by' => $ride->added_by,
-                        'message' =>  $request->seats . ' booked successfully',
+                        'message' => getNotificationMessageText(
+                            'booking_success_count',
+                            $user,
+                            ['seats' => $request->seats],
+                            '{seats} booked successfully'
+                        ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
                         'ride_detail_id' => $booking->ride_detail_id,
@@ -2310,9 +2376,15 @@ class BookingController extends Controller
                 $notification = Notification::create([
                     'ride_id' => $request->id,
                     'posted_by' => $user->id,
-                    // 'message' =>  'You have a new booking request from' . $user->first_name . '.' . $request->seats . ' Seats booked',
-                    'message' => 'You have a new booking request from ' . $user->first_name . "\n" . 
-                    'Seats booked: ' . numberToWords($request->seats),
+                    'message' => getNotificationMessageText(
+                        'booking_request_new',
+                        $ride->driver,
+                        [
+                            'first_name' => $user->first_name,
+                            'seats' => numberToWords($request->seats),
+                        ],
+                        "You have a new booking request from {first_name}\nSeats booked: {seats}"
+                    ),
                     'status' => 'request',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -2537,8 +2609,15 @@ class BookingController extends Controller
                     $notification = Notification::create([
                         'ride_id' => $request->id,
                         'posted_by' => $user->id,
-                        'message' => 'You have a new booking request from ' . $user->first_name . "\n" . 
-                        'Seats booked: ' . numberToWords($request->seats),
+                        'message' => getNotificationMessageText(
+                            'booking_request_new',
+                            $ride->driver,
+                            [
+                                'first_name' => $user->first_name,
+                                'seats' => numberToWords($request->seats),
+                            ],
+                            "You have a new booking request from {first_name}\nSeats booked: {seats}"
+                        ),
                         'status' => 'request',
                         'notification_type' => 'upcoming',
                         'ride_detail_id' => $booking->ride_detail_id,
@@ -2715,8 +2794,15 @@ class BookingController extends Controller
             $notification = Notification::create([
                 'ride_id' => $request->id,
                 'posted_by' => $user->id,
-                'message' => 'You have a new booking request from ' . $user->first_name . "\n" . 
-                'Seats booked: ' . numberToWords($request->seats),
+                'message' => getNotificationMessageText(
+                    'booking_request_new',
+                    $ride->driver,
+                    [
+                        'first_name' => $user->first_name,
+                        'seats' => numberToWords($request->seats),
+                    ],
+                    "You have a new booking request from {first_name}\nSeats booked: {seats}"
+                ),
                 'status' => 'request',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $booking->ride_detail_id,
@@ -3011,7 +3097,12 @@ class BookingController extends Controller
                             $notification = Notification::create([
                                 'ride_id' => $ride->id,
                                 'posted_by' => $user->id,
-                                'message' =>  $request->seats . ' seats needed',
+                                'message' => getNotificationMessageText(
+                                    'seats_needed_count',
+                                    $ride->driver,
+                                    ['seats' => $request->seats],
+                                    '{seats} seats needed'
+                                ),
                                 'status' => 'request',
                                 'notification_type' => 'upcoming',
                                 'ride_detail_id' => $newBooking->ride_detail_id,
@@ -3193,7 +3284,12 @@ class BookingController extends Controller
                                 $notification = Notification::create([
                                     'ride_id' => $ride->id,
                                     'posted_by' => $user->id,
-                                    'message' =>  $request->seats . ' seats needed',
+                                    'message' => getNotificationMessageText(
+                                        'seats_needed_count',
+                                        $ride->driver,
+                                        ['seats' => $request->seats],
+                                        '{seats} seats needed'
+                                    ),
                                     'status' => 'request',
                                     'notification_type' => 'upcoming',
                                     'ride_detail_id' => $newBooking->ride_detail_id,
@@ -3287,7 +3383,12 @@ class BookingController extends Controller
                         $notification = Notification::create([
                             'ride_id' => $ride->id,
                             'posted_by' => $user->id,
-                            'message' =>  $request->seats . ' seats needed',
+                            'message' => getNotificationMessageText(
+                                'seats_needed_count',
+                                $ride->driver,
+                                ['seats' => $request->seats],
+                                '{seats} seats needed'
+                            ),
                             'status' => 'request',
                             'notification_type' => 'upcoming',
                             'ride_detail_id' => $booking->ride_detail_id,
@@ -3395,7 +3496,12 @@ class BookingController extends Controller
                             $notification = Notification::create([
                                 'ride_id' => $ride->id,
                                 'posted_by' => $user->id,
-                                'message' =>  $seats . ' seats needed',
+                                'message' => getNotificationMessageText(
+                                    'seats_needed_count',
+                                    $ride->driver,
+                                    ['seats' => $seats],
+                                    '{seats} seats needed'
+                                ),
                                 'status' => 'request',
                                 'notification_type' => 'upcoming',
                                 'ride_detail_id' => $booking->ride_detail_id,
@@ -3545,7 +3651,12 @@ class BookingController extends Controller
                                 $notification = Notification::create([
                                     'ride_id' => $ride->id,
                                     'posted_by' => $user->id,
-                                    'message' =>  $seats . ' seats needed',
+                                    'message' => getNotificationMessageText(
+                                        'seats_needed_count',
+                                        $ride->driver,
+                                        ['seats' => $seats],
+                                        '{seats} seats needed'
+                                    ),
                                     'status' => 'request',
                                     'notification_type' => 'upcoming',
                                 'ride_detail_id' => $booking->ride_detail_id,
@@ -3634,7 +3745,12 @@ class BookingController extends Controller
                         $notification = Notification::create([
                             'ride_id' => $ride->id,
                             'posted_by' => $user->id,
-                            'message' =>  $seats . ' seats needed',
+                            'message' => getNotificationMessageText(
+                                'seats_needed_count',
+                                $ride->driver,
+                                ['seats' => $seats],
+                                '{seats} seats needed'
+                            ),
                             'status' => 'request',
                             'notification_type' => 'upcoming',
                                 'ride_detail_id' => $booking->ride_detail_id,
@@ -3742,8 +3858,15 @@ class BookingController extends Controller
                 $notification1 = Notification::create([
                     'ride_id' => $existingRecord->ride_id,
                     'posted_by' => $existingRecord->user_id,
-                    'message' =>  'You have approved ' . $existingRecord->passenger->first_name . "\n" . 
-                    'Seats booked: ' . numberToWords($existingRecord->seats),
+                    'message' => getNotificationMessageText(
+                        'booking_approved_you_have_approved',
+                        $existingRecord->ride->driver,
+                        [
+                            'first_name' => $existingRecord->passenger->first_name,
+                            'seats' => numberToWords($existingRecord->seats),
+                        ],
+                        "You have approved {first_name}\nSeats booked: {seats}"
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $existingRecord->ride_detail_id,
@@ -3766,7 +3889,12 @@ class BookingController extends Controller
                     'ride_id' => $existingRecord->ride_id,
                     'posted_to' => $existingRecord->id,
                     'posted_by' => $existingRecord->ride->added_by,
-                    'message' =>  'Booking request approved by' . $existingRecord->ride->driver->first_name,
+                    'message' => getNotificationMessageText(
+                        'booking_request_approved_by',
+                        $existingRecord->passenger,
+                        ['first_name' => $existingRecord->ride->driver->first_name],
+                        'Booking request approved by {first_name}'
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $existingRecord->ride_detail_id,
@@ -3944,8 +4072,15 @@ class BookingController extends Controller
                 $notification1 = Notification::create([
                     'ride_id' => $booking->ride_id,
                     'posted_by' => $booking->user_id,
-                    'message' =>  'You have approved ' . $booking->passenger->first_name . "\n" . 
-                    'Seats booked: ' . numberToWords($booking->seats),
+                    'message' => getNotificationMessageText(
+                        'booking_approved_you_have_approved',
+                        $booking->ride->driver,
+                        [
+                            'first_name' => $booking->passenger->first_name,
+                            'seats' => numberToWords($booking->seats),
+                        ],
+                        "You have approved {first_name}\nSeats booked: {seats}"
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -3968,7 +4103,12 @@ class BookingController extends Controller
                     'ride_id' => $booking->ride_id,
                     'posted_to' => $booking->id,
                     'posted_by' => $booking->ride->added_by,
-                    'message' =>  'Booking request approved by' . $booking->ride->driver->first_name,
+                    'message' => getNotificationMessageText(
+                        'booking_request_approved_by',
+                        $booking->passenger,
+                        ['first_name' => $booking->ride->driver->first_name],
+                        'Booking request approved by {first_name}'
+                    ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $booking->ride_detail_id,
@@ -4258,7 +4398,12 @@ class BookingController extends Controller
             'ride_id' => $booking->ride_id,
             'posted_to' => $booking->id,
             'posted_by' => $booking->ride->added_by,
-            'message' =>  'Booking request declined',
+            'message' => getNotificationMessageText(
+                'booking_request_declined',
+                $booking->passenger,
+                [],
+                'Booking request declined'
+            ),
             'status' => 'reject',
             'notification_type' => 'upcoming',
             'ride_detail_id' => $booking->ride_detail_id,

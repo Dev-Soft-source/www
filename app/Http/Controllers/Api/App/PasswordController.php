@@ -79,7 +79,12 @@ class PasswordController extends Controller
             'type' => null,
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-            'message' =>  'Your password has just been changed',
+            'message' => getNotificationMessageText(
+                'password_changed',
+                $user,
+                [],
+                'Your password has just been changed'
+            ),
             'status' => 'password',
             'notification_type' => 'password',
         ]);
