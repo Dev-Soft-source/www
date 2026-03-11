@@ -84,6 +84,8 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['edit_ride_btn_label.edit_ride_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['review_label.review_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['review_label.review_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['no_reviews_label.no_reviews_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['no_reviews_label.no_reviews_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_request_heading.booking_request_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['booking_request_heading.booking_request_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['seat_requested_label.seat_requested_label_' . $language->id => ['required', 'string']]);
@@ -279,6 +281,7 @@ class RideDetailPageSettingService
             'cancel_ride_no_btn' => $this->data($request, $language, 'cancel_ride_no_btn'),
             'edit_ride_btn_label' => $this->data($request, $language, 'edit_ride_btn_label'),
             'review_label' => $this->data($request, $language, 'review_label'),
+            'no_reviews_label' => $this->data($request, $language, 'no_reviews_label'),
             'booking_request_heading' => $this->data($request, $language, 'booking_request_heading'),
             'seat_requested_label' => $this->data($request, $language, 'seat_requested_label'),
             'request_accept_label' => $this->data($request, $language, 'request_accept_label'),

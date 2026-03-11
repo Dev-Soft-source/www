@@ -61,6 +61,7 @@ class RideDetailPageSettingDetailResource extends JsonResource
             'cancel_ride_no_btn' => $this->cancel_ride_no_btn,
             'edit_ride_btn_label' => $this->edit_ride_btn_label,
             'review_label' => $this->review_label,
+            'no_reviews_label' => $this->no_reviews_label,
             'booking_request_heading' => $this->booking_request_heading,
             'seat_requested_label' => $this->seat_requested_label,
             'request_accept_label' => $this->request_accept_label,

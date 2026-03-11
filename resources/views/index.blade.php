@@ -980,7 +980,7 @@
                                                             </svg>
                                                         @else
                                                             <span
-                                                                class="font-semibold text-gray-800">{{ $findRidePage->card_section_no_reviews ?? 'No Reviews' }}</span>
+                                                                class="font-semibold text-gray-800">{{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}</span>
                                                         @endif
                                                     </div>
                                                 </div>
