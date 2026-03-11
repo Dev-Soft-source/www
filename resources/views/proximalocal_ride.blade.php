@@ -2018,9 +2018,9 @@
         var toAutocompleteProximalocalRide = null;
         var isSettingPlaceValueProximalocalRide = false;
         var isSelectingFromDropdownProximalocalRide = false;
-        var errorFromRequiredProximalocalRide = 'The origin field is required';
-        var errorToRequiredProximalocalRide = 'The destination field is required';
-        var errorCityMissingProximalocalRide = 'We could not find this city name in our records, please double-check the spelling.';
+        var errorFromRequiredProximalocalRide = @json(__('validation.custom.from.required'));
+        var errorToRequiredProximalocalRide = @json(__('validation.custom.to.required'));
+        var errorCityMissingProximalocalRide = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal
         function closeHideRideModal() {

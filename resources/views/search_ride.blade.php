@@ -1446,7 +1446,8 @@
                                                             @if ($ride->getDriverHasRatings())
                                                                 {{ number_format($ride->getDriverAverageRating(), 1) }}
                                                             @else
-                                                                No Reviews @endif
+                                                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }} 
+                                                            @endif
                                                         </span>
 
                                                         @if ($ride->getDriverHasRatings())
@@ -1461,50 +1462,7 @@
 
                                                     </div>
                                                 </div>
-                                                {{-- <div>
-                                                    <div class="flex items-center justify-between px-4">
-                                                        <p class="font-semibold">
-                                                            @isset($findRidePage->card_section_booking_fee)
-                                                                {{ $findRidePage->card_section_booking_fee }}
-                                                            @endisset
-                                                        </p>
-                                                        <p class="">
-                                                            @if (auth()->user())
-                                                                ${{ number_format(floatval($ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
-                                                            @else
-                                                                $0.00
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                    <div class="flex items-center justify-between px-4">
-                                                        <p class="font-semibold">
-                                                            @isset($findRidePage->card_section_seats_fee)
-                                                                {{ $findRidePage->card_section_seats_fee }}
-                                                            @endisset
-                                                        </p>
-                                                        <p class="">
-                                                            @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * $ride->price)), 2) }}
-                                                            @else
-                                                                $0.00
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                    <div class="flex items-center justify-between px-4">
-                                                        <p class="font-semibold">
-                                                            @isset($findRidePage->card_section_amount)
-                                                                {{ $findRidePage->card_section_amount }}
-                                                            @endisset
-                                                        </p>
-                                                        <p class="">
-                                                            @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * $ride->price) + $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
-                                                            @else
-                                                                $0.00
-                                                            @endif
-                                                        </p>
-                                                    </div>
-                                                </div> --}}
+                                                
                                             </div>
                                 </div>
                                 @if ($isPinkAndExtraCare)
@@ -1746,9 +1704,9 @@
         let toAutocomplete = null;
         let isSettingPlaceValue = false;
         let isSelectingFromDropdown = false;
-        const errorFromRequired = 'The origin is required';
-        const errorToRequired = 'The destination is required';
-        const errorCityMissing = 'We could not find this city name in our records, please double-check the spelling.';
+        var errorFromRequired = @json(__('validation.custom.from.required'));
+        var errorToRequired = @json(__('validation.custom.to.required'));
+        var errorCityMissing = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal
         function closeHideRideModal() {

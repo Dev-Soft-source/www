@@ -177,24 +177,7 @@
             @yield('content')
         </div>
 
-        {{-- <div class="hidden md:block">
-            <button type="button" onclick="toggleModal('modal-id')" class="hideLanguageIcon">
-                <div class="fixed bottom-14 right-3 z-30">
-                    <span
-                        class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gray-600/50 cursor-pointer">
-                        <span class="font-semibold text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802">
-                                </path>
-                            </svg>
-                        </span>
-                    </span>
-                </div>
-            </button>
-        </div> --}}
-        
+      
         <button type="button" data-mdb-ripple="true" data-mdb-ripple-color="light"
             class="hideTopIcon inline-block p-3 w-10 h-10 z-20 fixed bottom-2 right-5 bg-gray-600/50 text-white font-medium text-xs leading-tight uppercase rounded-full shadow-md hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-600 active:shadow-lg transition duration-150 ease-in-out"
             id="btn-back-to-top">
@@ -327,12 +310,7 @@
                 </button>
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start justify-center">
-                        <!-- <div
-                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                            </svg>
-                        </div> -->
+
                     </div>
                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                         <div class="">

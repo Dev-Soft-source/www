@@ -1991,9 +1991,9 @@
         var toAutocompletePinkRide = null;
         var isSettingPlaceValuePinkRide = false;
         var isSelectingFromDropdownPinkRide = false;
-        var errorFromRequiredPinkRide = 'The origin is required';
-        var errorToRequiredPinkRide = 'The destination is required';
-        var errorCityMissingPinkRide = 'We could not find this city name in our records, please double-check the spelling.';
+        var errorFromRequiredPinkRide = @json(__('validation.custom.from.required'));
+        var errorToRequiredPinkRide = @json(__('validation.custom.to.required'));
+        var errorCityMissingPinkRide = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal
         function closeHideRideModal() {
