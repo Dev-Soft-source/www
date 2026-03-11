@@ -91,11 +91,12 @@
                 </div>
                 <div class="p-4 sm:p-6">
                     <div class="panel-body">
-                        {{-- <div class="ride-details-heading" style="font-weight: bold; color: #2563eb; margin-bottom:4px;">Ride Detail</div> --}}
                         <chat-messages 
                             :messages="messages" 
                             :logged_in_user_id="{{ auth()->id() }}"
                             empty_chat_placeholder="{{ $chatsPage->empty_chat_placeholder ?? 'No messages yet' }}"
+                            ride_detail_header="{{ $chatsPage->ride_detail_header ?? 'Ride Detail' }}"
+                            chat_start_mark="{{ $chatsPage->chat_start_mark ?? 'This marks the start of your chat with the driver.' }}"
                             current_lang="{{ app()->getLocale() }}">
                         </chat-messages>
                     </div>

@@ -18,9 +18,15 @@ class LanguageMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        $selectedLanguage = $request->route('lang')
-            ?: $request->query('lang')
-            ?: session('selectedLanguage', config('app.locale', 'en'));
+        $routeLanguage = $request->route('lang');
+        $queryLanguage = $request->query('lang');
+        $userLanguage = Auth::guard('web')->check() ? Auth::guard('web')->user()->lang : null;
+
+        $selectedLanguage = $routeLanguage
+            ?: $queryLanguage
+            ?: session('selectedLanguage')
+            ?: $userLanguage
+            ?: config('app.locale', 'en');
 
         if ($selectedLanguage) {
             session(['selectedLanguage' => $selectedLanguage]);
@@ -33,7 +39,13 @@ class LanguageMiddleware
         App::setLocale($locale);
 
         if (Auth::guard('web')->check()) {
-            if (Auth::guard('web')->user()->admin_deactive_account === '1') {
+            $user = Auth::guard('web')->user();
+
+            if (($routeLanguage || $queryLanguage) && $user->lang !== $selectedLanguage) {
+                $user->forceFill(['lang' => $selectedLanguage])->save();
+            }
+
+            if ($user->admin_deactive_account === '1') {
                 Auth::guard('web')->logout();
                 return redirect('/');
             }

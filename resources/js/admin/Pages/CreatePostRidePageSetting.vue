@@ -628,6 +628,146 @@
                                             " v-text="validationErros.get(
                                                 `drop_off_placeholder.drop_off_placeholder_${activeLanguageId}`
                                             )
+                                            "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`stop_along_the_way_label_${activeLanguageId}`">Stop along the way label</label>
+                                                </div>
+                                                <input type="text" :name="`stop_along_the_way_label_${activeLanguageId}`"
+                                                    :id="`stop_along_the_way_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'stop_along_the_way_label'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'stop_along_the_way_label'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `stop_along_the_way_label.stop_along_the_way_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `stop_along_the_way_label.stop_along_the_way_label_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`add_stop_btn_label_${activeLanguageId}`">Add stop button label</label>
+                                                </div>
+                                                <input type="text" :name="`add_stop_btn_label_${activeLanguageId}`"
+                                                    :id="`add_stop_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'add_stop_btn_label'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'add_stop_btn_label'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `add_stop_btn_label.add_stop_btn_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `add_stop_btn_label.add_stop_btn_label_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`stop_placeholder_${activeLanguageId}`">Stop placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`stop_placeholder_${activeLanguageId}`"
+                                                    :id="`stop_placeholder_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'stop_placeholder'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'stop_placeholder'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `stop_placeholder.stop_placeholder_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `stop_placeholder.stop_placeholder_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pickup_off_placeholder_${activeLanguageId}`">Pickup / dropoff placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`pickup_off_placeholder_${activeLanguageId}`"
+                                                    :id="`pickup_off_placeholder_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'pickup_off_placeholder'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'pickup_off_placeholder'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `pickup_off_placeholder.pickup_off_placeholder_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `pickup_off_placeholder.pickup_off_placeholder_${activeLanguageId}`
+                                            )
+                                            "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`delete_stop_text_${activeLanguageId}`">Delete stop text</label>
+                                                </div>
+                                                <input type="text" :name="`delete_stop_text_${activeLanguageId}`"
+                                                    :id="`delete_stop_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'delete_stop_text'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'delete_stop_text'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `delete_stop_text.delete_stop_text_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `delete_stop_text.delete_stop_text_${activeLanguageId}`
+                                            )
                                                 "></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
@@ -1154,34 +1294,6 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`make_label_${activeLanguageId}`">Make label</label>
-                                                </div>
-                                                <input type="text" :name="`make_label_${activeLanguageId}`"
-                                                    :id="`make_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'make_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'make_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `make_label.make_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `make_label.make_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
                                                     <label :for="`make_placeholder_${activeLanguageId}`">Make
                                                         placeholder</label>
                                                 </div>
@@ -1211,34 +1323,6 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`model_label_${activeLanguageId}`">Model label</label>
-                                                </div>
-                                                <input type="text" :name="`model_label_${activeLanguageId}`"
-                                                    :id="`model_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'model_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'model_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `model_label.model_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `model_label.model_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
                                                     <label :for="`model_placeholder_${activeLanguageId}`">Model
                                                         placeholder</label>
                                                 </div>
@@ -1262,235 +1346,6 @@
                                                 )
                                             " v-text="validationErros.get(
                                                 `model_placeholder.model_placeholder_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`type_label_${activeLanguageId}`">Type label</label>
-                                                </div>
-                                                <input type="text" :name="`type_label_${activeLanguageId}`"
-                                                    :id="`type_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'type_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'type_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `type_label.type_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `type_label.type_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`year_label_${activeLanguageId}`">Year label</label>
-                                                </div>
-                                                <input type="text" :name="`year_label_${activeLanguageId}`"
-                                                    :id="`year_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'year_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'year_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `year_label.year_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `year_label.year_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`color_label_${activeLanguageId}`">Color label</label>
-                                                </div>
-                                                <input type="text" :name="`color_label_${activeLanguageId}`"
-                                                    :id="`color_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'color_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'color_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `color_label.color_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `color_label.color_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`liscense_label_${activeLanguageId}`">License
-                                                        label</label>
-                                                </div>
-                                                <input type="text" :name="`liscense_label_${activeLanguageId}`"
-                                                    :id="`liscense_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'liscense_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'liscense_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `liscense_label.liscense_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `liscense_label.liscense_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`car_type_label_${activeLanguageId}`">Car type
-                                                        label</label>
-                                                </div>
-                                                <input type="text" :name="`car_type_label_${activeLanguageId}`"
-                                                    :id="`car_type_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'car_type_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'car_type_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `car_type_label.car_type_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `car_type_label.car_type_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`electric_car_label_${activeLanguageId}`">Electric car
-                                                        label</label>
-                                                </div>
-                                                <input type="text" :name="`electric_car_label_${activeLanguageId}`"
-                                                    :id="`electric_car_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'electric_car_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'electric_car_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `electric_car_label.electric_car_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `electric_car_label.electric_car_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`hybrid_car_label_${activeLanguageId}`">Hybrid car
-                                                        label</label>
-                                                </div>
-                                                <input type="text" :name="`hybrid_car_label_${activeLanguageId}`"
-                                                    :id="`hybrid_car_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'hybrid_car_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'hybrid_car_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `hybrid_car_label.hybrid_car_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `hybrid_car_label.hybrid_car_label_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`gas_car_label_${activeLanguageId}`">Gas car
-                                                        label</label>
-                                                </div>
-                                                <input type="text" :name="`gas_car_label_${activeLanguageId}`"
-                                                    :id="`gas_car_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'gas_car_label'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'gas_car_label'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `gas_car_label.gas_car_label_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `gas_car_label.gas_car_label_${activeLanguageId}`
                                             )
                                                 "></p>
                                         </div>
@@ -3715,6 +3570,11 @@ export default {
                             this.handleInput("", language, "pick_up_placeholder");
                             this.handleInput("", language, "drop_off_label");
                             this.handleInput("", language, "drop_off_placeholder");
+                            this.handleInput("", language, "stop_along_the_way_label");
+                            this.handleInput("", language, "add_stop_btn_label");
+                            this.handleInput("", language, "stop_placeholder");
+                            this.handleInput("", language, "pickup_off_placeholder");
+                            this.handleInput("", language, "delete_stop_text");
                             this.handleInput("", language, "date_time_label");
                             this.handleInput("", language, "at_label");
                             this.handleInput("", language, "recurring_label");
@@ -3733,18 +3593,8 @@ export default {
                             this.handleInput("", language, "skip_label");
                             this.handleInput("", language, "add_vehicle_label");
                             this.handleInput("", language, "existing_label");
-                            this.handleInput("", language, "make_label");
                             this.handleInput("", language, "make_placeholder");
-                            this.handleInput("", language, "model_label");
                             this.handleInput("", language, "model_placeholder");
-                            this.handleInput("", language, "type_label");
-                            this.handleInput("", language, "year_label");
-                            this.handleInput("", language, "color_label");
-                            this.handleInput("", language, "liscense_label");
-                            this.handleInput("", language, "car_type_label");
-                            this.handleInput("", language, "electric_car_label");
-                            this.handleInput("", language, "hybrid_car_label");
-                            this.handleInput("", language, "gas_car_label");
                             this.handleInput("", language, "preferences_label");
                             this.handleInput("", language, "smoking_label");
                             this.handleInput("", language, "smoking_option1");
@@ -3958,6 +3808,31 @@ export default {
                                 "drop_off_placeholder"
                             );
                             this.handleInput(
+                                setting?.stop_along_the_way_label,
+                                setting?.language,
+                                "stop_along_the_way_label"
+                            );
+                            this.handleInput(
+                                setting?.add_stop_btn_label,
+                                setting?.language,
+                                "add_stop_btn_label"
+                            );
+                            this.handleInput(
+                                setting?.stop_placeholder,
+                                setting?.language,
+                                "stop_placeholder"
+                            );
+                            this.handleInput(
+                                setting?.pickup_off_placeholder,
+                                setting?.language,
+                                "pickup_off_placeholder"
+                            );
+                            this.handleInput(
+                                setting?.delete_stop_text,
+                                setting?.language,
+                                "delete_stop_text"
+                            );
+                            this.handleInput(
                                 setting?.date_time_label,
                                 setting?.language,
                                 "date_time_label"
@@ -4041,64 +3916,14 @@ export default {
                                 "existing_label"
                             );
                             this.handleInput(
-                                setting?.make_label,
-                                setting?.language,
-                                "make_label"
-                            );
-                            this.handleInput(
                                 setting?.make_placeholder,
                                 setting?.language,
                                 "make_placeholder"
                             );
                             this.handleInput(
-                                setting?.model_label,
-                                setting?.language,
-                                "model_label"
-                            );
-                            this.handleInput(
                                 setting?.model_placeholder,
                                 setting?.language,
                                 "model_placeholder"
-                            );
-                            this.handleInput(
-                                setting?.type_label,
-                                setting?.language,
-                                "type_label"
-                            );
-                            this.handleInput(
-                                setting?.year_label,
-                                setting?.language,
-                                "year_label"
-                            );
-                            this.handleInput(
-                                setting?.color_label,
-                                setting?.language,
-                                "color_label"
-                            );
-                            this.handleInput(
-                                setting?.liscense_label,
-                                setting?.language,
-                                "liscense_label"
-                            );
-                            this.handleInput(
-                                setting?.car_type_label,
-                                setting?.language,
-                                "car_type_label"
-                            );
-                            this.handleInput(
-                                setting?.electric_car_label,
-                                setting?.language,
-                                "electric_car_label"
-                            );
-                            this.handleInput(
-                                setting?.hybrid_car_label,
-                                setting?.language,
-                                "hybrid_car_label"
-                            );
-                            this.handleInput(
-                                setting?.gas_car_label,
-                                setting?.language,
-                                "gas_car_label"
                             );
                             this.handleInput(
                                 setting?.preferences_label,
@@ -4716,6 +4541,21 @@ export default {
                     `drop_off_placeholder.drop_off_placeholder_${language.id}`
                 ) ||
                 validationErros.has(
+                    `stop_along_the_way_label.stop_along_the_way_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `add_stop_btn_label.add_stop_btn_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `stop_placeholder.stop_placeholder_${language.id}`
+                ) ||
+                validationErros.has(
+                    `pickup_off_placeholder.pickup_off_placeholder_${language.id}`
+                ) ||
+                validationErros.has(
+                    `delete_stop_text.delete_stop_text_${language.id}`
+                ) ||
+                validationErros.has(
                     `date_time_label.date_time_label_${language.id}`
                 ) ||
                 validationErros.has(
@@ -4768,40 +4608,10 @@ export default {
                     `existing_label.existing_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `make_label.make_label_${language.id}`
-                ) ||
-                validationErros.has(
                     `make_placeholder.make_placeholder_${language.id}`
                 ) ||
                 validationErros.has(
-                    `model_label.model_label_${language.id}`
-                ) ||
-                validationErros.has(
                     `model_placeholder.model_placeholder_${language.id}`
-                ) ||
-                validationErros.has(
-                    `type_label.type_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `year_label.year_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `color_label.color_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `liscense_label.liscense_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `car_type_label.car_type_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `electric_car_label.electric_car_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `hybrid_car_label.hybrid_car_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `gas_car_label.gas_car_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `preferences_label.preferences_label_${language.id}`

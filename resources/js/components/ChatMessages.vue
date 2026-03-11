@@ -4,19 +4,16 @@
         <template v-if="hasRideDetails">
             <div style="display: flex; justify-content: center; margin-bottom: 12px;">
                 <div class="bg-green-200 px-4 py-2 rounded-md">
-                    <div class="text-xl text-gray-800 font-bold">Ride Detail</div>
+                    <div class="text-xl text-gray-800 font-bold">{{ ride_detail_header }}</div>
                     <div class="text-sm text-gray-600">{{ rideDetailsLine }}</div>
                 </div>
             </div>
         </template>
         <!-- Initial system message - shown only when no actual messages exist -->
         <div v-if="!hasActualMessages" class="text-center mb-4 px-4">
+            <p class="text-gray-500 text-sm mb-2">{{ empty_chat_placeholder }}</p>
             <p class="text-gray-600 text-sm italic">
-                This marks the start of your chat with the driver. Please avoid sharing any contact details such as
-                phone
-                numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments
-                outside the
-                ProximaRide platform.
+                {{ chat_start_mark }}
             </p>
         </div>
         <!-- Chat messages -->
@@ -41,7 +38,28 @@
 import clsx from 'clsx';
 
 export default {
-    props: ['messages', 'logged_in_user_id'],
+    props: {
+        messages: {
+            type: Array,
+            default: () => [],
+        },
+        logged_in_user_id: {
+            type: [Number, String],
+            default: null,
+        },
+        empty_chat_placeholder: {
+            type: String,
+            default: 'No messages yet',
+        },
+        ride_detail_header: {
+            type: String,
+            default: 'Ride Detail',
+        },
+        chat_start_mark: {
+            type: String,
+            default: 'This marks the start of your chat with the driver. Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.',
+        },
+    },
     mounted() {
         // Scroll to bottom on initial mount
         this.$nextTick(() => {

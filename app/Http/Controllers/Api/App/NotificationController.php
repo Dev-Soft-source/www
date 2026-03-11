@@ -203,7 +203,7 @@ class NotificationController extends Controller
             ->whereLanguageId($selectedLanguage->id)
             ->first();
 
-        return view('notifications', compact('successMessage','notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions', 'selectedLanguage', 'languages'));
+        return view('notifications', compact('successMessage','notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions'));
     }
 
     public function readNotification(Request $request){

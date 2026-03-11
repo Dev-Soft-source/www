@@ -1844,7 +1844,7 @@ class RideController extends Controller
 
     public function PostRideStore(Request $request)
     {
-        // dd($request->all());
+
         $user_id = auth()->user()->id;
         $user = User::whereId($user_id)->first();
         $rides = Ride::where('added_by', $user_id)->get();
@@ -2009,9 +2009,6 @@ class RideController extends Controller
             'from.exists' => $cityErrorMessage->city_not_in_record,
             'to.exists' => $cityErrorMessage->city_not_in_record,
         ]);
-        // if ($cityValidator->fails()) {
-        //     return back()->withErrors($cityValidator)->withInput(); // Pass errors and old input back to the view
-        // }
 
         $nowDate = date('Y-m-d');
         $getRideCount = RideDetail::whereRaw('LOWER(`departure`) LIKE ? ', ['%' . $request->from . '%'])->where('date', $nowDate)->where('default_ride', '1')->whereHas('ride', function ($q) use ($nowDate, $user_id) {
@@ -2060,16 +2057,6 @@ class RideController extends Controller
             }
         }
 
-        // dd( $request->time);
-        // Parse the date and time once and store them for reuse
-
-        // Execute the query with the formatted date and time
-        // $rides = Ride::where('added_by', $user_id)
-        //     ->whereDate('date', '<=', $formattedDate)
-        //     ->whereTime('time', '<=', $formattedTime)
-        //     ->whereTime('destination_reached_time', '>=', $formattedTime)
-        //     ->whereDate('destination_reached_date', '>=', $formattedDate)
-        //     ->first();
         $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
         $formattedTime = Carbon::createFromFormat('H:i', $request->time)->format('H:i:s');
 
