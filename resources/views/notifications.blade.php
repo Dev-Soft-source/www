@@ -63,17 +63,49 @@
         </div>
 
         <div id="notifications-info-bar" class="mb-4 rounded-lg overflow-hidden transition-all duration-300 ease-in-out">
-            <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 bg-green-500 hover:bg-green-600 text-white px-4 py-3 text-left transition-colors cursor-pointer">
+            <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 text-left transition-colors cursor-pointer" aria-expanded="false" aria-controls="notifications-info-bar-content">
                 <span class="font-medium">Stay connected – your chats live here</span>
-                <svg id="notifications-info-bar-icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg id="notifications-info-bar-icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            <div id="notifications-info-bar-content" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out">
+            <div id="notifications-info-bar-content" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out" role="region">
                 <div class="overflow-hidden">
-                    <div class="bg-white p-4 rounded-lg shadow border border-gray-100">
-                        @if ($notifications && $notifications->count() > 0)
-                            <ul class="divide-y divide-gray-100">
+                    <div class="bg-white p-4 rounded-b-lg shadow border border-t-0 border-gray-200 text-gray-700 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M4 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM4.862 4.276 3.906 6.19a.51.51 0 0 0 .497.731c.91-.073 2.35-.17 3.597-.17 1.247 0 2.688.097 3.597.17a.51.51 0 0 0 .497-.731l-.956-1.913A.5.5 0 0 0 10.691 4H5.309a.5.5 0 0 0-.447.276Z"/>
+                                    <path d="M2.52 3.515A2.5 2.5 0 0 1 4.82 2h6.362c1 0 1.904.596 2.298 1.515l.792 1.848c.075.175.21.319.38.404.5.25.855.715.965 1.262l.335 1.679c.033.161.049.325.049.49v.413c0 .814-.39 1.543-1 1.997V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.338c-1.292.048-2.745.088-4 .088s-2.708-.04-4-.088V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.892c-.61-.454-1-1.183-1-1.997v-.413a2.5 2.5 0 0 1 .049-.49l.335-1.68c.11-.546.465-1.012.964-1.261a.807.807 0 0 0 .381-.404l.792-1.848ZM4.82 3a1.5 1.5 0 0 0-1.379.91l-.792 1.847a1.8 1.8 0 0 1-.853.904.807.807 0 0 0-.43.564L1.03 8.904a1.5 1.5 0 0 0-.03.294v.413c0 .796.62 1.448 1.408 1.484 1.555.07 3.786.155 5.592.155 1.806 0 4.037-.084 5.592-.155A1.479 1.479 0 0 0 15 9.611v-.413c0-.099-.01-.197-.03-.294l-.335-1.68a.807.807 0 0 0-.43-.563 1.807 1.807 0 0 1-.853-.904l-.792-1.848A1.5 1.5 0 0 0 11.18 3H4.82Z"/>
+                                </svg>
+                            </div>
+                            <p class="flex-1 pt-1">If the message is about a ride, tapping it will take you straight to that ride's details.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <p class="flex-1 pt-1">If it's from another member (a driver or passenger), you'll be directed to the conversation in your Inbox.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0018 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 00-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                </svg>
+                            </div>
+                            <p class="flex-1 pt-1">If it's a general update from ProximaRide, it will open right here for you to read.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-lg overflow-hidden bg-white shadow border border-gray-100">
+            <div class="p-4">
+                @if ($notifications && $notifications->count() > 0)
+                    <ul class="divide-y divide-gray-100">
                                 @foreach ($notifications as $notification)
                                     @if ($notification->from || ($notification->category == 'system' && $notification->notification_type == 'welcome'))
                                         @php
@@ -147,21 +179,18 @@
                                     @endif
                                 @endforeach
                             </ul>
-                        @else
-                            <div class="text-center py-12">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                <p class="mt-4 text-gray-500 font-medium">No notifications found.</p>
-                                <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
-                            </div>
-                        @endif
+                @else
+                    <div class="text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <p class="mt-4 text-gray-500 font-medium">No notifications found.</p>
+                        <p class="text-sm text-gray-400 mt-1">You're all caught up!</p>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
 
-        
     </div>
 @endsection
 @section('script')
@@ -174,14 +203,17 @@
             notificationsInfoBarOpen = !notificationsInfoBarOpen;
             const content = document.getElementById('notifications-info-bar-content');
             const icon = document.getElementById('notifications-info-bar-icon');
+            const btn = document.querySelector('#notifications-info-bar button[aria-controls="notifications-info-bar-content"]');
             if (notificationsInfoBarOpen) {
                 content.classList.remove('grid-rows-[0fr]');
                 content.classList.add('grid-rows-[1fr]');
                 icon.style.transform = 'rotate(180deg)';
+                if (btn) btn.setAttribute('aria-expanded', 'true');
             } else {
                 content.classList.remove('grid-rows-[1fr]');
                 content.classList.add('grid-rows-[0fr]');
                 icon.style.transform = 'rotate(0deg)';
+                if (btn) btn.setAttribute('aria-expanded', 'false');
             }
         }
 
