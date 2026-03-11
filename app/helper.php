@@ -446,3 +446,50 @@ if (!function_exists('isNorthAmericanNumber')) {
         return str_starts_with($phoneNumber, '+1');
     }
 }
+
+if (!function_exists('formatDepartureDateTime')) {
+    /**
+     * Format departure date and time with locale support
+     * 
+     * @param string|null $date The departure date
+     * @param object|null $selectedLanguage The selected language object
+     * @param object|null $rideDetailPage The ride detail page settings object
+     * @return array Returns array with 'dateLabel', 'timeLabel', 'date', 'time' keys
+     */
+    function formatDepartureDateTime($date, $selectedLanguage = null, $rideDetailPage = null)
+    {
+        // Get date locale from selected language or fallback to app locale
+        $dateLocale = optional($selectedLanguage)->locale
+            ?? optional($selectedLanguage)->abbreviation
+            ?? app()->getLocale();
+
+        // Parse the date with locale support
+        $departureAt = $date
+            ? \Carbon\Carbon::parse($date)->locale($dateLocale)
+            : null;
+
+        // Format the date in translated format
+        $departureDateLabel = $departureAt
+            ? $departureAt->translatedFormat('F d, Y')
+            : 'N/A';
+
+        // Format the time
+        $departureTime = $departureAt
+            ? $departureAt->format('h:i A')
+            : null;
+
+        // Handle special cases for noon and midnight
+        $departureTimeLabel = $departureTime === '12:00 PM'
+            ? (optional($rideDetailPage)->noon_label ?? 'Noon')
+            : ($departureTime === '12:00 AM' 
+                ? (optional($rideDetailPage)->midnight_label ?? 'Midnight') 
+                : $departureTime);
+
+        return [
+            'dateLabel' => $departureDateLabel,
+            'timeLabel' => $departureTimeLabel ?? 'N/A',
+            'date' => $departureAt,
+            'time' => $departureTime,
+        ];
+    }
+}

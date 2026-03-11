@@ -77,10 +77,16 @@ class FindRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['search_section_recent_searches.search_section_recent_searches_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['card_section_at_label.card_section_at_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['card_section_at_label.card_section_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['pickup_at_label.pickup_at_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['pickup_at_label.pickup_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['dropoff_at_label.dropoff_at_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['dropoff_at_label.dropoff_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['card_section_seats_left.card_section_seats_left_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['card_section_seats_left.card_section_seats_left_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['card_section_per_seat.card_section_per_seat_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['card_section_per_seat.card_section_per_seat_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['total_seats_label.total_seats_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['total_seats_label.total_seats_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['heading_ride_card_section.heading_ride_card_section_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['heading_ride_card_section.heading_ride_card_section_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 // $validationRule = array_merge($validationRule, ['card_section_booked.card_section_booked_' . $language->id => ['required', 'string']]);
@@ -219,8 +225,11 @@ class FindRidePageSettingService
             'card_section_from_label' => $this->data($request, $language, 'card_section_from_label'),
             'card_section_to_label' => $this->data($request, $language, 'card_section_to_label'),
             'card_section_at_label' => $this->data($request, $language, 'card_section_at_label'),
+            'pickup_at_label' => $this->data($request, $language, 'pickup_at_label'),
+            'dropoff_at_label' => $this->data($request, $language, 'dropoff_at_label'),
             'card_section_seats_left' => $this->data($request, $language, 'card_section_seats_left'),
             'card_section_per_seat' => $this->data($request, $language, 'card_section_per_seat'),
+            'total_seats_label' => $this->data($request, $language, 'total_seats_label'),
             'heading_ride_card_section' => $this->data($request, $language, 'heading_ride_card_section'),
             'card_section_booked' => $this->data($request, $language, 'card_section_booked'),
             'card_section_seats' => $this->data($request, $language, 'card_section_seats'),

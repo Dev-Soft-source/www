@@ -150,6 +150,25 @@ return [
             'email' => 'Mangyaring maglagay ng wastong email address, tulad ng name@example.com.',
             'unique' => 'May umiiral nang account gamit ang email address na ito.',
         ],
+        'package' => [
+            'required' => 'Kinakailangan ang package.',
+        ],
+        'custom_amount' => [
+            'required' => 'Kinakailangan ang custom na halaga.',
+        ],
+        'name' => [
+            'required' => 'Kinakailangan ang pangalan.',
+        ],
+        'payment_method' => [
+            'required' => 'Kinakailangan ang paraan ng pagbabayad.',
+            'in' => 'Hindi wasto ang paraan ng pagbabayad.',
+        ],
+        'donation_acknowledgment' => [
+            'required' => 'Kinakailangan ang pagkumpirma ng donasyon.',
+        ],
+        'terms_privacy' => [
+            'required' => 'Kinakailangan ang pagsang-ayon sa mga tuntunin at privacy.',
+        ],
         'old_email' => [
             'required' => 'Kinakailangan ang kasalukuyang email.',
             'email' => 'Ang kasalukuyang email ay hindi isang wastong email address.',

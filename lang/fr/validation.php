@@ -150,6 +150,25 @@ return [
             'email' => 'Veuillez saisir une adresse e-mail valide, par exemple name@example.com.',
             'unique' => 'Un compte avec cette adresse e-mail existe déjà.',
         ],
+        'package' => [
+            'required' => 'Le forfait est obligatoire.',
+        ],
+        'custom_amount' => [
+            'required' => 'Le montant personnalisé est obligatoire.',
+        ],
+        'name' => [
+            'required' => 'Le nom est obligatoire.',
+        ],
+        'payment_method' => [
+            'required' => 'Le mode de paiement est obligatoire.',
+            'in' => 'Le mode de paiement est invalide.',
+        ],
+        'donation_acknowledgment' => [
+            'required' => 'La reconnaissance du don est obligatoire.',
+        ],
+        'terms_privacy' => [
+            'required' => 'Les conditions et la politique de confidentialité sont obligatoires.',
+        ],
         'old_email' => [
             'required' => "L'adresse e-mail actuelle est obligatoire.",
             'email' => "L'adresse e-mail actuelle n'est pas une adresse e-mail valide.",

@@ -91,15 +91,15 @@
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                             <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
-                                class="inline-flex w-28 justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
-                                Log in
+                                class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
+                                {{ $siteText['login_btn_text'] ?? 'Log in' }}
                             </a>
-                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="inline-flex w-28 justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
-                                Sign up
+                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="inline-flex justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS">
+                                {{ $siteText['signup_btn_text'] ?? 'Sign up' }}
                             </a>
                             <button onclick="closeModal()"
-                                class="inline-flex w-28 justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
-                                Close
+                                class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400">
+                                {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
                         </div>
                     </div>
@@ -445,7 +445,7 @@
                                             @php $segmentPickup = $ride->rideDetail->first()?->pickup ?? $ride->pickup; @endphp
                                             @if(!empty($segmentPickup))
                                                 <p class="text-sm mt-2">
-                                                    Pick-up at: {{ $segmentPickup }}
+                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                 </p>
                                             @endif
                                         </div>
@@ -474,7 +474,7 @@
                                             @php $segmentDropoff = $ride->rideDetail->first()?->dropoff ?? $ride->dropoff; @endphp
                                             @if(!empty($segmentDropoff))
                                                 <p class="text-sm mt-2">
-                                                    Drop-off at: {{ $segmentDropoff }}
+                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
                                                 </p>
                                             @endif
                                         </div>
@@ -482,22 +482,17 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div class="mt-4 order-1 md:order-2">
-                            <p class="whitespace-nowrap font-semibold">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                @isset($rideDetailPage->at_label)
-                                    {{ $rideDetailPage->at_label }}
-                                @endisset
-                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
-                            </p>
-                        </div> --}}
+
                         <div class="mt-4 order-1 md:order-2">
+                            @php
+                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                            @endphp
                             <p class="whitespace-nowrap font-semibold">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('l, F j, Y') }}
-                                @isset($rideDetailPage->at_label)
-                                    {{ $rideDetailPage->at_label }}
-                                @endisset
-                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                {{ $departureDateLabel }}
+                                {{ $rideDetailPage->at_label }}
+                                {{ $departureTimeLabel ?? 'N/A' }}
                             </p>
                         </div>
                     </div>
@@ -571,7 +566,7 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl">
-                                Booking Price:
+                                {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
                             <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail->first()?->price }}
                                 @isset($rideDetailPage->per_seat_label)
@@ -584,9 +579,7 @@
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT items-baseline">
-                                @isset($rideDetailPage->payment_method_label)
-                                    {{ $rideDetailPage->payment_method_label }}
-                                @endisset
+                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                                 <span class="text-lg text-primary font-normal inline-block cursor-help" style="font-family: 'Roboto', sans-serif;"
                                     @if (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
@@ -598,7 +591,8 @@
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT items-baseline">
-                                    Booking Method:
+                                    
+                                    {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
@@ -1292,7 +1286,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($needsVerifiedPhoneForPinkExtra)
                                         <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()"
@@ -1308,7 +1302,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($needsPhoneVerification)
                                         <button type="button" onclick="showPhoneVerificationModal()"
@@ -1324,7 +1318,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($showPhotoIdRequiredForBooking)
                                         <button type="button" onclick="showPhotoIdRequiredModal()"
@@ -1340,7 +1334,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @else
                                         <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
@@ -1358,8 +1352,7 @@
                                                             alt="">
                                                     @endif
                                                     <span class="font-medium text-xl">
-                                                        Book Your Seats
-                                                        <!-- {{ $ride->booking_method->name }} -->
+                                                        {{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}
                                                     </span>
                                                 @endisset
                                             </label>

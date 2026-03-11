@@ -395,9 +395,15 @@
                             @endif
                         </div>
                         <div class="mt-4 order-1 md:order-2">
+                            @php
+                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                            @endphp
                             <p class="whitespace-nowrap font-semibold">
-                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }} at
-                                {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                {{ $departureDateLabel }}
+                                {{ $rideDetailPage->at_label }}
+                                {{ $departureTimeLabel ?? 'N/A' }}
                             </p>
                         </div>
                     </div>
@@ -425,11 +431,7 @@
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
-                                @isset($rideDetailPage->payment_method_label)
-                                    {{ $rideDetailPage->payment_method_label }}
-                                @else
-                                    Payment method:
-                                @endisset
+                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                                 <span class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
                             </h4>
                         </div>

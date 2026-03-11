@@ -496,6 +496,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`total_seats_label_${activeLanguageId}`"
+                                                        >Total seats label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`total_seats_label_${activeLanguageId}`"
+                                                    :id="`total_seats_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'total_seats_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'total_seats_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `total_seats_label.total_seats_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `total_seats_label.total_seats_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`seats_left_label_${activeLanguageId}`"
                                                         >Seats left label</label
                                                     >
@@ -672,6 +716,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`pickup_at_label_${activeLanguageId}`"
+                                                        >Pick-up at label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`pickup_at_label_${activeLanguageId}`"
+                                                    :id="`pickup_at_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'pickup_at_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pickup_at_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `pickup_at_label.pickup_at_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `pickup_at_label.pickup_at_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`dropoff_label_${activeLanguageId}`"
                                                         >Drop off label</label
                                                     >
@@ -706,6 +794,50 @@
                                                 v-text="
                                                     validationErros.get(
                                                         `dropoff_label.dropoff_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`dropoff_at_label_${activeLanguageId}`"
+                                                        >Drop-off at label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`dropoff_at_label_${activeLanguageId}`"
+                                                    :id="`dropoff_at_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'dropoff_at_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'dropoff_at_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `dropoff_at_label.dropoff_at_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `dropoff_at_label.dropoff_at_label_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -976,7 +1108,51 @@
                                                 "
                                             ></p>
                                         </div>
-                                        
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`book_seats_btn_label_${activeLanguageId}`"
+                                                        >Book your seats label (Web)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`book_seats_btn_label_${activeLanguageId}`"
+                                                    :id="`book_seats_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'book_seats_btn_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'book_seats_btn_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -4495,6 +4671,7 @@ export default {
                             this.handleInput("", language, "payment_method_label");
                             this.handleInput("", language, "booking_price_label");
                             this.handleInput("", language, "booking_method_label");
+                            this.handleInput("", language, "total_seats_label");
                             this.handleInput("", language, "booking_type_label");
                             this.handleInput("", language, "cancellation_policy_label");
                             this.handleInput("", language, "luggage_label");
@@ -4504,7 +4681,9 @@ export default {
                             this.handleInput("", language, "per_seat_label");
                             this.handleInput("", language, "pickup_dropoff_info_heading");
                             this.handleInput("", language, "pickup_label");
+                            this.handleInput("", language, "pickup_at_label");
                             this.handleInput("", language, "dropoff_label");
+                            this.handleInput("", language, "dropoff_at_label");
                             this.handleInput("", language, "description_label");
                             this.handleInput("", language, "ride_features_label");
                             this.handleInput("", language, "ride_seat_label");
@@ -4512,6 +4691,7 @@ export default {
                             this.handleInput("", language, "ride_canceller_by_driver");
                             this.handleInput("", language, "ride_completed_text");
                             this.handleInput("", language, "book_seat_btn_label");
+                            this.handleInput("", language, "book_seats_btn_label");
                             this.handleInput("", language, "no_seat_available_label");
                             this.handleInput("", language, "no_ride_found_message");
                             this.handleInput("", language, "cancel_booking_btn_label");
@@ -4687,6 +4867,11 @@ export default {
                                 "pets_label"
                             );
                             this.handleInput(
+                                setting?.total_seats_label,
+                                setting?.language,
+                                "total_seats_label"
+                            );
+                            this.handleInput(
                                 setting?.seats_left_label,
                                 setting?.language,
                                 "seats_left_label"
@@ -4707,9 +4892,19 @@ export default {
                                 "pickup_label"
                             );
                             this.handleInput(
+                                setting?.pickup_at_label,
+                                setting?.language,
+                                "pickup_at_label"
+                            );
+                            this.handleInput(
                                 setting?.dropoff_label,
                                 setting?.language,
                                 "dropoff_label"
+                            );
+                            this.handleInput(
+                                setting?.dropoff_at_label,
+                                setting?.language,
+                                "dropoff_at_label"
                             );
                             this.handleInput(
                                 setting?.description_label,
@@ -4745,6 +4940,11 @@ export default {
                                 setting?.book_seat_btn_label,
                                 setting?.language,
                                 "book_seat_btn_label"
+                            );
+                            this.handleInput(
+                                setting?.book_seats_btn_label,
+                                setting?.language,
+                                "book_seats_btn_label"
                             );
                             this.handleInput(
                                 setting?.instant_btn_label,
@@ -5169,6 +5369,9 @@ export default {
                     `pets_label.pets_label_${language.id}`
                 ) ||
                 validationErros.has(
+                    `total_seats_label.total_seats_label_${language.id}`
+                ) ||
+                validationErros.has(
                     `seats_left_label.seats_left_label_${language.id}`
                 ) ||
                 validationErros.has(
@@ -5181,7 +5384,13 @@ export default {
                     `pickup_label.pickup_label_${language.id}`
                 ) ||
                 validationErros.has(
+                    `pickup_at_label.pickup_at_label_${language.id}`
+                ) ||
+                validationErros.has(
                     `dropoff_label.dropoff_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `dropoff_at_label.dropoff_at_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `description_label.description_label_${language.id}`
@@ -5203,6 +5412,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `book_seat_btn_label.book_seat_btn_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `book_seats_btn_label.book_seats_btn_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `instant_btn_label.instant_btn_label_${language.id}`

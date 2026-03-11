@@ -150,6 +150,25 @@ return [
             'email' => '请输入有效的电子邮箱地址，例如 name@example.com。',
             'unique' => '该电子邮箱地址已存在账户。',
         ],
+        'package' => [
+            'required' => '套餐为必填项。',
+        ],
+        'custom_amount' => [
+            'required' => '自定义金额为必填项。',
+        ],
+        'name' => [
+            'required' => '姓名为必填项。',
+        ],
+        'payment_method' => [
+            'required' => '支付方式为必填项。',
+            'in' => '支付方式无效。',
+        ],
+        'donation_acknowledgment' => [
+            'required' => '捐赠确认为必填项。',
+        ],
+        'terms_privacy' => [
+            'required' => '必须同意条款和隐私政策。',
+        ],
         'old_email' => [
             'required' => '当前电子邮箱为必填项。',
             'email' => '当前电子邮箱不是有效的电子邮箱地址。',

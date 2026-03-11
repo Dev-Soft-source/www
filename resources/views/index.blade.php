@@ -27,11 +27,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                            </svg>
+                                        </div> -->
                                 </div>
                                 <div class="text-center w-full">
                                     <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -66,11 +66,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto h-16 w-16">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </div> -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        </div> -->
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -274,13 +274,13 @@
                                             {{ $homePage->section1_pink_rides_label }}
                                         @endisset
                                     </h3>
-                                    
+
                                     <p
                                         class="text-black text-justify font-semibold mt-4 lg:text-lg md:text-base text-base">
                                         @isset($homePage->section1_pink_rides_description)
                                             {!! $homePage->section1_pink_rides_description !!}
                                         @endisset
-                                    </p>                                    
+                                    </p>
                                 </div>
                             </div>
                         </a>
@@ -567,17 +567,24 @@
                                             id="ride-{{ $ride->id }}">
                                             <div
                                                 class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 px-4">
+                                                @php
+                                                    $departureDateTime = formatDepartureDateTime(
+                                                        $ride->date,
+                                                        $selectedLanguage ?? null,
+                                                        $rideDetailPage ?? null,
+                                                    );
+                                                    $departureDateLabel = $departureDateTime['dateLabel'];
+                                                    $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                @endphp
                                                 <p class="flex items-center space-x-2 font-semibold">
-                                                    {{ \Carbon\Carbon::parse($ride->date)->format('l, F d, Y') }}
-                                                    @isset($findRidePage->card_section_at_label)
-                                                        {{ $findRidePage->card_section_at_label }}
-                                                    @endisset
-                                                    {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                    {{ $departureDateLabel }}
+                                                    {{ $rideDetailPage->at_label }}
+                                                    {{ $departureTimeLabel ?? 'N/A' }}
                                                 </p>
                                                 <div class="mt-8">
                                                     <div>
                                                         <p class="font-medium">
-                                                            Total {{ $ride->seats }} seats</p>
+                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
                                                     </div>
                                                     <p class="text-xl font-semibold text-primary">
                                                         ${{ number_format(floatval($defaultRideDetail ? $defaultRideDetail->price : 0), 2) }}
@@ -603,12 +610,13 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">From</div>
-                                                                <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                <div class="font-bold text-black">{{$rideDetailPage->from_label ?? 'From'}}</div>
+                                                                <div
+                                                                    class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $from }}.
-                                                                    @if(optional($ride)->pickup)
+                                                                    @if (optional($ride)->pickup)
                                                                         <span class="text-sm text-gray-700">
-                                                                            Pick-up at: {{ $ride->pickup }}
+                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -626,12 +634,13 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">To</div>
-                                                                <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                <div class="font-bold text-black">{{$rideDetailPage->to_label ?? 'To'}}</div>
+                                                                <div
+                                                                    class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $to }}.
-                                                                    @if(optional($ride)->dropoff)
+                                                                    @if (optional($ride)->dropoff)
                                                                         <span class="text-sm text-gray-700">
-                                                                            Drop-off at: {{ $ride->dropoff }}
+                                                                            {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -677,233 +686,233 @@
                                                             : $iconPlaceholder;
                                                     };
                                                 @endphp
-                                                <div
-                                                    class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
-                                                    <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
-                                                        <img class="w-full h-full object-cover rounded-full"
-                                                            src="{{ $ride->car_image ?? $iconPlaceholder }}"
-                                                            alt="">
-                                                    </div>
-                                                    <div class="flex items-center space-x-1">
-                                                        @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->booking_option1) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->booking_option2) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->payment_methods_option2) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->payment_methods_option3) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->payment_methods_option4) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if ($ride->smoke == ($findRidePage->smoking_option1->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->smoking_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->smoking_option1) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->smoking_option2) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->animals_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->pets_allowed_option1) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->pets_allowed_option2) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->pets_allowed_option3) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->luggage_option1) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->luggage_option2) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->luggage_option3) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->luggage_option4) }}"
-                                                                    alt=""></span>
-                                                        @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->luggage_option5) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option1_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option1) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option2_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option2) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option3_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option3) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option8_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option8) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option9_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option9) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option10_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option10) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option11_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option11) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option12_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option12) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option13_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option13) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option14_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option14) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option15_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option15) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option16_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($findRidePage->ride_features_option16) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option4_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->features_option4) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option5_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->features_option5) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option6_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->features_option6) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <span class="inline-block cursor-help"
-                                                                data-tippy-content="{{ $postRidePage->features_option7_tooltip }}"><img
-                                                                    class="w-8 h-8"
-                                                                    src="{{ $iconSrc($postRidePage->features_option7) }}"
-                                                                    alt=""></span>
-                                                        @endif
-                                                    </div>
-                                                </div> -->
+                                                        <div
+                                                            class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
+                                                            <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
+                                                                <img class="w-full h-full object-cover rounded-full"
+                                                                    src="{{ $ride->car_image ?? $iconPlaceholder }}"
+                                                                    alt="">
+                                                            </div>
+                                                            <div class="flex items-center space-x-1">
+                                                                @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->booking_option1) }}"
+                                                                            alt=""></span>
+@elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->booking_option2) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option2) }}"
+                                                                            alt=""></span>
+@elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option3) }}"
+                                                                            alt=""></span>
+@elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option4) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if ($ride->smoke == ($findRidePage->smoking_option1->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->smoking_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->smoking_option1) }}"
+                                                                            alt=""></span>
+@elseif ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->smoking_option2) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->animals_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option1) }}"
+                                                                            alt=""></span>
+@elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option2) }}"
+                                                                            alt=""></span>
+@elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option3) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->luggage_option1) }}"
+                                                                            alt=""></span>
+@elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->luggage_option2) }}"
+                                                                            alt=""></span>
+@elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->luggage_option3) }}"
+                                                                            alt=""></span>
+@elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->luggage_option4) }}"
+                                                                            alt=""></span>
+@elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->luggage_option5) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option1_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option1) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option2_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option2) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option3_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option3) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option8_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option8) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option9_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option9) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option10_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option10) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option11_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option11) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option12_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option12) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option13_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option13) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option14_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option14) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option15_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option15) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option16_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($findRidePage->ride_features_option16) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option4_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->features_option4) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option5_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->features_option5) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option6_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->features_option6) }}"
+                                                                            alt=""></span>
+    @endif
+                                                                @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
+    <span class="inline-block cursor-help"
+                                                                        data-tippy-content="{{ $postRidePage->features_option7_tooltip }}"><img
+                                                                            class="w-8 h-8"
+                                                                            src="{{ $iconSrc($postRidePage->features_option7) }}"
+                                                                            alt=""></span>
+    @endif
+                                                            </div>
+                                                        </div> -->
                                             </div>
                                             <div
                                                 class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
                                                 <div class="flex items-center justify-between p-4 w-full">
                                                     <div class="flex items-center space-x-2">
                                                         <!-- <div class="w-12 h-12 rounded-full overflow-hidden">
-                                                            <img class="w-full h-full object-contain"
-                                                                src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}"
-                                                                alt="">
-                                                        </div> -->
+                                                                    <img class="w-full h-full object-contain"
+                                                                        src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}"
+                                                                        alt="">
+                                                                </div> -->
                                                         <div class="text-center ml-4">
                                                             <p class="font-semibold">
                                                                 {{-- @isset($findRidePage->card_section_driver)
@@ -970,7 +979,8 @@
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
                                                         @else
-                                                            <span class="font-semibold text-gray-800">{{ $findRidePage->card_section_no_reviews ?? 'No Reviews' }}</span>
+                                                            <span
+                                                                class="font-semibold text-gray-800">{{ $findRidePage->card_section_no_reviews ?? 'No Reviews' }}</span>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -2151,8 +2161,8 @@
 
             // Validate and show tooltip on blur if no valid place was selected
             document.getElementById('fromInput').addEventListener('blur', function() {
-                 
-                 
+
+
                 // Don't validate if we're programmatically setting the value or selecting from dropdown
                 if (isSettingPlaceValue || isSelectingFromDropdown) {
                     return;
@@ -2166,13 +2176,15 @@
                     let currentValue = this.value.trim();
                     const fromInputError = document.getElementById('fromInputError');
 
-                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !==
+                            selectedFromPlace.value)) {
                         await resolveTypedCityValue(currentValue, 'from');
                         currentValue = this.value.trim();
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                    if (currentValue === '' || !selectedFromPlace || currentValue !==
+                        selectedFromPlace.value) {
                         // Clear the selection if invalid
                         selectedFromPlace = null;
 
@@ -2180,7 +2192,8 @@
                         if (currentValue !== '' && toInputError) {
                             const tooltipError = fromInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorCityRequrired :
+                                tooltipError.textContent = currentValue === '' ?
+                                    errorCityRequrired :
                                     errorCityMissing;
                             }
                             fromInputError.classList.remove('hidden');
@@ -2209,7 +2222,8 @@
                     let currentValue = this.value.trim();
                     const toInputError = document.getElementById('toInputError');
 
-                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace
+                            .value)) {
                         await resolveTypedCityValue(currentValue, 'to');
                         currentValue = this.value.trim();
                     }
@@ -2224,7 +2238,8 @@
                         if (currentValue !== '' && toInputError) {
                             const tooltipError = toInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorCityRequrired :
+                                tooltipError.textContent = currentValue === '' ?
+                                    errorCityRequrired :
                                     errorCityMissing;
                             }
                             toInputError.classList.remove('hidden');
@@ -2549,7 +2564,7 @@
                     const tooltipError = fromInputError.querySelector('.tooltip-error');
                     if (tooltipError) {
                         tooltipError.textContent = fromValue === '' ? errorCityRequrired :
-                        errorCityMissing; // Show required error if empty, otherwise show invalid error
+                            errorCityMissing; // Show required error if empty, otherwise show invalid error
                     }
                     fromInputError.classList.remove('hidden');
                 }
@@ -2562,7 +2577,7 @@
                     const tooltipError = toInputError.querySelector('.tooltip-error');
                     if (tooltipError) {
                         tooltipError.textContent = toValue === '' ? errorCityRequrired :
-                        errorCityMissing; // Show required error if empty, otherwise show invalid error
+                            errorCityMissing; // Show required error if empty, otherwise show invalid error
                     }
                     toInputError.classList.remove('hidden');
                 }

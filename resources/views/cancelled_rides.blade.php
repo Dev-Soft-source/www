@@ -34,13 +34,17 @@
                                                 <a href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
                                                     <div class=" rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                                         <div class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
+                                                            @php
+                                                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                            @endphp
                                                             <p class="flex items-center space-x-2 w-full font-semibold text-left">
-                                                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                                                @isset($rideDetailPage->card_section_at_label)
-                                                                    {{ $rideDetailPage->card_section_at_label }}
-                                                                @endisset
-                                                                {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }} at {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                                {{ $departureDateLabel }}
+                                                                {{ $rideDetailPage->at_label }}
+                                                                {{ $departureTimeLabel ?? 'N/A' }}
                                                             </p>
+
                                                             <div class="flex justify-end w-full">
                                                                 <p class="font-medium text-red-500 bg-red-100 px-2 rounded">Cancelled</p>
                                                             </div>
@@ -68,7 +72,7 @@
                                                                                     {{ $from }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Pick-up at: {{ $ride->pickup }}
+                                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
@@ -94,7 +98,7 @@
                                                                                     {{ $to }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Drop-off at: {{ $ride->dropoff }}
+                                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
@@ -104,7 +108,7 @@
                                                             <div class="mt-1 md:mt-4 order-1 md:order-2">
                                                                 <div class="pr-8">
                                                                     <p class="font-medium">
-                                                                        Total {{ $ride->seats }} seats</p>
+                                                                        {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
                                                                 </div>
                                                                 <p class="text-lg md:text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }} <small>
                                                                     @isset($rideDetailPage->card_section_per_seat)

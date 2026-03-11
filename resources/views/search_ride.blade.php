@@ -29,11 +29,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div class="mx-auto h-16 w-16 flex-shrink-0 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </div> -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div> -->
                             </div>
                             <div class="mt-4 w-full">
                                 <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -100,11 +100,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                        </svg>
-                                    </div> -->
+                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                            </svg>
+                                        </div> -->
                             </div>
                             <div class="text-center">
 
@@ -133,11 +133,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                </svg>
+                                            </div> -->
                             </div>
                             <div class="text-center">
                                 <div class="w-full">
@@ -199,7 +199,9 @@
                                 <div class="bg-white p-4 ">
                                     <div class="divide-y mb-2">
                                         @php
-                                        $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
+                                            $features_check = isset($_GET['features'])
+                                                ? explode(';', $_GET['features'])
+                                                : [];
                                         @endphp
                                         @isset($findRidePage->ride_features_option1->features_setting_id)
                                             <div class="flex items-start justify-between p-3">
@@ -222,13 +224,13 @@
                                                         {{ $findRidePage->ride_features_option2->name }}
                                                     </span>
                                                     <!-- <div class="sups">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                                        viewBox="0 0 16 16">
-                                                                        <path
-                                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                                    </svg>
-                                                                </div> -->
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                                                viewBox="0 0 16 16">
+                                                                                <path
+                                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                                            </svg>
+                                                                        </div> -->
                                                 </label>
                                                 <input id="Extra+" type="checkbox"
                                                     value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
@@ -276,13 +278,15 @@
                                                 <select id="driverAge" name=""
                                                     class="bg-gray-100 text-base md:text-lg border-0 text-black rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
+                                                    <option value="0"
+                                                        {{ $request->driver_age == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_age_placeholder)
                                                             {{ $findRidePage->driver_age_placeholder }}
                                                         @endisset
                                                     </option>
                                                     @foreach ($driverAgeOptions as $age)
-                                                        <option value="{{ $age }}" {{ $request->driver_age == $age ? 'selected' : '' }}>
+                                                        <option value="{{ $age }}"
+                                                            {{ $request->driver_age == $age ? 'selected' : '' }}>
                                                             +{{ $age }}
                                                         </option>
                                                     @endforeach
@@ -308,13 +312,15 @@
                                                 <select id="driverRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
+                                                    <option value="0"
+                                                        {{ $request->driver_rating == 0 ? 'selected' : '' }}>
                                                         @isset($findRidePage->driver_rating_placeholder)
                                                             {{ $findRidePage->driver_rating_placeholder }}
                                                         @endisset
                                                     </option>
                                                     @foreach ($driverRatingOptions as $value => $text)
-                                                        <option value="{{ $value }}" {{ $request->driver_rating == $value ? 'selected' : '' }}>
+                                                        <option value="{{ $value }}"
+                                                            {{ $request->driver_rating == $value ? 'selected' : '' }}>
                                                             {{ $text }}
                                                         </option>
                                                     @endforeach
@@ -365,7 +371,8 @@
                                                 <select id="passengerRating" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 whitespace-pre-line pr-8"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
+                                                    <option value=""
+                                                        {{ $request->passenger_rating == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->passengers_rating_placeholder)
                                                             {{ $findRidePage->passengers_rating_placeholder }}
                                                         @endisset
@@ -374,11 +381,21 @@
                                                         @php
                                                             $optionProperty = 'ride_features_option' . $optionNum;
                                                             $option = $findRidePage->$optionProperty ?? null;
-                                                            $isSelected = $option && $request->passenger_rating == $option->features_setting_id;
-                                                            $dynamicText = $option ? str_replace('passengers', 'co-passengers', $option->name) : '';
+                                                            $isSelected =
+                                                                $option &&
+                                                                $request->passenger_rating ==
+                                                                    $option->features_setting_id;
+                                                            $dynamicText = $option
+                                                                ? str_replace(
+                                                                    'passengers',
+                                                                    'co-passengers',
+                                                                    $option->name,
+                                                                )
+                                                                : '';
                                                         @endphp
                                                         @if ($option && isset($option->features_setting_id))
-                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                            <option value="{{ $option->features_setting_id }}"
+                                                                {{ $isSelected ? 'selected' : '' }}>
                                                                 {{ $dynamicText }}
                                                             </option>
                                                         @endif
@@ -412,17 +429,22 @@
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
                                                     @isset($findRidePage->payment_methods_option1)
-                                                        <option value="" {{ $request->payment_method == '' ? 'selected' : '' }}>
+                                                        <option value=""
+                                                            {{ $request->payment_method == '' ? 'selected' : '' }}>
                                                             {{ $findRidePage->payment_methods_option1 }}
                                                         </option>
                                                     @endisset
                                                     @foreach ($paymentMethodOptions as $optionNum => $optionProperty)
                                                         @php
                                                             $option = $findRidePage->$optionProperty ?? null;
-                                                            $isSelected = $option && $request->payment_method == $option->features_setting_id;
+                                                            $isSelected =
+                                                                $option &&
+                                                                $request->payment_method ==
+                                                                    $option->features_setting_id;
                                                         @endphp
                                                         @if ($option && isset($option->features_setting_id))
-                                                            <option value="{{ $option->features_setting_id }}" {{ $isSelected ? 'selected' : '' }}>
+                                                            <option value="{{ $option->features_setting_id }}"
+                                                                {{ $isSelected ? 'selected' : '' }}>
                                                                 {{ $option->name }}
                                                             </option>
                                                         @endif
@@ -461,7 +483,8 @@
                                                 <select id="VehicleType" name=""
                                                     class="bg-gray-100 border-0 placeholder:text-gray-900 text-black text-base md:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                     {{-- onchange="navigateToSearchRoute()" --}}>
-                                                    <option value="" {{ $request->vehicle_type == '' ? 'selected' : '' }}>
+                                                    <option value=""
+                                                        {{ $request->vehicle_type == '' ? 'selected' : '' }}>
                                                         @isset($findRidePage->vehicle_type_placeholder)
                                                             {{ $findRidePage->vehicle_type_placeholder }}
                                                         @endisset
@@ -474,7 +497,8 @@
                                                             $text = $findRidePage->$textProperty ?? $default;
                                                             $isSelected = $request->vehicle_type === $value;
                                                         @endphp
-                                                        <option value="{{ $value }}" {{ $isSelected ? 'selected' : '' }}>
+                                                        <option value="{{ $value }}"
+                                                            {{ $isSelected ? 'selected' : '' }}>
                                                             {{ $text }}
                                                         </option>
                                                     @endforeach
@@ -494,7 +518,7 @@
                                                 $features_check = isset($_GET['features'])
                                                     ? explode(';', $_GET['features'])
                                                     : [];
-                                                
+
                                                 $featureOptions = [
                                                     3 => 'wi-fi',
                                                     4 => 'rating-passengers',
@@ -513,11 +537,14 @@
                                                     $optionProperty = 'ride_features_option' . $optionNum;
                                                     $option = $findRidePage->$optionProperty ?? null;
                                                     $hasFeatureId = $option && isset($option->features_setting_id);
-                                                    $isChecked = $hasFeatureId && in_array($option->features_setting_id, $features_check);
+                                                    $isChecked =
+                                                        $hasFeatureId &&
+                                                        in_array($option->features_setting_id, $features_check);
                                                 @endphp
                                                 @if ($hasFeatureId)
                                                     <div class="flex items-start justify-between p-3">
-                                                        <label for="{{ $inputId }}" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="{{ $inputId }}"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-base md:text-lg">{{ $option->name }}</span>
                                                         </label>
                                                         <input id="{{ $inputId }}" type="checkbox"
@@ -756,7 +783,8 @@
                                             <input type="checkbox" id="hide-full-rides"
                                                 class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                                                 {{ request('hide_full_rides') ? 'checked' : '' }}>
-                                            <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
+                                            <span
+                                                class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
                                         </label>
                                     </div>
 
@@ -786,9 +814,11 @@
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->from_field_icon)
-                                        <img src="{{ asset('home_page_icons/' . $findRidePage->from_field_icon) }}" class="w-auto h-6" alt="">
+                                        <img src="{{ asset('home_page_icons/' . $findRidePage->from_field_icon) }}"
+                                            class="w-auto h-6" alt="">
                                     @else
-                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt="">
+                                        <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6"
+                                            alt="">
                                     @endisset
                                 </div>
                                 <input type="text" id="from_spot_0" value="{{ $request->from }}" autocomplete="off"
@@ -798,13 +828,16 @@
                                     @endisset>
                             </div>
                             <div class="absolute hidden mt-1 z-10" id="fromInputError">
-                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                <div
+                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                </div>
                             </div>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
                             <button type="button" onclick="swapLocations()">
                                 @isset($findRidePage->swap_field_icon)
-                                    <img src="{{ asset('home_page_icons/' . $findRidePage->swap_field_icon) }}" class="w-8 h-8 mx-auto" alt="">
+                                    <img src="{{ asset('home_page_icons/' . $findRidePage->swap_field_icon) }}"
+                                        class="w-8 h-8 mx-auto" alt="">
                                 @else
                                     <img src="{{ asset('assets/arrow.png') }}" class="w-8 h-8 mx-auto" alt="">
                                 @endisset
@@ -814,9 +847,11 @@
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     @isset($findRidePage->to_field_icon)
-                                        <img src="{{ asset('home_page_icons/' . $findRidePage->to_field_icon) }}" class="w-4 h-6" alt="">
+                                        <img src="{{ asset('home_page_icons/' . $findRidePage->to_field_icon) }}"
+                                            class="w-4 h-6" alt="">
                                     @else
-                                        <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
+                                        <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6"
+                                            alt="">
                                     @endisset
                                 </div>
                                 <input type="text" id="to_spot_0" value="{{ $request->to }}" autocomplete="off"
@@ -826,7 +861,9 @@
                                     @endisset>
                             </div>
                             <div class="absolute hidden mt-1 z-10" id="toInputError">
-                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                <div
+                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                </div>
                             </div>
                         </div>
                         <div class="w-48 mx-auto md:mx-0 md:w-[30%]">
@@ -976,13 +1013,21 @@
                                             <div
                                                 class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
+                                                    @php
+                                                        $departureDateTime = formatDepartureDateTime(
+                                                            $ride->date,
+                                                            $selectedLanguage ?? null,
+                                                            $rideDetailPage ?? null,
+                                                        );
+                                                        $departureDateLabel = $departureDateTime['dateLabel'];
+                                                        $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                    @endphp
                                                     <p class="flex items-center space-x-2 font-semibold">
-                                                        {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
-                                                        @isset($findRidePage->card_section_at_label)
-                                                            {{ $findRidePage->card_section_at_label }}
-                                                        @endisset
-                                                        {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                        {{ $departureDateLabel }}
+                                                        {{ $rideDetailPage->at_label }}
+                                                        {{ $departureTimeLabel ?? 'N/A' }}
                                                     </p>
+
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <span class="ml-2 inline-block cursor-help"
                                                             data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
@@ -1004,7 +1049,7 @@
                                                 <div class="pr-8">
                                                     <div class="pr-8">
                                                         <p class="font-medium">
-                                                            Total {{ $ride->seats }} seats</p>
+                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}</p>
                                                     </div>
                                                     {{-- {{ dd($postRidePage->cancellation_policy_label1->features_setting_id,$ride->booking_type) }} --}}
                                                     <p class="text-xl font-semibold text-primary">
@@ -1056,7 +1101,7 @@
                                                 {{-- <div class="pr-8">
                                                     <div class="pr-8">
                                                         <p class="font-medium">
-                                                            Total {{ $ride->seats }} seats</p>
+                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}</p>
                                                     </div>
                                                     <p class="text-xl font-semibold text-primary">${{ number_format(floatval($rideDetail->price), 2) }}
                                                         <small>
@@ -1092,9 +1137,9 @@
                                                                         {{ $rideDetail->departure }}.
                                                                     </h3>
                                                                     @php $segmentPickup = $rideDetail->pickup ?? $ride->pickup; @endphp
-                                                                    @if(!empty($segmentPickup))
+                                                                    @if (!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            Pick-up at: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1123,10 +1168,10 @@
                                                                         {{ $rideDetail->destination }}.
                                                                     </h3>
                                                                     @php $segmentDropoff = $rideDetail->dropoff ?? $ride->dropoff; @endphp
-                                                                    @if(!empty($segmentDropoff))
-                                                                    <p class="text-sm mt-2">
-                                                                        Drop-off at: {{ $segmentDropoff }}
-                                                                    </p>
+                                                                    @if (!empty($segmentDropoff))
+                                                                        <p class="text-sm mt-2">
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
+                                                                        </p>
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1144,7 +1189,7 @@
                                                         @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
                                                             <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
                                                                 class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS flex items-center gap-2"
-                                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip}}"><img
+                                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}"><img
                                                                     class="w-8 h-8"
                                                                     src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
                                                                     alt="">
@@ -1393,7 +1438,7 @@
                                                                     {{ $findRidePage->card_section_driven }}
                                                                 @endisset
                                                             </p>
-                                                            
+
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center gap-2">
@@ -1616,11 +1661,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                    </svg>
-                                                </div> -->
+                                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                        </svg>
+                                                    </div> -->
                             </div>
                             <div class="text-center w-full">
                                 <h3 class="card-heading"></h3>
@@ -1803,7 +1848,9 @@
             return function() {
                 const args = arguments;
                 clearTimeout(timer);
-                timer = setTimeout(() => { func.apply(this, args); }, delay);
+                timer = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
             };
         }
 
@@ -1819,37 +1866,39 @@
                 _token: '{{ csrf_token() }}'
             });
             fetch('{{ url('get-cities-by-state') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: body.toString()
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('Request failed: ' + r.status);
-                return r.json();
-            })
-            .then(result => {
-                container.innerHTML = '';
-                const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object.values(result.cities)) : [];
-                cities.forEach(value => {
-                    const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
-                    const countryName = value.state && value.state.country && value.state.country.name ? value.state.country.name : '';
-                    const displayText = [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
-                    const div = document.createElement('div');
-                    div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
-                    div.textContent = displayText;
-                    div.addEventListener('click', function() {
-                        const input = document.getElementById(fieldId + '_' + fieldIndex);
-                        if (input) input.value = displayText;
-                        container.innerHTML = '';
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: body.toString()
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error('Request failed: ' + r.status);
+                    return r.json();
+                })
+                .then(result => {
+                    container.innerHTML = '';
+                    const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object
+                        .values(result.cities)) : [];
+                    cities.forEach(value => {
+                        const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
+                        const countryName = value.state && value.state.country && value.state.country.name ?
+                            value.state.country.name : '';
+                        const displayText = [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
+                        div.textContent = displayText;
+                        div.addEventListener('click', function() {
+                            const input = document.getElementById(fieldId + '_' + fieldIndex);
+                            if (input) input.value = displayText;
+                            container.innerHTML = '';
+                        });
+                        container.appendChild(div);
                     });
-                    container.appendChild(div);
-                });
-            })
-            .catch(err => console.error('fetchCities error', err));
+                })
+                .catch(err => console.error('fetchCities error', err));
         }
 
         const debouncedFromFetch = debounce(function() {
@@ -1882,7 +1931,8 @@
         document.addEventListener('click', function(e) {
             const fromSuggest = document.getElementById('from_spot_suggestions0');
             const toSuggest = document.getElementById('to_spot_suggestions0');
-            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
+            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest
+                .innerHTML = '';
             if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
         });
 
@@ -1924,7 +1974,7 @@
             $getSmoking = isset($_GET['smoking']) ? $_GET['smoking'] : '';
             $getPets = isset($_GET['pets']) ? $_GET['pets'] : '';
         @endphp
-        
+
         const parseSelectedArray = (value, filterEmpty = false) => {
             if (!value) return [];
             const items = value.split(";");
@@ -1952,11 +2002,26 @@
         };
 
         // Attach event listeners to all checkbox types
-        const checkboxConfigs = [
-            { selector: '.ride-preferences', array: selectedFeatures, allowDuplicates: false },
-            { selector: '.luggage', array: selectedLuggages, allowDuplicates: true },
-            { selector: '.smoking', array: selectedSmoking, allowDuplicates: true },
-            { selector: '.pet', array: selectedPets, allowDuplicates: true }
+        const checkboxConfigs = [{
+                selector: '.ride-preferences',
+                array: selectedFeatures,
+                allowDuplicates: false
+            },
+            {
+                selector: '.luggage',
+                array: selectedLuggages,
+                allowDuplicates: true
+            },
+            {
+                selector: '.smoking',
+                array: selectedSmoking,
+                allowDuplicates: true
+            },
+            {
+                selector: '.pet',
+                array: selectedPets,
+                allowDuplicates: true
+            }
         ];
 
         checkboxConfigs.forEach(config => {
@@ -2140,12 +2205,16 @@
             if (!fromInput || !toInput) return;
 
             fromAutocomplete = new google.maps.places.Autocomplete(fromInput, {
-                componentRestrictions: { country: 'ca' },
+                componentRestrictions: {
+                    country: 'ca'
+                },
                 types: ['(cities)'],
                 fields: ['address_components', 'formatted_address', 'name', 'place_id']
             });
             toAutocomplete = new google.maps.places.Autocomplete(toInput, {
-                componentRestrictions: { country: 'ca' },
+                componentRestrictions: {
+                    country: 'ca'
+                },
                 types: ['(cities)'],
                 fields: ['address_components', 'formatted_address', 'name', 'place_id']
             });
@@ -2156,11 +2225,18 @@
                     isSettingPlaceValue = true;
                     isSelectingFromDropdown = true;
                     const formattedAddress = formatPlaceAddressSearchRide(place);
-                    selectedFromPlace = { place_id: place.place_id, formatted_address: formattedAddress, value: formattedAddress };
+                    selectedFromPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
                     fromInput.value = formattedAddress;
                     const err = document.getElementById('fromInputError');
                     if (err) err.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValue = false; isSelectingFromDropdown = false; }, 100);
+                    setTimeout(function() {
+                        isSettingPlaceValue = false;
+                        isSelectingFromDropdown = false;
+                    }, 100);
                 }
             });
             toAutocomplete.addListener('place_changed', function() {
@@ -2169,17 +2245,25 @@
                     isSettingPlaceValue = true;
                     isSelectingFromDropdown = true;
                     const formattedAddress = formatPlaceAddressSearchRide(place);
-                    selectedToPlace = { place_id: place.place_id, formatted_address: formattedAddress, value: formattedAddress };
+                    selectedToPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
                     toInput.value = formattedAddress;
                     const err = document.getElementById('toInputError');
                     if (err) err.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValue = false; isSelectingFromDropdown = false; }, 100);
+                    setTimeout(function() {
+                        isSettingPlaceValue = false;
+                        isSelectingFromDropdown = false;
+                    }, 100);
                 }
             });
 
             fromInput.addEventListener('input', function() {
                 if (isSettingPlaceValue) return;
-                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace =
+                null;
             });
             toInput.addEventListener('input', function() {
                 if (isSettingPlaceValue) return;
@@ -2189,19 +2273,25 @@
             fromInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueSearchRide(this.value, 'from').then(function() { navigateToSearchRoute1(); });
+                    resolveTypedCityValueSearchRide(this.value, 'from').then(function() {
+                        navigateToSearchRoute1();
+                    });
                 }
             });
             toInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValueSearchRide(this.value, 'to').then(function() { navigateToSearchRoute1(); });
+                    resolveTypedCityValueSearchRide(this.value, 'to').then(function() {
+                        navigateToSearchRoute1();
+                    });
                 }
             });
 
             document.addEventListener('mousedown', function(e) {
                 if (e.target.closest('.pac-container')) isSelectingFromDropdown = true;
-                else setTimeout(function() { isSelectingFromDropdown = false; }, 50);
+                else setTimeout(function() {
+                    isSelectingFromDropdown = false;
+                }, 50);
             });
 
             fromInput.addEventListener('blur', function() {
@@ -2212,20 +2302,23 @@
                     var currentValue = self.value.trim();
                     var fromInputError = document.getElementById('fromInputError');
 
-                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !==
+                            selectedFromPlace.value)) {
                         await resolveTypedCityValueSearchRide(currentValue, 'from');
                         currentValue = self.value.trim();
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                    if (currentValue === '' || !selectedFromPlace || currentValue !==
+                        selectedFromPlace.value) {
                         selectedFromPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
                         if (currentValue !== '' && fromInputError) {
                             var tooltipError = fromInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorFromRequired : errorCityMissing;
+                                tooltipError.textContent = currentValue === '' ? errorFromRequired :
+                                    errorCityMissing;
                             }
                             fromInputError.classList.remove('hidden');
                         }
@@ -2246,20 +2339,23 @@
                     var currentValue = self.value.trim();
                     var toInputError = document.getElementById('toInputError');
 
-                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace
+                            .value)) {
                         await resolveTypedCityValueSearchRide(currentValue, 'to');
                         currentValue = self.value.trim();
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
+                        .value) {
                         selectedToPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
                         if (currentValue !== '' && toInputError) {
                             var tooltipError = toInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorToRequired : errorCityMissing;
+                                tooltipError.textContent = currentValue === '' ? errorToRequired :
+                                    errorCityMissing;
                             }
                             toInputError.classList.remove('hidden');
                         }
@@ -2291,16 +2387,31 @@
         };
 
         function formatPlaceAddressSearchRide(place) {
-            var city = '', province = '', country = 'Canada';
+            var city = '',
+                province = '',
+                country = 'Canada';
             if (!place.address_components) return place.name || place.formatted_address || '';
             for (var i = 0; i < place.address_components.length; i++) {
-                var c = place.address_components[i], t = c.types;
-                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+                var c = place.address_components[i],
+                    t = c.types;
+                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c
+                    .long_name;
                 if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
                 if (t.indexOf('country') !== -1) country = c.long_name;
             }
-            if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
-            if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
+            if (!city && place.name) {
+                var p = place.name.split(',').map(function(s) {
+                    return s.trim();
+                });
+                if (p[0]) city = p[0];
+                if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase();
+            }
+            if (!city && place.formatted_address) {
+                var a = place.formatted_address.split(',').map(function(s) {
+                    return s.trim();
+                });
+                if (a[0]) city = a[0];
+            }
             var out = city || '';
             if (province) out += (out ? ', ' : '') + province;
             if (country && out) out += ', ' + country;
@@ -2313,25 +2424,51 @@
             var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
             var input = document.getElementById(inputId);
             return new Promise(function(resolve) {
-                geocoder.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
-                    if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                geocoder.geocode({
+                    address: value,
+                    componentRestrictions: {
+                        country: 'CA'
+                    }
+                }, function(response, status) {
+                    if (status !== 'OK' || !response || !response.length) {
+                        resolve(false);
+                        return;
+                    }
                     var result = null;
                     for (var i = 0; i < response.length; i++) {
                         var item = response[i];
-                        if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) {
-                            result = item; break;
+                        if (item.address_components && item.address_components.some(function(comp) {
+                                return comp.types.indexOf('locality') !== -1 || comp.types.indexOf(
+                                    'administrative_area_level_2') !== -1;
+                            })) {
+                            result = item;
+                            break;
                         }
                     }
-                    if (!result) { resolve(false); return; }
+                    if (!result) {
+                        resolve(false);
+                        return;
+                    }
                     var formattedAddress = formatPlaceAddressSearchRide(result);
-                    if (!formattedAddress) { resolve(false); return; }
+                    if (!formattedAddress) {
+                        resolve(false);
+                        return;
+                    }
                     isSettingPlaceValue = true;
-                    var selectedPlace = { place_id: result.place_id, formatted_address: formattedAddress, value: formattedAddress };
-                    if (target === 'from') selectedFromPlace = selectedPlace; else selectedToPlace = selectedPlace;
+                    var selectedPlace = {
+                        place_id: result.place_id,
+                        formatted_address: formattedAddress,
+                        value: formattedAddress
+                    };
+                    if (target === 'from') selectedFromPlace = selectedPlace;
+                    else selectedToPlace = selectedPlace;
                     if (input) input.value = formattedAddress;
-                    var errorEl = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError');
+                    var errorEl = document.getElementById(target === 'from' ? 'fromInputError' :
+                        'toInputError');
                     if (errorEl) errorEl.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValue = false; }, 100);
+                    setTimeout(function() {
+                        isSettingPlaceValue = false;
+                    }, 100);
                     resolve(true);
                 });
             });
@@ -2349,7 +2486,7 @@
                 textarea.style.resize = 'none';
                 textarea.style.overflowY = 'hidden';
                 textarea.addEventListener('input', () => autoGrow(textarea));
-                
+
                 if (!textarea.value && textarea.placeholder) {
                     textarea.value = textarea.placeholder;
                     autoGrow(textarea);
