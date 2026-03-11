@@ -38,15 +38,6 @@
                                             </svg>
                                         </button>
                                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                                            <div class="sm:flex sm:items-start justify-center">
-                                                <!-- <div
-                                                    class="mx-auto h-16 w-16">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                    </svg>
-                                                </div> -->
-                                            </div>
                                             <div class="text-center sm:ml-4 sm:mt-0">
                                                 <div class="w-full">
                                                     <p class="text-lg text-center text-black">{!! session('success') !!}</p>
@@ -71,11 +62,8 @@
                                     value="{{ old('name') }}"
                                     class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 @error('name')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="tooltip-error shadow-lg">
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             </div>
@@ -84,15 +72,12 @@
                             <div>
                                 <label for="">{{ $contactProximaPage->your_email_address_label }} <span
                                         class="text-red-500">*</span></label>
-                                <input placeholder="{{ $contactUsPage->placeholder_email }}" type="email" name="email"
+                                <input placeholder="{{ $contactUsPage->placeholder_email }}" type="text" name="email"
                                     value="{{ old('email') }}"
                                     class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 italic focus:ring-none focus:outline-none focus:border-blue-600">
                                 @error('email')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="tooltip-error shadow-lg">
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             </div>
@@ -104,11 +89,8 @@
                                     value="{{ old('phone') }}"
                                     class=" block mt-1 border p-1.5 w-full text-base lg:text-lg italic rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 @error('phone')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="tooltip-error shadow-lg">
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             </div>
@@ -120,11 +102,8 @@
                                 <textarea placeholder="{{ $contactUsPage->placeholder_message }}" id="message" rows="5" name="message"
                                     class=" block mt-1 border p-1.5 w-full text-base lg:text-lg italic rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">{{ old('message') }}</textarea>
                                 @error('message')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
+                                    <div class="tooltip-error shadow-lg">
+                                        {{ $message }}
                                     </div>
                                 @enderror
                             </div>

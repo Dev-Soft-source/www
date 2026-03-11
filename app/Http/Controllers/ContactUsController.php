@@ -30,11 +30,11 @@ class ContactUsController extends Controller
 
     public function store(Request $request)
     {
-        $customMessages = [
-            'string' => 'The :attribute must be a string',
-            'max' => 'The :attribute may not be greater than :max characters',
-            'email' => 'This must be a valid email',
-        ];
+        // $customMessages = [
+        //     'string' => 'The :attribute must be a string',
+        //     'max' => 'The :attribute may not be greater than :max characters',
+        //     'email' => 'This must be a valid email',
+        // ];
 
         $request->validate([
             'name' => 'required|string|max:25',
@@ -43,7 +43,7 @@ class ContactUsController extends Controller
             'message' => 'required|string|max:300',
             'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
 
-        ], $customMessages);
+        ], []);
 
         $message = ContactMessage::create([
             'name' => $request->name,
