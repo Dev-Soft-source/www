@@ -179,6 +179,7 @@ class SignupController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'password' => Hash::make($request->password),
+                'lang' => $selectedLanguage->abbreviation ?? config('app.locale', 'en'),
                 'closed' => '0', // Reactivate the account
                 'email_verified' => '0', // Require email verification again
             ]);
@@ -192,11 +193,14 @@ class SignupController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
+                'lang' => $selectedLanguage->abbreviation ?? config('app.locale', 'en'),
                 'password' => Hash::make($request->password),
                 'country' => $country->id ?? 38,
                 'referral_uuid' => bin2hex(random_bytes(16))
             ]);
         }
+
+        session(['selectedLanguage' => $user->lang ?? ($selectedLanguage->abbreviation ?? config('app.locale', 'en'))]);
 
         DB::table('user_details')->insert([
             'ip_address' => $ip,
@@ -390,29 +394,31 @@ class SignupController extends Controller
 
     public function redirectToProvider($lang, $provider)
     {
+        session(['selectedLanguage' => $lang]);
+
         return Socialite::driver($provider)
             ->redirect();
     }
 
     public function handleProviderCallback($lang, $provider)
     {
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        } else {
+            $selectedLanguage = Language::where('abbreviation', $lang)->first();
+        }
+
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+
         try {
             // Check for Facebook error parameters in the request
             if ($provider === 'facebook' && request()->has('error')) {
                 $error = request()->get('error');
                 $errorDescription = request()->get('error_description', '');
                 $errorReason = request()->get('error_reason', '');
-
-                $selectedLanguage = session('selectedLanguage');
-                if ($selectedLanguage) {
-                    // Find the language by abbreviation
-                    $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-                } else {
-                    $selectedLanguage = Language::where('abbreviation', $lang)->first();
-                    if (!$selectedLanguage) {
-                        $selectedLanguage = Language::where('is_default', 1)->first();
-                    }
-                }
 
                 // Handle specific Facebook errors
                 if ($error === 'access_denied' || $errorReason === 'user_denied') {
@@ -450,9 +456,28 @@ class SignupController extends Controller
             $existingUser = User::where('email', $user->email)->first();
 
             if ($existingUser) {
+                if (!$existingUser->lang) {
+                    $existingUser->forceFill([
+                        'lang' => $selectedLanguage->abbreviation,
+                    ])->save();
+                }
+
                 // Log in the existing user
                 auth()->login($existingUser);
-                return redirect('/'); // Redirect to the home page
+                $userLang = $existingUser->fresh()->lang ?: $selectedLanguage->abbreviation;
+                session(['selectedLanguage' => $userLang]);
+
+                if ($existingUser->step1 == 0) {
+                    return redirect()->route('step1to5', ['lang' => $userLang]);
+                } elseif ($existingUser->step2 == 0) {
+                    return redirect()->route('step2to5', ['lang' => $userLang]);
+                } elseif ($existingUser->step3 == 0) {
+                    return redirect()->route('step3to5', ['lang' => $userLang]);
+                } elseif ($existingUser->step4 == 0) {
+                    return redirect()->route('step4to5', ['lang' => $userLang]);
+                }
+
+                return redirect()->route('home', ['lang' => $userLang]);
             }
 
             // Split the full name into first and last names
@@ -469,6 +494,7 @@ class SignupController extends Controller
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'email' => $user->email,
+                'lang' => $selectedLanguage->abbreviation ?? $lang ?? config('app.locale', 'en'),
                 'email_verified' => '1',
                 'password' => '',
                 'profile_image' => $user->avatar,
@@ -517,21 +543,10 @@ class SignupController extends Controller
             }
 
             auth()->login($newUser);
+            session(['selectedLanguage' => $newUser->lang]);
 
-            return redirect('/'); // Redirect to the home page
+            return redirect()->route('step1to5', ['lang' => $newUser->lang]);
         } catch (\Exception $e) {
-
-            $selectedLanguage = session('selectedLanguage');
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            } else {
-                $selectedLanguage = Language::where('abbreviation', $lang)->first();
-                if (!$selectedLanguage) {
-                    $selectedLanguage = Language::where('is_default', 1)->first();
-                }
-            }
-
             // Check if it's a Facebook-specific error
             $errorMessage = $e->getMessage();
             Log::info("social login error:" . $errorMessage);

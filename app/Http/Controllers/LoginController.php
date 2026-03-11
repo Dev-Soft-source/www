@@ -134,6 +134,19 @@ class LoginController extends Controller
         if ($loginSuccessful) {
             // Refresh user to get updated remember_token if remember was true
             $authenticatedUser = auth()->user();
+            $selectedLanguage = $selectedLanguage
+                ?: Language::where('abbreviation', $authenticatedUser->lang)->first()
+                ?: Language::where('is_default', 1)->first();
+
+            if ($selectedLanguage && $authenticatedUser->lang !== $selectedLanguage->abbreviation) {
+                $authenticatedUser->forceFill([
+                    'lang' => $selectedLanguage->abbreviation,
+                ])->save();
+            }
+
+            if ($selectedLanguage) {
+                session(['selectedLanguage' => $selectedLanguage->abbreviation]);
+            }
             
             // Log successful authentication
             // Log::info('Login successful', [
@@ -236,21 +249,32 @@ class LoginController extends Controller
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
         } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
+            $selectedLanguage = Auth::guard('web')->check()
+                ? Language::where('abbreviation', Auth::guard('web')->user()->lang)->first()
+                : null;
+
+            if (!$selectedLanguage) {
+                $selectedLanguage = Language::where('is_default', 1)->first();
+            }
         }
         return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
     }
 
     public function welcomeRoute($email){
+        $user = User::where('email', $email)->first();
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
-            // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
+        }
+
+        if (!$selectedLanguage && $user?->lang) {
+            $selectedLanguage = Language::where('abbreviation', $user->lang)->first();
+        }
+
+        if (!$selectedLanguage) {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
 
-        $user = User::where('email', $email)->first();
         if(isset($user) && !empty($user)){
 
         }else{
@@ -258,6 +282,7 @@ class LoginController extends Controller
         }
 
         $user = auth()->login($user);
+        session(['selectedLanguage' => $selectedLanguage->abbreviation]);
 
         $user = User::where('email', $email)->first();
 
@@ -301,25 +326,28 @@ class LoginController extends Controller
     }
 
     public function emailVerify($token, $email, Request $request){
-        $selectedLanguage = session('selectedLanguage');
-        $message = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_verified_message', 'continue_with_app_btn_label', 'create_my_profile_btn_label')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_verified_message', 'continue_with_app_btn_label', 'create_my_profile_btn_label')->first();
-            }
-        }
-
         $isApp = $request->has('app') && $request->get('app') === 'true';
         
         $result = DB::table('password_resets')->where('token', $token)->where('type', 'verify_email')->first();
         $user = User::where('email', $email)->first();
+        $selectedLanguage = session('selectedLanguage');
+        $message = null;
+
+        if ($selectedLanguage) {
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        }
+
+        if (!$selectedLanguage && $user?->lang) {
+            $selectedLanguage = Language::where('abbreviation', $user->lang)->first();
+        }
+
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+
+        if ($selectedLanguage) {
+            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_verified_message', 'continue_with_app_btn_label', 'create_my_profile_btn_label')->first();
+        }
         
         if(isset($user) && !empty($user)){
             if (!$result && $user->email_verified === '1') {
@@ -385,6 +413,7 @@ class LoginController extends Controller
             }
 
             $user = auth()->login($user);
+            session(['selectedLanguage' => $selectedLanguage->abbreviation]);
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
             
             // Redirect based on app parameter
