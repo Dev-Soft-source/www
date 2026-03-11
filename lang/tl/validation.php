@@ -145,6 +145,39 @@ return [
     'ulid' => 'Dapat ay wastong ULID ang :attribute field.',
     'uuid' => 'Dapat ay wastong UUID ang :attribute field.',
     'custom' => [
+        'make' => [
+            'required' => 'Kinakailangan ang gawa (make) ng sasakyan.',
+        ],
+        'model' => [
+            'required' => 'Kinakailangan ang modelo.',
+        ],
+        'type' => [
+            'required' => 'Kinakailangan ang uri ng sasakyan.',
+        ],
+        'liscense_no' => [
+            'required' => 'Kinakailangan ang numero ng plaka.',
+            'max' => 'Ang numero ng plaka ay dapat na mas mababa sa 8 karakter.',
+        ],
+        'color' => [
+            'required' => 'Kinakailangan ang kulay.',
+            'max' => 'Ang kulay ay dapat na mas mababa sa 15 karakter.',
+        ],
+        'year' => [
+            'required' => 'Kinakailangan ang taon.',
+            'max' => 'Ang taon ay dapat na mas mababa sa 4 na karakter.',
+        ],
+        'car_type' => [
+            'required' => 'Kinakailangan ang pinagmumulan ng lakas (fuel).',
+        ],
+        'primary_vehicle' => [
+            'required' => 'Kinakailangan ang pangunahing sasakyan.',
+        ],
+        'image' => [
+            'required_without' => 'Kinakailangan ang larawan ng sasakyan.',
+            'image' => 'Ang larawan ng sasakyan ay dapat na isang imahe.',
+            'mimes' => 'Ang larawan ng sasakyan ay dapat na file na may uri: jpeg, png, jpg, gif.',
+            'max' => 'Ang larawan ng sasakyan ay dapat na mas mababa sa 10MB.',
+        ],
         'city_not_in_record' => [
             'message' => 'Hindi namin makita ang pangalan ng lungsod na ito sa aming talaan, pakisuri muli ang baybay.',
         ],

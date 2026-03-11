@@ -156,6 +156,39 @@ return
 		'uuid' => 'The :attribute field must be a valid UUID.',
 		'custom' =>
 		[
+			'make' => [
+				'required' => 'The make is required.',
+			],
+			'model' => [
+				'required' => 'The model is required.',
+			],
+			'type' => [
+				'required' => 'The vehicle type is required.',
+			],
+			'liscense_no' => [
+				'required' => 'The license number is required.',
+				'max' => 'The license number must be less than 8 characters.',
+			],
+			'color' => [
+				'required' => 'The color is required.',
+				'max' => 'The color must be less than 15 characters.',
+			],
+			'year' => [
+				'required' => 'The year is required.',
+				'max' => 'The year must be less than 4 characters.',
+			],
+			'car_type' => [
+				'required' => 'The car type is required.',
+			],
+			'primary_vehicle' => [
+				'required' => 'The primary vehicle is required.',
+			],
+			'image' => [
+				'required_without' => 'The image is required.',
+				'image' => 'The image must be an image.',
+				'mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
+				'max' => 'The image must be less than 10MB.',
+			],
 			'city_not_in_record' => [
 				'message' => 'We could not find this city name in our records, please double-check the spelling.',
 			],

@@ -145,6 +145,39 @@ return [
     'ulid' => ':attribute 必须是有效的 ULID。',
     'uuid' => ':attribute 必须是有效的 UUID。',
     'custom' => [
+        'make' => [
+            'required' => '品牌为必填项。',
+        ],
+        'model' => [
+            'required' => '型号为必填项。',
+        ],
+        'type' => [
+            'required' => '车辆类型为必填项。',
+        ],
+        'liscense_no' => [
+            'required' => '车牌号为必填项。',
+            'max' => '车牌号长度必须少于 8 个字符。',
+        ],
+        'color' => [
+            'required' => '颜色为必填项。',
+            'max' => '颜色长度必须少于 15 个字符。',
+        ],
+        'year' => [
+            'required' => '年份为必填项。',
+            'max' => '年份长度必须少于 4 个字符。',
+        ],
+        'car_type' => [
+            'required' => '动力类型为必填项。',
+        ],
+        'primary_vehicle' => [
+            'required' => '主要车辆为必填项。',
+        ],
+        'image' => [
+            'required_without' => '车辆照片为必填项。',
+            'image' => '车辆照片必须是图片。',
+            'mimes' => '车辆照片必须是以下类型的文件：jpeg、png、jpg、gif。',
+            'max' => '车辆照片必须小于 10MB。',
+        ],
         'city_not_in_record' => [
             'message' => '我们在记录中找不到该城市名称，请再次检查拼写。',
         ],
