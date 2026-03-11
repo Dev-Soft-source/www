@@ -976,7 +976,51 @@
                                                 "
                                             ></p>
                                         </div>
-                                        
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`book_seats_btn_label_${activeLanguageId}`"
+                                                        >Book your seats label (Web)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`book_seats_btn_label_${activeLanguageId}`"
+                                                    :id="`book_seats_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'book_seats_btn_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'book_seats_btn_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -4512,6 +4556,7 @@ export default {
                             this.handleInput("", language, "ride_canceller_by_driver");
                             this.handleInput("", language, "ride_completed_text");
                             this.handleInput("", language, "book_seat_btn_label");
+                            this.handleInput("", language, "book_seats_btn_label");
                             this.handleInput("", language, "no_seat_available_label");
                             this.handleInput("", language, "no_ride_found_message");
                             this.handleInput("", language, "cancel_booking_btn_label");
@@ -4745,6 +4790,11 @@ export default {
                                 setting?.book_seat_btn_label,
                                 setting?.language,
                                 "book_seat_btn_label"
+                            );
+                            this.handleInput(
+                                setting?.book_seats_btn_label,
+                                setting?.language,
+                                "book_seats_btn_label"
                             );
                             this.handleInput(
                                 setting?.instant_btn_label,
@@ -5203,6 +5253,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `book_seat_btn_label.book_seat_btn_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `book_seats_btn_label.book_seats_btn_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `instant_btn_label.instant_btn_label_${language.id}`

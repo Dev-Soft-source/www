@@ -62,6 +62,8 @@ class RideDetailPageSettingService
                 
                 $validationRule = array_merge($validationRule, ['book_seat_btn_label.book_seat_btn_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['book_seat_btn_label.book_seat_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['book_seats_btn_label.book_seats_btn_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['book_seats_btn_label.book_seats_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['no_seat_available_label.no_seat_available_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['no_seat_available_label.no_seat_available_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['no_ride_found_message.no_ride_found_message_' . $language->id => ['required', 'string']]);
@@ -258,6 +260,7 @@ class RideDetailPageSettingService
             'ride_canceller_by_driver' => $this->data($request, $language, 'ride_canceller_by_driver'),
             'ride_completed_text' => $this->data($request, $language, 'ride_completed_text'),
             'book_seat_btn_label' => $this->data($request, $language, 'book_seat_btn_label'),
+            'book_seats_btn_label' => $this->data($request, $language, 'book_seats_btn_label'),
             'no_seat_available_label' => $this->data($request, $language, 'no_seat_available_label'),
             'no_ride_found_message' => $this->data($request, $language, 'no_ride_found_message'),
             'cancel_booking_btn_label' => $this->data($request, $language, 'cancel_booking_btn_label'),

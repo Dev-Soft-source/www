@@ -571,7 +571,7 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl">
-                                Booking Price:
+                                {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
                             <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail->first()?->price }}
                                 @isset($rideDetailPage->per_seat_label)
@@ -584,9 +584,7 @@
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT items-baseline">
-                                @isset($rideDetailPage->payment_method_label)
-                                    {{ $rideDetailPage->payment_method_label }}
-                                @endisset
+                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                                 <span class="text-lg text-primary font-normal inline-block cursor-help" style="font-family: 'Roboto', sans-serif;"
                                     @if (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
@@ -598,7 +596,8 @@
                         <div class="p-4">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT items-baseline">
-                                    Booking Method:
+                                    
+                                    {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
                                     <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
@@ -1292,7 +1291,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($needsVerifiedPhoneForPinkExtra)
                                         <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()"
@@ -1308,7 +1307,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($needsPhoneVerification)
                                         <button type="button" onclick="showPhoneVerificationModal()"
@@ -1324,7 +1323,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @elseif ($showPhotoIdRequiredForBooking)
                                         <button type="button" onclick="showPhotoIdRequiredModal()"
@@ -1340,7 +1339,7 @@
                                                         alt="">
                                                 @endif
                                             @endisset
-                                            <span class="font-medium text-xl">Book Your Seats</span>
+                                            <span class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                         </button>
                                     @else
                                         <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
@@ -1358,8 +1357,7 @@
                                                             alt="">
                                                     @endif
                                                     <span class="font-medium text-xl">
-                                                        Book Your Seats
-                                                        <!-- {{ $ride->booking_method->name }} -->
+                                                        {{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}
                                                     </span>
                                                 @endisset
                                             </label>

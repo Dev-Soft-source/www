@@ -425,11 +425,7 @@
                         class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4 items-baseline">
                             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
-                                @isset($rideDetailPage->payment_method_label)
-                                    {{ $rideDetailPage->payment_method_label }}
-                                @else
-                                    Payment method:
-                                @endisset
+                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                                 <span class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
                             </h4>
                         </div>
