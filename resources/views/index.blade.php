@@ -91,21 +91,28 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div
                         class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()">
-                        </div>
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
                         <div
                             class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                            <button onclick="closeModal('success-modal1')"
-                                class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                                <button onclick="closeModal()"
+                                    class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 z-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <div class="mx-auto h-16 w-16">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                </div>
                                 <div class="text-center sm:ml-4 sm:mt-0">
-                                    <div class="w-full mt-8">
+                                    <div class="w-full">
                                         <p class="can-exp-p text-center font-FuturaMdCnBT">{!! session('success1') !!}</p>
                                     </div>
                                 </div>

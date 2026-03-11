@@ -177,14 +177,14 @@
 
             <div class="flex items-center justify-end space-x-2 w-1/2">
                 @if (auth()->check())
-                    <div class="relative">
+                    <div class="relative pr-2">
                         <a href="{{ route('coffee_on_wall', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
                             class="px-2 py-1.5 button-exp-no-fill ml-2 flex gap-2 items-center !text-base xl:!text-lg">
                             <span>{{ $siteText['coffe_on_wall_text'] ?? 'Coffee on the Wall' }}</span>
                         </a>
                     </div>
                     <div class="relative">
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 pr-2">
                             <button id="dropdownNotificationButton" data-dropdown-toggle="dropdown_notification"
                                 class="flex items-center gap-1" type="button">
                                 <div class="relative">
@@ -328,7 +328,7 @@
                     <div class="relative">
                         <div class="border-l pl-3 flex items-center gap-1">
                             <button id="dropdownProfileButton" data-dropdown-toggle="dropdown_profile"
-                                class="pr-2 flex items-center gap-1" type="button">
+                                class="px-2 flex items-center gap-1" type="button">
                                 <span class="text-lg text-gray-800 font-FuturaMdCnBT">{{ auth()->user()->first_name }}
                                     {{ auth()->user()->last_name }}</span>
                             <div class="flex items-center justify-center">
@@ -360,7 +360,12 @@
                                                 {{ $name }}
                                             </a>
                                         @elseif ($link && \Illuminate\Support\Facades\Route::has($link))
-                                            <a href="{{ route($link, ['lang' => $langAbbr]) }}"
+                                            @php
+                                                $navUser = auth()->user();
+                                                $profileIncomplete = $navUser && $navUser->email_verified == '1' && $navUser->step1 == 0;
+                                                $navTargetRoute = $profileIncomplete ? 'step1to5' : $link;
+                                            @endphp
+                                            <a href="{{ route($navTargetRoute, ['lang' => $langAbbr]) }}"
                                                 class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100">
                                                 @if ($link === 'profile')
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -591,7 +596,12 @@
                                 {{ $name }}
                             </a>
                         @elseif ($link && \Illuminate\Support\Facades\Route::has($link))
-                            <a href="{{ route($link, ['lang' => $langAbbr]) }}"
+                            @php
+                                $navUser = auth()->user();
+                                $profileIncomplete = $navUser && $navUser->email_verified == '1' && $navUser->step1 == 0;
+                                $navTargetRoute = $profileIncomplete ? 'step1to5' : $link;
+                            @endphp
+                            <a href="{{ route($navTargetRoute, ['lang' => $langAbbr]) }}"
                                 class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100">
                                 @if ($link === 'profile')
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
