@@ -29,11 +29,11 @@
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div class="mx-auto h-16 w-16 flex-shrink-0 flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
-                                        </div> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                            </div> -->
                                     </div>
                                     <div class="mt-2 w-full">
                                         <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -41,7 +41,7 @@
                                 </div>
                                 <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button onclick="closeModal()"
-                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">Close</button>
+                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24 transition-colors duration-200">{{ $siteText['close_btn_text'] }}</button>
                                 </div>
                             </div>
                         </div>

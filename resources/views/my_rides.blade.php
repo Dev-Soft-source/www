@@ -4,9 +4,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         @keyframes booking-request-pulse {
-            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-            50% { opacity: 0.95; transform: scale(1.08); box-shadow: 0 10px 15px -3px rgb(35 168 168 / 0.2); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            }
+
+            50% {
+                opacity: 0.95;
+                transform: scale(1.08);
+                box-shadow: 0 10px 15px -3px rgb(35 168 168 / 0.2);
+            }
         }
+
         .booking-request-alert {
             animation: booking-request-pulse 1.5s ease-in-out 5;
         }
@@ -14,492 +26,589 @@
 @endsection
 
 @section('content')
-@if(session('error'))
-<div id="errorModal" class="relative z-50" aria-labelledby="error-modal-title" role="dialog" aria-modal="true">
-    <div onclick="closeErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                <button type="button" onclick="closeErrorModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start justify-center">
-                        <div class="mx-auto h-16 w-16 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-12 h-12 text-red-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    @if (session('error'))
+        <div id="errorModal" class="relative z-50" aria-labelledby="error-modal-title" role="dialog" aria-modal="true">
+            <div onclick="closeErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closeErrorModal()"
+                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                        </div>
-                    </div>
-                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                        <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="error-modal-title">Notice</h3>
-                        <div class="mt-2 w-full">
-                            <p class="can-exp-p text-center text-gray-700">{!! session('error') !!}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
-                    <button type="button" onclick="closeErrorModal()" class="button-exp-fill">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-function closeErrorModal() {
-    const modal = document.getElementById('errorModal');
-    if (modal) modal.style.display = 'none';
-}
-</script>
-@endif
-@if(session('message'))
-<div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-            <div
-                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start justify-center">
-                        <div
-                            class="mx-auto h-16 w-16 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                        </div>
-                        
-                        <!-- <div
-                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                            </svg>
-                        </div> -->
-                    </div>
-                    <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                        <div class="">
-                            <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                        </div>
-                        <div class="mt-2 w-full">
-                            <p class="can-exp-p text-center">{!! session('message') !!}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                    @if(session('id'))
-                        <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                            class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Post a Return Ride</a>
-                    @endif
-                    <a href=""
-                        class="button-exp-fill">Close</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-@if(session('price_warning'))
-    <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
-    <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title" role="dialog" aria-modal="true">
-        <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closePriceWarningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="">
-                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended Contribution Limit</h3>
+                        </button>
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="w-12 h-12 text-red-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1">The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.</p>
-                                <p class="can-exp-p text-center" id="priceWarningParagraph2">While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.</p>
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                    id="error-modal-title">Notice</h3>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center text-gray-700">{!! session('error') !!}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                        <button type="button" onclick="closePriceWarningModal()" class="button-exp-fill">Got it</button>
+                        <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
+                            <button type="button" onclick="closeErrorModal()"
+                                class="button-exp-fill">{{ $siteText['close_btn_text'] }}</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('priceWarningModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.style.display = 'block';
-                modal.style.visibility = 'visible';
-                modal.style.opacity = '1';
-                modal.style.zIndex = '50';
+        <script>
+            function closeErrorModal() {
+                const modal = document.getElementById('errorModal');
+                if (modal) modal.style.display = 'none';
             }
-        });
-        function closePriceWarningModal() {
-            const modal = document.getElementById('priceWarningModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
-        }
-    </script>
-@endif
-<div class="grid grid-cols-12 gap-4 md:container md:mx-auto  my-6 md:my-10 xl:my-14 px-4 xl:px-0">
-    @include('layouts.inc.profile_sidebar')
+        </script>
+    @endif
+    @if (session('message'))
+        <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closeModal()"
+                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
 
-    <div class="bg-white rounded pt-0 lg:px-4 w-full col-span-12 lg:col-span-9">
-        <div class="flex flex-wrap" id="tabs-id">
-            <div class="w-full">
-                @include('layouts.inc.trips_tabs')
-                <div class="relative flex flex-col min-w-0 break-words bg-white w-full py-5 shadow-lg rounded">
-                    <div class="">
-                    <div class="px-4 flex-auto">
-                        <div class="tab-content tab-space">
-                            <div class="block" id="tab-profile">
-                                <div class="space-y-4">
-                                    @if (!empty($rides) && count($rides) > 0)
-                                        @foreach ($rides as $ride)
-                                            @php
-                                                 $from = $ride->rideDetail[0]->departure;
-                                                 $to = $ride->rideDetail[0]->destination;
-                                            @endphp
-                                            <div class="relative even:bg-gray-200 odd:bg-white">
-                                                {{-- <div class="absolute right-4 top-8">
+                                <!-- <div
+                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                </svg>
+                            </div> -->
+                            </div>
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
+                                        id="modal-title">{!! session('heading') !!}</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center">{!! session('message') !!}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            @if (session('id'))
+                                <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
+                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Post
+                                    a Return Ride</a>
+                            @endif
+                            <a href="" class="button-exp-fill">{{ $siteText['close_btn_text'] }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+    @if (session('price_warning'))
+        <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
+        <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title"
+            role="dialog" aria-modal="true">
+            <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+            </div>
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button type="button" onclick="closePriceWarningModal()"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="">
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended
+                                        Contribution Limit</h3>
+                                </div>
+                                <div class="mt-2 w-full">
+                                    <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1">The price you
+                                        entered is above the standard reimbursement rate recommended by the CRA and Revenu
+                                        Québec.</p>
+                                    <p class="can-exp-p text-center" id="priceWarningParagraph2">While you can proceed, we
+                                        suggest reducing the price per seat. This ensures your ride remains a standard
+                                        carpool even if you drive long distances this year.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                            <button type="button" onclick="closePriceWarningModal()" class="button-exp-fill">Got
+                                it</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('priceWarningModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.style.display = 'block';
+                    modal.style.visibility = 'visible';
+                    modal.style.opacity = '1';
+                    modal.style.zIndex = '50';
+                }
+            });
+
+            function closePriceWarningModal() {
+                const modal = document.getElementById('priceWarningModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                }
+            }
+        </script>
+    @endif
+    <div class="grid grid-cols-12 gap-4 md:container md:mx-auto  my-6 md:my-10 xl:my-14 px-4 xl:px-0">
+        @include('layouts.inc.profile_sidebar')
+
+        <div class="bg-white rounded pt-0 lg:px-4 w-full col-span-12 lg:col-span-9">
+            <div class="flex flex-wrap" id="tabs-id">
+                <div class="w-full">
+                    @include('layouts.inc.trips_tabs')
+                    <div class="relative flex flex-col min-w-0 break-words bg-white w-full py-5 shadow-lg rounded">
+                        <div class="">
+                            <div class="px-4 flex-auto">
+                                <div class="tab-content tab-space">
+                                    <div class="block" id="tab-profile">
+                                        <div class="space-y-4">
+                                            @if (!empty($rides) && count($rides) > 0)
+                                                @foreach ($rides as $ride)
+                                                    @php
+                                                        $from = $ride->rideDetail[0]->departure;
+                                                        $to = $ride->rideDetail[0]->destination;
+                                                    @endphp
+                                                    <div class="relative even:bg-gray-200 odd:bg-white">
+                                                        {{-- <div class="absolute right-4 top-8">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn" data-ride-id="29">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
                                                 </div> --}}
-                                                <a class="" href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
-                                                    <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 " id="ride-29">
-                                                        @if ($ride->make === '')
-                                                            <span class="bg-red-100 text-red-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Not live</span>
-                                                        @endif
-                                                        <div class="flex items-center justify-between pb-0 p-4">
-                                                            @php
-                                                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
-                                                                $departureDateLabel = $departureDateTime['dateLabel'];
-                                                                $departureTimeLabel = $departureDateTime['timeLabel'];
-                                                            @endphp
-                                                            <p class="flex items-center space-x-2 font-semibold">
-                                                                {{ $departureDateLabel }}
-                                                                {{ $rideDetailPage->at_label }}
-                                                                {{ $departureTimeLabel ?? 'N/A' }}
-                                                            </p>
-
-                                                            <div class="pr-8">
-                                                                <p class="font-medium">
-                                                                    {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex flex-col md:flex-row justify-between px-4">
-                                                            <div class="w-full md:w-2/3 order-2 md:order-1">
-                                                                <div class="relative mt-5 text-left">
-                                                                    <div class="flex items-center relative">
-                                                                        <div
-                                                                            class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                                            <span
-                                                                                class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain"
-                                                                                    src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="ml-12 md:ml-20">
-                                                                            <p class="font-bold text-xl text-black">
-                                                                                @isset($rideDetailPage->card_section_from_label)
-                                                                                    {{ $rideDetailPage->card_section_from_label }}
-                                                                                @endisset
-                                                                            </p>
-                                                                            <div class="flex gap-2 items-baseline">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                    {{ $from }}.
-                                                                                </h3>
-                                                                                <p class="text-sm mt-2">
-                                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="flex items-center relative">
-                                                                        <div
-                                                                            class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                                            <span
-                                                                                class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                                                <img class="w-5 h-5 object-contain"
-                                                                                    src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="ml-12 md:ml-20 items-baseline">
-                                                                            <p class="font-bold text-xl text-black">
-                                                                                @isset($rideDetailPage->card_section_to_label)
-                                                                                    {{ $rideDetailPage->card_section_to_label }}
-                                                                                @endisset
-                                                                            </p>
-                                                                            <div class="flex gap-2">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                    {{ $to }}.
-                                                                                </h3>
-                                                                                <p class="text-sm mt-2">
-                                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="mt-4 order-1 md:order-2">
-                                                                <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
-                                                                    <small>
-                                                                        @isset($rideDetailPage->card_section_per_seat)
-                                                                            {{ $rideDetailPage->card_section_per_seat }}
-                                                                        @endisset
-                                                                    </small>
-                                                                </p>
-                                                                @php
-                                                                    $pendingBookingRequests = $ride->bookings->where('status', 0);
-                                                                @endphp
-                                                                @if ($pendingBookingRequests->isNotEmpty())
-                                                                    <div class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
-                                                                        <div class="flex items-center gap-2">
-                                                                            <svg class="h-5 w-5 flex-shrink-0 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
-                                                                            </svg>
-                                                                            <p class="font-semibold text-red-700">
-                                                                                You have {{ $pendingBookingRequests->count() }} booking request(s).
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
+                                                        <a class=""
+                                                            href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
+                                                            <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 "
+                                                                id="ride-29">
+                                                                @if ($ride->make === '')
+                                                                    <span
+                                                                        class="bg-red-100 text-red-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Not
+                                                                        live</span>
                                                                 @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                                                            <div class="flex items-center justify-between p-4">
-                                                                <p class="font-semibold">
-                                                                    @isset($rideDetailPage->card_section_booked)
-                                                                        {{ $rideDetailPage->card_section_booked }}
-                                                                    @endisset
-                                                                </p>
-                                                                <p class="">
-                                                                    {{
-                                                                        $ride->bookings()
-                                                                            ->where('status', '<>', 3)
-                                                                            ->where('status', '<>', 4)
-                                                                            ->whereHas('passenger', function($query) {
-                                                                                $query->whereNull('deleted_at'); // Exclude soft deleted users
-                                                                            })
-                                                                            ->sum('seats')
-                                                                    }}  @isset($rideDetailPage->card_section_seats)
-                                                                    {{ $rideDetailPage->card_section_seats }}
-                                                                @endisset
-                                                                </p>
-                                                            </div>
-                                                            <div class="p-4">
-                                                                <div class="flex items-center justify-between">
-                                                                    <p class="font-semibold">
-                                                                        @isset($rideDetailPage->card_section_seats_fee)
-                                                                        {{ $rideDetailPage->card_section_seats_fee }}
-                                                                    @endisset
-                                                                    : </p>
-                                                                    <p class="">
-
-                                                                        ${{ number_format(floatval(($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price))), 2) }}
+                                                                <div class="flex items-center justify-between pb-0 p-4">
+                                                                    @php
+                                                                        $departureDateTime = formatDepartureDateTime(
+                                                                            $ride->date,
+                                                                            $selectedLanguage ?? null,
+                                                                            $rideDetailPage ?? null,
+                                                                        );
+                                                                        $departureDateLabel =
+                                                                            $departureDateTime['dateLabel'];
+                                                                        $departureTimeLabel =
+                                                                            $departureDateTime['timeLabel'];
+                                                                    @endphp
+                                                                    <p class="flex items-center space-x-2 font-semibold">
+                                                                        {{ $departureDateLabel }}
+                                                                        {{ $rideDetailPage->at_label }}
+                                                                        {{ $departureTimeLabel ?? 'N/A' }}
                                                                     </p>
-                                                                </div>
 
-                                                                <div class="flex items-center justify-between">
-                                                                    <p class="font-semibold">
-                                                                        @isset($rideDetailPage->card_section_booking_fee)
-                                                                        {{ $rideDetailPage->card_section_booking_fee }}
-                                                                    @endisset
-                                                                        : </p>
-                                                                    <p class="">
-                                                                        ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
-                                                                    </p>
+                                                                    <div class="pr-8">
+                                                                        <p class="font-medium">
+                                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
+                                                                <div
+                                                                    class="flex flex-col md:flex-row justify-between px-4">
+                                                                    <div class="w-full md:w-2/3 order-2 md:order-1">
+                                                                        <div class="relative mt-5 text-left">
+                                                                            <div class="flex items-center relative">
+                                                                                <div
+                                                                                    class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                                                    <span
+                                                                                        class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                                                        <img class="w-5 h-5 object-contain"
+                                                                                            src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                                                            alt="">
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="ml-12 md:ml-20">
+                                                                                    <p
+                                                                                        class="font-bold text-xl text-black">
+                                                                                        @isset($rideDetailPage->card_section_from_label)
+                                                                                            {{ $rideDetailPage->card_section_from_label }}
+                                                                                        @endisset
+                                                                                    </p>
+                                                                                    <div class="flex gap-2 items-baseline">
+                                                                                        <h3
+                                                                                            class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                                            {{ $from }}.
+                                                                                        </h3>
+                                                                                        <p class="text-sm mt-2">
+                                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                                            {{ $ride->pickup }}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
 
-                                                                <div class="flex items-center justify-between">
-                                                                    <p class="font-semibold">
-                                                                        @isset($rideDetailPage->card_section_amount)
-                                                                        {{ $rideDetailPage->card_section_amount }}
-                                                                    @endisset
-                                                                        : </p>
-                                                                    <p class="">
-                                                                        ${{ number_format(floatval(($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price)) + $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
-                                                                    </p>
+                                                                            <div class="flex items-center relative">
+                                                                                <div
+                                                                                    class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                                                    <span
+                                                                                        class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                                                        <img class="w-5 h-5 object-contain"
+                                                                                            src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                                                            alt="">
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="ml-12 md:ml-20 items-baseline">
+                                                                                    <p
+                                                                                        class="font-bold text-xl text-black">
+                                                                                        @isset($rideDetailPage->card_section_to_label)
+                                                                                            {{ $rideDetailPage->card_section_to_label }}
+                                                                                        @endisset
+                                                                                    </p>
+                                                                                    <div class="flex gap-2">
+                                                                                        <h3
+                                                                                            class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                                            {{ $to }}.
+                                                                                        </h3>
+                                                                                        <p class="text-sm mt-2">
+                                                                                            {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                                            {{ $ride->dropoff }}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mt-4 order-1 md:order-2">
+                                                                        <p class="text-xl font-semibold text-primary">
+                                                                            ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                            <small>
+                                                                                @isset($rideDetailPage->card_section_per_seat)
+                                                                                    {{ $rideDetailPage->card_section_per_seat }}
+                                                                                @endisset
+                                                                            </small>
+                                                                        </p>
+                                                                        @php
+                                                                            $pendingBookingRequests = $ride->bookings->where(
+                                                                                'status',
+                                                                                0,
+                                                                            );
+                                                                        @endphp
+                                                                        @if ($pendingBookingRequests->isNotEmpty())
+                                                                            <div
+                                                                                class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
+                                                                                <div class="flex items-center gap-2">
+                                                                                    <svg class="h-5 w-5 flex-shrink-0 text-red-600"
+                                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                                        fill="none" viewBox="0 0 24 24"
+                                                                                        stroke-width="2"
+                                                                                        stroke="currentColor">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                                                                    </svg>
+                                                                                    <p class="font-semibold text-red-700">
+                                                                                        You have
+                                                                                        {{ $pendingBookingRequests->count() }}
+                                                                                        booking request(s).
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 no-scrollbar overflow-x-auto flex items-center space-x-2 p-4">
-                                                            @if ($ride->booking_method == $postRidePage->booking_option1->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->booking_option1->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->booking_method == $postRidePage->booking_option2->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->booking_option2->icon)}}"
-                                                                    alt="">
-                                                            @endif
-                                                            @if ($ride->payment_method == $postRidePage->payment_methods_option1->features_setting_id)
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon)}}" alt="">
-                                                            @elseif ($ride->payment_method == $postRidePage->payment_methods_option2->features_setting_id)
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon)}}" alt="">
-                                                            @elseif ($ride->payment_method == $postRidePage->payment_methods_option3->features_setting_id)
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon)}}" alt="">
-                                                            @endif
-                                                            @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->smoking_option1->icon)}}" alt="">
-                                                            @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->smoking_option2->icon)}}" alt="">
-                                                            @endif
-                                                            @if ($ride->animal_friendly == $postRidePage->animals_option1->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->animals_option1->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->animal_friendly == $postRidePage->animals_option2->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->animals_option2->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->animal_friendly == $postRidePage->animals_option3->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->animals_option3->icon)}}"
-                                                                    alt="">
-                                                            @endif
-                                                            @if ($ride->luggage == $postRidePage->luggage_option1->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->luggage_option1->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->luggage == $postRidePage->luggage_option2->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->luggage_option2->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->luggage == $postRidePage->luggage_option3->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->luggage_option3->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->luggage == $postRidePage->luggage_option4->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->luggage_option4->icon)}}"
-                                                                    alt="">
-                                                            @elseif ($ride->luggage == $postRidePage->luggage_option5->features_setting_id)
-                                                                <img class="w-8 h-8"
-                                                                    src="{{asset('home_page_icons/' . $postRidePage->luggage_option5->icon)}}"
-                                                                    alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option1->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option1->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option2->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option3->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option8->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option9->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option10->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option11->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option12->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option13->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option14->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option15->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option16->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt="">
-                                                            @endif
-                                                            @if (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features)))
-                                                                <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt="">
-                                                            @endif
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex no-scrollbar overflow-x-auto items-center space-x-2 p-4">
-                                                            @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
-                                                                @for ($i = 0; $i < $booking->seats; $i++)
-                                                                    @if ($booking->passenger)
-                                                                            @if ($booking->passenger->profile_image)
-                                                                                <img class="w-10 h-10 rounded-full"
-                                                                                    src="{{ $booking->passenger->profile_image }}"
-                                                                                    alt="">
-                                                                            @else
-                                                                                <img class="w-10 h-10 rounded-full" src="{{ asset('images/59-booked-seat.png') }}"
-                                                                                    alt="">
-                                                                            @endif
+                                                                <div
+                                                                    class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                                                                    <div class="flex items-center justify-between p-4">
+                                                                        <p class="font-semibold">
+                                                                            @isset($rideDetailPage->card_section_booked)
+                                                                                {{ $rideDetailPage->card_section_booked }}
+                                                                            @endisset
+                                                                        </p>
+                                                                        <p class="">
+                                                                            {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
+                                                                                    $query->whereNull('deleted_at'); // Exclude soft deleted users
+                                                                                })->sum('seats') }}
+                                                                            @isset($rideDetailPage->card_section_seats)
+                                                                                {{ $rideDetailPage->card_section_seats }}
+                                                                            @endisset
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="p-4">
+                                                                        <div class="flex items-center justify-between">
+                                                                            <p class="font-semibold">
+                                                                                @isset($rideDetailPage->card_section_seats_fee)
+                                                                                    {{ $rideDetailPage->card_section_seats_fee }}
+                                                                                @endisset
+                                                                                : </p>
+                                                                            <p class="">
+
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div class="flex items-center justify-between">
+                                                                            <p class="font-semibold">
+                                                                                @isset($rideDetailPage->card_section_booking_fee)
+                                                                                    {{ $rideDetailPage->card_section_booking_fee }}
+                                                                                @endisset
+                                                                                : </p>
+                                                                            <p class="">
+                                                                                ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div class="flex items-center justify-between">
+                                                                            <p class="font-semibold">
+                                                                                @isset($rideDetailPage->card_section_amount)
+                                                                                    {{ $rideDetailPage->card_section_amount }}
+                                                                                @endisset
+                                                                                : </p>
+                                                                            <p class="">
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->rideDetail[0]->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    class="border-t border-gray-300 no-scrollbar overflow-x-auto flex items-center space-x-2 p-4">
+                                                                    @if ($ride->booking_method == $postRidePage->booking_option1->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->booking_method == $postRidePage->booking_option2->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                                            alt="">
                                                                     @endif
-                                                                @endfor
-                                                            @endforeach
-                                                        </div>
+                                                                    @if ($ride->payment_method == $postRidePage->payment_methods_option1->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->payment_method == $postRidePage->payment_methods_option2->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->payment_method == $postRidePage->payment_methods_option3->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->smoking_option1->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if ($ride->animal_friendly == $postRidePage->animals_option1->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option1->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->animal_friendly == $postRidePage->animals_option2->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option2->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->animal_friendly == $postRidePage->animals_option3->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if ($ride->luggage == $postRidePage->luggage_option1->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option2->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option3->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option4->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
+                                                                            alt="">
+                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option5->features_setting_id)
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option1->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option3->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option8->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option10->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option11->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option12->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option13->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option14->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option15->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option16->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                    @if (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features)))
+                                                                        <img class="w-8 h-8"
+                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}"
+                                                                            alt="">
+                                                                    @endif
+                                                                </div>
+                                                                <div
+                                                                    class="border-t border-gray-300 flex no-scrollbar overflow-x-auto items-center space-x-2 p-4">
+                                                                    @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
+                                                                        @for ($i = 0; $i < $booking->seats; $i++)
+                                                                            @if ($booking->passenger)
+                                                                                @if ($booking->passenger->profile_image)
+                                                                                    <img class="w-10 h-10 rounded-full"
+                                                                                        src="{{ $booking->passenger->profile_image }}"
+                                                                                        alt="">
+                                                                                @else
+                                                                                    <img class="w-10 h-10 rounded-full"
+                                                                                        src="{{ asset('images/59-booked-seat.png') }}"
+                                                                                        alt="">
+                                                                                @endif
+                                                                            @endif
+                                                                        @endfor
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        </a>
                                                     </div>
-                                                </a>
-                                            </div>
-                                        @endforeach
-                                        {{ $rides->links() }}
-                                    @else
-                                        <p>{{ $tripsPage->no_upcoming_rides_label ?? 'You have no upcoming rides scheduled.' }}</p>
-                                    @endif
+                                                @endforeach
+                                                {{ $rides->links() }}
+                                            @else
+                                                <p>{{ $tripsPage->no_upcoming_rides_label ?? 'You have no upcoming rides scheduled.' }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 @section('script')
-<script>
-     function closeModal() {
-    // Hide all modals
-    document.querySelectorAll('.relative.z-50').forEach(modal => {
-        modal.style.display = 'none';
-    });
+    <script>
+        function closeModal() {
+            // Hide all modals
+            document.querySelectorAll('.relative.z-50').forEach(modal => {
+                modal.style.display = 'none';
+            });
 
-    // Also remove any session messages from the URL
-    if (window.history.replaceState) {
-        const cleanUrl = window.location.href.split('?')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
-}
-function closeModal() {
-    const modal = document.getElementById('myModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-</script>
+            // Also remove any session messages from the URL
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.href.split('?')[0];
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
 @endsection
