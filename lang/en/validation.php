@@ -156,6 +156,57 @@ return
 		'uuid' => 'The :attribute field must be a valid UUID.',
 		'custom' =>
 		[
+			'city_not_in_record' => [
+				'message' => 'We could not find this city name in our records, please double-check the spelling.',
+			],
+			'from' => [
+				'required' => 'The origin field is required.',
+			],
+			'to' => [
+				'required' => 'The destination field is required.',
+			],
+			'pickup' => [
+				'required' => 'The pickup field is required.',
+			],
+			'dropoff' => [
+				'required' => 'The dropoff field is required.',
+			],
+			'time' => [
+				'required' => 'The time field is required.',
+			],
+			'details' => [
+				'required' => 'The details field is required.',
+			],
+			'seats' => [
+				'required' => 'Please select the number of seats.',
+			],
+			'smoke' => [
+				'required' => 'Please select a smoking option.',
+			],
+			'animal_friendly' => [
+				'required' => 'Please select an animal-friendly option.',
+			],
+			'booking_method' => [
+				'required' => 'Please select a booking method.',
+			],
+			'luggage' => [
+				'required' => 'Please select a luggage option.',
+			],
+			'price' => [
+				'required' => 'The price field is required.',
+			],
+			'payment_method' => [
+				'required' => 'Please select a payment method.',
+			],
+			'middle_seats' => [
+				'required' => 'Please select middle seats.',
+			],
+			'back_seats' => [
+				'required' => 'Please select back seats.',
+			],
+			'agree_terms' => [
+				'accepted' => 'You must agree to the terms to continue.',
+			],
 			'email' =>
 			[
 				'required' => 'Email address is required.',

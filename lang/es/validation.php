@@ -169,6 +169,57 @@ return [
     */
 
     'custom' => [
+        'city_not_in_record' => [
+            'message' => 'No hemos encontrado este nombre de ciudad en nuestros registros, por favor verifica la ortografía.',
+        ],
+        'from' => [
+            'required' => 'El origen es obligatorio.',
+        ],
+        'to' => [
+            'required' => 'El destino es obligatorio.',
+        ],
+        'pickup' => [
+            'required' => 'El punto de recogida es obligatorio.',
+        ],
+        'dropoff' => [
+            'required' => 'El punto de llegada es obligatorio.',
+        ],
+        'time' => [
+            'required' => 'La hora es obligatoria.',
+        ],
+        'details' => [
+            'required' => 'El campo de detalles es obligatorio.',
+        ],
+        'seats' => [
+            'required' => 'Selecciona el número de asientos.',
+        ],
+        'smoke' => [
+            'required' => 'Selecciona una opción de fumadores.',
+        ],
+        'animal_friendly' => [
+            'required' => 'Selecciona una opción apta para animales.',
+        ],
+        'booking_method' => [
+            'required' => 'Selecciona un método de reserva.',
+        ],
+        'luggage' => [
+            'required' => 'Selecciona una opción de equipaje.',
+        ],
+        'price' => [
+            'required' => 'El precio es obligatorio.',
+        ],
+        'payment_method' => [
+            'required' => 'Selecciona un método de pago.',
+        ],
+        'middle_seats' => [
+            'required' => 'Selecciona los asientos del medio.',
+        ],
+        'back_seats' => [
+            'required' => 'Selecciona los asientos traseros.',
+        ],
+        'agree_terms' => [
+            'accepted' => 'Debes aceptar los términos para continuar.',
+        ],
         'email' => [
             'required' => 'La dirección de correo electrónico es obligatoria.',
             'email' => 'Introduce una dirección de correo electrónico válida, por ejemplo, name@example.com.',

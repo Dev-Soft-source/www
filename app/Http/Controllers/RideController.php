@@ -1989,24 +1989,7 @@ class RideController extends Controller
             'vehicle_id' => $added_vehicle !== 0 ? 'required' : 'nullable',
             'recurring_type' => $recurring !== 0 ? 'required' : 'nullable',
             'recurring_trips' => $recurring !== 0 ? 'required|numeric|max:10' : 'nullable',
-        ],[
-            'from.required' => ($siteTextErrorMessage['from_required'] ?? null) ?: 'The origin field is required.',
-            'to.required' => ($siteTextErrorMessage['to_required'] ?? null) ?: 'The destination field is required.',
-            'pickup.required' => ($siteTextErrorMessage['pickup_required'] ?? null) ?: 'The pickup field is required.',
-            'dropoff.required' => ($siteTextErrorMessage['dropoff_required'] ?? null) ?: 'The dropoff field is required.',
-            'time.required' => ($siteTextErrorMessage['time_required'] ?? null) ?: 'The time field is required.',
-            'details.required' => ($siteTextErrorMessage['details_required'] ?? null) ?: 'The details field is required.',
-            'seats.required' => ($siteTextErrorMessage['seats_required'] ?? null) ?: 'Please select the number of seats.',
-            'smoke.required' => ($siteTextErrorMessage['smoke_required'] ?? null) ?: 'Please select a smoking option.',
-            'animal_friendly.required' => ($siteTextErrorMessage['animal_friendly_required'] ?? null) ?: 'Please select an animal-friendly option.',
-            'booking_method.required' => ($siteTextErrorMessage['booking_method_required'] ?? null) ?: 'Please select a booking method.',
-            'luggage.required' => ($siteTextErrorMessage['luggage_required'] ?? null) ?: 'Please select a luggage option.',
-            'price.required' => ($siteTextErrorMessage['price_required'] ?? null) ?: 'The price field is required.',
-            'payment_method.required' => ($siteTextErrorMessage['payment_method_required'] ?? null) ?: 'Please select a payment method.',
-            'middle_seats.required' => ($siteTextErrorMessage['middle_seats_required'] ?? null) ?: 'Please select middle seats.',
-            'back_seats.required' => ($siteTextErrorMessage['back_seats_required'] ?? null) ?: 'Please select back seats.',
-            'agree_terms.accepted' => ($siteTextErrorMessage['agree_terms_required'] ?? $siteTextErrorMessage['firm_agree_terms_required'] ?? null) ?: 'You must agree to the terms to continue.',
-        ], $customMessages);
+        ], [], $customMessages);
         // $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
 
         $fromSpot = $request->input('from');

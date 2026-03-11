@@ -145,6 +145,57 @@ return [
     'ulid' => 'Le champ :attribute doit être un ULID valide.',
     'uuid' => 'Le champ :attribute doit être un UUID valide.',
     'custom' => [
+        'city_not_in_record' => [
+            'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l’orthographe.",
+        ],
+        'from' => [
+            'required' => "Le champ d'origine est obligatoire.",
+        ],
+        'to' => [
+            'required' => 'Le champ de destination est obligatoire.',
+        ],
+        'pickup' => [
+            'required' => 'Le champ de prise en charge est obligatoire.',
+        ],
+        'dropoff' => [
+            'required' => 'Le champ de dépôt est obligatoire.',
+        ],
+        'time' => [
+            'required' => 'L’heure est obligatoire.',
+        ],
+        'details' => [
+            'required' => 'Le champ des détails est obligatoire.',
+        ],
+        'seats' => [
+            'required' => 'Veuillez sélectionner le nombre de sièges.',
+        ],
+        'smoke' => [
+            'required' => 'Veuillez sélectionner une option fumeur.',
+        ],
+        'animal_friendly' => [
+            'required' => 'Veuillez sélectionner une option adaptée aux animaux.',
+        ],
+        'booking_method' => [
+            'required' => 'Veuillez sélectionner une méthode de réservation.',
+        ],
+        'luggage' => [
+            'required' => 'Veuillez sélectionner une option de bagages.',
+        ],
+        'price' => [
+            'required' => 'Le champ prix est obligatoire.',
+        ],
+        'payment_method' => [
+            'required' => 'Veuillez sélectionner un mode de paiement.',
+        ],
+        'middle_seats' => [
+            'required' => 'Veuillez sélectionner les sièges du milieu.',
+        ],
+        'back_seats' => [
+            'required' => 'Veuillez sélectionner les sièges arrière.',
+        ],
+        'agree_terms' => [
+            'accepted' => 'Vous devez accepter les conditions pour continuer.',
+        ],
         'email' => [
             'required' => "L'adresse e-mail est obligatoire.",
             'email' => 'Veuillez saisir une adresse e-mail valide, par exemple name@example.com.',

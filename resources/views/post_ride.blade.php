@@ -2586,9 +2586,9 @@
     var toAutocompletePostRide = null;
     var isSettingPlaceValuePostRide = false;
     var isSelectingFromDropdownPostRide = false;
-    var errorFromRequiredPostRide = 'The origin is required';
-    var errorToRequiredPostRide = 'The destination is required';
-    var errorCityMissingPostRide = 'We could not find this city name in our records, please double-check the spelling.';
+    var errorFromRequiredPostRide = @json(__('validation.custom.from.required'));
+    var errorToRequiredPostRide = @json(__('validation.custom.to.required'));
+    var errorCityMissingPostRide = @json(__('validation.custom.city_not_in_record.message'));
 
     // Define the handler function
     function extraCareRideModal(parms) {

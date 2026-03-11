@@ -145,6 +145,57 @@ return [
     'ulid' => ':attribute 必须是有效的 ULID。',
     'uuid' => ':attribute 必须是有效的 UUID。',
     'custom' => [
+        'city_not_in_record' => [
+            'message' => '我们在记录中找不到该城市名称，请再次检查拼写。',
+        ],
+        'from' => [
+            'required' => '出发地点为必填项。',
+        ],
+        'to' => [
+            'required' => '目的地为必填项。',
+        ],
+        'pickup' => [
+            'required' => '上车地点为必填项。',
+        ],
+        'dropoff' => [
+            'required' => '下车地点为必填项。',
+        ],
+        'time' => [
+            'required' => '时间为必填项。',
+        ],
+        'details' => [
+            'required' => '详情字段为必填项。',
+        ],
+        'seats' => [
+            'required' => '请选择座位数量。',
+        ],
+        'smoke' => [
+            'required' => '请选择吸烟选项。',
+        ],
+        'animal_friendly' => [
+            'required' => '请选择是否允许携带宠物的选项。',
+        ],
+        'booking_method' => [
+            'required' => '请选择预订方式。',
+        ],
+        'luggage' => [
+            'required' => '请选择行李选项。',
+        ],
+        'price' => [
+            'required' => '价格为必填项。',
+        ],
+        'payment_method' => [
+            'required' => '请选择支付方式。',
+        ],
+        'middle_seats' => [
+            'required' => '请选择中间座位。',
+        ],
+        'back_seats' => [
+            'required' => '请选择后排座位。',
+        ],
+        'agree_terms' => [
+            'accepted' => '要继续操作，必须同意条款。',
+        ],
         'email' => [
             'required' => '电子邮箱地址为必填项。',
             'email' => '请输入有效的电子邮箱地址，例如 name@example.com。',

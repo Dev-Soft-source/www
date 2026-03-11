@@ -145,6 +145,57 @@ return [
     'ulid' => 'Dapat ay wastong ULID ang :attribute field.',
     'uuid' => 'Dapat ay wastong UUID ang :attribute field.',
     'custom' => [
+        'city_not_in_record' => [
+            'message' => 'Hindi namin makita ang pangalan ng lungsod na ito sa aming talaan, pakisuri muli ang baybay.',
+        ],
+        'from' => [
+            'required' => 'Kinakailangan ang pinanggalingan.',
+        ],
+        'to' => [
+            'required' => 'Kinakailangan ang patutunguhan.',
+        ],
+        'pickup' => [
+            'required' => 'Kinakailangan ang lokasyon ng pickup.',
+        ],
+        'dropoff' => [
+            'required' => 'Kinakailangan ang lokasyon ng dropoff.',
+        ],
+        'time' => [
+            'required' => 'Kinakailangan ang oras.',
+        ],
+        'details' => [
+            'required' => 'Kinakailangan ang field ng detalye.',
+        ],
+        'seats' => [
+            'required' => 'Pakiusap piliin ang bilang ng mga upuan.',
+        ],
+        'smoke' => [
+            'required' => 'Pakiusap pumili ng opsyon para sa paninigarilyo.',
+        ],
+        'animal_friendly' => [
+            'required' => 'Pakiusap pumili ng opsyon na angkop sa alagang hayop.',
+        ],
+        'booking_method' => [
+            'required' => 'Pakiusap pumili ng paraan ng pag-book.',
+        ],
+        'luggage' => [
+            'required' => 'Pakiusap pumili ng opsyon para sa bagahe.',
+        ],
+        'price' => [
+            'required' => 'Kinakailangan ang field ng presyo.',
+        ],
+        'payment_method' => [
+            'required' => 'Pakiusap pumili ng paraan ng pagbabayad.',
+        ],
+        'middle_seats' => [
+            'required' => 'Pakiusap pumili ng mga upuang nasa gitna.',
+        ],
+        'back_seats' => [
+            'required' => 'Pakiusap pumili ng mga upuang nasa likod.',
+        ],
+        'agree_terms' => [
+            'accepted' => 'Dapat kang sumang-ayon sa mga tuntunin bago magpatuloy.',
+        ],
         'email' => [
             'required' => 'Kinakailangan ang email address.',
             'email' => 'Mangyaring maglagay ng wastong email address, tulad ng name@example.com.',
