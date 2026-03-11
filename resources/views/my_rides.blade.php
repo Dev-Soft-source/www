@@ -187,7 +187,6 @@ function closeErrorModal() {
                                                         @endif
                                                         <div class="flex items-center justify-between pb-0 p-4">
                                                             @php
-                                                            @php
                                                                 $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
                                                                 $departureDateLabel = $departureDateTime['dateLabel'];
                                                                 $departureTimeLabel = $departureDateTime['timeLabel'];

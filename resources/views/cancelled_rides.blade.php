@@ -35,7 +35,6 @@
                                                     <div class=" rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                                         <div class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
                                                             @php
-                                                            @php
                                                                 $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
                                                                 $departureDateLabel = $departureDateTime['dateLabel'];
                                                                 $departureTimeLabel = $departureDateTime['timeLabel'];

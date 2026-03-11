@@ -91,15 +91,15 @@
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
                             <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
-                                class="inline-flex w-28 justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
-                                Log in
+                                class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
+                                {{ $siteText['login_btn_text'] ?? 'Log in' }}
                             </a>
-                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="inline-flex w-28 justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:w-24">
-                                Sign up
+                            <a href="{{ route('signup', ['lang' => app()->getLocale()]) }}" class="inline-flex justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS">
+                                {{ $siteText['signup_btn_text'] ?? 'Sign up' }}
                             </a>
                             <button onclick="closeModal()"
-                                class="inline-flex w-28 justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">
-                                Close
+                                class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400">
+                                {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
                         </div>
                     </div>

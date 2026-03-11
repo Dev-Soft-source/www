@@ -1049,7 +1049,7 @@
                                                 <div class="pr-8">
                                                     <div class="pr-8">
                                                         <p class="font-medium">
-                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
+                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}</p>
                                                     </div>
                                                     {{-- {{ dd($postRidePage->cancellation_policy_label1->features_setting_id,$ride->booking_type) }} --}}
                                                     <p class="text-xl font-semibold text-primary">
@@ -1101,7 +1101,7 @@
                                                 {{-- <div class="pr-8">
                                                     <div class="pr-8">
                                                         <p class="font-medium">
-                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
+                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}</p>
                                                     </div>
                                                     <p class="text-xl font-semibold text-primary">${{ number_format(floatval($rideDetail->price), 2) }}
                                                         <small>
@@ -1139,7 +1139,7 @@
                                                                     @php $segmentPickup = $rideDetail->pickup ?? $ride->pickup; @endphp
                                                                     @if (!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1170,7 +1170,7 @@
                                                                     @php $segmentDropoff = $rideDetail->dropoff ?? $ride->dropoff; @endphp
                                                                     @if (!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
