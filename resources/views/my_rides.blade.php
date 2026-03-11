@@ -200,7 +200,7 @@ function closeErrorModal() {
 
                                                             <div class="pr-8">
                                                                 <p class="font-medium">
-                                                                    Total {{ $ride->seats }} seats</p>
+                                                                    {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
                                                             </div>
                                                         </div>
                                                         <div class="flex flex-col md:flex-row justify-between px-4">
@@ -226,7 +226,7 @@ function closeErrorModal() {
                                                                                     {{ $from }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Pick-up at: {{ $ride->pickup }}
+                                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
@@ -252,7 +252,7 @@ function closeErrorModal() {
                                                                                     {{ $to }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Drop-off at: {{ $ride->dropoff }}
+                                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>

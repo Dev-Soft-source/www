@@ -73,7 +73,7 @@
                                                                                     {{ $from }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Pick-up at: {{ $ride->pickup }}
+                                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
@@ -99,7 +99,7 @@
                                                                                     {{ $to }}.
                                                                                 </h3>
                                                                                 <p class="text-sm mt-2">
-                                                                                    Drop-off at: {{ $ride->dropoff }}
+                                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
@@ -109,7 +109,7 @@
                                                             <div class="mt-1 md:mt-4 order-1 md:order-2">
                                                                 <div class="pr-8">
                                                                     <p class="font-medium">
-                                                                        Total {{ $ride->seats }} seats</p>
+                                                                        {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
                                                                 </div>
                                                                 <p class="text-lg md:text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }} <small>
                                                                     @isset($rideDetailPage->card_section_per_seat)

@@ -37,6 +37,8 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['booking_price_label.booking_price_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_method_label.booking_method_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['booking_method_label.booking_method_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['total_seats_label.total_seats_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['total_seats_label.total_seats_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['luggage_label.luggage_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['luggage_label.luggage_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['smoking_label.smoking_label_' . $language->id => ['required', 'string']]);
@@ -169,8 +171,12 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['pickup_dropoff_info_heading.pickup_dropoff_info_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pickup_label.pickup_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pickup_label.pickup_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['pickup_at_label.pickup_at_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['pickup_at_label.pickup_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['dropoff_label.dropoff_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['dropoff_label.dropoff_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['dropoff_at_label.dropoff_at_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['dropoff_at_label.dropoff_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['description_label.description_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['description_label.description_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_type_label.booking_type_label_' . $language->id => ['required', 'string']]);
@@ -243,6 +249,7 @@ class RideDetailPageSettingService
             'payment_method_label' => $this->data($request, $language, 'payment_method_label'),
             'booking_price_label' => $this->data($request, $language, 'booking_price_label'),
             'booking_method_label' => $this->data($request, $language, 'booking_method_label'),
+            'total_seats_label' => $this->data($request, $language, 'total_seats_label'),
             'booking_type_label' => $this->data($request, $language, 'booking_type_label'),
             'cancellation_policy_label' => $this->data($request, $language, 'cancellation_policy_label'),
             'luggage_label' => $this->data($request, $language, 'luggage_label'),
@@ -252,7 +259,9 @@ class RideDetailPageSettingService
             'per_seat_label' => $this->data($request, $language, 'per_seat_label'),
             'pickup_dropoff_info_heading' => $this->data($request, $language, 'pickup_dropoff_info_heading'),
             'pickup_label' => $this->data($request, $language, 'pickup_label'),
+            'pickup_at_label' => $this->data($request, $language, 'pickup_at_label'),
             'dropoff_label' => $this->data($request, $language, 'dropoff_label'),
+            'dropoff_at_label' => $this->data($request, $language, 'dropoff_at_label'),
             'description_label' => $this->data($request, $language, 'description_label'),
             'ride_features_label' => $this->data($request, $language, 'ride_features_label'),
             'ride_seat_label' => $this->data($request, $language, 'ride_seat_label'),

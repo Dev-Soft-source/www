@@ -445,7 +445,7 @@
                                             @php $segmentPickup = $ride->rideDetail->first()?->pickup ?? $ride->pickup; @endphp
                                             @if(!empty($segmentPickup))
                                                 <p class="text-sm mt-2">
-                                                    Pick-up at: {{ $segmentPickup }}
+                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                 </p>
                                             @endif
                                         </div>
@@ -474,7 +474,7 @@
                                             @php $segmentDropoff = $ride->rideDetail->first()?->dropoff ?? $ride->dropoff; @endphp
                                             @if(!empty($segmentDropoff))
                                                 <p class="text-sm mt-2">
-                                                    Drop-off at: {{ $segmentDropoff }}
+                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
                                                 </p>
                                             @endif
                                         </div>
