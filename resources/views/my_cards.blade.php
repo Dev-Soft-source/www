@@ -385,23 +385,26 @@
         modal.classList.remove('hidden');
         backdrop.classList.remove('hidden');
         
+        // Check Google Pay availability and hide container if not available
+        checkAndShowGooglePay();
+        
         // Initialize other payment methods first (don't wait for PayPal)
         initializeApplePay();
         initializeGooglePay();
         
         // Load PayPal SDK if not already loaded
-        if (!paypalSDKLoaded && paypalClientId && paypalClientId !== '') {
-            loadPayPalSDK();
-        } else if (typeof paypal !== 'undefined' && paypal.Buttons) {
-            // PayPal is already loaded, initialize it
-            initializePayPal();
-        } else {
-            // PayPal is not configured or not available
-            const paypalContainer = document.getElementById('paypal-button-container');
-            if (paypalContainer && (!paypalClientId || paypalClientId === '')) {
-                paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">PayPal is not available</p>';
-            }
-        }
+        // if (!paypalSDKLoaded && paypalClientId && paypalClientId !== '') {
+        //     loadPayPalSDK();
+        // } else if (typeof paypal !== 'undefined' && paypal.Buttons) {
+        //     // PayPal is already loaded, initialize it
+        //     initializePayPal();
+        // } else {
+        //     // PayPal is not configured or not available
+        //     const paypalContainer = document.getElementById('paypal-button-container');
+        //     if (paypalContainer && (!paypalClientId || paypalClientId === '')) {
+        //         paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">PayPal is not available</p>';
+        //     }
+        // }
     }
     
     function loadPayPalSDK() {
@@ -576,6 +579,8 @@
             document.getElementById('apple-pay-button-container').classList.add('hidden');
         }
         
+        // Check Google Pay availability before initializing
+        checkAndShowGooglePay();
         initializeGooglePay();
         initializePayPal();
     }
@@ -1100,10 +1105,46 @@
         });
     }
     
+    function checkAndShowGooglePay() {
+        const googlePayContainer = document.getElementById('google-pay-button-container');
+        if (!googlePayContainer) {
+            return;
+        }
+        
+        // Check if browser supports Google Pay
+        // Heuristic: Android + Chrome + PaymentRequest API present
+        const ua = navigator.userAgent || '';
+        const isAndroid = /Android/.test(ua);
+        const isChrome = /Chrome/.test(ua) || /CriOS/.test(ua);
+        const hasPaymentRequest = typeof window.PaymentRequest !== 'undefined';
+        const isGooglePayCapable = isAndroid && isChrome && hasPaymentRequest;
+        
+        if (!isGooglePayCapable) {
+            googlePayContainer.classList.add('hidden');
+        } else {
+            googlePayContainer.classList.remove('hidden');
+        }
+    }
+    
     function initializeGooglePay() {
+        // Check if Google Pay container is visible before initializing
+        const googlePayContainer = document.getElementById('google-pay-button-container');
+        if (!googlePayContainer || googlePayContainer.classList.contains('hidden')) {
+            return;
+        }
+        
         // Clear any existing buttons first
-        const googlePayContainer = document.getElementById('google-pay-button');
-        googlePayContainer.innerHTML = '';
+        const googlePayButton = document.getElementById('google-pay-button');
+        if (!googlePayButton) {
+            return;
+        }
+        googlePayButton.innerHTML = '';
+        
+        // Check if google.payments API is available
+        if (typeof google === 'undefined' || !google.payments || !google.payments.api) {
+            console.warn('Google Pay API not loaded');
+            return;
+        }
         
         const paymentsClient = new google.payments.api.PaymentsClient({
             environment: '{{ env("APP_ENV") === "production" ? "PRODUCTION" : "TEST" }}'
@@ -1116,7 +1157,7 @@
             buttonSizeMode: 'fill'
         });
         
-        googlePayContainer.appendChild(button);
+        googlePayButton.appendChild(button);
     }
     
     function onGooglePayButtonClicked() {
@@ -1406,6 +1447,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Check Google Pay availability on page load
+        checkAndShowGooglePay();
+        
         var months = {
             1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
             7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'
@@ -1422,6 +1466,20 @@
                 }
             @endif
         @endforeach
+
+        // Load PayPal SDK if not already loaded
+        if (!paypalSDKLoaded && paypalClientId && paypalClientId !== '') {
+            loadPayPalSDK();
+        } else if (typeof paypal !== 'undefined' && paypal.Buttons) {
+            // PayPal is already loaded, initialize it
+            initializePayPal();
+        } else {
+            // PayPal is not configured or not available
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (paypalContainer && (!paypalClientId || paypalClientId === '')) {
+                paypalContainer.innerHTML = '<p class="text-gray-500 text-sm">PayPal is not available</p>';
+            }
+        }
     });
 
     function closeModal() {
