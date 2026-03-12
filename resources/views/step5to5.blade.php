@@ -2,8 +2,18 @@
 
 @section('style')
     <style>
+        .skip-button-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
 
-        .verify-button-modern:active {
+        .skip-button-modern:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .skip-button-modern:active {
             transform: translateY(0);
         }
     </style>
@@ -156,24 +166,8 @@
                             <div class=" items-center justify-center w-full">
                                 <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
                                     @isset($step5Page->unverified_number_label)
-                                        {{ $step5Page->unverified_number_label }}
+                                        {!! $step5Page->unverified_number_label !!}
                                     @endisset
-                                </p>                                
-                            </div>
-
-                            <div class=" items-center justify-center w-full px-6">
-                                <button type="button" onclick="showSkipConfirmation()" class="w-full button-exp-fill">
-                                    @isset($step5Page->skip_button_label)
-                                        {{ $step5Page->skip_button_label }}
-                                    @endisset
-                                </button>
-                            </div>                            
-                        </div>
-
-                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
-                            <div class=" items-center justify-center w-full">
-                                <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
-                                  
                                 </p>                                
                             </div>
 
@@ -185,6 +179,22 @@
                                     @endisset
                                 </button>
                             </div>                            
+                        </div>
+                        
+                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                            <div class=" items-center justify-center w-full">
+                                <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
+                                    {{ $step5Page->skip_phone_number_label ?? 'Continue without adding a phone number.' }}
+                                </p>                                
+                            </div>
+                            <div class=" items-center justify-center w-full px-6">
+                                <button type="button" onclick="showSkipConfirmation()" class="w-full button-exp-fill skip-button-modern">
+                                    @isset($step5Page->skip_button_label)
+                                        {{ $step5Page->skip_button_label }}
+                                    @endisset
+                                </button>
+                            </div>                            
+
                         </div>
                     </div>
                 </form>

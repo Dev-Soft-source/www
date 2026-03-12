@@ -27,6 +27,8 @@ class Step4PageSettingService
                 $errorMessages = array_merge($errorMessages, ['phone_error.phone_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['skip_button_label.skip_button_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['skip_button_label.skip_button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['skip_phone_number_label.skip_phone_number_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['skip_phone_number_label.skip_phone_number_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['save_button_label.save_button_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['save_button_label.save_button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['send_button_label.send_button_label_' . $language->id => ['required', 'string']]);
@@ -67,6 +69,7 @@ class Step4PageSettingService
             'phone_label' => $this->data($request, $language, 'phone_label'),
             'phone_error' => $this->data($request, $language, 'phone_error'),
             'skip_button_label' => $this->data($request, $language, 'skip_button_label'),
+            'skip_phone_number_label' => $this->data($request, $language, 'skip_phone_number_label'),
             'verify_button_label' => $this->data($request, $language, 'verify_button_label'),
             'verify_code_label' => $this->data($request, $language, 'verify_code_label'),
             'enter_code_label' => $this->data($request, $language, 'enter_code_label'),

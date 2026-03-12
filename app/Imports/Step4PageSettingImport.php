@@ -26,7 +26,7 @@ class Step4PageSettingImport implements ToCollection, WithHeadingRow, WithValida
         return [
             'name', 'meta_keywords', 'meta_description', 'main_heading', 'main_label',
             'country_code_label', 'country_code_error', 'phone_label', 'phone_error',
-            'skip_button_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
+            'skip_button_label', 'skip_phone_number_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
             'request_code_label', 'second_label', 'save_button_label', 'send_button_label', 'logout_button_label',
         ];
     }
@@ -135,6 +135,7 @@ class Step4PageSettingImport implements ToCollection, WithHeadingRow, WithValida
             'phone_label' => 'required|string',
             'phone_error' => 'required|string',
             'skip_button_label' => 'required|string',
+            'skip_phone_number_label' => 'required|string',
             'verify_button_label' => 'required|string',
             'verify_code_label' => 'required|string',
             'enter_code_label' => 'required|string',

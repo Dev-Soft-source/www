@@ -28,6 +28,7 @@ class Step4PageSettingDetailResource extends JsonResource
             'phone_label' => $this->phone_label,
             'phone_error' => $this->phone_error,
             'skip_button_label' => $this->skip_button_label,
+            'skip_phone_number_label' => $this->skip_phone_number_label,
             'verify_button_label' => $this->verify_button_label,
             'verify_code_label' => $this->verify_code_label,
             'enter_code_label' => $this->enter_code_label,

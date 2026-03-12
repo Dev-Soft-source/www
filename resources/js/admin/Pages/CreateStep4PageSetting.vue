@@ -402,6 +402,23 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`skip_phone_number_label_${activeLanguageId}`">Skip phone number label</label>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`skip_phone_number_label_${activeLanguageId}`"
+                                                    :id="`skip_phone_number_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('skip_phone_number_label')"
+                                                    @input="handleInput($event.target.value, language, 'skip_phone_number_label')"
+                                                />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`skip_phone_number_label.skip_phone_number_label_${activeLanguageId}`)" v-text="validationErros.get(`skip_phone_number_label.skip_phone_number_label_${activeLanguageId}`)"></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`verify_button_label_${activeLanguageId}`">Verify button label</label>
                                                 </div>
                                                 <input
@@ -629,6 +646,7 @@ export default {
                             this.handleInput("", language, "phone_label");
                             this.handleInput("", language, "phone_error");
                             this.handleInput("", language, "skip_button_label");
+                            this.handleInput("", language, "skip_phone_number_label");
                             this.handleInput("", language, "verify_button_label");
                             this.handleInput("", language, "verify_code_label");
                             this.handleInput("", language, "enter_code_label");
@@ -661,6 +679,7 @@ export default {
                             this.handleInput(setting?.phone_label ?? "", lang, "phone_label");
                             this.handleInput(setting?.phone_error ?? "", lang, "phone_error");
                             this.handleInput(setting?.skip_button_label ?? "", lang, "skip_button_label");
+                            this.handleInput(setting?.skip_phone_number_label ?? "", lang, "skip_phone_number_label");
                             this.handleInput(setting?.verify_button_label ?? "", lang, "verify_button_label");
                             this.handleInput(setting?.verify_code_label ?? "", lang, "verify_code_label");
                             this.handleInput(setting?.enter_code_label ?? "", lang, "enter_code_label");
@@ -714,6 +733,7 @@ export default {
                 validationErros.has(`phone_label.phone_label_${id}`) ||
                 validationErros.has(`phone_error.phone_error_${id}`) ||
                 validationErros.has(`skip_button_label.skip_button_label_${id}`) ||
+                validationErros.has(`skip_phone_number_label.skip_phone_number_label_${id}`) ||
                 validationErros.has(`verify_button_label.verify_button_label_${id}`) ||
                 validationErros.has(`verify_code_label.verify_code_label_${id}`) ||
                 validationErros.has(`enter_code_label.enter_code_label_${id}`) ||

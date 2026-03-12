@@ -37,7 +37,7 @@ class Step4PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
         return [
             'name', 'meta_keywords', 'meta_description', 'main_heading', 'main_label',
             'country_code_label', 'country_code_error', 'phone_label', 'phone_error',
-            'skip_button_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
+            'skip_button_label', 'skip_phone_number_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
             'request_code_label', 'second_label', 'save_button_label', 'send_button_label', 'logout_button_label',
         ];
     }
