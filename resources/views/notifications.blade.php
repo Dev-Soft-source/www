@@ -37,8 +37,8 @@
               </div>
               <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <input type="hidden" id="notificationId">
-                  <a href="#" onclick="closeModal()" class="button-exp-fill">{{ $successMessage->cancel_button ??'Close'}} </a>
-                  <a href="#" onclick="delete_notification()" class="button-exp-fill">{{ $successMessage->delete_button?? 'Yes'}} </a>
+                  <a href="#" onclick="closeModal()" class="button-exp-fill">{{ $successMessage->no_go_back_button_text ?? "No, go back"}}</a>
+                  <a href="#" onclick="delete_notification()" class="button-exp-fill">{{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
               </div>
           </div>
       </div>

@@ -202,7 +202,7 @@ class NotificationController extends Controller
         $languages = Language::all();
         $bookingOptions = PostRidePageSettingDetail::select('booking_option1', 'booking_option2')->first();
         $notificationPage = ChatsPageSettingDetail::select('notification_delete_text')->first();
-        $successMessage = SuccessMessagesSettingDetail::select('cancel_button','delete_button')->first();
+        // $successMessage = SuccessMessagesSettingDetail::first();
         $bookingOptions->booking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($bookingOptions->booking_option1)
             ->whereLanguageId($selectedLanguage->id)
             ->first();
@@ -221,7 +221,9 @@ class NotificationController extends Controller
             ->whereLanguageId($selectedLanguage->id)
             ->first();
 
-        return view('notifications', compact('successMessage','notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions', 'notificationsPageSetting'));
+        return view('notifications', compact(
+            // 'successMessage',
+            'notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions', 'notificationsPageSetting'));
     }
 
     public function readNotification(Request $request){
