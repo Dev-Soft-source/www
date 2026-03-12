@@ -40,7 +40,8 @@ class Step4to5Controller extends Controller
         ];
 
         if ($request->input('action') != 'skip_license') {
-            // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
+            $removeLicense = $request->input('remove_driver_license') === '1';
+
             if ($request->hasFile('driver_liscense')) {
                 $file = $request->file('driver_liscense');
                 $extension = strtolower($file->getClientOriginalExtension());
@@ -51,15 +52,24 @@ class Step4to5Controller extends Controller
                 }
             }
 
-            $validated = $request->validate([
-                'driver_liscense' => 'required|file|max:10240',
-            ], [
+            $rules = [
+                'driver_liscense' => $removeLicense ? 'nullable|file|max:10240' : 'required|file|max:10240',
+            ];
+            $validated = $request->validate($rules, [
                 'driver_liscense.required' => 'The driver license is required',
                 'driver_liscense.file' => 'The driver license must be a file',
                 'driver_liscense.max' => 'The driver license must be less than 10MB',
             ], $niceNames);
 
-            if ($request->hasFile('driver_liscense')) {
+            if ($removeLicense) {
+                User::whereId($id)->update([
+                    'driver_liscense' => null,
+                    'driver_license_original_upload' => null,
+                    'driver_license_upload' => null,
+                    'driver' => 2,
+                    'step4' => 1
+                ]);
+            } elseif ($request->hasFile('driver_liscense')) {
                 $file = $request->file('driver_liscense');
                 $filename = $file->getClientOriginalName();
                 $destination_path = public_path('/driver_liscenses');

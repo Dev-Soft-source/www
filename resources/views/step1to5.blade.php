@@ -101,7 +101,7 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div class="relative">
                             <x-form.input 
                                 label="{{ $step1Page->dob_label }}"
                                 name="dob" 
@@ -110,7 +110,9 @@
                                 type="text" 
                                 class=""
                             />
-                            
+                            <!-- <div id="dob-under-18-error" class="hidden tooltip-error shadow-lg">
+                                You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.
+                            </div> -->
                         </div>
 
                         <div class="">
@@ -120,12 +122,15 @@
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
+                            @php
+                                $preselectedCountry = old('country', $user->country);
+                            @endphp
                             <select name="country" id="country-dropdown" autocomplete="off"
                                 class="font-FuturaMdCnBT bg-white block border w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                                 <option value="">Select your country</option>
                                 @foreach ($countries as $country)
                                     <option value="{{ $country->id }}"
-                                        {{ $location['iso_code'] == $country->iso_code ? 'selected' : '' }}>
+                                        {{ ($preselectedCountry && (string)$preselectedCountry === (string)$country->id) || (!$preselectedCountry && ($location['iso_code'] ?? '') === $country->iso_code) ? 'selected' : '' }}>
                                         {{ $country->name }}
                                     </option>
                                 @endforeach
@@ -172,6 +177,7 @@
                                 <option value="">{{ $selectLocationSettingPage->select_state_first_label ?? '' }}
                                 </option>
                             </select>
+                            <input type="hidden" name="city_name" id="city_name" value="">
                             @error('city')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip"
@@ -182,12 +188,12 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div data-zipcode-value="{{ old('zipcode', $user->zipcode ?? '') }}">
                             <x-form.input 
                                 label="{{ $step1Page->zip_code_label }}"
                                 name="zipcode" 
                                 required=true
-                                value="{{ old('zipcode', $user->zipcode) }}"
+                                value="{{ old('zipcode', $user->zipcode ?? '') }}"
                                 type="text" 
                                 class=""
                             />
@@ -196,7 +202,7 @@
                         <div class="md:col-span-2">
                             <label >
                                 @isset($step1Page->bio_label)
-                                    {{ $step1Page->bio_label }}
+                                    {{!empty($step1Page->bio_label) ? $step1Page->bio_label : 'Bio'}}
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
@@ -212,7 +218,7 @@
                                 </div>
                             @enderror
                         </div>
-
+                        
                         {{-- @if ($errors->count() > 1)
                     <div class="md:col-span-2 mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
                         You must enter the required information above
@@ -323,10 +329,27 @@
                 csrfToken: '{{ csrf_token() }}'
             };
 
-            // Initialize Flatpickr
-            flatpickr("#dob", {
+            // Only show under-18 tooltip after user has focused the DOB field (never on refresh/init)
+            var dobPickerUserOpened = false;
+            var dobPicker = flatpickr("#dob", {
                 dateFormat: 'F d, Y',
+                onClose: function(selectedDates, dateStr) {
+                    var d = selectedDates.length ? selectedDates[0] : null;
+                    setDobTooltipFromSelection(d);
+                    validateStep1Form(d);
+                },
+                onChange: function(selectedDates, dateStr) {
+                    var d = selectedDates.length ? selectedDates[0] : null;
+                    setDobTooltipFromSelection(d);
+                    validateStep1Form(d);
+                }
             });
+            // Show existing DOB from server (Flatpickr can clear the input on init)
+            var initialDob = ($('#dob').val() || '').trim();
+            if (initialDob) {
+                dobPicker.setDate(initialDob, false);
+            }
+            $('#dob-under-18-error').addClass('hidden');
 
             // Modal functions
             function closeModal() {
@@ -337,10 +360,70 @@
             }
             window.closeModal = closeModal;
 
-            // Handle browser back/forward cache
+            var STEP1_STORAGE_KEY = 'step1to5_form_backup';
+
+            // When user clicks Back from Step 2: restore state/city dropdowns and DOB without full reload so no fields are lost
+            function restoreStep1FormFromCache() {
+                var countryId = $('#country-dropdown').val();
+                var stateId = $('#state-dropdown').val();
+                var cityId = $('#city-dropdown').val();
+                var dobVal = $('#dob').val();
+                if (stateId || cityId) {
+                    CONFIG.selectedState = stateId || CONFIG.selectedState;
+                    CONFIG.selectedCity = cityId || CONFIG.selectedCity;
+                }
+                if (countryId) {
+                    loadStatesByCountry(countryId, CONFIG.selectedState, false);
+                }
+                if (dobVal && typeof dobPicker !== 'undefined' && dobPicker.setDate) {
+                    dobPicker.setDate(dobVal, false);
+                }
+                // If cache left fields empty, restore from sessionStorage
+                try {
+                    var saved = sessionStorage.getItem(STEP1_STORAGE_KEY);
+                    if (saved) {
+                        var data = JSON.parse(saved);
+                        var needFullRestore = data.first_name && !$('input[name="first_name"]').val();
+                        if (needFullRestore) {
+                            $('input[name="first_name"]').val(data.first_name);
+                            $('input[name="last_name"]').val(data.last_name || '');
+                            $('input[name="zipcode"]').val(data.zipcode || '');
+                            $('textarea[name="bio"]').val(data.bio || '');
+                            $('#city_name').val(data.city_name || '');
+                            if (data.gender) { $('input[name="gender"]').each(function() { $(this).prop('checked', $(this).val() === data.gender); }); }
+                            if (data.dob && typeof dobPicker !== 'undefined' && dobPicker.setDate) dobPicker.setDate(data.dob, false);
+                        }
+                        if (data.country && (!$('#country-dropdown').val() || needFullRestore)) {
+                            $('#country-dropdown').val(data.country);
+                            CONFIG.selectedState = data.state || '';
+                            CONFIG.selectedCity = data.city || '';
+                            loadStatesByCountry(data.country, data.state || null, false);
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            function saveStep1FormToStorage() {
+                try {
+                    var data = {
+                        first_name: $('input[name="first_name"]').val(),
+                        last_name: $('input[name="last_name"]').val(),
+                        gender: $('input[name="gender"]:checked').val(),
+                        dob: $('input[name="dob"]').val(),
+                        country: $('#country-dropdown').val(),
+                        state: $('#state-dropdown').val(),
+                        city: $('#city-dropdown').val(),
+                        city_name: $('#city_name').val(),
+                        zipcode: $('input[name="zipcode"]').val(),
+                        bio: $('textarea[name="bio"]').val()
+                    };
+                    sessionStorage.setItem(STEP1_STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {}
+            }
+
             window.addEventListener("pageshow", function(event) {
                 if (event.persisted) {
-                    window.location.reload();
+                    restoreStep1FormFromCache();
                 }
             });
 
@@ -374,18 +457,19 @@
                         let stateOptions = `<option value="">${CONFIG.labels.selectState}</option>`;
                         
                         $.each(result.states, function(key, value) {
-                            const selected = preselectedState && value.id == preselectedState ? 'selected' : '';
+                            const stateId = value.id != null ? String(value.id) : '';
+                            const selected = preselectedState && stateId === String(preselectedState) ? 'selected' : '';
                             stateOptions += `<option value="${value.id}" ${selected}>${value.name}</option>`;
                         });
                         
                         $('#state-dropdown').html(stateOptions);
-                        
+                        if (preselectedState) {
+                            $('#state-dropdown').val(preselectedState);
+                        }
                         if (resetCity) {
                             const cityLabel = preselectedState ? CONFIG.labels.selectCity : CONFIG.labels.selectStateFirst;
                             $('#city-dropdown').html(`<option value="">${cityLabel}</option>`);
                         }
-                        
-                        // Auto-load cities if state is preselected
                         if (preselectedState) {
                             loadCitiesByState(preselectedState, CONFIG.selectedCity);
                         }
@@ -419,11 +503,24 @@
                         
                         $.each(result.cities, function(key, value) {
                             const displayText = formatCityDisplay(value);
-                            const selected = preselectedCity && value.id == preselectedCity ? 'selected' : '';
-                            cityOptions += `<option value="${value.id}" ${selected}>${displayText}</option>`;
+                            const cityId = value.id != null ? String(value.id) : '';
+                            const selected = preselectedCity && cityId === String(preselectedCity) ? 'selected' : '';
+                            const nameAttr = (value.name || '').replace(/"/g, '&quot;');
+                            cityOptions += `<option value="${value.id}" ${selected} data-name="${nameAttr}">${displayText}</option>`;
                         });
                         
                         $('#city-dropdown').html(cityOptions);
+                        if (preselectedCity) {
+                            $('#city-dropdown').val(preselectedCity);
+                            var opt = $('#city-dropdown').find('option:selected');
+                            if (opt.length && String(opt.val()).indexOf('api_') === 0) {
+                                $('#city_name').val(opt.data('name') || '');
+                            } else {
+                                $('#city_name').val('');
+                            }
+                        } else {
+                            $('#city_name').val('');
+                        }
 
                         validateStep1Form();
                     },
@@ -433,24 +530,63 @@
                 });
             }
 
-            // Form validation
-            function validateStep1Form() {
+            // Check if DOB indicates user is at least 18 (accepts Date, string, or null/empty)
+            function isAtLeast18(dob) {
+                if (dob == null || dob === '') return true;
+                var birth = dob instanceof Date ? dob : new Date(String(dob).trim());
+                if (isNaN(birth.getTime())) return true;
+                var today = new Date();
+                var age = today.getFullYear() - birth.getFullYear();
+                var m = today.getMonth() - birth.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+                return age >= 18;
+            }
+
+            // Only place that shows the under-18 tooltip. Show only after user opened the picker (never on refresh).
+            function setDobTooltipFromSelection(selectedDate) {
+                var $dobError = $('#dob-under-18-error');
+                if (selectedDate == null) {
+                    $dobError.addClass('hidden');
+                    return;
+                }
+                if (isAtLeast18(selectedDate)) {
+                    $dobError.addClass('hidden');
+                } else if (dobPickerUserOpened) {
+                    $dobError.removeClass('hidden');
+                } else {
+                    $dobError.addClass('hidden');
+                }
+            }
+
+            // Form validation (pass dobOverride: Date or string from Flatpickr to avoid timing issues)
+            function validateStep1Form(dobOverride) {
                 const formData = {
                     firstName: $('input[name="first_name"]').val().trim(),
                     lastName: $('input[name="last_name"]').val().trim(),
                     gender: $('input[name="gender"]:checked').length > 0,
-                    dob: $('input[name="dob"]').val().trim(),
+                    dob: dobOverride != null ? (typeof dobOverride === 'string' ? dobOverride : $('input[name="dob"]').val().trim()) : $('input[name="dob"]').val().trim(),
                     country: $('select[name="country"]').val(),
                     state: $('select[name="state"]').val(),
                     city: $('select[name="city"]').val(),
                     zipcode: $('input[name="zipcode"]').val().trim(),
                     bio: $('textarea[name="bio"]').val().trim()
                 };
+                if (dobOverride instanceof Date) {
+                    formData.dobDate = dobOverride;
+                }
+
+                var dobOk = formData.dobDate != null ? isAtLeast18(formData.dobDate) : isAtLeast18(formData.dob);
+                var $dobError = $('#dob-under-18-error');
+                // Only hide tooltip here (never show). Show only from setDobTooltipFromSelection in Flatpickr.
+                if (dobOk || !formData.dob) {
+                    $dobError.addClass('hidden');
+                }
 
                 const isValid = formData.firstName && 
                     formData.lastName && 
                     formData.gender && 
                     formData.dob && 
+                    dobOk &&
                     formData.country && 
                     formData.state && 
                     formData.city && 
@@ -472,6 +608,21 @@
 
             // Initialize when DOM is ready
             $(document).ready(function() {
+                // Allow tooltip to show only after user has focused DOB (not on refresh)
+                $('#dob').one('focus', function() { dobPickerUserOpened = true; });
+                // Force-hide tooltip after any init/async callbacks from Flatpickr
+                setTimeout(function() { $('#dob-under-18-error').addClass('hidden'); }, 0);
+
+                // Ensure zipcode and DOB display (in case component or Flatpickr cleared them)
+                var $zipWrap = $('input[name="zipcode"]').closest('[data-zipcode-value]');
+                if ($zipWrap.length && $zipWrap.data('zipcode-value') && !$('input[name="zipcode"]').val()) {
+                    $('input[name="zipcode"]').val($zipWrap.data('zipcode-value'));
+                }
+                var dobInput = document.getElementById('dob');
+                if (dobInput && dobInput.value && typeof dobPicker !== 'undefined' && dobPicker.setDate) {
+                    dobPicker.setDate(dobInput.value, false);
+                }
+
                 // Initialize location dropdowns
                 const countryId = $('#country-dropdown').val();
                 if (countryId) {
@@ -492,22 +643,33 @@
                     validateStep1Form();
                 });
 
-                // City dropdown change handler
+                // City dropdown change handler (set city_name for API-sourced cities so backend can find/create)
                 $('#city-dropdown').on('change', function() {
+                    var opt = $(this).find('option:selected');
+                    var val = opt.val();
+                    if (val && String(val).indexOf('api_') === 0) {
+                        $('#city_name').val(opt.data('name') || '');
+                    } else {
+                        $('#city_name').val('');
+                    }
                     validateStep1Form();
                 });
 
-                // Form validation event listeners
+                // Form validation event listeners (dob excluded: only Flatpickr onChange/onClose update tooltip and dob validation)
                 const formInputs = [
                     'input[name="first_name"]',
                     'input[name="last_name"]',
                     'input[name="gender"]',
-                    'input[name="dob"]',
                     'input[name="zipcode"]',
                     'textarea[name="bio"]'
                 ];
 
-                $(formInputs.join(',')).on('input change', validateStep1Form);
+                $(formInputs.join(',')).on('input change', function() { validateStep1Form(); });
+
+                // Save form to sessionStorage before leaving so Back button can restore
+                $('form').on('submit', function() {
+                    saveStep1FormToStorage();
+                });
 
                 // Initial validation
                 validateStep1Form();

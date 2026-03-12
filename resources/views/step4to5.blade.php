@@ -25,32 +25,42 @@
                     enctype="multipart/form-data">
                     @csrf
 
-                    <div
-                        class="bg-primary text-white rounded-t-lg text-xl mt-4 flex items-center justify-center space-x-2 p-4 font-FuturaMdCnBT">
-                        {{ $step4Page->liecense_section_heading ?? 'Step 4 - Your driver’s license' }}
-                    </div>
 
                     <div
-                        class="bg-white rounded-b-lg overflow-hidden shadow-3xl grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4">
+                        class="bg-white rounded-b-lg overflow-hidden shadow-3xl grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4 mt-6">
                         <div class="md:col-span-2">
-
-                            <label for="dropzone-file1"
-                                class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                                    @if (!empty($user->driver_liscense))
-                                        <img id="profile-image1" class="w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg" src="{{ $user->driver_liscense }}" alt="Driver license">
-                                    @else
-                                        <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Driver license placeholder">
-                                    @endif
-                                    <p class="text-sm lg:text-lg text-gray-900">
-                                        @isset($step4Page->driver_liscense_photo_label)
-                                            {{ $step4Page->driver_liscense_photo_label }}
-                                        @endisset
-                                    </p>
-                                </div>
-                                <input id="dropzone-file1" name="driver_liscense" type="file"
-                                    onchange="previewImage1(this)" class="hidden" />
-                            </label>
+                            <div class="relative w-full">
+                                <button type="button" id="remove-license-photo-btn" onclick="removeLicensePhoto()" title="Remove photo"
+                                    class="hidden absolute top-2 right-2 z-10 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    aria-label="Remove photo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                                <label for="dropzone-file1"
+                                    class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
+                                        @if (!empty($user->driver_liscense))
+                                            <img id="profile-image1" class="w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg" src="{{ $user->driver_liscense }}" alt="Driver license">
+                                        @else
+                                            <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Driver license placeholder">
+                                        @endif
+                                        <p class="text-sm lg:text-lg text-gray-900">
+                                            @isset($step4Page->driver_liscense_photo_label)
+                                                {{ $step4Page->driver_liscense_photo_label }}
+                                            @endisset
+                                        </p>
+                                        <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
+                                            @isset($step4Page->photo_detail_label)
+                                                {{ $step4Page->photo_detail_label }}
+                                            @endisset
+                                        </p>
+                                    </div>
+                                    <input id="dropzone-file1" name="driver_liscense" type="file"
+                                        onchange="previewImage1(this)" class="hidden" />
+                                    <input type="hidden" name="remove_driver_license" id="remove_driver_license" value="0">
+                                </label>
+                            </div>
                             @error('driver_liscense')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip"
@@ -66,7 +76,7 @@
                                     @endisset
                                 </button>
                                 <button type="submit" id="nextButton"
-                                    class="button-exp-fill w-42 opacity-50 cursor-not-allowed" disabled>
+                                    class="bg-greenXS px-3 py-2 text-white w-auto opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm" disabled>
                                     @isset($step4Page->next_button_label)
                                         {{ $step4Page->next_button_label }}
                                     @endisset
@@ -126,6 +136,33 @@
         console.log(sessionImage);
         sessionStorage.setItem("uploaded_profile_image", "{{ session('uploaded_profile_image') }}");
         const profileImage1 = document.getElementById('profile-image1');
+        const licensePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
+
+        function updateRemoveLicensePhotoButtonVisibility() {
+            const img = document.getElementById('profile-image1');
+            const btn = document.getElementById('remove-license-photo-btn');
+            if (!img || !btn) return;
+            const isPlaceholder = (img.src || '').indexOf('image-placeholder.png') !== -1;
+            if (isPlaceholder) {
+                btn.classList.add('hidden');
+            } else {
+                btn.classList.remove('hidden');
+            }
+        }
+
+        function removeLicensePhoto() {
+            const img = document.getElementById('profile-image1');
+            const fileInput = document.getElementById('dropzone-file1');
+            const removeFlag = document.getElementById('remove_driver_license');
+            if (img) {
+                img.src = licensePhotoPlaceholderUrl;
+                img.className = 'w-12 h-12 object-contain mb-3 cursor-pointer';
+            }
+            if (fileInput) fileInput.value = '';
+            if (removeFlag) removeFlag.value = '1';
+            validateStep4Form();
+            document.getElementById('remove-license-photo-btn').classList.add('hidden');
+        }
 
         function previewImage1(input) {
             if (input.files && input.files[0]) {
@@ -133,8 +170,14 @@
                 reader.onload = function(e) {
                     profileImage1.src = e.target.result;
                     profileImage1.className = 'w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg';
+                    document.getElementById('remove_driver_license').value = '0';
+                    updateRemoveLicensePhotoButtonVisibility();
+                    validateStep4Form();
                 };
                 reader.readAsDataURL(input.files[0]);
+            } else {
+                updateRemoveLicensePhotoButtonVisibility();
+                validateStep4Form();
             }
         }
 
@@ -170,33 +213,35 @@
             form.submit();
         }
 
-        // Form validation for Step 4
+        // Form validation for Step 4 (valid if file selected or existing license image shown and not removed)
         function validateStep4Form() {
             const fileInput = document.querySelector('input[name="driver_liscense"]');
             const nextButton = document.getElementById('nextButton');
+            const img = document.getElementById('profile-image1');
+            const removeFlag = document.getElementById('remove_driver_license');
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            const hasExistingAndNotRemoved = img && (img.src || '').indexOf('image-placeholder.png') === -1 && removeFlag && removeFlag.value !== '1';
+            const isValid = hasFile || hasExistingAndNotRemoved;
 
-            // Check if file is selected
-            const isValid = fileInput && fileInput.files && fileInput.files.length > 0;
-
-            if (isValid) {
-                nextButton.disabled = false;
-                nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                nextButton.classList.add('opacity-100');
-            } else {
-                nextButton.disabled = true;
-                nextButton.classList.add('opacity-50', 'cursor-not-allowed');
-                nextButton.classList.remove('opacity-100');
+            if (nextButton) {
+                if (isValid) {
+                    nextButton.disabled = false;
+                    nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    nextButton.classList.add('opacity-100');
+                } else {
+                    nextButton.disabled = true;
+                    nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    nextButton.classList.remove('opacity-100');
+                }
             }
         }
 
-        // Add event listener to file input for real-time validation
         document.addEventListener('DOMContentLoaded', function() {
             const fileInput = document.querySelector('input[name="driver_liscense"]');
             if (fileInput) {
                 fileInput.addEventListener('change', validateStep4Form);
             }
-
-            // Initial validation check
+            updateRemoveLicensePhotoButtonVisibility();
             validateStep4Form();
         });
     </script>

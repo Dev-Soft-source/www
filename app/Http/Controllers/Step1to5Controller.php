@@ -74,7 +74,16 @@ class Step1to5Controller extends Controller
             'first_name' => 'required|string|max:25|regex:/^[a-zA-Z\s\-]+$/',
             'last_name' => 'required|string|max:25|regex:/^[a-zA-Z\s\-]+$/',
             'gender' => 'required',
-            'dob' => 'required|date',
+            'dob' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $birth = \Carbon\Carbon::parse($value);
+                    if ($birth->age < 18) {
+                        $fail('You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.');
+                    }
+                },
+            ],
             'country' => 'required',
             'state' => 'nullable',
             'city' => 'nullable',
@@ -120,15 +129,35 @@ class Step1to5Controller extends Controller
         }
 
         if ($request->city && $request->city != '0') {
-            $cityQuery = \App\Models\City::where('id', $request->city);
-            if ($stateValue) {
-                $cityQuery->where('state_id', $stateValue);
+            $cityInput = $request->city;
+            if (is_string($cityInput) && str_starts_with($cityInput, 'api_')) {
+                // City from API (GeoNames/CountriesNow) – find or create by name + state
+                $cityName = $request->input('city_name') ?: str_replace('_', ' ', preg_replace('/^api_/', '', $cityInput));
+                if (!$stateValue || $cityName === '') {
+                    return redirect()->back()->withErrors(['city' => 'Invalid city selected for the given state'])->withInput();
+                }
+                $city = \App\Models\City::firstOrCreate(
+                    [
+                        'name' => $cityName,
+                        'state_id' => $stateValue,
+                    ],
+                    ['name' => $cityName, 'state_id' => $stateValue, 'status' => 1]
+                );
+                if ($city->exists && $city->getAttribute('status') !== 1) {
+                    $city->update(['status' => 1]);
+                }
+                $cityValue = $city->id;
+            } else {
+                $cityQuery = \App\Models\City::where('id', $cityInput);
+                if ($stateValue) {
+                    $cityQuery->where('state_id', $stateValue);
+                }
+                $cityExists = $cityQuery->exists();
+                if (!$cityExists) {
+                    return redirect()->back()->withErrors(['city' => 'Invalid city selected for the given state'])->withInput();
+                }
+                $cityValue = $cityInput;
             }
-            $cityExists = $cityQuery->exists();
-            if (!$cityExists) {
-                return redirect()->back()->withErrors(['city' => 'Invalid city selected for the given state'])->withInput();
-            }
-            $cityValue = $request->city;
         }
 
         User::whereId($id)->update([

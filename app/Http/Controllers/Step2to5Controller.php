@@ -74,7 +74,16 @@ class Step2to5Controller extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        if ($request->hasFile('image')) {
+        $userModel = User::findOrFail($id);
+        $defaultAvatar = ($userModel->gender === 'female') ? 'female.png'
+            : (($userModel->gender === 'prefer not to say') ? 'neutral.png' : 'male.png');
+
+        if ($request->input('remove_profile_photo') === '1') {
+            User::whereId($id)->update([
+                'profile_image' => $defaultAvatar,
+                'profile_original_image' => $defaultAvatar,
+            ]);
+        } elseif ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/users_images');
