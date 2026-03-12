@@ -370,6 +370,18 @@ return [
             'max' => 'La biografia no debe superar los :max caracteres.',
         ],
     ],
+    'custom' => [
+        'payment_method' => [
+            'required' => 'El método de pago es obligatorio.',
+        ],
+        'card_id' => [
+            'required' => 'Selecciona una opción de pago.',
+        ],
+        'dr_amount' => [
+            'required' => 'El importe es obligatorio.',
+        ],
+        'dr_amount.gt' => 'El importe debe ser mayor que 0.',
+    ],
 
     /*
     |--------------------------------------------------------------------------

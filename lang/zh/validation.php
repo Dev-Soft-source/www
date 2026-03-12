@@ -346,6 +346,18 @@ return [
             'max' => '个人简介不能超过 :max 个字符。',
         ],
     ],
+    'custom' => [
+        'payment_method' => [
+            'required' => '付款方式为必填项。',
+        ],
+        'card_id' => [
+            'required' => '请选择支付选项。',
+        ],
+        'dr_amount' => [
+            'required' => '金额为必填项。',
+        ],
+        'dr_amount.gt' => '金额必须大于 0。',
+    ],
     'attributes' => [
         'make' => '品牌',
         'model' => '型号',

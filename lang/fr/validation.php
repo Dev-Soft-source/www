@@ -346,6 +346,18 @@ return [
             'max' => 'La bio ne doit pas depasser :max caracteres.',
         ],
     ],
+    'custom' => [
+        'payment_method' => [
+            'required' => 'La méthode de paiement est obligatoire.',
+        ],
+        'card_id' => [
+            'required' => 'Veuillez sélectionner une option de paiement.',
+        ],
+        'dr_amount' => [
+            'required' => 'Le montant est obligatoire.',
+        ],
+        'dr_amount.gt' => 'Le montant doit être supérieur à 0.',
+    ],
     'attributes' => [
         'make' => 'Marque',
         'model' => 'Modèle',

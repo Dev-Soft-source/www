@@ -30,59 +30,14 @@ class CardController extends Controller
         // Clear booking context when viewing payment options so "add card" from here doesn't redirect to a booking
         session()->forget(['bookingId', 'rideDetailId', 'rideId', 'type']);
 
-        $paymentSettingDetail = null;
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        $reviewSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
+            
+        $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        $user_id = auth()->user()->id;
+        
         $cards = Card::where('user_id', $user_id)->orderByRaw('`primary_card` DESC')->orderBy('id', 'desc')->get();
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -100,8 +55,6 @@ class CardController extends Controller
         return view('my_cards', [
             'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
             'ProfileSetting' => $ProfileSetting, 'cards' => $cards, 
-            // 'notifications' => $notifications, 
-            // 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 
             'paymentSettingDetail' => $paymentSettingDetail]);
     }
 

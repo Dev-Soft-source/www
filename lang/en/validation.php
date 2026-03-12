@@ -231,6 +231,13 @@ return
 			'payment_method' => [
 				'required' => 'Please select a payment method.',
 			],
+			'card_id' => [
+				'required' => 'Please select a payment option.',
+			],
+			'dr_amount' => [
+				'required' => 'The amount is required.',
+			],
+			'dr_amount.gt' => 'The amount must be greater than 0.',
 			'middle_seats' => [
 				'required' => 'Please select middle seats.',
 			],

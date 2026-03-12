@@ -256,11 +256,6 @@
                 </div>
             @empty
                 <div class="text-center pt-8">
-                    <!-- <h2>
-                        @if(isset($paymentSettingDetail->no_payment_methods_title_label))
-                            {{ $paymentSettingDetail->no_payment_methods_title_label }}
-                        @endif
-                    </h2> -->
                     <p class="text-gray-600 text-center py-4">
                         @if(isset($paymentSettingDetail->no_payment_methods_text_label))
                             {{ $paymentSettingDetail->no_payment_methods_text_label }}

@@ -346,6 +346,18 @@ return [
             'max' => 'Ang bio ay hindi maaaring lumampas sa :max na mga character.',
         ],
     ],
+    'custom' => [
+        'payment_method' => [
+            'required' => 'Kinakailangan ang paraan ng pagbabayad.',
+        ],
+        'card_id' => [
+            'required' => 'Pakiusap pumili ng opsyon sa pagbabayad.',
+        ],
+        'dr_amount' => [
+            'required' => 'Kinakailangan ang halaga.',
+        ],
+        'dr_amount.gt' => 'Ang halaga ay dapat na mas malaki sa 0.',
+    ],
     'attributes' => [
         'make' => 'Gawa',
         'model' => 'Modelo',

@@ -334,80 +334,8 @@ class PassengerWalletController extends Controller
         $message = $this->siteText;
 
         $user = auth()->user();
-        $amount = (float) $request->dr_amount;
-        $amountCents = (int) round($amount * 100);
-
-        // Helper to redirect back with a generic error
-        $genericErrorResponse = function () use ($message) {
-            return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment could not be completed. Please try again.']);
-        };
-
-        // Helper: after successful charge, store top-up and send receipt
-        $handleSuccessfulTopUp = function (string $provider, string $providerId, ?Card $card = null) use ($user, $amount, $message) {
-            $storeTopUpBalance = TopUpBalance::create([
-                'user_id'   => $user->id,
-                'dr_amount' => $amount,
-                'stripe_id' => $provider === 'stripe' ? $providerId : null,
-                'paypal_id' => $provider === 'paypal' ? $providerId : null,
-                'added_date'=> Carbon::now(),
-            ]);
-
-            $data = [
-                'full_name'        => $user->first_name . ' ' . $user->last_name,
-                'amount'           => $amount,
-                'transaction_id'   => $storeTopUpBalance->random_id,
-                'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
-                'payment_method'   => $card?->payment_method_type ?? $provider,
-                'card_type'        => $card?->card_type ?? '',
-            ];
-
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->send(new TopUpReceiptMail($data));
-            }
-
-            $selectedLanguage = session('selectedLanguage');
-            if ($selectedLanguage) {
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-            }
-
-            return redirect()->route('get_top_up_balance', ['lang' => $selectedLanguage->abbreviation])
-                ->with(['error' => $message->topup_balance_success_message ?? 'You have successfully bought top up balance']);
-        };
-
-        // Helper: charge via Stripe PaymentIntent using a Stripe payment method id (card / Google Pay / Apple Pay)
-        $chargeWithStripePaymentMethod = function (string $stripePaymentMethodId) use ($user, $amountCents, $genericErrorResponse) {
-            if (!$user->stripe_customer_id) {
-                return $genericErrorResponse();
-            }
-
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-            try {
-                $paymentIntent = PaymentIntent::create([
-                    'amount'        => $amountCents,
-                    'currency'      => 'usd',
-                    'customer'      => $user->stripe_customer_id,
-                    'payment_method'=> $stripePaymentMethodId,
-                    'off_session'   => true,
-                    'confirm'       => true,
-                ]);
-
-                return $paymentIntent;
-            } catch (\Stripe\Exception\CardException $e) {
-                // Card declined or similar error
-                return redirect()->back()->with(['error' => $e->getMessage()]);
-            } catch (\Stripe\Exception\ApiErrorException $e) {
-                // General Stripe API error
-                return redirect()->back()->with(['error' => $e->getMessage()]);
-            } catch (\Throwable $e) {
-                return $genericErrorResponse();
-            }
-        };
 
         if ($request->card_id == 'paypal') {
-            // Direct PayPal checkout (not using a saved PayPal card)
             $paypal = new PayPalClient;
             $paypal->setApiCredentials(config('paypal'));
             $token = $paypal->getAccessToken();
@@ -418,7 +346,7 @@ class PassengerWalletController extends Controller
                 "purchase_units" => [
                     [
                         "amount" => [
-                            "currency_code" => env('DEFAULT_CURRENCY', 'USD'),
+                            "currency_code" => "USD",
                             "value" => $request->dr_amount
                         ]
                     ]
@@ -438,111 +366,83 @@ class PassengerWalletController extends Controller
             }
 
             return redirect()->route('paypal.cancel');
+        } elseif ($request->card_id == 'credit_card') {
 
-        } elseif ($request->card_id == 'google_pay' || $request->card_id == 'apple_pay' || $request->card_id == 'credit_card') {
-            // Use the user's primary card of the corresponding type (Stripe-based methods)
-            $typeMap = [
-                'google_pay'  => 'google_pay',
-                'apple_pay'   => 'apple_pay',
-                'credit_card' => 'card',
+            $stripId = "";
+            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '0') {
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+                try {
+                    $paymentIntent = PaymentIntent::retrieve($request->gPayApplePayId);
+                    if ($paymentIntent->status !== 'succeeded') {
+                        return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment was not completed. Please try again.']);
+                    }
+                    $expectedAmount = (int) round((float) $request->dr_amount * 100);
+                    if ($paymentIntent->amount !== $expectedAmount) {
+                        return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment amount does not match. Please try again.']);
+                    }
+                    $stripId = $request->gPayApplePayId;
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    return redirect()->back()->with(['error' => $message->general_error_message ?? 'Invalid payment. Please try again.']);
+                }
+            } else {
+                $card = Card::where('id', $request->card_id)
+                    ->where('user_id', $user->id)
+                    ->firstOrFail();
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                try {
+                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                    $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
+                    $paymentIntent = PaymentIntent::create([
+                        'amount' => $request->input('dr_amount') * 100,
+                        'currency' => 'usd',
+                        'customer' => $user->stripe_customer_id,
+                        'payment_method' => $paymentMethod->id,
+                        'off_session' => true,
+                        'confirm' => true,
+                    ]);
+
+                    $stripId = $paymentIntent->id;
+                } catch (\Stripe\Exception\CardException $e) {
+                    // Handle Stripe card-related errors
+                    if ($e->getError()->code === 'card_declined' && $e->getError()->decline_code === 'expired_card') {
+                        return redirect()->back()->with(['error' => $message->card_expiry_message ?? 'The card has expired. Please use a different card']);
+                    }
+
+                    // General Stripe card-related error message
+                    return redirect()->back()->with(['error' => $e->getMessage()]);
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    // Handle error
+                    return redirect()->back()->with(['error' => $e->getMessage()]);
+                }
+            }
+
+            // Payment successful, handle booking logic here
+            $storeTopUpBalance = TopUpBalance::create([
+                'user_id' => $user->id,
+                'dr_amount' => $request->dr_amount,
+                'stripe_id' => $stripId,
+                'added_date' => Carbon::now(),
+            ]);
+
+            $data = [
+                'full_name' => $user->first_name . ' ' . $user->last_name,
+                'amount' => $request->dr_amount,
+                'transaction_id' => $storeTopUpBalance->random_id,
+                'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
+                'payment_method' => 'credit_card',
+                'card_type' => isset($request->gPayApplePayId) && $request->gPayApplePayId != '0' ? 'Gpay/ApplePay' : $card->card_type,
             ];
 
-            $mappedType = $typeMap[$request->card_id] ?? null;
-            if (!$mappedType) {
-                return $genericErrorResponse();
+            if (isset($user->email_notification) && $user->email_notification == 1) {
+                Mail::to($user->email)->queue(new TopUpReceiptMail($data));
             }
-
-            $card = Card::where('user_id', $user->id)
-                ->where('payment_method_type', $mappedType)
-                ->where('primary_card', 1)
-                ->first();
-
-            if (!$card || !$card->stripe_payment_method_id) {
-                return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment method not found. Please add a card first.']);
-            }
-
-            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id);
-            if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
-                // An error response was returned from the helper
-                return $paymentIntentOrResponse;
-            }
-
-            /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
-            if ($paymentIntentOrResponse->status !== 'succeeded') {
-                return $genericErrorResponse();
-            }
-
-            return $handleSuccessfulTopUp('stripe', $paymentIntentOrResponse->id, $card);
-
-        } elseif ($request->card_id == 'google_pay') {
-            // Kept for backward compatibility; primary Google Pay handling is above.
-            return $genericErrorResponse();
-        } elseif ($request->card_id == 'apple_pay') {
-            // Kept for backward compatibility; primary Apple Pay handling is above.
-            return $genericErrorResponse();
-        } elseif ($request->card_id == 'credit_card') {
-            // Kept for backward compatibility; primary card handling is above.
-            return $genericErrorResponse();
+            
+            return redirect()->route('get_top_up_balance', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $message->topup_balance_success_message ?? "You have successfully buy top up balance"]);
         } else {
-            // card_id is expected to be an ID of a saved card in the cards table
-            $card = Card::where('id', $request->card_id)
-                ->where('user_id', $user->id)
-                ->first();
-
-            if (!$card) {
-                return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment method not found. Please try again.']);
-            }
-
-            if ($card->payment_method_type === 'paypal') {
-                // For saved PayPal "cards", we still redirect through PayPal checkout
-                $paypal = new PayPalClient;
-                $paypal->setApiCredentials(config('paypal'));
-                $token = $paypal->getAccessToken();
-                $paypal->setAccessToken($token);
-
-                $order = $paypal->createOrder([
-                    "intent" => "CAPTURE",
-                    "purchase_units" => [
-                        [
-                            "amount" => [
-                                "currency_code" => env('DEFAULT_CURRENCY', 'USD'),
-                                "value" => $request->dr_amount
-                            ]
-                        ]
-                    ],
-                    "application_context" => [
-                        "cancel_url" => route('paypal.cancel'),
-                        "return_url" => route('paypal.success.top-up', ['dr_amount' => $request->dr_amount]),
-                    ]
-                ]);
-
-                if (isset($order['id'])) {
-                    foreach ($order['links'] as $link) {
-                        if ($link['rel'] == 'approve') {
-                            return redirect()->away($link['href']);
-                        }
-                    }
-                }
-
-                return redirect()->route('paypal.cancel');
-            }
-
-            // Stripe-based saved payment methods (card / Google Pay / Apple Pay)
-            if (!$card->stripe_payment_method_id) {
-                return redirect()->back()->with(['error' => $message->general_error_message ?? 'Saved payment method is not properly configured.']);
-            }
-
-            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id);
-            if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
-                return $paymentIntentOrResponse;
-            }
-
-            /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
-            if ($paymentIntentOrResponse->status !== 'succeeded') {
-                return $genericErrorResponse();
-            }
-
-            return $handleSuccessfulTopUp('stripe', $paymentIntentOrResponse->id, $card);
+            // 
+            $card_id = $request->card_id;
 
         }
 
@@ -595,7 +495,7 @@ class PassengerWalletController extends Controller
             ];
 
             if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->queue(new TopUpReceiptMail($data));
+                Mail::to($user->email)->send(new TopUpReceiptMail($data));
             }
 
             $selectedLanguage = session('selectedLanguage');

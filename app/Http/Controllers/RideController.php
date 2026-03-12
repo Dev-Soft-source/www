@@ -51,7 +51,7 @@ class RideController extends Controller
 {
     public function SearchRide(Request $request, $lang = null)
     {
-        
+
         $rides = null;
 
         $findRidePage = $this->getFindRidePageWithSettingDetail();
@@ -263,8 +263,8 @@ class RideController extends Controller
                     WHERE bookings.ride_id = rides.id
                     AND bookings.status NOT IN (0, 1)
                 )');
-            }   
-            
+            }
+
             $rides = $rides->orderBy('date', 'asc')->orderBy('time', 'asc')->paginate(6);
             if ($request->driver_rating) {
                 $filteredRides = [];
@@ -296,12 +296,10 @@ class RideController extends Controller
                     Paginator::resolveCurrentPage(),
                     ['path' => Paginator::resolveCurrentPath()]
                 );
-                
             }
-            
         }
- 
-        
+
+
         $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(2)->get();
 
 
@@ -340,18 +338,18 @@ class RideController extends Controller
             return redirect(route('home', ['lang' => $lang]));
         }
 
-        
+
         $setting = ReviewSetting::first();
         $cancelSetting = CancelRideSetting::first();
         $ratings = Rating::all();
-        
-        
+
+
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
         $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
         $postRidePage = $this->getPostRidePageWithSettingDetail();
-        
+
         if ($ride) {
             // Optimized: Batch load all option groups in a single query instead of 5 separate queries
             $ride->mapMultipleOptionColumnsToDetails(
@@ -361,7 +359,7 @@ class RideController extends Controller
                 false
             );
         }
-        
+
 
         $featureIds = array_filter(explode('=', $ride->features ?? ''));
         $ride->pink_ride = ($postRidePage->features_option1 && in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)) ? $postRidePage->features_option1 : null;
@@ -583,7 +581,7 @@ class RideController extends Controller
 
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return back()->with('message', 'Your account has been suspended by the admin');
+            return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
         if (!isset($user->profile_image) || $user->profile_image == '' || in_array(basename($user->profile_image), ['male.png', 'female.png', 'neutral.png'])) {
@@ -1758,7 +1756,7 @@ class RideController extends Controller
         $vehicles = Vehicle::where('user_id', $user_id)->get();
         $rides = Ride::where('added_by', $user_id)->get();
         $noshows = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
-        
+
         $phone_verified = PhoneNumber::where('user_id', $user_id)->where('verified', '1')->first();
         if (!$phone_verified) {
             // phone number not verified, redirect to phone verification page
@@ -1880,7 +1878,7 @@ class RideController extends Controller
 
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return back()->with('message', 'Your account has been suspended by the admin');
+            return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
         // Feature gatekeeping logic for Pink Ride and Extra Care Ride
@@ -1954,7 +1952,7 @@ class RideController extends Controller
         } elseif ($skip_vehicle !== 0) {
             $filename = '';
         }
-        
+
         $recurring = $request->filled('recurring') ? $request->recurring : 0;
 
         $validator = Validator::make($request->all(), [

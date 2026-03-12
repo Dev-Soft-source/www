@@ -92,7 +92,7 @@ class BookingController extends Controller
                 try {
                     $expirationDate = Carbon::parse($user->student_card_exp_date);
                     $now = Carbon::now();
-                    
+
                     // If card is expired, charge booking fee (set charge_booking back to '1')
                     if ($expirationDate->isPast()) {
                         // Update user's charge_booking to '1' since card is expired
@@ -113,7 +113,7 @@ class BookingController extends Controller
                     ]);
                 }
             }
-            
+
             // Student with valid card - booking fee is waived
             Log::info('Student booking fee waived', [
                 'user_id' => $user->id,
@@ -122,7 +122,7 @@ class BookingController extends Controller
             ]);
             return '0';
         }
-        
+
         // Regular user or student with expired card - charge booking fee
         return $bookingCredit;
     }
@@ -153,7 +153,7 @@ class BookingController extends Controller
             $user = User::whereId($user_id)->first();
             // Check if user has suspanded
             if ($user->suspand === '1') {
-                return back()->with('message', 'Your account has been suspended by the admin');
+                return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
             }
 
             // $rideDetailId = isset($request->rideDetailId) ? $request->rideDetailId : 0;
@@ -190,9 +190,9 @@ class BookingController extends Controller
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                
+
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
-                
+
 
                 $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
 
@@ -214,7 +214,7 @@ class BookingController extends Controller
 
                 // Compute Pink Ride and Extra Care flags BEFORE replacing features with names
                 $featureIds = array_filter(explode('=', $ride->features ?? ''));
-                
+
                 $pinkRideId = optional($postRidePage->features_option1 ?? null)->features_setting_id ?? ($postRidePage->features_option1 ?? null);
                 $isPinkRide = $pinkRideId && !empty($featureIds) && in_array((string)$pinkRideId, $featureIds);
                 $extraCareId = optional($postRidePage->features_option2 ?? null)->features_setting_id ?? ($postRidePage->features_option2 ?? null);
@@ -816,7 +816,7 @@ class BookingController extends Controller
                     }
                 }
             }
-            
+
             // For passengers booking Pink Rides, require government ID (check all possible ID fields)
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
@@ -843,10 +843,10 @@ class BookingController extends Controller
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
-            
+
             // Check if payment method is Cash (payment_methods_option1 is Cash)
             $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-            
+
             // Apply limit only for students on Cash rides
             if ($isStudent && $isCashPayment) {
                 if ($request->seats > 2) {
@@ -1154,12 +1154,12 @@ class BookingController extends Controller
                         Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
 
                         if ($driver) {
-                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
-                            // ->where('verified', '1')
-                            ->where('default', '1')
-                            ->first();
+                            $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
+                                // ->where('verified', '1')
+                                ->where('default', '1')
+                                ->first();
 
-                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
+                            $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
                         }
 
                         // Get the verified phone number for the passenger (user)
@@ -1513,7 +1513,7 @@ class BookingController extends Controller
         }
         return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
     }
-    
+
     public function sendVerificationCodeBooking($id)
     {
         $phoneNumber = PhoneNumber::find($id);
@@ -1947,12 +1947,12 @@ class BookingController extends Controller
                 Notification::create([
                     'ride_id' => $ride->id,
                     'posted_by' => $user->id,
-                'message' => getNotificationMessageText(
-                    'booking_request_from_name',
-                    $ride->driver,
-                    ['first_name' => $user->first_name],
-                    'Booking request from {first_name}'
-                ),
+                    'message' => getNotificationMessageText(
+                        'booking_request_from_name',
+                        $ride->driver,
+                        ['first_name' => $user->first_name],
+                        'Booking request from {first_name}'
+                    ),
                     'status' => 'request',
                     'notification_type' => 'upcoming',
                     'ride_detail_id' => $newBooking->ride_detail_id,
@@ -2142,13 +2142,13 @@ class BookingController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message','booking_not_update_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message', 'booking_not_update_message')->first();
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message','booking_not_update_message')->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message', 'booking_not_update_message')->first();
             }
         }
         $booking = Booking::where('id', $id)->first();
@@ -2197,10 +2197,10 @@ class BookingController extends Controller
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
-            
+
             // Check if payment method is Cash (payment_methods_option1 is Cash)
             $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-            
+
             // Apply limit only for students on Cash rides
             if ($isStudent && $isCashPayment) {
                 if ($request->seats > 2) {
@@ -3176,43 +3176,43 @@ class BookingController extends Controller
                     $booking->secured_cash_code = $secured_cash_code;
                     $booking->save();
 
-                       $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
-                        $securedCashNotification = Notification::create([
-                            'type' => 2, // Assuming 3 is for secured-cash notifications
-                            'ride_id' => $booking->ride_id,
-                            'posted_to' => $booking->id,
-                            'posted_by' => $booking->ride->added_by,
-                            'receiver_id' => $booking->user_id,
-                            'message' => getNotificationMessageText(
-                                'secured_cash_payment_code',
-                                $booking->passenger,
-                                ['code' => $secured_cash_code],
-                                'Your Secured-cash payment code is: {code}'
-                            ),
-                            'status' => 'completed',
-                            'notification_type' => 'secured_cash',
-                            'ride_detail_id' => $booking->ride_detail_id,
-                            'departure' => $booking->departure,
-                            'destination' => $booking->destination
-                        ]);
+                    $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
+                    $securedCashNotification = Notification::create([
+                        'type' => 2, // Assuming 3 is for secured-cash notifications
+                        'ride_id' => $booking->ride_id,
+                        'posted_to' => $booking->id,
+                        'posted_by' => $booking->ride->added_by,
+                        'receiver_id' => $booking->user_id,
+                        'message' => getNotificationMessageText(
+                            'secured_cash_payment_code',
+                            $booking->passenger,
+                            ['code' => $secured_cash_code],
+                            'Your Secured-cash payment code is: {code}'
+                        ),
+                        'status' => 'completed',
+                        'notification_type' => 'secured_cash',
+                        'ride_detail_id' => $booking->ride_detail_id,
+                        'departure' => $booking->departure,
+                        'destination' => $booking->destination
+                    ]);
 
-                        // Send push notification for secured cash code
-                        $fcmService = new FCMService();
-                        $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-                        $body = $securedCashNotification->message;
+                    // Send push notification for secured cash code
+                    $fcmService = new FCMService();
+                    $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
+                    $body = $securedCashNotification->message;
 
-                        $fcmToken = $booking->passenger->mobile_fcm_token;
-                        if ($fcmToken) {
-                            $fcmService->sendNotification($fcmToken, $body);
+                    $fcmToken = $booking->passenger->mobile_fcm_token;
+                    if ($fcmToken) {
+                        $fcmService->sendNotification($fcmToken, $body);
+                    }
+
+                    foreach ($fcm_tokens as $fcm_token) {
+                        try {
+                            $fcmService->sendNotification($fcm_token->token, $body);
+                        } catch (\Exception $e) {
+                            Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
                         }
-
-                        foreach ($fcm_tokens as $fcm_token) {
-                            try {
-                                $fcmService->sendNotification($fcm_token->token, $body);
-                            } catch (\Exception $e) {
-                                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-                            }
-                        }
+                    }
 
                     $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
                     if (!$phoneNumber) {
@@ -3796,7 +3796,7 @@ class BookingController extends Controller
                     }
                 }
             }
-            
+
             // For passengers booking Pink Rides, require government ID (check all possible ID fields)
             if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
@@ -3857,10 +3857,10 @@ class BookingController extends Controller
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
-            
+
             // Check if payment method is Cash (payment_methods_option1 is Cash)
             $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-            
+
             // Apply limit only for students on Cash rides
             if ($isStudent && $isCashPayment) {
                 if ($request->seats > 2) {
@@ -4066,15 +4066,15 @@ class BookingController extends Controller
                                 $stripePay = $request->input('online_payment');
                             }
                             // Create a payment intent
-                                    $paymentIntent = PaymentIntent::create([
-                                        'amount' => round(($stripePay * 100), 0),
-                                        'currency' => 'cad',
-                                        'customer' => $user->stripe_customer_id,
-                                        'payment_method' => $paymentMethod->id,
-                                        'off_session' => true,
-                                        'confirm' => true,
-                                    ]);
-                                    $stripId = $paymentIntent->id;
+                            $paymentIntent = PaymentIntent::create([
+                                'amount' => round(($stripePay * 100), 0),
+                                'currency' => 'cad',
+                                'customer' => $user->stripe_customer_id,
+                                'payment_method' => $paymentMethod->id,
+                                'off_session' => true,
+                                'confirm' => true,
+                            ]);
+                            $stripId = $paymentIntent->id;
                         }
                     }
 
@@ -4336,44 +4336,43 @@ class BookingController extends Controller
                         ];
 
                         Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
-                            $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
-                                $securedCashNotification = Notification::create([
-                                    'type' => 2,
-                                    'ride_id' => $booking->ride_id,
-                                    'posted_to' => $booking->id ?? null,
-                                    'posted_by' => $booking->ride->added_by,
-                                    'receiver_id' => $booking->user_id,
-                                    'message' => getNotificationMessageText(
-                                        'secured_cash_payment_code',
-                                        $booking->passenger,
-                                        ['code' => $secured_cash_code],
-                                        'Your Secured-cash payment code is: {code}'
-                                    ),
-                                    'status' => 'completed',
-                                    'notification_type' => 'secured_cash',
-                                    'ride_detail_id' => $ride->rideDetail[0]->id,
-                                    'departure' => $ride->rideDetail[0]->departure,
-                                    'destination' => $ride->rideDetail[0]->destination
-                                ]);
+                        $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
+                        $securedCashNotification = Notification::create([
+                            'type' => 2,
+                            'ride_id' => $booking->ride_id,
+                            'posted_to' => $booking->id ?? null,
+                            'posted_by' => $booking->ride->added_by,
+                            'receiver_id' => $booking->user_id,
+                            'message' => getNotificationMessageText(
+                                'secured_cash_payment_code',
+                                $booking->passenger,
+                                ['code' => $secured_cash_code],
+                                'Your Secured-cash payment code is: {code}'
+                            ),
+                            'status' => 'completed',
+                            'notification_type' => 'secured_cash',
+                            'ride_detail_id' => $ride->rideDetail[0]->id,
+                            'departure' => $ride->rideDetail[0]->departure,
+                            'destination' => $ride->rideDetail[0]->destination
+                        ]);
 
-                                // Send push notification
-                                $fcmService = new FCMService();
-                                $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-                                $body = $securedCashNotification->message;
+                        // Send push notification
+                        $fcmService = new FCMService();
+                        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+                        $body = $securedCashNotification->message;
 
-                                $fcmToken = $user->mobile_fcm_token;
-                                if ($fcmToken) {
-                                    $fcmService->sendNotification($fcmToken, $body);
-                                }
+                        $fcmToken = $user->mobile_fcm_token;
+                        if ($fcmToken) {
+                            $fcmService->sendNotification($fcmToken, $body);
+                        }
 
-                                foreach ($fcm_tokens as $fcm_token) {
-                                    try {
-                                        $fcmService->sendNotification($fcm_token->token, $body);
-                                    } catch (\Exception $e) {
-                                        Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-                                    }
-                                }
-
+                        foreach ($fcm_tokens as $fcm_token) {
+                            try {
+                                $fcmService->sendNotification($fcm_token->token, $body);
+                            } catch (\Exception $e) {
+                                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+                            }
+                        }
                     }
                     $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
 
@@ -4455,54 +4454,54 @@ class BookingController extends Controller
                     if ($passengerPhoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
                         $driver = $driver ?? $ride->driver ?? User::find($ride->added_by);
                         if ($driver) {
-                        $sid = env('TWILIO_ACCOUNT_SID');
-                        $token = env('TWILIO_AUTH_TOKEN');
-                        $from = env('TWILIO_PHONE_NUMBER');
+                            $sid = env('TWILIO_ACCOUNT_SID');
+                            $token = env('TWILIO_AUTH_TOKEN');
+                            $from = env('TWILIO_PHONE_NUMBER');
 
-                        $twilio = new Client($sid, $token);
-                        $to = $passengerPhoneNumber->phone;
-                        $title = "";
-                        $currentHour = date('H');
-                        if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $booking->passenger->first_name . ",";
-                        } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $booking->passenger->first_name . ",";
-                        } else {
-                            $title = "Good evening " . $booking->passenger->first_name . ",";
-                        }
-
-                        $departureTime = date('H:i:s', strtotime($ride->time));
-                        $departureDate = date('d F, Y', strtotime($ride->date));
-                        $seatWords = numberToWords($booking->seats);
-
-                        $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
-                            ->where('default', '1')
-                            ->first();
-                        $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
-
-                        $message = $title . "\n" . "From ProximaRide: You have just booked on the ride from " . $booking->departure .
-                            " to " . $booking->destination .
-                            " on " . $departureDate .
-                            " at " . $departureTime .
-                            ".\nDriver name is (" . $driver->first_name .
-                            ") Phone " . $driverPhoneToUse .
-                            "\nNumber of seats: " . $seatWords;
-
-                        if (!empty($from)) {
-                            try {
-                                $res = $twilio->messages->create(
-                                    $to,
-                                    [
-                                        'from' => $from,
-                                        'body' => $message,
-                                    ]
-                                );
-                            } catch (\Exception $e) {
-                                $this->logTwilioSmsFailure($to, $message, $e);
+                            $twilio = new Client($sid, $token);
+                            $to = $passengerPhoneNumber->phone;
+                            $title = "";
+                            $currentHour = date('H');
+                            if ($currentHour >= 0 && $currentHour < 12) {
+                                $title = "Good morning " . $booking->passenger->first_name . ",";
+                            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                                $title = "Good afternoon " . $booking->passenger->first_name . ",";
+                            } else {
+                                $title = "Good evening " . $booking->passenger->first_name . ",";
                             }
-                        } else {
-                            Log::info('SMS skipped (passenger booking confirmation): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
-                        }
+
+                            $departureTime = date('H:i:s', strtotime($ride->time));
+                            $departureDate = date('d F, Y', strtotime($ride->date));
+                            $seatWords = numberToWords($booking->seats);
+
+                            $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
+                                ->where('default', '1')
+                                ->first();
+                            $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
+
+                            $message = $title . "\n" . "From ProximaRide: You have just booked on the ride from " . $booking->departure .
+                                " to " . $booking->destination .
+                                " on " . $departureDate .
+                                " at " . $departureTime .
+                                ".\nDriver name is (" . $driver->first_name .
+                                ") Phone " . $driverPhoneToUse .
+                                "\nNumber of seats: " . $seatWords;
+
+                            if (!empty($from)) {
+                                try {
+                                    $res = $twilio->messages->create(
+                                        $to,
+                                        [
+                                            'from' => $from,
+                                            'body' => $message,
+                                        ]
+                                    );
+                                } catch (\Exception $e) {
+                                    $this->logTwilioSmsFailure($to, $message, $e);
+                                }
+                            } else {
+                                Log::info('SMS skipped (passenger booking confirmation): TWILIO_PHONE_NUMBER not set. Set it in .env to send Twilio SMS.');
+                            }
                         }
                     }
 
@@ -4793,15 +4792,15 @@ class BookingController extends Controller
             $notification = Notification::create([
                 'ride_id' => $id,
                 'posted_by' => $user->id,
-                    'message' => getNotificationMessageText(
-                        'instant_booking_new',
-                        $ride->driver,
-                        [
-                            'first_name' => $user->first_name,
-                            'seats' => numberToWords($request->seats),
-                        ],
-                        "You have a new instant booking from {first_name}\nSeats booked: {seats}"
-                    ),
+                'message' => getNotificationMessageText(
+                    'instant_booking_new',
+                    $ride->driver,
+                    [
+                        'first_name' => $user->first_name,
+                        'seats' => numberToWords($request->seats),
+                    ],
+                    "You have a new instant booking from {first_name}\nSeats booked: {seats}"
+                ),
                 'status' => 'completed',
                 'notification_type' => 'upcoming',
                 'ride_detail_id' => $booking->ride_detail_id,
@@ -5598,10 +5597,10 @@ class BookingController extends Controller
             if ($postRidePage) {
                 // Check if user is a student (student == 1 for verified, student == 2 for pending)
                 $isStudent = ($user->student == '1' || $user->student == '2');
-                
+
                 // Check if payment method is Cash (payment_methods_option1 is Cash)
                 $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-                
+
                 // Apply limit only for students on Cash rides
                 if ($isStudent && $isCashPayment) {
                     if ($request->seats > 2) {
@@ -6816,12 +6815,12 @@ class BookingController extends Controller
         $notification = Notification::create([
             'ride_id' => $booking->ride_id,
             'posted_by' => $booking->user_id,
-                'message' => getNotificationMessageText(
-                    'booking_cancelled',
-                    $booking->ride->driver,
-                    [],
-                    'Booking cancelled'
-                ),
+            'message' => getNotificationMessageText(
+                'booking_cancelled',
+                $booking->ride->driver,
+                [],
+                'Booking cancelled'
+            ),
             'status' => 'cancelled',
             'notification_type' => 'upcoming',
             'ride_detail_id' => $booking->ride_detail_id,
