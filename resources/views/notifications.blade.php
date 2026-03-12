@@ -69,7 +69,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="closeGeneralMessageModal()" class="button-exp-fill w-full sm:ml-3 sm:w-auto">Close</button>
+                    <button type="button" onclick="closeGeneralMessageModal()" class="button-exp-fill w-full sm:ml-3 sm:w-auto">{{ $siteText['close_btn_text'] ??'Close' }}</button>
                 </div>
             </div>
         </div>

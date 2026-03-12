@@ -9,11 +9,19 @@ use Illuminate\Support\Facades\Log;
 class CountryStateCityApiService
 {
     /**
-     * API endpoints
-     * Using CountryStateCity API - Free tier available
-     * Alternative: https://countriesnow.space/api/v0.1/countries/states
+     * CountriesNow.space API - used when GeoNames is not configured
      */
     private $baseUrl = 'https://countriesnow.space/api/v0.1/countries';
+
+    /**
+     * GeoNames search API (industry standard). Set GEONAMES_USERNAME in .env for better city coverage.
+     * Free registration: https://www.geonames.org/login
+     */
+    private function getGeonamesUsername(): ?string
+    {
+        $username = config('services.geonames.username') ?: env('GEONAMES_USERNAME');
+        return $username ?: null;
+    }
 
     /**
      * Get all countries
@@ -92,47 +100,105 @@ class CountryStateCityApiService
     }
 
     /**
-     * Get cities by state and country
+     * Get cities by state and country (tries GeoNames first if configured, then CountriesNow.space)
      *
      * @param string $countryName
      * @param string $stateName
-     * @return array
+     * @param string|null $countryIso ISO 3166-1 alpha-2 (e.g. US) for GeoNames
+     * @param string|null $stateCode State/region code (e.g. NY) for GeoNames
+     * @return array Array of ['name' => string]
      */
-    public function getCitiesByState($countryName, $stateName)
+    public function getCitiesByState($countryName, $stateName, $countryIso = null, $stateCode = null)
     {
-        $cacheKey = 'api_cities_' . md5($countryName . '_' . $stateName);
+        $cacheKey = 'api_cities_' . md5($countryName . '_' . $stateName . '_' . ($countryIso ?? '') . '_' . ($stateCode ?? ''));
 
-        return Cache::remember($cacheKey, 86400, function () use ($countryName, $stateName) {
+        return Cache::remember($cacheKey, 86400, function () use ($countryName, $stateName, $countryIso, $stateCode) {
+            $username = $this->getGeonamesUsername();
+            if ($username && $countryIso && $stateCode) {
+                $fromGeonames = $this->getCitiesByStateFromGeoNames($countryIso, $stateCode, $username);
+                if (!empty($fromGeonames)) {
+                    return $fromGeonames;
+                }
+            }
+
+            return $this->getCitiesByStateFromCountriesNow($countryName, $stateName);
+        });
+    }
+
+    /**
+     * GeoNames search API - populated places in a country/state (industry standard, full coverage)
+     */
+    public function getCitiesByStateFromGeoNames(string $countryIso, string $stateCode, string $username): array
+    {
+        $cacheKey = 'geonames_cities_' . md5(strtoupper($countryIso) . '_' . strtoupper($stateCode));
+
+        return Cache::remember($cacheKey, 86400, function () use ($countryIso, $stateCode, $username) {
             try {
-                $response = Http::timeout(10)->post("{$this->baseUrl}/state/cities", [
-                    'country' => $countryName,
-                    'state' => $stateName
+                $response = Http::timeout(15)->get('https://api.geonames.org/search', [
+                    'country' => strtoupper($countryIso),
+                    'adminCode1' => strtoupper($stateCode),
+                    'featureClass' => 'P', // populated place
+                    'type' => 'json',
+                    'username' => $username,
+                    'maxRows' => 1000,
                 ]);
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    if (isset($data['data'])) {
-                        return collect($data['data'])->map(function ($city) {
-                            return ['name' => $city];
-                        })->toArray();
-                    }
+                    $list = $data['geonames'] ?? [];
+                    $names = collect($list)->pluck('name')->unique()->sort()->values();
+                    return $names->map(fn ($name) => ['name' => $name])->toArray();
                 }
 
-                Log::error('Failed to fetch cities from API', [
-                    'country' => $countryName,
-                    'state' => $stateName,
-                    'response' => $response->body()
+                Log::warning('GeoNames cities response not successful', [
+                    'country' => $countryIso,
+                    'state' => $stateCode,
+                    'status' => $response->status(),
                 ]);
                 return [];
             } catch (\Exception $e) {
-                Log::error('Exception fetching cities', [
-                    'country' => $countryName,
-                    'state' => $stateName,
-                    'error' => $e->getMessage()
+                Log::error('Exception fetching cities from GeoNames', [
+                    'country' => $countryIso,
+                    'state' => $stateCode,
+                    'error' => $e->getMessage(),
                 ]);
                 return [];
             }
         });
+    }
+
+    /**
+     * CountriesNow.space API (fallback when GeoNames not used)
+     */
+    protected function getCitiesByStateFromCountriesNow(string $countryName, string $stateName): array
+    {
+        try {
+            $response = Http::timeout(10)->post("{$this->baseUrl}/state/cities", [
+                'country' => $countryName,
+                'state' => $stateName,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['data'])) {
+                    return collect($data['data'])->map(fn ($city) => ['name' => is_array($city) ? ($city['name'] ?? $city) : $city])->toArray();
+                }
+            }
+
+            Log::error('Failed to fetch cities from CountriesNow', [
+                'country' => $countryName,
+                'state' => $stateName,
+                'response' => $response->body(),
+            ]);
+            return [];
+        } catch (\Exception $e) {
+            Log::error('Exception fetching cities from CountriesNow', [
+                'country' => $countryName,
+                'state' => $stateName,
+                'error' => $e->getMessage(),
+            ]);
+            return [];
+        }
     }
 
     /**

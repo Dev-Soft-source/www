@@ -12,16 +12,13 @@
                     @endisset
                 </h1>
             </div>
-            {{-- <h4 class="mb-4 text-red-500 font-FuturaMdCnBT text-center">
-                {{ $step3Page->sub_heading ?? "Don’t forget your driver’s license below" }}
-            </h4> --}}
             <p for="" class=" text-black mt-2">
                 {!! $step3Page->main_label ?? "If you are signing up as a driver, please note that to be eligible to post ProximaRide and Extra+ Rides, you must state your vehicle details on every ride, and must upload a valid driver’s license. " !!}
             </p>
             <p for="" class=" text-black mt-8">
                 {!! $step3Page->sub_main_label ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may “Skip” it" !!}
             </p>
-            <div class="pb-2 flex items-center justify-start mt-3">
+            <div class="pb-2 flex items-center justify-end mt-3">
                 <p class="text-red-500">
                     @isset($step3Page->required_label)
                         {{ $step3Page->required_label }}
@@ -187,35 +184,17 @@
                         @enderror
                     </div>
 
-                    <div class="md:col-span-2">
-                            <label for="" class="mb-2 block mt-4 font-FuturaMdCnBT">
-                                @isset($step3Page->photo_label)
-                                    {{ $step3Page->photo_label }}
-                                @endisset
-                            </label>
-                            {{-- <div class="flex flex-col items-center justify-center w-full">
-                                <label for="dropzone-file h-52"
-                                    class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
-                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                        @if ($user->car_image != '')
-                                        <img id="profile-image" src="{{ $user->car_image }}" class="w-32 h-32 rounded-full mb-4">
-                                        @else
-                                            <img id="profile-image" class="w-12 h-12 object-contain mb-4" src="{{ asset('assets/image-placeholder.png')}}">
-                                        @endif
-                                        <p class="text-base lg:text-lg text-gray-900">Car Photo. 
-                                            <span class="font-semibold text-primary">Choose file</span>
-                                        </p>
-                                        <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
-                                            (Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max.)
-                                        </p>
-                                    </div>
-                                    <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
-                                    @if (session('uploaded_image'))
-                                        <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
-                                    @endif
-                                </label>
-                            </div> --}}
-                            {{-- <div class="md:col-span-2"> --}}
+                    <div class="md:col-span-2 mt-6">
+
+
+                            <div class="relative w-full">
+                                <button type="button" id="remove-vehicle-photo-btn" onclick="removeVehiclePhoto()" title="Remove photo"
+                                    class="hidden absolute top-2 right-2 z-10 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    aria-label="Remove photo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                                 <label for="dropzone-file"
                                     class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100 font-FuturaMdCnBT">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
@@ -224,7 +203,7 @@
                                     @else
                                         <img id="profile-image" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Vehicle photo placeholder">
                                     @endif
-                                    <p class="text-sm lg:text-lg text-gray-900">Vehicle photo
+                                    <p class="text-sm lg:text-lg text-gray-900">@isset($step3Page->upload_photo_label) {{ $step3Page->upload_photo_label }} @endisset
                                     </p>
                                     <p class="text-sm lg:text-base text-gray-900 ">
                                         @isset($step3Page->photo_detail_label)
@@ -234,6 +213,7 @@
                                 </div>
                                     <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
                                 </label>
+                            </div>
                                     @error('image')
                                     <div class="relative tooltip -bottom-4 group-hover:flex">
                                         <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -298,7 +278,7 @@
                             {{ $step3Page->skip_button_label }}
                         @endisset
                     </button>
-                    <button type="submit" id="nextButton" class="button-exp-fill w-42 opacity-50 cursor-not-allowed" disabled>
+                    <button type="submit" id="nextButton" class="bg-greenXS w-auto px-3 py-2 text-white opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm" disabled>
                         @isset($step3Page->next_button_label)
                             {{ $step3Page->next_button_label }}
                         @endisset
@@ -317,11 +297,11 @@
             <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="text-center w-full">
-                        <h6 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
+                        <h3 class=" font-FuturaMdCnBT text-gray-700 mb-4">
                             @isset($step3Page->skip_confirmation_heading)
                                 {{ $step3Page->skip_confirmation_heading }}
                             @endisset
-                        </h6>
+                        </h3>
                         <p class="text-gray-600">
                             @isset($step3Page->skip_confirmation_message)
                                 {{ $step3Page->skip_confirmation_message }}
@@ -391,21 +371,47 @@
     }
 
     let hasVehiclePhoto = false;
+    const vehiclePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
+
+    function updateRemoveVehiclePhotoButtonVisibility() {
+        const profileImageEl = document.getElementById('profile-image');
+        const btn = document.getElementById('remove-vehicle-photo-btn');
+        if (!profileImageEl || !btn) return;
+        const isPlaceholder = (profileImageEl.src || '').indexOf('image-placeholder.png') !== -1;
+        if (isPlaceholder) {
+            btn.classList.add('hidden');
+        } else {
+            btn.classList.remove('hidden');
+        }
+    }
+
+    function removeVehiclePhoto() {
+        const profileImageEl = document.getElementById('profile-image');
+        const fileInput = document.getElementById('dropzone-file');
+        if (profileImageEl) {
+            profileImageEl.src = vehiclePhotoPlaceholderUrl;
+            profileImageEl.className = 'w-12 h-12 object-contain mb-3 cursor-pointer';
+        }
+        if (fileInput) fileInput.value = '';
+        hasVehiclePhoto = false;
+        validateStep3Form();
+        document.getElementById('remove-vehicle-photo-btn').classList.add('hidden');
+    }
 
     function previewImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
             reader.onload = function(e) {
                 profileImage.src = e.target.result;
                 profileImage.className = 'w-72 h-72 object-contain mb-3 cursor-pointer rounded-lg';
                 hasVehiclePhoto = true;
+                updateRemoveVehiclePhotoButtonVisibility();
                 validateStep3Form();
             };
-
             reader.readAsDataURL(input.files[0]);
         } else {
             hasVehiclePhoto = false;
+            updateRemoveVehiclePhotoButtonVisibility();
             validateStep3Form();
         }
     }
@@ -508,6 +514,8 @@
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             hasVehiclePhoto = true;
         }
+        
+        updateRemoveVehiclePhotoButtonVisibility();
         
         // Prevent form submission if no photo
         document.getElementById('step3Form').addEventListener('submit', function(e) {

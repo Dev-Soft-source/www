@@ -74,4 +74,8 @@ return [
     'fcm' => [
         'key' => env('FCM_SERVER_KEY'),
     ],
+
+    'geonames' => [
+        'username' => env('GEONAMES_USERNAME'),
+    ],
 ];

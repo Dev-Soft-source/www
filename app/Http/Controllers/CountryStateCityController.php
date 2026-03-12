@@ -79,8 +79,57 @@ class CountryStateCityController extends Controller
             return $city;
         });
 
-        // Reset array keys after unique() to ensure proper JSON encoding
-        $data['cities'] = $uniqueCities->values();
+        $cityList = $uniqueCities->values();
+
+        // Merge with API (GeoNames or CountriesNow) when state_id given so NY, TX, etc. have full city lists
+        if (isset($request->state_id) && (int) $request->state_id > 0) {
+            $state = State::with('country')->find((int) $request->state_id);
+            if ($state && $state->country) {
+                $countryIso = $state->country->iso_code ?? null;
+                $stateCode = $state->abrv ?? null;
+                $apiCities = $this->apiService->getCitiesByState(
+                    $state->country->name,
+                    $state->name,
+                    $countryIso,
+                    $stateCode
+                );
+                $existingNames = $cityList->map(function ($c) {
+                    return strtolower(trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $c->name)));
+                })->flip();
+                foreach ($apiCities as $row) {
+                    $name = is_array($row) ? ($row['name'] ?? '') : (string) $row;
+                    if ($name === '') {
+                        continue;
+                    }
+                    $key = strtolower(trim($name));
+                    if ($existingNames->has($key)) {
+                        continue;
+                    }
+                    $existingNames->put($key, true);
+                    $slug = preg_replace('/[^a-z0-9]+/i', '_', $name);
+                    $slug = trim($slug, '_') ?: 'city';
+                    $cityList->push((object) [
+                        'id' => 'api_' . $slug,
+                        'name' => $name,
+                        'state_id' => $state->id,
+                        'state' => (object) [
+                            'id' => $state->id,
+                            'abrv' => $state->abrv ?? null,
+                            'country_id' => $state->country_id,
+                            'country' => (object) [
+                                'id' => $state->country->id,
+                                'name' => $state->country->name,
+                            ],
+                        ],
+                    ]);
+                }
+                $cityList = $cityList->sortBy(function ($c) {
+                    return strtolower(is_object($c) ? $c->name : ($c['name'] ?? ''));
+                })->values();
+            }
+        }
+
+        $data['cities'] = $cityList;
         return response()->json($data);
     }
 
