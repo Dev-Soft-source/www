@@ -37,8 +37,8 @@
               </div>
               <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <input type="hidden" id="notificationId">
-                  <a href="#" onclick="closeModal()" class="button-exp-fill">{{ $successMessage->cancel_button ??'Close'}} </a>
-                  <a href="#" onclick="delete_notification()" class="button-exp-fill">{{ $successMessage->delete_button?? 'Yes'}} </a>
+                  <a href="#" onclick="closeModal()" class="button-exp-fill">{{ $successMessage->no_go_back_button_text ?? "No, go back"}}</a>
+                  <a href="#" onclick="delete_notification()" class="button-exp-fill">{{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
               </div>
           </div>
       </div>
@@ -202,7 +202,7 @@
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            {{ \Carbon\Carbon::parse($notification->added_on)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($notification->added_on)->format('h:i A') }}
+                                                            {{ \Carbon\Carbon::parse($notification->added_on)->locale(app()->getLocale())->translatedFormat('M d, Y h:i A') }}
                                                         </p>
                                                     </div>
                                                 </div>

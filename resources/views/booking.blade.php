@@ -1713,7 +1713,7 @@
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button type="button" onclick="closeStudentSeatLimitModal()"
                                 class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
-                                OK
+                                {{ $siteText['ok_btn_text'] }}
                             </button>
                         </div>
                     </div>

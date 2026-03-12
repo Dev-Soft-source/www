@@ -361,8 +361,8 @@
                 </div>
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-28">{{ $siteText['remove_btn_text'] }}</a>
-                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill w-42">{{ $siteText['cancel_btn_text'] }}</button>
+                <a id="delete-card-link" href="#" class="inline-flex w-auto justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it" }}</a>
+                <button type="button" onclick="toggleModalCard('card-modal')" class="button-exp-fill w-42">{{ $successMessage->no_go_back_button_text ?? "No, go back" }}</button>
             </div>
         </div>
     </div>

@@ -76,9 +76,9 @@
                     <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                         <input type="hidden" id="notificationId">
                         <a href="#" onclick="closeNotificationModal()"
-                            class="button-exp-fill font-FuturaMdCnBT">{{ $successMessage->cancel_button ?? 'Close' }}</a>
+                            class="button-exp-fill">{{ $successMessage->no_go_back_button_text ?? "No, go back"}}</a>
                         <a href="#" onclick="delete_notification()"
-                            class="button-exp-fill bg-red-500 hover:bg-red-500 border-red-500 hover:border-red-500 font-FuturaMdCnBT">{{ $successMessage->delete_button ?? 'Yes' }}</a>
+                            class="button-exp-fill bg-red-500 hover:bg-red-500 border-red-500 hover:border-red-500 font-FuturaMdCnBT">{{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
                     </div>
                 </div>
             </div>

@@ -165,7 +165,12 @@ class PhoneController extends Controller
             $countries = Country::where('status', '1')->orderBy('name', 'asc')->get();
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
-            return view('phone', ['user' => $user, 'countries' => $countries, 'phoneSetting' => $phoneSetting, 'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'phone_numbers' => $phone_numbers, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            return view('phone', ['user' => $user, 'countries' => $countries, 
+            'phoneSetting' => $phoneSetting, 'reviewSetting' => $reviewSetting, 
+            'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 
+            'phone_numbers' => $phone_numbers, 
+            // 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage
+            ]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
         }

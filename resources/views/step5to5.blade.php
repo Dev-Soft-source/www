@@ -304,17 +304,13 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="text-center w-full">
                                 <div id="whatsappUnavailableIcon"
-                                    class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-                                    <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
+                                    class="mx-auto flex items-center justify-center mb-4">
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#d10000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#d10000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#d10000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                                 </div>
                                 <h2 class="font-FuturaMdCnBT text-gray-700 mb-4" id="whatsappUnavailableTitle">
                                     WhatsApp Not Available
                                 </h2>
-                                <p class="text-gray-600" id="whatsappUnavailableMessage">
+                                <p class="text-gray-600 text-center text-xl" id="whatsappUnavailableMessage">
                                     WhatsApp is not available for this number. Verification code has been sent via SMS
                                     instead.
                                 </p>
@@ -323,7 +319,7 @@
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button type="button" onclick="closeWhatsAppUnavailableModal()"
                                 class="inline-flex justify-center rounded w-28 bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 ">
-                                OK
+                                {{ $siteText['ok_btn_text'] }}
                             </button>
                         </div>
                     </div>
@@ -591,7 +587,7 @@
 
             // Validate inputs
             if (!country || !countryCode || !phone) {
-                showWhatsAppUnavailableModal('Please fill in all fields', 'Validation Required');
+                showWhatsAppUnavailableModal('Please fill in phone number.', 'Validation Required');
                 return;
             }
 
@@ -693,7 +689,7 @@
 
                         // Show remaining attempts if provided
                         if (data.remaining_attempts !== undefined) {
-                            console.log('Remaining verification attempts:', data.remaining_attempts);
+                            
                             if (data.remaining_attempts <= 1) {
                                 showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
                                     ' verification attempt remaining.');
@@ -745,7 +741,7 @@
             const phone = document.querySelector('input[name="phone"]').value;
 
             if (!country || !countryCode || !phone) {
-                alert('Please fill in all fields');
+                alert('Please fill in phone number.');
                 return;
             }
 
