@@ -697,14 +697,14 @@
                             if (whatsappResendBtnWrapper) whatsappResendBtnWrapper.classList.add('hidden');
                         }
 
-                        // Show remaining attempts if provided
-                        if (data.remaining_attempts !== undefined) {
+                        // // Show remaining attempts if provided
+                        // if (data.remaining_attempts !== undefined) {
                             
-                            if (data.remaining_attempts <= 1) {
-                                showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
-                                    ' verification attempt remaining.');
-                            }
-                        }
+                        //     if (data.remaining_attempts <= 1) {
+                        //         showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
+                        //             ' verification attempt remaining.');
+                        //     }
+                        // }
 
                         openVerifyModal();
                     } else {

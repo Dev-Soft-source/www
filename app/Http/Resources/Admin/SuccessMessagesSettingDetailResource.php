@@ -77,6 +77,7 @@ class SuccessMessagesSettingDetailResource extends JsonResource
             'withdraw_message' => $this->withdraw_message,
             'delete_vehicle_message' => $this->delete_vehicle_message,
             'remove_driver_license_message' => $this->remove_driver_license_message,
+            'all_set_steps_message' => $this->all_set_steps_message,
             'popup_close_btn_text' => $this->popup_close_btn_text,
             'select_reason' => $this->select_reason,
             'select_recommend' => $this->select_recommend,

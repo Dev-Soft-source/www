@@ -2311,8 +2311,46 @@
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
+                                                    :for="`all_set_steps_message_${activeLanguageId}`"
+                                                    >51. All set steps message</label
+                                                >
+                                            </div>
+                                            <textarea
+                                                :name="`all_set_steps_message_${activeLanguageId}`"
+                                                :id="`all_set_steps_message_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                rows="3"
+                                                :value="getCurrentValue('all_set_steps_message')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'all_set_steps_message'
+                                                    )
+                                                "
+                                            ></textarea>
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `all_set_steps_message.all_set_steps_message_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `all_set_steps_message.all_set_steps_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
                                                     :for="`popup_close_btn_text_${activeLanguageId}`"
-                                                    >51. Close button</label
+                                                    >52. Close button</label
                                                 >
                                             </div>
                                             <input
@@ -2352,7 +2390,7 @@
                                             <div class="flex justify-between">
                                                 <label
                                                     :for="`select_reason_${activeLanguageId}`"
-                                                    >52. Please select 1 or more reason(s)</label
+                                                    >53. Please select 1 or more reason(s)</label
                                                 >
                                             </div>
                                             <input
@@ -5342,6 +5380,7 @@ export default {
                             this.handleInput("", language, "withdraw_message");
                             this.handleInput("", language, "delete_vehicle_message");
                             this.handleInput("", language, "remove_driver_license_message");
+                            this.handleInput("", language, "all_set_steps_message");
                             this.handleInput("", language, "popup_close_btn_text");
                             this.handleInput("", language, "popup_signup_btn_text");
                             this.handleInput("", language, "popup_login_btn_text");
@@ -5745,6 +5784,11 @@ export default {
                                 setting?.remove_driver_license_message,
                                 setting?.language,
                                 "remove_driver_license_message"
+                            );
+                            this.handleInput(
+                                setting?.all_set_steps_message,
+                                setting?.language,
+                                "all_set_steps_message"
                             );
                             this.handleInput(
                                 setting?.popup_close_btn_text,
@@ -6211,6 +6255,7 @@ export default {
                 validationErros.has(`withdraw_message.withdraw_message_${language.id}`) ||
                 validationErros.has(`delete_vehicle_message.delete_vehicle_message_${language.id}`) ||
                 validationErros.has(`remove_driver_license_message.remove_driver_license_message_${language.id}`) ||
+                validationErros.has(`all_set_steps_message.all_set_steps_message_${language.id}`) ||
                 validationErros.has(`popup_close_btn_text.popup_close_btn_text_${language.id}`) ||
                 validationErros.has(`popup_signup_btn_text.popup_signup_btn_text_${language.id}`) ||
                 validationErros.has(`popup_login_btn_text.popup_login_btn_text_${language.id}`) ||
