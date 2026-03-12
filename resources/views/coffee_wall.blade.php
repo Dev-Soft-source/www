@@ -331,7 +331,7 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                                     <div id="credit-card-div"
-                                        class="hidden mt-4 p-4 bg-white border border-gray-400 rounded">
+                                        class="hidden mt-4 p-4 bg-white border border-b-4 border-gray-400 rounded">
                                         <div>
                                             <label
                                                 for="name_on_card">{{ $paymentSettingDetail->name_on_card_label ?? 'Cardholder’s name' }}</label>
