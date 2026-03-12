@@ -57,8 +57,6 @@
                                                         @endphp
                                                         @if(!$on_paypal)
                                                         <div class="flex items-center justify-between p-3">
-                                                            <input type="radio" id="paypal" name="payment_method"
-                                                                value="paypal" class="hidden peer" >
                                                             <label for="paypal"
                                                                 class="relative flex justify-center w-full p-2 bg-[#fec43a] border-2 border-[#fec43a] rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
                                                                 <img class="h-8"
@@ -76,8 +74,6 @@
                                                         @endif
                                                         @if(!$on_google_pay)
                                                         <div class="flex items-center justify-between p-3 google-pay-option">
-                                                            <input type="radio" id="google_pay" name="payment_method"
-                                                                value="google_pay" class="hidden peer" >
                                                             <label for="google_pay"
                                                                 class="relative flex justify-center w-full p-2 bg-gray-800 border-2 border-gray-800 rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
                                                                 <img class="h-8"
@@ -113,7 +109,7 @@
                                                         @if(!$on_card)
                                                         <div class="p-3">
                                                             <label for="credit_card"
-                                                                class="relative font-semibold flex items-center justify-center w-full p-2 bg-white border-2 border-gray-500 rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
+                                                                class="relative font-semibold flex items-center justify-center w-full p-2 bg-[#e0f2fe] border-2 border-blue-500 rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
                                                                 <div class="mr-2">
                                                                 <svg class="h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3.92969 15.8792L15.8797 3.9292" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M11.1013 18.2791L12.3013 17.0791" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M13.793 15.5887L16.183 13.1987" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M3.60127 10.239L10.2413 3.599C12.3613 1.479 13.4213 1.469 15.5213 3.569L20.4313 8.479C22.5313 10.579 22.5213 11.639 20.4013 13.759L13.7613 20.399C11.6413 22.519 10.5813 22.529 8.48127 20.429L3.57127 15.519C1.47127 13.419 1.47127 12.369 3.60127 10.239Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M2 21.9985H22" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>    
                                                                 </div>Credit or Debit Card
