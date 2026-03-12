@@ -19,12 +19,6 @@
               </button>
               <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <div class="sm:flex sm:items-start justify-center">
-                      <!-- <div
-                          class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                              <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                          </svg>
-                      </div> -->
                   </div>
                   <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                       <div class="">
@@ -94,40 +88,40 @@
             </div>
         </div>
 
-        <div id="notifications-info-bar" class="mb-4 rounded-lg overflow-hidden transition-all duration-300 ease-in-out">
-            <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 text-left transition-colors cursor-pointer" aria-expanded="false" aria-controls="notifications-info-bar-content">
-                <span class="font-medium">{{ $notificationsPageSetting->info_bar_title }}</span>
+        <div id="notifications-info-bar" class="mb-4 rounded-lg overflow-hidden transition-all duration-300 ease-in-out bg-teal-500 hover:bg-teal-600 text-white ">
+            <button type="button" onclick="toggleNotificationsInfoBar()" class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors cursor-pointer" aria-expanded="false" aria-controls="notifications-info-bar-content">
+                <span class="font-medium text-xl">{{ $notificationsPageSetting->info_bar_title }}</span>
                 <svg id="notifications-info-bar-icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-300 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
             <div id="notifications-info-bar-content" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out" role="region">
                 <div class="overflow-hidden">
-                    <div class="bg-white p-4 rounded-b-lg shadow border border-t-0 border-gray-200 text-gray-700 space-y-3">
+                    <div class="px-8 py-4 rounded-b-lg shadow space-y-3">
                         <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 16 16">
                                     <path d="M4 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM4.862 4.276 3.906 6.19a.51.51 0 0 0 .497.731c.91-.073 2.35-.17 3.597-.17 1.247 0 2.688.097 3.597.17a.51.51 0 0 0 .497-.731l-.956-1.913A.5.5 0 0 0 10.691 4H5.309a.5.5 0 0 0-.447.276Z"/>
                                     <path d="M2.52 3.515A2.5 2.5 0 0 1 4.82 2h6.362c1 0 1.904.596 2.298 1.515l.792 1.848c.075.175.21.319.38.404.5.25.855.715.965 1.262l.335 1.679c.033.161.049.325.049.49v.413c0 .814-.39 1.543-1 1.997V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.338c-1.292.048-2.745.088-4 .088s-2.708-.04-4-.088V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.892c-.61-.454-1-1.183-1-1.997v-.413a2.5 2.5 0 0 1 .049-.49l.335-1.68c.11-.546.465-1.012.964-1.261a.807.807 0 0 0 .381-.404l.792-1.848ZM4.82 3a1.5 1.5 0 0 0-1.379.91l-.792 1.847a1.8 1.8 0 0 1-.853.904.807.807 0 0 0-.43.564L1.03 8.904a1.5 1.5 0 0 0-.03.294v.413c0 .796.62 1.448 1.408 1.484 1.555.07 3.786.155 5.592.155 1.806 0 4.037-.084 5.592-.155A1.479 1.479 0 0 0 15 9.611v-.413c0-.099-.01-.197-.03-.294l-.335-1.68a.807.807 0 0 0-.43-.563 1.807 1.807 0 0 1-.853-.904l-.792-1.848A1.5 1.5 0 0 0 11.18 3H4.82Z"/>
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_ride }}</p>
+                            <p class="flex-1 pt-1 text-white text-lg">{{ $notificationsPageSetting->info_paragraph_ride }}</p>
                         </div>
                         <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_inbox }}</p>
+                            <p class="flex-1 pt-1 text-white text-lg">{{ $notificationsPageSetting->info_paragraph_inbox }}</p>
                         </div>
                         <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white">
+                            <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0018 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 00-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                                 </svg>
                             </div>
-                            <p class="flex-1 pt-1">{{ $notificationsPageSetting->info_paragraph_general }}</p>
+                            <p class="flex-1 pt-1 text-white text-lg">{{ $notificationsPageSetting->info_paragraph_general }}</p>
                         </div>
                     </div>
                 </div>
