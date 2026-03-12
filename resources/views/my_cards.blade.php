@@ -280,7 +280,7 @@
                 </svg>
             </button>
             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                <h3 class="text-2xl font-FuturaMdCnBT font-medium text-gray-900 mb-6">Add Payment Method</h3>
+                <h3 class="text-2xl font-FuturaMdCnBT font-medium text-gray-900 mb-6">{{$paymentSettingDetail->add_new_card_button_text ?? "Add Payment Method"}}</h3>
                 
                 <!-- Payment Method Selection -->
                 <div id="payment-method-selection" class="space-y-4">
@@ -322,10 +322,10 @@
                         <div id="payment-element-errors" class="text-red-500 text-sm mt-1"></div>
                         <div class="mt-4 flex space-x-3">
                             <button type="button" onclick="resetCardForm()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
-                                Back
+                                {{ $siteText['back_btn_text'] ?? 'Back' }}
                             </button>
                             <button type="submit" id="submit-card-button" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                                Add
+                                {{ $siteText['add_btn_text'] ?? 'Add' }}
                             </button>
                         </div>
                     </form>

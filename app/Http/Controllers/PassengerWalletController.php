@@ -17,6 +17,7 @@ use App\Models\ProfileSettingDetail;
 use App\Models\RewardPoint;
 use App\Models\RewardPointSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
+use App\Models\BillingAddressSettingDetail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -303,6 +304,8 @@ class PassengerWalletController extends Controller
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
+        $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -315,6 +318,7 @@ class PassengerWalletController extends Controller
 
         return view('buy_balance', [
             'reviewSetting' => $reviewSetting,
+            'paymentSettingDetail' => $paymentSettingDetail,
             'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,
             'cards' => $cards,

@@ -1218,6 +1218,182 @@
                                                         class="flex justify-between"
                                                     >
                                                         <label
+                                                            :for="`top_up_my_balance_head_${activeLanguageId}`"
+                                                            >Top up my balance heading</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`top_up_my_balance_head_${activeLanguageId}`"
+                                                        :id="`top_up_my_balance_head_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'top_up_my_balance_head'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'top_up_my_balance_head'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `top_up_my_balance_head.top_up_my_balance_head_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `top_up_my_balance_head.top_up_my_balance_head_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`purchase_amount_label_${activeLanguageId}`"
+                                                            >Purchase amount label</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`purchase_amount_label_${activeLanguageId}`"
+                                                        :id="`purchase_amount_label_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'purchase_amount_label'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'purchase_amount_label'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `purchase_amount_label.purchase_amount_label_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `purchase_amount_label.purchase_amount_label_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`purchase_amount_placeholder_${activeLanguageId}`"
+                                                            >Purchase amount placeholder</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`purchase_amount_placeholder_${activeLanguageId}`"
+                                                        :id="`purchase_amount_placeholder_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'purchase_amount_placeholder'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'purchase_amount_placeholder'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `purchase_amount_placeholder.purchase_amount_placeholder_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `purchase_amount_placeholder.purchase_amount_placeholder_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`buy_btn_text_${activeLanguageId}`"
+                                                            >Buy button text</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`buy_btn_text_${activeLanguageId}`"
+                                                        :id="`buy_btn_text_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'buy_btn_text'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'buy_btn_text'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `buy_btn_text.buy_btn_text_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `buy_btn_text.buy_btn_text_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
                                                             :for="`mobile_country_label_${activeLanguageId}`"
                                                             >Country label (mobile)</label
                                                         >
@@ -2052,6 +2228,10 @@ export default {
                             this.handleInput("", language, "mobile_postal_code_placeholder");
                             this.handleInput("", language, "mobile_primary_card_placeholder");
                             this.handleInput("", language, "save_button_text");
+                            this.handleInput("", language, "buy_btn_text");
+                            this.handleInput("", language, "top_up_my_balance_head");
+                            this.handleInput("", language, "purchase_amount_label");
+                            this.handleInput("", language, "purchase_amount_placeholder");
                             this.handleInput("", language, "select_card_type_text");
                             this.handleInput("", language, "indicate_field_label");
 
@@ -2240,6 +2420,26 @@ export default {
                                 "save_button_text"
                             );
                              this.handleInput(
+                                setting?.buy_btn_text,
+                                setting?.language,
+                                "buy_btn_text"
+                            );
+                             this.handleInput(
+                                setting?.top_up_my_balance_head,
+                                setting?.language,
+                                "top_up_my_balance_head"
+                            );
+                             this.handleInput(
+                                setting?.purchase_amount_label,
+                                setting?.language,
+                                "purchase_amount_label"
+                            );
+                             this.handleInput(
+                                setting?.purchase_amount_placeholder,
+                                setting?.language,
+                                "purchase_amount_placeholder"
+                            );
+                             this.handleInput(
                                 setting?.select_card_type_text,
                                 setting?.language,
                                 "select_card_type_text"
@@ -2416,6 +2616,18 @@ export default {
                 )||
                 validationErros.has(
                     `save_button_text.save_button_text_${language.id}`
+                )||
+                validationErros.has(
+                    `buy_btn_text.buy_btn_text_${language.id}`
+                )||
+                validationErros.has(
+                    `top_up_my_balance_head.top_up_my_balance_head_${language.id}`
+                )||
+                validationErros.has(
+                    `purchase_amount_label.purchase_amount_label_${language.id}`
+                )||
+                validationErros.has(
+                    `purchase_amount_placeholder.purchase_amount_placeholder_${language.id}`
                 )||
                 validationErros.has(
                     `mobile_card_type_label.mobile_card_type_label_${language.id}`

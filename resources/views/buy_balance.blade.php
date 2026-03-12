@@ -15,7 +15,7 @@
                         enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="gPayApplePayId" value="0">
-                        <h1>Top up my balance</h1>
+                        <h1>{{ $paymentSettingDetail->top_up_my_balance_head ?? 'Top up my balance' }}</h1>
                         <div class="grid grid-cols-1 lg:grid-cols-1 gap-4">
                             <div class="col-span-1">
                                 <div class="space-y-4">
@@ -31,11 +31,11 @@
                                             <div class="space-y-4 mb-4">
                                                 <div class="w-full md:w-1/2">
                                                     <label for="seats"
-                                                        class="block mb-2 font-medium text-gray-900">Purchase top up balance
+                                                        class="block mb-2 font-medium text-gray-900">{{ $paymentSettingDetail->purchase_amount_label ?? 'Purchase amount' }}
                                                         <span class="text-red-500">*</span></label>
                                                     <input type="number" id="dr_amount" step="any" name="dr_amount"
                                                         value="{{ old('dr_amount') }}"
-                                                        placeholder="Enter the amount you want to add"
+                                                        placeholder="{{ $paymentSettingDetail->purchase_amount_placeholder ?? 'Enter the amount you want to add' }}"
                                                         class=" block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('dr_amount') ? 'border-red-500' : '' }}">
                                                     @error('dr_amount')
                                                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -483,7 +483,7 @@
                                                         </div>
                                                         <div class="flex justify-center items-center p-4">
                                                             <a href="{{ route('my_cards', ['lang' => $selectedLanguage->abbreviation]) }}"
-                                                                class="button-exp-fill">Add new payment</a>
+                                                                class="button-exp-fill">{{$paymentSettingDetail->add_new_card_button_text ?? "Add Payment Method"}}</a>
                                                         </div>
                                                     </div>
                                                     @error('card_id')
@@ -493,7 +493,7 @@
                                             </div>
                                             <div class="flex justify-center items-center mt-4 md:w-1/2 w-full">
                                                 <button id="submitButton" class="bg-greenXS hover:bg-greenXS text-white text-sm rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-3 hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS" type="submit">
-                                                    {{ $cardSelected == true ? '1 tap buy' : 'Buy' }}
+                                                    {{ $paymentSettingDetail->buy_btn_text ?? 'Buy' }}
                                                 </button>
                                             </div>
                                         </div>

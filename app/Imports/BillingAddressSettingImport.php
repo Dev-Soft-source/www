@@ -191,6 +191,10 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
             'delete_card_message' => $row['delete_card_message'] ?? null,
             'mobile_primary_card_placeholder' => $row['mobile_primary_card_placeholder'] ?? null,
             'save_button_text' => $row['save_button_text'] ?? null,
+            'buy_btn_text' => $row['buy_btn_text'] ?? null,
+            'top_up_my_balance_head' => $row['top_up_my_balance_head'] ?? null,
+            'purchase_amount_label' => $row['purchase_amount_label'] ?? null,
+            'purchase_amount_placeholder' => $row['purchase_amount_placeholder'] ?? null,
         ];
 
         BillingAddressSettingDetail::updateOrCreate(
@@ -230,6 +234,10 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
                 'mobile_country_label' => 'required|string',
                 'mobile_postal_code_label' => 'required|string',
                 'save_button_text' => 'required|string',
+                'buy_btn_text' => 'required|string',
+                'top_up_my_balance_head' => 'required|string',
+                'purchase_amount_label' => 'required|string',
+                'purchase_amount_placeholder' => 'required|string',
                 'indicate_field_label' => 'required|string',
             ];
         }
@@ -254,6 +262,10 @@ class BillingAddressSettingImport implements ToCollection, WithHeadingRow, WithV
             'mobile_country_label.required' => 'Country Label is required',
             'mobile_postal_code_label.required' => 'Postal Code Label is required',
             'save_button_text.required' => 'Save Button Text is required',
+            'buy_btn_text.required' => 'Buy Button Text is required',
+            'top_up_my_balance_head.required' => 'Top Up My Balance Heading is required',
+            'purchase_amount_label.required' => 'Purchase Amount Label is required',
+            'purchase_amount_placeholder.required' => 'Purchase Amount Placeholder is required',
             'indicate_field_label.required' => 'Indicate Field Label is required',
         ];
     }

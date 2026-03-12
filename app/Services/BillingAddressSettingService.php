@@ -61,6 +61,14 @@ class BillingAddressSettingService
                 // $errorMessages = array_merge($errorMessages, ['mobile_primary_card_placeholder.mobile_primary_card_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['save_button_text.save_button_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['save_button_text.save_button_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['buy_btn_text.buy_btn_text_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['buy_btn_text.buy_btn_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['top_up_my_balance_head.top_up_my_balance_head_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['top_up_my_balance_head.top_up_my_balance_head_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['purchase_amount_label.purchase_amount_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['purchase_amount_label.purchase_amount_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['purchase_amount_placeholder.purchase_amount_placeholder_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['purchase_amount_placeholder.purchase_amount_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
 
                 $validationRule = array_merge($validationRule, ['indicate_field_label.indicate_field_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['indicate_field_label.indicate_field_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -118,6 +126,10 @@ class BillingAddressSettingService
             'mobile_postal_code_placeholder' => $this->data($request, $language, 'mobile_postal_code_placeholder'),
             'mobile_primary_card_placeholder' => $this->data($request, $language, 'mobile_primary_card_placeholder'),
             'save_button_text' => $this->data($request, $language, 'save_button_text'),
+            'buy_btn_text' => $this->data($request, $language, 'buy_btn_text'),
+            'top_up_my_balance_head' => $this->data($request, $language, 'top_up_my_balance_head'),
+            'purchase_amount_label' => $this->data($request, $language, 'purchase_amount_label'),
+            'purchase_amount_placeholder' => $this->data($request, $language, 'purchase_amount_placeholder'),
             'indicate_field_label' => $this->data($request, $language, 'indicate_field_label'),
             'select_card_type_text' => $this->data($request, $language, 'select_card_type_text'),
             'expiry_month_placeholder' => $this->data($request, $language, 'expiry_month_placeholder'),
