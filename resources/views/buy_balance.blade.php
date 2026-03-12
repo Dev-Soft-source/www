@@ -76,7 +76,7 @@
                                                         </div>
                                                         @endif
                                                         @if(!$on_google_pay)
-                                                        <div class="flex items-center justify-between p-3">
+                                                        <div class="flex items-center justify-between p-3 google-pay-option">
                                                             <input type="radio" id="google_pay" name="payment_method"
                                                                 value="google_pay" class="hidden peer" >
                                                             <label for="google_pay"
@@ -96,7 +96,7 @@
                                                         </div>
                                                         @endif
                                                         @if(!$on_apple_pay)
-                                                        <div class="flex items-center justify-between p-3">
+                                                        <div class="flex items-center justify-between p-3 apple-pay-option">
                                                             <label for="apple_pay"
                                                                 class="relative flex justify-center w-full p-2 bg-black border-2 border-black rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
                                                                 <img class="h-8"
@@ -319,7 +319,7 @@
                                                                                         {{ $card->paymentMethod->card->last4 }}</span>
                                                                                 </div>
                                                                             @elseif($card->payment_method_type == 'google_pay')
-                                                                                <div class="flex items-center space-x-3">
+                                                                                <div class="flex items-center space-x-3 google-pay-option">
                                                                                     <div
                                                                                         class="w-14 h-9 bg-black rounded flex items-center justify-center p-1">
                                                                                         <svg class="gpay-logo"
@@ -397,7 +397,7 @@
                                                                                     </div>
                                                                                 </div>
                                                                             @elseif($card->payment_method_type == 'apple_pay')
-                                                                                <div class="flex items-center space-x-3">
+                                                                                <div class="flex items-center space-x-3 apple-pay-option">
                                                                                     <div
                                                                                         class="w-14 h-9 bg-black rounded flex items-center justify-center">
                                                                                         <svg width="24" height="24"
@@ -540,6 +540,34 @@
             $('input[type=radio][name=card_id]').on('change', toggleInlineCardSection);
             // Run once on page load in case "Credit or Debit Card" is preselected
             toggleInlineCardSection();
+
+            // Hide Apple Pay option on non-Apple devices
+            var ua = navigator.userAgent || '';
+            var isAppleDevice = /iPad|iPhone|iPod|Macintosh/.test(ua) && !window.MSStream;
+            if (!isAppleDevice) {
+                $('.apple-pay-option').addClass('hidden');
+                // If Apple Pay was pre-selected, clear selection
+                var appleRadio = document.getElementById('apple_pay');
+                if (appleRadio && appleRadio.checked) {
+                    appleRadio.checked = false;
+                }
+            }
+
+            // Hide Google Pay option when browser does not appear to support it
+            // Heuristic: Android + Chrome + PaymentRequest API present
+            var isAndroid = /Android/.test(ua);
+            var isChrome = /Chrome/.test(ua) || /CriOS/.test(ua);
+            var hasPaymentRequest = typeof window.PaymentRequest !== 'undefined';
+            var isGooglePayCapable = isAndroid && isChrome && hasPaymentRequest;
+
+            if (!isGooglePayCapable) {
+                $('.google-pay-option').addClass('hidden');
+                // If Google Pay was pre-selected, clear selection
+                var gpayRadio = document.getElementById('google_pay');
+                if (gpayRadio && gpayRadio.checked) {
+                    gpayRadio.checked = false;
+                }
+            }
         });
 
         var stripePk = '{{ env('STRIPE_KEY') ?? '' }}';

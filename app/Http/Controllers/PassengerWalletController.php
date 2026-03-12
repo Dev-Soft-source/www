@@ -387,7 +387,7 @@ class PassengerWalletController extends Controller
             try {
                 $paymentIntent = PaymentIntent::create([
                     'amount'        => $amountCents,
-                    'currency'      => 'usd',
+                    'currency'      => 'CAD',
                     'customer'      => $user->stripe_customer_id,
                     'payment_method'=> $stripePaymentMethodId,
                     'off_session'   => true,
@@ -418,7 +418,7 @@ class PassengerWalletController extends Controller
                 "purchase_units" => [
                     [
                         "amount" => [
-                            "currency_code" => env('DEFAULT_CURRENCY', 'USD'),
+                            "currency_code" => env('DEFAULT_CURRENCY', 'CAD'),
                             "value" => $request->dr_amount
                         ]
                     ]
@@ -505,7 +505,7 @@ class PassengerWalletController extends Controller
                     "purchase_units" => [
                         [
                             "amount" => [
-                                "currency_code" => env('DEFAULT_CURRENCY', 'USD'),
+                                "currency_code" => env('DEFAULT_CURRENCY', 'CAD'),
                                 "value" => $request->dr_amount
                             ]
                         ]
