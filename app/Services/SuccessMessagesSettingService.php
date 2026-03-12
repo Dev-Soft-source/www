@@ -381,6 +381,7 @@ class SuccessMessagesSettingService
             'withdraw_message' => $this->data($request, $language, 'withdraw_message'),
             'delete_vehicle_message' => $this->data($request, $language, 'delete_vehicle_message'),
             'remove_driver_license_message' => $this->data($request, $language, 'remove_driver_license_message'),
+            'all_set_steps_message' => $this->data($request, $language, 'all_set_steps_message'),
             'popup_close_btn_text' => $this->data($request, $language, 'popup_close_btn_text'),
             'select_reason' => $this->data($request, $language, 'select_reason'),
             'select_recommend' => $this->data($request, $language, 'select_recommend'),

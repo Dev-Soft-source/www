@@ -691,7 +691,7 @@ class PhoneController extends Controller
                 
                 if ($request->step) {
                     $response['redirect'] = route('profile', ['lang' => $selectedLanguage->abbreviation]);
-                    $response['message'] = "Your profile is all set. Welcome to ProximaRide!";
+                    $response['message'] = $message->all_set_steps_message ?? "You're all set! Welcome to ProximaRide — let's get you on the road.";
                 } elseif ($returnUrl) {
                     $response['redirect'] = $returnUrl;
                 } elseif ($request->page && $request->page == "booking") {
@@ -707,7 +707,7 @@ class PhoneController extends Controller
             // Handle regular form submissions (non-AJAX)
             if ($request->step) {
                 session()->forget('return_url_after_action');
-                return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', "Your profile is all set. Welcome to ProximaRide!");
+                return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->all_set_steps_message ?? "You're all set! Welcome to ProximaRide — let's get you on the road.");
             }
             
             // If return URL exists, redirect there

@@ -219,11 +219,11 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="text-center w-full">
-                                <h2 class="font-FuturaMdCnBT text-gray-700 mb-4">
+                                <h3 class="font-FuturaMdCnBT text-gray-700 mb-4">
                                     @isset($step5Page->confirm_title)
                                         {{ $step5Page->confirm_title }}
                                     @endisset
-                                </h2>
+                                </h3>
                                 <p class="text-gray-600">
                                     @isset($step5Page->confirm_text)
                                         {{ $step5Page->confirm_text }}
@@ -233,9 +233,9 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                             <a href="{{ route('home', ['lang' => $selectedLanguage->abbreviation, 'skip' => 1]) }}"
-                                class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">{{ $step5Page->confirm_skip }}</a>
+                                class="button-exp-red-fill font-FuturaMdCnBT w-auto sm:w-auto">{{ $step5Page->confirm_skip }}</a>
                             <button type="button" onclick="hideSkipConfirmation()"
-                                class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
+                                class="button-exp-fill font-FuturaMdCnBT w-auto sm:w-auto">
                                 @isset($step5Page->confirm_back)
                                     {{ $step5Page->confirm_back }}
                                 @endisset
@@ -264,11 +264,11 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="text-center w-full">
-                                <h2 class="font-FuturaMdCnBT text-gray-700 mb-4">
+                                <h3 class="font-FuturaMdCnBT text-gray-700 mb-4">
                                     @isset($step5Page->skip_confirmation_heading)
                                         {{ $step5Page->skip_confirmation_heading }}
                                     @endisset
-                                </h2>
+                                </h3>
                                 <p class="text-gray-600">
                                     @isset($step5Page->skip_confirmation_message)
                                         {{ $step5Page->skip_confirmation_message }}
@@ -278,13 +278,13 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                             <button type="button" onclick="confirmSaveUnverified()"
-                                class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                                class="button-exp-red-fill font-FuturaMdCnBT w-auto sm:w-auto">
                                 @isset($step5Page->save_button_label_1)
                                     {{ $step5Page->save_button_label_1 }}
                                 @endisset
                             </button>
                             <button type="button" onclick="hideSaveUnverifiedConfirmation()"
-                                class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
+                                class="button-exp-fill font-FuturaMdCnBT w-auto sm:w-auto">
                                 @isset($step5Page->skip_button_label_1)
                                     {{ $step5Page->skip_button_label_1 }}
                                 @endisset
@@ -697,14 +697,14 @@
                             if (whatsappResendBtnWrapper) whatsappResendBtnWrapper.classList.add('hidden');
                         }
 
-                        // Show remaining attempts if provided
-                        if (data.remaining_attempts !== undefined) {
+                        // // Show remaining attempts if provided
+                        // if (data.remaining_attempts !== undefined) {
                             
-                            if (data.remaining_attempts <= 1) {
-                                showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
-                                    ' verification attempt remaining.');
-                            }
-                        }
+                        //     if (data.remaining_attempts <= 1) {
+                        //         showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
+                        //             ' verification attempt remaining.');
+                        //     }
+                        // }
 
                         openVerifyModal();
                     } else {
