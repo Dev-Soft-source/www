@@ -2,16 +2,6 @@
 
 @section('style')
     <style>
-        .verify-button-modern {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-
-        .verify-button-modern:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
 
         .verify-button-modern:active {
             transform: translateY(0);
@@ -136,36 +126,65 @@
                                 </div>
                             @enderror
                         </div>
-                        <div
-                            class="font-FuturaMdCnBT mt-4 flex flex-col  md:flex-row lg:flex-row items-center gap-2 justify-center md:col-span-2">
-                            <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn"
-                                class="button-exp-fill verify-button-modern text-white rounded font-FuturaMdCnBT text-center shadow-md">
-                                @isset($step5Page->verify_button_label)
-                                    {{ $step5Page->verify_button_label }}
-                                @endisset
-                            </button>
-                            <div id="whatsappButtonContainer" class="hidden">
-                                <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn"
-                                    class="button-exp-fill bg-green-500 hover:bg-green-600 text-white rounded font-FuturaMdCnBT text-center shadow-md flex items-center justify-center gap-2">
-                                    @isset($step5Page->verify_button_label_2)
-                                        {{ $step5Page->verify_button_label_2 }}
+                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                            <div class=" items-center justify-center w-full">
+                                <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
+                                    @isset($step5Page->get_book_label)
+                                        {{ $step5Page->get_book_label }}
+                                    @endisset
+                                </p>                                
+                            </div>
+
+                            <div class=" items-center justify-center w-full px-6">
+                                <button type="button" onclick="sendVerificationCode()" id="sendCodeBtn"
+                                    class="shrink-0 bg-greenXS px-3 py-1.5 text-white verify-button-modern w-full text-white rounded font-FuturaMdCnBT ">
+                                    @isset($step5Page->verify_button_label)
+                                        {{ $step5Page->verify_button_label }}
                                     @endisset
                                 </button>
+                                <div id="whatsappButtonContainer" class="hidden shrink-0">
+                                    <button type="button" onclick="sendVerificationCodeWhatsApp()" id="sendWhatsAppBtn"
+                                        class="button-exp-fill bg-green-500 hover:bg-green-600 text-white w-full rounded font-FuturaMdCnBT text-center shadow-md flex items-center justify-center gap-2">
+                                        @isset($step5Page->verify_button_label_2)
+                                            {{ $step5Page->verify_button_label_2 }}
+                                        @endisset
+                                    </button>
+                                </div>
+                            </div>                            
+                        </div>
+                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                            <div class=" items-center justify-center w-full">
+                                <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
+                                    @isset($step5Page->unverified_number_label)
+                                        {{ $step5Page->unverified_number_label }}
+                                    @endisset
+                                </p>                                
                             </div>
-                            <div
-                                class="font-FuturaMdCnBT flex flex-col md:flex-row lg:flex-row items-center justify-center gap-2 w-full md:w-auto">
-                                <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill ">
+
+                            <div class=" items-center justify-center w-full px-6">
+                                <button type="button" onclick="showSkipConfirmation()" class="w-full button-exp-fill">
                                     @isset($step5Page->skip_button_label)
                                         {{ $step5Page->skip_button_label }}
                                     @endisset
                                 </button>
+                            </div>                            
+                        </div>
+
+                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                            <div class=" items-center justify-center w-full">
+                                <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
+                                  
+                                </p>                                
+                            </div>
+
+                            <div class=" items-center justify-center w-full px-6">
                                 <button type="button" onclick="showSaveUnverifiedConfirmation()" id="saveButton"
-                                    class="font-FuturaMdCnBT button-exp-fill opacity-50 cursor-not-allowed" disabled>
+                                    class="w-full font-FuturaMdCnBT button-exp-fill opacity-50 cursor-not-allowed" disabled>
                                     @isset($step5Page->save_button_label)
                                         {{ $step5Page->save_button_label }}
                                     @endisset
                                 </button>
-                            </div>
+                            </div>                            
                         </div>
                     </div>
                 </form>
