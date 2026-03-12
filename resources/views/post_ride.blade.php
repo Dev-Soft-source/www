@@ -135,6 +135,17 @@
             }, 500)();
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var fromEl = document.getElementById('from_spot_0');
+        var toEl = document.getElementById('to_spot_0');
+        var fromError = document.getElementById('from-server-error');
+        var toError = document.getElementById('to-server-error');
+        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
+        function hideToError() { if (toError) toError.classList.add('hidden'); }
+        if (fromEl) fromEl.addEventListener('input', hideFromError);
+        if (toEl) toEl.addEventListener('input', hideToError);
+    });
 </script>
 
 <div class="container px-4 mx-auto my-14 page-post_a_ride">
@@ -472,8 +483,8 @@
                                         </div>
                                     </div>
                                     @error('from')
-                                    <div class="absolute mt-1 z-10">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="absolute mt-1 z-10" id="from-server-error">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                     </div>
                                     @enderror
                                 </div>
@@ -506,8 +517,8 @@
                                         </div>
                                     </div>
                                     @error('to')
-                                    <div class="absolute mt-1 z-10">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="absolute mt-1 z-10" id="to-server-error">
+                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                     </div>
                                     @enderror
                                 </div>
@@ -557,7 +568,7 @@
                                 >{{ old('pickup', optional($ride)->pickup) }}</textarea>
                                 @error('pickup')
                                 <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                 </div>
                                 @enderror
                             </div>
@@ -576,7 +587,7 @@
                                 >{{ old('dropoff', optional($ride)->dropoff) }}</textarea>
                                 @error('dropoff')
                                 <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} <a class="text-white text-sm lg:text-base" href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}">{{ $postRideSubDetailPage->city_not_fount_contact_text ?? '' }}</a></div>
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
                                 </div>
                                 @enderror
                             </div>
@@ -892,20 +903,22 @@
                             </label>
                         </div>
                         <div class="bg-white p-4">
-                            <div class="flex items-center flex-wrap gap-2 mt-2">
-                                @for ($i = 1; $i <= 7; $i++)
-                                <div class="relative">
-                                    <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                        <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                        <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                            <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                            <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
-                                        </span>
-                                    </label>
+                            <div class="relative">
+                                <div class="flex items-center flex-wrap gap-2 mt-2">
+                                    @for ($i = 1; $i <= 7; $i++)
+                                    <div class="relative">
+                                        <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
+                                            <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
+                                            <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
+                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    @endfor
                                 </div>
-                                @endfor
                                 @error('seats')
-                                <div class="absolute mt-1 z-10">
+                                <div class="mt-1 z-10 w-full">
                                     <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror

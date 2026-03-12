@@ -1762,7 +1762,6 @@ class RideController extends Controller
             // phone number not verified, redirect to phone verification page
             return redirect()->route('phone', ['lang' => $lang]);
         }
-        Log::info("sldkfsdlkfjlsdkfjlsdfk");
         // Require driver's license on file (uploaded). Allow access once uploaded; admin approval (driver === '1') is not required to view/post ride form.
         $driver_license_on_file = User::where('id', $user_id)->whereNotNull('driver_license_upload')->where('driver_license_upload', '!=', '')->first();
         if (!$driver_license_on_file) {
