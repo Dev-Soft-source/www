@@ -67,14 +67,11 @@
         <a aria-label="Candian Riders" target="_blank" href="{{ $settingPage->twitter }}" class="flex justify-center items-center bg-gray-50 border-2 border-gray-300 hover:border-blue-900 rounded-full h-10 w-10">
           <img class="h-4" src="/assets/icons/twitter.png" alt="twiiter icon">
         </a>
-        {{-- <a aria-label="Candian Riders" target="_blank" href="#" class="flex justify-center items-center bg-gray-50 border-2 border-gray-300 hover:border-blue-900 rounded-full h-10 w-10">
-          <img class="h-5" src="/assets/icons/google.png" alt="google icon">
-        </a> --}}
       </div>
       <div class="flex flex-row items-center pb-7 md:pb-14 relative">
         {{-- copyright --}}
         <div class="w-full flex justify-center">
-          <p class="text-white">{!! getTranslatedText('footer_copyright', $selectedLanguage ?? 1, ['year' => date('Y')], '© ProximaRide ' . date('Y') . '. All rights reserved') !!}</p>
+          <p class="text-white">{!! getTranslatedText('footer_copyright', $selectedLanguage->id ?? 1, ['year' => date('Y')], '© ProximaRide ' . date('Y') . '. All rights reserved') !!}</p>
         </div> 
         {{-- multi language list --}}
         <div class="relative lg:w-1/2 flex justify-end lg:absolute lg:right-0">

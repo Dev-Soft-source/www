@@ -5,6 +5,7 @@ use App\Models\Language;
 use App\Models\MenuDetail;
 use App\Models\NotificationMessage;
 use App\Models\SiteText;
+use App\Models\SiteTextDetail;
 use Illuminate\Support\Facades\Session;
 
 if (!function_exists('getAllLanguages')) {
@@ -60,17 +61,21 @@ if (!function_exists('getTranslatedText')) {
             $languageId = 1;
         }
 
-        $row = SiteText::where('slug', $slug)
-            ->where('language_id', $languageId)
-            ->first();
+        // $row = SiteText::where('slug', $slug)
+        //     ->where('language_id', $languageId)
+        //     ->first();
 
-        if (!$row) {
-            $row = SiteText::where('slug', $slug)
-                ->where('language_id', 1)
-                ->first();
-        }
 
-        $text = ($row && $row->text !== null && $row->text !== '') ? $row->text : $default;
+        // if (!$row) {
+        //     $row = SiteText::where('slug', $slug)
+        //         ->where('language_id', 1)
+        //         ->first();
+        // }
+
+        // $text = ($row && $row->text !== null && $row->text !== '') ? $row->text : $default;
+
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($languageId, 1);
+        $text = $siteText[$slug];
 
         foreach ($replacements as $key => $value) {
             $text = str_replace('{' . $key . '}', (string) $value, $text);
