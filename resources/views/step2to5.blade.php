@@ -119,7 +119,7 @@
                         @endif
 
                         <div class="mt-6 flex justify-center space-x-2 md:col-span-2">
-                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-42">
+                            <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-auto">
                                 @isset($step2Page->skip_button_label)
                                     {{ $step2Page->skip_button_label }}
                                 @endisset
