@@ -69,7 +69,6 @@
                                                                             id="paypal"
                                                                             name="card_id"
                                                                             value="paypal"
-                                                                            {{ $card->primary_card ? 'checked' : '' }}
                                                                             class="w-6 h-6 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
                                                                     </div>
                                                             </label>
@@ -89,7 +88,6 @@
                                                                             id="google_pay"
                                                                             name="card_id"
                                                                             value="google_pay"
-                                                                            {{ $card->primary_card ? 'checked' : '' }}
                                                                             class="w-6 h-6 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
                                                                     </div>
                                                             </label>
@@ -107,7 +105,6 @@
                                                                             id="apple_pay"
                                                                             name="card_id"
                                                                             value="apple_pay"
-                                                                            {{ $card->primary_card ? 'checked' : '' }}
                                                                             class="w-6 h-6 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
                                                                     </div>
                                                             </label>
@@ -125,7 +122,6 @@
                                                                             id="credit_card"
                                                                             name="card_id"
                                                                             value="credit_card"
-                                                                            {{ $card->primary_card ? 'checked' : '' }}
                                                                             class="w-6 h-6 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
                                                                     </div>
                                                             </label>
@@ -169,9 +165,14 @@
                                                         <div>
                                                             <div class="p-3 space-y-3">
                                                                 @forelse($cards as $card)
+                                                                @php
+                                                                    $social_pay_option = "";
+                                                                    if($card->payment_method_type == 'google_pay') $social_pay_option = "google-pay-option";
+                                                                    if($card->payment_method_type == 'apple_pay') $social_pay_option = "apple-pay-option";
+                                                                @endphp
                                                                     <label 
                                                                         for="card_id_{{ $card->id }}"
-                                                                        class="border rounded p-3 flex items-center justify-between cursor-pointer">
+                                                                        class="border rounded p-3 flex items-center justify-between cursor-pointer {{ $social_pay_option }}">
                                                                         <div class="flex items-center space-x-3">
                                                                             @if ($card->payment_method_type == 'card' && $card->paymentMethod && $card->paymentMethod->card)
                                                                                 @php
@@ -313,13 +314,13 @@
                                                                                 @endif
                                                                                 <div>
                                                                                     <span
-                                                                                        class="text-sm font-semibold block">{{ ucfirst($card->paymentMethod->card->brand ?? 'Card') }}</span>
+                                                                                        class="text-lg font-semibold block">{{ ucfirst($card->paymentMethod->card->brand ?? 'Card') }}</span>
                                                                                     <span
-                                                                                        class="text-xs text-gray-600">••••
+                                                                                        class="text-sm text-gray-600">••••
                                                                                         {{ $card->paymentMethod->card->last4 }}</span>
                                                                                 </div>
                                                                             @elseif($card->payment_method_type == 'google_pay')
-                                                                                <div class="flex items-center space-x-3 google-pay-option">
+                                                                                <div class="flex items-center space-x-3">
                                                                                     <div
                                                                                         class="w-14 h-9 bg-black rounded flex items-center justify-center p-1">
                                                                                         <svg class="gpay-logo"
@@ -374,7 +375,7 @@
                                                                                     </div>
                                                                                     <div>
                                                                                         <span
-                                                                                            class="text-sm font-semibold block">Google
+                                                                                            class="text-lg font-semibold block">Google
                                                                                             Pay</span>
                                                                                         <span class="text-sm capitalize">
                                                                                             {{ $card->payment_method_details['card_type'] ?? '' }}
@@ -391,13 +392,13 @@
                                                                                         @endphp
                                                                                         @if ($details['card_brand'] ?? (null && $details['last4'] ?? null))
                                                                                             <span
-                                                                                                class="text-xs text-gray-600">••••
+                                                                                                class="text-sm text-gray-600">••••
                                                                                                 {{ $details['last4'] }}</span>
                                                                                         @endif
                                                                                     </div>
                                                                                 </div>
                                                                             @elseif($card->payment_method_type == 'apple_pay')
-                                                                                <div class="flex items-center space-x-3 apple-pay-option">
+                                                                                <div class="flex items-center space-x-3">
                                                                                     <div
                                                                                         class="w-14 h-9 bg-black rounded flex items-center justify-center">
                                                                                         <svg width="24" height="24"
@@ -410,7 +411,7 @@
                                                                                     </div>
                                                                                     <div>
                                                                                         <span
-                                                                                            class="text-sm font-semibold block">Apple
+                                                                                            class="text-lg font-semibold block">Apple
                                                                                             Pay</span>
                                                                                         @php
                                                                                             $details = is_array(
@@ -424,7 +425,7 @@
                                                                                         @endphp
                                                                                         @if ($details['card_brand'] ?? (null && $details['last4'] ?? null))
                                                                                             <span
-                                                                                                class="text-xs text-gray-600">••••
+                                                                                                class="text-sm text-gray-600">••••
                                                                                                 {{ $details['last4'] }}</span>
                                                                                         @endif
                                                                                     </div>
@@ -461,9 +462,9 @@
                                                                                     </div>
                                                                                     <div>
                                                                                         <span
-                                                                                            class="text-sm font-semibold block">PayPal</span>
+                                                                                            class="text-lg font-semibold block">PayPal</span>
                                                                                         <span
-                                                                                            class="text-xs text-gray-600">{{ $card->paypal_email ?? 'PayPal account' }}</span>
+                                                                                            class="text-sm text-gray-600">{{ $card->paypal_email ?? 'PayPal account' }}</span>
                                                                                     </div>
                                                                                 </div>
                                                                             @endif
