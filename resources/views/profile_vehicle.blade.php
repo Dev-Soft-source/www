@@ -192,9 +192,9 @@
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                 <a id="delete-card-link" href="#"
-                    class="button-exp-red-fill sm:ml-3">{{$siteText['remove_btn_text']}}</a>
+                    class="button-exp-red-fill sm:ml-3">{{$successMessage->yes_remove_it_button_text ?? "Yes, remove it"}}</a>
                 <button type="button" onclick="toggleModalCard('card-modal')"
-                    class="button-exp-fill">{{$siteText['cancel_btn_text']}}</button>
+                    class="button-exp-fill">{{$successMessage->no_go_back_button_text ?? "No, go back"}}</button>
             </div>
         </div>
     </div>

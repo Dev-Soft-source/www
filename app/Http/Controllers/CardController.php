@@ -97,7 +97,12 @@ class CardController extends Controller
                 }
             }
         }
-        return view('my_cards', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'cards' => $cards, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail]);
+        return view('my_cards', [
+            'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
+            'ProfileSetting' => $ProfileSetting, 'cards' => $cards, 
+            // 'notifications' => $notifications, 
+            // 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 
+            'paymentSettingDetail' => $paymentSettingDetail]);
     }
 
     public function sessionData(Request $request)

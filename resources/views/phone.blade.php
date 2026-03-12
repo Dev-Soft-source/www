@@ -414,10 +414,10 @@
                                 <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button type="button" id="hide-modal"
                                         class="no-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">
-                                        {{ $siteText['cancel_btn_text'] }}</button>
+                                        {{ $successMessage->no_go_back_button_text ?? "No, go back" }}</button>
                                     <a id="delete-card-link"
                                         class="cursor-pointer button-exp-red-fill inline-flex w-full justinline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm sm:ml-3 sm:w-auto">
-                                        {{ $siteText['remove_btn_text'] }}</a>
+                                        {{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it" }}</a>
                                 </div>
                             </div>
                         </div>
