@@ -798,7 +798,7 @@ class BookingController extends Controller
 
 
         if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->block_booking_message ?? null]);
         }
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride
@@ -902,42 +902,10 @@ class BookingController extends Controller
 
         $price = $request->seats_amount / $request->seats;
 
-        if ($request->online_payment > '0') {
-            /**
-             * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
-             * to the legacy payment_method field so existing PayPal/Stripe flows keep working.
-             */
-            $rawCardId = $request->input('card_id');
-            if ($rawCardId && $rawCardId !== '') {
-                if (in_array($rawCardId, ['paypal', 'credit_card', 'google_pay', 'apple_pay'], true)) {
-                    if ($rawCardId === 'paypal') {
-                        $request->merge(['payment_method' => 'paypal']);
-                    } else {
-                        // credit_card, google_pay, apple_pay – Stripe-based
-                        $request->merge(['payment_method' => 'credit_card']);
-                    }
-                } else {
-                    // Saved card from cards table
-                    $selectedCard = Card::where('id', $rawCardId)
-                        ->where('user_id', $user->id)
-                        ->first();
+        // Only validate and process PayPal/GPay/card when there is a positive amount to charge (not wallet-only or cash with no fee)
+        $hasOnlinePayment = (float) ($request->input('online_payment', 0)) > 0;
 
-                    if (!$selectedCard) {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
-                    }
-
-                    if ($selectedCard->payment_method_type === 'paypal') {
-                        $request->merge(['payment_method' => 'paypal']);
-                    } else {
-                        // 'card', 'google_pay', 'apple_pay' – handled via Stripe
-                        $request->merge(['payment_method' => 'credit_card']);
-                        $request->merge(['card_id' => (string) $selectedCard->id]);
-                    }
-                }
-            }
-
+        if ($hasOnlinePayment) {
             $validated = $request->validate([
                 'payment_method' => 'required',
                 // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
@@ -952,7 +920,7 @@ class BookingController extends Controller
                 $token = $paypal->getAccessToken();
                 $paypal->setAccessToken($token);
 
-                if ($request->online_payment > '0') {
+                if ($hasOnlinePayment) {
 
                     if ($ride->payment_method === $findRidePage->payment_methods_option4) {
                         $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->where('default', '1')->first();
@@ -1042,7 +1010,7 @@ class BookingController extends Controller
                         $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
-                        if ($request->online_payment > '0') {
+                        if ($hasOnlinePayment) {
 
                             $stripePay = 0;
                             if ($request->cash_payment > 0) {
@@ -1099,7 +1067,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    if ($request->online_payment > '0') {
+                    if ($hasOnlinePayment) {
                         $onlinePayment = $request->input('online_payment');
                         if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
                             $onlinePayment = $request->input('online_payment') + $request->booking_credit;
@@ -1222,7 +1190,7 @@ class BookingController extends Controller
                             'amount' => $request->total,
                             'transaction_id' => $topUpBalance->random_id,
                             'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
-                            'payment_method' => isset($request->gPayApplePayId) && $request->gPayApplePayId != '' ? 'Gay' : 'credit_card',
+                            'payment_method' => isset($request->gPayApplePayId) && $request->gPayApplePayId != '' ? 'GPay' : 'credit_card',
                             'card_type' => isset($card) && !is_null($card) ? $card->card_type : "",
                             'cardholder_name' => isset($card) && !is_null($card) ? $card->name_on_card : "",
                             'last_four_digits' => isset($card) && !is_null($card) ? $card->card_number : "****",
@@ -1768,7 +1736,7 @@ class BookingController extends Controller
                     'first_name' => $user->first_name,
                     'full_name' => $user->first_name . ' ' . $user->last_name,
                     'amount' => $total,
-                    'transaction_id' => $card->random_id ?? 'N/A',
+                    'transaction_id' => $transaction->random_id ?? 'N/A',
                     'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
                     'payment_method' => 'paypal',
                     'paypal_email' => $user->paypal_email ?? 'N/A',
