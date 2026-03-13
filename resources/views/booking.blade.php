@@ -1771,13 +1771,6 @@
                     '[name="online_payment"]')[1].value : document.querySelector('[name="online_payment"]')
                 .value);
 
-            // Do not process PayPal/GPay when there is no online payment (wallet-only or cash with no fee)
-            const amountNum = parseFloat(amount);
-            if (isNaN(amountNum) || amountNum <= 0) {
-                ev.complete('fail');
-                return;
-            }
-
             const response = await fetch('/create-payment-intent', {
                 method: 'POST',
                 headers: {
@@ -2165,32 +2158,22 @@
             if ($("#check_payment_method").val() == "cash") {
                 var chargeAmount = totalAmountIn + taxAmount;
                 $('#stripeChargeAmount').val(chargeAmount);
-                if (typeof paymentRequest !== 'undefined' && paymentRequest) {
-                    paymentRequest.update({
-                        total: {
-                            label: 'Total',
-                            amount: Math.round(chargeAmount * 100)
-                        },
-                    });
-                }
+                paymentRequest.update({
+                    total: {
+                        label: 'Total',
+                        amount: Math.round(chargeAmount * 100)
+                    },
+                });
             } else {
                 $('#stripeChargeAmount').val(totalSumIn);
-                if (typeof paymentRequest !== 'undefined' && paymentRequest) {
-                    paymentRequest.update({
-                        total: {
-                            label: 'Total',
-                            amount: Math.round(totalSumIn * 100)
-                        },
-                    });
-                }
+                paymentRequest.update({
+                    total: {
+                        label: 'Total',
+                        amount: Math.round(totalSumIn * 100)
+                    },
+                });
             }
 
-            // When there is no online payment (wallet-only or cash with no fee), clear PayPal/GPay so server does not process them
-            var effectiveCharge = ($("#check_payment_method").val() == "cash") ? (totalAmountIn + taxAmount) : totalSumIn;
-            if (effectiveCharge <= 0) {
-                $('input[name="payment_method"]').prop('checked', false);
-                document.querySelector('[name="gPayApplePayId"]').value = '';
-            }
 
         }
 

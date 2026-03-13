@@ -340,25 +340,7 @@
         }
 
 
-        // Hide tooltip-error when email or password inputs have focus
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-
-        function hideTooltipErrors() {
-            document.querySelectorAll('.tooltip-error').forEach(function(tooltip) {
-                tooltip.style.display = 'none';
-                tooltip.style.opacity = '0';
-                tooltip.style.visibility = 'hidden';
-            });
-        }
-
-        if (emailInput) {
-            emailInput.addEventListener('focus', hideTooltipErrors);
-        }
-
-        if (passwordInput) {
-            passwordInput.addEventListener('focus', hideTooltipErrors);
-        }
+        
 
         // Handle password toggle functionality
         document.querySelectorAll('.password-toggle-icon').forEach(function(toggleIcon) {
