@@ -22,9 +22,11 @@
                                             @if (!empty($pastRides) && count($pastRides) > 0)
                                                 @foreach ($pastRides as $ride)
                                                     @php
-                                                        $from = $ride->rideDetail[0]->departure;
-                                                        $to = $ride->rideDetail[0]->destination;
+                                                        $defaultDetail = $ride->rideDetail->first();
+                                                        $from = optional($defaultDetail)->departure;
+                                                        $to = optional($defaultDetail)->destination;
                                                     @endphp
+                                                    @if ($defaultDetail)
                                                     <div class="relative even:bg-gray-100 odd:bg-white">
                                                         <div class="">
                                                             {{-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn" data-ride-id="29">
@@ -33,14 +35,15 @@
 
                                                         </div>
                                                         <a
-                                                            href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
+                                                            href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">
                                                             <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 "
                                                                 id="ride-29">
                                                                 <div
                                                                     class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
                                                                     @php
+                                                                        $displayDt = ($defaultDetail->date ?? $ride->date) . ' ' . ($defaultDetail->time ?? $ride->time ?? '00:00');
                                                                         $departureDateTime = formatDepartureDateTime(
-                                                                            $ride->date,
+                                                                            $displayDt,
                                                                             $selectedLanguage ?? null,
                                                                             $rideDetailPage ?? null,
                                                                         );
@@ -135,7 +138,7 @@
                                                                         </div>
                                                                         <p
                                                                             class="text-lg md:text-xl font-semibold text-primary">
-                                                                            ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                            ${{ number_format(floatval($defaultDetail->price), 2) }}
                                                                             <small>
                                                                                 @isset($rideDetailPage->card_section_per_seat)
                                                                                     {{ $rideDetailPage->card_section_per_seat }}
@@ -168,7 +171,7 @@
                                                                                 @endisset
                                                                                 : </p>
                                                                             <p class="">
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($defaultDetail->price)),2) }}
                                                                             </p>
                                                                         </div>
 
@@ -190,7 +193,7 @@
                                                                                 @endisset
                                                                                 : </p>
                                                                             <p class="">
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *$ride->rideDetail[0]->price +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * $defaultDetail->price + $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -347,7 +350,7 @@
                                                                     <div class="pb-4">
                                                                         @if (count($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)) > 0)
                                                                             <a
-                                                                                href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">Review
+                                                                                href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">Review
                                                                                 passenger</a>
                                                                         @endif
                                                                     </div>
@@ -376,6 +379,7 @@
                                                         </a>
 
                                                     </div>
+                                                    @endif
                                                 @endforeach
                                                 {{ $pastRides->links() }}
                                             @else

@@ -1029,14 +1029,19 @@
                                             in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
                                             in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
+                                            @php
+                                                $segmentForCard = $ride->rideDetail->first();
+                                                $displayDate = $segmentForCard?->date ?? $ride->date;
+                                                $displayTime = $segmentForCard?->time ?? $ride->time ?? '00:00';
+                                            @endphp
                                             <div class="flex items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
                                                     <p class="flex items-center space-x-2 font-semibold">
-                                                        {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
+                                                        {{ \Carbon\Carbon::parse($displayDate)->format('F d, Y') }}
                                                         @isset($findRidePage->card_section_at_label)
                                                             {{ $findRidePage->card_section_at_label }}
                                                         @endisset
-                                                        {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                        {{ \Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($displayTime)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
@@ -1500,14 +1505,19 @@
                                             in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
                                             in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
+                                            @php
+                                                $segmentForCard = $ride->rideDetail->first();
+                                                $displayDate = $segmentForCard?->date ?? $ride->date;
+                                                $displayTime = $segmentForCard?->time ?? $ride->time ?? '00:00';
+                                            @endphp
                                             <div class="flex items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
                                                     <p class="flex items-center space-x-2 font-semibold">
-                                                        {{ \Carbon\Carbon::parse($ride->date)->format('F d, Y') }}
+                                                        {{ \Carbon\Carbon::parse($displayDate)->format('F d, Y') }}
                                                         @isset($findRidePage->card_section_at_label)
                                                             {{ $findRidePage->card_section_at_label }}
                                                         @endisset
-                                                        {{ \Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($ride->time)->format('h:i A')) }}
+                                                        {{ \Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($displayTime)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
                                                         <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">

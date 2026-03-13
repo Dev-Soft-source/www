@@ -226,8 +226,9 @@
                                                                 @endif
                                                                 <div class="flex items-center justify-between pb-0 p-4">
                                                                     @php
+                                                                        $displayDt = ($defaultDetail->date ?? $ride->date) . ' ' . ($defaultDetail->time ?? $ride->time ?? '00:00');
                                                                         $departureDateTime = formatDepartureDateTime(
-                                                                            $ride->date,
+                                                                            $displayDt,
                                                                             $selectedLanguage ?? null,
                                                                             $rideDetailPage ?? null,
                                                                         );
