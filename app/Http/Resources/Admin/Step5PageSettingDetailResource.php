@@ -37,7 +37,19 @@ class Step5PageSettingDetailResource extends JsonResource
             'save_button_label' => $this->save_button_label,
             'send_button_label' => $this->send_button_label,
             'logout_button_label' => $this->logout_button_label,
-             'language' => new LanguageResource($this->whenLoaded('language')),
+            'whatsapp_validation_title' => $this->whatsapp_validation_title,
+            'whatsapp_validation_message' => $this->whatsapp_validation_message,
+            'whatsapp_not_available_title' => $this->whatsapp_not_available_title,
+            'whatsapp_not_available_message' => $this->whatsapp_not_available_message,
+            'whatsapp_success_title' => $this->whatsapp_success_title,
+            'whatsapp_success_message' => $this->whatsapp_success_message,
+            'whatsapp_error_title' => $this->whatsapp_error_title,
+            'whatsapp_error_message' => $this->whatsapp_error_message,
+            'whatsapp_limit_title' => $this->whatsapp_limit_title,
+            'whatsapp_limit_message' => $this->whatsapp_limit_message,
+            'whatsapp_default_title' => $this->whatsapp_default_title,
+            'whatsapp_default_message' => $this->whatsapp_default_message,
+            'language' => new LanguageResource($this->whenLoaded('language')),
         ];
         
     }

@@ -39,6 +39,12 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
             'country_code_label', 'country_code_error', 'phone_label', 'phone_error',
             'skip_button_label', 'skip_phone_number_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
             'request_code_label', 'second_label', 'save_button_label', 'send_button_label', 'logout_button_label',
+            'whatsapp_validation_title', 'whatsapp_validation_message',
+            'whatsapp_not_available_title', 'whatsapp_not_available_message',
+            'whatsapp_success_title', 'whatsapp_success_message',
+            'whatsapp_error_title', 'whatsapp_error_message',
+            'whatsapp_limit_title', 'whatsapp_limit_message',
+            'whatsapp_default_title', 'whatsapp_default_message',
         ];
     }
 

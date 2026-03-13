@@ -49,6 +49,30 @@ class Step5PageSettingService
                 $errorMessages = array_merge($errorMessages, ['request_code_label.request_code_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['second_label.second_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['second_label.second_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_validation_title.whatsapp_validation_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_validation_title.whatsapp_validation_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_validation_message.whatsapp_validation_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_validation_message.whatsapp_validation_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_not_available_title.whatsapp_not_available_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_not_available_title.whatsapp_not_available_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_not_available_message.whatsapp_not_available_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_not_available_message.whatsapp_not_available_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_success_title.whatsapp_success_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_success_title.whatsapp_success_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_success_message.whatsapp_success_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_success_message.whatsapp_success_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_error_title.whatsapp_error_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_error_title.whatsapp_error_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_error_message.whatsapp_error_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_error_message.whatsapp_error_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_limit_title.whatsapp_limit_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_limit_title.whatsapp_limit_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_limit_message.whatsapp_limit_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_limit_message.whatsapp_limit_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_default_title.whatsapp_default_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_default_title.whatsapp_default_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['whatsapp_default_message.whatsapp_default_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['whatsapp_default_message.whatsapp_default_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
         }
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
@@ -78,6 +102,18 @@ class Step5PageSettingService
             'save_button_label' => $this->data($request, $language, 'save_button_label'),
             'send_button_label' => $this->data($request, $language, 'send_button_label'),
             'logout_button_label' => $this->data($request, $language, 'logout_button_label'),
+            'whatsapp_validation_title' => $this->data($request, $language, 'whatsapp_validation_title'),
+            'whatsapp_validation_message' => $this->data($request, $language, 'whatsapp_validation_message'),
+            'whatsapp_not_available_title' => $this->data($request, $language, 'whatsapp_not_available_title'),
+            'whatsapp_not_available_message' => $this->data($request, $language, 'whatsapp_not_available_message'),
+            'whatsapp_success_title' => $this->data($request, $language, 'whatsapp_success_title'),
+            'whatsapp_success_message' => $this->data($request, $language, 'whatsapp_success_message'),
+            'whatsapp_error_title' => $this->data($request, $language, 'whatsapp_error_title'),
+            'whatsapp_error_message' => $this->data($request, $language, 'whatsapp_error_message'),
+            'whatsapp_limit_title' => $this->data($request, $language, 'whatsapp_limit_title'),
+            'whatsapp_limit_message' => $this->data($request, $language, 'whatsapp_limit_message'),
+            'whatsapp_default_title' => $this->data($request, $language, 'whatsapp_default_title'),
+            'whatsapp_default_message' => $this->data($request, $language, 'whatsapp_default_message'),
         ];
     }
 
