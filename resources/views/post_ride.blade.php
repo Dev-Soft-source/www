@@ -920,6 +920,7 @@
                                                 <div class="flex items-center gap-3 stop-row"
                                                     data-stop-index="{{ $renderIndex }}">
                                                     <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
+                                                        {{-- 1) Stop city --}}
                                                         <div class="relative flex-1 min-w-0">
                                                             <div
                                                                 class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
@@ -939,9 +940,32 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
-                                                            id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
-                                                            class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
+                                                        {{-- 2) Pick up / drop off (text) --}}
+                                                        <div class="flex-1 min-w-0">
+                                                            <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
+                                                                id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1"
+                                                                placeholder="pick up / drop off"
+                                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
+                                                        </div>
+                                                        {{-- 3) Time --}}
+                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48">
+                                                            <div class="relative">
+                                                                <div
+                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <input type="text" name="stop_time[]"
+                                                                    id="stop_time_{{ $renderIndex }}"
+                                                                    value="{{ old('stop_time.' . $idx) }}"
+                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                                    placeholder="">
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <button type="button"
                                                         class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -4206,7 +4230,7 @@
         }, 10);
     }
 
-    // Initialize the date picker for time input
+    // Initialize the date picker for main time input
     // AM: display with "am" suffix (e.g. 9:30 am); PM: 24-hour format (e.g. 14:30)
     function formatTimeDisplay(date) {
         const hours = date.getHours();
@@ -4248,7 +4272,62 @@
         }
     }, 0);
 
-    // Add a click event listener to the time input field
+    // Shared initializer for stop time inputs (same behavior/style as main time input)
+    function initStopTimePicker(el) {
+        if (!el) return;
+        try {
+            if (el._flatpickr) {
+                el._flatpickr.destroy();
+            }
+        } catch (e) {
+            // ignore
+        }
+        const existingVal = el.value || '';
+        const picker = flatpickr(el, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: 'H:i',
+            altInput: true,
+            altFormat: 'H:i',
+            time_24hr: false,
+            disableMobile: true,
+            minTime: getCurrentProjectTime(),
+            defaultDate: existingVal || '',
+            minuteIncrement: 1,
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length && instance.altInput) {
+                    instance.altInput.value = formatTimeDisplay(selectedDates[0]);
+                }
+            },
+            onClose: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length && instance.altInput) {
+                    instance.altInput.value = formatTimeDisplay(selectedDates[0]);
+                }
+            },
+        });
+        // If there is already a selected date, ensure display is formatted
+        setTimeout(function() {
+            if (picker.selectedDates.length && picker.altInput) {
+                picker.altInput.value = formatTimeDisplay(picker.selectedDates[0]);
+            }
+        }, 0);
+        // When user first clicks and there is no value, set current project time as default
+        el.addEventListener('click', function() {
+            if (!el._flatpickr || !el._flatpickr.input || el._flatpickr.input.value) return;
+            const projectTime = getCurrentProjectTime();
+            const [hours, minutes] = projectTime.split(':');
+            const d = new Date();
+            d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            el._flatpickr.setDate(d, true);
+        });
+    }
+
+    // Initialize all existing stop time inputs on page load
+    document.querySelectorAll('input[name="stop_time[]"]').forEach(function(el) {
+        initStopTimePicker(el);
+    });
+
+    // Add a click event listener to the main time input field
     timeInput.addEventListener('click', function() {
         // Check if the time input field is empty before setting the default time
         if (!timeInput._flatpickr.input.value) {
@@ -4596,19 +4675,40 @@
             '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex +
             '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
             '</div>' +
+            '<div class="flex-1 min-w-0">' +
             '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' +
             nextIndex +
-            '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '" rows="1" placeholder="pick up / drop off" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '</div>' +
+            '<div class="w-32 sm:w-40 md:w-44 lg:w-48">' +
+            '<div class="relative">' +
+            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />' +
+            '</svg>' +
+            '</div>' +
+            '<input type="text" name="stop_time[]" id="stop_time_' + nextIndex +
+            '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '</div>' +
+            '</div>' +
             '</div>' +
             '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
             '</button>';
         container.appendChild(row);
         var newStopInput = document.getElementById('stop_spot_' + nextIndex);
-        if (newStopInput && typeof attachStopAutocompletePostRide === 'function') attachStopAutocompletePostRide(
-            newStopInput);
+        if (newStopInput && typeof attachStopAutocompletePostRide === 'function') {
+            attachStopAutocompletePostRide(newStopInput);
+        }
+        // Initialize time picker for the new stop time input (same behavior as main time input)
+        var newStopTimeInput = document.getElementById('stop_time_' + nextIndex);
+        if (newStopTimeInput && typeof initStopTimePicker === 'function') {
+            initStopTimePicker(newStopTimeInput);
+        }
         updateStopsOriginDestinationLabelsPostRide();
-        if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
+        if (typeof syncSegmentPricesUIPostRide === 'function') {
+            syncSegmentPricesUIPostRide();
+        }
     }
 
     function confirmDeleteStopPostRide(btn) {
