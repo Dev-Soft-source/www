@@ -204,9 +204,11 @@
                                             @if (!empty($rides) && count($rides) > 0)
                                                 @foreach ($rides as $ride)
                                                     @php
-                                                        $from = $ride->rideDetail[0]->departure;
-                                                        $to = $ride->rideDetail[0]->destination;
+                                                        $defaultDetail = $ride->rideDetail->first();
+                                                        $from = optional($defaultDetail)->departure;
+                                                        $to = optional($defaultDetail)->destination;
                                                     @endphp
+                                                    @if ($defaultDetail)
                                                     <div class="relative even:bg-gray-200 odd:bg-white">
                                                         {{-- <div class="absolute right-4 top-8">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn" data-ride-id="29">
@@ -214,7 +216,7 @@
                                                     </svg>
                                                 </div> --}}
                                                         <a class=""
-                                                            href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
+                                                            href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">
                                                             <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 "
                                                                 id="ride-29">
                                                                 @if ($ride->make === '')
@@ -571,6 +573,7 @@
                                                             </div>
                                                         </a>
                                                     </div>
+                                                    @endif
                                                 @endforeach
                                                 {{ $rides->links() }}
                                             @else
