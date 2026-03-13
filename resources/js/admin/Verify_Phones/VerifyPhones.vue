@@ -75,7 +75,7 @@
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Phone number</label>
-                                            <div>{{ verify_bank . phone . phone }}</div>
+                                            <div>{{ verify_bank?.phone?.phone || '-' }}</div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"

@@ -2329,6 +2329,9 @@ export default {
         this.fetchLanguages();
     },
     methods: {
+        getPageSettingData() {
+            this.fetchBookingPageSetting();
+        },
         getCurrentValue(name) {
             return this.form[name] &&
                 this.form[name][`${name}_${this.activeLanguageId}`]

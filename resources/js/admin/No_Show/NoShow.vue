@@ -72,12 +72,14 @@
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Ride</label>
                                             <div v-if="no_show?.ride?.ride_detail?.length">{{ no_show.ride.ride_detail[0]?.departure }} to {{ no_show.ride.ride_detail[0]?.destination }}</div>
+                                            <div v-else>-</div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Ride's date</label>
-                                            <div>{{ no_show.ride.date }}<br><small>{{ no_show.ride.time
-                                                    }}</small></div>
+                                            <div>
+                                                {{ no_show?.ride?.date || '-' }}<br><small>{{ no_show?.ride?.time || '' }}</small>
+                                            </div>
                                         </td>
                                         <td
                                             class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">

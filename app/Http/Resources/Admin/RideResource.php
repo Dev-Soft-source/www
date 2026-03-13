@@ -16,6 +16,10 @@ class RideResource extends JsonResource
             return [];
         }
 
+        $defaultRideDetail = $this->rideDetail->first();
+        $paymentMethodName = FeaturesSettingDetail::where('features_setting_id', $this->payment_method)
+            ->first()?->name;
+
         // Fetch the default language ID
         $defaultLanguageId = Language::where('is_default', 1)->value('id');
 
@@ -35,18 +39,18 @@ class RideResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'departure_city' => $this->rideDetail[0]->departure,
+            'departure_city' => $defaultRideDetail?->departure,
             'random_id' => $this->random_id,
-            'destination_city' => $this->rideDetail[0]->destination,
+            'destination_city' => $defaultRideDetail?->destination,
             'driver_first_name' => $this->driver->first_name ?? null,
             'driver_last_name' => $this->driver->last_name ?? null,
             'driver_email' => $this->driver->email ?? null,
             'driver_phone' => $this->driver->phone ?? null,
             'date' => $this->date,
             'time' => $this->time,
-            'price' => $this->rideDetail[0]->price,
+            'price' => $defaultRideDetail?->price,
             'payment_method' => $this->payment_method,
-            'payment_method_name' => FeaturesSettingDetail::where('features_setting_id',$this->payment_method)->first()->name,
+            'payment_method_name' => $paymentMethodName,
             'seats' => $this->seats,
             'status' => $this->status,
             'details' => $this->details,

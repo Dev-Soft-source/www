@@ -374,6 +374,9 @@ export default {
         this.fetchLanguages();
     },
     methods: {
+        getPageSettingData() {
+            this.fetchTermsOfUsePageSetting();
+        },
         getCurrentValue(name) {
             return this.form[name] &&
                 this.form[name][`${name}_${this.activeLanguageId}`]

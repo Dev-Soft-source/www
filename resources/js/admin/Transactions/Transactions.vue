@@ -77,7 +77,13 @@
                                                 </div>
                                             </div>
                                             <div class="font-medium text-gray-900 flex mt-1 items-center gap-1">
-                                                <router-link :to="{ name: 'admin.ride.index', params: { id: transaction.ride_id } }">{{ transaction.random_id }}</router-link>
+                                                <router-link
+                                                    v-if="transaction.ride_id"
+                                                    :to="{ name: 'admin.ride.index', params: { id: transaction.ride_id } }"
+                                                >
+                                                    {{ transaction.random_id }}
+                                                </router-link>
+                                                <span v-else>{{ transaction.random_id }}</span>
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">

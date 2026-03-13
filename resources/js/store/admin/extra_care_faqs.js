@@ -91,8 +91,8 @@ const extraCareFaqs = {
         addUpdateForm({ commit, state }) {
             let method = state.isFormEdit ? "put" : "post";
             let url = state.isFormEdit
-                ? `${process.env.MIX_ADMIN_API_URL}Extra+-faqs/${state.form.id}`
-                : `${process.env.MIX_ADMIN_API_URL}Extra+-faqs`;
+                ? `${process.env.MIX_ADMIN_API_URL}extra-care-faqs/${state.form.id}`
+                : `${process.env.MIX_ADMIN_API_URL}extra-care-faqs`;
             commit("setLoading");
             return new Promise(function (resolve, reject) {
                 axios[method](url, state.form)
@@ -124,7 +124,7 @@ const extraCareFaqs = {
         fetchExtraCareFaqs({ commit, state }, payload) {
             let url = payload && payload.url
                     ? payload.url
-                    : `${process.env.MIX_ADMIN_API_URL}Extra+-faqs?q=1`;
+                    : `${process.env.MIX_ADMIN_API_URL}extra-care-faqs?q=1`;
             url = `${url}&${state.param}`;
             commit("setLoading");
             return new Promise(function (resolve, reject) {
@@ -145,7 +145,7 @@ const extraCareFaqs = {
         fetchExtraCareFaq({ commit, state }, payload) {
             let url = payload && payload.url
                     ? payload.url
-                    : `${process.env.MIX_ADMIN_API_URL}Extra+-faqs/${payload.id}?q=1`;
+                    : `${process.env.MIX_ADMIN_API_URL}extra-care-faqs/${payload.id}?q=1`;
             url = `${url}&${state.param}`;
             commit("setLoading");
             return new Promise(function (resolve, reject) {
@@ -166,7 +166,7 @@ const extraCareFaqs = {
             commit("setLoading");
             let url = payload && payload.url
                     ? payload.url
-                    : `${process.env.MIX_ADMIN_API_URL}Extra+-faqs/${payload.id}`;
+                    : `${process.env.MIX_ADMIN_API_URL}extra-care-faqs/${payload.id}`;
             return new Promise(function (resolve, reject) {
                 axios.delete(url)
                     .then((res) => {
