@@ -484,7 +484,7 @@
                                 </div>
                                 @php
                                     $departureDateTime = formatDepartureDateTime(
-                                        $ride->date,
+                                        $displayDepartureDateTime ?? ($ride->date . ' ' . ($ride->time ?? '00:00')),
                                         $selectedLanguage ?? null,
                                         $rideDetailPage ?? null,
                                     );

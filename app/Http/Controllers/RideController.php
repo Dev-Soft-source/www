@@ -485,6 +485,20 @@ class RideController extends Controller
             $ride_cancelled = true;
         }
 
+        // When "From" is a stop (not the route origin), show that segment's departure date/time
+        $displayDepartureDate = $ride->date;
+        $displayDepartureTime = $ride->time ?? null;
+        if ($from !== null && $from !== '' && (string) $from !== (string) $origin) {
+            $segmentFrom = $allDetails->first(function ($d) use ($from) {
+                return (string) $d->departure === (string) $from;
+            });
+            if ($segmentFrom) {
+                $displayDepartureDate = $segmentFrom->date ?? $ride->date;
+                $displayDepartureTime = $segmentFrom->time ?? $ride->time;
+            }
+        }
+        $displayDepartureDateTime = ($displayDepartureDate ?? '') . ' ' . ($displayDepartureTime ?? '00:00');
+
         $fromLabel = $from ?? null;
         $toLabel = $to ?? null;
 
@@ -504,8 +518,9 @@ class RideController extends Controller
             'stops'            => $stops,
             'segmentPickup'    => $segmentPickup,
             'segmentDropoff'   => $segmentDropoff,
-            'searchFrom'       => $from,
-            'searchTo'         => $to,
+            'searchFrom'               => $from,
+            'searchTo'                 => $to,
+            'displayDepartureDateTime' => $displayDepartureDateTime,
         ]);
     }
 

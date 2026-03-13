@@ -396,7 +396,17 @@
                         </div>
                         <div class="mt-4 order-1 md:order-2">
                             @php
-                                $departureDateTime = formatDepartureDateTime($ride->date, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                $displayDt = $ride->date . ' ' . ($ride->time ?? '00:00');
+                                $reqFrom = request('departure');
+                                if ($reqFrom !== null && $reqFrom !== '' && (string) $reqFrom !== (string) $origin) {
+                                    $segmentFrom = $ride->rideDetail->first(function ($d) use ($reqFrom) {
+                                        return (string) $d->departure === (string) $reqFrom;
+                                    });
+                                    if ($segmentFrom) {
+                                        $displayDt = ($segmentFrom->date ?? $ride->date) . ' ' . ($segmentFrom->time ?? $ride->time ?? '00:00');
+                                    }
+                                }
+                                $departureDateTime = formatDepartureDateTime($displayDt, $selectedLanguage ?? null, $rideDetailPage ?? null);
                                 $departureDateLabel = $departureDateTime['dateLabel'];
                                 $departureTimeLabel = $departureDateTime['timeLabel'];
                             @endphp
