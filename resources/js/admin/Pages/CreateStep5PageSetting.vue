@@ -552,142 +552,6 @@
                                             </div>
                                             <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`logout_button_label.logout_button_label_${activeLanguageId}`)" v-text="validationErros.get(`logout_button_label.logout_button_label_${activeLanguageId}`)"></p>
                                         </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_not_available_title_${activeLanguageId}`">WhatsApp not available title</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_not_available_title_${activeLanguageId}`"
-                                                    :id="`whatsapp_not_available_title_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_not_available_title')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_not_available_title')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_not_available_title.whatsapp_not_available_title_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_not_available_title.whatsapp_not_available_title_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_not_available_message_${activeLanguageId}`">WhatsApp not available message</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_not_available_message_${activeLanguageId}`"
-                                                    :id="`whatsapp_not_available_message_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_not_available_message')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_not_available_message')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_not_available_message.whatsapp_not_available_message_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_not_available_message.whatsapp_not_available_message_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_success_title_${activeLanguageId}`">WhatsApp success title</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_success_title_${activeLanguageId}`"
-                                                    :id="`whatsapp_success_title_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_success_title')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_success_title')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_success_title.whatsapp_success_title_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_success_title.whatsapp_success_title_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_success_message_${activeLanguageId}`">WhatsApp success message</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_success_message_${activeLanguageId}`"
-                                                    :id="`whatsapp_success_message_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_success_message')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_success_message')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_success_message.whatsapp_success_message_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_success_message.whatsapp_success_message_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_error_title_${activeLanguageId}`">WhatsApp error title</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_error_title_${activeLanguageId}`"
-                                                    :id="`whatsapp_error_title_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_error_title')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_error_title')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_error_title.whatsapp_error_title_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_error_title.whatsapp_error_title_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_error_message_${activeLanguageId}`">WhatsApp error message</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_error_message_${activeLanguageId}`"
-                                                    :id="`whatsapp_error_message_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_error_message')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_error_message')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_error_message.whatsapp_error_message_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_error_message.whatsapp_error_message_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_warning_title_${activeLanguageId}`">WhatsApp warning title</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_warning_title_${activeLanguageId}`"
-                                                    :id="`whatsapp_warning_title_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_warning_title')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_warning_title')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_warning_title.whatsapp_warning_title_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_warning_title.whatsapp_warning_title_${activeLanguageId}`)"></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`whatsapp_warning_message_${activeLanguageId}`">WhatsApp warning message</label>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`whatsapp_warning_message_${activeLanguageId}`"
-                                                    :id="`whatsapp_warning_message_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('whatsapp_warning_message')"
-                                                    @input="handleInput($event.target.value, language, 'whatsapp_warning_message')"
-                                                />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="validationErros.has(`whatsapp_warning_message.whatsapp_warning_message_${activeLanguageId}`)" v-text="validationErros.get(`whatsapp_warning_message.whatsapp_warning_message_${activeLanguageId}`)"></p>
-                                        </div>
                                     </div>
                                 </div>
                                 <!-- main section end -->
@@ -791,14 +655,7 @@ export default {
                             this.handleInput("", language, "save_button_label");
                             this.handleInput("", language, "send_button_label");
                             this.handleInput("", language, "logout_button_label");
-                            this.handleInput("", language, "whatsapp_not_available_title");
-                            this.handleInput("", language, "whatsapp_not_available_message");
-                            this.handleInput("", language, "whatsapp_success_title");
-                            this.handleInput("", language, "whatsapp_success_message");
-                            this.handleInput("", language, "whatsapp_error_title");
-                            this.handleInput("", language, "whatsapp_error_message");
-                            this.handleInput("", language, "whatsapp_warning_title");
-                            this.handleInput("", language, "whatsapp_warning_message");
+                            
                         });
                         this.fetchStep5PageSetting();
                     }
@@ -832,14 +689,6 @@ export default {
                             this.handleInput(setting?.save_button_label ?? "", lang, "save_button_label");
                             this.handleInput(setting?.send_button_label ?? "", lang, "send_button_label");
                             this.handleInput(setting?.logout_button_label ?? "", lang, "logout_button_label");
-                            this.handleInput(setting?.whatsapp_not_available_title ?? "", lang, "whatsapp_not_available_title");
-                            this.handleInput(setting?.whatsapp_not_available_message ?? "", lang, "whatsapp_not_available_message");
-                            this.handleInput(setting?.whatsapp_success_title ?? "", lang, "whatsapp_success_title");
-                            this.handleInput(setting?.whatsapp_success_message ?? "", lang, "whatsapp_success_message");
-                            this.handleInput(setting?.whatsapp_error_title ?? "", lang, "whatsapp_error_title");
-                            this.handleInput(setting?.whatsapp_error_message ?? "", lang, "whatsapp_error_message");
-                            this.handleInput(setting?.whatsapp_warning_title ?? "", lang, "whatsapp_warning_title");
-                            this.handleInput(setting?.whatsapp_warning_message ?? "", lang, "whatsapp_warning_message");
                         });
                     }
                 });
@@ -893,15 +742,7 @@ export default {
                 validationErros.has(`second_label.second_label_${id}`) ||
                 validationErros.has(`save_button_label.save_button_label_${id}`) ||
                 validationErros.has(`send_button_label.send_button_label_${id}`) ||
-                validationErros.has(`logout_button_label.logout_button_label_${id}`) ||
-                validationErros.has(`whatsapp_not_available_title.whatsapp_not_available_title_${id}`) ||
-                validationErros.has(`whatsapp_not_available_message.whatsapp_not_available_message_${id}`) ||
-                validationErros.has(`whatsapp_success_title.whatsapp_success_title_${id}`) ||
-                validationErros.has(`whatsapp_success_message.whatsapp_success_message_${id}`) ||
-                validationErros.has(`whatsapp_error_title.whatsapp_error_title_${id}`) ||
-                validationErros.has(`whatsapp_error_message.whatsapp_error_message_${id}`) ||
-                validationErros.has(`whatsapp_warning_title.whatsapp_warning_title_${id}`) ||
-                validationErros.has(`whatsapp_warning_message.whatsapp_warning_message_${id}`)
+                validationErros.has(`logout_button_label.logout_button_label_${id}`)
             );
         },
     },

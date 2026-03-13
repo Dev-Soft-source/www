@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Step5PageSetting;
+use App\Models\Step5PageSettingDetail;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -22,7 +23,7 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
     /**
      * @param string $format 'single_column', 'multi_column', or 'all_languages'
      * @param \Illuminate\Support\Collection|array|null $languages For all_languages format
-     * @param \App\Models\Step5PageSetting|null $existingData For all_languages (with step5PageSettingDetail loaded)
+     * @param \App\Models\Step5PageSetting|null $existingData For all_languages (with Step5PageSettingDetail loaded)
      */
     public function __construct($format = 'single_column', $languages = null, $existingData = null)
     {
@@ -35,9 +36,9 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
     {
         return [
             'name', 'meta_keywords', 'meta_description', 'main_heading', 'main_label',
-            'sub_main_label', 'required_label', 'driver_license_label', 'driver_license_error',
-            'driver_license_sub_label', 'photo_detail_label', 'mobile_photo_choose_file_label',
-            'skip_license', 'next_button_label', 'liecense_section_heading',
+            'country_code_label', 'country_code_error', 'phone_label', 'phone_error',
+            'skip_button_label', 'skip_phone_number_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
+            'request_code_label', 'second_label', 'save_button_label', 'send_button_label', 'logout_button_label',
         ];
     }
 
@@ -108,5 +109,3 @@ class Step5PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
         return array_map(fn($f) => ucwords(str_replace('_', ' ', $f)), $this->fields());
     }
 }
-
-
