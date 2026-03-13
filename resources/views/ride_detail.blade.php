@@ -456,74 +456,32 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-4">
                 <div class="col-span-2">
                     <div class="bg-white rounded-lg shadow-3xl">
-                        <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
-                            <div class="w-full md:w-2/3 order-2 md:order-1">
-                                <div class="relative mt-5 text-left">
-                                    <div class="flex items-center relative">
-                                        <div
-                                            class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                            <span
-                                                class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                <img class="w-5 h-5 object-contain"
-                                                    src="{{ asset('./images/new-21-search-bar-from.png') }}"
-                                                    alt="">
-                                            </span>
-                                        </div>
-                                        <div class="ml-12 md:ml-20">
-                                            <p class="font-bold text-xl text-black">
-                                                @isset($rideDetailPage->from_label)
-                                                    {{ $rideDetailPage->from_label }}
-                                                @endisset
-                                            </p>
-                                            <div class="flex gap-2">
-                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                    {{ $ride->rideDetail->first()?->departure }}.
-                                                </h3>
-                                                @php $segmentPickup = $ride->rideDetail->first()?->pickup ?? $ride->pickup; @endphp
-                                                @if (!empty($segmentPickup))
-                                                    <p class="text-sm mt-2">
-                                                        {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
-                                                        {{ $segmentPickup }}
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center relative">
-                                        <div
-                                            class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                            <span
-                                                class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                <img class="w-5 h-5 object-contain"
-                                                    src="{{ asset('./images/new-21-search-bar-to.png') }}"
-                                                    alt="">
-                                            </span>
-                                        </div>
-                                        <div class="ml-12 md:ml-20">
-                                            <p class="font-bold text-xl text-black">
-                                                @isset($rideDetailPage->to_label)
-                                                    {{ $rideDetailPage->to_label }}
-                                                @endisset
-                                            </p>
-                                            <div class="flex gap-2">
-                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                    {{ $ride->rideDetail->first()?->destination }}.
-                                                </h3>
-                                                @php $segmentDropoff = $ride->rideDetail->first()?->dropoff ?? $ride->dropoff; @endphp
-                                                @if (!empty($segmentDropoff))
-                                                    <p class="text-sm mt-2">
-                                                        {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
-                                                        {{ $segmentDropoff }}
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="flex flex-col px-4 pb-4 md:pb-0">
+                            @php
+                                // Always show the driver's full route: origin (e.g. A) and destination (e.g. E), regardless of passenger search (e.g. B to D)
+                                $displayFrom = $origin ?? null;
+                                $displayTo = $destination ?? null;
+                            @endphp
+                            <div class="w-full flex items-center justify-between mt-4 ml-4 mr-4">
+                                <div class="text-gray-700 text-lg">
+                                    @if ($displayFrom && $displayTo)
+                                        <span>
+                                            Origin:
+                                        </span>
+                                        <span class="text-primary">
+                                            {{ $displayFrom }}
+                                        </span>
+                                        <span class="font-semibold">
+                                            &rarr;
+                                        </span>
+                                        <span>
+                                            Destination:
+                                        </span>
+                                        <span class="text-primary">
+                                            {{ $displayTo }}
+                                        </span>
+                                    @endif
                                 </div>
-                            </div>
-
-                            <div class="mt-4 order-1 md:order-2">
                                 @php
                                     $departureDateTime = formatDepartureDateTime(
                                         $ride->date,
@@ -533,11 +491,111 @@
                                     $departureDateLabel = $departureDateTime['dateLabel'];
                                     $departureTimeLabel = $departureDateTime['timeLabel'];
                                 @endphp
-                                <p class="whitespace-nowrap font-semibold">
+                                <p class="whitespace-nowrap font-semibold mr-4">
                                     {{ $departureDateLabel }}
                                     {{ $rideDetailPage->at_label }}
                                     {{ $departureTimeLabel ?? 'N/A' }}
                                 </p>
+                            </div>
+                            <div class="w-full md:w-2/3 order-2 md:order-1">
+                                @php
+                                    // Full route labels: always driver's origin and destination (A and E), not search segment (B to D)
+                                @endphp
+                                @if ($fromLabel || $toLabel)
+                                    <div class="relative mt-5 text-left rounded-lg bg-white p-4">
+                                        <div class="space-y-0">
+                                            @if ($fromLabel)
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-12 md:ml-20">
+                                                        <p class="font-bold text-xl text-black">
+                                                            @isset($rideDetailPage->from_label)
+                                                                {{ $rideDetailPage->from_label }}:
+                                                            @else
+                                                                From:
+                                                            @endisset
+                                                        </p>
+                                                        <div class="flex flex-col md:flex-row md:items-baseline md:space-x-2">
+                                                            <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                {{ $fromLabel }}.
+                                                            </h4>
+                                                            @if (!empty($segmentPickup))
+                                                                <p class="text-sm mt-1 md:mt-0">
+                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                    {{ $segmentPickup }}
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if ($stops->isNotEmpty())
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10"></div>
+                                                    <div class="ml-12 md:ml-20 py-2">
+                                                        <p class="font-bold text-xl text-black mb-2">
+                                                            @isset($rideDetailPage->stops_label)
+                                                                {{ $rideDetailPage->stops_label }}
+                                                            @else
+                                                                Stops:
+                                                            @endisset
+                                                        </p>
+                                                        <ul class="list-disc list-inside space-y-3 ml-6 text-gray-900 text-base md:text-lg">
+                                                            @foreach ($stops as $stop)
+                                                                <li class="flex flex-row items-center items-baseline">
+                                                                    <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                        {{ $stop['name'] }}.
+                                                                    </div>
+                                                                    @if (!empty($stop['pickup']))
+                                                                        <p class="text-sm mt-1 md:mt-0 ml-2">
+                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                            {{ $stop['pickup'] }}
+                                                                        </p>
+                                                                    @endif 
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if ($toLabel)
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                        <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-12 md:ml-20">
+                                                        <p class="font-bold text-xl text-black">
+                                                            @isset($rideDetailPage->to_label)
+                                                                {{ $rideDetailPage->to_label }}:
+                                                            @else
+                                                                To:
+                                                            @endisset
+                                                        </p>
+                                                        <div class="flex flex-col md:flex-row md:items-baseline md:space-x-2">
+                                                            <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                {{ $toLabel }}.
+                                                            </h4>
+                                                            @if (!empty($segmentDropoff))
+                                                                <p class="text-sm mt-1 md:mt-0">
+                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                    {{ $segmentDropoff }}
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
