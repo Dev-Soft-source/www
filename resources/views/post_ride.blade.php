@@ -3289,26 +3289,31 @@
             visibility: window.getComputedStyle(modal).visibility
         });
 
-        // Store callback for continue button (Keep Current Price)
+        // Wire "Keep Current Price" button: set onclick directly so it works every time (cloning would drop the handler on reopen)
         const continueBtn = document.getElementById('priceWarningContinue');
         if (continueBtn) {
-            // Remove any existing event listeners by cloning
-            const newContinueBtn = continueBtn.cloneNode(true);
-            continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
-
-            newContinueBtn.onclick = function(e) {
+            continueBtn.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Keep Current Price clicked');
                 modal.classList.add('hidden');
-                modal.style.display = 'none';
-                if (callback) {
+                modal.style.setProperty('display', 'none', 'important');
+                if (typeof callback === 'function') {
                     callback();
                 }
             };
         } else {
             console.error('Continue button not found!');
         }
+    }
+
+    // Get the active price input (single or full-route in segment mode)
+    function getActivePriceInput() {
+        const dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+        const isSegmentMode = dynamicBlock && dynamicBlock.offsetParent !== null && dynamicBlock.style.display !== 'none';
+        if (isSegmentMode) {
+            return document.getElementById('priceData0DynamicInput');
+        }
+        return document.getElementById('priceData0');
     }
 
     // Function to adjust price (focus on price input field)
@@ -3318,8 +3323,7 @@
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
-        // Focus on price input field
-        const priceInput = document.getElementById('priceData0');
+        const priceInput = getActivePriceInput();
         if (priceInput) {
             priceInput.scrollIntoView({
                 behavior: 'smooth',
@@ -3341,22 +3345,17 @@
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
-        // Focus on price input field (Price per Seat) - do NOT submit the form
-        const priceInput = document.getElementById('priceData0');
+        const priceInput = getActivePriceInput();
         if (priceInput) {
-            // Scroll to the price input field
             priceInput.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
             });
-            // Focus and select the field after a short delay to ensure modal is closed
             setTimeout(() => {
                 priceInput.focus();
                 priceInput.select();
             }, 300);
         }
-        // Explicitly do NOT submit the form - user needs to adjust price first
-        // Return false to prevent any default behavior
         return false;
     }
 
@@ -3404,6 +3403,67 @@
             form.querySelectorAll('.post-ride-submit-btn').forEach(function(btn) {
                 btn.disabled = false;
             });
+        }
+
+        // When driver inputs an exceeded price, show the error or warning popup (Exceeds $0.72/km or $0.66–$0.72/km)
+        function runPriceValidationOnInput() {
+            const dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
+            const isSegmentMode = dynamicBlock && dynamicBlock.offsetParent !== null && dynamicBlock.style.display !== 'none';
+            const priceInput = document.getElementById('priceData0');
+            const dynamicPriceInput = document.getElementById('priceData0DynamicInput');
+            let price = null;
+            if (isSegmentMode && dynamicPriceInput && dynamicPriceInput.value) {
+                const fullRoutePrice = parseFloat(dynamicPriceInput.value);
+                const seatsInput = document.querySelector('input[name="seats"]:checked');
+                const seatsVal = seatsInput ? parseInt(seatsInput.value) : 0;
+                price = (seatsVal > 0 && !isNaN(fullRoutePrice)) ? fullRoutePrice / seatsVal : null;
+            } else if (priceInput && priceInput.value) {
+                price = parseFloat(priceInput.value);
+            }
+            if (!price || price <= 0) return;
+            let distance = null;
+            const distSource = priceInput || dynamicPriceInput;
+            if (distSource && typeof $ !== 'undefined') {
+                distance = $(distSource).data('distance') || window.rideDistance;
+            } else {
+                distance = window.rideDistance;
+            }
+            if (!distance || distance <= 0) {
+                const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
+                if (distanceInput && distanceInput.value) {
+                    distance = parseFloat(distanceInput.value);
+                }
+            }
+            const seatsInput = document.querySelector('input[name="seats"]:checked');
+            const seats = seatsInput ? parseInt(seatsInput.value) : 0;
+            if (!distance || distance <= 0 || !seats || seats <= 0) return;
+            const validation = validatePricePerSeat(price, distance, seats);
+            if (!validation.valid) {
+                showPriceErrorModal(validation.maxPricePerSeat);
+                return;
+            }
+            if (validation.type === 'warning') {
+                showPriceWarningModal(function() {
+                    closePriceWarningModal();
+                });
+            }
+        }
+
+        var priceValidationDebounce = null;
+        function schedulePriceValidationOnInput() {
+            if (priceValidationDebounce) clearTimeout(priceValidationDebounce);
+            priceValidationDebounce = setTimeout(runPriceValidationOnInput, 600);
+        }
+
+        const priceInputEl = document.getElementById('priceData0');
+        if (priceInputEl) {
+            priceInputEl.addEventListener('input', schedulePriceValidationOnInput);
+            priceInputEl.addEventListener('change', runPriceValidationOnInput);
+        }
+        const dynamicPriceInputEl = document.getElementById('priceData0DynamicInput');
+        if (dynamicPriceInputEl) {
+            dynamicPriceInputEl.addEventListener('input', schedulePriceValidationOnInput);
+            dynamicPriceInputEl.addEventListener('change', runPriceValidationOnInput);
         }
 
         // Add our submit handler with capture phase to run first
