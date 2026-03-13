@@ -182,22 +182,22 @@ return [
             'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l’orthographe.",
         ],
         'from' => [
-            'required' => "Le champ d'origine est obligatoire.",
+            'required' => "L'origine est obligatoire.",
         ],
         'to' => [
-            'required' => 'Le champ de destination est obligatoire.',
+            'required' => 'La destination est obligatoire.',
         ],
         'pickup' => [
-            'required' => 'Le champ de prise en charge est obligatoire.',
+            'required' => 'Le lieu de prise en charge est obligatoire.',
         ],
         'dropoff' => [
-            'required' => 'Le champ de dépôt est obligatoire.',
+            'required' => 'Le lieu de dépôt est obligatoire.',
         ],
         'time' => [
             'required' => 'L’heure est obligatoire.',
         ],
         'details' => [
-            'required' => 'Le champ des détails est obligatoire.',
+            'required' => 'Les détails sont obligatoires.',
         ],
         'seats' => [
             'required' => 'Veuillez sélectionner le nombre de sièges.',
@@ -215,7 +215,7 @@ return [
             'required' => 'Veuillez sélectionner une option de bagages.',
         ],
         'price' => [
-            'required' => 'Le champ prix est obligatoire.',
+            'required' => 'Le prix est obligatoire.',
         ],
         'payment_method' => [
             'required' => 'Veuillez sélectionner un mode de paiement.',

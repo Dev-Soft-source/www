@@ -197,7 +197,7 @@ return [
             'required' => 'Kinakailangan ang oras.',
         ],
         'details' => [
-            'required' => 'Kinakailangan ang field ng detalye.',
+            'required' => 'Kinakailangan ang mga detalye.',
         ],
         'seats' => [
             'required' => 'Pakiusap piliin ang bilang ng mga upuan.',
@@ -215,7 +215,7 @@ return [
             'required' => 'Pakiusap pumili ng opsyon para sa bagahe.',
         ],
         'price' => [
-            'required' => 'Kinakailangan ang field ng presyo.',
+            'required' => 'Kinakailangan ang presyo.',
         ],
         'payment_method' => [
             'required' => 'Pakiusap pumili ng paraan ng pagbabayad.',

@@ -221,7 +221,7 @@ return [
             'required' => 'La hora es obligatoria.',
         ],
         'details' => [
-            'required' => 'El campo de detalles es obligatorio.',
+            'required' => 'Los detalles son obligatorios.',
         ],
         'seats' => [
             'required' => 'Selecciona el número de asientos.',

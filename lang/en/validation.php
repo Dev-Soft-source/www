@@ -193,22 +193,22 @@ return
 				'message' => 'We could not find this city name in our records, please double-check the spelling.',
 			],
 			'from' => [
-				'required' => 'The origin field is required.',
+				'required' => 'The origin is required.',
 			],
 			'to' => [
-				'required' => 'The destination field is required.',
+				'required' => 'The destination is required.',
 			],
 			'pickup' => [
-				'required' => 'The pickup field is required.',
+				'required' => 'The pickup is required.',
 			],
 			'dropoff' => [
-				'required' => 'The dropoff field is required.',
+				'required' => 'The dropoff is required.',
 			],
 			'time' => [
-				'required' => 'The time field is required.',
+				'required' => 'The time is required.',
 			],
 			'details' => [
-				'required' => 'The details field is required.',
+				'required' => 'The details are required.',
 			],
 			'seats' => [
 				'required' => 'Please select the number of seats.',
@@ -226,7 +226,7 @@ return
 				'required' => 'Please select a luggage option.',
 			],
 			'price' => [
-				'required' => 'The price field is required.',
+				'required' => 'The price is required.',
 			],
 			'payment_method' => [
 				'required' => 'Please select a payment method.',

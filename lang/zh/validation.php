@@ -197,7 +197,7 @@ return [
             'required' => '时间为必填项。',
         ],
         'details' => [
-            'required' => '详情字段为必填项。',
+            'required' => '详情为必填项。',
         ],
         'seats' => [
             'required' => '请选择座位数量。',
