@@ -50,7 +50,7 @@
                                             <div class="p-4">
                                                 <div class="">
                                                     <ul
-                                                        class="text-sm font-medium text-center text-gray-500 rounded-md md:rounded-lg shadow-sm grid grid-cols-3 border-2 dark:divide-gray-700 dark:text-gray-400">
+                                                        class="mt-4 text-sm font-medium text-center text-gray-500 rounded-md md:rounded-lg shadow-sm grid grid-cols-3 border-2 dark:divide-gray-700 dark:text-gray-400">
                                                         <li class="focus-within:z-10">
                                                             <input type="radio" id="one_time" name="frequency"
                                                                 value=""
@@ -86,7 +86,7 @@
                                                     <div class="">
                                                         <div class="bg-white p-4">
                                                             <ul id="packages-dropdown"
-                                                                class="my-8 grid grid-cols-2 md:grid-cols-6 gap-4">
+                                                                class="my-4 grid grid-cols-2 md:grid-cols-6 gap-4">
                                                                 @foreach ($packages as $package)
                                                                     <li>
                                                                         <input type="radio"
@@ -101,11 +101,13 @@
                                                                     </li>
                                                                 @endforeach
                                                             </ul>
-                                                            <div class="mt-2 min-h-[2.5rem]">
-                                                                @error('package')
-                                                                    <div class="tooltip-error shadow-lg">{{ $message }}
-                                                                    </div>
-                                                                @enderror
+                                                            @error('package')
+                                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                            @enderror
+                                                            <div class="flex items-center gap-4 py-4">
+                                                                <div class="h-px flex-1 bg-gray-300"></div>
+                                                                <span class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">or</span>
+                                                                <div class="h-px flex-1 bg-gray-300"></div>
                                                             </div>
                                                             <div class="w-full mt-4">
                                                                 <div id="custom_field" class="">
@@ -121,15 +123,12 @@
                                                                         <input type="number" name="custom_amount"
                                                                             id="custom_amount_input" min="1"
                                                                             value="{{ old('custom_amount') }}"
-                                                                            class="block mt-1 border-2 p-2.5 w-full rounded border-blue-500 focus:ring-1 focus:outline-none focus:border-green-500 pl-10 h-20 text-lg"
+                                                                            class="block border-2 p-2.5 w-full rounded border-blue-500 focus:ring-1 focus:outline-none focus:border-green-500 pl-10 h-20 text-lg"
                                                                             placeholder="{{ $coffeeWallPage->custom_amount_label }}">
                                                                     </div>
-                                                                    <div class="mt-2 min-h-[2.5rem]">
-                                                                        @error('custom_amount')
-                                                                            <div class="tooltip-error shadow-lg">
-                                                                                {{ $message }}</div>
-                                                                        @enderror
-                                                                    </div>
+                                                                    @error('custom_amount')
+                                                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                                                    @enderror
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -338,14 +337,11 @@
                                             <input type="text" id="name_on_card" name="name_on_card"
                                                 value="{{ old('name_on_card') }}"
                                                 class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                                            <div id="card-name-error"
-                                                class="{{ $errors->has('name_on_card') ? '' : 'hidden' }}">
-                                                <div class="tooltip-error shadow-lg mt-2">
-                                                    @error('name_on_card')
-                                                        {{ $message }}
-                                                    @enderror
-                                                </div>
-                                            </div>
+
+                                            @error('name_on_card')
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                            @enderror
+
                                         </div>
                                         <div class="mt-4">
                                             <label class="font-normal text-gray-700">
@@ -354,13 +350,11 @@
                                             <div id="card-element" name="card_element"
                                                 class="block mt-1 border p-2.5 w-full rounded text-base md:text-lg border-gray-300">
                                             </div>
-                                            <div id="card-errors"
-                                                class="{{ $errors->has('card_element') ? '' : 'hidden' }}">
-                                                <div class="tooltip-error shadow-lg mt-2">
-                                                    @error('card_element')
-                                                        {{ $message }}
-                                                    @enderror
-                                                </div>
+
+                                            @error('card_element')
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                            @enderror
+ 
                                             </div>
                                         </div>
                                     </div>
@@ -506,12 +500,7 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+
                             </div>
                             <div class="text-center">
                                 <div class="">
@@ -683,13 +672,6 @@
                 }
             }
 
-            function hideTooltipOnCheck(checkbox, container) {
-                checkbox?.addEventListener('change', function() {
-                    if (this.checked && container) {
-                        container.classList.add('hidden');
-                    }
-                });
-            }
 
             frequencyRadios.forEach((radio) => {
                 radio.addEventListener('change', updateFrequencyStyles);
@@ -756,49 +738,8 @@
             });
 
             anonymousCheckbox?.addEventListener('change', syncAnonymousFields);
-            hideTooltipOnCheck(donationAckCheckbox, donationAckDiv);
-            hideTooltipOnCheck(termsPrivacyCheckbox, termsPrivacyDiv);
 
-            // Hide field tooltip error when user clicks/focuses inside its parent container.
-            function hideTooltipInParent(eventTarget) {
-                if (!(eventTarget instanceof HTMLElement) || !form) return;
-                let node = eventTarget.closest('div, section, label');
 
-                // Walk up until form root and remove tooltips that belong to the current field
-                while (node && node !== form) {
-                    // Check for tooltip as a direct child
-                    const tooltipInChildren = Array.from(node.children).find((child) =>
-                        child instanceof HTMLElement && child.classList.contains('tooltip-error')
-                    );
-                    if (tooltipInChildren) {
-                        tooltipInChildren.remove();
-                        return;
-                    }
-
-                    // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
-                    if (node.parentElement) {
-                        const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
-                            sibling instanceof HTMLElement &&
-                            sibling.classList.contains('tooltip-error') &&
-                            sibling !== node
-                        );
-                        if (tooltipSibling) {
-                            tooltipSibling.remove();
-                            return;
-                        }
-                    }
-                    node = node.parentElement?.closest('div, section') || null;
-                }
-            }
-
-            if (form) {
-                form.addEventListener('click', function(event) {
-                    hideTooltipInParent(event.target);
-                });
-                form.addEventListener('focusin', function(event) {
-                    hideTooltipInParent(event.target);
-                });
-            }
 
             // On submit, create Stripe token when paying by card
             if (form) {
@@ -815,29 +756,30 @@
                     ensureStripe();
 
                     const nameOnCardInput = document.getElementById('name_on_card');
-                    const nameError = document.getElementById('card-name-error');
-                    const nameErrorText = nameError?.querySelector('.tooltip-error');
-                    const cardErrors = document.getElementById('card-errors');
-                    const cardErrorsText = cardErrors?.querySelector('.tooltip-error');
+                    const cardContainer = creditCardDiv || document;
 
-                    // Clear previous errors
-                    if (nameError) {
-                        nameError.classList.add('hidden');
-                    }
-                    if (cardErrors) {
-                        cardErrors.classList.add('hidden');
-                    }
+                    // Clear previous tooltip errors inside the card section
+                    cardContainer.querySelectorAll('.tooltip-error').forEach(function(el) {
+                        el.classList.add('hidden');
+                    });
 
                     // Validate cardholder name before calling Stripe
                     if (!nameOnCardInput || nameOnCardInput.value.trim() === '') {
-                        if (nameError && nameErrorText) {
-                            nameError.classList.remove('hidden');
-                            nameErrorText.textContent = @json(__('validation.custom.name_on_card.required_if'));
-                            nameError.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            });
+                        let nameErrorTooltip = nameOnCardInput.parentElement.querySelector('.tooltip-error');
+                        if (!nameErrorTooltip) {
+                            nameErrorTooltip = document.createElement('div');
+                            nameErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
+                            const p = document.createElement('p');
+                            p.className = 'text-white leading-none text-sm lg:text-base';
+                            nameErrorTooltip.appendChild(p);
+                            nameOnCardInput.parentElement.appendChild(nameErrorTooltip);
                         }
+                        nameErrorTooltip.classList.remove('hidden');
+                        nameErrorTooltip.textContent = @json(__('validation.custom.name_on_card.required_if'));
+                        nameErrorTooltip.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
                         return;
                     }
 
@@ -845,14 +787,24 @@
                         name: nameOnCardInput.value
                     }).then(function(result) {
                         if (result.error) {
-                            if (cardErrors && cardErrorsText) {
-                                cardErrors.classList.remove('hidden');
-                                cardErrorsText.textContent = result.error.message;
-                                cardErrors.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'center'
-                                });
+                            // Show or create tooltip under card element
+                            const cardElementWrapper = document.getElementById('card-element')
+                                ?.parentElement || cardContainer;
+                            let cardErrorTooltip = cardElementWrapper.querySelector('.tooltip-error');
+                            if (!cardErrorTooltip) {
+                                cardErrorTooltip = document.createElement('div');
+                                cardErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
+                                const p = document.createElement('p');
+                                p.className = 'text-white leading-none text-sm lg:text-base';
+                                cardErrorTooltip.appendChild(p);
+                                cardElementWrapper.appendChild(cardErrorTooltip);
                             }
+                            cardErrorTooltip.classList.remove('hidden');
+                            cardErrorTooltip.textContent = result.error.message;
+                            cardErrorTooltip.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
                             return;
                         }
 
@@ -872,31 +824,6 @@
                         form.submit();
                     });
                 });
-            }
-
-            // On page load, scroll to the first *visible* tooltip with an error (server-side validation)
-            const allTooltips = document.querySelectorAll('.tooltip-error');
-            for (const tooltip of allTooltips) {
-                let node = tooltip;
-                let hiddenByAncestor = false;
-
-                // Skip tooltips inside any container that has the 'hidden' class
-                while (node && node !== document.body) {
-                    if (node.classList && node.classList.contains('hidden')) {
-                        hiddenByAncestor = true;
-                        break;
-                    }
-                    node = node.parentElement;
-                }
-
-                if (!hiddenByAncestor) {
-                    const wrapper = tooltip.parentElement || tooltip;
-                    wrapper.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                    break;
-                }
             }
 
             updateFrequencyStyles();
