@@ -249,7 +249,6 @@
                 <input type="hidden" name="ride_detail_id" value="{{ $ride->rideDetail[0]->id }}">
                 <input type="hidden" name="type" value="{{ $ride->booking_type }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
-                <input type="hidden" name="gPayApplePayId" value="">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
                     <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 items-baseline">
                         <h1 class="-mb-2">
@@ -960,16 +959,7 @@
                                             @endforeach
                                         </div>
                                         @error('seats')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">
-                                                        @isset($bookingPage->seats_available_tooltip)
-                                                            {{ $bookingPage->seats_available_tooltip }}
-                                                        @endisset
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <div class="tooltip-error shadow-lg">{{ $bookingPage->seats_available_tooltip ?? $message }}</div>
                                         @enderror
 
                                         <div id ="seats-error" class="relative tooltip -bottom-4 group-hover:flex">
@@ -1259,16 +1249,7 @@
                                             class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                             placeholder="{{ $bookingPage->message_driver_placeholder ?? '' }}">{{ old('driver_message') }}</textarea>
                                         @error('driver_message')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">
-                                                        @isset($bookingPage->chat_with_driver_tooltip)
-                                                            {{ $bookingPage->chat_with_driver_tooltip }}
-                                                        @endisset
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <div role="tooltip" class="tooltip-error shadow-lg">{{ $bookingPage->chat_with_driver_tooltip ?? $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
@@ -1314,16 +1295,7 @@
                                         </label>
                                     </div>
                                     @error('agree_terms')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">
-                                                    @isset($bookingPage->aggreement_tooltip)
-                                                        {{ $bookingPage->aggreement_tooltip }}
-                                                    @endisset
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
                                     @enderror
 
                                     <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
@@ -1498,7 +1470,7 @@
 
 
                                     @isset($ride->booking_method->features_setting_id)
-                                        @if (
+                                        {{-- @if (
                                             (optional($ride->payment_method)->features_setting_id ?? null) ===
                                                 (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null) &&
                                                 $ride->rideDetail[0]->price <= 15)
@@ -1506,7 +1478,7 @@
                                             <div id="paymentSectionGPay">
                                                 <div id="payment-request-button"></div>
                                             </div>
-                                        @endif
+                                        @endif --}}
 
                                         <div class="flex justify-center items-center mt-4">
                                             <button id="submitButton" class="button-exp-fill" type="submit">
@@ -1829,9 +1801,6 @@
             } else {
                 ev.complete('success');
 
-
-                document.querySelector('[name="gPayApplePayId"]').value = paymentIntent.id;
-                document.querySelector('[name="payment_method"][value="credit_card"]').checked = true;
 
 
                 console.log('Transaction ID:', paymentIntent.id); // <--- HERE
@@ -2454,28 +2423,7 @@
             updateTotalAmount();
         }
 
-        // Hide payment/card error tooltips immediately when user selects an option
-        function hidePaymentErrors() {
-            function hideEl(id) {
-                var el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            }
-            document.querySelectorAll('[name="payment_method"]').forEach(function(radio) {
-                radio.addEventListener('change', function() {
-                    hideEl('payment_method-laravel-error');
-                });
-            });
-            document.querySelectorAll('[name="card_id"]').forEach(function(radio) {
-                radio.addEventListener('change', function() {
-                    hideEl('card_id-laravel-error');
-                });
-            });
-        }
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', hidePaymentErrors);
-        } else {
-            hidePaymentErrors();
-        }
+        
 
         function closeModal() {
             const modal = document.getElementById('myModal');

@@ -14,7 +14,6 @@
                     <form id="submitForm" method="POST" action="{{ route('store_top_up_balance') }}"
                         enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="gPayApplePayId" value="0">
                         <h1>{{ $paymentSettingDetail->top_up_my_balance_head ?? 'Top up my balance' }}</h1>
                         <div class="grid grid-cols-1 lg:grid-cols-1 gap-4">
                             <div class="col-span-1">
@@ -70,47 +69,5 @@
         
 
 
-        // Hide field tooltip error when user clicks/focuses inside its parent container.
-        const form = document.getElementById('submitForm');
-
-        function hideTooltipInParent(eventTarget) {
-            if (!(eventTarget instanceof HTMLElement) || !form) return;
-            let node = eventTarget.closest('div, section, label');
-
-            // Walk up until form root and remove tooltips that belong to the current field
-            while (node && node !== form) {
-                // Check for tooltip as a direct child
-                const tooltipInChildren = Array.from(node.children).find((child) =>
-                    child instanceof HTMLElement && child.classList.contains('tooltip-error')
-                );
-                if (tooltipInChildren) {
-                    tooltipInChildren.remove();
-                    return;
-                }
-
-                // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
-                if (node.parentElement) {
-                    const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
-                        sibling instanceof HTMLElement &&
-                        sibling.classList.contains('tooltip-error') &&
-                        sibling !== node
-                    );
-                    if (tooltipSibling) {
-                        tooltipSibling.remove();
-                        return;
-                    }
-                }
-                node = node.parentElement?.closest('div, section') || null;
-            }
-        }
-
-        if (form) {
-            form.addEventListener('click', function(event) {
-                hideTooltipInParent(event.target);
-            });
-            form.addEventListener('focusin', function(event) {
-                hideTooltipInParent(event.target);
-            });
-        }
     </script>
 @endsection

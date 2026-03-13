@@ -903,13 +903,47 @@ class BookingController extends Controller
         $price = $request->seats_amount / $request->seats;
 
         if ($request->online_payment > '0') {
+            /**
+             * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
+             * to the legacy payment_method field so existing PayPal/Stripe flows keep working.
+             */
+            $rawCardId = $request->input('card_id');
+            if ($rawCardId && $rawCardId !== '') {
+                if (in_array($rawCardId, ['paypal', 'credit_card', 'google_pay', 'apple_pay'], true)) {
+                    if ($rawCardId === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // credit_card, google_pay, apple_pay – Stripe-based
+                        $request->merge(['payment_method' => 'credit_card']);
+                    }
+                } else {
+                    // Saved card from cards table
+                    $selectedCard = Card::where('id', $rawCardId)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (!$selectedCard) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                    }
+
+                    if ($selectedCard->payment_method_type === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // 'card', 'google_pay', 'apple_pay' – handled via Stripe
+                        $request->merge(['payment_method' => 'credit_card']);
+                        $request->merge(['card_id' => (string) $selectedCard->id]);
+                    }
+                }
+            }
+
             $validated = $request->validate([
                 'payment_method' => 'required',
-                'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
+                'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
             ]);
-
-
 
             if ($request->payment_method == 'paypal') {
 
@@ -3876,10 +3910,48 @@ class BookingController extends Controller
 
         if ($request->online_payment > '0') {
 
+            /**
+             * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
+             * to the legacy payment_method field so existing PayPal/Stripe flows keep working.
+             */
+            $rawCardId = $request->input('card_id');
+            if ($rawCardId && $rawCardId !== '') {
+                // Direct options from the radio group
+                if (in_array($rawCardId, ['paypal', 'credit_card', 'google_pay', 'apple_pay'], true)) {
+                    if ($rawCardId === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // credit_card, google_pay, apple_pay are all Stripe-based online payments
+                        $request->merge(['payment_method' => 'credit_card']);
+                    }
+                } else {
+                    // Saved card from cards table
+                    $selectedCard = Card::where('id', $rawCardId)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (!$selectedCard) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                    }
+
+                    if ($selectedCard->payment_method_type === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // 'card', 'google_pay', 'apple_pay' – handled via Stripe
+                        $request->merge(['payment_method' => 'credit_card']);
+                        // Keep the concrete card id so the Stripe branch can use it
+                        $request->merge(['card_id' => (string) $selectedCard->id]);
+                    }
+                }
+            }
+
             $rules = [
                 'agree_terms' => 'accepted|required',
                 'payment_method' => 'required',
-                'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
+                'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
             ];
 
