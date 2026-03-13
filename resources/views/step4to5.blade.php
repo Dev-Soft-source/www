@@ -30,20 +30,27 @@
                         class="bg-white rounded-b-lg overflow-hidden shadow-3xl grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4 mt-6">
                         <div class="md:col-span-2">
                             <div class="relative w-full">
-                                <button type="button" id="remove-license-photo-btn" onclick="removeLicensePhoto()" title="Remove photo"
+                                <button type="button" id="remove-license-photo-btn" onclick="removeLicensePhoto()"
+                                    title="Remove photo"
                                     class="hidden absolute top-2 right-2 z-10 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
                                     aria-label="Remove photo">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
                                 <label for="dropzone-file1"
                                     class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                         @if (!empty($user->driver_liscense))
-                                            <img id="profile-image1" class="w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg" src="{{ $user->driver_liscense }}" alt="Driver license">
+                                            <img id="profile-image1"
+                                                class="w-48 h-48 object-contain mb-3 cursor-pointer rounded-lg"
+                                                src="{{ $user->driver_liscense }}" alt="Driver license">
                                         @else
-                                            <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer" src="{{ asset('assets/image-placeholder.png')}}" alt="Driver license placeholder">
+                                            <img id="profile-image1" class="w-12 h-12 object-contain mb-3 cursor-pointer"
+                                                src="{{ asset('assets/image-placeholder.png') }}"
+                                                alt="Driver license placeholder">
                                         @endif
                                         <p class="text-sm lg:text-lg text-gray-900">
                                             @isset($step4Page->driver_liscense_photo_label)
@@ -58,7 +65,8 @@
                                     </div>
                                     <input id="dropzone-file1" name="driver_liscense" type="file"
                                         onchange="previewImage1(this)" class="hidden" />
-                                    <input type="hidden" name="remove_driver_license" id="remove_driver_license" value="0">
+                                    <input type="hidden" name="remove_driver_license" id="remove_driver_license"
+                                        value="0">
                                 </label>
                             </div>
                             @error('driver_liscense')
@@ -76,7 +84,8 @@
                                     @endisset
                                 </button>
                                 <button type="submit" id="nextButton"
-                                    class="bg-greenXS px-3 py-2 text-white w-auto opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm" disabled>
+                                    class="bg-greenXS px-3 py-2 text-white w-auto opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm"
+                                    disabled>
                                     @isset($step4Page->next_button_label)
                                         {{ $step4Page->next_button_label }}
                                     @endisset
@@ -112,11 +121,9 @@
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                         <a href="{{ route('step5to5', ['lang' => $selectedLanguage->abbreviation, 'skip' => 1]) }}"
-                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes,
-                            skip it!</a>
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">{{ $siteText['skip_ok_btn_text'] ?? 'Yes, skip it!' }}</a>
                         <button type="button" onclick="hideSkipConfirmation()"
-                            class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No,
-                            take me back</button>
+                            class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">{{ $siteText['no_take_btn_text'] ?? 'No, take me back' }}</button>
                     </div>
                 </div>
             </div>
@@ -220,7 +227,8 @@
             const img = document.getElementById('profile-image1');
             const removeFlag = document.getElementById('remove_driver_license');
             const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
-            const hasExistingAndNotRemoved = img && (img.src || '').indexOf('image-placeholder.png') === -1 && removeFlag && removeFlag.value !== '1';
+            const hasExistingAndNotRemoved = img && (img.src || '').indexOf('image-placeholder.png') === -1 && removeFlag &&
+                removeFlag.value !== '1';
             const isValid = hasFile || hasExistingAndNotRemoved;
 
             if (nextButton) {

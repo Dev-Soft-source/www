@@ -40,8 +40,10 @@
                                 <button type="button" id="remove-photo-btn" onclick="removePhoto()" title="Remove photo"
                                     class="hidden absolute top-2 right-2 z-10 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
                                     aria-label="Remove photo">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
                                 <label for="dropzone-file"
@@ -73,7 +75,8 @@
                                     </div>
                                     <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)"
                                         class="hidden" />
-                                    <input type="hidden" name="remove_profile_photo" id="remove_profile_photo" value="0">
+                                    <input type="hidden" name="remove_profile_photo" id="remove_profile_photo"
+                                        value="0">
                                 </label>
                             </div>
                             @error('image')
@@ -97,11 +100,11 @@
                                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                                 <div class="sm:flex sm:items-start justify-center">
                                                     <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                                                 </div>
                                                 <div class="text-center w-full">
                                                     <p class="can-exp-p text-center">The image size must not be larger than
@@ -125,7 +128,8 @@
                                 @endisset
                             </button>
                             <button type="submit" id="nextButton"
-                                class="bg-greenXS px-3 py-2 text-white w-auto opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm" disabled>
+                                class="bg-greenXS px-3 py-2 text-white w-auto opacity-50 cursor-not-allowed font-FuturaMdCnBT rounded-sm"
+                                disabled>
                                 @isset($step2Page->next_button_label)
                                     {{ $step2Page->next_button_label }}
                                 @endisset
@@ -160,11 +164,9 @@
                     </div>
                     <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
                         <a href="{{ route('step3to5', ['lang' => $selectedLanguage->abbreviation, 'skip' => 1]) }}"
-                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">Yes,
-                            skip it!</a>
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">{{ $siteText['skip_ok_btn_text'] ?? 'Yes, skip it!' }}</a>
                         <button type="button" onclick="hideSkipConfirmation()"
-                            class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">No,
-                            take me back</button>
+                            class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">{{ $siteText['no_take_btn_text'] ?? 'No, take me back' }}</button>
                     </div>
                 </div>
             </div>
@@ -177,8 +179,11 @@
     <script>
         @php
             $defaultAvatar = 'male.png';
-            if ($user->gender == 'female') $defaultAvatar = 'female.png';
-            elseif ($user->gender == 'prefer not to say') $defaultAvatar = 'neutral.png';
+            if ($user->gender == 'female') {
+                $defaultAvatar = 'female.png';
+            } elseif ($user->gender == 'prefer not to say') {
+                $defaultAvatar = 'neutral.png';
+            }
         @endphp
         var defaultAvatarUrl = "{{ asset('users_images/' . $defaultAvatar) }}";
 
@@ -201,7 +206,8 @@
             if (!profileImage || !btn) return;
             var src = (profileImage.src || '').split('?')[0];
             var isDataUrl = profileImage.src && profileImage.src.indexOf('data:') === 0;
-            var isDefault = src.indexOf('male.png') !== -1 || src.indexOf('female.png') !== -1 || src.indexOf('neutral.png') !== -1;
+            var isDefault = src.indexOf('male.png') !== -1 || src.indexOf('female.png') !== -1 || src.indexOf(
+                'neutral.png') !== -1;
             if (isDataUrl || !isDefault) {
                 btn.classList.remove('hidden');
             } else {

@@ -295,7 +295,48 @@
             </div>
         </div>
 
-        {{-- WhatsApp Unavailable Notification Modal --}}
+        @php
+            // WhatsApp modal text variants, fully controlled via $step5Page (multilingual)
+            $whatsAppModalTexts = [
+                'validation' => [
+                    'title' => $step5Page->whatsapp_validation_title ?? 'Validation Required',
+                    'message' => $step5Page->whatsapp_validation_message ?? 'Please fill in phone number.',
+                    'type' => 'warning',
+                ],
+                'not_available' => [
+                    'title' => $step5Page->whatsapp_not_available_title ?? 'WhatsApp Not Available',
+                    'message' => $step5Page->whatsapp_not_available_message ??
+                        'WhatsApp is not available for this number. Verification code has been sent via SMS instead.',
+                    'type' => 'warning',
+                ],
+                'success' => [
+                    'title' => $step5Page->whatsapp_success_title ?? 'Success',
+                    'message' => $step5Page->whatsapp_success_message ??
+                        'Verification code sent via WhatsApp successfully!',
+                    'type' => 'success',
+                ],
+                'error' => [
+                    'title' => $step5Page->whatsapp_error_title ?? 'Error',
+                    'message' => $step5Page->whatsapp_error_message ??
+                        'Error sending verification code. Please try again.',
+                    'type' => 'error',
+                ],
+                'limit' => [
+                    'title' => $step5Page->whatsapp_limit_title ?? 'Limit Reached',
+                    'message' => $step5Page->whatsapp_limit_message ??
+                        'Maximum verification attempts reached for this number. Please try again later.',
+                    'type' => 'warning',
+                ],
+                'default' => [
+                    'title' => $step5Page->whatsapp_default_title ?? 'WhatsApp Notification',
+                    'message' => $step5Page->whatsapp_default_message ??
+                        'There was an issue with WhatsApp verification. Please try again.',
+                    'type' => 'warning',
+                ],
+            ];
+        @endphp
+
+        {{-- WhatsApp Unavailable / Info Notification Modal --}}
         <div id="whatsappUnavailableModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
             aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
@@ -314,15 +355,18 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="text-center w-full">
                                 <div id="whatsappUnavailableIcon"
-                                    class="mx-auto flex items-center justify-center mb-4">
-                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#d10000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#d10000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#d10000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                    class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+                                    <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
                                 </div>
                                 <h2 class="font-FuturaMdCnBT text-gray-700 mb-4" id="whatsappUnavailableTitle">
-                                    WhatsApp Not Available
+                                    {{ $whatsAppModalTexts['default']['title'] }}
                                 </h2>
                                 <p class="text-gray-600 text-center text-xl" id="whatsappUnavailableMessage">
-                                    WhatsApp is not available for this number. Verification code has been sent via SMS
-                                    instead.
+                                    {{ $whatsAppModalTexts['default']['message'] }}
                                 </p>
                             </div>
                         </div>
@@ -589,6 +633,8 @@
             });
         }
 
+        const whatsappModalTexts = @json($whatsAppModalTexts);
+
         function sendVerificationCode(channel = 'sms') {
             // Get form data
             const country = document.querySelector('select[name="country"]').value;
@@ -597,7 +643,7 @@
 
             // Validate inputs
             if (!country || !countryCode || !phone) {
-                showWhatsAppUnavailableModal('Please fill in phone number.', 'Validation Required');
+                showWhatsAppUnavailableModal('validation');
                 return;
             }
 
@@ -649,9 +695,7 @@
                     if (data.success) {
                         // Show modal if WhatsApp was requested but unavailable (SMS used instead)
                         if (data.whatsapp_unavailable && channel === 'whatsapp') {
-                            showWhatsAppUnavailableModal(
-                                'WhatsApp is not available for this number. Verification code has been sent via SMS instead.'
-                                );
+                            showWhatsAppUnavailableModal('not_available');
                         }
 
                         // Update button visibility based on number type
@@ -709,13 +753,7 @@
                         openVerifyModal();
                     } else {
                         // Show error in modal for WhatsApp failures
-                        if (channel === 'whatsapp') {
-                            showWhatsAppUnavailableModal(data.message ||
-                                'Error sending verification code via WhatsApp. Please try again.');
-                        } else {
-                            showWhatsAppUnavailableModal(data.message ||
-                                'Error sending verification code. Please try again.');
-                        }
+                        showWhatsAppUnavailableModal('error');
                     }
                 })
                 .catch(error => {
@@ -724,18 +762,9 @@
                     button.innerHTML = originalText;
 
                     if (error.status === 429) {
-                        showWhatsAppUnavailableModal(error.data?.message ||
-                            'Maximum verification attempts (3) reached for this number. Please try again after 24 hours.'
-                            );
+                        showWhatsAppUnavailableModal('limit');
                     } else {
-                        // Show error in modal for WhatsApp failures
-                        if (channel === 'whatsapp') {
-                            showWhatsAppUnavailableModal(error.data?.message ||
-                                'Error sending verification code via WhatsApp. Please try again.');
-                        } else {
-                            showWhatsAppUnavailableModal(error.data?.message ||
-                                'Error sending verification code. Please try again.');
-                        }
+                        showWhatsAppUnavailableModal('error');
                     }
                 });
         }
@@ -751,7 +780,7 @@
             const phone = document.querySelector('input[name="phone"]').value;
 
             if (!country || !countryCode || !phone) {
-                alert('Please fill in phone number.');
+                showWhatsAppUnavailableModal('validation');
                 return;
             }
 
@@ -798,16 +827,12 @@
                     if (data.success) {
                         // Show modal if WhatsApp was requested but unavailable (SMS used instead)
                         if (data.whatsapp_unavailable) {
-                            showWhatsAppUnavailableModal(
-                                'WhatsApp is not available for this number. Verification code has been sent via SMS instead.',
-                                'WhatsApp Not Available');
+                            showWhatsAppUnavailableModal('not_available');
                         } else {
-                            showWhatsAppUnavailableModal('Verification code sent via WhatsApp successfully!',
-                            'Success');
+                            showWhatsAppUnavailableModal('success');
                         }
                     } else {
-                        showWhatsAppUnavailableModal(data.message ||
-                            'Error sending verification code via WhatsApp. Please try again.', 'Error');
+                        showWhatsAppUnavailableModal('error');
                     }
                 })
                 .catch(error => {
@@ -816,12 +841,9 @@
                     button.innerHTML = originalText;
 
                     if (error.status === 429) {
-                        showWhatsAppUnavailableModal(error.data?.message ||
-                            'Maximum verification attempts (3) reached for this number. Please try again after 24 hours.'
-                            );
+                        showWhatsAppUnavailableModal('limit');
                     } else {
-                        showWhatsAppUnavailableModal(error.data?.message ||
-                            'Error sending verification code via WhatsApp. Please try again.');
+                        showWhatsAppUnavailableModal('error');
                     }
                 });
         }
@@ -952,67 +974,40 @@
             document.getElementById('skipModal').classList.add('hidden');
         }
 
-        function showWhatsAppUnavailableModal(message, title = null) {
+        function showWhatsAppUnavailableModal(type = 'default') {
             const modal = document.getElementById('whatsappUnavailableModal');
             const messageElement = document.getElementById('whatsappUnavailableMessage');
             const titleElement = document.getElementById('whatsappUnavailableTitle');
             const iconElement = document.getElementById('whatsappUnavailableIcon');
 
             if (modal && messageElement) {
-                if (message) {
-                    messageElement.textContent = message;
-                }
-                if (title && titleElement) {
-                    titleElement.textContent = title;
-                } else if (titleElement) {
-                    // Set default title based on message content
-                    if (message && message.includes('successfully')) {
-                        titleElement.textContent = 'Success';
-                        // Change icon to success (green checkmark)
-                        if (iconElement) {
-                            iconElement.className =
-                                'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4';
-                            iconElement.innerHTML =
-                                '<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
-                        }
-                    } else if (message && message.includes('Send code via WhatsApp')) {
-                        titleElement.textContent = 'Use WhatsApp';
-                        if (iconElement) {
-                            iconElement.className =
-                                'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4';
-                            iconElement.innerHTML =
-                                '<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
-                        }
-                    } else if (message && (message.includes('Error') || message.includes('error') || message.includes(
-                            'failed'))) {
-                        titleElement.textContent = 'Error';
-                        // Change icon to error (red X)
-                        if (iconElement) {
-                            iconElement.className =
-                                'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4';
-                            iconElement.innerHTML =
-                                '<svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
-                        }
-                    } else if (message && message.includes('Warning')) {
-                        titleElement.textContent = 'Warning';
-                        // Keep warning icon (yellow)
-                        if (iconElement) {
-                            iconElement.className =
-                                'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4';
-                            iconElement.innerHTML =
-                                '<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
-                        }
+                const config = whatsappModalTexts[type] || whatsappModalTexts['default'];
+
+                // Set title and message from config (multilingual via $step5Page)
+                titleElement.textContent = config.title || '';
+                messageElement.textContent = config.message || '';
+
+                // Adjust icon based on type
+                if (iconElement) {
+                    if (config.type === 'success') {
+                        iconElement.className =
+                            'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4';
+                        iconElement.innerHTML =
+                            '<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                    } else if (config.type === 'error') {
+                        iconElement.className =
+                            'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4';
+                        iconElement.innerHTML =
+                            '<svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
                     } else {
-                        titleElement.textContent = 'WhatsApp Not Available';
-                        // Keep warning icon (yellow)
-                        if (iconElement) {
-                            iconElement.className =
-                                'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4';
-                            iconElement.innerHTML =
-                                '<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
-                        }
+                        // warning / default
+                        iconElement.className =
+                            'mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4';
+                        iconElement.innerHTML =
+                            '<svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
                     }
                 }
+
                 modal.classList.remove('hidden');
                 modal.style.setProperty('display', 'block', 'important');
                 modal.style.setProperty('visibility', 'visible', 'important');
