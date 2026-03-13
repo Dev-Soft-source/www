@@ -16,6 +16,7 @@ use App\Models\Booking;
 use App\Models\City;
 use App\Models\BookingPageSettingDetail;
 use App\Models\CancellationHistory;
+use App\Models\BillingAddressSettingDetail;
 use App\Models\Card;
 use App\Models\CoffeeWallet;
 use App\Models\Message;
@@ -153,7 +154,7 @@ class BookingController extends Controller
             $user = User::whereId($user_id)->first();
             // Check if user has suspanded
             if ($user->suspand === '1') {
-                return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
+                return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
             }
 
             // $rideDetailId = isset($request->rideDetailId) ? $request->rideDetailId : 0;
@@ -256,7 +257,7 @@ class BookingController extends Controller
 
             $seatsBooked = $bookings->sum('seats');
             if ($seatsBooked >= $ride->seats) {
-                return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+                return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
             }
 
             $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
@@ -265,7 +266,7 @@ class BookingController extends Controller
             $isOnlinePaymentRide = (optional($ride->payment_method)->features_setting_id ?? null) !== (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null);
             $hasPrimaryCard = $cards->contains(fn($c) => $c->primary_card == 1 || $c->primary_card === '1');
             if ($isOnlinePaymentRide && $cards->isNotEmpty() && !$hasPrimaryCard) {
-                return redirect()->route('my_cards', ['lang' => $selectedLanguage->abbreviation])
+                return redirect()->route('my_cards', ['lang' => $this->selectedLanguage->abbreviation])
                     ->with('message', 'Please set a primary card to continue with your booking.');
             }
 
@@ -283,7 +284,12 @@ class BookingController extends Controller
             $getCrBalance = TopUpBalance::where('user_id', $user->id)->sum('cr_amount');
             $getDrBalance = TopUpBalance::where('user_id', $user->id)->sum('dr_amount');
 
-            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false]);
+            $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 
+            'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 
+            'paymentSettingDetail' => $paymentSettingDetail,
+            'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false]);
         } else {
             return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
         }
@@ -738,10 +744,10 @@ class BookingController extends Controller
         $user = User::where('id', auth()->user()->id)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {
-            // Store return URL to redirect back after phone verification
+            // Store return URL to redirect back after add phone
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone number"]);
+            return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $messages->add_your_phone ?? "add phone number"]);
         }
 
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
@@ -749,7 +755,7 @@ class BookingController extends Controller
             // Store return URL to redirect back after phone verification
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
+            return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
         }
 
 
@@ -889,9 +895,9 @@ class BookingController extends Controller
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation,'from' => $ride->rideDetail[0]->departure,'to' => $ride->rideDetail[0]->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
+            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $ride->rideDetail[0]->departure,'to' => $ride->rideDetail[0]->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
 
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         $price = $request->seats_amount / $request->seats;
@@ -902,11 +908,10 @@ class BookingController extends Controller
         if ($hasOnlinePayment) {
             $validated = $request->validate([
                 'payment_method' => 'required',
-                'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
+                'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
             ]);
-
-
 
             if ($request->payment_method == 'paypal') {
 
@@ -925,7 +930,7 @@ class BookingController extends Controller
                         }
 
                         if (!$phoneNumber) {
-                            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                         }
                     }
 
@@ -1143,7 +1148,7 @@ class BookingController extends Controller
 
                     $driver = $ride->driver ?? User::find($ride->added_by);
                     if ($driver) {
-                        $data = ['first_name' => $driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $driver->email, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i')];
+                        $data = ['first_name' => $driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $driver->email, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i')];
 
                         // Send booking request email
                         if (isset($driver->email_notification) && $driver->email_notification == 1) {
@@ -1261,7 +1266,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
                 } catch (\Stripe\Exception\ApiErrorException $e) {
                     // Handle error
                     return redirect()->back()->with(['error' => $e->getMessage()]);
@@ -1419,7 +1424,7 @@ class BookingController extends Controller
 
 
         if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-            $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+            $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
             // Send booking request email
             Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
         }
@@ -1514,7 +1519,7 @@ class BookingController extends Controller
                 // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
             }
         }
-        return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
     }
 
     public function sendVerificationCodeBooking($id)
@@ -1572,9 +1577,9 @@ class BookingController extends Controller
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
-        // return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
+        // return redirect()->route('phone_code', ['lang' => $this->selectedLanguage->abbreviation]);
         return redirect()->back()->with([
-            'lang' => $selectedLanguage->abbreviation,
+            'lang' => $this->selectedLanguage->abbreviation,
             'phone_code' => 'Language changed successfully!' // or any success message
         ]);
     }
@@ -1713,7 +1718,7 @@ class BookingController extends Controller
             if (isset($user->email_notification) && $user->email_notification == 1) {
 
                 $price = $seats_amount / $seats;
-                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
                 // Send booking request email
                 Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
             }
@@ -1791,7 +1796,7 @@ class BookingController extends Controller
                 }
             }
 
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
         }
 
         return redirect()
@@ -1965,7 +1970,7 @@ class BookingController extends Controller
                 if (isset($user->email_notification) && $user->email_notification == 1) {
 
                     $price = $seats_amount / $seats;
-                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
                     // Send booking request email
                     Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                 }
@@ -2058,7 +2063,7 @@ class BookingController extends Controller
                 if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
                     $price = $newBooking->fare / $newBooking->seats;
-                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
                     // Send booking request email
                     Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                 }
@@ -2128,7 +2133,7 @@ class BookingController extends Controller
                 }
             }
 
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
         }
 
         return redirect()
@@ -2167,14 +2172,14 @@ class BookingController extends Controller
             // Store return URL to redirect back after phone verification
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone "]);
+            return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone "]);
         }
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
         if (!$phoneVerification && $type->slug == 'secured') {
             // Store return URL to redirect back after phone verification
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
+            return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
         }
 
         $rules = [
@@ -2243,7 +2248,7 @@ class BookingController extends Controller
 
 
         if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         $bookings = Booking::where('ride_id', $booking->ride_id)
@@ -2254,9 +2259,9 @@ class BookingController extends Controller
         $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
+            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
 
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         //Booking Method
@@ -2473,13 +2478,13 @@ class BookingController extends Controller
                             ]);
                             if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $newBooking->booking_credit, 'total_price' => $newBooking->fare, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $newBooking->booking_credit, 'total_price' => $newBooking->fare, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
                                 // Send booking request email
                                 Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                             }
 
 
-                            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
+                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
                         } catch (\Stripe\Exception\ApiErrorException $e) {
                             // Handle error
                             return redirect()->back()->with(['error' => $e->getMessage()]);
@@ -2572,15 +2577,15 @@ class BookingController extends Controller
                     }
                     if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $request->seats, 'booking_price' => $request->booking_credit, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $request->seats, 'booking_price' => $request->booking_credit, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
                         // Send booking request email
                         Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                     }
 
-                    return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
                 }
             } else {
-                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
+                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
             }
         } elseif ($booking->status === '1') {
             if ($request->seats > $booking->seats) {
@@ -2771,12 +2776,12 @@ class BookingController extends Controller
                             ]);
                             if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'),];
+                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'),];
                                 // Send booking request email
                                 Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                             }
 
-                            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
+                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
                         } catch (\Stripe\Exception\ApiErrorException $e) {
                             // Handle error
                             return redirect()->back()->with(['error' => $e->getMessage()]);
@@ -2865,19 +2870,19 @@ class BookingController extends Controller
                     }
                     if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
                         // Send booking request email
                         Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
                     }
 
-                    return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
                 }
             } else {
-                return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update ']);
+                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update ']);
             }
         }
 
-        return redirect()->route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
+        return redirect()->route('ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
     }
 
     public function AcceptBookingRequest($lang = null, $id, $email)
@@ -3113,7 +3118,7 @@ class BookingController extends Controller
                     }
                 }
 
-                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id])
+                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id])
                     ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
             } else {
 
@@ -3473,7 +3478,7 @@ class BookingController extends Controller
                         Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
                     }
                 }
-                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
                     ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
             }
         } else {
@@ -3714,15 +3719,12 @@ class BookingController extends Controller
             }
         }
 
-        return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+        return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
             ->with('decline_success_message', 'You have declined the booking request. The seats are now available for other passengers to book.');
     }
 
     public function instantBooking($id, Request $request)
     {
-        $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        $messages = null;
         $ride = Ride::where('id', $request->id)->first();
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $ride = Ride::where('id', $request->id);
@@ -3739,43 +3741,36 @@ class BookingController extends Controller
 
         $ride = $ride->first();
 
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('book_seat_message_end_part', 'book_seat_message', 'block_booking_message', 'verified_number_message', 'add_your_phone')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('book_seat_message_end_part', 'book_seat_message', 'block_booking_message', 'verified_number_message', 'add_your_phone')->first();
-            }
-        }
-        $user = User::where('id', auth()->user()->id)->first();
-        $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
-        if (is_null($phoneNumber) && $type->slug == 'secured') {
-            // Store return URL to redirect back after phone verification
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
+
+        $user = auth()->user();
+        $phoneNumber = $user->primaryPhone();
+        
+        if ($type->slug === 'secured') {
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? 'Add your phone number']);
+
+            if (!$user->hasPhone()) {
+                return redirect()
+                    ->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])
+                    ->with([
+                        'error' => $messages->add_your_phone ?? 'Add your phone number'
+                    ]);
+            }
+
+            if (!$user->hasVerifiedPhone()) {
+                return redirect()
+                    ->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])
+                    ->with([
+                        'error' => $messages->verified_number_message ?? 'Verify your phone number',
+                        'phone' => $phoneNumber,
+                    ]);
+            }
         }
-        $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
-        if (!$phoneVerification && $type->slug == 'secured') {
-            // Store return URL to redirect back after phone verification
-            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
-            session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('phone_code_step', ['lang' => $selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? 'Verify your phone number', 'phone' => $phoneNumber]);
-        }
 
-
-
-
-
-
-        if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+        if ($user->isBlockedBooking()) {
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride (instant booking)
@@ -3826,13 +3821,12 @@ class BookingController extends Controller
         ]);
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
-        $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
+        $errorMsg = $this->successMessage;
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation,'from' => $ride->rideDetail[0]->departure,'to' => $ride->rideDetail[0]->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
-
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
+            ->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
@@ -3856,7 +3850,7 @@ class BookingController extends Controller
         $validated = $request->validate($rules);
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
@@ -3884,10 +3878,48 @@ class BookingController extends Controller
 
         if ($request->online_payment > '0') {
 
+            /**
+             * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
+             * to the legacy payment_method field so existing PayPal/Stripe flows keep working.
+             */
+            $rawCardId = $request->input('card_id');
+            if ($rawCardId && $rawCardId !== '') {
+                // Direct options from the radio group
+                if (in_array($rawCardId, ['paypal', 'credit_card', 'google_pay', 'apple_pay'], true)) {
+                    if ($rawCardId === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // credit_card, google_pay, apple_pay are all Stripe-based online payments
+                        $request->merge(['payment_method' => 'credit_card']);
+                    }
+                } else {
+                    // Saved card from cards table
+                    $selectedCard = Card::where('id', $rawCardId)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (!$selectedCard) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                    }
+
+                    if ($selectedCard->payment_method_type === 'paypal') {
+                        $request->merge(['payment_method' => 'paypal']);
+                    } else {
+                        // 'card', 'google_pay', 'apple_pay' – handled via Stripe
+                        $request->merge(['payment_method' => 'credit_card']);
+                        // Keep the concrete card id so the Stripe branch can use it
+                        $request->merge(['card_id' => (string) $selectedCard->id]);
+                    }
+                }
+            }
+
             $rules = [
                 'agree_terms' => 'accepted|required',
                 'payment_method' => 'required',
-                'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
+                'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
             ];
 
@@ -3915,7 +3947,7 @@ class BookingController extends Controller
                     }
 
                     if (!$phoneNumber) {
-                        return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                        return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                     }
                 }
 
@@ -3988,7 +4020,7 @@ class BookingController extends Controller
                             $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                         }
                         if (!$phoneNumber) {
-                            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                         }
 
                         $secured_cash = '1';
@@ -4287,7 +4319,7 @@ class BookingController extends Controller
                             ->first();
 
                         $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone : $user->phone;
-                        $data = ['first_name' => $driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
+                        $data = ['first_name' => $driver->first_name, 'lang' => $this->selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
                         Mail::to($driver->email)->queue(new PassengerDetailsMail($data));
                     }
 
@@ -4595,7 +4627,7 @@ class BookingController extends Controller
                     }
 
 
-                    return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->book_seat_message . ' ' . $request->seats . ' ' . $messages->book_seat_message_end_part]);
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->book_seat_message . ' ' . $request->seats . ' ' . $messages->book_seat_message_end_part]);
                 } catch (\Stripe\Exception\ApiErrorException $e) {
                     // Handle error
                     return redirect()->back()->with(['error' => $e->getMessage()]);
@@ -4609,7 +4641,7 @@ class BookingController extends Controller
                     $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                 }
                 if (!$phoneNumber) {
-                    return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                 }
 
                 $secured_cash = '1';
@@ -4900,7 +4932,7 @@ class BookingController extends Controller
                     ->first();
 
                 $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone : $user->phone;
-                $data = ['first_name' => $ride->driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
+                $data = ['first_name' => $ride->driver->first_name, 'lang' => $this->selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $passengerPhoneToUse];
                 Mail::to($ride->driver->email)->queue(new PassengerDetailsMail($data));
             }
 
@@ -5127,7 +5159,7 @@ class BookingController extends Controller
                     }
                 }
             }
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->book_seat_message]);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->book_seat_message]);
         }
     }
 
@@ -5170,7 +5202,7 @@ class BookingController extends Controller
                     $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                 }
                 if (!$phoneNumber) {
-                    return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                 }
 
                 $secured_cash = '1';
@@ -5372,7 +5404,7 @@ class BookingController extends Controller
             // Mail::to($ride->driver->email)->queue(new InstantBookingMail($data));
             if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                $data = ['first_name' => $ride->driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $user->phone];
+                $data = ['first_name' => $ride->driver->first_name, 'lang' => $this->selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $booking->price, 'total_price' => $bookingPrice, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $user->phone];
                 Mail::to($ride->driver->email)->queue(new PassengerDetailsMail($data));
             }
             if (isset($user->email_notification) && $user->email_notification == 1) {
@@ -5490,7 +5522,7 @@ class BookingController extends Controller
                 }
             }
 
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
         }
 
         return redirect()
@@ -5539,7 +5571,7 @@ class BookingController extends Controller
             return redirect()->back()->with(['failure' => $messages->verified_number_message ?? null, 'phone' => $phoneNumber]);
         }
         if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         $bookings = Booking::where('ride_id', $booking->ride_id)
@@ -5551,9 +5583,9 @@ class BookingController extends Controller
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
+            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
 
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
@@ -5792,7 +5824,7 @@ class BookingController extends Controller
                             'destination' => $booking->destination
                         ]);
 
-                        return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $message->book_seat_message]);
+                        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $message->book_seat_message]);
                     } catch (\Stripe\Exception\ApiErrorException $e) {
                         // Handle error
                         return redirect()->back()->with(['error' => $e->getMessage()]);
@@ -5869,9 +5901,9 @@ class BookingController extends Controller
                 'destination' => $booking->destination
             ]);
 
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $message->book_seat_message]);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $message->book_seat_message]);
         } elseif ($request->seats <= $booking->seats) {
-            return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
         }
     }
 
@@ -5992,7 +6024,7 @@ class BookingController extends Controller
             // Mail::to($ride->driver->email)->queue(new InstantBookingMail($data));
             if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
 
-                $data = ['first_name' => $ride->driver->first_name, 'lang' => $selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $Price, 'total_price' => $fare, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $user->phone];
+                $data = ['first_name' => $ride->driver->first_name, 'lang' => $this->selectedLanguage->abbreviation, 'origin' => $booking->departure, 'destination' => $booking->destination, 'date' => $ride->date, 'time' => $ride->time, 'seats' => $booking->seats, 'booking_price' => $Price, 'total_price' => $fare, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'email' => $user->email, 'phone' => $user->phone];
                 Mail::to($ride->driver->email)->queue(new PassengerDetailsMail($data));
             }
 
@@ -6112,7 +6144,7 @@ class BookingController extends Controller
                 }
             }
 
-            return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
         }
 
         return redirect()
@@ -7070,7 +7102,7 @@ class BookingController extends Controller
             }
         }
 
-        return redirect()->route('my_trips', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $messages->cancel_booking_message ?? null]);
+        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->cancel_booking_message ?? null]);
     }
 
     public function createPaymentIntent(Request $request)

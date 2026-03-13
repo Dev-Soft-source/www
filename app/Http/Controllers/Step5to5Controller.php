@@ -60,12 +60,6 @@ class Step5to5Controller extends Controller
 
         $niceNames = ['phone' => $step4Page->phone_error ?? ''];
 
-        Log::info('Step5to5Controller@update called', [
-            'user_id' => $user_id,
-            'country' => $request->country,
-            'country_code' => $request->country_code,
-        ]);
-
         // Normalize phone
         $countryDialCode = optional(Country::find($request->country))->dial_code ?: $request->country_code;
         $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode);
@@ -110,10 +104,21 @@ class Step5to5Controller extends Controller
             if ($response) {
                 return $response;
             }
+
+            // Redirect to verification step; if a return URL is present in session,
+            // Phone verification flow should ultimately redirect there after success.
             return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation]);
         }
 
         User::whereId($user_id)->update(['step5' => 1]);
+
+        // If a post-action return URL is stored in the session, prefer that.
+        // This is used to send the user back to the original page after completing step 5.
+        $returnUrl = session('return_url_after_action');
+        if ($returnUrl) {
+            return redirect($returnUrl);
+        }
+
         return redirect()->route('profile', ['lang' => $this->selectedLanguage->abbreviation]);
     }
 

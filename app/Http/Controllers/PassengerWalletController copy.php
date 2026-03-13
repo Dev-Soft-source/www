@@ -295,7 +295,7 @@ class PassengerWalletController extends Controller
         $user = User::whereId($user_id)->first();
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
+            return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -331,7 +331,7 @@ class PassengerWalletController extends Controller
             'card_element' => 'required_if:card_id,credit_card',
         ]);
 
-        $message = $this->siteText;
+        $message = $this->successMessage;
 
         $user = auth()->user();
 

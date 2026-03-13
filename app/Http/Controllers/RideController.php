@@ -581,7 +581,7 @@ class RideController extends Controller
 
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
+            return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
         if (!isset($user->profile_image) || $user->profile_image == '' || in_array(basename($user->profile_image), ['male.png', 'female.png', 'neutral.png'])) {
@@ -1877,7 +1877,7 @@ class RideController extends Controller
 
         // Check if user has suspanded
         if ($user->suspand === '1') {
-            return back()->with('message', $this->siteText['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
+            return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
         // Feature gatekeeping logic for Pink Ride and Extra Care Ride
@@ -3127,7 +3127,7 @@ class RideController extends Controller
         if ($user->folks_ride !== '1') {
             if ($setting->verfiy_phone === '1') {
                 $hasVerifiedPhone = $user->relationLoaded('phone_numbers')
-                    ? $user->phone_numbers->contains('verified', 1)
+                    ? $user->phoneNumbers->contains('verified', 1)
                     : $user->phoneNumbers()->where('verified', 1)->exists();
                 if (!$hasVerifiedPhone) {
                     return 'A verified phone number is required to post Extra Care Rides.';
