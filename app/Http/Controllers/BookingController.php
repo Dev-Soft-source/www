@@ -33,6 +33,7 @@ use App\Models\Payout;
 use App\Models\PhoneNumber;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\Ride;
+use App\Models\RideDetail;
 use App\Models\SeatDetail;
 use App\Models\SiteSetting;
 use App\Models\SuccessMessagesSettingDetail;
@@ -286,10 +287,81 @@ class BookingController extends Controller
 
             $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage, 
-            'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 
+            // Build full route (origin, stops, destination) and segment time for booking display (same logic as ride_detail)
+            $bookedSegment = $ride->rideDetail->first();
+            $from = $bookedSegment ? $bookedSegment->departure : null;
+            $to = $bookedSegment ? $bookedSegment->destination : null;
+            $allDetails = RideDetail::where('ride_id', $ride->id)->orderBy('id')->get();
+            $defaultDetail = $allDetails->where('default_ride', 1)->first();
+            $moreDetails = $allDetails->where('default_ride', 0)->sortBy('id');
+            $origin = $defaultDetail && $defaultDetail->departure
+                ? $defaultDetail->departure
+                : ($allDetails->first() ? $allDetails->first()->departure : '');
+            $destination = $defaultDetail && $defaultDetail->destination
+                ? $defaultDetail->destination
+                : ($allDetails->last() ? $allDetails->last()->destination : '');
+            $segmentPickup = $bookedSegment && !empty($bookedSegment->pickup) ? $bookedSegment->pickup : ($ride->pickup ?? '');
+            $segmentDropoff = $bookedSegment && !empty($bookedSegment->dropoff) ? $bookedSegment->dropoff : ($ride->dropoff ?? '');
+            $orderedPoints = collect([$origin]);
+            $current = $origin;
+            $remaining = $moreDetails->values();
+            while ($current !== $destination && $remaining->isNotEmpty()) {
+                $nextSegment = $remaining->first(function ($d) use ($current) {
+                    return (string) $d->departure === (string) $current;
+                });
+                if (!$nextSegment) {
+                    break;
+                }
+                $orderedPoints->push($nextSegment->destination);
+                $current = $nextSegment->destination;
+                $remaining = $remaining->filter(function ($d) use ($nextSegment) {
+                    return $d->id != $nextSegment->id;
+                });
+            }
+            if ($orderedPoints->isNotEmpty()) {
+                $origin = $orderedPoints->first();
+                $destination = $orderedPoints->last();
+            }
+            $fromIndex = $orderedPoints->search(function ($p) use ($from) {
+                return (string) $p === (string) $from;
+            });
+            $toIndex = $orderedPoints->search(function ($p) use ($to) {
+                return (string) $p === (string) $to;
+            });
+            $stopNames = collect();
+            if ($from !== null && $from !== '' && $to !== null && $to !== ''
+                && $fromIndex !== false && $toIndex !== false && $fromIndex < $toIndex && ($toIndex - $fromIndex) >= 2) {
+                $stopNames = $orderedPoints->slice($fromIndex + 1, $toIndex - $fromIndex - 1)->values();
+            } else {
+                $stopNames = $orderedPoints->count() > 2
+                    ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
+                    : collect();
+            }
+            $stops = $stopNames->map(function ($name) use ($allDetails) {
+                $pickupSegment = $allDetails->first(function ($d) use ($name) {
+                    return (string) $d->departure === (string) $name && !empty($d->pickup);
+                });
+                $dropoffSegment = $allDetails->first(function ($d) use ($name) {
+                    return (string) $d->destination === (string) $name && !empty($d->dropoff);
+                });
+                return [
+                    'name'    => $name,
+                    'pickup'  => $pickupSegment ? $pickupSegment->pickup : null,
+                    'dropoff' => $dropoffSegment ? $dropoffSegment->dropoff : null,
+                ];
+            });
+            $displayDepartureDate = $bookedSegment && $bookedSegment->date ? $bookedSegment->date : $ride->date;
+            $displayDepartureTime = $bookedSegment && $bookedSegment->time ? $bookedSegment->time : ($ride->time ?? '00:00');
+            $displayDepartureDateTime = ($displayDepartureDate ?? '') . ' ' . ($displayDepartureTime ?? '00:00');
+            $fromLabel = $from;
+            $toLabel = $to;
+
+            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage,
+            'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
             'paymentSettingDetail' => $paymentSettingDetail,
-            'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false]);
+            'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false,
+            'selectedLanguage' => $selectedLanguage,
+            'origin' => $origin, 'destination' => $destination, 'stops' => $stops, 'segmentPickup' => $segmentPickup, 'segmentDropoff' => $segmentDropoff, 'displayDepartureDateTime' => $displayDepartureDateTime, 'fromLabel' => $fromLabel, 'toLabel' => $toLabel]);
         } else {
             return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
         }
