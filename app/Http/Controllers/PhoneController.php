@@ -573,13 +573,13 @@ class PhoneController extends Controller
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_verified_message', 'incorrect_code_message', 'phone_code_error_message')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_verified_message', 'incorrect_code_message', 'phone_code_error_message', 'all_set_steps_message')->first();
                 $phoneSetting = MyPhoneSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_verified_message', 'incorrect_code_message', 'phone_code_error_message')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_verified_message', 'incorrect_code_message', 'phone_code_error_message', 'all_set_steps_message')->first();
                 $phoneSetting = MyPhoneSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
         }

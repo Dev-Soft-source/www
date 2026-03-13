@@ -271,7 +271,7 @@
                         </div>
 
                         <!-- Cost-sharing information paragraphs -->
-                        <div class="mt-6 space-y-3">
+                        <div class="my-6 space-y-3">
                             
                             <div class="text-sm text-gray-800 border border-gray-300 p-4 space-y-1 border-shadow-lg">
                                 <span class="font-FuturaMdCnBT text-lg text-black">{{ $signupPage->ride_description1 }}</span>
@@ -283,7 +283,7 @@
                         </div>
 
                         <div class="">
-                            <div class="mt-6 relative">
+                            <div class="mt-2 relative">
                                 <label for="remember-me" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
                                     <input id="remember-me" name="remember_me" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
                                     <div class="text_base -mt-2">
@@ -302,11 +302,10 @@
                                         @endisset
                                     </div>
                                 </label>
-
-                                @error('remember_me')
-                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                @enderror
                             </div>
+                            @error('remember_me')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="">
