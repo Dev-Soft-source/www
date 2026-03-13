@@ -5916,6 +5916,70 @@ if (document.readyState === 'loading') {
 } else {
   initTooltips();
 }
+document.addEventListener("DOMContentLoaded", function () {
+  // Scroll to first error on page load if validation errors exist
+  var firstError = document.querySelector('.tooltip-error');
+  if (firstError) {
+    // Find the parent container that contains the error (usually a form field wrapper)
+    var errorContainer = firstError.closest('div');
+
+    // Walk up to find a meaningful container (section or field wrapper)
+    while (errorContainer) {
+      // Check if this container is a section or has a meaningful structure
+      if (errorContainer.tagName === 'SECTION' || errorContainer.querySelector('input, select, textarea, label')) {
+        break;
+      }
+      errorContainer = errorContainer.parentElement;
+    }
+
+    // Scroll to the error container or the error itself
+    var scrollTarget = errorContainer || firstError;
+    scrollTarget.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }
+});
+function findTooltipInScope(startNode, root) {
+  if (!(startNode instanceof HTMLElement) || !(root instanceof HTMLElement)) {
+    return null;
+  }
+  var node = startNode.closest('div, section, label');
+  while (node && node !== root) {
+    var _node$parentElement;
+    var tooltipInChildren = Array.from(node.children).find(function (child) {
+      return child instanceof HTMLElement && child.classList.contains('tooltip-error');
+    });
+    if (tooltipInChildren) {
+      return tooltipInChildren;
+    }
+    if (node.parentElement) {
+      var tooltipSibling = Array.from(node.parentElement.children).find(function (sibling) {
+        return sibling instanceof HTMLElement && sibling.classList.contains('tooltip-error') && sibling !== node;
+      });
+      if (tooltipSibling) {
+        return tooltipSibling;
+      }
+    }
+    node = ((_node$parentElement = node.parentElement) === null || _node$parentElement === void 0 ? void 0 : _node$parentElement.closest('div, section, label')) || null;
+  }
+  return null;
+}
+function hideTooltipOnInteraction(event) {
+  if (!(event.target instanceof HTMLElement)) {
+    return;
+  }
+  var form = event.target.closest('form');
+  if (!form) {
+    return;
+  }
+  var tooltip = findTooltipInScope(event.target, form);
+  if (tooltip) {
+    tooltip.remove();
+  }
+}
+document.addEventListener('click', hideTooltipOnInteraction);
+document.addEventListener('focusin', hideTooltipOnInteraction);
 
 // Available Default Themes:
 // light - Light background with dark text
