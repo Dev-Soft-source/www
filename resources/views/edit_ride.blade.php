@@ -3604,12 +3604,23 @@
             });
         }
 
-        // Ensure all form fields are submitted, especially disabled/readonly ones
-        document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+        // Prevent double submit: disable submit buttons on submit, re-enable only if validation fails (same as post_ride)
+        function disableEditRideSubmitButtons() {
             var form = document.getElementById('edit-ride-form');
             if (form) form.querySelectorAll('.edit-ride-submit-btn').forEach(function(btn) {
                 btn.disabled = true;
             });
+        }
+        function enableEditRideSubmitButtons() {
+            var form = document.getElementById('edit-ride-form');
+            if (form) form.querySelectorAll('.edit-ride-submit-btn').forEach(function(btn) {
+                btn.disabled = false;
+            });
+        }
+
+        // Ensure all form fields are submitted, especially disabled/readonly ones
+        document.getElementById('edit-ride-form').addEventListener('submit', function(e) {
+            disableEditRideSubmitButtons();
             try {
                 var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
                 var toVal = (document.getElementById('to_spot_0') || {}).value || '';
@@ -3981,14 +3992,9 @@
                     });
                 }
             } finally {
-                if (e.defaultPrevented) {
-                    var f = document.getElementById('edit-ride-form');
-                    if (f) f.querySelectorAll('.edit-ride-submit-btn').forEach(function(btn) {
-                        btn.disabled = false;
-                    });
-                }
+                if (e.defaultPrevented) enableEditRideSubmitButtons();
             }
-        });
+        }, true);
 
 
         function fromInput(index) {

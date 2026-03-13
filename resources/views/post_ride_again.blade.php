@@ -35,9 +35,11 @@
                                     @if (!empty($rides) && count($rides) > 0)
                                         @foreach ($rides as $ride)
                                             @php
-                                                $from = $ride->rideDetail[0]->departure;
-                                                $to = $ride->rideDetail[0]->destination;
+                                                $firstDetail = $ride->rideDetail->first();
+                                                $from = $firstDetail?->departure ?? '';
+                                                $to = $firstDetail?->destination ?? '';
                                             @endphp
+                                            @if (!empty($from))
                                             <div class="relative">
                                                 <a href="{{ route('copy_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}">
                                                     <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
@@ -74,6 +76,7 @@
                                                     </div>
                                                 </a>
                                             </div>
+                                            @endif
                                         @endforeach
                                         {{ $rides->links() }}
                                     @else

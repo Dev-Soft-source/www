@@ -80,12 +80,23 @@
                                                     <div style="cursor:pointer;" onclick="window.location=''" style="cursor:pointer;">
                                                     <div class=" rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                                         <div class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
+                                                            @php
+                                                                $bookingSegment = $booking->ride_detail_id
+                                                                    ? $booking->ride->rideDetail->firstWhere('id', $booking->ride_detail_id)
+                                                                    : $booking->ride->rideDetail->first(fn($d) => (string) $d->departure === (string) $booking->departure);
+                                                                $displayDt = $bookingSegment
+                                                                    ? (($bookingSegment->date ?? $booking->ride->date) . ' ' . ($bookingSegment->time ?? $booking->ride->time ?? '00:00'))
+                                                                    : ($booking->ride->date . ' ' . ($booking->ride->time ?? '00:00'));
+                                                                $departureDateTime = formatDepartureDateTime($displayDt, $selectedLanguage ?? null, $rideDetailPage ?? null);
+                                                                $departureDateLabel = $departureDateTime['dateLabel'];
+                                                                $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                            @endphp
                                                             <p class="flex items-center space-x-2 font-semibold w-full">
-                                                                {{ \Carbon\Carbon::parse($booking->ride->date)->format('F d, Y') }}
+                                                                {{ $departureDateLabel }}
                                                                 @isset($rideDetailPage->card_section_at_label)
                                                                     {{ $rideDetailPage->card_section_at_label }}
                                                                 @endisset
-                                                                {{ \Carbon\Carbon::parse($booking->ride->time)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($booking->ride->time)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($booking->ride->time)->format('h:i A')) }}
+                                                                {{ $departureTimeLabel ?? 'N/A' }}
                                                             </p>
                                                             <div class="flex items-center justify-end w-full">
                                                                 <span class="text-green-600 p-1 px-2 rounded text-sm bg-green-100">
