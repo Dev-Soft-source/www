@@ -1193,33 +1193,20 @@
                                         (optional($ride->payment_method)->features_setting_id ?? null) ===
                                             (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                         <div class="flex items-center justify-between gap-2 mt-1">
-                                            {{-- <p>Total online payment</p>
-                                    <p class="totalAmount text-black"></p> --}}
-                                            <input type="hidden" name="online_payment"
-                                                class="totalAmountIn form-control" readonly>
+                                            <input type="hidden" name="online_payment" class="totalAmountIn form-control" readonly>
                                         </div>
                                         <div class="flex items-center justify-between gap-2 mt-1">
-                                            {{-- <p>Total cash payment</p>
-                                    <p class="totalSeatsAmount text-black"></p> --}}
-                                            <input type="hidden" name="cash_payment"
-                                                class="totalSeatsAmountInput form-control" readonly>
+                                            <input type="hidden" name="cash_payment" class="totalSeatsAmountInput form-control" readonly>
                                         </div>
                                     @else
                                         <div class="flex items-center justify-between gap-2 mt-1">
-                                            {{-- <p>Total online payment</p>
-                                    <p class="totalSum text-black"></p> --}}
-                                            <input type="hidden" name="online_payment" class="totalSumIn form-control"
-                                                readonly>
+                                            <input type="hidden" name="online_payment" class="totalSumIn form-control" readonly>
                                         </div>
                                         <div class="flex items-center justify-between gap-2 mt-1">
-                                            {{-- <p>Total cash payment</p>
-                                    <p class="text-black">$0.00</p> --}}
-                                            <input type="hidden" name="cash_payment" value="0"
-                                                class="form-control" readonly>
+                                            <input type="hidden" name="cash_payment" value="0" class="form-control" readonly>
                                         </div>
                                     @endif
-                                    <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control"
-                                        readonly>
+                                    <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control" readonly>
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <p>
                                             @isset($bookingPage->total_label)
@@ -1231,7 +1218,6 @@
                                             <span id="discount" class="text-right"></span>
                                         </div>
                                         <input type="hidden" name="total" class="totalSumInput form-control" readonly>
-                                        <input type="hidden" id="stripeChargeAmount" value="">
                                     </div>
                                 </div>
                             </div>
@@ -1258,7 +1244,7 @@
                             <div class="mt-4 bg-white rounded-lg overflow-hidden shadow-3xl">
                                 <div class="bg-primary text-white px-4 py-2">
                                     <h3 class="text-2xl xl:text-3xl">
-                                        User Declarations
+                                        {{ $bookingPage->user_declarations_label ?? 'User declarations' }}
                                     </h3>
                                 </div>
                                 <div class="bg-white p-4">
@@ -1592,67 +1578,8 @@
 @endsection
 
 @section('script')
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        // Define the handler function
-        function hideTooltip(parms) {
-            if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-                $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-            }
-        }
 
-        const inputs = document.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', hideTooltip); // no parameter on input typing
-        });
-
-        const labels = document.querySelectorAll('label');
-        labels.forEach(input => {
-            input.addEventListener('click', function(e) {
-                hideTooltip.call(this, 'label'); // pass 'testing' on label click
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const inputs = document.querySelectorAll("input[name='code[]']");
-
-            inputs.forEach((input, index) => {
-                // Move to the next field on input
-                input.addEventListener("input", function() {
-                    if (this.value.length === 1 && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    }
-                });
-
-                // Handle backspace to move to previous field
-                input.addEventListener("keydown", function(event) {
-                    if (event.key === "Backspace" && this.value === "" && index > 0) {
-                        inputs[index - 1].focus();
-                    }
-                });
-
-                // Paste event to split the code into inputs
-                input.addEventListener("paste", function(event) {
-                    event.preventDefault();
-                    const pastedData = event.clipboardData.getData("text").trim();
-                    if (pastedData.length === inputs.length) {
-                        pastedData.split("").forEach((char, i) => {
-                            if (inputs[i]) {
-                                inputs[i].value = char;
-                            }
-                        });
-                        inputs[inputs.length - 1].focus(); // Move focus to the last field
-                    }
-                });
-            });
-        });
-    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Get all code inputs
@@ -1715,106 +1642,7 @@
 
 
     <script>
-        const stripe = Stripe('{{ env('STRIPE_KEY') }}'); // Your public key from Stripe
-
-        const paymentRequest = stripe.paymentRequest({
-            country: 'CA',
-            currency: 'cad',
-            total: {
-                label: 'Total',
-                amount: 100,
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-        });
-
-        // Check if the device/browser supports Apple Pay or Google Pay
-        paymentRequest.canMakePayment().then(function(result) {
-            console.log(result); // Log the result to understand what's being returned
-
-            if (result && result.googlePay) {
-                // Google Pay is available, enable the button
-                const elements = stripe.elements();
-                const prButton = elements.create('paymentRequestButton', {
-                    paymentRequest: paymentRequest,
-                });
-
-
-                prButton.mount('#payment-request-button');
-
-                //validateBookingAndShowGPay();
-
-            } else if (result && result.applePay) {
-                // Apple Pay is available (on Safari for Apple devices), enable the button
-                const elements = stripe.elements();
-                const prButton = elements.create('paymentRequestButton', {
-                    paymentRequest: paymentRequest,
-                });
-
-                prButton.mount('#payment-request-button');
-            } else {
-                // If neither is available, log a message
-                console.log("Neither Apple Pay nor Google Pay is available on this device.");
-            }
-        }).catch(function(error) {
-            // Handle errors
-            console.error('Error checking payment method availability:', error);
-        });
-
-
-        paymentRequest.on('paymentmethod', async (ev) => {
-
-            // Use the amount shown in Google/Apple Pay (same as paymentRequest.update)
-            const amountInput = document.getElementById('stripeChargeAmount');
-            const amount = amountInput && amountInput.value !== '' ? amountInput.value : (document
-                .querySelectorAll('[name="online_payment"]')[1] ? document.querySelectorAll(
-                    '[name="online_payment"]')[1].value : document.querySelector('[name="online_payment"]')
-                .value);
-
-            const response = await fetch('/create-payment-intent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                },
-                body: JSON.stringify({
-                    payment_method: ev.paymentMethod.id,
-                    amount: amount
-                }),
-            });
-
-            const {
-                clientSecret
-            } = await response.json();
-
-            // Confirm the payment
-            const {
-                error,
-                paymentIntent
-            } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: ev.paymentMethod.id,
-            });
-
-            if (error) {
-                ev.complete('fail');
-                console.error(error.message);
-            } else {
-                ev.complete('success');
-
-
-
-                console.log('Transaction ID:', paymentIntent.id); // <--- HERE
-                console.log('Status:', paymentIntent.status);
-
-                document.getElementById('submitForm').submit();
-                // Handle post-payment success (e.g., show a confirmation page)
-                console.log('Payment Successful!');
-            }
-        });
-    </script>
-
-    <script>
-        
+        // Key used to persist selected seats across reloads for this ride
         var bookingSeatsStorageKey = 'booking_seats_{{ $ride->id }}_{{ $ride->rideDetail[0]->id }}';
 
         $(document).ready(function() {
@@ -1939,9 +1767,6 @@
             //     updateTotalAmount();
             // });
         });
-
-
-
 
         // Get the current date
         var currentDate = new Date();
@@ -2157,7 +1982,6 @@
 
             if ($("#check_payment_method").val() == "cash") {
                 var chargeAmount = totalAmountIn + taxAmount;
-                $('#stripeChargeAmount').val(chargeAmount);
                 paymentRequest.update({
                     total: {
                         label: 'Total',
@@ -2165,7 +1989,6 @@
                     },
                 });
             } else {
-                $('#stripeChargeAmount').val(totalSumIn);
                 paymentRequest.update({
                     total: {
                         label: 'Total',

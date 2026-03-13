@@ -61,6 +61,7 @@ class BookingPageSettingDetailResource extends JsonResource
             'booking_term_agree_text' => $this->booking_term_agree_text,
             'booking_pink_ride_term_agree_text' => $this->booking_pink_ride_term_agree_text,
             'booking_extra_care_ride_term_agree_text' => $this->booking_extra_care_ride_term_agree_text,
+            'user_declarations_label' => $this->user_declarations_label,
             'firm_cancellation_label_price_section' => $this->firm_cancellation_label_price_section,
             'firm_discount_label_price_section' => $this->firm_discount_label_price_section,
             'firm_your_price_label_price_section' => $this->firm_your_price_label_price_section,

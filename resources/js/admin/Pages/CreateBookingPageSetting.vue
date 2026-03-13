@@ -272,7 +272,51 @@
                                                 "
                                             ></p>
                                         </div>
- 
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`user_declarations_label_${activeLanguageId}`"
+                                                        >User declarations label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`user_declarations_label_${activeLanguageId}`"
+                                                    :id="`user_declarations_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'user_declarations_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'user_declarations_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `user_declarations_label.user_declarations_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `user_declarations_label.user_declarations_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -2365,6 +2409,7 @@ export default {
                             this.handleInput("", language, "booking_term_agree_text");
                             this.handleInput("", language, "booking_pink_ride_term_agree_text");
                             this.handleInput("", language, "booking_extra_care_ride_term_agree_text");
+                            this.handleInput("", language, "user_declarations_label");
                             this.handleInput("", language, "firm_cancellation_label_price_section");
                             this.handleInput("", language, "firm_discount_label_price_section");
                             this.handleInput("", language, "firm_your_price_label_price_section");
@@ -2581,6 +2626,11 @@ export default {
                                 "booking_extra_care_ride_term_agree_text"
                             );
                             this.handleInput(
+                                setting?.user_declarations_label,
+                                setting?.language,
+                                "user_declarations_label"
+                            );
+                            this.handleInput(
                                 setting?.booking_disclaimer_on_time,
                                 setting?.language,
                                 "booking_disclaimer_on_time"
@@ -2725,6 +2775,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_${language.id}`
+                ) ||
+                validationErros.has(
+                    `user_declarations_label.user_declarations_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `firm_cancellation_label_price_section.firm_cancellation_label_price_section_${language.id}`

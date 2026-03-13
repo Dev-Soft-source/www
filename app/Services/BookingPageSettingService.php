@@ -96,6 +96,8 @@ class BookingPageSettingService
                 $errorMessages = array_merge($errorMessages, ['booking_pink_ride_term_agree_text.booking_pink_ride_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['user_declarations_label.user_declarations_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['user_declarations_label.user_declarations_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
 
                 $validationRule = array_merge($validationRule, ['firm_cancellation_label_price_section.firm_cancellation_label_price_section_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['firm_cancellation_label_price_section.firm_cancellation_label_price_section_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -159,6 +161,7 @@ class BookingPageSettingService
             'booking_term_agree_text' => $this->data($request, $language, 'booking_term_agree_text'),
             'booking_pink_ride_term_agree_text' => $this->data($request, $language, 'booking_pink_ride_term_agree_text'),
             'booking_extra_care_ride_term_agree_text' => $this->data($request, $language, 'booking_extra_care_ride_term_agree_text'),
+            'user_declarations_label' => $this->data($request, $language, 'user_declarations_label'),
             'firm_cancellation_label_price_section' => $this->data($request, $language, 'firm_cancellation_label_price_section'),
             'firm_discount_label_price_section' => $this->data($request, $language, 'firm_discount_label_price_section'),
             'firm_your_price_label_price_section' => $this->data($request, $language, 'firm_your_price_label_price_section'),
