@@ -317,12 +317,6 @@ return
 				'required' => 'The confirm email is required.',
 				'email' => 'The confirm email is not a valid email address.',
 			],
-			'email' =>
-			[
-				'required' => 'The email is required.',
-				'email' => 'The email is not a valid email address.',
-				'unique' => 'The email is already taken.',
-			],
 			'pass1' =>
 			[
 				'required' => 'The current password is required.',
