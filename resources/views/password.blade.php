@@ -86,12 +86,7 @@
                             </span>
                         </div>
                         @error('pass1')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -111,12 +106,7 @@
                             </span>
                         </div>
                         @error('pass2')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -137,12 +127,7 @@
                             </span>
                         </div>
                         @error('pass3')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -156,27 +141,7 @@
     </div>
 
     <script>
-        function hideTooltip(parms) {
-            if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-                $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-            }
-        }
-
-        const inputs = document.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', hideTooltip); // no parameter on input typing
-        });
-
-        const labels = document.querySelectorAll('label');
-        labels.forEach(input => {
-            input.addEventListener('click', function(e) {
-                hideTooltip.call(this, 'label'); // pass 'testing' on label click
-            });
-        });
+        
 
         const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('password');

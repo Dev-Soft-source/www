@@ -34,8 +34,6 @@
     </div>
 
     @error($name)
-        <div class="tooltip-error shadow-lg">
-            {{ $message }}
-        </div>
+        <div class="tooltip-error shadow-lg">{{ $message }}</div>
     @enderror
 </div>

@@ -33,12 +33,7 @@
                             value="{{ optional($vehicle)->make }}" @endif
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('make')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
@@ -54,12 +49,7 @@
                             value="{{ optional($vehicle)->model }}" @endif
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('model')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
@@ -93,12 +83,7 @@
                             @endforeach
                         </select>
                         @error('type')
-                            <div class="relative tooltip flex mt-1">
-                                <div role="alert"
-                                    class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="">
@@ -112,12 +97,7 @@
                             value="{{ old('liscense_no', optional($vehicle)->liscense_no) }}"
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('liscense_no')
-                            <div class="relative tooltip flex mt-1">
-                                <div role="alert"
-                                    class="relative tooltiptext -top-2 z-10 leading-none shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
@@ -133,12 +113,7 @@
                             value="{{ optional($vehicle)->color }}" @endif
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('color')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
@@ -151,12 +126,7 @@
                             value="{{ optional($vehicle)->year }}" @endif
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('year')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
@@ -193,12 +163,7 @@
                             </div>
                         </div>
                         @error('car_type')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="justify-between md:items-center gap-2">
@@ -224,12 +189,7 @@
                             </div>
                         </div>
                         @error('primary_vehicle')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -274,7 +234,7 @@
                             @endif
                             @error('image')
                                 @if ($message !== 'The image is not uploaded yet' && $message !== 'The image failed to upload')
-                                    <p class="text-red-500">{{ $message }}</p>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @endif
                             @enderror
                         </label>
@@ -337,11 +297,11 @@
                     </div>
                 </div>
                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                    <button id="remove-photo" class="button-exp-fill sm:w-24">
+                    <button id="remove-photo" class="button-exp-red-fill">
                         {{ $successMessage->yes_remove_it_button_text ?? 'Yes' }}
                     </button>
                     <button type="button" onclick="toggleModalCard('card-modal-1')"
-                        class="button-exp-fill sm:w-24">{{ $successMessage->no_go_back_button_text ?? 'No' }}</button>
+                        class="button-exp-fill">{{ $successMessage->no_go_back_button_text ?? 'No' }}</button>
                 </div>
             </div>
         </div>
@@ -393,35 +353,8 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
     <script>
-        function hideTooltip(parms) {
-            if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-                $(this).parent().parent().find('.tooltip').addClass('hidden');
-            } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-                $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-            }
-        }
+        
 
-        const inputs = document.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', hideTooltip);
-        });
-
-        // Also add change listener for select elements to clear validation errors
-        const selects = document.querySelectorAll('select');
-        selects.forEach(select => {
-            select.addEventListener('change', hideTooltip);
-        });
-
-        const labels = document.querySelectorAll('label');
-        labels.forEach(input => {
-            input.addEventListener('click', function(e) {
-                hideTooltip.call(this, 'label');
-            });
-        });
-
-        var hasErrors = {{ $errors->any() ? 'true' : 'false' }};
         var uploadedImage = "{{ session('uploaded_image') }}";
         var hasUploadedImage = uploadedImage && uploadedImage !== "null";
         var vehicleImage = "{{ $vehicle->image ?? '' }}";
@@ -453,9 +386,6 @@
             var hasImageOnLoad = (hasUploadedImage || hasVehicleImage || (originalImageSrc && !originalImageSrc
                 .includes('image-placeholder.png')));
 
-            if (hasErrors) {
-                scrollToFirstError();
-            }
 
             if (hasImageOnLoad) {
                 // Ensure image maintains its source and proper display
@@ -561,13 +491,7 @@
                 checkFormChanges();
             });
 
-            $('form').on('submit', function(e) {
-                if ($('.error').length > 0) {
-                    scrollToFirstError();
-                    return false;
-                }
-            });
-
+            
             $(document).on('click', function(event) {
                 if ($(event.target).is('#card-modal-1-backdrop-1')) {
                     toggleModalCard('card-modal-1');
@@ -584,15 +508,6 @@
             this.value = this.value.replace(/\D/g, '').slice(0, 4);
         });
 
-        function scrollToFirstError() {
-            const firstErrorElement = $('[class*="tooltip"]').first();
-            if (firstErrorElement.length) {
-                const offset = firstErrorElement.offset();
-                $('html, body').animate({
-                    scrollTop: offset.top - 100
-                }, 500);
-            }
-        }
 
         $('#remove_image').on('change', function() {
             if (this.checked) {

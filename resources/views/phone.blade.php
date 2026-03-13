@@ -24,11 +24,11 @@
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                                     </div>
                                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                         <div class="mt-2 w-full text-center">
@@ -67,11 +67,11 @@
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                                     </div>
                                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                         <div class="mt-2 w-full">
@@ -98,7 +98,7 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
                             <button type="button" onclick="closeAjaxErrorModal()"
                                 class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,8 +106,28 @@
                                         d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
+                            <div class="sm:flex sm:items-start justify-center pt-5">
+                                <div class="text-3xl text-center font-FuturaMdCnBT text-black">
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" stroke="#ff0000">
+                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                            stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M12 10V13" stroke="#db0000" stroke-width="2"
+                                                stroke-linecap="round"></path>
+                                            <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2"
+                                                stroke-linecap="round"></path>
+                                            <path
+                                                d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z"
+                                                stroke="#db0000" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round"></path>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <div class="text-center">
                                     <div class="mt-2 w-full">
                                         <p id="ajaxErrorModalMessage" class="can-exp-p text-center"></p>
                                     </div>
@@ -170,12 +190,7 @@
                                     @endforeach
                                 </select>
                                 @error('country')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                             <p class="w-full text-center">{{ $phone_number->phone }}</p>
@@ -277,12 +292,7 @@
                                     @endforeach
                                 </select>
                                 @error('country')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
 
@@ -299,24 +309,14 @@
                                 <input type="tel" pattern="[0-9]+" name="phone" value="{{ old('phone') }}"
                                     placeholder="{{ $phoneSetting->phone_number_placeholder ?? 'Numbers only, with area code' }}"
                                     maxlength="15" inputmode="numeric"
-                                    class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}">
+                                    class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 @error('phone')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         @error('full_phone')
-                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
-                            </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <input type="hidden" id="error_count" value="{{ $errors->any() ?? '' }}">
@@ -334,41 +334,7 @@
                         </button>
                     </div>
                 </form>
-                {{-- <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center" id="card-modal">
-                <div class="relative h-screen my-6 mx-auto flex items-center justify-center w-full">
-                    <!-- content -->
-                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <button type="button" id="hide-modal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
-                            </div>
-                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">Are you sure you want to delete this phone number?</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">Are you sure you want to delete this phone number?</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            <a id="delete-card-link" href="#" class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Delete</a>
-                            <button type="button" id="hide-modal" class="button-exp-fill sm:w-24">{{ $siteText['close_btn_text'] }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="card-modal-backdrop"></div> --}}
+                
                 <div id="modal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog"
                     aria-modal="true">
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
@@ -414,10 +380,10 @@
                                 <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button type="button" id="hide-modal"
                                         class="no-button inline-flex w-full justinline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-auto">
-                                        {{ $successMessage->no_go_back_button_text ?? "No, go back" }}</button>
+                                        {{ $successMessage->no_go_back_button_text ?? 'No, go back' }}</button>
                                     <a id="delete-card-link"
                                         class="cursor-pointer button-exp-red-fill inline-flex w-full justinline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm sm:ml-3 sm:w-auto">
-                                        {{ $successMessage->yes_remove_it_button_text ?? "Yes, remove it" }}</a>
+                                        {{ $successMessage->yes_remove_it_button_text ?? 'Yes, remove it' }}</a>
                                 </div>
                             </div>
                         </div>
@@ -472,13 +438,8 @@
                                         class="w-10 h-10 text-center block mt-1 border p-1.5 text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                 </div>
                                 @error('code')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex left-0 right-0 mx-auto">
-                                        <div role="tooltip"
-                                            class="mt-2 relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded mx-auto">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
-                                    @endif
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
                                 </div>
                             </div>
 
@@ -501,31 +462,7 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
         <script>
-            function hideTooltip(parms) {
-                if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-                    $(this).parent().find('.tooltip').addClass('hidden');
-                } else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-                    $(this).parent().parent().find('.tooltip').addClass('hidden');
-                } else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-                    $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-                }
-            }
-
-            const inputs = document.querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                input.addEventListener('input', hideTooltip); // no parameter on input typing
-            });
-
-            const labels = document.querySelectorAll('label');
-            labels.forEach(input => {
-                input.addEventListener('click', function(e) {
-                    hideTooltip.call(this, 'label'); // pass 'testing' on label click
-                });
-            });
-
-            // if (window.location.pathname === '/en/add-phone') {
-            //   history.replaceState(null, '', '/en/phone'); // Change the URL back to /en/phone on page reload
-            // }
+            
             function initializeCountryCode() {
                 let countryCodeInput = document.querySelector('#addForm input[name="country_code"]');
                 let countryDropdown = document.querySelector('#addForm select[name="country"]');

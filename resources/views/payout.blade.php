@@ -127,22 +127,14 @@
                         <label for="interac_email">Email Address<span class="text-red-500">*</span></label>
                         <input type="email" id="interac_email" name="interac_email" value="{{ old('interac_email', $userBankDetail->interac_email ?? '') }}" {{ optional($userBankDetail)->interac_email ? 'readonly' : '' }} placeholder=" e.g. name@email.com " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('interac_email')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div> 
                         @enderror
                     </div>
                     <div>
                         <label for="interac_email_confirm">Confirm Email Address<span class="text-red-500">*</span></label>
                         <input type="email" id="interac_email_confirm" name="interac_email_confirm" value="{{ old('interac_email_confirm', '') }}" placeholder=" Re-enter your email address " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('interac_email_confirm')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -152,15 +144,11 @@
                                 I have enabled Interac 
                                 <span class="inline-flex items-center relative sups">
                                     Autodeposit
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-500 cursor-help hover:text-blue-700 ml-1 autodeposit-info-icon">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                    </svg>
-                                    <!-- Tooltip -->
-                                    <div class="tooltip hidden shift-right">
-                                        <div class="password-tooltip">
-                                            <p class="text-white">Autodeposit is a bank setting that lets you receive funds instantly without a security question. You can enable it in your bank's mobile app under 'Interac e-Transfer settings'.</p>
-                                        </div>
-                                    </div>
+                                    <span data-tippy-content="Autodeposit is a bank setting that lets you receive funds instantly without a security question. You can enable it in your bank's mobile app under 'Interac e-Transfer settings'.">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-500 cursor-help hover:text-blue-700 ml-1 autodeposit-info-icon">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                        </svg>
+                                    </span>
                                 </span>
                                 for this email address.
                             </label>
@@ -208,11 +196,7 @@
                         <label for="account_holder_name">Account Holder Name<span class="text-red-500">*</span></label>
                         <input type="text" id="account_holder_name" name="account_holder_name" placeholder="As it appears on your bank statement" value="{{ old('account_holder_name', $userBankDetail->bank_title ?? '') }}" {{ optional($userBankDetail)->bank_title ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('account_holder_name')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -220,11 +204,7 @@
                         <label for="transit_number">Transit Number (5 digits)<span class="text-red-500">*</span></label>
                         <input type="text" id="transit_number" name="branch_number" placeholder="The branch code" value="{{ old('branch_number', $userBankDetail->branch_number ?? '') }}" {{ optional($userBankDetail)->branch_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('branch_number')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -232,11 +212,7 @@
                         <label for="institution_number">Institution Number (3 digits)<span class="text-red-500">*</span></label>
                         <input type="text" id="institution_number" name="institution_number" placeholder="The bank code (e.g., 004 for TD, 001 for BMO)" value="{{ old('institution_number', $userBankDetail->institution_number ?? '') }}" {{ optional($userBankDetail)->institution_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('institution_number')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -244,11 +220,7 @@
                         <label for="account_number">Account Number<span class="text-red-500">*</span></label>
                         <input type="text" id="account_number" name="account_holder_number" placeholder="The unique account string (7–12 digits)" value="{{ old('account_holder_number', $userBankDetail->acc_no ?? '') }}" {{ optional($userBankDetail)->acc_no ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('account_holder_number')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -302,22 +274,14 @@
                         <label for="paypal_email">PayPal Email Address<span class="text-red-500">*</span></label>
                         <input type="email" id="paypal_email" name="paypal_email" value="{{ old('paypal_email', $userBankDetail->paypal_email ?? '') }}"  placeholder=" e.g. name@email.com " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('paypal_email')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
                         <label for="paypal_email_confirm">Confirm PayPal Email<span class="text-red-500">*</span></label>
                         <input type="email" id="paypal_email_confirm" name="paypal_email_confirm" value="{{ old('paypal_email_confirm', '') }}" placeholder=" Re-enter your PayPal email " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('paypal_email_confirm')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -369,50 +333,7 @@
 
 @section('style')
 <style>
-    /* Tooltip container */
-    .tooltip {
-        position: absolute;
-        top: calc(100% + 8px); /* BELOW icon */
-        left: 50%;
-        transform: translateX(-50%) translateY(-5px);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        z-index: 50;
-    }
-
-    /* Show tooltip */
-    .tooltip.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(calc(-50% + 30px)) translateY(0);
-        pointer-events: auto;
-    }
-
-    /* Tooltip box */
-    .password-tooltip {
-        position: relative;
-        background-color: #c75b5b;
-        border-radius: 0.5rem;
-        padding: 0.75rem;
-        width: 25rem;
-        text-align: left;
-    }
-
-    /* Arrow pointing UP to icon */
-    .password-tooltip::before {
-        content: "";
-        position: absolute;
-        top: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 8px solid #c75b5b;
-    }
+    
 
     .shift-right {
         margin-right: 50px;
@@ -423,29 +344,6 @@
 @section('script')
 
 <script>
-    function hideTooltip(parms) {
-        if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-            $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-        }
-    }
-
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('input', hideTooltip); // no parameter on input typing
-    });
-
-    const labels = document.querySelectorAll('label');
-    labels.forEach(input => {
-        input.addEventListener('click', function (e) {
-            hideTooltip.call(this, 'label'); // pass 'testing' on label click
-        });
-    });
     
     function updatePayoutFields() {
         const selectedRadio = document.querySelector('input[name="payout_method"]:checked');

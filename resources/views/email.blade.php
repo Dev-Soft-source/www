@@ -38,8 +38,8 @@
                                 {{ $emailSettingPage->email_label }}
                             @endisset
                         </label>
-                        <input type="text" name="old_email" value="{{ $user->email }}" readonly
-                            class="block mt-1 border p-1.5 w-full text-base lg:text-lg bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <input type="text" name="old_email" value="{{ $user->email }}" readonly disabled
+                            class="block mt-1 border p-1.5 w-full text-base lg:text-lg text-gray-500 bg-gray-50 rounded border-gray-300">
                     </div>
                     <div class="mt-3 flex justify-center">
                         <button id="showUpdateForm" type="button" class="button-exp-fill w-28"
@@ -60,12 +60,7 @@
                             <input type="text" name="email" value="{{ old('email') }}"
                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                             @error('email')
-                                <div class="relative tooltip -bottom-4 group-hover:flex mb-2">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mt-3">
@@ -76,28 +71,11 @@
                             </label>
                             <input type="text" name="email_confirmation" value="{{ old('email_confirmation') }}"
                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                                @error('email_confirmation')
-                                <div class="relative tooltip -bottom-4 group-hover:flex mb-2">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
+                            @error('email_confirmation')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                             </div>
-                        {{-- <div class="mt-3">
-                            <label for="">Current password</label>
-                            <input type="password" name="password"
-                                class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                            @error('password')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
-                            @enderror
-                        </div> --}}
+                        
                         <div class="mt-3 flex justify-center w-full">
                             <button type="submit" class="button-exp-fill w-28">
                                 @isset($emailSettingPage->save_btn_label)

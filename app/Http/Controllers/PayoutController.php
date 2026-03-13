@@ -18,63 +18,23 @@ use Illuminate\Http\Request;
 class PayoutController extends Controller
 {
     public function index($lang = null){
-        $languages = Language::all();
-        $payoutOptionPage = null;
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $payoutOptionPage = PayoutOptionSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $payoutOptionPage = PayoutOptionSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
+        
+        $payoutOptionPage = PayoutOptionSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
             $banks = Bank::orderBy('name','asc')->get();
 
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
             $userBankDetail = BankDetail::where('user_id', $user_id)->first();
 
-            return view('payout',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'user' => $user,'banks' => $banks,'userBankDetail' => $userBankDetail,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage, 'payoutOptionPage' => $payoutOptionPage]);
+            return view('payout',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,'user' => $user,'banks' => $banks,'userBankDetail' => $userBankDetail,
+            'payoutOptionPage' => $payoutOptionPage]);
         } else {
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation, 'payoutOptionPage' => $payoutOptionPage]);
+            return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation, 'payoutOptionPage' => $payoutOptionPage]);
         }
     }
 

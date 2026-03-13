@@ -25,11 +25,7 @@
                     @endisset <span class="text-red-500">*</span></label>
                     <input type="text" placeholder="@isset($myVehiclePage->make_placeholder) {{ $myVehiclePage->make_placeholder }} @else Default Placeholder @endisset" name="make" value="{{ old('make') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('make')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div>
@@ -39,11 +35,7 @@
                      <span class="text-red-500">*</span></label>
                     <input type="text" placeholder="@isset($myVehiclePage->model_placeholder) {{ $myVehiclePage->model_placeholder }} @else Default Placeholder @endisset" name="model" value="{{ old('model') }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('model')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div>
@@ -84,11 +76,7 @@
                         </option>
                     </select>
                     @error('type')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -99,11 +87,7 @@
                     <span class="text-red-500">*</span></label>
                     <input type="text" name="liscense_no" value="{{ old('liscense_no') }}" maxlength="8" placeholder="@isset($myVehiclePage->license_plate_number_placeholder) {{ $myVehiclePage->license_plate_number_placeholder }} @endisset" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('liscense_no')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -113,11 +97,7 @@
                     @endisset <span class="text-red-500">*</span></label>
                     <input type="text" name="color" value="{{ old('color') }}" maxlength="15" placeholder="@isset($myVehiclePage->color_placeholder) {{ $myVehiclePage->color_placeholder }} @endisset" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('color')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div>
@@ -126,11 +106,7 @@
                     @endisset <span class="text-red-500">*</span></label>
                     <input type="text" name="year" value="{{ old('year') }}" maxlength="4" placeholder="@isset($myVehiclePage->year_placeholder) {{ $myVehiclePage->year_placeholder }} @endisset" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                     @error('year')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div>
@@ -156,11 +132,7 @@
                         </div>
                     </div>
                     @error('car_type')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="justify-between md:items-center gap-2">
@@ -180,30 +152,10 @@
                         </div>
                     </div>
                     @error('primary_vehicle')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
-                <!-- <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center mt-4 gap-2 md:col-span-2">
-                    <div id="hide-text2" class="text-gray-500"><p>{{ $myVehiclePage->car_photo_label ?? "Car Photo"}}</p></div>
-                    <div id="show-text1" class="text-gray-500 hidden"><p> This is your car. Click on the photo if you want to change it</p></div>
-                    <div id="hide-buttons" class="hidden justify-end gap-2">
-                        <label for="edit-file" class="text-white bg-primary p-1 rounded cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke="1" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
-                            <input id="edit-file" name="image" type="file" onchange="previewImage(this)" class="hidden" />
-                        </label>
-                        <button class="text-red-500 bg-primary p-1 rounded" type="button" onclick="toggleModalCard('card-modal-1')">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-white">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke="1" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </div> -->
+                
                 <div class="md:col-span-2">
                     <label for="dropzone-file" id="dropzone-file-label" class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
@@ -228,11 +180,7 @@
                     </label>
                     @error('image')
                         @if ($message !== 'The image is not uploaded yet' && $message !== 'The image failed to upload')
-                         <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @endif
                     @enderror
                 </div>
@@ -273,10 +221,10 @@
                 </div>
             </div>
             <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                <button id="remove-photo" class="button-exp-fill sm:w-24">
+                <button id="remove-photo" class="button-exp-red-fill">
                     {{ $successMessage->yes_remove_it_button_text ?? "Yes" }}
                 </button>
-                <button type="button" onclick="toggleModalCard('card-modal-1')" class="button-exp-fill sm:w-24">{{ $successMessage->no_go_back_button_text ?? "No" }}</button>
+                <button type="button" onclick="toggleModalCard('card-modal-1')" class="button-exp-fill">{{ $successMessage->no_go_back_button_text ?? "No" }}</button>
             </div>
         </div>
     </div>
@@ -321,39 +269,11 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
-    function hideTooltip(parms) {
-        if ($(this).parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().find('.tooltip').length > 0 && parms != 'label') {
-            $(this).parent().parent().find('.tooltip').addClass('hidden');
-        }
-        else if ($(this).parent().parent().parent().find('.tooltip').length > 0) {
-            $(this).parent().parent().parent().find('.tooltip').addClass('hidden');
-        }
-    }
-
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('input', hideTooltip); // no parameter on input typing
-    });
-
-    const labels = document.querySelectorAll('label');
-    labels.forEach(input => {
-        input.addEventListener('click', function (e) {
-            hideTooltip.call(this, 'label'); // pass 'testing' on label click
-        });
-    });
     
-    var hasErrors = {{ $errors->any() ? 'true' : 'false' }};
     var uploadedImage = "{{ session('uploaded_image') }}";
     var hasUploadedImage = uploadedImage && uploadedImage !== "null";
 
     $(document).ready(function() {
-        // Scroll to first error on page load if there are errors
-        if (hasErrors) {
-            scrollToFirstError();
-        }
 
         if (hasErrors && hasUploadedImage) {
             $('#profile-image').removeClass('w-12');
@@ -373,14 +293,7 @@
             $('#dropzone-file').prop('readonly', true);
         }
 
-        // Handle form submission
-        $('form').on('submit', function(e) {
-            // Check for errors before submitting
-            if ($('.error').length > 0) {
-                scrollToFirstError();
-                return false;
-            }
-        });
+        
 
         // Handle backdrop clicks to close modals
         $(document).on('click', function(event) {
@@ -400,20 +313,7 @@
         this.value = this.value.replace(/\D/g, '').slice(0, 4); // removes non-digits and limits to 4 digits
     });
 
-    function scrollToFirstError() {
-        // Find the first element with error
-        const firstErrorElement = $('[class*="tooltip"]').first();
-
-        if (firstErrorElement.length) {
-            // Get the position of the error element
-            const offset = firstErrorElement.offset();
-
-            // Scroll to the error element with some padding
-            $('html, body').animate({
-                scrollTop: offset.top - 100
-            }, 500);
-        }
-    }
+    
 
     // Event listener for checkbox change
     $('#remove_image').on('change', function() {
