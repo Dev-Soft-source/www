@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
             $table->string('phone_error')->nullable();
             $table->string('country_code_error')->nullable();
         });
@@ -26,7 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
             $table->dropColumn(['country_code_error', 'phone_error']);
         });
     }

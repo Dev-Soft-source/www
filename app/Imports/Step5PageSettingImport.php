@@ -25,9 +25,15 @@ class Step5PageSettingImport implements ToCollection, WithHeadingRow, WithValida
     {
         return [
             'name', 'meta_keywords', 'meta_description', 'main_heading', 'main_label',
-            'sub_main_label', 'required_label', 'driver_license_label', 'driver_license_error',
-            'driver_license_sub_label', 'photo_detail_label', 'mobile_photo_choose_file_label',
-            'skip_license', 'next_button_label', 'liecense_section_heading',
+            'country_code_label', 'country_code_error', 'phone_label', 'phone_error',
+            'skip_button_label', 'skip_phone_number_label', 'verify_button_label', 'verify_code_label', 'enter_code_label',
+            'request_code_label', 'second_label', 'save_button_label', 'send_button_label', 'logout_button_label',
+            'whatsapp_validation_title', 'whatsapp_validation_message',
+            'whatsapp_not_available_title', 'whatsapp_not_available_message',
+            'whatsapp_success_title', 'whatsapp_success_message',
+            'whatsapp_error_title', 'whatsapp_error_message',
+            'whatsapp_limit_title', 'whatsapp_limit_message',
+            'whatsapp_default_title', 'whatsapp_default_message',
         ];
     }
 
@@ -38,6 +44,7 @@ class Step5PageSettingImport implements ToCollection, WithHeadingRow, WithValida
         $firstRow = $rows->first();
         $keys = array_keys($firstRow->toArray());
 
+        // All-languages format: first column "field_name", rest are language columns
         $isAllLanguages = $this->languageId === null
             && (in_array('field_name', $keys) || in_array('field name', $keys))
             && count($keys) > 1;
@@ -129,16 +136,32 @@ class Step5PageSettingImport implements ToCollection, WithHeadingRow, WithValida
             'meta_description' => 'required|string',
             'main_heading' => 'required|string',
             'main_label' => 'required|string',
-            'sub_main_label' => 'required|string',
-            'required_label' => 'required|string',
-            'driver_license_label' => 'required|string',
-            'driver_license_error' => 'required|string',
-            'driver_license_sub_label' => 'required|string',
-            'photo_detail_label' => 'required|string',
-            'mobile_photo_choose_file_label' => 'required|string',
-            'skip_license' => 'required|string',
-            'next_button_label' => 'required|string',
-            'liecense_section_heading' => 'required|string',
+            'country_code_label' => 'required|string',
+            'country_code_error' => 'required|string',
+            'phone_label' => 'required|string',
+            'phone_error' => 'required|string',
+            'skip_button_label' => 'required|string',
+            'skip_phone_number_label' => 'required|string',
+            'verify_button_label' => 'required|string',
+            'verify_code_label' => 'required|string',
+            'enter_code_label' => 'required|string',
+            'request_code_label' => 'required|string',
+            'second_label' => 'required|string',
+            'save_button_label' => 'required|string',
+            'send_button_label' => 'required|string',
+            'logout_button_label' => 'required|string',
+            'whatsapp_validation_title' => 'required|string',
+            'whatsapp_validation_message' => 'required|string',
+            'whatsapp_not_available_title' => 'required|string',
+            'whatsapp_not_available_message' => 'required|string',
+            'whatsapp_success_title' => 'required|string',
+            'whatsapp_success_message' => 'required|string',
+            'whatsapp_error_title' => 'required|string',
+            'whatsapp_error_message' => 'required|string',
+            'whatsapp_limit_title' => 'required|string',
+            'whatsapp_limit_message' => 'required|string',
+            'whatsapp_default_title' => 'required|string',
+            'whatsapp_default_message' => 'required|string',
         ];
     }
 }

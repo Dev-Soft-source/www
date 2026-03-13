@@ -314,7 +314,7 @@ class StepController extends Controller
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the Step3PageSettingDetail associated with the selected language
             $step3Page = Step3PageSettingDetail::where('language_id', $request->lang_id)->first();
-            $step4Page = Step5PageSettingDetail::where('language_id', $request->lang_id)->first();
+            $step4Page = Step4PageSettingDetail::where('language_id', $request->lang_id)->first();
             $postRidePage = PostRidePageSettingDetail::where('language_id', $request->lang_id)->first();
             $step3Page->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
             $step3Page->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($request->lang_id)->value('name');
@@ -338,7 +338,7 @@ class StepController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $step3Page = Step3PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $step4Page = Step5PageSettingDetail::where('language_id', $request->lang_id)->first();
+                $step4Page = Step4PageSettingDetail::where('language_id', $request->lang_id)->first();
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $step3Page->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
                 $step3Page->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');

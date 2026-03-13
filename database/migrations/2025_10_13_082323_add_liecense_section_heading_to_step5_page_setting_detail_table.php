@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
             $table->string('liecense_section_heading')->nullable()->after('next_button_label');
         });
     }
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
             $table->dropColumn('liecense_section_heading');
         });
     }

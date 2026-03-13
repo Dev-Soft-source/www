@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
             $table->text('country_code_label')->nullable();
             $table->text('verify_button_label')->nullable();
             $table->text('verify_code_label')->nullable();
@@ -30,7 +30,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
             $table->dropColumn(['verify_button_label', 'country_code_label', 'verify_code_label', 'enter_code_label',
                 'request_code_label', 'second_label'
             ]);
