@@ -487,165 +487,8 @@
                                 </div>
                             </div>
 
-                            @php
-                                $originText =
-                                    isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                        ? $ride->defaultRideDetail[0]->departure
-                                        : '';
-                                $destinationText =
-                                    isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                        ? $ride->defaultRideDetail[0]->destination
-                                        : '';
-                                $stopsForDisplay = [];
-                                $pricesForDisplay = [];
-                                $segmentIdsForStops = [];
-                                $chainSegments = [];
-                                if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
-                                    $stopsForDisplay = old('stop_spot_display');
-                                    $pricesForDisplay =
-                                        null !== old('price_spot_display') && is_array(old('price_spot_display'))
-                                            ? old('price_spot_display')
-                                            : array_fill(0, count($stopsForDisplay), '');
-                                } elseif (
-                                    null !== old('to_spot') &&
-                                    is_array(old('to_spot')) &&
-                                    count(old('to_spot')) > 0
-                                ) {
-                                    $toSpots = old('to_spot');
-                                    $n = count($toSpots) - 1;
-                                    for ($i = 0; $i < $n; $i++) {
-                                        $stopsForDisplay[] = $toSpots[$i];
-                                    }
-                                    $pricesForDisplay =
-                                        null !== old('price_spot') && is_array(old('price_spot'))
-                                            ? array_slice(old('price_spot'), 0, $n)
-                                            : array_fill(0, count($stopsForDisplay), '');
-                                } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
-                                    // Build ordered chain from origin to destination using only the actual route segments.
-                                    $details = $ride->moreRideDetail->sortBy('id')->values();
-                                    $orderedPoints = collect([$originText]);
-                                    $current = $originText;
-                                    $remaining = $details;
-                                    while ($current !== $destinationText && $remaining->isNotEmpty()) {
-                                        $nextSegment = $remaining->first(function ($d) use ($current) {
-                                            return (string) $d->departure === (string) $current;
-                                        });
-                                        if (!$nextSegment) {
-                                            break;
-                                        }
-                                        $chainSegments[] = $nextSegment;
-                                        $orderedPoints->push($nextSegment->destination);
-                                        $current = $nextSegment->destination;
-                                        $remaining = $remaining->filter(function ($d) use ($nextSegment) {
-                                            return $d->id != $nextSegment->id;
-                                        });
-                                    }
-                                    $segmentIdsForStops = collect($chainSegments)->pluck('id')->values()->all();
-                                    $chainStops =
-                                        $orderedPoints->count() > 2
-                                            ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
-                                            : collect();
-                                    foreach ($chainStops as $index => $stop) {
-                                        $stopsForDisplay[] = $stop;
-                                        if (isset($chainSegments[$index])) {
-                                            $pricesForDisplay[] = $chainSegments[$index]->price ?? '';
-                                        } else {
-                                            $pricesForDisplay[] = '';
-                                        }
-                                    }
-                                }
-                                $stopPickupDropoffForDisplay = [];
-                                if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
-                                    $stopPickupDropoffForDisplay = old('stop_pickup_dropoff');
-                                } elseif (
-                                    !empty($ride->moreRideDetail) &&
-                                    count($ride->moreRideDetail) > 0 &&
-                                    !empty($chainSegments)
-                                ) {
-                                    foreach ($chainSegments as $index => $segment) {
-                                        if ($index >= count($stopsForDisplay)) {
-                                            break;
-                                        }
-                                        $stopPickupDropoffForDisplay[] = $segment->dropoff ?? '';
-                                    }
-                                }
-                                if (empty($stopsForDisplay)) {
-                                    $stopsForDisplay = [''];
-                                    $pricesForDisplay = [''];
-                                }
-                                if (count($pricesForDisplay) !== count($stopsForDisplay)) {
-                                    $pricesForDisplay = array_pad($pricesForDisplay, count($stopsForDisplay), '');
-                                }
-                                if (count($stopPickupDropoffForDisplay) !== count($stopsForDisplay)) {
-                                    $stopPickupDropoffForDisplay = array_pad(
-                                        $stopPickupDropoffForDisplay,
-                                        count($stopsForDisplay),
-                                        '',
-                                    );
-                                }
-                                $segmentsForPrice = [];
-                                $realStops = array_values(
-                                    array_filter($stopsForDisplay, function ($s) {
-                                        return trim((string) $s) !== '';
-                                    }),
-                                );
-                                if (count($realStops) > 0) {
-                                    // Always show only the consecutive segments (origin → stop1, stop1 → stop2, ..., lastStop → destination)
-                                    if (!empty($chainSegments)) {
-                                        $n = count($chainSegments);
-                                        for ($i = 0; $i < $n; $i++) {
-                                            $from = $chainSegments[$i]->departure ?? '';
-                                            $to = $chainSegments[$i]->destination ?? '';
-                                            $segmentsForPrice[] = [
-                                                'from' => $from,
-                                                'to' => $to,
-                                                'price' => $chainSegments[$i]->price ?? '',
-                                            ];
-                                        }
-                                    } elseif (
-                                        null !== old('from_spot') &&
-                                        is_array(old('from_spot')) &&
-                                        null !== old('to_spot') &&
-                                        is_array(old('to_spot')) &&
-                                        count(old('from_spot')) > 0
-                                    ) {
-                                        $fromSpot = old('from_spot');
-                                        $toSpot = old('to_spot');
-                                        $prices =
-                                            null !== old('price_spot') && is_array(old('price_spot'))
-                                                ? old('price_spot')
-                                                : (null !== old('price_spot_display') &&
-                                                is_array(old('price_spot_display'))
-                                                    ? old('price_spot_display')
-                                                    : []);
-                                        for ($i = 0; $i < count($fromSpot); $i++) {
-                                            $segmentsForPrice[] = [
-                                                'from' => $fromSpot[$i] ?? '',
-                                                'to' => $toSpot[$i] ?? '',
-                                                'price' => $prices[$i] ?? '',
-                                            ];
-                                        }
-                                    } else {
-                                        $n = count($realStops);
-                                        $pricesFromOld =
-                                            null !== old('price_spot_display') && is_array(old('price_spot_display'))
-                                                ? old('price_spot_display')
-                                                : [];
-                                        for ($i = 0; $i <= $n; $i++) {
-                                            $from = $i === 0 ? $originText : $realStops[$i - 1];
-                                            $to = $i === $n ? $destinationText : $realStops[$i];
-                                            $segmentsForPrice[] = [
-                                                'from' => $from,
-                                                'to' => $to,
-                                                'price' => isset($pricesFromOld[$i]) ? $pricesFromOld[$i] : '',
-                                            ];
-                                        }
-                                    }
-                                }
-                            @endphp
                             <div class="bg-white rounded-lg overflow-hidden shadow-3xl" id="stops-section-wrapper"
                                 data-segment-ids="{{ json_encode($segmentIdsForStops) }}">
-                                @php $hasStops = count($realStops) > 0; @endphp
                                 <button type="button" id="add-more-spots-toggle"
                                     class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4"
                                     aria-expanded="{{ $hasStops ? 'true' : 'false' }}"
@@ -674,8 +517,9 @@
                                                     @php $renderIndex = $idx + 1; @endphp
                                                     <div class="flex items-center gap-3 stop-row"
                                                         data-stop-index="{{ $renderIndex }}">
-                                                        <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
-                                                            <div class="relative flex-1 min-w-0">
+                                                    <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
+                                                        {{-- 1) Stop city --}}
+                                                        <div class="relative flex-1 min-w-0">
                                                                 <div
                                                                     class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                                                     <img src="{{ asset('assets/search-bar-from.png') }}"
@@ -694,9 +538,31 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
+                                                        {{-- 2) Pick up / drop off (text) --}}
+                                                        <div class="flex-1 min-w-0">
                                                             <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
                                                                 id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
-                                                                class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
+                                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
+                                                        </div>
+                                                        {{-- 3) Time --}}
+                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48">
+                                                            <div class="relative">
+                                                                <div
+                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                </div>
+                                                                <input type="text" name="stop_time[]"
+                                                                    id="stop_time_{{ $renderIndex }}"
+                                                                    value="{{ old('stop_time.' . $idx, $stopTimesForDisplay[$idx] ?? '') }}"
+                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                                    placeholder="">
+                                                            </div>
+                                                        </div>
                                                         </div>
                                                         <button type="button"
                                                             class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -3233,6 +3099,59 @@
                 }
             });
 
+            // Shared initializer for per-stop time inputs (same behavior/style as main time input)
+            function initStopTimePickerForEdit(el) {
+                if (!el || typeof flatpickr === 'undefined') return;
+                try {
+                    if (el._flatpickr) {
+                        el._flatpickr.destroy();
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                const existingVal = el.value || '';
+                const picker = flatpickr(el, {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: 'H:i',
+                    altInput: true,
+                    altFormat: 'H:i',
+                    time_24hr: false,
+                    disableMobile: true,
+                    minTime: getCurrentProjectTime(),
+                    defaultDate: existingVal || '',
+                    minuteIncrement: 1,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        if (selectedDates.length && instance.altInput) {
+                            instance.altInput.value = formatTimeDisplay(selectedDates[0]);
+                        }
+                    },
+                    onClose: function(selectedDates, dateStr, instance) {
+                        if (selectedDates.length && instance.altInput) {
+                            instance.altInput.value = formatTimeDisplay(selectedDates[0]);
+                        }
+                    },
+                });
+                setTimeout(function() {
+                    if (picker.selectedDates.length && picker.altInput) {
+                        picker.altInput.value = formatTimeDisplay(picker.selectedDates[0]);
+                    }
+                }, 0);
+                el.addEventListener('click', function() {
+                    if (!el._flatpickr || !el._flatpickr.input || el._flatpickr.input.value) return;
+                    const projectTime = getCurrentProjectTime();
+                    const [hours, minutes] = projectTime.split(':');
+                    const d = new Date();
+                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                    el._flatpickr.setDate(d, true);
+                });
+            }
+
+            // Initialize any existing stop time inputs on page load
+            document.querySelectorAll('input[name="stop_time[]"]').forEach(function(el) {
+                initStopTimePickerForEdit(el);
+            });
+
         }
 
         function seat_selected(th) {
@@ -4135,9 +4054,22 @@
                 '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex +
                 '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
                 '</div>' +
+                '<div class="flex-1 min-w-0">' +
                 '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' +
                 nextIndex +
-                '" rows="1" placeholder="pick up / drop off" class="flex-1 min-w-0 bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+                '" rows="1" placeholder="pick up / drop off" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+                '</div>' +
+                '<div class="w-32 sm:w-40 md:w-44 lg:w-48">' +
+                '<div class="relative">' +
+                '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />' +
+                '</svg>' +
+                '</div>' +
+                '<input type="text" name="stop_time[]" id="stop_time_' + nextIndex +
+                '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+                '</div>' +
+                '</div>' +
                 '</div>' +
                 '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStop(this)" title="Delete stop" aria-label="Delete stop">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
@@ -4146,6 +4078,11 @@
             var newStopInput = document.getElementById('stop_spot_' + nextIndex);
             if (newStopInput && typeof attachStopAutocompleteEditRide === 'function') attachStopAutocompleteEditRide(
                 newStopInput);
+            // initialize time picker for new stop time input
+            var newStopTimeInput = document.getElementById('stop_time_' + nextIndex);
+            if (newStopTimeInput && typeof initStopTimePickerForEdit === 'function') {
+                initStopTimePickerForEdit(newStopTimeInput);
+            }
             var wrapper = document.getElementById('stops-section-wrapper');
             if (wrapper) {
                 var segIds = [];

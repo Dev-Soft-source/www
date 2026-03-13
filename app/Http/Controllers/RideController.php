@@ -568,7 +568,6 @@ class RideController extends Controller
     {
         $ride = Ride::with(['defaultRideDetail', 'MoreRideDetail'])->where('id', $id)->first();
 
-
         if (!isset($ride) && empty($ride)) {
             $lang = $lang ?? "en";
             return redirect(route('home', ['lang' => $lang]));
@@ -657,8 +656,173 @@ class RideController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
+        // Stops/origin/destination and segment data for edit form (moved from edit_ride.blade.php)
+        $originText = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
+            ? $ride->defaultRideDetail[0]->departure
+            : '';
+        $destinationText = isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
+            ? $ride->defaultRideDetail[0]->destination
+            : '';
+        $stopsForDisplay = [];
+        $pricesForDisplay = [];
+        $segmentIdsForStops = [];
+        $chainSegments = [];
+        if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
+            $stopsForDisplay = old('stop_spot_display');
+            $pricesForDisplay = null !== old('price_spot_display') && is_array(old('price_spot_display'))
+                ? old('price_spot_display')
+                : array_fill(0, count($stopsForDisplay), '');
+        } elseif (null !== old('to_spot') && is_array(old('to_spot')) && count(old('to_spot')) > 0) {
+            $toSpots = old('to_spot');
+            $n = count($toSpots) - 1;
+            for ($i = 0; $i < $n; $i++) {
+                $stopsForDisplay[] = $toSpots[$i];
+            }
+            $pricesForDisplay = null !== old('price_spot') && is_array(old('price_spot'))
+                ? array_slice(old('price_spot'), 0, $n)
+                : array_fill(0, count($stopsForDisplay), '');
+        } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0) {
+            $details = $ride->moreRideDetail->sortBy('id')->values();
+            $orderedPoints = collect([$originText]);
+            $current = $originText;
+            $remaining = $details;
+            while ($current !== $destinationText && $remaining->isNotEmpty()) {
+                $nextSegment = $remaining->first(function ($d) use ($current) {
+                    return (string) $d->departure === (string) $current;
+                });
+                if (!$nextSegment) {
+                    break;
+                }
+                $chainSegments[] = $nextSegment;
+                $orderedPoints->push($nextSegment->destination);
+                $current = $nextSegment->destination;
+                $remaining = $remaining->filter(function ($d) use ($nextSegment) {
+                    return $d->id != $nextSegment->id;
+                });
+            }
+            $segmentIdsForStops = collect($chainSegments)->pluck('id')->values()->all();
+            $chainStops = $orderedPoints->count() > 2
+                ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
+                : collect();
+            foreach ($chainStops as $index => $stop) {
+                $stopsForDisplay[] = $stop;
+                $pricesForDisplay[] = isset($chainSegments[$index]) ? ($chainSegments[$index]->price ?? '') : '';
+            }
+        }
+        $stopPickupDropoffForDisplay = [];
+        if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
+            $stopPickupDropoffForDisplay = old('stop_pickup_dropoff');
+        } elseif (!empty($ride->moreRideDetail) && count($ride->moreRideDetail) > 0 && !empty($chainSegments)) {
+            foreach ($chainSegments as $index => $segment) {
+                if ($index >= count($stopsForDisplay)) {
+                    break;
+                }
+                $stopPickupDropoffForDisplay[] = $segment->dropoff ?? '';
+            }
+        }
+        // Times per stop (for UI).
+        // Prefer old('stop_time') when present.
+        // Otherwise, use the arrival time at that stop:
+        //   the segment whose destination matches this stop, from ride_details.destination_time.
+        $stopTimesForDisplay = [];
+        if (null !== old('stop_time') && is_array(old('stop_time'))) {
+            $stopTimesForDisplay = old('stop_time');
+        } elseif (!empty($chainSegments) && !empty($stopsForDisplay)) {
+            foreach ($stopsForDisplay as $index => $stopName) {
+                $timeForStop = '';
+                foreach ($chainSegments as $seg) {
+                    // When a stop matches a segment's departure ('from'), use that segment's departure time
+                    if ((string) $seg->departure === (string) $stopName && !empty($seg->time)) {
+                        $timeForStop = $seg->time;
+                        break;
+                    }
+                }
+                $stopTimesForDisplay[] = $timeForStop;
+            }
+        }
+        if (empty($stopsForDisplay)) {
+            $stopsForDisplay = [''];
+            $pricesForDisplay = [''];
+        }
+        if (count($pricesForDisplay) !== count($stopsForDisplay)) {
+            $pricesForDisplay = array_pad($pricesForDisplay, count($stopsForDisplay), '');
+        }
+        if (count($stopPickupDropoffForDisplay) !== count($stopsForDisplay)) {
+            $stopPickupDropoffForDisplay = array_pad($stopPickupDropoffForDisplay, count($stopsForDisplay), '');
+        }
+        if (count($stopTimesForDisplay) !== count($stopsForDisplay)) {
+            $stopTimesForDisplay = array_pad($stopTimesForDisplay, count($stopsForDisplay), '');
+        }
+        $segmentsForPrice = [];
+        $realStops = array_values(array_filter($stopsForDisplay, function ($s) {
+            return trim((string) $s) !== '';
+        }));
+        if (count($realStops) > 0) {
+            if (!empty($chainSegments)) {
+                $n = count($chainSegments);
+                for ($i = 0; $i < $n; $i++) {
+                    $segmentsForPrice[] = [
+                        'from' => $chainSegments[$i]->departure ?? '',
+                        'to' => $chainSegments[$i]->destination ?? '',
+                        'price' => $chainSegments[$i]->price ?? '',
+                    ];
+                }
+            } elseif (null !== old('from_spot') && is_array(old('from_spot')) && null !== old('to_spot') && is_array(old('to_spot')) && count(old('from_spot')) > 0) {
+                $fromSpot = old('from_spot');
+                $toSpot = old('to_spot');
+                $prices = null !== old('price_spot') && is_array(old('price_spot'))
+                    ? old('price_spot')
+                    : (null !== old('price_spot_display') && is_array(old('price_spot_display')) ? old('price_spot_display') : []);
+                for ($i = 0; $i < count($fromSpot); $i++) {
+                    $segmentsForPrice[] = [
+                        'from' => $fromSpot[$i] ?? '',
+                        'to' => $toSpot[$i] ?? '',
+                        'price' => $prices[$i] ?? '',
+                    ];
+                }
+            } else {
+                $n = count($realStops);
+                $pricesFromOld = null !== old('price_spot_display') && is_array(old('price_spot_display')) ? old('price_spot_display') : [];
+                for ($i = 0; $i <= $n; $i++) {
+                    $from = $i === 0 ? $originText : $realStops[$i - 1];
+                    $to = $i === $n ? $destinationText : $realStops[$i];
+                    $segmentsForPrice[] = [
+                        'from' => $from,
+                        'to' => $to,
+                        'price' => $pricesFromOld[$i] ?? '',
+                    ];
+                }
+            }
+        }
+        $hasStops = count($realStops) > 0;
 
-        return view('edit_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'postRidePage' => $postRidePage, 'postRideSubDetailPage' => $postRideSubDetailPage, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'edit']);
+        return view('edit_ride', [
+            'notificationPage' => $notificationPage,
+            'successMessage' => $successMessage,
+            'postRidePage' => $postRidePage,
+            'postRideSubDetailPage' => $postRideSubDetailPage,
+            'ride' => $ride,
+            'user' => $user,
+            'vehicles' => $vehicles,
+            'pinkRideSetting' => $pinkRideSetting,
+            'setting' => $setting,
+            'overallRating' => $overallRating,
+            'notifications' => $notifications,
+            'languages' => $languages,
+            'selectedLanguage' => $selectedLanguage,
+            'routeType' => 'edit',
+            'originText' => $originText,
+            'destinationText' => $destinationText,
+            'stopsForDisplay' => $stopsForDisplay,
+            'pricesForDisplay' => $pricesForDisplay,
+            'segmentIdsForStops' => $segmentIdsForStops,
+            'chainSegments' => $chainSegments,
+            'stopPickupDropoffForDisplay' => $stopPickupDropoffForDisplay,
+            'stopTimesForDisplay' => $stopTimesForDisplay,
+            'segmentsForPrice' => $segmentsForPrice,
+            'realStops' => $realStops,
+            'hasStops' => $hasStops,
+        ]);
     }
 
     public function UpdateRide($lang, $ride_id, Request $request)
@@ -1365,7 +1529,16 @@ class RideController extends Controller
                 $rideDetail->total_distance = $distance;
                 $rideDetail->total_duration = $duration;
                 $rideDetail->price = $request->price_spot[$key];
-                $rideDetail->time = $request->time;
+                // Segment departure time: origin segment uses main time; later segments use stop_time[ key - 1 ]
+                $segmentTime = $request->time;
+                if ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && trim((string) $request->stop_time[$key - 1]) !== '') {
+                    try {
+                        $segmentTime = Carbon::parse($request->stop_time[$key - 1])->format('H:i');
+                    } catch (\Throwable $e) {
+                        // keep main time if parse fails
+                    }
+                }
+                $rideDetail->time = $segmentTime;
                 $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
 
                 if (isset($adminSetting)) {
@@ -1433,7 +1606,14 @@ class RideController extends Controller
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
                     $compositeDetail->price = $compositePrice;
-                    $compositeDetail->time = $request->time;
+                    $compositeSegmentTime = $request->time;
+                    if ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && trim((string) $request->stop_time[$i - 1]) !== '') {
+                        try {
+                            $compositeSegmentTime = Carbon::parse($request->stop_time[$i - 1])->format('H:i');
+                        } catch (\Throwable $e) {
+                        }
+                    }
+                    $compositeDetail->time = $compositeSegmentTime;
                     $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
                     if (isset($adminSetting) && isset($ride->date) && isset($ride->time)) {
                         $cumulativeDurationToJ = 0;
@@ -2646,7 +2826,14 @@ class RideController extends Controller
                 $rideDetail->total_distance = $distance;
                 $rideDetail->total_duration = $duration;
                 $rideDetail->price = $request->price_spot[$key];
-                $rideDetail->time = $request->time;
+                $segmentTime = $request->time;
+                if ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && trim((string) $request->stop_time[$key - 1]) !== '') {
+                    try {
+                        $segmentTime = Carbon::parse($request->stop_time[$key - 1])->format('H:i');
+                    } catch (\Throwable $e) {
+                    }
+                }
+                $rideDetail->time = $segmentTime;
                 $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
 
                 if (isset($adminSetting)) {
@@ -2715,7 +2902,14 @@ class RideController extends Controller
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
                     $compositeDetail->price = $compositePrice;
-                    $compositeDetail->time = $request->time;
+                    $compositeSegmentTime = $request->time;
+                    if ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && trim((string) $request->stop_time[$i - 1]) !== '') {
+                        try {
+                            $compositeSegmentTime = Carbon::parse($request->stop_time[$i - 1])->format('H:i');
+                        } catch (\Throwable $e) {
+                        }
+                    }
+                    $compositeDetail->time = $compositeSegmentTime;
                     $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
                     if (isset($adminSetting) && isset($initialRide->date) && isset($initialRide->time)) {
                         $cumulativeDurationToJ = 0;
