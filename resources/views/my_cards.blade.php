@@ -899,10 +899,15 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: JSON.stringify({
-                            payment_method_type: 'card',
-                            stripeToken: setupIntent.payment_method
-                        })
+                        body: JSON.stringify((() => {
+                            const params = new URLSearchParams(window.location.search);
+                            const redirectUrl = params.get('redirectUrl') || null;
+                            return {
+                                payment_method_type: 'card',
+                                stripeToken: setupIntent.payment_method,
+                                redirectUrl: redirectUrl,
+                            };
+                        })())
                     })
                     .then(async response => {
                         const contentType = response.headers.get('content-type');
@@ -916,16 +921,22 @@
                     })
                     .then(data => {
                         if (data && data.success) {
-                            // Store message for success popup after reload
+                            // Store message for success popup
                             if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
                             closeAddPaymentMethodModal();
-                            window.location.reload();
+                            const params = new URLSearchParams(window.location.search);
+                            const redirectUrl = params.get('redirectUrl') || null;
+                            if (redirectUrl) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                window.location.reload();
+                            }
                         } else if (data && data.message) {
                             document.getElementById('payment-element-errors').textContent = data.message;
                             submitButton.disabled = false;
                             submitButton.textContent = 'Add';
                         } else {
-                            // Reload on success
+                            // Fallback: close and reload
                             closeAddPaymentMethodModal();
                             window.location.reload();
                         }
@@ -1072,14 +1083,19 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                payment_method_type: 'apple_pay',
-                payment_method_details: {
-                    card_brand: cardBrand || cardNetwork,
-                    last4: last4
-                },
-                apple_pay_token: payment.token
-            })
+            body: JSON.stringify((() => {
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                return {
+                    payment_method_type: 'apple_pay',
+                    payment_method_details: {
+                        card_brand: cardBrand || cardNetwork,
+                        last4: last4
+                    },
+                    apple_pay_token: payment.token,
+                    redirectUrl: redirectUrl,
+                };
+            })())
         })
         .then(async response => {
             const contentType = response.headers.get('content-type');
@@ -1093,7 +1109,13 @@
         .then(data => {
             if (data.success) {
                 if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
-                window.location.reload();
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.reload();
+                }
             } else {
                 console.error('Apple Pay error:', data.message || 'Unknown error');
                 alert(data.message || 'Failed to add Apple Pay. Please try again.');
@@ -1255,15 +1277,20 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                payment_method_type: 'google_pay',
-                payment_method_details: {
-                    card_brand: cardDescription,
-                    card_type: cardBrand,
-                    last4: cardDetails
-                },
-                google_pay_token: token
-            })
+            body: JSON.stringify((() => {
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                return {
+                    payment_method_type: 'google_pay',
+                    payment_method_details: {
+                        card_brand: cardDescription,
+                        card_type: cardBrand,
+                        last4: cardDetails
+                    },
+                    google_pay_token: token,
+                    redirectUrl: redirectUrl,
+                };
+            })())
         })
         .then(async response => {
             const contentType = response.headers.get('content-type');
@@ -1277,7 +1304,13 @@
         .then(data => {
             if (data.success) {
                 if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
-                window.location.reload();
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.reload();
+                }
             } else {
                 console.error('Google Pay error:', data.message || 'Unknown error');
                 alert(data.message || 'Failed to add Google Pay. Please try again.');
@@ -1398,11 +1431,16 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                payment_method_type: 'paypal',
-                paypal_email: details.payer.email_address,
-                paypal_payer_id: details.payer.payer_id
-            })
+            body: JSON.stringify((() => {
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                return {
+                    payment_method_type: 'paypal',
+                    paypal_email: details.payer.email_address,
+                    paypal_payer_id: details.payer.payer_id,
+                    redirectUrl: redirectUrl,
+                };
+            })())
         })
         .then(async response => {
             const contentType = response.headers.get('content-type');
@@ -1416,7 +1454,13 @@
         .then(data => {
             if (data.success) {
                 if (data.message) sessionStorage.setItem('cardAddSuccess', data.message);
-                window.location.reload();
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirectUrl') || null;
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.reload();
+                }
             } else {
                 console.error('PayPal error:', data.message || 'Unknown error');
                 alert(data.message || 'Failed to add PayPal. Please try again.');

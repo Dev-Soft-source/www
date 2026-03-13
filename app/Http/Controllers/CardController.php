@@ -30,7 +30,6 @@ class CardController extends Controller
         // Clear booking context when viewing payment options so "add card" from here doesn't redirect to a booking
         session()->forget(['bookingId', 'rideDetailId', 'rideId', 'type']);
 
-            
         $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -176,24 +175,19 @@ class CardController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
         $paymentMethodType = $request->input('payment_method_type', 'card');
-        
-        $selectedLanguage = session('selectedLanguage', Language::where('is_default', 1)->first()->abbreviation);
-        $message = null;
-        if ($selectedLanguage) {
-            $language = Language::where('abbreviation', $selectedLanguage)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $language->id)->select('card_add_message', 'already_added_card_message')->first();
-        }
+
+        $message = $this->successMessage;
 
         try {
             // Handle different payment method types
             if ($paymentMethodType === 'card') {
-                return $this->storeCard($request, $user, $user_id, $message, $selectedLanguage);
+                return $this->storeCard($request, $user, $user_id, $message, $this->selectedLanguage);
             } elseif ($paymentMethodType === 'paypal') {
-                return $this->storePayPal($request, $user, $user_id, $message, $selectedLanguage);
+                return $this->storePayPal($request, $user, $user_id, $message, $this->selectedLanguage);
             } elseif ($paymentMethodType === 'apple_pay') {
-                return $this->storeApplePay($request, $user, $user_id, $message, $selectedLanguage);
+                return $this->storeApplePay($request, $user, $user_id, $message, $this->selectedLanguage);
             } elseif ($paymentMethodType === 'google_pay') {
-                return $this->storeGooglePay($request, $user, $user_id, $message, $selectedLanguage);
+                return $this->storeGooglePay($request, $user, $user_id, $message, $this->selectedLanguage);
             } else {
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json(['success' => false, 'message' => 'Invalid payment method type'], 400);
@@ -304,31 +298,21 @@ class CardController extends Controller
 
         if (isset($user->email_notification) && $user->email_notification == 1) {
             $emailData = ['first_name' => $user->first_name];
-            Mail::to($user->email)->send(new CardAddedEmail($emailData));
+            Mail::to($user->email)->queue(new CardAddedEmail($emailData));
         }
 
         $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
 
+        // If a redirectUrl query/body param is present, prefer redirecting there
+        $redirectUrl = $request->input('redirectUrl');
+        
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => $successMessage]);
+            return response()->json(['success' => true, 'message' => $successMessage, 'redirect' => $redirectUrl]);
         }
-
-        // If user came from booking flow, return to the correct booking page to complete payment
-        $bookingId = session('bookingId');
-        $rideId = session('rideId');
-        $rideDetailId = session('rideDetailId');
-        $type = session('type');
-
-        if ($bookingId && $type === 'edit-booking') {
-            // Came from edit-booking page
-            return redirect()->route('booking.edit', ['lang' => $selectedLanguage, 'id' => $bookingId])
-                ->with('message', $successMessage);
-        }
-
-        if ($rideId && $rideDetailId && $type === 'booking') {
-            // Came from initial booking page (booking.blade.php)
-            return redirect()->route('booking', ['lang' => $selectedLanguage, 'id' => $rideId, 'rideDetailId' => $rideDetailId])
-                ->with('message', $successMessage);
+            
+        if ($redirectUrl) {
+            // Basic safety: only allow absolute URLs
+            return redirect()->to($redirectUrl)->with('message', $successMessage);
         }
 
         return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $successMessage);
@@ -381,11 +365,18 @@ class CardController extends Controller
             'exp_year' => '0',
         ]);
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
-        }
+        $successMessage = 'You have successfully added the card to your profile.';
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
+        $redirectUrl = $request->input('redirectUrl');
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $successMessage, 'redirect' => $redirectUrl]);
+        }
+        if ($redirectUrl) {
+            return redirect()->to($redirectUrl)->with('message', $successMessage);
+        }
+            
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $successMessage);
     }
     
     private function storeApplePay(Request $request, $user, $user_id, $message, $selectedLanguage)
@@ -441,7 +432,7 @@ class CardController extends Controller
             Card::where('user_id', $user_id)->update(['primary_card' => 0]);
         }
 
-        Card::create([
+        $card = Card::create([
             'user_id' => $user_id,
             'payment_method_type' => 'apple_pay',
             'payment_method_details' => $request->payment_method_details,
@@ -452,11 +443,18 @@ class CardController extends Controller
             'primary_card' => $primary_card,
         ]);
 
+        $successMessage = 'You have successfully added the card to your profile.';
+
+        $redirectUrl = $request->input('redirectUrl');
+        
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
+            return response()->json(['success' => true, 'message' => $successMessage, 'redirect' => $redirectUrl]);
+        }
+        if ($redirectUrl) {
+            return redirect()->to($redirectUrl)->with('message', $successMessage);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $successMessage);
     }
     
     private function storeGooglePay(Request $request, $user, $user_id, $message, $selectedLanguage)
@@ -572,8 +570,7 @@ class CardController extends Controller
     {
         $user = auth()->user();
         if (!$user) {
-            $lang = session('selectedLanguage', Language::where('is_default', 1)->first()?->abbreviation ?? 'en');
-            return redirect()->route('login', ['lang' => $lang])->withErrors(['error' => 'Please log in to delete your card']);
+            return redirect()->route('login', ['lang' => $this->selectedLanguage->abbreviation])->withErrors(['error' => 'Please log in to delete your card']);
         }
 
         $card = Card::find($id);
@@ -618,7 +615,7 @@ class CardController extends Controller
                 $emailData = [
                     'first_name' => $user->first_name,
                 ];
-                Mail::to($user->email)->send(new CardRemovedEmail($emailData));
+                Mail::to($user->email)->queue(new CardRemovedEmail($emailData));
             }
 
             $notification = Notification::create([
@@ -655,13 +652,9 @@ class CardController extends Controller
                 }
             }
 
-            $message = null;
-            $selectedLanguage = session('selectedLanguage', Language::where('is_default', 1)->first()->abbreviation);
-            if ($selectedLanguage) {
-                $language = Language::where('abbreviation', $selectedLanguage)->first();
-                $message = SuccessMessagesSettingDetail::where('language_id', $language->id)->select('card_delete_message')->first();
-            }
-            return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $message->card_delete_message);
+            $message = $this->successMessage;
+
+            return redirect()->route('my_cards', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->card_delete_message);
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'An error occurred while deleting your card. Please try again']);
         }

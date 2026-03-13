@@ -1814,27 +1814,7 @@
     </script>
 
     <script>
-        function storeDataAndRedirect() {
-            var data = {
-                rideDetailId: @json($ride->rideDetail[0]->id),
-                rideId: @json($ride->rideDetail[0]->ride_id),
-                type: 'booking',
-                lang: @json($selectedLanguage->abbreviation),
-                _token: '{{ csrf_token() }}'
-            };
-
-            $.ajax({
-                url: '{{ route('my_cards.sessionData') }}',
-                type: 'POST',
-                data: data,
-                success: function(response) {
-                    window.location.href = '{{ route('my_cards.create', ['lang' => '__lang__']) }}'.replace(
-                        '__lang__', data.lang);
-
-                },
-
-            });
-        }
+        
         var bookingSeatsStorageKey = 'booking_seats_{{ $ride->id }}_{{ $ride->rideDetail[0]->id }}';
 
         $(document).ready(function() {
