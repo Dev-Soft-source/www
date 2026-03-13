@@ -27,7 +27,7 @@ class Controller extends BaseController
 
     protected $selectedLanguage;
 
-    protected $siteText;
+    protected $successMessage;
 
     public function __construct()
     {
@@ -53,9 +53,9 @@ class Controller extends BaseController
 
         // $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $this->siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Share notifications with all views
         $this->middleware(function ($request, $next) use ($lang) {
@@ -156,8 +156,8 @@ class Controller extends BaseController
         View::share([
             'selectedLanguage' => $this->selectedLanguage,
             'languages' => $languages,
-            'siteText' => $this->siteText,
-            'successMessage' => $successMessage,
+            'siteText' => $siteText,
+            'successMessage' => $this->successMessage,
             // 'ratings' => $ratings,
             // 'notificationPage' => $notificationPage,
         ]);

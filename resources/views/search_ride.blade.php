@@ -29,11 +29,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div class="mx-auto h-16 w-16 flex-shrink-0 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                        </svg>
-                                    </div> -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        </div> -->
                             </div>
                             <div class="mt-4 w-full">
                                 <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -100,11 +100,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                </svg>
+                                            </div> -->
                             </div>
                             <div class="text-center">
 
@@ -133,11 +133,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                             </div>
                             <div class="text-center">
                                 <div class="w-full">
@@ -224,13 +224,13 @@
                                                         {{ $findRidePage->ride_features_option2->name }}
                                                     </span>
                                                     <!-- <div class="sups">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                                                viewBox="0 0 16 16">
-                                                                                <path
-                                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                                            </svg>
-                                                                        </div> -->
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                                                        viewBox="0 0 16 16">
+                                                                                        <path
+                                                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                                                    </svg>
+                                                                                </div> -->
                                                 </label>
                                                 <input id="Extra+" type="checkbox"
                                                     value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
@@ -953,13 +953,13 @@
                                                 in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
                                                 (auth()->user()->gender !== 'female' ||
                                                     ($pinkRideSetting->verfiy_phone_passenger == 1
-                                                        ? !auth()->user()->phone_numbers->contains('verified', 1)
+                                                        ? !auth()->user()->phoneNumbers->contains('verified', 1)
                                                         : false)))
                                             href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only female passengers @if ($pinkRideSetting->verfiy_phone_passenger == 1) with verified number @endif
                                         can select this ride')" @elseif (isset($findRidePage->ride_features_option18) &&
                                                 auth()->user() &&
                                                 in_array($findRidePage->ride_features_option18->features_setting_id, explode('=', $ride->features)) &&
-                                                !auth()->user()->phone_numbers->contains('verified', 1))
+                                                !auth()->user()->phoneNumbers->contains('verified', 1))
                                             href="javascript:void(0);"
                                             onclick="toggleModal1('modal-id1', 'This driver accepts only phone-verified passengers.')"
                                         @elseif (auth()->user() &&
@@ -1049,7 +1049,8 @@
                                                 <div class="pr-8">
                                                     <div class="pr-8">
                                                         <p class="font-medium">
-                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}</p>
+                                                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}
+                                                        </p>
                                                     </div>
                                                     {{-- {{ dd($postRidePage->cancellation_policy_label1->features_setting_id,$ride->booking_type) }} --}}
                                                     <p class="text-xl font-semibold text-primary">
@@ -1139,7 +1140,8 @@
                                                                     @php $segmentPickup = $rideDetail->pickup ?? $ride->pickup; @endphp
                                                                     @if (!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                            {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1170,7 +1172,8 @@
                                                                     @php $segmentDropoff = $rideDetail->dropoff ?? $ride->dropoff; @endphp
                                                                     @if (!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                            {{ $segmentDropoff }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1446,7 +1449,7 @@
                                                             @if ($ride->getDriverHasRatings())
                                                                 {{ number_format($ride->getDriverAverageRating(), 1) }}
                                                             @else
-                                                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }} 
+                                                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                                             @endif
                                                         </span>
 
@@ -1462,7 +1465,7 @@
 
                                                     </div>
                                                 </div>
-                                                
+
                                             </div>
                                 </div>
                                 @if ($isPinkAndExtraCare)
@@ -1619,11 +1622,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                        </svg>
-                                                    </div> -->
+                                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                            </svg>
+                                                        </div> -->
                             </div>
                             <div class="text-center w-full">
                                 <h3 class="card-heading"></h3>
@@ -2221,7 +2224,7 @@
             fromInput.addEventListener('input', function() {
                 if (isSettingPlaceValue) return;
                 if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace =
-                null;
+                    null;
             });
             toInput.addEventListener('input', function() {
                 if (isSettingPlaceValue) return;

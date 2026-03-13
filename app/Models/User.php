@@ -42,7 +42,7 @@ class User extends Authenticatable
         } elseif ($this->gender === 'prefer not to say' || $this->gender === 'Prefer not to say') {
             return rtrim(config('app.url'), '/') . '/assets/neutral.png';
         }
-        
+
         return null;
     }
 
@@ -63,10 +63,10 @@ class User extends Authenticatable
         } elseif ($this->gender === 'prefer not to say' || $this->gender === 'Prefer not to say') {
             return rtrim(config('app.url'), '/') . '/assets/neutral.png';
         }
-        
+
         return null;
     }
-    
+
     public function getDriverLiscenseAttribute($value)
     {
         // You can perform any transformation you need here
@@ -74,7 +74,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/driver_liscenses/' . $value;
         }
-        
+
         return null;
     }
 
@@ -85,7 +85,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/driver_liscenses/' . $value;
         }
-        
+
         return null;
     }
 
@@ -96,7 +96,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/student_cards/' . $value;
         }
-        
+
         return null;
     }
 
@@ -107,7 +107,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/student_cards/' . $value;
         }
-        
+
         return null;
     }
 
@@ -118,7 +118,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/users_government_ids/' . $value;
         }
-        
+
         return null;
     }
 
@@ -129,7 +129,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/users_government_ids/' . $value;
         }
-        
+
         return null;
     }
 
@@ -140,7 +140,7 @@ class User extends Authenticatable
             // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/en/signup-with-referral/' . $value;
         }
-        
+
         return null;
     }
 
@@ -163,39 +163,67 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    function messages(){
+    function messages()
+    {
         return $this->hasMany(Message::class);
     }
 
-    function rides(){
+    function rides()
+    {
         return $this->hasMany(Ride::class, 'added_by');
     }
 
-    function bookings(){
+    function bookings()
+    {
         return $this->hasMany(Booking::class, 'user_id');
     }
 
-    function vehicles(){
+    function vehicles()
+    {
         return $this->hasMany(Vehicle::class, 'user_id');
     }
 
-    function phone_numbers(){
+    function phoneNumbers()
+    {
         return $this->hasMany(PhoneNumber::class, 'user_id');
     }
 
-    function driver_payout(){
+    public function hasPhone()
+    {
+        return $this->phoneNumbers()->exists();
+    }
+
+    public function hasVerifiedPhone()
+    {
+        return $this->phoneNumbers()
+            ->where('verified', 1)
+            ->exists();
+    }
+
+    public function primaryPhone()
+    {
+        return $this->phoneNumbers()
+            ->where('default', 1)
+            ->first();
+    }
+
+    function driver_payout()
+    {
         return $this->hasMany(Payout::class, 'user_id');
     }
 
-    function bankDetail(){
+    function bankDetail()
+    {
         return $this->hasOne(BankDetail::class, 'user_id');
     }
 
-    function seatDetail(){
+    function seatDetail()
+    {
         return $this->hasMany(SeatDetail::class, 'user_id');
     }
 
-    function phoneNumber(){
-        return $this->hasMany(PhoneNumber::class, 'user_id');
+    public function isBlockedBooking()
+    {
+        return $this->block_booking;
     }
 }

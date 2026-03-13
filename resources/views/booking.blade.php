@@ -104,7 +104,7 @@
             @endphp
         @endif
 
-        {{-- {{ dd(session()->all()) }} --}}
+
         @if (session('failure'))
             <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -121,22 +121,17 @@
                             </button>
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
-                                    <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
+
                                 </div>
                                 <div class="mt-10 text-center sm:text-left">
-
                                     <div class="mt-2">
                                         <p class="text-lg text-center text-black">{!! session('failure') !!}</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                <a href=""
-                                    class="whitespace-nowrap inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
+                                <a href="javascript:void(0);" class="whitespace-nowrap inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
+                                    {{ $siteText['close_btn_text'] }}</a>
                                 @if (session()->has('phone') && !is_null(session('phone')))
                                     <a href="{{ route('send_verification_code_booking', session('phone')->id) }}"
                                         class="button-exp-fill py-1.5 w-36 px-2 text-center inline-block ">
@@ -1497,106 +1492,7 @@
                                                     {{ $bookingPage->like_to_pay_label }}
                                                 @endisset
                                             </h3>
-                                            <div class="bg-white md:p-4">
-                                                <div class="border rounded-md overflow-hidden divide-y">
-                                                    <div class="flex items-center justify-between p-3">
-                                                        <input type="radio" id="paypal" name="payment_method"
-                                                            value="paypal" class="hidden peer">
-                                                        <label for="paypal"
-                                                            class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                            <span class="font-medium text-xl">
-                                                                @isset($bookingPage->paypal_label)
-                                                                    {{ $bookingPage->paypal_label }}
-                                                                @endisset
-                                                            </span>
-                                                        </label>
-                                                    </div>
-                                                    <div>
-                                                        <div class="flex items-center justify-between p-3">
-                                                            <input type="radio" id="credit_card" name="payment_method"
-                                                                value="credit_card" class="hidden peer"
-                                                                {{ old('payment_method') === 'credit_card' ? 'checked' : '' }}>
-                                                            <label for="credit_card"
-                                                                class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                                <span class="font-medium text-xl">
-                                                                    @isset($bookingPage->credit_card_label)
-                                                                        {{ $bookingPage->credit_card_label }}
-                                                                    @endisset
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                        @php
-                                                            $primaryCardId =
-                                                                $cards->firstWhere(
-                                                                    fn($c) => $c->primary_card == 1 ||
-                                                                        $c->primary_card === '1',
-                                                                )?->id ?? '';
-                                                            $cards = $cards
-                                                                ->filter(fn($c) => $c->paymentMethod)
-                                                                ->values();
-                                                        @endphp
-                                                        <div
-                                                            class="cards mt-2 pb-2 {{ old('payment_method') === 'credit_card' ? '' : 'hidden' }}">
-                                                            @foreach ($cards as $card)
-                                                                @if ($card->paymentMethod)
-                                                                    <div class="flex items-start justify-between p-3">
-                                                                        <label for="card_id_{{ $card->id }}"
-                                                                            class="font-normal text-gray-900 flex items-start space-x-1">
-                                                                            <div>
-                                                                                <p class="leading-normal mt-2">
-                                                                                    **** **** ****
-                                                                                    {{ $card->paymentMethod->card->last4 }}
-                                                                                </p>
-                                                                                <div
-                                                                                    class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                                                    <small>{{ ucfirst($card->paymentMethod->card->brand) }}</small>
-                                                                                </div>
-                                                                            </div>
-                                                                        </label>
-                                                                        <input type="radio"
-                                                                            id="card_id_{{ $card->id }}"
-                                                                            name="card_id" value="{{ $card->id }}"
-                                                                            {{ old('card_id', $primaryCardId) == $card->id ? 'checked' : '' }}
-                                                                            class="w-4 h-4 mt-2 ml-4 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-                                                                    </div>
-                                                                @endif
-                                                            @endforeach
-                                                            @error('card_id')
-                                                                <div id="card_id-laravel-error"
-                                                                    class="relative tooltip -bottom-4 group-hover:flex">
-                                                                    <div role="tooltip"
-                                                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                                        <p
-                                                                            class="text-white leading-none text-sm lg:text-base">
-                                                                            {{ $message }}</p>
-                                                                    </div>
-                                                                </div>
-                                                            @enderror
-                                                            @if ($cards->isEmpty())
-                                                                <div class="flex justify-center items-center mt-4">
-                                                                    <button onclick="storeDataAndRedirect()"
-                                                                        class="button-exp-fill">
-                                                                        @isset($bookingPage->add_card_label)
-                                                                            {{ $bookingPage->add_card_label }}
-                                                                        @endisset
-                                                                    </button>
-                                                                </div>
-                                                            @endif
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                @error('payment_method')
-                                                    <div id="payment_method-laravel-error"
-                                                        class="relative tooltip -bottom-4 group-hover:flex">
-                                                        <div role="tooltip"
-                                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                            <p class="text-white leading-none text-sm lg:text-base">
-                                                                {{ $message }}</p>
-                                                        </div>
-                                                    </div>
-                                                @enderror
-                                            </div>
+                                            <x-payment-list :cards="$cards" :paymentSettingDetail="$paymentSettingDetail" />
                                         </div>
                                     @endif
 
