@@ -319,9 +319,9 @@ return
 			],
 			'email' =>
 			[
-				'required' => 'The new email is required.',
-				'email' => 'The new email is not a valid email address.',
-				'unique' => 'The new email is already taken.',
+				'required' => 'The email is required.',
+				'email' => 'The email is not a valid email address.',
+				'unique' => 'The email is already taken.',
 			],
 			'pass1' =>
 			[
