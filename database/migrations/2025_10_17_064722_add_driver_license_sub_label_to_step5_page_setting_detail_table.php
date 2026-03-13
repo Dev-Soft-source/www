@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
             $table->text('driver_license_sub_label')->nullable()->after('main_label');
         });
     }
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('step5_page_setting_detail', function (Blueprint $table) {
+        Schema::table('step4_page_setting_detail', function (Blueprint $table) {
             $table->dropColumn('driver_license_sub_label');
         });
     }

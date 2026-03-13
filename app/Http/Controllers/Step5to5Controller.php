@@ -6,7 +6,7 @@ use App\Models\Country;
 use App\Models\Language;
 use App\Models\Notification;
 use App\Models\PhoneNumber;
-use App\Models\Step4PageSettingDetail;
+use App\Models\Step5PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
 use Carbon\Carbon;
@@ -25,7 +25,7 @@ class Step5to5Controller extends Controller
         $user = auth()->user();
         $countries = Country::where('status', '1')->orderBy('name')->get();
         
-        $step5Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step5Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Update step
         if (request()->has('skip')) {
@@ -53,7 +53,7 @@ class Step5to5Controller extends Controller
         $selectedLanguage = $sessionLang
             ? Language::where('abbreviation', $sessionLang)->first() ?? Language::where('is_default', 1)->first()
             : Language::where('is_default', 1)->first();
-        $step4Page = $selectedLanguage ? Step4PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
+        $step4Page = $selectedLanguage ? Step5PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
         $message = $selectedLanguage
             ? SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('admin_block_account_message')->first()
             : null;
@@ -238,7 +238,7 @@ class Step5to5Controller extends Controller
             : $request->country_code;
         $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode);
 
-        $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $country = $request->country
             ? optional(Country::find($request->country))->iso_code

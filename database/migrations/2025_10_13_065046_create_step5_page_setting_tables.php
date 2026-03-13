@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('step5_page_setting', function (Blueprint $table) {
+        Schema::create('step4_page_setting', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
         });
 
-        Schema::create('step5_page_setting_detail', function (Blueprint $table) {
+        Schema::create('step4_page_setting_detail', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('step5_page_setting_id')
+            $table->foreignId('step4_page_setting_id')
                 ->constrained()
-                ->on('step5_page_setting')
+                ->on('step4_page_setting')
                 ->references('id')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
@@ -56,7 +56,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('step5_page_setting_detail');
-        Schema::dropIfExists('step5_page_setting');
+        Schema::dropIfExists('step4_page_setting_detail');
+        Schema::dropIfExists('step4_page_setting');
     }
 };
