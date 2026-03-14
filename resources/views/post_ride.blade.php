@@ -3088,6 +3088,10 @@
         var $wrappers = $el.parent().find('.tooltip-error').parent();
         if ($wrappers.length === 0) $wrappers = $el.parent().parent().find('.tooltip-error').parent();
         if ($wrappers.length === 0) $wrappers = $el.parent().parent().parent().find('.tooltip-error').parent();
+        // Do not hide From/To tooltips when the user is typing in another field (they have their own input/focus handlers)
+        if (this.id !== 'from_spot_0' && this.id !== 'to_spot_0') {
+            $wrappers = $wrappers.not('#fromInputError, #toInputError');
+        }
         if ($wrappers.length > 0) $wrappers.addClass('hidden');
     }
 
@@ -3581,6 +3585,17 @@
                 var hasAnyValidationError = false;
                 var firstErrorElement = null;
 
+                // 1. Block submit if From/To tooltip errors are visible
+                var fromInputError = document.getElementById('fromInputError');
+                var toInputError = document.getElementById('toInputError');
+                if (fromInputError && !fromInputError.classList.contains('hidden')) {
+                    hasAnyValidationError = true;
+                    if (!firstErrorElement) firstErrorElement = document.getElementById('from_spot_0');
+                }
+                if (toInputError && !toInputError.classList.contains('hidden')) {
+                    hasAnyValidationError = true;
+                    if (!firstErrorElement) firstErrorElement = document.getElementById('to_spot_0');
+                }
 
                 // 3. Validate stop inputs
                 var stopsContainer = document.getElementById('stops-rows-container');
@@ -3627,9 +3642,6 @@
                     }
                     return;
                 }
-                if (fromInputError) fromInputError.classList.add('hidden');
-                if (toInputError) toInputError.classList.add('hidden');
-                if (agreeTermsError) agreeTermsError.classList.add('hidden');
 
                 // Check if validation should be bypassed (user clicked "Keep Current Price")
                 const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
@@ -4059,15 +4071,17 @@
                                 var te = fromInputError.querySelector('.tooltip-error');
                                 if (te) te.textContent = errorCityMissingPostRide;
                                 fromInputError.classList.remove('hidden');
-                            } else if (fromInputError) fromInputError.classList.add(
-                                'hidden');
-                        } else if (fromInputError) fromInputError.classList.add('hidden');
+                            }
+                            // do not hide fromInputError here when user left the field (blur); only hide when they interact with From (input/focus/place_changed/Enter)
+                        } else {
+                            // resolved and valid: still do not hide on blur so tooltip does not disappear when driver types in another input
+                        }
                         if (typeof fetchAndStoreDistance === 'function' && toInput &&
                             toInput.value) fetchAndStoreDistance(0);
                     });
                 } else {
                     if (currentValue === '' || !selectedFromPlace || currentValue !==
-                        selectedFromPlace.value) {
+                            selectedFromPlace.value) {
                         selectedFromPlace = null;
                         if (currentValue !== '' && fromInputError) {
                             var te = fromInputError.querySelector('.tooltip-error');
@@ -4075,7 +4089,8 @@
                                 errorFromRequiredPostRide : errorCityMissingPostRide;
                             fromInputError.classList.remove('hidden');
                         }
-                    } else if (fromInputError) fromInputError.classList.add('hidden');
+                    }
+                    // do not hide fromInputError on blur when user switched to another field
                     if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value)
                         fetchAndStoreDistance(0);
                 }
@@ -4099,8 +4114,11 @@
                                 var te = toInputError.querySelector('.tooltip-error');
                                 if (te) te.textContent = errorCityMissingPostRide;
                                 toInputError.classList.remove('hidden');
-                            } else if (toInputError) toInputError.classList.add('hidden');
-                        } else if (toInputError) toInputError.classList.add('hidden');
+                            }
+                            // do not hide toInputError on blur so tooltip does not disappear when driver types in another input
+                        } else {
+                            // resolved and valid: still do not hide on blur
+                        }
                         if (typeof fetchAndStoreDistance === 'function' && fromInput &&
                             fromInput.value) fetchAndStoreDistance(0);
                     });
@@ -4114,7 +4132,8 @@
                                 errorCityMissingPostRide;
                             toInputError.classList.remove('hidden');
                         }
-                    } else if (toInputError) toInputError.classList.add('hidden');
+                    }
+                    // do not hide toInputError on blur when user switched to another field
                     if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value)
                         fetchAndStoreDistance(0);
                 }
