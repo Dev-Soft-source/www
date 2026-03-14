@@ -150,8 +150,19 @@
                 }, 500)();
             }
         }
-    
-    </script>
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var fromEl = document.getElementById('from_spot_0');
+        var toEl = document.getElementById('to_spot_0');
+        var fromError = document.getElementById('from-server-error');
+        var toError = document.getElementById('to-server-error');
+        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
+        function hideToError() { if (toError) toError.classList.add('hidden'); }
+        if (fromError) fromEl.addEventListener('input', hideFromError);
+        if (toError) toEl.addEventListener('input', hideToError);
+    });
+</script>
 
     <div class="container px-4 mx-auto my-14 page-post_a_ride">
         @if (session('error'))
@@ -1113,7 +1124,7 @@
                                     @endfor
                                 </div>
                                 @error('seats')
-                                <div class="mt-1 z-10 w-full" id="seats-server-error">
+                                <div class="mt-1 z-10 w-full">
                                     <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
@@ -3067,10 +3078,12 @@
 
 
     function hideTooltip(parms) {
-        // Hide only the validation tooltip for THIS field (same immediate parent), not tooltips for other fields
+        // Hide validation tooltips (wrapper is parent of .tooltip-error)
         if (parms === 'label') return;
         var $el = $(this);
         var $wrappers = $el.parent().find('.tooltip-error').parent();
+        if ($wrappers.length === 0) $wrappers = $el.parent().parent().find('.tooltip-error').parent();
+        if ($wrappers.length === 0) $wrappers = $el.parent().parent().parent().find('.tooltip-error').parent();
         if ($wrappers.length > 0) $wrappers.addClass('hidden');
     }
 
@@ -3564,45 +3577,6 @@
                 var hasAnyValidationError = false;
                 var firstErrorElement = null;
 
-                // 1. Validate From (origin) – block submit if empty
-                var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
-                var toVal = (document.getElementById('to_spot_0') || {}).value || '';
-                var fromInputError = document.getElementById('fromInputError');
-                var toInputError = document.getElementById('toInputError');
-                var fromInvalid = !fromVal.trim();
-                var toInvalid = !toVal.trim();
-                if (fromInputError) fromInputError.classList.toggle('hidden', !fromInvalid);
-                if (fromInvalid && fromInputError) {
-                    var te = fromInputError.querySelector('.tooltip-error');
-                    if (te) te.textContent = (typeof errorFromRequiredPostRide !== 'undefined' ? errorFromRequiredPostRide : 'The origin is required.');
-                }
-                if (toInputError) toInputError.classList.toggle('hidden', !toInvalid);
-                if (toInvalid && toInputError) {
-                    var te2 = toInputError.querySelector('.tooltip-error');
-                    if (te2) te2.textContent = (typeof errorToRequiredPostRide !== 'undefined' ? errorToRequiredPostRide : 'The destination is required.');
-                }
-                if (fromInvalid) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = document.getElementById('from_spot_0');
-                }
-                if (toInvalid) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = document.getElementById('to_spot_0');
-                }
-
-                // 2. Validate Seats – block submit if not selected
-                var seatsInput = document.querySelector('input[name="seats"]:checked');
-                var seatsInputError = document.getElementById('seatsInputError');
-                var seatsInvalid = !seatsInput || !seatsInput.value;
-                if (seatsInputError) seatsInputError.classList.toggle('hidden', !seatsInvalid);
-                if (seatsInvalid && seatsInputError) {
-                    var teSeats = seatsInputError.querySelector('.tooltip-error');
-                    if (teSeats) teSeats.textContent = (typeof errorSeatsRequiredPostRide !== 'undefined' ? errorSeatsRequiredPostRide : 'Please select the available seats.');
-                }
-                if (seatsInvalid) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = document.getElementById('seats-section-post') || document.querySelector('input[name="seats"]');
-                }
 
                 // 3. Validate stop inputs
                 var stopsContainer = document.getElementById('stops-rows-container');
@@ -3649,22 +3623,9 @@
                     }
                     return;
                 }
-                // Block submit if From or To tooltip is still visible (e.g. invalid city from blur validation)
-                if (fromInputError && !fromInputError.classList.contains('hidden')) {
-                    e.preventDefault();
-                    if (document.getElementById('from_spot_0')) document.getElementById('from_spot_0').focus();
-                    return;
-                }
-                if (toInputError && !toInputError.classList.contains('hidden')) {
-                    e.preventDefault();
-                    if (document.getElementById('to_spot_0')) document.getElementById('to_spot_0').focus();
-                    return;
-                }
-                var agreeTermsError = document.getElementById('agreeTermsError');
-                if (agreeTermsError && !agreeTermsError.classList.contains('hidden')) {
-                    e.preventDefault();
-                    return;
-                }
+                if (fromInputError) fromInputError.classList.add('hidden');
+                if (toInputError) toInputError.classList.add('hidden');
+                if (agreeTermsError) agreeTermsError.classList.add('hidden');
 
                 // Check if validation should be bypassed (user clicked "Keep Current Price")
                 const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
@@ -4571,10 +4532,6 @@
     });
 
     function seat_selected(th) {
-        var seatsErr = document.getElementById('seatsInputError');
-        if (seatsErr) seatsErr.classList.add('hidden');
-        var seatsServerErr = document.getElementById('seats-server-error');
-        if (seatsServerErr) seatsServerErr.classList.add('hidden');
         var seat = parseInt($(th).val());
 
         for (i = 1; i <= seat; i++) {
@@ -5262,13 +5219,6 @@
         // Listen for changes on from_spot_0 and to_spot_0
         const fromInput0 = document.getElementById('from_spot_0');
         const toInput0 = document.getElementById('to_spot_0');
-
-        var fromError = document.getElementById('from-server-error');
-        var toError = document.getElementById('to-server-error');
-        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
-        function hideToError() { if (toError) toError.classList.add('hidden'); }
-        if (fromError) fromInput0.addEventListener('input', hideFromError);
-        if (toError) toInput0.addEventListener('input', hideToError);
 
         if (fromInput0) {
             fromInput0.addEventListener('blur', function() {
