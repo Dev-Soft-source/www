@@ -1276,6 +1276,56 @@
                         </div>
                     </div>
 
+                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
+                        <div class="bg-primary text-white py-2 px-4">
+                            <h3>
+                                Cancellation policy
+                            </h3>
+                        </div>
+                        <div class="bg-white p-4">
+                            <div>
+                                <div class="space-y-2 mt-2">
+                                    @isset($postRidePage->cancellation_policy_label1->features_setting_id)
+                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                            <input id="standard" name="booking_type" type="radio"
+                                                value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
+                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id ? 'checked' : '' }}
+                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="standard"
+                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                                <span class="">
+                                                    {{ $postRidePage->cancellation_policy_label1->name }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                    @endisset
+                                    @isset($postRidePage->cancellation_policy_label2->features_setting_id)
+                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
+                                            <input id="firm" name="booking_type" type="radio"
+                                                value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
+                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
+                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="firm"
+                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
+                                                <span class="">
+                                                    {{ $postRidePage->cancellation_policy_label2->name }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                    @endisset
+                                </div>
+                                @error('booking_type')
+                                    <div class="relative tooltip -bottom-4 group-hover:flex">
+                                        <div role="tooltip"
+                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-primary text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <!--Vehicle label-->
                     <div class="mt-6">
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
@@ -2365,55 +2415,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-6">
-                        <div class="bg-primary text-white py-2 px-4">
-                            <h3>
-                                Cancellation policy
-                            </h3>
-                        </div>
-                        <div class="bg-white p-4">
-                            <div>
-                                <div class="space-y-2 mt-2">
-                                    @isset($postRidePage->cancellation_policy_label1->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="standard" name="booking_type" type="radio"
-                                                value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
-                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="standard"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                <span class="">
-                                                    {{ $postRidePage->cancellation_policy_label1->name }}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endisset
-                                    @isset($postRidePage->cancellation_policy_label2->features_setting_id)
-                                        <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="firm" name="booking_type" type="radio"
-                                                value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
-                                                {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
-                                                class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                            <label for="firm"
-                                                class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                                <span class="">
-                                                    {{ $postRidePage->cancellation_policy_label2->name }}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    @endisset
-                                </div>
-                                @error('booking_type')
-                                    <div class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-primary text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <div class=" mt-6">
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
@@ -2981,6 +2983,15 @@
             inputElement.addEventListener('focus', function() {
                 var err = getStopErrorElementEditRide(inputElement);
                 if (err) err.classList.add('hidden');
+            });
+            // Enter: resolve typed city (autocomplete logic like search_ride.blade.php)
+            inputElement.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    if (typeof resolveTypedCityValueForStopPostRide === 'function') {
+                        resolveTypedCityValueForStopPostRide(this);
+                    }
+                }
             });
             inputElement.addEventListener('blur', function() {
                 if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;

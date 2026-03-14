@@ -14,6 +14,8 @@ use Carbon\Carbon;
 
 class Step3to5Controller extends Controller
 {
+    private const MAX_VEHICLE_IMAGE_SIZE_KB = 10240;
+
     public function create($lang = null)
     {
         $user = auth()->user();
@@ -104,7 +106,13 @@ class Step3to5Controller extends Controller
             $file = $request->file('image');
             $extension = strtolower($file->getClientOriginalExtension());
             $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
-            
+
+            if ($file->getSize() > (self::MAX_VEHICLE_IMAGE_SIZE_KB * 1024)) {
+                return redirect()->back()
+                    ->withErrors(['image' => 'The image must be less than 10MB.'])
+                    ->withInput();
+            }
+
             if (!in_array($extension, $allowedExtensions)) {
                 return redirect()->back()->withErrors(['image' => 'The image must be a file of type: jpeg, png, jpg, gif.'])->withInput();
             }
@@ -119,7 +127,7 @@ class Step3to5Controller extends Controller
             'color' => 'required',
             'year' => 'required',
             'car_type' => 'required',
-            'image' => 'nullable|file|max:10240',
+            'image' => 'nullable|file|max:' . self::MAX_VEHICLE_IMAGE_SIZE_KB,
         ], [
             'make.required' => 'The make is required',
             'model.required' => 'The model is required',
