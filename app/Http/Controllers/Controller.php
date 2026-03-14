@@ -37,31 +37,56 @@ class Controller extends BaseController
 
         $this->defaultLang = getDefaultLanguage();
 
-        $lang = request()->route('lang'); // get route parameter
-        if ($lang) {
-            session(['selectedLanguage' => $lang]);
-        } else {
-            $lang = request()->query('lang');
-            if (!$lang) {
-                $lang = session('selectedLanguage', $this->defaultLang->abbreviation);
+        // Initialize language-dependent data per request so POST/PUT routes
+        // without a {lang} segment still inherit the active locale correctly.
+        $this->middleware(function ($request, $next) {
+            $lang = $request->route('lang');
+
+            if ($lang) {
+                session(['selectedLanguage' => $lang]);
+            } else {
+                $lang = $request->query('lang');
+
+                if (!$lang) {
+                    $lang = session('selectedLanguage');
+                }
+
+                if (!$lang && auth()->check() && auth()->user()->lang) {
+                    $lang = auth()->user()->lang;
+                }
+
+                if (!$lang) {
+                    $lang = $this->defaultLang->abbreviation;
+                }
+
+                session(['selectedLanguage' => $lang]);
             }
-            session(['selectedLanguage' => $lang]);
-        }
-        $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
 
-        $languages = Language::all();
+            $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
 
-        // $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            if (!$this->selectedLanguage) {
+                $this->selectedLanguage = $this->defaultLang;
+                session(['selectedLanguage' => $this->defaultLang->abbreviation]);
+            }
 
-        $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $languages = Language::all();
+            $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+            View::share([
+                'selectedLanguage' => $this->selectedLanguage,
+                'languages' => $languages,
+                'siteText' => $siteText,
+                'successMessage' => $this->successMessage,
+                // 'ratings' => $ratings,
+                // 'notificationPage' => $notificationPage,
+            ]);
 
-        // Share notifications with all views
-        $this->middleware(function ($request, $next) use ($lang) {
             if (auth()->check()) {
                 $user = auth()->user();
                 $user_id = $user->id;
+                $lang = $this->selectedLanguage->abbreviation;
+
                 // Redirect users based on their profile completion step when they try to access certain routes
                 $routeName = request()->route()->getName();
                 if ($routeName === 'profile' || $routeName === 'welcomeRoute') {
@@ -150,17 +175,6 @@ class Controller extends BaseController
 
             return $next($request);
         });
-
-        // $ratings = Rating::all();
-
-        View::share([
-            'selectedLanguage' => $this->selectedLanguage,
-            'languages' => $languages,
-            'siteText' => $siteText,
-            'successMessage' => $this->successMessage,
-            // 'ratings' => $ratings,
-            // 'notificationPage' => $notificationPage,
-        ]);
     }
 
     /**
