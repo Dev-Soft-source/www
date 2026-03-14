@@ -345,6 +345,11 @@ return [
             'string' => 'Ang bio ay dapat isang string.',
             'max' => 'Ang bio ay hindi maaaring lumampas sa :max na mga character.',
         ],
+        'phone' => [
+            'required' => 'Kinakailangan ang numero ng telepono.',
+            'valid' => 'Pakiusap maglagay ng wastong numero ng telepono.',
+            'unique' => 'Mayroon nang account na may ganitong numero ng telepono.',
+        ],
 
         'payment_method' => [
             'required' => 'Kinakailangan ang paraan ng pagbabayad.',

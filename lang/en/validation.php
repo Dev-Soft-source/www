@@ -392,6 +392,12 @@ return
 				'string' => 'The bio must be a string.',
 				'max' => 'The bio may not be greater than :max characters.',
 			],
+			'phone' =>
+			[
+				'required' => 'Phone number is required.',
+				'valid' => 'Please enter a valid phone number.',
+				'unique' => 'An account with this phone number already exists.',
+			],
 		],
 		'attributes' =>
 		[

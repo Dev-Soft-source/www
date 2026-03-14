@@ -345,6 +345,11 @@ return [
             'string' => 'La bio doit etre une chaine de caracteres.',
             'max' => 'La bio ne doit pas depasser :max caracteres.',
         ],
+        'phone' => [
+            'required' => 'Le numéro de téléphone est obligatoire.',
+            'valid' => 'Veuillez entrer un numéro de téléphone valide.',
+            'unique' => 'Un compte avec ce numéro de téléphone existe déjà.',
+        ],
 
         'payment_method' => [
             'required' => 'La méthode de paiement est obligatoire.',
