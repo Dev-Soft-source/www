@@ -150,19 +150,8 @@
                 }, 500)();
             }
         }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var fromEl = document.getElementById('from_spot_0');
-        var toEl = document.getElementById('to_spot_0');
-        var fromError = document.getElementById('from-server-error');
-        var toError = document.getElementById('to-server-error');
-        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
-        function hideToError() { if (toError) toError.classList.add('hidden'); }
-        if (fromEl) fromEl.addEventListener('input', hideFromError);
-        if (toEl) toEl.addEventListener('input', hideToError);
-    });
-</script>
+    
+    </script>
 
     <div class="container px-4 mx-auto my-14 page-post_a_ride">
         @if (session('error'))
@@ -1124,7 +1113,7 @@
                                     @endfor
                                 </div>
                                 @error('seats')
-                                <div class="mt-1 z-10 w-full">
+                                <div class="mt-1 z-10 w-full" id="seats-server-error">
                                     <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
@@ -1278,15 +1267,7 @@
                                     <input type="number" step="any" id="priceData0DynamicInput" placeholder=""
                                         value="{{ old('price', '') }}"
                                         class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
-                                </div>
-                                <div id="full-route-tooltip-container-dynamic"
-                                    class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
-                                    <div
-                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        The full-route price can't be higher than the total of all route sections.<br>
-                                        You can lower the full-route price or adjust section prices.
-                                    </div>
-                                </div>
+                                </div>                                
                             </div>
                             <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
                             <div class="relative mt-2 mb-4">
@@ -3086,12 +3067,10 @@
 
 
     function hideTooltip(parms) {
-        // Hide validation tooltips (wrapper is parent of .tooltip-error)
+        // Hide only the validation tooltip for THIS field (same immediate parent), not tooltips for other fields
         if (parms === 'label') return;
         var $el = $(this);
         var $wrappers = $el.parent().find('.tooltip-error').parent();
-        if ($wrappers.length === 0) $wrappers = $el.parent().parent().find('.tooltip-error').parent();
-        if ($wrappers.length === 0) $wrappers = $el.parent().parent().parent().find('.tooltip-error').parent();
         if ($wrappers.length > 0) $wrappers.addClass('hidden');
     }
 
@@ -3316,6 +3295,9 @@
         return document.getElementById('priceData0');
     }
 
+    // When modal was triggered by a segment (stop) price, focus that input on "Adjust Price"
+    window.lastSegmentPriceInputForModal = null;
+
     // Function to adjust price (focus on price input field)
     function adjustPriceFromError() {
         const modal = document.getElementById('priceErrorModal');
@@ -3323,7 +3305,8 @@
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
-        const priceInput = getActivePriceInput();
+        const priceInput = window.lastSegmentPriceInputForModal || getActivePriceInput();
+        window.lastSegmentPriceInputForModal = null;
         if (priceInput) {
             priceInput.scrollIntoView({
                 behavior: 'smooth',
@@ -3345,7 +3328,8 @@
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
-        const priceInput = getActivePriceInput();
+        const priceInput = window.lastSegmentPriceInputForModal || getActivePriceInput();
+        window.lastSegmentPriceInputForModal = null;
         if (priceInput) {
             priceInput.scrollIntoView({
                 behavior: 'smooth',
@@ -3373,6 +3357,61 @@
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
+    }
+
+    // Validate a single segment (stop) price against that segment's route distance; show error/warning popup if exceeded.
+    function runSegmentPriceValidationOnInput(segmentInputEl) {
+        if (!segmentInputEl || segmentInputEl.name !== 'price_spot_display[]') return;
+        const price = parseFloat(segmentInputEl.value);
+        if (!price || price <= 0) return;
+        const from = segmentInputEl.getAttribute('data-segment-from');
+        const to = segmentInputEl.getAttribute('data-segment-to');
+        if (!from || !to) return;
+        const seatsInput = document.querySelector('input[name="seats"]:checked');
+        const seats = seatsInput ? parseInt(seatsInput.value) : 0;
+        if (!seats || seats <= 0) return;
+
+        function doValidate(distanceKm) {
+            if (!distanceKm || distanceKm <= 0) return;
+            const validation = validatePricePerSeat(price, distanceKm, seats);
+            if (!validation.valid) {
+                window.lastSegmentPriceInputForModal = segmentInputEl;
+                showPriceErrorModal(validation.maxPricePerSeat);
+                return;
+            }
+            if (validation.type === 'warning') {
+                window.lastSegmentPriceInputForModal = segmentInputEl;
+                showPriceWarningModal(function() {
+                    closePriceWarningModal();
+                });
+            }
+        }
+
+        const cachedDist = segmentInputEl.getAttribute('data-segment-distance');
+        if (cachedDist) {
+            const distanceKm = parseFloat(cachedDist);
+            doValidate(distanceKm);
+            return;
+        }
+        if (typeof $ === 'undefined') return;
+        $.ajax({
+            url: '{{ url("get-cities-distance") }}',
+            type: 'POST',
+            data: {
+                search: from,
+                searchData: to,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function(result) {
+                const distanceValue = result.distance || (result.data && result.data.distance) || null;
+                if (distanceValue && parseFloat(distanceValue) > 0) {
+                    const distanceKm = parseFloat(distanceValue);
+                    segmentInputEl.setAttribute('data-segment-distance', distanceKm);
+                    doValidate(distanceKm);
+                }
+            }
+        });
     }
 
     // Handle form submission errors
@@ -3405,24 +3444,43 @@
             });
         }
 
-        // When driver inputs an exceeded price, show the error or warning popup (Exceeds $0.72/km or $0.66–$0.72/km)
+        // When driver inputs an exceeded price, show the error or warning popup (Exceeds $0.72/km or $0.66–$0.72/km).
+        // In segment mode: validate segment total first; if none, validate full-route field. Otherwise single price.
         function runPriceValidationOnInput() {
             const dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
             const isSegmentMode = dynamicBlock && dynamicBlock.offsetParent !== null && dynamicBlock.style.display !== 'none';
             const priceInput = document.getElementById('priceData0');
             const dynamicPriceInput = document.getElementById('priceData0DynamicInput');
+            // In segment mode the full-route input gets id="priceData0", so resolve by class when needed
+            const fullRouteInput = dynamicPriceInput || (dynamicBlock ? dynamicBlock.querySelector('.full-route-price-input') : null) || priceInput;
             let price = null;
-            if (isSegmentMode && dynamicPriceInput && dynamicPriceInput.value) {
-                const fullRoutePrice = parseFloat(dynamicPriceInput.value);
-                const seatsInput = document.querySelector('input[name="seats"]:checked');
-                const seatsVal = seatsInput ? parseInt(seatsInput.value) : 0;
-                price = (seatsVal > 0 && !isNaN(fullRoutePrice)) ? fullRoutePrice / seatsVal : null;
+            if (isSegmentMode) {
+                const segmentTotalEl = document.getElementById('segment-total-price-input-dynamic');
+                let segmentTotal = 0;
+                if (segmentTotalEl && segmentTotalEl.value) {
+                    segmentTotal = parseFloat(segmentTotalEl.value) || 0;
+                }
+                if (segmentTotal <= 0 && dynamicBlock) {
+                    const segmentInputs = dynamicBlock.querySelectorAll('input[name="price_spot_display[]"]');
+                    segmentInputs.forEach(function(inp) {
+                        const v = parseFloat(inp.value);
+                        if (!isNaN(v)) segmentTotal += v;
+                    });
+                }
+                if (segmentTotal > 0) {
+                    price = segmentTotal;
+                } else if (fullRouteInput && fullRouteInput.value) {
+                    const fullRoutePrice = parseFloat(fullRouteInput.value);
+                    const seatsInput = document.querySelector('input[name="seats"]:checked');
+                    const seatsVal = seatsInput ? parseInt(seatsInput.value) : 0;
+                    price = (seatsVal > 0 && !isNaN(fullRoutePrice)) ? fullRoutePrice / seatsVal : null;
+                }
             } else if (priceInput && priceInput.value) {
                 price = parseFloat(priceInput.value);
             }
             if (!price || price <= 0) return;
             let distance = null;
-            const distSource = priceInput || dynamicPriceInput;
+            const distSource = priceInput || fullRouteInput;
             if (distSource && typeof $ !== 'undefined') {
                 distance = $(distSource).data('distance') || window.rideDistance;
             } else {
@@ -3439,10 +3497,12 @@
             if (!distance || distance <= 0 || !seats || seats <= 0) return;
             const validation = validatePricePerSeat(price, distance, seats);
             if (!validation.valid) {
+                if (window.lastSegmentPriceInputForModal !== undefined) window.lastSegmentPriceInputForModal = null;
                 showPriceErrorModal(validation.maxPricePerSeat);
                 return;
             }
             if (validation.type === 'warning') {
+                if (window.lastSegmentPriceInputForModal !== undefined) window.lastSegmentPriceInputForModal = null;
                 showPriceWarningModal(function() {
                     closePriceWarningModal();
                 });
@@ -3453,6 +3513,14 @@
         function schedulePriceValidationOnInput() {
             if (priceValidationDebounce) clearTimeout(priceValidationDebounce);
             priceValidationDebounce = setTimeout(runPriceValidationOnInput, 600);
+        }
+
+        var segmentPriceValidationDebounce = null;
+        function scheduleSegmentPriceValidationOnInput(segmentInputEl) {
+            if (segmentPriceValidationDebounce) clearTimeout(segmentPriceValidationDebounce);
+            segmentPriceValidationDebounce = setTimeout(function() {
+                if (typeof runSegmentPriceValidationOnInput === 'function') runSegmentPriceValidationOnInput(segmentInputEl);
+            }, 600);
         }
 
         const priceInputEl = document.getElementById('priceData0');
@@ -3466,6 +3534,28 @@
             dynamicPriceInputEl.addEventListener('change', runPriceValidationOnInput);
         }
 
+        // When driver edits any segment (stop) price: update total, run full-total validation, and run per-segment validation (popup for individual route distance)
+        form.addEventListener('input', function(e) {
+            if (e.target && e.target.name === 'price_spot_display[]') {
+                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
+                schedulePriceValidationOnInput();
+                scheduleSegmentPriceValidationOnInput(e.target);
+            }
+            if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
+                schedulePriceValidationOnInput();
+            }
+        });
+        form.addEventListener('change', function(e) {
+            if (e.target && e.target.name === 'price_spot_display[]') {
+                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
+                runPriceValidationOnInput();
+                if (typeof runSegmentPriceValidationOnInput === 'function') runSegmentPriceValidationOnInput(e.target);
+            }
+            if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
+                runPriceValidationOnInput();
+            }
+        });
+
         // Add our submit handler with capture phase to run first
         form.addEventListener('submit', function(e) {
             disablePostRideSubmitButtons();
@@ -3474,6 +3564,45 @@
                 var hasAnyValidationError = false;
                 var firstErrorElement = null;
 
+                // 1. Validate From (origin) – block submit if empty
+                var fromVal = (document.getElementById('from_spot_0') || {}).value || '';
+                var toVal = (document.getElementById('to_spot_0') || {}).value || '';
+                var fromInputError = document.getElementById('fromInputError');
+                var toInputError = document.getElementById('toInputError');
+                var fromInvalid = !fromVal.trim();
+                var toInvalid = !toVal.trim();
+                if (fromInputError) fromInputError.classList.toggle('hidden', !fromInvalid);
+                if (fromInvalid && fromInputError) {
+                    var te = fromInputError.querySelector('.tooltip-error');
+                    if (te) te.textContent = (typeof errorFromRequiredPostRide !== 'undefined' ? errorFromRequiredPostRide : 'The origin is required.');
+                }
+                if (toInputError) toInputError.classList.toggle('hidden', !toInvalid);
+                if (toInvalid && toInputError) {
+                    var te2 = toInputError.querySelector('.tooltip-error');
+                    if (te2) te2.textContent = (typeof errorToRequiredPostRide !== 'undefined' ? errorToRequiredPostRide : 'The destination is required.');
+                }
+                if (fromInvalid) {
+                    hasAnyValidationError = true;
+                    if (!firstErrorElement) firstErrorElement = document.getElementById('from_spot_0');
+                }
+                if (toInvalid) {
+                    hasAnyValidationError = true;
+                    if (!firstErrorElement) firstErrorElement = document.getElementById('to_spot_0');
+                }
+
+                // 2. Validate Seats – block submit if not selected
+                var seatsInput = document.querySelector('input[name="seats"]:checked');
+                var seatsInputError = document.getElementById('seatsInputError');
+                var seatsInvalid = !seatsInput || !seatsInput.value;
+                if (seatsInputError) seatsInputError.classList.toggle('hidden', !seatsInvalid);
+                if (seatsInvalid && seatsInputError) {
+                    var teSeats = seatsInputError.querySelector('.tooltip-error');
+                    if (teSeats) teSeats.textContent = (typeof errorSeatsRequiredPostRide !== 'undefined' ? errorSeatsRequiredPostRide : 'Please select the available seats.');
+                }
+                if (seatsInvalid) {
+                    hasAnyValidationError = true;
+                    if (!firstErrorElement) firstErrorElement = document.getElementById('seats-section-post') || document.querySelector('input[name="seats"]');
+                }
 
                 // 3. Validate stop inputs
                 var stopsContainer = document.getElementById('stops-rows-container');
@@ -3520,9 +3649,22 @@
                     }
                     return;
                 }
-                if (fromInputError) fromInputError.classList.add('hidden');
-                if (toInputError) toInputError.classList.add('hidden');
-                if (agreeTermsError) agreeTermsError.classList.add('hidden');
+                // Block submit if From or To tooltip is still visible (e.g. invalid city from blur validation)
+                if (fromInputError && !fromInputError.classList.contains('hidden')) {
+                    e.preventDefault();
+                    if (document.getElementById('from_spot_0')) document.getElementById('from_spot_0').focus();
+                    return;
+                }
+                if (toInputError && !toInputError.classList.contains('hidden')) {
+                    e.preventDefault();
+                    if (document.getElementById('to_spot_0')) document.getElementById('to_spot_0').focus();
+                    return;
+                }
+                var agreeTermsError = document.getElementById('agreeTermsError');
+                if (agreeTermsError && !agreeTermsError.classList.contains('hidden')) {
+                    e.preventDefault();
+                    return;
+                }
 
                 // Check if validation should be bypassed (user clicked "Keep Current Price")
                 const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
@@ -3543,21 +3685,47 @@
                     return;
                 }
 
-                // Validate price per seat before submission
+                // Validate price per seat before submission (same as runPriceValidationOnInput: single, full-route, or segment total)
                 const priceInput = document.getElementById('priceData0');
-                const price = priceInput ? parseFloat(priceInput.value) : null;
+                const dynamicBlockSubmit = document.getElementById('stops-segment-prices-dynamic');
+                const isSegmentModeSubmit = dynamicBlockSubmit && dynamicBlockSubmit.offsetParent !== null && dynamicBlockSubmit.style.display !== 'none';
+                const dynamicPriceInputSubmit = document.getElementById('priceData0DynamicInput');
+
+                let price = null;
+                if (isSegmentModeSubmit) {
+                    const segmentTotalEl = document.getElementById('segment-total-price-input-dynamic');
+                    let segmentTotal = 0;
+                    if (segmentTotalEl && segmentTotalEl.value) {
+                        segmentTotal = parseFloat(segmentTotalEl.value) || 0;
+                    }
+                    if (segmentTotal <= 0 && dynamicBlockSubmit) {
+                        dynamicBlockSubmit.querySelectorAll('input[name="price_spot_display[]"]').forEach(function(inp) {
+                            const v = parseFloat(inp.value);
+                            if (!isNaN(v)) segmentTotal += v;
+                        });
+                    }
+                    if (segmentTotal > 0) {
+                        price = segmentTotal;
+                    } else if (dynamicPriceInputSubmit && dynamicPriceInputSubmit.value) {
+                        const fullRoutePrice = parseFloat(dynamicPriceInputSubmit.value);
+                        const seatsForPrice = document.querySelector('input[name="seats"]:checked');
+                        const s = seatsForPrice ? parseInt(seatsForPrice.value) : 1;
+                        price = s > 0 ? fullRoutePrice / s : fullRoutePrice;
+                    }
+                }
+                if (price == null && priceInput && priceInput.value) {
+                    price = parseFloat(priceInput.value);
+                }
 
                 // Get distance - try from data attribute first, then global variable
                 let distance = null;
-                if (priceInput && typeof $ !== 'undefined') {
-                    distance = $(priceInput).data('distance') || window.rideDistance;
+                const distSource = priceInput || dynamicPriceInputSubmit;
+                if (distSource && typeof $ !== 'undefined') {
+                    distance = $(distSource).data('distance') || window.rideDistance;
                 } else {
                     distance = window.rideDistance;
                 }
-
-                // If distance is not available, try to get it from hidden input or calculate it
                 if (!distance || distance <= 0) {
-                    // Try to get from hidden input if available
                     const distanceInput = document.querySelector(
                         'input[name="distance"], input[id*="distance"]');
                     if (distanceInput && distanceInput.value) {
@@ -3577,6 +3745,7 @@
                     price: price,
                     distance: distance,
                     seats: seats,
+                    isSegmentMode: isSegmentModeSubmit,
                     hasPriceInput: !!priceInput,
                     hasSeatsInput: !!seatsInput,
                     windowRideDistance: window.rideDistance
@@ -4402,6 +4571,10 @@
     });
 
     function seat_selected(th) {
+        var seatsErr = document.getElementById('seatsInputError');
+        if (seatsErr) seatsErr.classList.add('hidden');
+        var seatsServerErr = document.getElementById('seats-server-error');
+        if (seatsServerErr) seatsServerErr.classList.add('hidden');
         var seat = parseInt($(th).val());
 
         for (i = 1; i <= seat; i++) {
@@ -4834,18 +5007,12 @@
         var fullRouteInput = container.querySelector('input[name="price"]') || container.querySelector(
             '.full-route-price-input');
         var totalInput = container.querySelector('#segment-total-price-input-dynamic');
-        var tooltip = container.querySelector('#full-route-tooltip-container-dynamic');
-        if (!fullRouteInput || !totalInput || !tooltip) return;
+        if (!fullRouteInput || !totalInput) return;
         if (container.style.display === 'none' || !container.offsetParent) return;
         var fullVal = parseFloat(fullRouteInput.value);
         var totalVal = parseFloat(totalInput.value);
         if (isNaN(fullVal)) fullVal = 0;
         if (isNaN(totalVal)) totalVal = 0;
-        if (fullVal > totalVal) {
-            tooltip.classList.remove('hidden');
-        } else {
-            tooltip.classList.add('hidden');
-        }
     }
 
     function syncSegmentPricesUIPostRide() {
@@ -4886,9 +5053,7 @@
                 singlePriceInput.id = 'priceData0';
             }
             var rowsDyn = document.getElementById('segment-price-rows-dynamic');
-            if (rowsDyn) rowsDyn.innerHTML = '';
-            var tooltipDyn = document.getElementById('full-route-tooltip-container-dynamic');
-            if (tooltipDyn) tooltipDyn.classList.add('hidden');
+            if (rowsDyn) rowsDyn.innerHTML = '';            
             return;
         }
         if (singleBlock) singleBlock.style.display = 'none';
@@ -4942,6 +5107,8 @@
             } else if (initialPrices[j] !== undefined && initialPrices[j] !== null && initialPrices[j] !== '') {
                 defaultValue = initialPrices[j];
             }
+            var fromAttr = (seg.from || '').replace(/"/g, '&quot;');
+            var toAttr = (seg.to || '').replace(/"/g, '&quot;');
             row.innerHTML = '<p class="text-gray-700 font-medium mb-1 segment-label">' + (seg.from + ' \u2192 ' + seg
                     .to) + '</p>' +
                 '<div class="relative mt-2">' +
@@ -4949,7 +5116,7 @@
                 '<svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"><path d="' +
                 svgPath + '"/></svg></span>' +
                 '<input type="number" step="any" name="price_spot_display[]" placeholder="" value="' + defaultValue +
-                '" ' +
+                '" data-segment-from="' + fromAttr + '" data-segment-to="' + toAttr + '" ' +
                 'class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>' +
                 '</div>';
             rowsEl.appendChild(row);
@@ -5095,6 +5262,13 @@
         // Listen for changes on from_spot_0 and to_spot_0
         const fromInput0 = document.getElementById('from_spot_0');
         const toInput0 = document.getElementById('to_spot_0');
+
+        var fromError = document.getElementById('from-server-error');
+        var toError = document.getElementById('to-server-error');
+        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
+        function hideToError() { if (toError) toError.classList.add('hidden'); }
+        if (fromError) fromInput0.addEventListener('input', hideFromError);
+        if (toError) toInput0.addEventListener('input', hideToError);
 
         if (fromInput0) {
             fromInput0.addEventListener('blur', function() {
