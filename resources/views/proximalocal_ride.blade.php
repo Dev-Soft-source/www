@@ -1072,7 +1072,7 @@
                                                                     @php $segmentPickup = $ride->rideDetail[0]?->pickup ?? $ride->pickup; @endphp
                                                                     @if(!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            Pick-up at: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1101,7 +1101,7 @@
                                                                     @php $segmentDropoff = $ride->rideDetail[0]?->dropoff ?? $ride->dropoff; @endphp
                                                                     @if(!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
-                                                                            Drop-off at: {{ $segmentDropoff }}
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1549,7 +1549,7 @@
                                                                         {{ $from }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                        {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1575,7 +1575,7 @@
                                                                         {{ $to }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1832,7 +1832,7 @@
                                                         </svg>
                                                     </div>
                                                 </div>
-                                                <div>
+                                                <div class="hidden">
                                                     <div class="flex items-center justify-between px-4">
                                                         <p class="font-semibold">
                                                             @isset($findRidePage->card_section_booking_fee)
