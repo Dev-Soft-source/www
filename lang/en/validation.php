@@ -334,15 +334,15 @@ return
 				'string' => 'The confirm password must be a string.',
 				'same' => 'The confirm password does not match the new password.',
 			],
-			'remember_me' =>
+			'agree_cost_share_terms' =>
 			[
 				'required' => 'Please confirm you agree to the cost-sharing rule.',
 				'accepted' => 'Please confirm you agree to the cost-sharing rule.',
 			],
 			'rideshare_disclaimer' =>
 			[
-				'required' => 'Please confirm the rideshare disclaimer.',
-				'accepted' => 'Please confirm the rideshare disclaimer.',
+				'required' => 'This acknowledgment is required before continuing.',
+				'accepted' => 'This acknowledgment is required before continuing.',
 			],
 			'gender' =>
 			[

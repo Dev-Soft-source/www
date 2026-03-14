@@ -298,13 +298,13 @@ return [
             'string' => 'Ang kumpirmasyon ng bagong password ay dapat isang string.',
             'same' => 'Ang kumpirmasyon ng password ay hindi tumutugma sa bagong password.',
         ],
-        'remember_me' => [
+        'agree_cost_share_terms' => [
             'required' => 'Pakikumpirma na sumasang-ayon ka sa patakaran sa paghahati ng gastos.',
             'accepted' => 'Pakikumpirma na sumasang-ayon ka sa patakaran sa paghahati ng gastos.',
         ],
         'rideshare_disclaimer' => [
-            'required' => 'Pakikumpirma ang rideshare disclaimer.',
-            'accepted' => 'Pakikumpirma ang rideshare disclaimer.',
+            'required' => 'Kinakailangan ang pagkilalang ito bago magpatuloy.',
+            'accepted' => 'Kinakailangan ang pagkilalang ito bago magpatuloy.',
         ],
         'gender' => [
             'required' => 'Kailangan ang kasarian.',

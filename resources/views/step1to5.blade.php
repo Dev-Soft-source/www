@@ -127,7 +127,7 @@
                             @endphp
                             <select name="country" id="country-dropdown" autocomplete="off"
                                 class="font-FuturaMdCnBT bg-white block border w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('country') ? 'border-red-500' : '' }}">
-                                <option value="">Select your country</option>
+                                <option value="">{{ $selectLocationSettingPage->select_country_label ?? 'Select your country' }}</option>
                                 @foreach ($countries as $country)
                                     <option value="{{ $country->id }}"
                                         {{ ($preselectedCountry && (string)$preselectedCountry === (string)$country->id) || (!$preselectedCountry && ($location['iso_code'] ?? '') === $country->iso_code) ? 'selected' : '' }}>
