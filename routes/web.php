@@ -9,6 +9,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\CloseAccountController;
 use App\Http\Controllers\ContactUsController;
+use App\Http\Controllers\CostSharingPolicyController;
 use App\Http\Controllers\CostSharingCompliancePolicyController;
 use App\Http\Controllers\CountryStateCityController;
 use App\Http\Controllers\DisputePolicyController;
@@ -384,6 +385,7 @@ Route::get('{lang?}/terms-and-conditions', [TermsAndConditionsController::class,
 Route::get('{lang?}/media', [NewsController::class, 'index'])->name('news');
 Route::get('{lang?}/news-detail/{id}', [NewsController::class, 'newsDetail'])->name('news_detail');
 Route::get('{lang?}/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy_policy');
+Route::get('{lang?}/cost-sharing-policy', [CostSharingPolicyController::class, 'index'])->name('cost_sharing_policy');
 Route::get('{lang?}/terms-of-use', [TermsOfUseController::class, 'index'])->name('terms_use');
 Route::get('{lang?}/profile-photo-guidelines', [ProfilePhotoGuidelinesController::class, 'index'])->name('profile_photo_guidelines');
 Route::get('{lang?}/refund-policy', [RefundPolicyController::class, 'index'])->name('refund_policy');

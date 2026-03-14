@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\Admin\{
     CityController,
     ClosedAccountMessageController,
     ContactUsPageSettingController,
+    CostSharingPageSettingController,
     CountryController,
     DisputePolicyPageSettingController,
     DriverPageSettingController,
@@ -229,6 +230,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-privacy-policy-page-setting', [PrivacyPolicyPageSettingController::class, 'show']);
     Route::post('/upload-privacy-policy-page-setting-excel', [PrivacyPolicyPageSettingController::class, 'uploadExcel']);
     Route::get('/download-privacy-policy-page-setting-template', [PrivacyPolicyPageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-cost-sharing-page-setting', [CostSharingPageSettingController::class, 'update']);
+    Route::get('/get-cost-sharing-page-setting', [CostSharingPageSettingController::class, 'show']);
+    Route::post('/upload-cost-sharing-page-setting-excel', [CostSharingPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-cost-sharing-page-setting-template', [CostSharingPageSettingController::class, 'downloadTemplate']);
     Route::post('/update-terms-of-use-page-setting', [TermsOfUsePageSettingController::class, 'update']);
     Route::get('/get-terms-of-use-page-setting', [TermsOfUsePageSettingController::class, 'show']);
     Route::post('/upload-terms-of-use-page-setting-excel', [TermsOfUsePageSettingController::class, 'uploadExcel']);

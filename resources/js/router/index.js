@@ -64,6 +64,7 @@ import CreateStep5PageSetting from '../admin/Pages/CreateStep5PageSetting.vue'
 import CreateContactUsPageSetting from '../admin/Pages/CreateContactUsPageSetting.vue'
 import CreateTermsAndConditionPageSetting from '../admin/Pages/CreateTermsAndConditionPageSetting.vue'
 import CreatePrivacyPolicyPageSetting from '../admin/Pages/CreatePrivacyPolicyPageSetting.vue'
+import CreateCostSharingPageSetting from '../admin/Pages/CreateCostSharingPageSetting.vue'
 import CreateTermsOfUsePageSetting from '../admin/Pages/CreateTermsOfUsePageSetting.vue'
 import CreateRefundPolicyPageSetting from '../admin/Pages/CreateRefundPolicyPageSetting.vue'
 import CreateCancellationPageSetting from '../admin/Pages/CreateCancellationPageSetting.vue'
@@ -861,6 +862,14 @@ const routes = [
         component: CreatePrivacyPolicyPageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Privacy policy page settings', 'routeName': 'admin.privacy-policy-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/cost-sharing-page-settings',
+        name: 'admin.cost-sharing-page-setting.index',
+        component: CreateCostSharingPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Cost sharing page settings', 'routeName': 'admin.cost-sharing-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {
