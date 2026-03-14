@@ -124,7 +124,7 @@
                                         </svg>
                                     </div> -->
                             </div>
-                            <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="text-center  sm:mt-0 sm:text-left">
                                 <div class="">
                                     <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
                                         id="modal-title">{!! session('heading') !!}</h3>
