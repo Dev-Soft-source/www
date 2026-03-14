@@ -150,19 +150,19 @@
                 }, 500)();
             }
         }
-    }
+    
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var fromEl = document.getElementById('from_spot_0');
-        var toEl = document.getElementById('to_spot_0');
-        var fromError = document.getElementById('from-server-error');
-        var toError = document.getElementById('to-server-error');
-        function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
-        function hideToError() { if (toError) toError.classList.add('hidden'); }
-        if (fromError) fromEl.addEventListener('input', hideFromError);
-        if (toError) toEl.addEventListener('input', hideToError);
-    });
-</script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var fromEl = document.getElementById('from_spot_0');
+            var toEl = document.getElementById('to_spot_0');
+            var fromError = document.getElementById('from-server-error');
+            var toError = document.getElementById('to-server-error');
+            function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
+            function hideToError() { if (toError) toError.classList.add('hidden'); }
+            if (fromError) fromEl.addEventListener('input', hideFromError);
+            if (toError) toEl.addEventListener('input', hideToError);
+        });
+    </script>
 
     <div class="container px-4 mx-auto my-14 page-post_a_ride">
         @if (session('error'))
