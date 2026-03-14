@@ -45,7 +45,7 @@ class LoginController extends Controller
         }
         
         $loginPage = LoginPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+       
         return view('login',['loginPage' => $loginPage]);
     }
 
@@ -208,8 +208,7 @@ class LoginController extends Controller
 
                 return back()->with(['error' => $errorMsg])->withInput();
             } elseif ($user && $user->email_verified == 0) {
-                $errorMsg = ($message->verified_email_message ?? null)
-                    . '<a href="' . route('sendEmailVerify', ['email' => $user->email]) . '">' . ($loginPage->new_verification_email_btn_label ?? 'Request a new verification email') . '</a>';
+                $errorMsg = ($message->verified_email_message ?? null);
 
                 return back()->with([
                     'error'        => $errorMsg,
