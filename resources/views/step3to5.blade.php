@@ -393,7 +393,7 @@
                                 Upload Error
                             </h3>
                             <p id="imageSizeErrorMessage" class="text-gray-600">
-                                The image must be less than 10MB.
+                                The image must be less than {{ $maxVehicleImageSizeMb }}MB.
                             </p>
                         </div>
                     </div>
@@ -437,9 +437,10 @@
 
         let hasVehiclePhoto = false;
         const vehiclePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
-        const maxVehicleImageSizeBytes = 10 * 1024 * 1024;
+        const maxVehicleImageSizeBytes = {{ $maxVehicleImageSizeKb }} * 1024;
+        const maxVehicleImageSizeMessage = 'The image must be less than {{ $maxVehicleImageSizeMb }}MB.';
 
-        function showImageSizeErrorModal(message = 'The image must be less than 10MB.') {
+        function showImageSizeErrorModal(message = maxVehicleImageSizeMessage) {
             const modal = document.getElementById('imageSizeErrorModal');
             const messageEl = document.getElementById('imageSizeErrorMessage');
 
@@ -489,7 +490,7 @@
                 if (input.files[0].size > maxVehicleImageSizeBytes) {
                     input.value = '';
                     hasVehiclePhoto = false;
-                    showImageSizeErrorModal('The image must be less than 10MB.');
+                    showImageSizeErrorModal(maxVehicleImageSizeMessage);
                     updateRemoveVehiclePhotoButtonVisibility();
                     validateStep3Form();
                     return;
@@ -628,7 +629,7 @@
 
                 if (fileInput && fileInput.files.length && fileInput.files[0].size > maxVehicleImageSizeBytes) {
                     e.preventDefault();
-                    showImageSizeErrorModal('The image must be less than 10MB.');
+                    showImageSizeErrorModal(maxVehicleImageSizeMessage);
                     fileInput.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center'

@@ -14,7 +14,12 @@ use Carbon\Carbon;
 
 class Step3to5Controller extends Controller
 {
-    private const MAX_VEHICLE_IMAGE_SIZE_KB = 10240;
+    private const DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB = 10240;
+
+    private function getMaxVehicleImageSizeKb(): int
+    {
+        return (int) env('MAX_VEHICLE_IMAGE_SIZE_KB', self::DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB);
+    }
 
     public function create($lang = null)
     {
@@ -53,7 +58,14 @@ class Step3to5Controller extends Controller
             ]);
         }
 
-        return view('step3to5', ['step3Page' => $step3Page, 'user' => $user]);
+        $maxVehicleImageSizeKb = $this->getMaxVehicleImageSizeKb();
+
+        return view('step3to5', [
+            'step3Page' => $step3Page,
+            'user' => $user,
+            'maxVehicleImageSizeKb' => $maxVehicleImageSizeKb,
+            'maxVehicleImageSizeMb' => round($maxVehicleImageSizeKb / 1024, 2),
+        ]);
     }
 
     public function store($id, Request $request)
@@ -102,14 +114,17 @@ class Step3to5Controller extends Controller
         // }
 
         // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
+        $maxVehicleImageSizeKb = $this->getMaxVehicleImageSizeKb();
+        $maxVehicleImageSizeMessage = 'The image must be less than ' . round($maxVehicleImageSizeKb / 1024, 2) . 'MB.';
+
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $extension = strtolower($file->getClientOriginalExtension());
             $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
 
-            if ($file->getSize() > (self::MAX_VEHICLE_IMAGE_SIZE_KB * 1024)) {
+            if ($file->getSize() > ($maxVehicleImageSizeKb * 1024)) {
                 return redirect()->back()
-                    ->withErrors(['image' => 'The image must be less than 10MB.'])
+                    ->withErrors(['image' => $maxVehicleImageSizeMessage])
                     ->withInput();
             }
 
@@ -127,7 +142,7 @@ class Step3to5Controller extends Controller
             'color' => 'required',
             'year' => 'required',
             'car_type' => 'required',
-            'image' => 'nullable|file|max:' . self::MAX_VEHICLE_IMAGE_SIZE_KB,
+            'image' => 'nullable|file|max:' . $maxVehicleImageSizeKb,
         ], [
             'make.required' => 'The make is required',
             'model.required' => 'The model is required',
@@ -138,7 +153,7 @@ class Step3to5Controller extends Controller
             'car_type.required' => 'The car type is required',
             'image.nullable' => 'The image may be null',
             'image.file' => 'The image must be a file',
-            'image.max' => 'The image must be less than 10MB',
+            'image.max' => $maxVehicleImageSizeMessage,
         ], $niceNames);
         
         if ($request->hasFile('image')) {
