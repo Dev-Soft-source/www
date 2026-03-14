@@ -636,6 +636,50 @@
                                                 "
                                             ></p>
                                         </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`upload_another_image_btn_label_${activeLanguageId}`"
+                                                        >Upload Another Image Button</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`upload_another_image_btn_label_${activeLanguageId}`"
+                                                    :id="`upload_another_image_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'upload_another_image_btn_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'upload_another_image_btn_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `upload_another_image_btn_label.upload_another_image_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `upload_another_image_btn_label.upload_another_image_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- main section end -->
@@ -742,6 +786,7 @@ export default {
                             this.handleInput("", language, "year_placeholder");
                             this.handleInput("", language, "upload_button_text");
                             this.handleInput("", language, "upload_new_image_btn_label");
+                            this.handleInput("", language, "upload_another_image_btn_label");
                             this.handleInput("", language, "update_button_text");
                         });
                         this.fetchMyStudentCardSetting();
@@ -815,6 +860,11 @@ export default {
                                 setting?.upload_new_image_btn_label,
                                 setting?.language,
                                 "upload_new_image_btn_label"
+                            );
+                            this.handleInput(
+                                setting?.upload_another_image_btn_label,
+                                setting?.language,
+                                "upload_another_image_btn_label"
                             );
 
                               this.handleInput(
@@ -893,6 +943,10 @@ export default {
                 ) ||
                 validationErros.has(
                     `upload_new_image_btn_label.upload_new_image_btn_label_${language.id}`
+                )
+                ||
+                validationErros.has(
+                    `upload_another_image_btn_label.upload_another_image_btn_label_${language.id}`
                 )
                 ||
                 validationErros.has(

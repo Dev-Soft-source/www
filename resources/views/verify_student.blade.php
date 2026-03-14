@@ -288,7 +288,7 @@
                                 <div class="text-primary border border-primary px-6 py-3 rounded w-full mt-3 text-center">
                                     <input id="dropzone-file" name="student_card" type="file" 
                                         onchange="previewImage(this)" class="hidden" />
-                                    Upload another image
+                                    {{ $studentCardPage->upload_another_image_btn_label ?? 'Upload another image' }}
                                 </div>
                             </label>
                         @endif

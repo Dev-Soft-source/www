@@ -30,6 +30,7 @@ class MyStudentCardSettingDetailResource extends JsonResource
             'upload_button_text' => $this->upload_button_text,
             'update_button_text' => $this->update_button_text,
             'upload_new_image_btn_label' => $this->upload_new_image_btn_label,
+            'upload_another_image_btn_label' => $this->upload_another_image_btn_label,
             'my_student_card_setting' => new MyStudentCardSettingResource($this->whenLoaded('myStudentCardSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),
         ];

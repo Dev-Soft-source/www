@@ -33,6 +33,8 @@ class MyStudentCardSettingService
                 $errorMessages = array_merge($errorMessages, ['update_button_text.update_button_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['upload_new_image_btn_label.upload_new_image_btn_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['upload_new_image_btn_label.upload_new_image_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['upload_another_image_btn_label.upload_another_image_btn_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['upload_another_image_btn_label.upload_another_image_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
         }
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
@@ -56,6 +58,7 @@ class MyStudentCardSettingService
             'upload_button_text' => $this->data($request, $language, 'upload_button_text'),
             'update_button_text' => $this->data($request, $language, 'update_button_text'),
             'upload_new_image_btn_label' => $this->data($request, $language, 'upload_new_image_btn_label'),
+            'upload_another_image_btn_label' => $this->data($request, $language, 'upload_another_image_btn_label'),
         ];
     }
 

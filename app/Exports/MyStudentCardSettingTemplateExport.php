@@ -33,7 +33,7 @@ class MyStudentCardSettingTemplateExport implements FromCollection, WithHeadings
     public static function getTranslatableFieldsWithDefaults(): array
     {
         $fields = [
-            'mobile_indicate_required_field_label', 'student_card_description_text', 'main_heading', 'student_card_image_placeholder', 'choose_file_image_placeholder', 'mobile_image_type_placeholder', 'expiry_date_label', 'month_placeholder', 'year_placeholder', 'upload_button_text', 'update_button_text', 'upload_new_image_btn_label',
+            'mobile_indicate_required_field_label', 'student_card_description_text', 'main_heading', 'student_card_image_placeholder', 'choose_file_image_placeholder', 'mobile_image_type_placeholder', 'expiry_date_label', 'month_placeholder', 'year_placeholder', 'upload_button_text', 'update_button_text', 'upload_new_image_btn_label', 'upload_another_image_btn_label',
         ];
         return array_fill_keys($fields, '');
     }

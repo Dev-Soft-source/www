@@ -22,7 +22,7 @@ class MyStudentCardSettingImport implements ToCollection, WithHeadingRow, WithVa
     protected function fieldsList(): array
     {
         return [
-            'mobile_indicate_required_field_label','student_card_description_text','main_heading','student_card_image_placeholder','choose_file_image_placeholder','mobile_image_type_placeholder','expiry_date_label','month_placeholder','year_placeholder','upload_button_text','update_button_text','upload_new_image_btn_label'
+            'mobile_indicate_required_field_label','student_card_description_text','main_heading','student_card_image_placeholder','choose_file_image_placeholder','mobile_image_type_placeholder','expiry_date_label','month_placeholder','year_placeholder','upload_button_text','update_button_text','upload_new_image_btn_label','upload_another_image_btn_label'
         ];
     }
 
@@ -103,6 +103,7 @@ class MyStudentCardSettingImport implements ToCollection, WithHeadingRow, WithVa
             'upload_button_text' => 'required|string',
             'update_button_text' => 'required|string',
             'upload_new_image_btn_label' => 'required|string',
+            'upload_another_image_btn_label' => 'required|string',
         ];
     }
 }
