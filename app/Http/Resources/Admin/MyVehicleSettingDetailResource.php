@@ -63,6 +63,7 @@ class MyVehicleSettingDetailResource extends JsonResource
             'update_vehicle_button_text' => $this->update_vehicle_button_text,
             'no_vehicle_message' => $this->no_vehicle_message,
             'delete_photo_message' => $this->delete_photo_message,
+            'delete_vehicle_message' => $this->delete_vehicle_message,
             'edit_photo_label' => $this->edit_photo_label,
             'my_vehicle_setting' => new MyVehicleSettingResource($this->whenLoaded('myVehicleSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),

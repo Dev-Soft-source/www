@@ -63,16 +63,14 @@ class CloseAccountController extends Controller
             'reasons' => 'array|required',
             'improve_message' => 'required',
             'close_account_reason' => 'required',
-            'close_account' => 'required'
-        ], [], array_merge($niceNames, [
+            'confirm_close_account' => 'required'
+        ], [
             'reasons.array' => 'The reasons are required',
             'reasons.required' => 'The reasons are required',
-            'improve_message.required' => 'The improve message is required',
-            'close_account_reason.required' => 'The close account reason is required',
-            'close_account.required' => 'The close account is required',
-            'close_account_reason' => $closeAccountPage->why_closing_account_label ?? 'Reason for closing account',
-            'improve_message' => $closeAccountPage->improve_label ?? 'How we can improve',
-        ]));
+            'improve_message.required' => $closeAccountPage->improve_label ?? 'How we can improve',
+            'close_account_reason.required' => $closeAccountPage->why_closing_account_label ?? 'Reason for closing account',
+            'confirm_close_account.required' => $closeAccountPage->check_box_validation_message ?? 'Just one last step! Please check this box to confirm.',
+        ], []);
 
         if ($validator->fails()) {
             $lang = $selectedLanguage->abbreviation ?? null;

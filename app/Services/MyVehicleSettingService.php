@@ -81,6 +81,8 @@ class MyVehicleSettingService
                 $errorMessages = array_merge($errorMessages, ['year_error.year_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['delete_photo_message.delete_photo_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['delete_photo_message.delete_photo_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['delete_vehicle_message.delete_vehicle_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['delete_vehicle_message.delete_vehicle_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['edit_photo_label.edit_photo_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['edit_photo_label.edit_photo_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
@@ -138,6 +140,7 @@ class MyVehicleSettingService
             'update_vehicle_button_text' => $this->data($request, $language, 'update_vehicle_button_text'),
             'no_vehicle_message' => $this->data($request, $language, 'no_vehicle_message'),
             'delete_photo_message' => $this->data($request, $language, 'delete_photo_message'),
+            'delete_vehicle_message' => $this->data($request, $language, 'delete_vehicle_message'),
             'edit_photo_label' => $this->data($request, $language, 'edit_photo_label'),
         ];
     }
