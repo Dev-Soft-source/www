@@ -2047,25 +2047,63 @@
                                                     "
                                                 />
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `delete_photo_message.delete_photo_message_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `delete_photo_message.delete_photo_message_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label
-                                                        :for="`edit_photo_label_${activeLanguageId}`"
+                                          <p
+                                              class="mt-2 text-sm text-red-400"
+                                              v-if="
+                                                  validationErros.has(
+                                                      `delete_photo_message.delete_photo_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                              v-text="
+                                                  validationErros.get(
+                                                      `delete_photo_message.delete_photo_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                          ></p>
+                                      </div>
+                                      <div class="relative z-0 w-full group">
+                                          <div>
+                                              <div class="flex justify-between">
+                                                  <label
+                                                      :for="`delete_vehicle_message_${activeLanguageId}`"
+                                                      >Delete vehicle message</label
+                                                  >
+                                              </div>
+                                              <input
+                                                  type="text"
+                                                  :name="`delete_vehicle_message_${activeLanguageId}`"
+                                                  :id="`delete_vehicle_message_${activeLanguageId}`"
+                                                  class="can-exp-input w-full block border border-gray-300 rounded"
+                                                  placeholder=" "
+                                                  :value="getCurrentValue('delete_vehicle_message')"
+                                                  @input="
+                                                      handleInput(
+                                                          $event.target.value,
+                                                          language,
+                                                          'delete_vehicle_message'
+                                                      )
+                                                  "
+                                              />
+                                          </div>
+                                          <p
+                                              class="mt-2 text-sm text-red-400"
+                                              v-if="
+                                                  validationErros.has(
+                                                      `delete_vehicle_message.delete_vehicle_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                              v-text="
+                                                  validationErros.get(
+                                                      `delete_vehicle_message.delete_vehicle_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                          ></p>
+                                      </div>
+                                      <div class="relative z-0 w-full group">
+                                          <div>
+                                              <div class="flex justify-between">
+                                                  <label
+                                                      :for="`edit_photo_label_${activeLanguageId}`"
                                                         >Edit photo message</label
                                                     >
                                                 </div>
@@ -2237,6 +2275,9 @@ export default {
                             this.handleInput("", language, "no_vehicle_message");
                             this.handleInput("", language, "update_vehicle_button_text");
                             this.handleInput("", language, "remove_car_photo_label");
+                            this.handleInput("", language, "delete_photo_message");
+                            this.handleInput("", language, "delete_vehicle_message");
+                            this.handleInput("", language, "edit_photo_label");
                         });
                         this.fetchMyVehicleSetting();
                     }
@@ -2479,6 +2520,11 @@ export default {
                                 "delete_photo_message"
                             );
                             this.handleInput(
+                                setting?.delete_vehicle_message,
+                                setting?.language,
+                                "delete_vehicle_message"
+                            );
+                            this.handleInput(
                                 setting?.edit_photo_label,
                                 setting?.language,
                                 "edit_photo_label"
@@ -2541,6 +2587,7 @@ export default {
                 ) ||
                 validationErros.has(`edit_photo_label.edit_photo_label_${language.id}`) ||
                 validationErros.has(`delete_photo_message.delete_photo_message_${language.id}`) ||
+                validationErros.has(`delete_vehicle_message.delete_vehicle_message_${language.id}`) ||
                 validationErros.has(
                     `make_error.make_error_${language.id}`
                 ) ||

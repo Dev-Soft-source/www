@@ -186,7 +186,7 @@
                         <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
                     </div>
                     <div class="mt-2 w-full">
-                        <p class="can-exp-p text-center">{{ $myVehiclePage->delete_photo_message  }}</p>
+                        <p class="can-exp-p text-center">{{ $myVehiclePage->delete_vehicle_message ?? 'Are you sure you want to remove this vehicle?' }}</p>
                     </div>
                 </div>
             </div>

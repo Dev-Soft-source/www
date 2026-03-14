@@ -292,7 +292,7 @@
                     <div class="sm:flex sm:items-start justify-center"></div>
                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                         <div class="mt-2 w-full">
-                            <p class="text-lg text-center text-black">Are you sure you want to remove this photo?</p>
+                            <p class="text-lg text-center text-black">{{ $myVehiclePage->delete_photo_message ?? 'Are you sure you want to remove your car photo?' }}</p>
                         </div>
                     </div>
                 </div>
@@ -331,7 +331,7 @@
                         </div>
                         <div class="mt-2 w-full">
                             <p class="can-exp-p text-center">
-                                {{ $myVehiclePage->delete_photo_message ?? 'Are you sure you want to remove your car photo' }}
+                                {{ $myVehiclePage->delete_photo_message ?? 'Are you sure you want to remove your car photo?' }}
                             </p>
                         </div>
                     </div>
