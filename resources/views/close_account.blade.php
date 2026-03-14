@@ -6,7 +6,7 @@
 
         <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow ">
             @if (session('message'))
-                <div id="myModal" class="relative z-50" id="delete_message_confirmation" aria-labelledby="modal-title"
+                <div id="myModal" class="relative z-50" aria-labelledby="modal-title"
                     role="dialog" aria-modal="true">
                     <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -76,7 +76,7 @@
                             class="text-red-500 text-xl md:text-2xl font-bold">*</span>
                     </p>
                 </div>
-                <form method="POST" action="{{ route('close_account.update', $user->id) }}">
+                <form method="POST" action="{{ route('close_account.update', $user->id) }}" id="close-account-form">
                     @csrf
                     @method('PUT')
                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -275,12 +275,51 @@
                         </div>
 
                         <div class="md:col-span-2 flex justify-center">
-                            <button type="submit"
+                            <button type="button" onclick="openCloseAccountConfirmationModal()"
                                 class="button-exp-red-fill">{{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}</button>
                         </div>
                     </div>
 
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="closeAccountConfirmationModal" class="relative z-50 hidden" aria-labelledby="close-account-modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeCloseAccountConfirmationModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closeCloseAccountConfirmationModal()"
+                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full">
+                            <h3 id="close-account-modal-title" class="font-FuturaMdCnBT text-gray-700 mb-4">
+                                {{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}
+                            </h3>
+                            <p class="can-exp-p text-center">
+                                {{ $closeAccountPage->warning_text ?? ($closeAccountPage->closing_account_label ?? 'Closing your account will delete all of your data from our platform and this action is permanent') }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center justify-center space-x-2 sm:space-x-4 sm:px-6">
+                        <button type="button" onclick="submitCloseAccountForm()"
+                            class="button-exp-red-fill">
+                            {{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}
+                        </button>
+                        <button type="button" onclick="closeCloseAccountConfirmationModal()"
+                            class="button-exp-fill">
+                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -296,6 +335,27 @@
             const modal = document.getElementById('myModal');
             if (modal) {
                 modal.classList.add('hidden');
+            }
+        }
+
+        function openCloseAccountConfirmationModal() {
+            const modal = document.getElementById('closeAccountConfirmationModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeCloseAccountConfirmationModal() {
+            const modal = document.getElementById('closeAccountConfirmationModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function submitCloseAccountForm() {
+            const form = document.getElementById('close-account-form');
+            if (form) {
+                form.submit();
             }
         }
     </script>
