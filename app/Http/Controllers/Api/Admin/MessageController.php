@@ -49,9 +49,9 @@ class MessageController extends Controller
         }
 
         $sortType = ['ASC', 'asc', 'DESC', 'desc'];
-        $sortBy = ['id'];
+        $sortBy = ['id', 'created_at'];
         if (isset($_GET['sortBy']) && $_GET['sortBy'] != '' && isset($_GET['sortType']) && $_GET['sortType'] != '' && in_array($_GET['sortBy'], $sortBy) && in_array($_GET['sortType'], $sortType)) {
-            $messages = $messages->OrderBy($_GET['sortBy'], $_GET['sortType']);
+            $messages = $messages->reorder()->orderBy($_GET['sortBy'], $_GET['sortType']);
         }
 
 

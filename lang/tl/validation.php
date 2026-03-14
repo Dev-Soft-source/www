@@ -354,6 +354,9 @@ return [
             'max' => 'Ang numero ng telepono ay dapat na mas mababa sa 20 na character.',
             'unique' => 'Ang numero ng telepono na ito ay nakuha na.',
         ],
+        'message' => [
+            'required' => 'Kinakailangan ang mensahe.',
+        ],
 
         'payment_method' => [
             'required' => 'Kinakailangan ang paraan ng pagbabayad.',

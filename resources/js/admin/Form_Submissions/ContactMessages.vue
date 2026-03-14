@@ -52,8 +52,20 @@
                                             Message
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
-                                            Send date
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal cursor-pointer hover:opacity-90 select-none"
+                                            @click="sortByDate">
+                                            <div class="flex items-center gap-2">
+                                                <span>Send date</span>
+                                                <svg v-if="sortBy === 'created_at' && sortType === 'asc'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                                </svg>
+                                                <svg v-else-if="sortBy === 'created_at' && sortType === 'desc'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                                <svg v-else class="w-4 h-4 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                                </svg>
+                                            </div>
                                         </th>
                                     </tr>
                                 </thead>
@@ -185,6 +197,8 @@ export default {
             pagination: (state) => state.messages.pagination,
             searchParam: (state) => state.messages.searchParam,
             loading: (state) => state.messages.loading,
+            sortBy: (state) => state.messages.sortBy,
+            sortType: (state) => state.messages.sortType,
         }),
         limit: {
             get() {
@@ -212,6 +226,18 @@ export default {
             this.$store.commit("messages/setSearchParam", this.quickSearch);
             this.$store.dispatch("messages/fetchMessages");
         }, 500),
+        sortByDate() {
+            if (this.sortBy === 'created_at') {
+                // Toggle between asc and desc
+                const newSortType = this.sortType === 'asc' ? 'desc' : 'asc';
+                this.$store.commit("messages/setSortType", newSortType);
+            } else {
+                // Set to created_at with desc as default
+                this.$store.commit("messages/setSortBy", "created_at");
+                this.$store.commit("messages/setSortType", "desc");
+            }
+            this.$store.dispatch("messages/fetchMessages");
+        },
     },
     created() {
         this.$store.commit("messages/setLimit", 100);

@@ -403,6 +403,10 @@ return
 			'max' => 'The phone number must be less than 20 characters.',
 			'unique' => 'The phone number has already been taken.',
 		],
+		'message' =>
+		[
+			'required' => 'The message is required.',
+		],
 		],
 		'attributes' =>
 		[

@@ -354,6 +354,9 @@ return [
             'max' => '电话号码必须少于20个字符。',
             'unique' => '该电话号码已被使用。',
         ],
+        'message' => [
+            'required' => '消息为必填项。',
+        ],
         'payment_method' => [
             'required' => '付款方式为必填项。',
         ],
