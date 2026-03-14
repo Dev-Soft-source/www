@@ -1086,7 +1086,7 @@
                                                                     @php $segmentPickup = $ride->rideDetail[0]?->pickup ?? $ride->pickup; @endphp
                                                                     @if(!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            Pick-up at: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1115,7 +1115,7 @@
                                                                     @php $segmentDropoff = $ride->rideDetail[0]?->dropoff ?? $ride->dropoff; @endphp
                                                                     @if(!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
-                                                                            Drop-off at: {{ $segmentDropoff }}
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
                                                                         </p>    
                                                                     @endif
                                                                 </div>
@@ -1425,9 +1425,9 @@
                         @if ($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
                             <div class="border-b border-gray-400 flex flex-col items-center justify-center pt-6">
                             @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
-                                <h3 class="text-primary">{{ $findRidePage->no_rides_found_folk_ride_label ?? 'Sorry, we couldn\'t find any Folk Rides matching your search.' }}</h3>
+                                <h3 class="text-primary">{{ $findRidePage->no_rides_found_extra_ride_label ?? 'Sorry, we couldn\'t find any Folk Rides matching your search.' }}</h3>
                             @endif
-                                <h3 class="text-primary">{{ $findRidePage->more_rides_folk_ride_label ?? 'More rides from' }} {{ $request->from }} {{ $findRidePage->to_folk_ride_label ?? 'to' }} {{ $request->to }}. {{ $findRidePage->imp_folk_ride_label ?? 'Important: these are NOT Folk Ride' }}</h3>
+                                <h3 class="text-primary">{{ $findRidePage->more_rides_pink_ride_label ?? 'More rides from' }} {{ $request->from }} {{ $findRidePage->to_extra_care_ride_label ?? 'to' }} {{ $request->to }}. {{ $findRidePage->imp_extra_care_ride_label ?? 'Important: these are NOT Folk Ride' }}</h3>
                             </div>                       
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide') as $ride)
                                 @php
@@ -1562,7 +1562,7 @@
                                                                         {{ $from }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        Pick-up at: {{ $ride->pickup }}
+                                                                       {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1588,7 +1588,7 @@
                                                                         {{ $to }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        Drop-off at: {{ $ride->dropoff }}
+                                                                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1849,7 +1849,7 @@
                                                         </svg>
                                                     </div>
                                                 </div>
-                                                <div>
+                                                <div class="hidden">
                                                     <div class="flex items-center justify-between px-4">
                                                         <p class="font-semibold">
                                                             @isset($findRidePage->card_section_booking_fee)
@@ -1902,7 +1902,7 @@
                         {{ $paginatedRides->appends(request()->except('page'))->links() }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
-                            <h3 class="text-primary">{{ $findRidePage->no_rides_found_folk_ride_label ?? 'Sorry, we couldn\'t find any Folk Rides matching your search.' }}</h3>
+                            <h3 class="text-primary">{{ $findRidePage->no_rides_found_extra_ride_label ?? 'Sorry, we couldn\'t find any Folk Rides matching your search.' }}</h3>
                         </div>
                     @endif
                 </div>
