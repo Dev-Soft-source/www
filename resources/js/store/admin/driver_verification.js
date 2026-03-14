@@ -60,7 +60,16 @@ const drivers = {
             let url = payload && payload.url
                     ? payload.url
                     : `${process.env.MIX_ADMIN_API_URL}driver-verification?q=1`;
-            url = `${url}&${state.param}`;
+            
+            // Only append state.param if it's not already in the URL (for pagination URLs)
+            if (payload && payload.url) {
+                // If using a pagination URL, it already has all parameters
+                url = url;
+            } else {
+                // For new requests, append state.param
+                url = `${url}&${state.param}`;
+            }
+            
             commit("setLoading");
             return new Promise(function (resolve, reject) {
                 axios.get(url)
@@ -69,63 +78,16 @@ const drivers = {
                             commit("setPagination", res.data);
                             commit("setDrivers", res.data.data);
                             resolve(res);
+                        } else {
+                            reject(new Error(res.data.message || "Unknown error"));
                         }
                     })
                     .catch((error) => {
+                        console.error("Error fetching drivers:", error);
                         reject(error);
                     })
                     .finally(() => commit("setLoading"));
             });
-        },
-        async suspandUser({ commit }, payload) {
-            commit("setLoading");
-
-            try {
-              const url = payload && payload.url
-                ? payload.url
-                : `${process.env.MIX_ADMIN_API_URL}suspand-user/${payload.id}`;
-              const res = await axios.put(url);
-
-              if (res && res.data && res.data.status === "Success") {
-                // Update the user from the state only if the query parameter is 2
-                commit("updateUserStatus", { id: payload.id, suspand: 1 });
-
-                // Display a success message
-                helper.swalSuccessMessage(res.data.message);
-              } else if (res && res.data && res.data.status === "Error") {
-                // Display an error message
-                helper.swalErrorMessage(res.data.message);
-              }
-            } catch (error) {
-              console.error(error);
-            } finally {
-              commit("setLoading");
-            }
-        },
-        async unSuspandUser({ commit }, payload) {
-            commit("setLoading");
-
-            try {
-              const url = payload && payload.url
-                ? payload.url
-                : `${process.env.MIX_ADMIN_API_URL}unsuspand-user/${payload.id}`;
-              const res = await axios.put(url);
-
-              if (res && res.data && res.data.status === "Success") {
-                // Update the user from the state only if the query parameter is 2
-                commit("updateUserStatus", { id: payload.id, suspand: 0 });
-
-                // Display a success message
-                helper.swalSuccessMessage(res.data.message);
-              } else if (res && res.data && res.data.status === "Error") {
-                // Display an error message
-                helper.swalErrorMessage(res.data.message);
-              }
-            } catch (error) {
-              console.error(error);
-            } finally {
-              commit("setLoading");
-            }
         },
         async suspandUser({ commit }, payload) {
             commit("setLoading");

@@ -36,37 +36,37 @@
                 </div>
                 <div class="container space-y-8 mx-auto">
                     <div class="space-y-2">
-                        <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
+                        <div class="bg-white shadow-lg hover:shadow-xl rounded-md">
                             <table
-                                class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
+                                class="table table-fixed w-full leading-normal text-base md:text-base lg:text-lg">
                                 <thead class="text-white">
                                     <tr class="hidden md:table-row">
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[12%]">
                                             Name
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[15%]">
                                             Email
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[12%]">
                                             Phone
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[15%]">
                                             Driver's license
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[15%]">
                                             Vehicle
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal w-[10%]">
                                             Status
                                         </th>
                                         <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-4 pr-3 font-FuturaMdCnBT text-white sm:pl-6 lg:text-xl md:text-lg text-lg font-normal">
+                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-4 pr-3 font-FuturaMdCnBT text-white sm:pl-6 lg:text-xl md:text-lg text-lg font-normal w-[21%]">
                                             Actions
                                         </th>
                                     </tr>
@@ -74,51 +74,49 @@
                                 <tbody class="flex-1 text-gray-700 sm:flex-none">
                                     <tr v-for="driver in sortedDrivers" :key="driver.id"
                                         class="border-t first:border-t-0 flex p-3 md:p-3  md:table-row flex-col w-full flex-wrap even:bg-gray-50 odd:bg-white">
-                                        <td class="p-2 md:p-3 border-b md:border-none">
+                                        <td class="p-2 md:p-3 border-b md:border-none break-words">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Name</label>
-                                            <div class="">{{ driver.first_name }} {{ driver.last_name }}</div>
+                                            <div class="break-words">{{ driver.first_name }} {{ driver.last_name }}</div>
                                         </td>
-                                        <td class="p-2 md:p-3 md:border-none">
+                                        <td class="p-2 md:p-3 md:border-none break-words">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Email</label>
-                                            <div>{{ driver.email }}</div>
+                                            <div class="break-words">{{ driver.email }}</div>
                                             <div v-if="driver.email_verified == 0">Pending</div>
                                             <div v-else>Verified</div>
                                         </td>
-                                        <td class="p-2 md:p-3 md:border-none">
+                                        <td class="p-2 md:p-3 md:border-none break-words">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Phone</label>
-                                            <div>{{ driver.phone }}</div>
+                                            <div class="break-words">{{ driver.phone }}</div>
                                             <div v-if="driver.phone_verified == 0">Pending</div>
                                             <div v-else>Verified</div>
                                         </td>
-                                        <td class="p-2 md:p-3 md:border-none">
+                                        <td class="p-2 md:p-3 md:border-none break-words">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Driver's license</label>
-                                            <div>
+                                            <div class="break-words">
                                                 <a :href="getDriverLiscenseUrl(driver.driver_liscense)"
-                                                    target="_blank">{{ driver.driver_liscense }}</a>
+                                                    target="_blank" class="break-all">{{ driver.driver_liscense }}</a>
                                             </div>
                                             <div v-if="driver.driver == 1">Verified</div>
                                             <div v-if="driver.driver == 2">Pending</div>
                                         </td>
-                                        <td class="p-2 md:p-3 md:border-none">
+                                        <td class="p-2 md:p-3 md:border-none break-words">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Vehicle</label>
                                             <div v-if="driver.vehicles.length === 1">
-
-                                                <ul :key="driver.vehicles[0].id">
-                                                    <li>Model - {{ driver.vehicles[0].model }}</li>
-                                                    <li>Type - {{ driver.vehicles[0].type }}</li>
-                                                    <li>Year - {{ driver.vehicles[0].year }}</li>
-                                                    <li>Color - {{ driver.vehicles[0].color }}</li>
+                                                <ul :key="driver.vehicles[0].id" class="text-sm">
+                                                    <li class="truncate">Model - {{ driver.vehicles[0].model }}</li>
+                                                    <li class="truncate">Type - {{ driver.vehicles[0].type }}</li>
+                                                    <li class="truncate">Year - {{ driver.vehicles[0].year }}</li>
+                                                    <li class="truncate">Color - {{ driver.vehicles[0].color }}</li>
                                                 </ul>
-
                                             </div>
                                             <div v-if="driver.vehicles.length > 1">
                                                 <button
-                                                    class="text-primary font-bold text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                                                    class="text-primary font-bold text-sm px-4 py-2 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                                     type="button" @click="toggleModal(driver)">
                                                     Multiple car
                                                 </button>
@@ -184,51 +182,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <!-- <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
-                                v-if="pagination">
-                                <div class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
-                                    <div>
-                                        <p class="text-sm text-gray-700" v-if="pagination.current_page">
-                                            Page {{ pagination . current_page }} of {{ pagination . last_page }}
-
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                                            aria-label="Pagination"
-                                            v-if="pagination.next_page_url || pagination.prev_page_url">
-                                            <a href="#"
-                                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                                                v-bind:class="[{disabled: !pagination.prev_page_url}]"
-                                                @click="fetchDrivers(pagination.prev_page_url)">
-                                                <span class="sr-only">Previous</span>
-                                                <svg class="h-5 w-5" x-description="Heroicon name: solid/chevron-left"
-                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                    fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd"
-                                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                            </a>
-
-                                            <a href="#"
-                                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                                                v-bind:class="[{disabled: !pagination.next_page_url}]"
-                                                @click.prevent="fetchDrivers(pagination.next_page_url)">
-                                                <span class="sr-only">Next</span>
-                                                <svg class="h-5 w-5"
-                                                    x-description="Heroicon name: solid/chevron-right"
-                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                    fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd"
-                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                            </a>
-                                        </nav>
-                                    </div>
-                                </div>
-                            </div> -->
+                            
                             <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
                                 v-if="pagination && pagination.links && pagination.links.length">
                                 <div
@@ -352,7 +306,9 @@ export default {
             this.showModal = !this.showModal;
         },
         fetchDrivers(page_url) {
-            this.$store.dispatch("drivers/fetchDrivers", { url: page_url });
+            // Only pass url if it's a valid string
+            const payload = page_url && typeof page_url === 'string' ? { url: page_url } : {};
+            this.$store.dispatch("drivers/fetchDrivers", payload);
         },
         updateLimit(value) {
             this.$store.commit("drivers/setLimit", value);

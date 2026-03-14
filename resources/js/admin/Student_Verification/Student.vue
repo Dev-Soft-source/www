@@ -57,11 +57,11 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-3-yes" type="radio" name="email_verified" v-model="user.email_verified" :value="'1'" @change="updateEmailVerified(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <input id="bordered-radio-3-yes" type="radio" name="email_verified" :checked="user.email_verified === '1'" :value="'1'" @change="updateEmailVerified(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                             <label for="bordered-radio-3-yes">Yes</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-3-no" type="radio" name="email_verified" v-model="user.email_verified" :value="'0'" @change="updateEmailVerified(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <input id="bordered-radio-3-no" type="radio" name="email_verified" :checked="user.email_verified === '0'" :value="'0'" @change="updateEmailVerified(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                             <label for="bordered-radio-3-no">No</label>
                                         </div>
                                     </div>
@@ -72,11 +72,11 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-5-yes" type="radio" name="driver_verified" v-model="user.driver" :value="'1'" @change="approveDriver(user)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <input id="bordered-radio-5-yes" type="radio" name="driver_verified" :checked="user.driver === '1'" :value="'1'" @change="approveDriver(user)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                             <label for="bordered-radio-5-yes">Yes</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-5-no" type="radio" name="driver_verified" v-model="user.driver" :value="'3'" @change="rejectDriver(user)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <input id="bordered-radio-5-no" type="radio" name="driver_verified" :checked="user.driver === '3'" :value="'3'" @change="rejectDriver(user)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                             <label for="bordered-radio-5-no">No</label>
                                         </div>
                                     </div>
@@ -102,12 +102,12 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-2-yes" type="radio" name="student_verification" v-model="user.student" :value="'1'" @change="updateStudentVerification(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-yes">Yes</label>
+                                            <input id="student-verification-yes" type="radio" name="student_verification" :checked="user.student === '1'" :value="'1'" @change="updateStudentVerification(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="student-verification-yes">Yes</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-2-no" type="radio" name="student_verification" v-model="user.student" :value="'3'" @change="updateStudentVerification(3)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-no">No</label>
+                                            <input id="student-verification-no" type="radio" name="student_verification" :checked="user.student === '3'" :value="'3'" @change="updateStudentVerification(3)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="student-verification-no">No</label>
                                         </div>
                                     </div>
                                 </td>
@@ -117,12 +117,12 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-2-yes" type="radio" name="student_verification" v-model="user.student" :value="'1'" disabled @change="updateStudentVerification(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-yes">Yes</label>
+                                            <input id="student-verification-yes-disabled" type="radio" name="student_verification" :checked="user.student === '1'" :value="'1'" disabled class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="student-verification-yes-disabled">Yes</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-2-no" type="radio" name="student_verification" v-model="user.student" :value="'3'" disabled @change="updateStudentVerification(3)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-no">No</label>
+                                            <input id="student-verification-no-disabled" type="radio" name="student_verification" :checked="user.student === '3'" :value="'3'" disabled class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="student-verification-no-disabled">No</label>
                                         </div>
                                     </div>
                                 </td>
@@ -132,18 +132,17 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-2-yes" type="radio" name="pink_ride" v-model="user.pink_ride" :value="'1'" :checked="user.pink_ride === '1'" @change="updatePinkRideStatus(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-yes">Enable</label>
+                                            <input id="pink-ride-enable" type="radio" name="pink_ride" :checked="user.pink_ride === '1'" :value="'1'" @change="updatePinkRideStatus(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="pink-ride-enable">Enable</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-2-no" type="radio" name="pink_ride" v-model="user.pink_ride" :value="'0'" :checked="user.pink_ride === '0'" @change="updatePinkRideStatus(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-no">Disable</label>
+                                            <input id="pink-ride-disable" type="radio" name="pink_ride" :checked="user.pink_ride === '0'" :value="'0'" @change="updatePinkRideStatus(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="pink-ride-disable">Disable</label>
                                         </div>
                                         <div class="flex items-center">
-                                            <input id="bordered-radio-2-none" type="radio" name="pink_ride" v-model="user.pink_ride" :value="''" :checked="user.pink_ride === ''" @change="updatePinkRideStatus('')" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-none">Default</label>
-                                            <p class="text-sm font-semibold"
-                                               :class="isPinkRideDisabled ? 'text-red-600' : 'text-green-600'">
+                                            <input id="pink-ride-default" type="radio" name="pink_ride" :checked="user.pink_ride === ''" :value="''" @change="updatePinkRideStatus('')" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="pink-ride-default">Default</label>
+                                            <p class="text-sm font-semibold" :class="isPinkRideDisabled ? 'text-red-600' : 'text-green-600'">
                                                 ({{ isPinkRideDisabled ? 'Disabled' : 'Enabled' }})
                                             </p>
                                         </div>
@@ -155,16 +154,16 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-2-yes" type="radio" name="folks_ride" v-model="user.folks_ride" :value="'1'" :checked="user.folks_ride === '1'" @change="updateFolkRideStatus(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-yes">Enable</label>
+                                            <input id="folks-ride-enable" type="radio" name="folks_ride" :checked="user.folks_ride === '1'" :value="'1'" @change="updateFolkRideStatus(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="folks-ride-enable">Enable</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-2-no" type="radio" name="folks_ride" v-model="user.folks_ride" :value="'0'" :checked="user.folks_ride === '0'" @change="updateFolkRideStatus(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-no">Disable</label>
+                                            <input id="folks-ride-disable" type="radio" name="folks_ride" :checked="user.folks_ride === '0'" :value="'0'" @change="updateFolkRideStatus(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="folks-ride-disable">Disable</label>
                                         </div>
                                         <div class="flex items-center">
-                                            <input id="bordered-radio-2-none" type="radio" name="folks_ride" v-model="user.folks_ride" :value="''" :checked="user.folks_ride === ''" @change="updateFolkRideStatus('')" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-none">Default</label>
+                                            <input id="folks-ride-default" type="radio" name="folks_ride" :checked="user.folks_ride === ''" :value="''" @change="updateFolkRideStatus('')" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="folks-ride-default">Default</label>
                                             <p class="text-sm font-semibold"
                                                :class="isFolksRideDisabled ? 'text-red-600' : 'text-green-600'">
                                                 ({{ isFolksRideDisabled ? 'Disabled' : 'Enabled' }})
@@ -178,12 +177,12 @@
                                 <td>
                                     <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
                                         <div>
-                                            <input id="bordered-radio-2-yes" type="radio" name="government_issued_id" v-model="user.government_id" :value="'0'" :checked="user.government_issued_id !== '' && user.government_id !== '1'" @change="updateGovernmentId(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-yes">Yes</label>
+                                            <input id="government-id-yes" type="radio" name="government_issued_id" :checked="user.government_issued_id !== '' && user.government_id !== '1'" :value="'0'" @change="updateGovernmentId(0)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="government-id-yes">Yes</label>
                                         </div>
                                         <div>
-                                            <input id="bordered-radio-2-no" type="radio" name="government_issued_id" v-model="user.government_id" :value="'1'" :checked="user.government_issued_id === '' || user.government_id === '1'" @change="updateGovernmentId(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                            <label for="bordered-radio-2-no">No</label>
+                                            <input id="government-id-no" type="radio" name="government_issued_id" :checked="user.government_issued_id === '' || user.government_id === '1'" :value="'1'" @change="updateGovernmentId(1)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                            <label for="government-id-no">No</label>
                                         </div>
                                     </div>
                                 </td>
@@ -237,7 +236,7 @@
                         </tbody>
                     </table>
                     <h4 class="flex items-center mt-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg> Documents</h4>
                     <hr style="margin-top: 10px" />
@@ -300,8 +299,8 @@ export default {
             let age = this.calculateAge(this.user.dob);
 
             if (this.setting) {
-                if (this.setting.verfiy_phone == '1' && 
-                    !this.user.phone_verified == '1') {
+                if (this.setting.verfiy_phone === '1' && 
+                    this.user.phone_verified !== '1') {
                     disabled = true;
                 } else if (this.setting.verify_email === '1' && 
                            this.user.email_verified !== '1') {
@@ -388,6 +387,9 @@ export default {
         },
         updateFolkRideStatus(value) {
             this.$store.dispatch("users/updateFolkRideStatus", { id: this.user.id, folks_ride: value });
+        },
+        updatePinkRideStatus(value) {
+            this.$store.dispatch("users/updatePinkRideStatus", { id: this.user.id, pink_ride: value });
         },
     },
     created() {
