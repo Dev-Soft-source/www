@@ -853,7 +853,7 @@ class PhoneController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
+        Log::info('OTP sent via SMS for phone number', ['phone' => $phone->phone, 'otp' => $otp]);
         $canSendSms = $smsFrom || $messagingServiceSid;
         if (!$canSendSms) {
             return response()->json([
