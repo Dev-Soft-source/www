@@ -298,6 +298,10 @@
             const viewAllButton = document.getElementById("viewAllButton");
             const hiddenRatings = document.querySelectorAll(".hidden-rating");
 
+            if (!viewAllButton) {
+                return;
+            }
+
             // Function to toggle visibility of hidden ratings
             function toggleHiddenRatings() {
                 hiddenRatings.forEach(rating => {

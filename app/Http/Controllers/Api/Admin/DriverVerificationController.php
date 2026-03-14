@@ -8,6 +8,7 @@ use App\Mail\DriverLicenseApprovedMail;
 use App\Models\User;
 use App\Traits\StatusResponser;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class DriverVerificationController extends Controller

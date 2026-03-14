@@ -354,6 +354,9 @@ return [
             'max' => 'Le numéro de téléphone doit contenir moins de 20 caractères.',
             'unique' => 'Ce numéro de téléphone a déjà été utilisé.',
         ],
+        'message' => [
+            'required' => 'Le message est obligatoire.',
+        ],
 
         'payment_method' => [
             'required' => 'La méthode de paiement est obligatoire.',

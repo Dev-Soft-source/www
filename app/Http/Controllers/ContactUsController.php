@@ -41,14 +41,14 @@ class ContactUsController extends Controller
             'email' => 'required|email',
             'phone' => 'nullable|regex:/^[0-9\-\(\)\s]{1,15}$/',
             'message' => 'required|string|max:300',
-            'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
+            // 'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
 
         ], []);
 
         $message = ContactMessage::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
+            'phone' => $request->phone ?? '',
             'message' => $request->message,
         ]);
 
@@ -57,7 +57,7 @@ class ContactUsController extends Controller
             'username' => $admin->username,
             'name' => $message->name,
             'email' => $message->email,
-            'phone' => $message->phone,
+            'phone' => $message->phone ?? '',
             'message' => $message->message,
             'transaction_date' => $message->created_at->format('M d, Y H:i:s'),
         ];

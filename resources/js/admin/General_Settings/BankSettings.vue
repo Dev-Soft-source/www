@@ -160,11 +160,11 @@
                         <label for="set_default" class="">Set default</label>
                         <div class="flex space-x-3">
                             <div>
-                                <input id="bordered-radio-bank" type="radio" name="set_default" v-model="form.set_default" :value="'bank'" @change="updateForm('set_default', $event.target.value)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                <input id="bordered-radio-bank" type="radio" name="set_default" :checked="form.set_default === 'bank'" :value="'bank'" @change="updateForm('set_default', $event.target.value)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                 <label for="bordered-radio-bank">Bank</label>
                             </div>
                             <div>
-                                <input id="bordered-radio-paypal" type="radio" name="set_default" v-model="form.set_default" :value="'paypal'" @change="updateForm('set_default', $event.target.value)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
+                                <input id="bordered-radio-paypal" type="radio" name="set_default" :checked="form.set_default === 'paypal'" :value="'paypal'" @change="updateForm('set_default', $event.target.value)" class="w-4 h-4 me-1 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                 <label for="bordered-radio-paypal">PayPal</label>
                             </div>
                         </div>

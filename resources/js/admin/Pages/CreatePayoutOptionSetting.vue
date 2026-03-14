@@ -599,7 +599,7 @@
                                                 >
                                                     <label
                                                         :for="`country_code_placeholder_${activeLanguageId}`"
-                                                        >Cousntry Code Placeholder</label
+                                                        >Country Code Placeholder</label
                                                     >
                                                 </div>
                                                 <input

@@ -378,6 +378,9 @@ return [
             'max' => 'El número de teléfono debe tener menos de 20 caracteres.',
             'unique' => 'Este número de teléfono ya ha sido registrado.',
         ],
+        'message' => [
+            'required' => 'El mensaje es obligatorio.',
+        ],
 
         'payment_method' => [
             'required' => 'El método de pago es obligatorio.',

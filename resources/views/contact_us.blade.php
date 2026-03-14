@@ -1,7 +1,7 @@
 @extends('layouts.template')
 
 @section('content')
-    {!! RecaptchaV3::initJs() !!}
+    {{-- {!! RecaptchaV3::initJs() !!} --}}
 
     <div class="container mx-auto my-14">
         <div class="bg-white border rounded p-4 border-gray-200 shadow w-full md:w-[70%] mx-auto">
@@ -20,7 +20,7 @@
             <div class="pb-2">
                 <form method="POST" action="{{ route('contact_us.store') }}" enctype="multipart/form-data">
                     @csrf
-                    {!! RecaptchaV3::field('register') !!}
+                    {{-- {!! RecaptchaV3::field('register') !!} --}}
 
                     @if (session('success'))
                         <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
