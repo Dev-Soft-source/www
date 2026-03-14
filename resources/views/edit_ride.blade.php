@@ -2674,6 +2674,20 @@
                 var el = document.getElementById('toInputError');
                 if (el) el.classList.add('hidden');
             });
+
+            // Enter: resolve typed city (autocomplete logic like search_ride.blade.php)
+            fromInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueEditRide(this.value, 'from');
+                }
+            });
+            toInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    resolveTypedCityValueEditRide(this.value, 'to');
+                }
+            });
             fromInput.addEventListener('blur', function() {
                 if (isSettingPlaceValueEditRide || isSelectingFromDropdownEditRide) return;
                 var self = this;

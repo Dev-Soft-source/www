@@ -1124,7 +1124,7 @@
                                     @endfor
                                 </div>
                                 @error('seats')
-                                <div class="mt-1 z-10 w-full">
+                                <div id="seats-server-error" class="mt-1 z-10 w-full">
                                     <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                 </div>
                                 @enderror
@@ -4024,6 +4024,19 @@
             var el = document.getElementById('toInputError');
             if (el) el.classList.add('hidden');
         });
+        // Enter: resolve typed city (autocomplete logic like search_ride.blade.php)
+        fromInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                resolveTypedCityValuePostRide(this.value, 'from');
+            }
+        });
+        toInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                resolveTypedCityValuePostRide(this.value, 'to');
+            }
+        });
         fromInput.addEventListener('blur', function() {
             if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
             var self = this;
@@ -4533,6 +4546,8 @@
 
     function seat_selected(th) {
         var seat = parseInt($(th).val());
+        var seatsError = document.getElementById('seats-server-error');
+        if (seatsError) seatsError.classList.add('hidden');
 
         for (i = 1; i <= seat; i++) {
             // Change the image source for selected seats
