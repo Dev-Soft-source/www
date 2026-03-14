@@ -68,22 +68,14 @@
                     <label for="">{{ $editProfilePage->first_name_label ?? 'First name' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="first_name" placeholder="{{ $editProfilePage->first_name_placeholder ?? 'Enter your first name' }}" value="{{ old('first_name', $user->first_name) }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('first_name') ? 'border-red-500' : '' }}">
                     @error('first_name')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
                 <div>
                     <label for="">{{ $editProfilePage->last_name_label ?? 'Last name' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="last_name" placeholder="{{ $editProfilePage->last_name_placeholder ?? 'Enter your last name' }}" value="{{ old('last_name', $user->last_name) }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('last_name') ? 'border-red-500' : '' }}">
                     @error('last_name')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -98,11 +90,7 @@
                         placeholder="{{ $editProfilePage->dob_placeholder ?? 'Select date of birth' }}"
                         class="block mt-1 border p-1.5 w-full rounded text-base lg:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('dob') ? 'border-red-500' : '' }}">
                     @error('dob')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -123,11 +111,7 @@
                         </div>
                     </div>
                     @error('gender')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -142,11 +126,7 @@
                         @endforeach
                     </select>
                     @error('country')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -155,11 +135,7 @@
                     <select name="state" id="state-dropdown" class="bg-white block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                     </select>
                     @error('state')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -168,11 +144,7 @@
                     <select name="city" id="city-dropdown" class="bg-white block text-base lg:text-lg mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                     </select>
                     @error('city')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -180,11 +152,7 @@
                     <label for="">{{ $editProfilePage->address_label ?? 'Address' }}</label>
                     <input type="text" name="address" placeholder="{{ $editProfilePage->address_placeholder ?? 'Enter your address' }}" value="{{ old('address', $user->address) }}" class=" block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('address') ? 'border-red-500' : '' }}">
                     @error('address')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -192,11 +160,7 @@
                     <label for="">{{ $editProfilePage->zip_label ?? 'Postal/Zip code' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="zipcode" maxlength="7" value="{{ old('zipcode', $user->zipcode) }}" class=" block text-base lg:text-lg mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('zipcode') ? 'border-red-500' : '' }}">
                     @error('zipcode')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -265,27 +229,11 @@
                     <label for="">{{ $editProfilePage->mini_bio_label ?? 'Mini bio' }} <span class="text-red-500">*</span></label>
                     <textarea id="message" rows="5" name="bio" class=" block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('bio') ? 'border-red-500' : '' }}">{{ old('bio', $user->about) }}</textarea>
                     @error('bio')
-                      <div class="relative tooltip -bottom-4 group-hover:flex">
-                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                        </div>
-                      </div>
+                      <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
 
-                {{-- @if ($errors->count() > 1)
-                    <div class="md:col-span-2 mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
-                        To be eligible for the rides you selected, you must enter the required information above
-                    </div>
-                @elseif ($errors->count() === 1)
-                    <div class="md:col-span-2 mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
-                        @php
-                            $errorKeys = array_keys($errors->messages());
-                            $errorField = $errorKeys[0];
-                        @endphp
-                        Please fill in the {{ $errorField }} field
-                    </div>
-                @endif --}}
+                
 
                 <div class="md:col-span-2 flex justify-center">
                     <button type="submit" class="button-exp-fill w-32">{{ $editProfilePage->save_button_text ?? 'Save' }}</button>
