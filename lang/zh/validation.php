@@ -345,8 +345,6 @@ return [
             'string' => '个人简介必须是字符串。',
             'max' => '个人简介不能超过 :max 个字符。',
         ],
-    ],
-    'custom' => [
         'payment_method' => [
             'required' => '付款方式为必填项。',
         ],
@@ -358,6 +356,7 @@ return [
         ],
         'dr_amount.gt' => '金额必须大于 0。',
     ],
+    
     'attributes' => [
         'make' => '品牌',
         'model' => '型号',

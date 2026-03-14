@@ -80,34 +80,34 @@ class ProfileVehicleController extends Controller
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_add_message', 'image_size_error_message')->first();
                 $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
-                    'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
-                    'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
-                    'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
-                    'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
-                    'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
-                    'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
-                    'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
-                    'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
-                ];
+                // $niceNames = [
+                //     'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
+                //     'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
+                //     'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
+                //     'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
+                //     'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
+                //     'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
+                //     'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
+                //     'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
+                //     'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
+                // ];
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_add_message', 'image_size_error_message')->first();
                 $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
-                    'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
-                    'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
-                    'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
-                    'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
-                    'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
-                    'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
-                    'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
-                    'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
-                ];
+                // $niceNames = [
+                //     'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
+                //     'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
+                //     'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
+                //     'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
+                //     'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
+                //     'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
+                //     'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
+                //     'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
+                //     'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
+                // ];
             }
         }
 
@@ -121,7 +121,7 @@ class ProfileVehicleController extends Controller
             'car_type' => 'required',
             'primary_vehicle' => 'required',
             'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240',
-        ], [], $niceNames);
+        ], [], []);
 
         if ($validator->fails()) {
             // Check if there are validation errors for the 'uploaded' attribute

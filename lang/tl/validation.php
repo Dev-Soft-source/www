@@ -345,8 +345,7 @@ return [
             'string' => 'Ang bio ay dapat isang string.',
             'max' => 'Ang bio ay hindi maaaring lumampas sa :max na mga character.',
         ],
-    ],
-    'custom' => [
+
         'payment_method' => [
             'required' => 'Kinakailangan ang paraan ng pagbabayad.',
         ],

@@ -369,8 +369,7 @@ return [
             'string' => 'La biografia debe ser una cadena de texto.',
             'max' => 'La biografia no debe superar los :max caracteres.',
         ],
-    ],
-    'custom' => [
+
         'payment_method' => [
             'required' => 'El método de pago es obligatorio.',
         ],

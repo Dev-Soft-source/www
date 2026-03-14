@@ -345,8 +345,7 @@ return [
             'string' => 'La bio doit etre une chaine de caracteres.',
             'max' => 'La bio ne doit pas depasser :max caracteres.',
         ],
-    ],
-    'custom' => [
+
         'payment_method' => [
             'required' => 'La méthode de paiement est obligatoire.',
         ],

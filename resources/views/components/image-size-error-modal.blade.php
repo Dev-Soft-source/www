@@ -1,6 +1,6 @@
 @props([
     'title' => 'Upload Error',
-    'message' => 'The selected image is too large.',
+    'message' => 'The image must be less than ' . env('MAX_IMAGE_SIZE', 10) . 'MB.',
     'buttonLabel' => 'OK',
     'modalBorderClass' => 'modal-border1',
 ])
@@ -42,4 +42,19 @@
             modal.classList.add('hidden');
         }
     }
+
+    function showImageSizeErrorModal() {
+        const modal = document.getElementById('imageSizeErrorModal');
+        const messageEl = document.getElementById('imageSizeErrorMessage');
+
+        if (messageEl) {
+            messageEl.textContent = message;
+        }
+
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+
 </script>
