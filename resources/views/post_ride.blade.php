@@ -3092,6 +3092,19 @@
         if (this.id !== 'from_spot_0' && this.id !== 'to_spot_0') {
             $wrappers = $wrappers.not('#fromInputError, #toInputError');
         }
+        // Do not hide stop tooltips when the user is in another field (same as From/To — only hide when interacting with that stop's input)
+        var currentStopIndex = null;
+        if (this.id && this.id.indexOf('stop_spot_') === 0) currentStopIndex = this.id.replace('stop_spot_', '');
+        else {
+            var dataIdx = this.getAttribute('data-stop-index');
+            if (dataIdx !== null && dataIdx !== '') currentStopIndex = dataIdx;
+        }
+        $wrappers = $wrappers.filter(function() {
+            var id = this.id;
+            if (!id || id.indexOf('stopInputError_') !== 0) return true;
+            var stopIdx = id.replace('stopInputError_', '');
+            return currentStopIndex !== null && String(stopIdx) === String(currentStopIndex);
+        });
         if ($wrappers.length > 0) $wrappers.addClass('hidden');
     }
 
@@ -4466,7 +4479,7 @@
     }
 
     // Initialize the date picker for main time input
-    // AM: display with "am" suffix (e.g. 9:30 am); PM: 24-hour format (e.g. 14:30)
+    // AM/PM display: e.g. 9:30 am, 2:30 pm (12-hour so AM/PM toggle is visible)
     function formatTimeDisplay(date) {
         const hours = date.getHours();
         const minutes = date.getMinutes();
@@ -4475,8 +4488,8 @@
             const h = hours === 0 ? 12 : hours;
             return h + ':' + mins + ' am';
         } else {
-            const h = hours < 10 ? '0' + hours : String(hours);
-            return h + ':' + mins;
+            const h = hours === 12 ? 12 : hours - 12;
+            return h + ':' + mins + ' pm';
         }
     }
     const timePicker = flatpickr(timeInput, {
@@ -4490,7 +4503,13 @@
         minTime: getCurrentProjectTime(), // Set min time to current time
         defaultDate: oldTime || '',
         minuteIncrement: 1, // Set minute increment to 1
+        clickOpens: false, // We handle open/close so second click on time area closes
         onChange: function(selectedDates) {
+            if (selectedDates.length && timeInput._flatpickr.altInput) {
+                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
+            }
+        },
+        onValueUpdate: function(selectedDates) {
             if (selectedDates.length && timeInput._flatpickr.altInput) {
                 timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
             }
@@ -4507,7 +4526,7 @@
         }
     }, 0);
 
-    // Shared initializer for stop time inputs (same behavior/style as main time input)
+    // Shared initializer for stop time inputs (same behavior/style as main time input: first click opens, second click closes)
     function initStopTimePicker(el) {
         if (!el) return;
         try {
@@ -4529,6 +4548,7 @@
             minTime: getCurrentProjectTime(),
             defaultDate: existingVal || '',
             minuteIncrement: 1,
+            clickOpens: false, // We handle open/close so second click on time area closes
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length && instance.altInput) {
                     instance.altInput.value = formatTimeDisplay(selectedDates[0]);
@@ -4546,15 +4566,46 @@
                 picker.altInput.value = formatTimeDisplay(picker.selectedDates[0]);
             }
         }, 0);
-        // When user first clicks and there is no value, set current project time as default
-        el.addEventListener('click', function() {
-            if (!el._flatpickr || !el._flatpickr.input || el._flatpickr.input.value) return;
-            const projectTime = getCurrentProjectTime();
-            const [hours, minutes] = projectTime.split(':');
-            const d = new Date();
-            d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-            el._flatpickr.setDate(d, true);
-        });
+        // Time area: first click opens, second click (same area) closes. Use wrapper so clock icon zone counts too.
+        var stopTimeWrapper = el.closest('.relative') || el.parentElement;
+        if (stopTimeWrapper) {
+            stopTimeWrapper.addEventListener('click', function(e) {
+                if (e.target.closest('.flatpickr-calendar')) return;
+                if (!el._flatpickr) return;
+                if (picker.isOpen) {
+                    picker.close();
+                    e.stopPropagation();
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+            }, true);
+            stopTimeWrapper.addEventListener('click', function(e) {
+                if (e.target.closest('.flatpickr-calendar')) return;
+                if (!el._flatpickr) return;
+                if (!el._flatpickr.input.value) {
+                    const projectTime = getCurrentProjectTime();
+                    const [hours, minutes] = projectTime.split(':');
+                    const d = new Date();
+                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                    el._flatpickr.setDate(d, true);
+                }
+                picker.open();
+            }, false);
+        } else {
+            el.addEventListener('click', function() {
+                if (!el._flatpickr) return;
+                if (picker.isOpen) { picker.close(); return; }
+                if (!el._flatpickr.input.value) {
+                    const projectTime = getCurrentProjectTime();
+                    const [hours, minutes] = projectTime.split(':');
+                    const d = new Date();
+                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                    el._flatpickr.setDate(d, true);
+                }
+                picker.open();
+            });
+        }
     }
 
     // Initialize all existing stop time inputs on page load
@@ -4562,19 +4613,46 @@
         initStopTimePicker(el);
     });
 
-    // Add a click event listener to the main time input field
-    timeInput.addEventListener('click', function() {
-        // Check if the time input field is empty before setting the default time
-        if (!timeInput._flatpickr.input.value) {
-            // Set the default time to the current time when the field is clicked
-            const projectTime = getCurrentProjectTime();
-            // Convert 24-hour to Date object for flatpickr
-            const [hours, minutes] = projectTime.split(':');
-            const date = new Date();
-            date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-            timeInput._flatpickr.setDate(date, true);
-        }
-    });
+    // Time area: first click opens dropdown, second click (same area) closes it. Use wrapper so clock icon zone counts too.
+    var timeWrapper = timeInput.closest('.relative') || timeInput.parentElement;
+    if (timeWrapper) {
+        timeWrapper.addEventListener('click', function(e) {
+            if (e.target.closest('.flatpickr-calendar')) return;
+            if (!timeInput._flatpickr) return;
+            if (timePicker.isOpen) {
+                timePicker.close();
+                e.stopPropagation();
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+        }, true);
+        timeWrapper.addEventListener('click', function(e) {
+            if (e.target.closest('.flatpickr-calendar')) return;
+            if (!timeInput._flatpickr) return;
+            if (!timeInput._flatpickr.input.value) {
+                const projectTime = getCurrentProjectTime();
+                const [hours, minutes] = projectTime.split(':');
+                const date = new Date();
+                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                timeInput._flatpickr.setDate(date, true);
+            }
+            timePicker.open();
+        }, false);
+    } else {
+        timeInput.addEventListener('click', function() {
+            if (!timeInput._flatpickr) return;
+            if (timePicker.isOpen) { timePicker.close(); return; }
+            if (!timeInput._flatpickr.input.value) {
+                const projectTime = getCurrentProjectTime();
+                const [hours, minutes] = projectTime.split(':');
+                const date = new Date();
+                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                timeInput._flatpickr.setDate(date, true);
+            }
+            timePicker.open();
+        });
+    }
 
     function seat_selected(th) {
         var seat = parseInt($(th).val());

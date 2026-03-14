@@ -3098,6 +3098,7 @@
                 minTime: initialMinTime,
                 defaultDate: (oldTime && oldTime.length >= 4) ? oldTime : '',
                 minuteIncrement: 1,
+                clickOpens: false, // We handle open/close so second click on time area closes
                 onChange: function(selectedDates) {
                     if (selectedDates.length && timeInput._flatpickr.altInput) {
                         timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
@@ -3113,18 +3114,48 @@
                 timePicker.altInput.value = formatTimeDisplay(timePicker.selectedDates[0]);
             }
 
-            timeInput.addEventListener('click', function() {
-                if (!timeInput._flatpickr || !timeInput._flatpickr.input) return;
-                if (!timeInput._flatpickr.input.value) {
-                    const projectTime = getCurrentProjectTime();
-                    const [hours, minutes] = projectTime.split(':');
-                    const date = new Date();
-                    date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                    timeInput._flatpickr.setDate(date, true);
-                }
-            });
+            // Time area: first click opens dropdown, second click (same area) closes it. Use wrapper so clock icon zone counts too.
+            var timeWrapper = timeInput.closest('.relative') || timeInput.parentElement;
+            if (timeWrapper) {
+                timeWrapper.addEventListener('click', function(e) {
+                    if (e.target.closest('.flatpickr-calendar')) return;
+                    if (!timeInput._flatpickr) return;
+                    if (timePicker.isOpen) {
+                        timePicker.close();
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return;
+                    }
+                }, true);
+                timeWrapper.addEventListener('click', function(e) {
+                    if (e.target.closest('.flatpickr-calendar')) return;
+                    if (!timeInput._flatpickr) return;
+                    if (!timeInput._flatpickr.input.value) {
+                        const projectTime = getCurrentProjectTime();
+                        const [hours, minutes] = projectTime.split(':');
+                        const date = new Date();
+                        date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                        timeInput._flatpickr.setDate(date, true);
+                    }
+                    timePicker.open();
+                }, false);
+            } else {
+                timeInput.addEventListener('click', function() {
+                    if (!timeInput._flatpickr) return;
+                    if (timePicker.isOpen) { timePicker.close(); return; }
+                    if (!timeInput._flatpickr.input.value) {
+                        const projectTime = getCurrentProjectTime();
+                        const [hours, minutes] = projectTime.split(':');
+                        const date = new Date();
+                        date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                        timeInput._flatpickr.setDate(date, true);
+                    }
+                    timePicker.open();
+                });
+            }
 
-            // Shared initializer for per-stop time inputs (same behavior/style as main time input)
+            // Shared initializer for per-stop time inputs (same behavior as main time: first click opens, second click closes)
             function initStopTimePickerForEdit(el) {
                 if (!el || typeof flatpickr === 'undefined') return;
                 try {
@@ -3146,6 +3177,7 @@
                     minTime: getCurrentProjectTime(),
                     defaultDate: existingVal || '',
                     minuteIncrement: 1,
+                    clickOpens: false, // We handle open/close so second click on time area closes
                     onChange: function(selectedDates, dateStr, instance) {
                         if (selectedDates.length && instance.altInput) {
                             instance.altInput.value = formatTimeDisplay(selectedDates[0]);
@@ -3162,14 +3194,46 @@
                         picker.altInput.value = formatTimeDisplay(picker.selectedDates[0]);
                     }
                 }, 0);
-                el.addEventListener('click', function() {
-                    if (!el._flatpickr || !el._flatpickr.input || el._flatpickr.input.value) return;
-                    const projectTime = getCurrentProjectTime();
-                    const [hours, minutes] = projectTime.split(':');
-                    const d = new Date();
-                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                    el._flatpickr.setDate(d, true);
-                });
+                // Time area: first click opens, second click (same area) closes. Use wrapper so clock icon zone counts too.
+                var stopTimeWrapper = el.closest('.relative') || el.parentElement;
+                if (stopTimeWrapper) {
+                    stopTimeWrapper.addEventListener('click', function(e) {
+                        if (e.target.closest('.flatpickr-calendar')) return;
+                        if (!el._flatpickr) return;
+                        if (picker.isOpen) {
+                            picker.close();
+                            e.stopPropagation();
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            return;
+                        }
+                    }, true);
+                    stopTimeWrapper.addEventListener('click', function(e) {
+                        if (e.target.closest('.flatpickr-calendar')) return;
+                        if (!el._flatpickr) return;
+                        if (!el._flatpickr.input.value) {
+                            const projectTime = getCurrentProjectTime();
+                            const [hours, minutes] = projectTime.split(':');
+                            const d = new Date();
+                            d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                            el._flatpickr.setDate(d, true);
+                        }
+                        picker.open();
+                    }, false);
+                } else {
+                    el.addEventListener('click', function() {
+                        if (!el._flatpickr) return;
+                        if (picker.isOpen) { picker.close(); return; }
+                        if (!el._flatpickr.input.value) {
+                            const projectTime = getCurrentProjectTime();
+                            const [hours, minutes] = projectTime.split(':');
+                            const d = new Date();
+                            d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+                            el._flatpickr.setDate(d, true);
+                        }
+                        picker.open();
+                    });
+                }
             }
 
             // Initialize any existing stop time inputs on page load
