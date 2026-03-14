@@ -316,7 +316,7 @@
                 </div>
             @else
                 <div id="default_submit_btn_container" class="md:col-span-2 mt-4 flex justify-center" style="display: {{ old('payout_method', 'interac') == 'interac' ? 'none' : 'flex' }};">
-                    <button type="submit" class="button-exp-fill w-28">{{ $payoutOptionPage->save_btn_label ?? "Submit"}}</button>
+                    <button type="submit" class="button-exp-fill w-auto">{{ $payoutOptionPage->save_btn_label ?? "Submit"}}</button>
                 </div>
             @endif
             

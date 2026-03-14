@@ -147,7 +147,7 @@
 
                         <div class="mt-4 flex justify-center md:justify-start">
                             <button type="submit"
-                                class="submitBtn button-exp-fill {{ isset($user->profile_image) && $user->profile_image != '' ? 'disabled:bg-primary/20 cursor-not-allowed disabled:border-none' : '' }} w-28"
+                                class="submitBtn button-exp-fill {{ isset($user->profile_image) && $user->profile_image != '' ? 'disabled:bg-primary/20 cursor-not-allowed disabled:border-none' : '' }} w-auto"
                                 {{ isset($user->profile_image) && $user->profile_image != '' ? 'disabled' : '' }}>
                                 @isset($profilePhotoPage->save_button_text)
                                     {{ $profilePhotoPage->save_button_text }}

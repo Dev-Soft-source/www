@@ -14,11 +14,11 @@ use Carbon\Carbon;
 
 class Step3to5Controller extends Controller
 {
-    private const DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB = 10240;
+    private const DEFAULT_MAX_IMAGE_SIZE_KB = 10240;
 
     private function getMaxVehicleImageSizeKb(): int
     {
-        return (int) env('MAX_VEHICLE_IMAGE_SIZE_KB', self::DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB);
+        return (int) env('DEFAULT_MAX_IMAGE_SIZE_KB', self::DEFAULT_MAX_IMAGE_SIZE_KB);
     }
 
     public function create($lang = null)

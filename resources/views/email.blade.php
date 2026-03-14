@@ -42,7 +42,7 @@
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg text-gray-500 bg-gray-50 rounded border-gray-300">
                     </div>
                     <div class="mt-3 flex justify-center">
-                        <button id="showUpdateForm" type="button" class="button-exp-fill w-28"
+                        <button id="showUpdateForm" type="button" class="button-exp-fill w-auto"
                             @if ($errors->any()) class="button-exp-fill hidden" @else class="button-exp-fill block" @endif>
                             @isset($emailSettingPage->update_button_text)
                                 {{ $emailSettingPage->update_button_text }}
@@ -77,7 +77,7 @@
                             </div>
                         
                         <div class="mt-3 flex justify-center w-full">
-                            <button type="submit" class="button-exp-fill w-28">
+                            <button type="submit" class="button-exp-fill w-auto">
                                 @isset($emailSettingPage->save_btn_label)
                                     {{ $emailSettingPage->save_btn_label }}
                                 @endisset

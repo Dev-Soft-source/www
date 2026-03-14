@@ -133,7 +133,7 @@
 
                     <div class="flex justify-center">
                         <button
-                            class="button-exp-fill w-28">{{ $passwordSettingPage->update_button_text ?? 'Update' }}</button>
+                            class="button-exp-fill w-auto">{{ $passwordSettingPage->update_button_text ?? 'Update' }}</button>
                     </div>
                 </div>
             </form>
