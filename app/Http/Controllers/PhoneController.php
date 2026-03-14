@@ -138,20 +138,7 @@ class PhoneController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
 
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_add_message', 'suspended_account_phone_number_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_add_message', 'suspended_account_phone_number_message')->first();
-            }
-        }
+        $message = $this->successMessage;
 
         // Get country dial code if country is selected
         $countryDialCode = null;
@@ -190,14 +177,11 @@ class PhoneController extends Controller
         }
 
         if (!validatePhoneNumber($request->phone, $country)) {
-            return back()->withErrors(['phone' => 'Please enter a valid phone number.'])->withInput();
+            return back()->withErrors(['phone' => __('validation.custom.phone.valid')])->withInput();
         }
 
         $request->validate([
             'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,user_id',
-        ], [
-            'full_phone.max' => 'The phone number must be less than 20 characters',
-            'full_phone.unique' => 'The phone number has already been taken',
         ]);
 
         $phone = PhoneNumber::create([
@@ -713,19 +697,7 @@ class PhoneController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
 
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_add_message', 'suspended_account_phone_number_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_add_message', 'suspended_account_phone_number_message')->first();
-            }
-        }
+        $message = $this->successMessage;
 
         // Get country dial code if country is selected
         $countryDialCode = null;

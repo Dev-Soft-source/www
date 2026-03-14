@@ -369,6 +369,15 @@ return [
             'string' => 'La biografia debe ser una cadena de texto.',
             'max' => 'La biografia no debe superar los :max caracteres.',
         ],
+        'phone' => [
+            'required' => 'El número de teléfono es obligatorio.',
+            'valid' => 'Por favor, introduce un número de teléfono válido.',
+            'unique' => 'Ya existe una cuenta con este número de teléfono.',
+        ],
+        'full_phone' => [
+            'max' => 'El número de teléfono debe tener menos de 20 caracteres.',
+            'unique' => 'Este número de teléfono ya ha sido registrado.',
+        ],
 
         'payment_method' => [
             'required' => 'El método de pago es obligatorio.',
