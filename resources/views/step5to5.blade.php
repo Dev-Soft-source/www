@@ -372,7 +372,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button type="button" onclick="closeWhatsAppUnavailableModal()"
-                                class="inline-flex justify-center rounded w-28 bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 ">
+                                class="inline-flex justify-center rounded w-auto bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 ">
                                 {{ $siteText['ok_btn_text'] }}
                             </button>
                         </div>

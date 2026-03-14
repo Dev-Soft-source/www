@@ -14,11 +14,11 @@ use Carbon\Carbon;
 
 class Step3to5Controller extends Controller
 {
-    private const DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB = 10240;
+    private const DEFAULT_MAX_IMAGE_SIZE_KB = 10240;
 
     private function getMaxVehicleImageSizeKb(): int
     {
-        return (int) env('MAX_VEHICLE_IMAGE_SIZE_KB', self::DEFAULT_MAX_VEHICLE_IMAGE_SIZE_KB);
+        return (int) env('DEFAULT_MAX_IMAGE_SIZE_KB', self::DEFAULT_MAX_IMAGE_SIZE_KB);
     }
 
     public function create($lang = null)
@@ -72,66 +72,7 @@ class Step3to5Controller extends Controller
     {
 
 
-        $selectedLanguage = session('selectedLanguage');
-        $step3Page = null;
-        $niceNames = [];
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $step3Page = Step3PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $niceNames = [
-                'make' => isset($step3Page->make_error) ? $step3Page->make_error : '',
-                'model' => isset($step3Page->model_error) ? $step3Page->model_error : '',
-                'type' => isset($step3Page->vehicle_type_error) ? $step3Page->vehicle_type_error : '',
-                'color' => isset($step3Page->color_error) ? $step3Page->color_error : '',
-                'liscense_no' => isset($step3Page->license_error) ? $step3Page->license_error : '',
-                'year' => isset($step3Page->year_error) ? $step3Page->year_error : '',
-                'car_type' => isset($step3Page->fuel_error) ? $step3Page->fuel_error : '',
-                'driver_liscense' => isset($step3Page->driver_license_error) ? $step3Page->driver_license_error : '',
-                'image' => isset($step3Page->photo_error) ? $step3Page->photo_error : '',
-            ];
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $step3Page = Step3PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $niceNames = [
-                'make' => isset($step3Page->make_error) ? $step3Page->make_error : '',
-                'model' => isset($step3Page->model_error) ? $step3Page->model_error : '',
-                'type' => isset($step3Page->vehicle_type_error) ? $step3Page->vehicle_type_error : '',
-                'color' => isset($step3Page->color_error) ? $step3Page->color_error : '',
-                'liscense_no' => isset($step3Page->license_error) ? $step3Page->license_error : '',
-                'year' => isset($step3Page->year_error) ? $step3Page->year_error : '',
-                'car_type' => isset($step3Page->fuel_error) ? $step3Page->fuel_error : '',
-                'driver_liscense' => isset($step3Page->driver_license_error) ? $step3Page->driver_license_error : '',
-                'image' => isset($step3Page->photo_error) ? $step3Page->photo_error : '',
-            ];
-        }
-
-        // If user clicks Skip Vehicle Info -> go to Step 4 directly (no validations)
-        // if ($request->input('action') === 'skip_vehicle_info') {
-        //     User::whereId($id)->update(['step' => '4']);
-        //     session()->forget('uploaded_profile_image');
-        //     return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
-        // }
-
-        // Manual validation for file extensions if file is uploaded (to avoid requiring php_fileinfo extension)
         $maxVehicleImageSizeKb = $this->getMaxVehicleImageSizeKb();
-        $maxVehicleImageSizeMessage = 'The image must be less than ' . round($maxVehicleImageSizeKb / 1024, 2) . 'MB.';
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $extension = strtolower($file->getClientOriginalExtension());
-            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
-
-            if ($file->getSize() > ($maxVehicleImageSizeKb * 1024)) {
-                return redirect()->back()
-                    ->withErrors(['image' => $maxVehicleImageSizeMessage])
-                    ->withInput();
-            }
-
-            if (!in_array($extension, $allowedExtensions)) {
-                return redirect()->back()->withErrors(['image' => 'The image must be a file of type: jpeg, png, jpg, gif.'])->withInput();
-            }
-        }
 
         // Otherwise, user is adding vehicle -> validate only vehicle fields
         $validated = $request->validate([
@@ -143,18 +84,7 @@ class Step3to5Controller extends Controller
             'year' => 'required',
             'car_type' => 'required',
             'image' => 'nullable|file|max:' . $maxVehicleImageSizeKb,
-        ], [
-            'make.required' => 'The make is required',
-            'model.required' => 'The model is required',
-            'type.required' => 'The vehicle type is required',
-            'liscense_no.required' => 'The license number is required',
-            'color.required' => 'The color is required',
-            'year.required' => 'The year is required',
-            'car_type.required' => 'The car type is required',
-            'image.nullable' => 'The image may be null',
-            'image.file' => 'The image must be a file',
-            'image.max' => $maxVehicleImageSizeMessage,
-        ], $niceNames);
+        ]);
         
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -186,10 +116,8 @@ class Step3to5Controller extends Controller
 
         User::whereId($id)->update(['step3' => 1]);
 
-        
-
         session()->forget('uploaded_profile_image');
 
-        return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
+        return redirect()->route('step4to5', ['lang' => $this->selectedLanguage->abbreviation]);
     }
 }

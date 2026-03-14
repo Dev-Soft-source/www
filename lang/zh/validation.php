@@ -345,8 +345,15 @@ return [
             'string' => '个人简介必须是字符串。',
             'max' => '个人简介不能超过 :max 个字符。',
         ],
-    ],
-    'custom' => [
+        'phone' => [
+            'required' => '电话号码为必填项。',
+            'valid' => '请输入有效的电话号码。',
+            'unique' => '使用此电话号码的账户已存在。',
+        ],
+        'full_phone' => [
+            'max' => '电话号码必须少于20个字符。',
+            'unique' => '该电话号码已被使用。',
+        ],
         'payment_method' => [
             'required' => '付款方式为必填项。',
         ],
@@ -358,6 +365,7 @@ return [
         ],
         'dr_amount.gt' => '金额必须大于 0。',
     ],
+    
     'attributes' => [
         'make' => '品牌',
         'model' => '型号',

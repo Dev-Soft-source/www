@@ -30,7 +30,7 @@
                                 </div>
                                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                                     <a href="#" onclick="closeNotificationModal()"
-                                        class="button-exp-fill w-28">{{ $siteText['close_btn_text'] }}
+                                        class="button-exp-fill w-auto">{{ $siteText['close_btn_text'] }}
                                     </a>
                                 </div>
                             </div>

@@ -112,7 +112,7 @@
                         @isset($contactProximaPage->submit_button_text)
                             <div class="md:col-span-2 flex justify-center">
                                 <button type="submit"
-                                    class="w-28 button-exp-fill">{{ $contactProximaPage->submit_button_text }}</button>
+                                    class="w-auto button-exp-fill">{{ $contactProximaPage->submit_button_text }}</button>
                             </div>
                         @endisset
                     </div>

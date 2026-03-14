@@ -234,7 +234,7 @@
                                             @endisset
                                         </p>
                                     </div>
-                                    <input id="dropzone-file" name="image" type="file"
+                                    <input id="dropzone-file" name="image" type="file" accept="image/*"
                                         onchange="previewImage(this)" class="hidden" />
                                 </label>
                             </div>
@@ -382,8 +382,8 @@
     </div>
 
     <x-image-size-error-modal
-        title=""
-        :message="'The image must be less than ' . $maxVehicleImageSizeMb . 'MB.'"
+        title="Upload Error"
+        message="The image must be less than 10MB."
         button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
         modal-border-class="modal-border1"
     />
@@ -398,42 +398,13 @@
         });
 
         let sessionImage = "{{ session('uploaded_profile_image') }}";
-        console.log(sessionImage);
+
         sessionStorage.setItem("uploaded_profile_image", "{{ session('uploaded_profile_image') }}");
         const profileImage = document.getElementById('profile-image');
-        const profileImage1 = document.getElementById('profile-image1');
-
-        function previewImage1(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    profileImage1.src = e.target.result;
-                };
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
 
         let hasVehiclePhoto = false;
         const vehiclePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
-        const maxVehicleImageSizeBytes = {{ $maxVehicleImageSizeKb }} * 1024;
-        const maxVehicleImageSizeMessage = 'The image must be less than {{ $maxVehicleImageSizeMb }}MB.';
-
-        function showImageSizeErrorModal(message = maxVehicleImageSizeMessage) {
-            const modal = document.getElementById('imageSizeErrorModal');
-            const messageEl = document.getElementById('imageSizeErrorMessage');
-
-            if (messageEl) {
-                messageEl.textContent = message;
-            }
-
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
-        }
-
-
+        
         function updateRemoveVehiclePhotoButtonVisibility() {
             const profileImageEl = document.getElementById('profile-image');
             const btn = document.getElementById('remove-vehicle-photo-btn');
@@ -461,12 +432,12 @@
 
         function previewImage(input) {
             if (input.files && input.files[0]) {
-                if (input.files[0].size > maxVehicleImageSizeBytes) {
+                if (input.files[0].size > ({{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
                     input.value = '';
                     hasVehiclePhoto = false;
-                    showImageSizeErrorModal(maxVehicleImageSizeMessage);
+                    showImageSizeErrorModal();
                     updateRemoveVehiclePhotoButtonVisibility();
-                    validateStep3Form();
+                    // validateStep3Form();
                     return;
                 }
 
@@ -476,13 +447,13 @@
                     profileImage.className = 'w-72 h-72 object-contain mb-3 cursor-pointer rounded-lg';
                     hasVehiclePhoto = true;
                     updateRemoveVehiclePhotoButtonVisibility();
-                    validateStep3Form();
+                    // validateStep3Form();
                 };
                 reader.readAsDataURL(input.files[0]);
             } else {
                 hasVehiclePhoto = false;
                 updateRemoveVehiclePhotoButtonVisibility();
-                validateStep3Form();
+                // validateStep3Form();
             }
         }
 
@@ -601,9 +572,9 @@
                 const carType = document.querySelector('input[name="car_type"]:checked');
                 const fileInput = document.getElementById('dropzone-file');
 
-                if (fileInput && fileInput.files.length && fileInput.files[0].size > maxVehicleImageSizeBytes) {
+                if (fileInput && fileInput.files.length && fileInput.files[0].size > ({{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
                     e.preventDefault();
-                    showImageSizeErrorModal(maxVehicleImageSizeMessage);
+                    showImageSizeErrorModal();
                     fileInput.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center'
@@ -624,9 +595,6 @@
             // Initial validation check (enables Save & Continue when all required fields are filled)
             validateStep3Form();
 
-            @if ($errors->has('image'))
-                showImageSizeErrorModal(@json($errors->first('image')));
-            @endif
         }
 
         if (document.readyState === 'loading') {

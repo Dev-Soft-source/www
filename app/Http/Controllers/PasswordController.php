@@ -37,39 +37,15 @@ class PasswordController extends Controller
 
     public function update($id, Request $request)
     {
-        $niceNames = [];
-        $messages = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('password_update_message', 'incorrect_password_message')->first();
-                $passwordSettingPage = PasswordSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'pass1' => isset($passwordSettingPage->current_password_error) ? $passwordSettingPage->current_password_error : '',
-                    'pass2' => isset($passwordSettingPage->new_password_error) ? $passwordSettingPage->new_password_error : '',
-                    'pass3' => isset($passwordSettingPage->confirm_new_password_error) ? $passwordSettingPage->confirm_new_password_error : '',
-                ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('password_update_message', 'incorrect_password_message')->first();
-                $passwordSettingPage = PasswordSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'pass1' => isset($passwordSettingPage->current_password_error) ? $passwordSettingPage->current_password_error : '',
-                    'pass2' => isset($passwordSettingPage->new_password_error) ? $passwordSettingPage->new_password_error : '',
-                    'pass3' => isset($passwordSettingPage->confirm_new_password_error) ? $passwordSettingPage->confirm_new_password_error : '',
-                ];
-            }
-        }
+        
+
+        $messages = $this->successMessage;
 
         $request->validate([
             'pass1' => 'required',
             'pass2' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
             'pass3' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/|same:pass2',
-        ], [], $niceNames);
+        ]);
 
         // Check if the current password is correct
         if (!Hash::check($request->pass1, auth()->user()->password)) {
