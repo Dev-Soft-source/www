@@ -155,7 +155,7 @@
                     </div>
                     <div class="mt-4 flex justify-center">
                         <button type="submit"
-                            class="submitBtn w-28 button-exp-fill {{ isset($user->driver_liscense) && $user->driver_liscense != '' ? 'disabled:bg-primary/20 cursor-not-allowed disabled:border-none' : '' }}"
+                            class="submitBtn w-auto button-exp-fill {{ isset($user->driver_liscense) && $user->driver_liscense != '' ? 'disabled:bg-primary/20 cursor-not-allowed disabled:border-none' : '' }}"
                             {{ isset($user->driver_liscense) && $user->driver_liscense != '' ? 'disabled' : '' }}>
                             @isset($driverSettingPage->upload_button_text)
                                 {{ $driverSettingPage->upload_button_text }}

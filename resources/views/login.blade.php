@@ -58,11 +58,11 @@
 
                                                 @if (session('verify_email') != null && session('verify_email') == true)
                                                     <a href="{{ route('sendEmailVerify', ['email' => session('email')]) }}"
-                                                        class="inline-flex justify-center w-28 rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">{{ $loginPage->new_verification_email_btn_label ?? ' resend email' }}</a>
+                                                        class="inline-flex justify-center w-auto rounded bg-primary px-3 py-2 whitespace-nowrap font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">{{ $loginPage->new_verification_email_btn_label ?? ' resend email' }}</a>
                                                 @endif
 
                                                 <a onclick="closeModal('error-modal')"
-                                                    class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
+                                                    class="inline-flex justify-center w-auto rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                                             </div>
                                         </div>
                                     </div>
@@ -108,7 +108,7 @@
                                                 class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
 
                                                 <a href=""
-                                                    class="inline-flex justify-center w-28 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] }}</a>
+                                                    class="inline-flex justify-center w-auto rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] }}</a>
                                             </div>
                                         </div>
                                     </div>
