@@ -236,8 +236,11 @@ export default {
                 );
         },
         updateCheckbox(field) {
-            // Toggle the value of the checkbox in the form data
-            this.form[field] = this.form[field] === '1' ? '0' : '1';
+            // Toggle the value of the checkbox in the form data using mutation
+            const newValue = this.form[field] === '1' ? '0' : '1';
+            this.$store.commit("folk_ride_settings/setForm", {
+                [field]: newValue,
+            });
         },
     },
     created() {
