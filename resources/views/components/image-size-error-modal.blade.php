@@ -1,6 +1,5 @@
 @props([
     'title' => 'Upload Error',
-    'message' => 'The image must be less than ' . env('MAX_IMAGE_SIZE', 10) . 'MB.',
     'buttonLabel' => 'OK',
     'modalBorderClass' => 'modal-border1',
 ])
@@ -17,10 +16,10 @@
                     </div>
                     <div class="text-center w-full">
                         <h3 class="font-FuturaMdCnBT text-gray-700 mb-4">
-                            {{ $title }}
+                            {{-- {{ $title }} --}}
                         </h3>
                         <p class="text-center text-gray-600">
-                            {{ $message }}
+                            {{ __('validation.custom.image.max') }}
                         </p>
                     </div>
                 </div>

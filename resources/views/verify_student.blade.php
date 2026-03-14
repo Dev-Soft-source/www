@@ -275,7 +275,7 @@
                                         @endisset
                                     </p>
                                 </div>
-                                <input id="dropzone-file" name="student_card" type="file" onchange="previewImage(this)"
+                                <input id="dropzone-file" name="student_card" type="file" onchange="previewImage(this)" accept="image/*"
                                     class="hidden" />
                             </label>
                         @endif
@@ -286,7 +286,7 @@
                             <input type="hidden" name="existing_image" value="{{ $imageName }}">
                             <label for="dropzone-file" class="cursor-pointer">
                                 <div class="text-primary border border-primary px-6 py-3 rounded w-full mt-3 text-center">
-                                    <input id="dropzone-file" name="student_card" type="file"
+                                    <input id="dropzone-file" name="student_card" type="file" 
                                         onchange="previewImage(this)" class="hidden" />
                                     Upload another image
                                 </div>
@@ -349,6 +349,12 @@
             </form>
         </div>
     </div>
+
+    <x-image-size-error-modal
+        title="Upload Error"
+        button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
+        modal-border-class="modal-border1"
+    />
 
 @endsection
 
@@ -458,6 +464,13 @@
 
         function previewImage(input) {
             if (input.files && input.files[0]) {
+
+                if (input.files[0].size > ({{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
+                    input.value = '';
+                    showImageSizeErrorModal();
+                    return;
+                }
+
                 const reader = new FileReader();
 
                 reader.onload = function(e) {

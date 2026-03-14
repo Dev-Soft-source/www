@@ -129,7 +129,7 @@
                                     @endisset
                                 </p>
                             </div>
-                            <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)"
+                            <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" accept="image/*" 
                                 class="hidden" />
                             @if (session('uploaded_image'))
                                 <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
@@ -160,6 +160,12 @@
             </form>
         </div>
     </div>
+
+    <x-image-size-error-modal
+        title="Upload Error"
+        button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
+        modal-border-class="modal-border1"
+    />
 @endsection
 
 @section('script')
@@ -168,6 +174,12 @@
         function previewImage(input) {
             const profileImage = document.getElementById('profile-image');
             if (input.files && input.files[0]) {
+
+                if (input.files[0].size > ({{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
+                    input.value = '';
+                    showImageSizeErrorModal();
+                    return;
+                }
 
                 $(".submitBtn").removeAttr('disabled');
                 $(".submitBtn").removeClass('disabled:bg-primary/20 cursor-not-allowed disabled:border-none');

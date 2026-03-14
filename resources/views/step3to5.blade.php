@@ -383,7 +383,6 @@
 
     <x-image-size-error-modal
         title="Upload Error"
-        message="The image must be less than 10MB."
         button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
         modal-border-class="modal-border1"
     />
