@@ -54,6 +54,7 @@ use App\Http\Controllers\Api\Admin\{
     PinkRideSettingController,
     PostRidePageSettingController,
     PreferencesSettingController,
+    ProfilePhotoGuidelinesPageSettingController,
     PrivacyPolicyPageSettingController,
     ReferralSystemSettingController,
     RefundPolicyPageSettingController,
@@ -234,6 +235,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-cost-sharing-page-setting', [CostSharingPageSettingController::class, 'show']);
     Route::post('/upload-cost-sharing-page-setting-excel', [CostSharingPageSettingController::class, 'uploadExcel']);
     Route::get('/download-cost-sharing-page-setting-template', [CostSharingPageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-profile-photo-guidelines-page-setting', [ProfilePhotoGuidelinesPageSettingController::class, 'update']);
+    Route::get('/get-profile-photo-guidelines-page-setting', [ProfilePhotoGuidelinesPageSettingController::class, 'show']);
+    Route::post('/upload-profile-photo-guidelines-page-setting-excel', [ProfilePhotoGuidelinesPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-profile-photo-guidelines-page-setting-template', [ProfilePhotoGuidelinesPageSettingController::class, 'downloadTemplate']);
     Route::post('/update-terms-of-use-page-setting', [TermsOfUsePageSettingController::class, 'update']);
     Route::get('/get-terms-of-use-page-setting', [TermsOfUsePageSettingController::class, 'show']);
     Route::post('/upload-terms-of-use-page-setting-excel', [TermsOfUsePageSettingController::class, 'uploadExcel']);

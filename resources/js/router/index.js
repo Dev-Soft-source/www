@@ -65,6 +65,7 @@ import CreateContactUsPageSetting from '../admin/Pages/CreateContactUsPageSettin
 import CreateTermsAndConditionPageSetting from '../admin/Pages/CreateTermsAndConditionPageSetting.vue'
 import CreatePrivacyPolicyPageSetting from '../admin/Pages/CreatePrivacyPolicyPageSetting.vue'
 import CreateCostSharingPageSetting from '../admin/Pages/CreateCostSharingPageSetting.vue'
+import CreateProfilePhotoGuidelinesPageSetting from '../admin/Pages/CreateProfilePhotoGuidelinesPageSetting.vue'
 import CreateTermsOfUsePageSetting from '../admin/Pages/CreateTermsOfUsePageSetting.vue'
 import CreateRefundPolicyPageSetting from '../admin/Pages/CreateRefundPolicyPageSetting.vue'
 import CreateCancellationPageSetting from '../admin/Pages/CreateCancellationPageSetting.vue'
@@ -870,6 +871,14 @@ const routes = [
         component: CreateCostSharingPageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Cost sharing page settings', 'routeName': 'admin.cost-sharing-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/profile-photo-guidelines-page-settings',
+        name: 'admin.profile-photo-guidelines-page-setting.index',
+        component: CreateProfilePhotoGuidelinesPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Profile photo guidelines page settings', 'routeName': 'admin.profile-photo-guidelines-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {
