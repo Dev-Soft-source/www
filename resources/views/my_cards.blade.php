@@ -240,7 +240,7 @@
                         @endif
                         @if ($card->primary_card == 1 || $card->primary_card === '1')
                             <span
-                                class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Primary</span>
+                                class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">{{ $paymentSettingDetail->mobile_default_card_tab ?? 'Primary' }}</span>
                         @endif
                     </div>
                     <div class="flex items-center space-x-2">

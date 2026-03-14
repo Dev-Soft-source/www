@@ -116,58 +116,14 @@ class CardController extends Controller
             }
         }
 
-        $paymentSettingDetail = null;
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $ProfilePage = null;
-        $ProfileSetting = null;
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $paymentSettingDetail = BillingAddressSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfilePage = ProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $ProfileSetting = ProfileSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $reviewSetting = MyReviewSettingDetail::where('language_id', $selectedLanguage->id)->select('review_left_label', 'review_received_label')->first();
-        }
+        $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        return view('create_card', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'paymentSettingDetail' => $paymentSettingDetail]);
+        return view('create_card', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
+        'ProfileSetting' => $ProfileSetting, 
+        'paymentSettingDetail' => $paymentSettingDetail]);
     }
 
     public function store(Request $request)
@@ -304,7 +260,7 @@ class CardController extends Controller
         $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
 
         // If a redirectUrl query/body param is present, prefer redirecting there
-        $redirectUrl = $request->input('redirectUrl');
+        $redirectUrl = $request->input('redirectUrl', url()->full());
         
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json(['success' => true, 'message' => $successMessage, 'redirect' => $redirectUrl]);
