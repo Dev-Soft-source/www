@@ -182,9 +182,6 @@ class PhoneController extends Controller
 
         $request->validate([
             'full_phone' => 'max:20|unique:phone_numbers,phone,NULL,user_id',
-        ], [
-            'full_phone.max' => 'The phone number must be less than 20 characters',
-            'full_phone.unique' => 'The phone number has already been taken',
         ]);
 
         $phone = PhoneNumber::create([

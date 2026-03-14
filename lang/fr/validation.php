@@ -350,6 +350,10 @@ return [
             'valid' => 'Veuillez entrer un numéro de téléphone valide.',
             'unique' => 'Un compte avec ce numéro de téléphone existe déjà.',
         ],
+        'full_phone' => [
+            'max' => 'Le numéro de téléphone doit contenir moins de 20 caractères.',
+            'unique' => 'Ce numéro de téléphone a déjà été utilisé.',
+        ],
 
         'payment_method' => [
             'required' => 'La méthode de paiement est obligatoire.',
