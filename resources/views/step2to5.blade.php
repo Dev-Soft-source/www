@@ -89,38 +89,6 @@
                             @enderror
                         </div>
 
-                        @if ($errors->has('image') && Str::contains($errors->first('image'), 'greater than 10MB'))
-                            <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                    <div
-                                        class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                        <div
-                                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
-                                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                                <div class="sm:flex sm:items-start justify-center">
-                                                    <!-- <div
-                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                    </svg>
-                                                </div> -->
-                                                </div>
-                                                <div class="text-center w-full">
-                                                    <p class="can-exp-p text-center">The image size must not be larger than
-                                                        10 MB</p>
-                                                </div>
-                                            </div>
-                                            <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                                <a href=""
-                                                    class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
                         <div class="mt-6 flex justify-center space-x-2 md:col-span-2">
                             <button type="button" onclick="showSkipConfirmation()" class="button-exp-fill w-auto">
                                 @isset($step2Page->skip_button_label)
@@ -172,6 +140,33 @@
             </div>
         </div>
     </div>
+
+    <div id="imageSizeErrorModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+        aria-labelledby="image-size-error-modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full">
+                            <h3 id="image-size-error-modal-title" class="font-FuturaMdCnBT text-gray-700 mb-4">
+                                Upload Error
+                            </h3>
+                            <p id="imageSizeErrorMessage" class="text-gray-600">
+                                The image must be less than 10MB.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="hideImageSizeErrorModal()"
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -186,6 +181,7 @@
             }
         @endphp
         var defaultAvatarUrl = "{{ asset('users_images/' . $defaultAvatar) }}";
+        var maxProfileImageSizeBytes = 10 * 1024 * 1024;
 
         window.addEventListener("pageshow", function(event) {
             if (event.persisted) {
@@ -199,6 +195,26 @@
                 }
             }
         });
+
+        function showImageSizeErrorModal(message = 'The image must be less than 10MB.') {
+            var modal = document.getElementById('imageSizeErrorModal');
+            var messageEl = document.getElementById('imageSizeErrorMessage');
+
+            if (messageEl) {
+                messageEl.textContent = message;
+            }
+
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideImageSizeErrorModal() {
+            var modal = document.getElementById('imageSizeErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
 
         function updateRemoveButtonVisibility() {
             var profileImage = document.getElementById('profile-image');
@@ -241,6 +257,16 @@
             const nextButton = document.getElementById('nextButton');
 
             if (input.files && input.files[0]) {
+                if (input.files[0].size > maxProfileImageSizeBytes) {
+                    input.value = '';
+                    nextButton.disabled = true;
+                    nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    nextButton.classList.remove('opacity-100');
+                    showImageSizeErrorModal('The image must be less than 10MB.');
+                    updateRemoveButtonVisibility();
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     profileImage.src = e.target.result;
@@ -284,6 +310,10 @@
                 nextButton.classList.remove('opacity-100');
             @endif
             updateRemoveButtonVisibility();
+
+            @if ($errors->has('image'))
+                showImageSizeErrorModal(@json($errors->first('image')));
+            @endif
         });
 
         function showSkipConfirmation() {
