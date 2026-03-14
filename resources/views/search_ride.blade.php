@@ -1886,8 +1886,7 @@
         document.addEventListener('click', function(e) {
             const fromSuggest = document.getElementById('from_spot_suggestions0');
             const toSuggest = document.getElementById('to_spot_suggestions0');
-            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest
-                .innerHTML = '';
+            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
             if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
         });
 
