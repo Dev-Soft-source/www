@@ -6,11 +6,11 @@
     box-shadow: 0px 0px 10px var(--box-shadow);
 }
 
-.calendar-toolbar > .current-month {
+.calendar-toolbar>.current-month {
     color: var(--highlight-text-color);
 }
 
-.calendar-toolbar > [class$="month-btn"] {
+.calendar-toolbar>[class$="month-btn"] {
     width: 40px;
     aspect-ratio: 1;
     text-align: center;
@@ -65,7 +65,7 @@
     user-select: none;
 }
 
-.calendar-toolbar > [class$="month-btn"]:hover,
+.calendar-toolbar>[class$="month-btn"]:hover,
 .month-day:hover,
 .btn:hover {
     border-radius: var(--border-radius);
@@ -77,7 +77,7 @@
     box-shadow: inset 0px 0px 0px 1.5px var(--color-accent);
 }
 
-.calendar-toolbar > [class$="month-btn"]:focus,
+.calendar-toolbar>[class$="month-btn"]:focus,
 .month-day:focus,
 .btn:focus {
     border-radius: var(--border-radius);
@@ -191,12 +191,12 @@
     z-index: 2;
 }
 
-.sidebar.open ~ .home-section {
+.sidebar.open~.home-section {
     left: 240px;
     width: calc(100% - 240px);
 }
 
-.sidebar.open ~ .header-section {
+.sidebar.open~.header-section {
     left: 240px;
     width: calc(100% - 240px);
 }
@@ -262,6 +262,7 @@
     -webkit-border-radius: 20px 0 0 0;
     border-radius: 20px 0 0 0;
 }
+
 a.filepond--credits {
     display: none !important;
 }
@@ -284,26 +285,33 @@ a.filepond--credits {
         z-index: 2;
     }
 
-    .sidebar.open ~ .home-section {
+    .sidebar.open~.home-section {
         left: 0;
         width: 100%;
     }
 
-    .sidebar.open ~ .header-section {
+    .sidebar.open~.header-section {
         left: 0;
         width: 100%;
     }
+
     /*sidebar css*/
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 0px;
-    background: #106BC7;
-    /* padding: 0px 6px; */
-    z-index: 99;
-    transition: all 0.5s ease;
-    overflow-y: auto;
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0px;
+        background: #106BC7;
+        /* padding: 0px 6px; */
+        z-index: 99;
+        transition: all 0.5s ease;
+        overflow-y: auto;
+    }
 }
-  }
+
+
+body.tox-fullscreen .sidebar,
+body.tox-fullscreen .header-section {
+    display: none;
+}

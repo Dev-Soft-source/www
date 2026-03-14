@@ -307,3 +307,10 @@ a.filepond--credits {
     overflow-y: auto;
 }
   }
+
+
+  
+body.tox-fullscreen .sidebar,
+body.tox-fullscreen .navbar {
+    display: none;
+}
