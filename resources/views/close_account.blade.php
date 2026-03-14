@@ -262,14 +262,14 @@
 
                         <div class="md:col-span-2">
                             <div>
-                                <input type="checkbox" value="1" name="close_account" id="close_account_checkbox"
-                                {{ old('close_account') === '1' ? 'checked' : '' }}
+                                <input type="checkbox" value="1" name="confirm_close_account" id="close_account_checkbox"
+                                {{ old('confirm_close_account') === '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 ml-2 focus:ring-none">
                                 <label for="close_account_checkbox"
                                 class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->close_my_account_checkbox ?? 'Close my account' }}</label><span
                                 class="text-red-500 font-bold">*</span>
                             </div>
-                            @error('close_account')
+                            @error('confirm_close_account')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
