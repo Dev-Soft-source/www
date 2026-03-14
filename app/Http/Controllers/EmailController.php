@@ -50,10 +50,10 @@ class EmailController extends Controller
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
-
+        Log::info("User with ID {$userId} is attempting to update their email address.");
         try {
             $validated = $request->validate([
-                'old_email' => 'required|email',
+            //    'old_email' => 'required|email',
                 'email_confirmation' => 'required|email',
                 'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
             ]);
@@ -62,9 +62,10 @@ class EmailController extends Controller
                 ->withErrors($e->errors())
                 ->withInput();
         }
-
+        Log::info("User with ID {$userId} is attempting to update their email address.");
         // Find the user
         $user = User::findOrFail($userId);
+        Log::info("User {$user->id} is updating their email from {$user->email} to {$request->email}");
         $notification = Notification::create([
             'type' => null,
             'category' => 'system',
@@ -95,14 +96,14 @@ class EmailController extends Controller
             }
         }
         // Check if the old email matches
-        if ($request->old_email !== $user->email) {
-            return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
-                ->withErrors(['old_email' => 'The current email does not match.'])
-                ->withInput();
-        }
+        // if ($request->old_email !== $user->email) {
+        //     return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+        //         ->withErrors(['old_email' => 'The current email does not match.'])
+        //         ->withInput();
+        // }
 
         // Store old email for notification
-        $oldEmail = $user->email;
+        //$oldEmail = $user->email;
 
         // Update the user's email and set email_verified to 0
         $user->email = $request->email;
