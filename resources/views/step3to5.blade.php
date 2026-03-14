@@ -380,6 +380,33 @@
             </div>
         </div>
     </div>
+
+    <div id="imageSizeErrorModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+        aria-labelledby="image-size-error-modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full">
+                            <h3 id="image-size-error-modal-title" class="font-FuturaMdCnBT text-gray-700 mb-4">
+                                Upload Error
+                            </h3>
+                            <p id="imageSizeErrorMessage" class="text-gray-600">
+                                The image must be less than 10MB.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="hideImageSizeErrorModal()"
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -410,6 +437,27 @@
 
         let hasVehiclePhoto = false;
         const vehiclePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
+        const maxVehicleImageSizeBytes = 10 * 1024 * 1024;
+
+        function showImageSizeErrorModal(message = 'The image must be less than 10MB.') {
+            const modal = document.getElementById('imageSizeErrorModal');
+            const messageEl = document.getElementById('imageSizeErrorMessage');
+
+            if (messageEl) {
+                messageEl.textContent = message;
+            }
+
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideImageSizeErrorModal() {
+            const modal = document.getElementById('imageSizeErrorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
 
         function updateRemoveVehiclePhotoButtonVisibility() {
             const profileImageEl = document.getElementById('profile-image');
@@ -438,6 +486,15 @@
 
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                if (input.files[0].size > maxVehicleImageSizeBytes) {
+                    input.value = '';
+                    hasVehiclePhoto = false;
+                    showImageSizeErrorModal('The image must be less than 10MB.');
+                    updateRemoveVehiclePhotoButtonVisibility();
+                    validateStep3Form();
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     profileImage.src = e.target.result;
@@ -569,6 +626,16 @@
                 const carType = document.querySelector('input[name="car_type"]:checked');
                 const fileInput = document.getElementById('dropzone-file');
 
+                if (fileInput && fileInput.files.length && fileInput.files[0].size > maxVehicleImageSizeBytes) {
+                    e.preventDefault();
+                    showImageSizeErrorModal('The image must be less than 10MB.');
+                    fileInput.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    return false;
+                }
+
                 // Check if all fields are filled but no photo
                 const allFieldsFilled = make && model && type && color && licenseNo && year && carType;
 
@@ -581,6 +648,10 @@
 
             // Initial validation check (enables Save & Continue when all required fields are filled)
             validateStep3Form();
+
+            @if ($errors->has('image'))
+                showImageSizeErrorModal(@json($errors->first('image')));
+            @endif
         }
 
         if (document.readyState === 'loading') {
