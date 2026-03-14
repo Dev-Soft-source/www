@@ -298,13 +298,13 @@ return [
             'string' => '确认新密码必须是字符串。',
             'same' => '确认密码与新密码不匹配。',
         ],
-        'remember_me' => [
+        'agree_cost_share_terms' => [
             'required' => '请确认你同意费用分摊规则。',
             'accepted' => '请确认你同意费用分摊规则。',
         ],
         'rideshare_disclaimer' => [
-            'required' => '请确认拼车免责声明。',
-            'accepted' => '请确认拼车免责声明。',
+            'required' => '在继续之前需要此确认。',
+            'accepted' => '在继续之前需要此确认。',
         ],
         'gender' => [
             'required' => '性别为必填项。',

@@ -322,13 +322,13 @@ return [
             'string' => 'La confirmación de la nueva contraseña debe ser una cadena de texto.',
             'same' => 'La confirmación de la contraseña no coincide con la nueva contraseña.',
         ],
-        'remember_me' => [
+        'agree_cost_share_terms' => [
             'required' => 'Confirma que aceptas la regla de reparto de costos.',
             'accepted' => 'Confirma que aceptas la regla de reparto de costos.',
         ],
         'rideshare_disclaimer' => [
-            'required' => 'Confirma el aviso de viaje compartido.',
-            'accepted' => 'Confirma el aviso de viaje compartido.',
+            'required' => 'Este reconocimiento es obligatorio antes de continuar.',
+            'accepted' => 'Este reconocimiento es obligatorio antes de continuar.',
         ],
         'gender' => [
             'required' => 'El genero es obligatorio.',

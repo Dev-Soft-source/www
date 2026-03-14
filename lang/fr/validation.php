@@ -298,13 +298,13 @@ return [
             'string' => 'La confirmation du nouveau mot de passe doit être une chaîne de caractères.',
             'same' => 'La confirmation du mot de passe ne correspond pas au nouveau mot de passe.',
         ],
-        'remember_me' => [
+        'agree_cost_share_terms' => [
             'required' => 'Veuillez confirmer que vous acceptez la règle de partage des frais.',
             'accepted' => 'Veuillez confirmer que vous acceptez la règle de partage des frais.',
         ],
         'rideshare_disclaimer' => [
-            'required' => 'Veuillez confirmer l’avertissement de covoiturage.',
-            'accepted' => 'Veuillez confirmer l’avertissement de covoiturage.',
+            'required' => 'Cette confirmation est requise avant de continuer.',
+            'accepted' => 'Cette confirmation est requise avant de continuer.',
         ],
         'gender' => [
             'required' => 'Le genre est obligatoire.',

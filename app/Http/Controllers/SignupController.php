@@ -35,95 +35,17 @@ class SignupController extends Controller
 
     public function signupWithReferral($lang = null, $uuid)
     {
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $signupPage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                // Retrieve the SignupPageSettingDetail associated with the selected language
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('signup', ['signupPage' => $signupPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'uuid' => $uuid]);
+                
+        $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+       
+        return view('signup', ['signupPage' => $signupPage, 'uuid' => $uuid]);
     }
 
     public function store(Request $request)
     {
-        $niceNames = [];
-        $signupPage = null;
-        $messages = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'first_name' => $signupPage->first_name_label ?? __('validation.attributes.first_name'),
-                    'last_name' => $signupPage->last_name_label ?? __('validation.attributes.last_name'),
-                    'email' => $signupPage->email_label ?? __('validation.attributes.email'),
-                    'password' => $signupPage->password_label ?? __('validation.attributes.password'),
-                    'password_confirmation' => $signupPage->confirm_password_label ?? __('validation.attributes.password'),
-                    'remember_me' => __('validation.attributes.remember_me'),
-                    'rideshare_disclaimer' => __('validation.attributes.rideshare_disclaimer'),
-                ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('welcome_message', 'email_sent_message', 'registration_successful_title')->first();
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'first_name' => $signupPage->first_name_label ?? __('validation.attributes.first_name'),
-                    'last_name' => $signupPage->last_name_label ?? __('validation.attributes.last_name'),
-                    'email' => $signupPage->email_label ?? __('validation.attributes.email'),
-                    'password' => $signupPage->password_label ?? __('validation.attributes.password'),
-                    'password_confirmation' => $signupPage->confirm_password_label ?? __('validation.attributes.password'),
-                    'remember_me' => __('validation.attributes.remember_me'),
-                    'rideshare_disclaimer' => __('validation.attributes.rideshare_disclaimer'),
-                ];
-            }
-        }
+        
+        $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
 
         // Check if email exists and account is closed - allow re-registration
         $existingUser = User::where('email', $request->email)->whereNull('deleted_at')->first();
@@ -137,7 +59,7 @@ class SignupController extends Controller
             // Email doesn't exist - allow registration
             $emailRule = 'required|string|email|max:255|unique:users,email,NULL,id,deleted_at,NULL';
         }
-Log::info($signupPage);
+
         // Validate the form data with AJAX support
         try {
             $validatedData = $request->validate([
@@ -145,12 +67,12 @@ Log::info($signupPage);
                 'last_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\-]+$/',
                 'email' => $emailRule,
                 'password' => 'required|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
-                'remember_me' => 'required|accepted',
                 'password_confirmation' => 'required|same:password',
-                'rideshare_disclaimer' => 'required|accepted',
+                'agree_cost_share_terms' => 'required',
+                'rideshare_disclaimer' => 'required',
             ], [
                 'password.min' => $signupPage->password_placeholder ?? 'The password must be at least 8 characters long',
-            ], $niceNames);
+            ], []);
         } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -237,7 +159,7 @@ Log::info($signupPage);
         // Send email verification immediately; fallback to log mailer if SMTP fails
         $emailSent = false;
         try {
-            Mail::to($request->email)->send(new UserEmailVerification($data));
+            Mail::to($request->email)->queue(new UserEmailVerification($data));
             $emailSent = true;
             Log::info('Email verification sent successfully via ' . $mailDriver, [
                 'email' => $request->email,
@@ -253,7 +175,7 @@ Log::info($signupPage);
 
             // Try fallback to log mailer
             try {
-                Mail::mailer('log')->to($request->email)->send(new UserEmailVerification($data));
+                Mail::mailer('log')->to($request->email)->queue(new UserEmailVerification($data));
                 $emailSent = true;
                 Log::info('Email verification sent via log mailer (fallback)', ['email' => $request->email]);
             } catch (\Throwable $e2) {
@@ -280,7 +202,7 @@ Log::info($signupPage);
             'platform' => 'Website'
         ];
         try {
-            Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+            Mail::to('ccaned@gmail.com')->queue(new AdminNewUserSignupMail($adminData));
         } catch (\Throwable $e) {
             try {
                 Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
