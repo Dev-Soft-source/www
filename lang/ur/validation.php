@@ -357,6 +357,11 @@ return [
         'message' => [
             'required' => 'پیغام درکار ہے۔',
         ],
+        'student_card' => [
+            'required' => 'طالب علم کارڈ درکار ہے۔',
+            'mimes' => 'تصویر jpeg, png, jpg, gif, pdf قسم کی فائل ہونی چاہیے۔',
+            'max' => 'تصویر 10MB سے کم ہونی چاہیے۔',
+        ],
 
         'payment_method' => [
             'required' => 'ادائیگی کا طریقہ ضروری ہے۔',

@@ -297,12 +297,11 @@
                                 value="{{ $user->student_card_exp_date }}">
                         @endif
                         @error('student_card')
-                            <div class="relative tooltip -bottom-4 group-hover:flex flex justify-center">
-                                <div role="tooltip"
-                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                    <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                </div>
+                        <div class="flex justify-center">
+                            <div class="tooltip-error shadow-lg">
+                                {{ $message }}
                             </div>
+                        </div>
                         @enderror
                     </div>
                     <div class="mt-10 flex flex-col items-center justify-center">
