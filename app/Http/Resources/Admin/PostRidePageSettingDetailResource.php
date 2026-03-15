@@ -208,6 +208,8 @@ class PostRidePageSettingDetailResource extends JsonResource
             'phone_required_modal_body_after' => $this->phone_required_modal_body_after,
             'phone_required_modal_close_btn' => $this->phone_required_modal_close_btn,
             'phone_required_modal_phone_btn' => $this->phone_required_modal_phone_btn,
+            'alert_need_government_photo_label' => $this->alert_need_government_photo_label,
+            'alert_need_driver_license_label' => $this->alert_need_driver_license_label,
             'submit_button_label' => $this->submit_button_label,
             'main_heading_update' => $this->main_heading_update,
             'cancellation_policy_label1_tooltip' => $this->cancellation_policy_label1_tooltip,

@@ -233,6 +233,8 @@ class PostRidePageSettingService
             'phone_required_modal_body_after' => $this->data($request, $language, 'phone_required_modal_body_after'),
             'phone_required_modal_close_btn' => $this->data($request, $language, 'phone_required_modal_close_btn'),
             'phone_required_modal_phone_btn' => $this->data($request, $language, 'phone_required_modal_phone_btn'),
+            'alert_need_government_photo_label' => $this->data($request, $language, 'alert_need_government_photo_label'),
+            'alert_need_driver_license_label' => $this->data($request, $language, 'alert_need_driver_license_label'),
             'submit_button_label' => $this->data($request, $language, 'submit_button_label'),
             'main_heading_update' => $this->data($request, $language, 'main_heading_update'),
             'mobile_agree_terms_label' => $this->data($request, $language, 'mobile_agree_terms_label'),
