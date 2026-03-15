@@ -1,5 +1,8 @@
 @php
     $errorPage = $errorPage ?? null;
+    $currentLanguage = session('selectedLanguage') ?: app()->getLocale();
+    $homeUrl = route('home', ['lang' => $currentLanguage ?: null]);
+    $contactUrl = route('contact_us', ['lang' => $currentLanguage ?: null]);
 @endphp
 <!doctype html>
 <html>
@@ -114,13 +117,13 @@
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a 
                     aria-label="{{ optional($errorPage)->error_404_back_home_btn ?? 'Back to Homepage' }}"
-                    href="/"
+                    href="{{ $homeUrl }}"
                     class="button-exp-fill px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 w-full sm:w-auto">
                     {{ optional($errorPage)->error_404_back_home_btn ?? 'Back to Homepage' }}
                 </a>
                 <a 
                     aria-label="{{ optional($errorPage)->error_404_contact_btn ?? 'Contact us' }}"
-                    href="/"
+                    href="{{ $contactUrl }}"
                     class="button-exp-fill px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-300 w-full sm:w-auto">
                     {{ optional($errorPage)->error_404_contact_btn ?? 'Contact us' }}
                 </a>
