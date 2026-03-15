@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Admin\{
     WithdrawalRequestController,
     CoffeeWalletController,
     BookingCreditController,
+    DashboardController,
     BookingPageSettingController,
     ReferralPageSettingController,
     CancellationPolicyPageSettingController,
@@ -347,6 +348,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::put('reject-withdrawal-request/{id}', [WithdrawalRequestController::class, 'rejectRequest']);
     Route::get('coffee-wallet', [CoffeeWalletController::class, 'index']);
     Route::get('total-amount', [CoffeeWalletController::class, 'totalAmount']);
+    Route::get('dashboard/statistics', [DashboardController::class, 'statistics']);
     Route::apiResource('booking-credits', BookingCreditController::class);
     Route::apiResource('articles', ArticleController::class);
     Route::apiResource('videos', VideoController::class);
