@@ -305,21 +305,21 @@
                                 <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#db0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                             </div>
                             <h3 id="close-account-modal-title" class="font-FuturaMdCnBT text-gray-700 mb-4">
-                                {{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}
+                                {{ $closeAccountPage->web_irreversible_label ?? 'This Action Cannot Be Undone.' }}
                             </h3>
                             <p class="can-exp-p text-center">
-                                {{ $closeAccountPage->warning_text ?? ($closeAccountPage->closing_account_label ?? 'Closing your account will delete all of your data from our platform and this action is permanent') }}
+                                {{ $closeAccountPage->close_account_sure_message_text ?? ($closeAccountPage->closing_account_label ?? 'Closing your account will delete all of your data from our platform and this action is permanent') }}
                             </p>
                         </div>
                     </div>
                     <div class="px-4 pb-6 pt-4 flex items-center justify-center space-x-2 sm:space-x-4 sm:px-6">
+                         <button type="button" onclick="closeCloseAccountConfirmationModal()"
+                            class="button-exp-fill">
+                            {{ $siteText['take_me_back_button_label'] ?? 'No, take me back!' }}
+                        </button>
                         <button type="button" onclick="submitCloseAccountForm()"
                             class="button-exp-red-fill">
-                            {{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}
-                        </button>
-                        <button type="button" onclick="closeCloseAccountConfirmationModal()"
-                            class="button-exp-fill">
-                            {{ $siteText['close_btn_text'] ?? 'Close' }}
+                            {{ $closeAccountPage->close_it_button_label ?? 'Yes, close it!' }}
                         </button>
                     </div>
                 </div>
