@@ -116,25 +116,7 @@ class PostRideInitController extends Controller
         }
 
         if ($postRidePage) {
-            // Add vehicle type values and labels
-            $postRidePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-            $postRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-            $postRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-            $postRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-            $postRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-            $postRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-            $postRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-            $postRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-            $postRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($langId)->value('name');
-            $postRidePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-            $postRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($langId)->value('name');
+            // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $langId, $selectedLanguage?->id);
 
             // Add error labels
             $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();

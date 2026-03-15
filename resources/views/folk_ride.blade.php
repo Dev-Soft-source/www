@@ -481,18 +481,27 @@
                                                 {{ $findRidePage->vehicle_type_placeholder }}
                                             @endisset
                                         </option>
-                                        <option {{ $request->vehicle_type == 'Convertable' ? 'selected' : '' }}>Convertable
-                                        </option>
-                                        <option {{ $request->vehicle_type == 'Hatchback' ? 'selected' : '' }}>Hatchback
-                                        </option>
-                                        <option {{ $request->vehicle_type == 'Coupe' ? 'selected' : '' }}>Coupe</option>
-                                        <option {{ $request->vehicle_type == 'Minivan' ? 'selected' : '' }}>Minivan</option>
-                                        <option {{ $request->vehicle_type == 'Sedan' ? 'selected' : '' }}>Sedan</option>
-                                        <option {{ $request->vehicle_type == 'Station Wagon' ? 'selected' : '' }}>Station Wagon
-                                        </option>
-                                        <option {{ $request->vehicle_type == 'SUV' ? 'selected' : '' }}>SUV</option>
-                                        <option {{ $request->vehicle_type == 'Truck' ? 'selected' : '' }}>Truck</option>
-                                        <option {{ $request->vehicle_type == 'Van' ? 'selected' : '' }}>Van</option>
+                                        @foreach ([
+                                            'convertible' => 'Convertable',
+                                            'hatchback' => 'Hatchback',
+                                            'coupe' => 'Coupe',
+                                            'minivan' => 'Minivan',
+                                            'sedan' => 'Sedan',
+                                            'station_wagon' => 'Station wagon',
+                                            'suv' => 'SUV',
+                                            'truck' => 'Truck',
+                                            'van' => 'Van',
+                                        ] as $key => $default)
+                                            @php
+                                                $valueProperty = 'vehicle_type_' . $key . '_value';
+                                                $textProperty = 'vehicle_type_' . $key . '_text';
+                                                $value = $findRidePage->$valueProperty ?? $default;
+                                                $text = $findRidePage->$textProperty ?? $default;
+                                            @endphp
+                                            <option value="{{ $value }}" {{ (string) $request->vehicle_type === (string) $value ? 'selected' : '' }}>
+                                                {{ $text }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

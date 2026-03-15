@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\FeaturesSettingDetail;
+use App\Models\Language;
 
 class Vehicle extends Model
 {
@@ -11,66 +13,93 @@ class Vehicle extends Model
     public $timestamps = false;
 
     protected $fillable = ['user_id','make','model','type','liscense_no','color','year','car_type','image', 'original_image','remove_image','added_on','primary_vehicle'];
+    protected $casts = [
+        'type' => 'integer',
+    ];
+
+    protected const TYPE_ASSET_MAP = [
+        38 => 'convertable.png',
+        39 => 'Hatchback.png',
+        40 => 'Coupe.png',
+        41 => 'Minivan.png',
+        42 => 'Sedan.png',
+        43 => 'Station Wagon.png',
+        44 => 'SUV.png',
+        45 => 'Truck.png',
+        46 => 'Van.png',
+    ];
+
+    protected const LEGACY_TYPE_NAME_MAP = [
+        'convertable' => 38,
+        'convertible' => 38,
+        'hatchback' => 39,
+        'coupe' => 40,
+        'minivan' => 41,
+        'sedan' => 42,
+        'station wagon' => 43,
+        'suv' => 44,
+        'truck' => 45,
+        'van' => 46,
+    ];
+
+    public static function normalizeVehicleTypeId($value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+
+        return self::LEGACY_TYPE_NAME_MAP[$normalized] ?? null;
+    }
+
+    protected function getDefaultVehicleImagePath(): string
+    {
+        $typeId = self::normalizeVehicleTypeId($this->attributes['type'] ?? null);
+        $asset = self::TYPE_ASSET_MAP[$typeId] ?? 'car.png';
+
+        return rtrim(config('app.url'), '/') . '/assets/' . $asset;
+    }
+
+    public function getTypeLabelAttribute(): ?string
+    {
+        $typeId = self::normalizeVehicleTypeId($this->attributes['type'] ?? null);
+
+        if (!$typeId) {
+            return null;
+        }
+
+        $selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
+        $defaultLanguageId = Language::where('is_default', 1)->value('id') ?? 1;
+
+        $detail = FeaturesSettingDetail::where('features_setting_id', $typeId)
+            ->whereIn('language_id', array_filter([$selectedLanguage?->id, $defaultLanguageId]))
+            ->get()
+            ->sortByDesc(fn ($item) => (int) ($selectedLanguage && $item->language_id == $selectedLanguage->id))
+            ->first();
+
+        return $detail?->name;
+    }
 
     public function getImageAttribute($value)
     {
-        // You can perform any transformation you need here
         if (isset($value) && $value != "") {
-            // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/car_images/' . $value;
-        } elseif ($this->vehicle_type === 'Convertable') {
-            return rtrim(config('app.url'), '/') . '/assets/convertable.png';
-        } elseif ($this->vehicle_type === 'Hatchback') {
-            return rtrim(config('app.url'), '/') . '/assets/Hatchback.png';
-        } elseif ($this->vehicle_type === 'Coupe') {
-            return rtrim(config('app.url'), '/') . '/assets/Coupe.png';
-        } elseif ($this->vehicle_type === 'Minivan') {
-            return rtrim(config('app.url'), '/') . '/assets/Minivan.png';
-        } elseif ($this->vehicle_type === 'Sedan') {
-            return rtrim(config('app.url'), '/') . '/assets/Sedan.png';
-        } elseif ($this->vehicle_type === 'Station wagon') {
-            return rtrim(config('app.url'), '/') . '/assets/Station Wagon.png';
-        } elseif ($this->vehicle_type === 'SUV') {
-            return rtrim(config('app.url'), '/') . '/assets/SUV.png';
-        } elseif ($this->vehicle_type === 'Truck') {
-            return rtrim(config('app.url'), '/') . '/assets/Truck.png';
-        } elseif ($this->vehicle_type === 'Van') {
-            return rtrim(config('app.url'), '/') . '/assets/Van.png';
-        }else{
-            return rtrim(config('app.url'), '/') . '/assets/car.png';
         }
-        
-        return null;
+
+        return $this->getDefaultVehicleImagePath();
     }
 
     public function getOriginalImageAttribute($value)
     {
-        // You can perform any transformation you need here
         if (isset($value) && $value != "") {
-            // For example, prepend the base URL to the image path
             return rtrim(config('app.url'), '/') . '/car_images/' . $value;
-        } elseif ($this->vehicle_type === 'Convertable') {
-            return rtrim(config('app.url'), '/') . '/assets/convertable.png';
-        } elseif ($this->vehicle_type === 'Hatchback') {
-            return rtrim(config('app.url'), '/') . '/assets/Hatchback.png';
-        } elseif ($this->vehicle_type === 'Coupe') {
-            return rtrim(config('app.url'), '/') . '/assets/Coupe.png';
-        } elseif ($this->vehicle_type === 'Minivan') {
-            return rtrim(config('app.url'), '/') . '/assets/Minivan.png';
-        } elseif ($this->vehicle_type === 'Sedan') {
-            return rtrim(config('app.url'), '/') . '/assets/Sedan.png';
-        } elseif ($this->vehicle_type === 'Station wagon') {
-            return rtrim(config('app.url'), '/') . '/assets/Station Wagon.png';
-        } elseif ($this->vehicle_type === 'SUV') {
-            return rtrim(config('app.url'), '/') . '/assets/SUV.png';
-        } elseif ($this->vehicle_type === 'Truck') {
-            return rtrim(config('app.url'), '/') . '/assets/Truck.png';
-        } elseif ($this->vehicle_type === 'Van') {
-            return rtrim(config('app.url'), '/') . '/assets/Van.png';
-        }else{
-            return rtrim(config('app.url'), '/') . '/assets/car.png';
         }
-        
-        return null;
+
+        return $this->getDefaultVehicleImagePath();
     }
 }

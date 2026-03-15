@@ -376,7 +376,7 @@ class RideController extends Controller
                 $rides = $rides->where('payment_method', $request->payment_method);
             }
             if ($request->vehicle_type) {
-                $rides = $rides->where('vehicle_type', $request->vehicle_type);
+                $rides = $rides->where('vehicle_type', Ride::normalizeRideVehicleTypeId($request->vehicle_type));
             }
             if ($request->pink_ride == '1') {
                 $featureId1 = FeaturesSetting::whereSlug('pink_rides')->value('id');
@@ -2031,7 +2031,7 @@ class RideController extends Controller
             'image' => $add_vehicle !== '0' ? 'nullable|mimes:jpeg,png,jpg,gif|max:10240' : 'nullable|mimes:jpeg,png,jpg,gif|max:10240',
             'make' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'model' => $add_vehicle !== '0' ? 'required' : 'nullable',
-            'vehicle_type' => $add_vehicle !== '0' ? 'required' : 'nullable',
+            'vehicle_type' => $add_vehicle !== '0' ? 'required|integer|exists:features_setting_detail,features_setting_id' : 'nullable',
             'year' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'color' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'license_no' => $add_vehicle !== '0' ? 'required' : 'nullable',
@@ -2099,7 +2099,7 @@ class RideController extends Controller
         if ($add_vehicle == '1') {
             $make = $request->make;
             $model = $request->model;
-            $vehicle_type = $request->vehicle_type;
+            $vehicle_type = Ride::normalizeRideVehicleTypeId($request->vehicle_type);
             $year = $request->year;
             $color = $request->color;
             $license_no = $request->license_no;
@@ -2108,7 +2108,7 @@ class RideController extends Controller
                 'user_id' => $user_id,
                 'make' => $request->make,
                 'model' => $request->model,
-                'type' => $request->vehicle_type,
+                'type' => Vehicle::normalizeVehicleTypeId($request->vehicle_type),
                 'liscense_no' => $request->license_no,
                 'color' => $request->color,
                 'year' => $request->year,
@@ -2216,7 +2216,7 @@ class RideController extends Controller
             'vehicle_id' => $vehicle_id ?? null,
             'make' => $make,
             'model' => $model,
-            'vehicle_type' => $vehicle_type,
+            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
             'year' => $year,
             'color' => $color,
             'license_no' => $license_no,
@@ -2462,7 +2462,7 @@ class RideController extends Controller
                     'vehicle_id' => $vehicle_id ?? null,
                     'make' => $make,
                     'model' => $model,
-                    'vehicle_type' => $vehicle_type,
+                    'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                     'year' => $year,
                     'color' => $color,
                     'license_no' => $license_no,
@@ -3452,7 +3452,7 @@ class RideController extends Controller
             'image' => $add_vehicle !== '0' ? 'nullable|mimes:jpeg,png,jpg,gif|max:10240' : 'nullable|mimes:jpeg,png,jpg,gif|max:10240',
             'make' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'model' => $add_vehicle !== '0' ? 'required' : 'nullable',
-            'vehicle_type' => $add_vehicle !== '0' ? 'required' : 'nullable',
+            'vehicle_type' => $add_vehicle !== '0' ? 'required|integer|exists:features_setting_detail,features_setting_id' : 'nullable',
             'year' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'color' => $add_vehicle !== '0' ? 'required' : 'nullable',
             'license_no' => $add_vehicle !== '0' ? 'required' : 'nullable',
@@ -3504,7 +3504,7 @@ class RideController extends Controller
         if ($add_vehicle == '1') {
             $make = $request->make;
             $model = $request->model;
-            $vehicle_type = $request->vehicle_type;
+            $vehicle_type = Ride::normalizeRideVehicleTypeId($request->vehicle_type);
             $year = $request->year;
             $color = $request->color;
             $license_no = $request->license_no;
@@ -3513,7 +3513,7 @@ class RideController extends Controller
                 'user_id' => $user_id,
                 'make' => $request->make,
                 'model' => $request->model,
-                'type' => $request->vehicle_type,
+                'type' => Vehicle::normalizeVehicleTypeId($request->vehicle_type),
                 'liscense_no' => $request->license_no,
                 'color' => $request->color,
                 'year' => $request->year,
@@ -3615,7 +3615,7 @@ class RideController extends Controller
             'vehicle_id' => $vehicle_id ?? null,
             'make' => $make,
             'model' => $model,
-            'vehicle_type' => $vehicle_type,
+            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
             'year' => $year,
             'color' => $color,
             'license_no' => $license_no,
@@ -3856,7 +3856,7 @@ class RideController extends Controller
                         'vehicle_id' => $vehicle_id ?? null,
                         'make' => $make,
                         'model' => $model,
-                        'vehicle_type' => $vehicle_type,
+                        'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                         'year' => $year,
                         'color' => $color,
                         'license_no' => $license_no,
@@ -3944,7 +3944,7 @@ class RideController extends Controller
                         'added_vehicle' => $added_vehicle,
                         'make' => $make,
                         'model' => $model,
-                        'vehicle_type' => $vehicle_type,
+                        'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                         'year' => $year,
                         'color' => $color,
                         'license_no' => $license_no,
@@ -4037,24 +4037,7 @@ class RideController extends Controller
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the PostRidePageSettingDetail associated with the selected language
             $postRidePage = PostRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            $postRidePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-            $postRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-            $postRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-            $postRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-            $postRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-            $postRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-            $postRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-            $postRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-            $postRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($request->lang_id)->value('name');
-            $postRidePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-            $postRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($request->lang_id)->value('name');
+            // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $request->lang_id, $request->lang_id);
             $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
             $postRidePage->from_error = $postRideError->from_error ?? null ;
             $postRidePage->to_error = $postRideError->to_error ?? null ;
@@ -4091,24 +4074,7 @@ class RideController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $postRidePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-                $postRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-                $postRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-                $postRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-                $postRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-                $postRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-                $postRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-                $postRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-                $postRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $postRidePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-                $postRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
+                // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $selectedLanguage->id, $selectedLanguage->id);
                 $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
                 $postRidePage->from_error = $postRideError->from_error ?? null ;
                 $postRidePage->to_error = $postRideError->to_error ?? null ;
@@ -4180,49 +4146,13 @@ class RideController extends Controller
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the FindRidePageSettingDetail associated with the selected language
             $findRidePage = FindRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            $findRidePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-            $findRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-            $findRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-            $findRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-            $findRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-            $findRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-            $findRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-            $findRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-            $findRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($request->lang_id)->value('name');
-            $findRidePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-            $findRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($request->lang_id)->value('name');
+            // $findRidePage = $this->attachVehicleTypeOptions($findRidePage, $request->lang_id, $request->lang_id);
             $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('female_user_message', 'star5_passenger_message', 'star4_passenger_message', 'star3_passenger_message', 'passenger_with_review_message', 'search_result_clear_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $findRidePage->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-                $findRidePage->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-                $findRidePage->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-                $findRidePage->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-                $findRidePage->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-                $findRidePage->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-                $findRidePage->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-                $findRidePage->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-                $findRidePage->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($selectedLanguage->id)->value('name');
-                $findRidePage->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-                $findRidePage->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
+                // $findRidePage = $this->attachVehicleTypeOptions($findRidePage, $selectedLanguage->id, $selectedLanguage->id);
                 $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('female_user_message', 'star5_passenger_message', 'star4_passenger_message', 'star3_passenger_message', 'passenger_with_review_message', 'search_result_clear_message')->first();
             }
         }

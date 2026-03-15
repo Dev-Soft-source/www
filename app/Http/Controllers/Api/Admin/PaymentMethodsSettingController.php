@@ -453,16 +453,6 @@ class PaymentMethodsSettingController extends Controller
                     'payment_methods_option2_tooltip' => $request['payment_methods_option2_tooltip']['payment_methods_option2_tooltip_' . $language->id],
                     'payment_methods_option3' => $paymentSetting3->id,
                     'payment_methods_option3_tooltip' => $request['payment_methods_option3_tooltip']['payment_methods_option3_tooltip_' . $language->id],
-    
-                    'vehicle_type_convertible_text' => $vehicleSettingConvertible->id,
-                    'vehicle_type_hatchback_text' => $vehicleSettingHatchback->id,
-                    'vehicle_type_coupe_text' => $vehicleSettingCoupe->id,
-                    'vehicle_type_minivan_text' => $vehicleSettingMinivan->id,
-                    'vehicle_type_sedan_text' => $vehicleSettingSedan->id,
-                    'vehicle_type_station_wagon_text' => $vehicleSettingStationWagon->id,
-                    'vehicle_type_suv_text' => $vehicleSettingSuv->id,
-                    'vehicle_type_truck_text' => $vehicleSettingTruck->id,
-                    'vehicle_type_van_text' => $vehicleSettingVan->id,
                 ]);
             } else {
                 PostRidePageSettingDetail::whereLanguageId($language->id)->update([
@@ -480,16 +470,6 @@ class PaymentMethodsSettingController extends Controller
                     'payment_methods_option2_tooltip' => $request['payment_methods_option2_tooltip']['payment_methods_option2_tooltip_' . $language->id],
                     'payment_methods_option3' => $paymentSetting3->id,
                     'payment_methods_option3_tooltip' => $request['payment_methods_option3_tooltip']['payment_methods_option3_tooltip_' . $language->id],
-    
-                    'vehicle_type_convertible_text' => $vehicleSettingConvertible->id,
-                    'vehicle_type_hatchback_text' => $vehicleSettingHatchback->id,
-                    'vehicle_type_coupe_text' => $vehicleSettingCoupe->id,
-                    'vehicle_type_minivan_text' => $vehicleSettingMinivan->id,
-                    'vehicle_type_sedan_text' => $vehicleSettingSedan->id,
-                    'vehicle_type_station_wagon_text' => $vehicleSettingStationWagon->id,
-                    'vehicle_type_suv_text' => $vehicleSettingSuv->id,
-                    'vehicle_type_truck_text' => $vehicleSettingTruck->id,
-                    'vehicle_type_van_text' => $vehicleSettingVan->id,
                 ]);
             }
         }

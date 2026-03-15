@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Concerns\HasOptionGroups;
 use App\Models\Rating;
+use App\Models\FeaturesSettingDetail;
+use App\Models\Language;
+use App\Models\Vehicle;
 
 class Ride extends Model
 {
@@ -20,6 +23,9 @@ class Ride extends Model
         'status', 'added_on', 'remove_car_image'];
 
     public $timestamps = false;
+    protected $casts = [
+        'vehicle_type' => 'integer',
+    ];
     
     function driver(){
         return $this->belongsTo(User::class, 'added_by')->withTrashed();
@@ -211,6 +217,31 @@ class Ride extends Model
         }
         
         return null;
+    }
+
+    public static function normalizeRideVehicleTypeId($value): ?int
+    {
+        return Vehicle::normalizeVehicleTypeId($value);
+    }
+
+    public function getVehicleTypeLabelAttribute(): ?string
+    {
+        $featureId = self::normalizeRideVehicleTypeId($this->attributes['vehicle_type'] ?? null);
+
+        if (!$featureId) {
+            return null;
+        }
+
+        $selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
+        $defaultLanguageId = Language::where('is_default', 1)->value('id') ?? 1;
+
+        $detail = FeaturesSettingDetail::where('features_setting_id', $featureId)
+            ->whereIn('language_id', array_filter([$selectedLanguage?->id, $defaultLanguageId]))
+            ->get()
+            ->sortByDesc(fn ($item) => (int) ($selectedLanguage && $item->language_id == $selectedLanguage->id))
+            ->first();
+
+        return $detail?->name;
     }
 
     protected static function booted()

@@ -190,7 +190,7 @@ class RideController extends Controller
                 $rides = $rides->where('payment_method', $request->payment_method);
             }
             if ($request->vehicle_type) {
-                $rides = $rides->where('vehicle_type', $request->vehicle_type);
+                $rides = $rides->where('vehicle_type', Ride::normalizeRideVehicleTypeId($request->vehicle_type));
             }
             if ($request->features) {
                 $features = explode(';', $request->features);
@@ -828,6 +828,8 @@ class RideController extends Controller
         }
         $hasStops = count($realStops) > 0;
 
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
+
         return view('edit_ride', [
             'notificationPage' => $notificationPage,
             'successMessage' => $successMessage,
@@ -836,6 +838,7 @@ class RideController extends Controller
             'ride' => $ride,
             'user' => $user,
             'vehicles' => $vehicles,
+            'vehicleTypes' => $vehicleTypes,
             'pinkRideSetting' => $pinkRideSetting,
             'setting' => $setting,
             'overallRating' => $overallRating,
@@ -1007,7 +1010,7 @@ class RideController extends Controller
             'image' => $request->has('existing_image') || $skip_vehicle !== 0 ? 'nullable|mimes:jpeg,png,jpg,gif|max:10240' : 'required|mimes:jpeg,png,jpg,gif|max:10240',
             'make' => $add_vehicle == 1 ? 'required' : 'nullable',
             'model' => $add_vehicle == 1 ? 'required' : 'nullable',
-            'vehicle_type' => $add_vehicle == 1 ? 'required' : 'nullable',
+            'vehicle_type' => $add_vehicle == 1 ? 'required|integer|exists:features_setting_detail,features_setting_id' : 'nullable',
             'year' => $add_vehicle == 1 ? 'required' : 'nullable',
             'color' => $add_vehicle == 1 ? 'required' : 'nullable',
             'license_no' => $add_vehicle == 1 ? 'required' : 'nullable',
@@ -1148,7 +1151,7 @@ class RideController extends Controller
             // Preserve original values if request values are empty (for edit mode when fields are readonly/disabled)
             $make = $request->make ?: $ride->make ?? '';
             $model = $request->model ?: $ride->model ?? '';
-            $vehicle_type = $request->vehicle_type ?: $ride->vehicle_type ?? '';
+            $vehicle_type = Ride::normalizeRideVehicleTypeId($request->vehicle_type ?: $ride->vehicle_type ?? '');
             $year = $request->year ?: $ride->year ?? '';
             $color = $request->color ?: $ride->color ?? '';
             $license_no = $request->license_no ?: $ride->license_no ?? '';
@@ -1160,7 +1163,7 @@ class RideController extends Controller
                     'user_id' => auth()->user()->id,
                     'make' => $make,
                     'model' => $model,
-                    'type' => $vehicle_type,
+                    'type' => Vehicle::normalizeVehicleTypeId($vehicle_type),
                     'liscense_no' => $license_no,
                     'color' => $color,
                     'year' => $year,
@@ -1263,7 +1266,7 @@ class RideController extends Controller
             'vehicle_id' => $vehicle_id ?? null,
             'make' => $make,
             'model' => $model,
-            'vehicle_type' => $vehicle_type,
+            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
             'year' => $year,
             'color' => $color,
             'license_no' => $license_no,
@@ -1758,7 +1761,7 @@ class RideController extends Controller
                         'vehicle_id' => $vehicle_id ?? null,
                         'make' => $make,
                         'model' => $model,
-                        'vehicle_type' => $vehicle_type,
+                        'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                         'year' => $year,
                         'color' => $color,
                         'license_no' => $license_no,
@@ -1843,7 +1846,7 @@ class RideController extends Controller
                         'added_vehicle' => $added_vehicle,
                         'make' => $make,
                         'model' => $model,
-                        'vehicle_type' => $vehicle_type,
+                        'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                         'year' => $year,
                         'color' => $color,
                         'license_no' => $license_no,
@@ -1990,12 +1993,17 @@ class RideController extends Controller
 
         $isNewForm = false;
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
         return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 
         'postRidePage' => $postRidePage, 
+        'vehicleTypes' => $vehicleTypes, 
         'vehiclePage' => $vehiclePage, 
-        'cancellationCount' => $cancellationCount, 'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'copy']);
+        'cancellationCount' => $cancellationCount, 
+        'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 
+        'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 
+        'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'copy']);
     }
 
     public function RepostRide($lang, $id)
@@ -2071,10 +2079,12 @@ class RideController extends Controller
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 
         'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 
         'pinkRideSetting' => $pinkRideSetting, 
+        'vehicleTypes' => $vehicleTypes, 
         'vehiclePage' => $vehiclePage, 
         'setting' => $setting, 'overallRating' => $overallRating, 
         'routeType' => 'repost', 'noshows' => $noshows, 'totalNoOfRides' => $totalNoOfRides, 'noShowsCount' => $noShowsCount, 'cancellationCount' => $cancellationCount]);
@@ -2152,6 +2162,7 @@ class RideController extends Controller
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         return view('post_ride', [
             'totalRides' => $totalNoOfRides,
@@ -2164,6 +2175,7 @@ class RideController extends Controller
             'ride' => $ride,
             'user' => $user,
             'vehicles' => $vehicles,
+            'vehicleTypes' => $vehicleTypes,
             'vehiclePage' => $vehiclePage,
             'pinkRideSetting' => $pinkRideSetting,
             'setting' => $setting,
@@ -2355,7 +2367,7 @@ class RideController extends Controller
             'image' => $request->has('existing_image') || $add_vehicle !== 0 ? 'nullable|mimes:jpeg,png,jpg,gif|max:10240' : 'required|mimes:jpeg,png,jpg,gif|max:10240',
             'make' => $add_vehicle !== 0 ? 'required' : 'nullable',
             'model' => $add_vehicle !== 0 ? 'required' : 'nullable',
-            'vehicle_type' => $add_vehicle !== 0 ? 'required' : 'nullable',
+            'vehicle_type' => $add_vehicle !== 0 ? 'required|integer|exists:features_setting_detail,features_setting_id' : 'nullable',
             'year' => $add_vehicle !== 0 ? 'required' : 'nullable',
             'color' => $add_vehicle !== 0 ? 'required' : 'nullable',
             'license_no' => $add_vehicle !== 0 ? 'required' : 'nullable',
@@ -2598,7 +2610,7 @@ class RideController extends Controller
         if ($add_vehicle !== 0) {
             $make = $request->make;
             $model = $request->model;
-            $vehicle_type = $request->vehicle_type;
+            $vehicle_type = Ride::normalizeRideVehicleTypeId($request->vehicle_type);
             $year = $request->year;
             $color = $request->color;
             $license_no = $request->license_no;
@@ -2608,7 +2620,7 @@ class RideController extends Controller
                 'user_id' => auth()->user()->id,
                 'make' => $request->make,
                 'model' => $request->model,
-                'type' => $request->vehicle_type,
+                'type' => Vehicle::normalizeVehicleTypeId($request->vehicle_type),
                 'liscense_no' => $request->license_no,
                 'color' => $request->color,
                 'year' => $request->year,
@@ -2695,7 +2707,7 @@ class RideController extends Controller
             'vehicle_id' => $vehicle_id ?? null,
             'make' => $make,
             'model' => $model,
-            'vehicle_type' => $vehicle_type,
+            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
             'year' => $year,
             'color' => $color,
             'license_no' => $license_no,
@@ -3080,7 +3092,7 @@ class RideController extends Controller
                     'vehicle_id' => $vehicle_id ?? null,
                     'make' => $make,
                     'model' => $model,
-                    'vehicle_type' => $vehicle_type,
+                    'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
                     'year' => $year,
                     'color' => $color,
                     'license_no' => $license_no,

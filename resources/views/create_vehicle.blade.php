@@ -47,33 +47,11 @@
                         <option value="" {{ old('type') === '' ? 'selected' : '' }}>
                             {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                         </option>
-                        <option value="{{ 'Convertable' }}" {{ old('type') === ('Convertable') ? 'selected' : '' }}>
-                            {{ "Convertable"}}
-                        </option>
-                        <option value="{{ 'Coupe' }}" {{ old('type') === ('Coupe') ? 'selected' : '' }}>
-                            {{ "Coupe"}}
-                        </option>
-                        <option value="{{ 'Hatchback' }}" {{ old('type') === ('Hatchback') ? 'selected' : '' }}>
-                            {{ "Hatchback"}}
-                        </option>
-                        <option value="{{ 'Minivan' }}" {{ old('type') === ('Minivan') ? 'selected' : '' }}>
-                            {{ "Minivan"}}
-                        </option>
-                        <option value="{{ 'Sedan' }}" {{ old('type') === ('Sedan') ? 'selected' : '' }}>
-                            {{  "Sedan"}}
-                        </option>
-                        <option value="{{ "Station wagon" }}" {{ old('type') === ('Station wagon') ? 'selected' : '' }}>
-                            {{  "Station wagon"}}
-                        </option>
-                        <option value="{{ 'SUV' }}" {{ old('type') === ('SUV') ? 'selected' : '' }}>
-                            {{  "SUV"}}
-                        </option>
-                        <option value="{{ 'Truck' }}" {{ old('type') === ('Truck') ? 'selected' : '' }}>
-                            {{  "Truck"}}
-                        </option>
-                        <option value="{{ 'Van' }}" {{ old('type') === ('Van') ? 'selected' : '' }}>
-                            {{  "Van"}}
-                        </option>
+                        @foreach (($vehicleTypes ?? collect()) as $vehicleType)
+                            <option value="{{ $vehicleType['id'] }}" {{ old('type', '') === $vehicleType['id'] ? 'selected' : '' }}>
+                                {{ $vehicleType['label'] }}
+                            </option>
+                        @endforeach
                     </select>
                     @error('type')
                       <div class="tooltip-error shadow-lg">{{ $message }}</div>

@@ -93,42 +93,11 @@
                                 <option value="" {{ old('type') === '' ? 'selected' : '' }}>
                                     {{ $step3Page->vehicle_type_placeholder ?? 'Select' }}
                                 </option>
-                                <option value="{{ $step3Page->vehicle_type_convertible_value ?? 'Convertable' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_convertible_text ?? 'Convertable' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_coupe_text ?? 'Coupe' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_hatchback_value ?? 'Hatchback' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_hatchback_text ?? 'Hatchback' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_minivan_value ?? 'Minivan' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_minivan_text ?? 'Minivan' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_sedan_value ?? 'Sedan' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_sedan_text ?? 'Sedan' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_station_wagon_value }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_station_wagon_text ?? 'Station wagon' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_suv_value ?? 'SUV' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_suv_text ?? 'SUV' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_truck_value ?? 'Truck' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_truck_text ?? 'Truck' }}
-                                </option>
-                                <option value="{{ $step3Page->vehicle_type_van_value ?? 'Van' }}"
-                                    {{ old('type') === ($step3Page->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
-                                    {{ $step3Page->vehicle_type_van_text ?? 'Van' }}
-                                </option>
+                                @foreach (($vehicleTypes ?? collect()) as $vehicleType)
+                                    <option value="{{ $vehicleType['id'] }}" {{ (string) old('type', '') === (string) $vehicleType['id'] ? 'selected' : '' }}>
+                                        {{ $vehicleType['label'] }}
+                                    </option>
+                                @endforeach
                             </select>
                             @error('type')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">

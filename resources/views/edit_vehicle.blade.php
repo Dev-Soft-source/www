@@ -53,41 +53,28 @@
                         @enderror
                     </div>
                     <div>
-                        <label for=""> @isset($myVehiclePage->vehicle_type_label)
+                        <label for="type"> @isset($myVehiclePage->vehicle_type_label)
                                 {{ $myVehiclePage->vehicle_type_label }}
                             @endisset
                             <span class="text-red-500">*</span></label>
-                        @php
-                            $selectedType = old('type', optional($vehicle)->type ?? '');
-                            $vehicleTypes = [
-                                'Convertable' => $myVehiclePage->vehicle_type_convertible_text ?? 'Convertable',
-                                'Coupe' => $myVehiclePage->vehicle_type_coupe_text ?? 'Coupe',
-                                'Hatchback' => $myVehiclePage->vehicle_type_hatchback_text ?? 'Hatchback',
-                                'Minivan' => $myVehiclePage->vehicle_type_minivan_text ?? 'Minivan',
-                                'Sedan' => $myVehiclePage->vehicle_type_sedan_text ?? 'Sedan',
-                                'Station wagon' => $myVehiclePage->vehicle_type_station_wagon_text ?? 'Station wagon',
-                                'SUV' => $myVehiclePage->vehicle_type_suv_text ?? 'SUV',
-                                'Truck' => $myVehiclePage->vehicle_type_truck_text ?? 'Truck',
-                                'Van' => $myVehiclePage->vehicle_type_van_text ?? 'Van',
-                            ];
-                        @endphp
+
                         <select id="type" name="type"
                             class="block mt-1 border w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                            <option value="" {{ $selectedType === '' || $selectedType === null ? 'selected' : '' }}>
-                                {{ $myVehiclePage->vehicle_type_placeholder ?? 'Select' }}
+                            <option value="" {{ old('type') === '' ? 'selected' : '' }}>
+                                {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                             </option>
-                            @foreach ($vehicleTypes as $value => $label)
-                                <option value="{{ $value }}" {{ (string)($selectedType ?? '') === (string)$value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
+                            @foreach (($vehicleTypes ?? collect()) as $vehicleType)
+                            <option value="{{ $vehicleType['id'] }}" {{ (int) old('type', optional($vehicle)->type) === $vehicleType['id'] ? 'selected' : '' }}>
+                                {{ $vehicleType['label'] }}
+                            </option>
+                        @endforeach
                         </select>
                         @error('type')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="">
-                        <label for="">
+                        <label for="liscense_no">
                             @isset($myVehiclePage->license_plate_number_label)
                                 {{ $myVehiclePage->license_plate_number_label }}
                             @endisset

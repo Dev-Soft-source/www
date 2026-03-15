@@ -488,7 +488,7 @@
                                                             $textProperty = 'vehicle_type_' . $key . '_text';
                                                             $value = $findRidePage->$valueProperty ?? $default;
                                                             $text = $findRidePage->$textProperty ?? $default;
-                                                            $isSelected = $request->vehicle_type === $value;
+                                                            $isSelected = (string) $request->vehicle_type === (string) $value;
                                                         @endphp
                                                         <option value="{{ $value }}"
                                                             {{ $isSelected ? 'selected' : '' }}>

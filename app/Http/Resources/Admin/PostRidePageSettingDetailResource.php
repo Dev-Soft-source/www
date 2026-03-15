@@ -15,6 +15,11 @@ class PostRidePageSettingDetailResource extends JsonResource
      */
     public function toArray($request)
     {
+        $vehicleTypeNames = FeaturesSettingDetail::whereIn('features_setting_id', range(38, 46))
+            ->whereLanguageId($this->language_id)
+            ->get()
+            ->keyBy('features_setting_id');
+
         return [
             'id' => $this->id,
             'post_ride_page_setting_id' => $this->post_ride_page_setting_id,
@@ -231,15 +236,15 @@ class PostRidePageSettingDetailResource extends JsonResource
             'cancelled_ride_no_found_message' => $this->cancelled_ride_no_found_message,
             'completed_ride_no_found_message' => $this->completed_ride_no_found_message,
             'upcoming_ride_no_found_message' => $this->upcoming_ride_no_found_message,
-            'vehicle_type_convertible_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_convertible_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_hatchback_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_hatchback_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_coupe_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_coupe_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_minivan_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_minivan_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_sedan_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_sedan_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_station_wagon_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_station_wagon_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_suv_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_suv_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_truck_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_truck_text)->whereLanguageId($this->language_id)->value('name'),
-            'vehicle_type_van_text' => FeaturesSettingDetail::whereFeaturesSettingId($this->vehicle_type_van_text)->whereLanguageId($this->language_id)->value('name'),
+            'vehicle_type_convertible_text' => $vehicleTypeNames->get(38)?->name,
+            'vehicle_type_hatchback_text' => $vehicleTypeNames->get(39)?->name,
+            'vehicle_type_coupe_text' => $vehicleTypeNames->get(40)?->name,
+            'vehicle_type_minivan_text' => $vehicleTypeNames->get(41)?->name,
+            'vehicle_type_sedan_text' => $vehicleTypeNames->get(42)?->name,
+            'vehicle_type_station_wagon_text' => $vehicleTypeNames->get(43)?->name,
+            'vehicle_type_suv_text' => $vehicleTypeNames->get(44)?->name,
+            'vehicle_type_truck_text' => $vehicleTypeNames->get(45)?->name,
+            'vehicle_type_van_text' => $vehicleTypeNames->get(46)?->name,
             'post_ride_page_setting' => new PostRidePageSettingResource($this->whenLoaded('postRidePageSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),
             'extra_care_tooltip_admin_enable_text' => $this->extra_care_tooltip_admin_enable_text,

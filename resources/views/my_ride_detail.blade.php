@@ -758,8 +758,8 @@
                                     @endif
                                 </div>
                                 <p class="font-semibold text-lg text-black text-start">{{ $ride->license_no }}</p>
-                                @if ($ride->vehicle_type)
-                                    <p class="text-md">{{ $ride->vehicle_type }} </p>
+                                @if ($ride->vehicle_type_label)
+                                    <p class="text-md">{{ $ride->vehicle_type_label }} </p>
                                 @endif
                             </div>
                         </div>

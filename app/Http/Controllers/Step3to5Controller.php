@@ -26,29 +26,7 @@ class Step3to5Controller extends Controller
         $user = auth()->user();
         
         $step3Page = Step3PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
-        $selectedLanguage = $this->selectedLanguage;
-        
-        $step3Page->vehicle_type_convertible_value = $postRidePage->vehicle_type_convertible_text;
-        $step3Page->vehicle_type_convertible_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_convertible_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_hatchback_value = $postRidePage->vehicle_type_hatchback_text;
-        $step3Page->vehicle_type_hatchback_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_hatchback_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_coupe_value = $postRidePage->vehicle_type_coupe_text;
-        $step3Page->vehicle_type_coupe_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_coupe_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_minivan_value = $postRidePage->vehicle_type_minivan_text;
-        $step3Page->vehicle_type_minivan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_minivan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_sedan_value = $postRidePage->vehicle_type_sedan_text;
-        $step3Page->vehicle_type_sedan_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_sedan_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_station_wagon_value = $postRidePage->vehicle_type_station_wagon_text;
-        $step3Page->vehicle_type_station_wagon_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_station_wagon_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_suv_value = $postRidePage->vehicle_type_suv_text;
-        $step3Page->vehicle_type_suv_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_suv_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_truck_value = $postRidePage->vehicle_type_truck_text;
-        $step3Page->vehicle_type_truck_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_truck_text)->whereLanguageId($selectedLanguage->id)->value('name');
-        $step3Page->vehicle_type_van_value = $postRidePage->vehicle_type_van_text;
-        $step3Page->vehicle_type_van_text = FeaturesSettingDetail::whereFeaturesSettingId($postRidePage->vehicle_type_van_text)->whereLanguageId($selectedLanguage->id)->value('name');
-
+       
         $user_id = auth()->user()->id;
 
         // from step2 with skip -> update step2 to 1 and stay on step3 page (no validations)
@@ -58,13 +36,12 @@ class Step3to5Controller extends Controller
             ]);
         }
 
-        $maxVehicleImageSizeKb = $this->getMaxVehicleImageSizeKb();
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         return view('step3to5', [
             'step3Page' => $step3Page,
             'user' => $user,
-            'maxVehicleImageSizeKb' => $maxVehicleImageSizeKb,
-            'maxVehicleImageSizeMb' => round($maxVehicleImageSizeKb / 1024, 2),
+            'vehicleTypes' => $vehicleTypes,
         ]);
     }
 
@@ -78,7 +55,7 @@ class Step3to5Controller extends Controller
         $validated = $request->validate([
             'make' => 'required',
             'model' => 'required',
-            'type' => 'required',
+            'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
             'liscense_no' => 'required',
             'color' => 'required',
             'year' => 'required',
@@ -103,7 +80,7 @@ class Step3to5Controller extends Controller
                 'user_id' => auth()->user()->id,
                 'make' => $request->make ?? '',
                 'model' => $request->model ?? '',
-                'type' => $request->type ?? '',
+                'type' => Vehicle::normalizeVehicleTypeId($request->type),
                 'liscense_no' => $request->liscense_no ?? '',
                 'color' => $request->color ?? '',
                 'year' => $request->year ?? '',

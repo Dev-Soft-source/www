@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewVehicleAddedMail;
 use App\Services\FCMService;
 use App\Models\FCMToken;
+use App\Models\FeaturesSettingDetail;
 use App\Mail\VehicleRemovedEmail;
 use App\Models\Language;
 use App\Models\MyVehicleSettingDetail;
@@ -55,7 +56,7 @@ class ProfileVehicleController extends Controller
         $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
-
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
         $userVehicleCount = 0;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -65,7 +66,9 @@ class ProfileVehicleController extends Controller
         return view('create_vehicle', [
             'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
             'ProfileSetting' => $ProfileSetting,
-            'myVehiclePage' => $myVehiclePage, 'userVehicleCount' => $userVehicleCount]);
+            'myVehiclePage' => $myVehiclePage, 'userVehicleCount' => $userVehicleCount,
+            'vehicleTypes' => $vehicleTypes,
+        ]);
     }
 
     public function store(Request $request)
@@ -114,7 +117,7 @@ class ProfileVehicleController extends Controller
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
-            'type' => 'required',
+            'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
             'liscense_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
@@ -165,7 +168,7 @@ class ProfileVehicleController extends Controller
             'user_id' => auth()->user()->id,
             'make' => $request->make,
             'model' => $request->model,
-            'type' => $request->type,
+            'type' => Vehicle::normalizeVehicleTypeId($request->type),
             'liscense_no' => $request->liscense_no,
             'color' => $request->color,
             'year' => $request->year,
@@ -235,6 +238,8 @@ class ProfileVehicleController extends Controller
 
         $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
 
+        $vehicleTypes = $this->getVehicleTypesByLanguage();
+
         $vehicle = Vehicle::findOrFail($id);
 
         return view('edit_vehicle', [
@@ -242,6 +247,7 @@ class ProfileVehicleController extends Controller
             'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,
             'vehicle' => $vehicle,
+            'vehicleTypes' => $vehicleTypes,
             'myVehiclePage' => $myVehiclePage,
         ]);
     }
@@ -268,7 +274,7 @@ class ProfileVehicleController extends Controller
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
-            'type' => 'required',
+            'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
             'liscense_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
@@ -331,7 +337,7 @@ class ProfileVehicleController extends Controller
         $updateData = [
             'make' => $request->make,
             'model' => $request->model,
-            'type' => $request->type,
+            'type' => Vehicle::normalizeVehicleTypeId($request->type),
             'liscense_no' => $request->liscense_no,
             'color' => $request->color,
             'year' => $request->year,
@@ -474,4 +480,6 @@ class ProfileVehicleController extends Controller
             return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_removed_message);
         }
     }
+
+    
 }

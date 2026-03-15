@@ -1723,42 +1723,11 @@
                                                     @endisset
                                                 </option>
 
-                                                <option value="{{ $postRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_convertible_text ?? "Convertable"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_coupe_value ??'Coupe') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_coupe_text ?? "Coupe"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_hatchback_value ??'Hatchback' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_hatchback_value ??'Hatchback') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_hatchback_text ?? "Hatchback"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_minivan_value ??'Minivan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_minivan_value ??'Minivan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_minivan_text ?? "Minivan"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_sedan_value ??'Sedan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_sedan_value ??'Sedan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_sedan_text ?? "Sedan"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_station_wagon_value }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_station_wagon_value ??'Station wagon') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_station_wagon_text ?? "Station wagon"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_suv_value ??'SUV' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_suv_value ??'SUV') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_suv_text ?? "SUV"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_truck_value ??'Truck' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_truck_value ??'Truck') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_truck_text ?? "Truck"}}
-                                                </option>
-                                                <option value="{{ $postRidePage->vehicle_type_van_value ??'Van' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_van_value ??'Van') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_van_text ?? "Van"}}
-                                                </option>
+                                                @foreach (($vehicleTypes ?? collect()) as $vehicleType)
+                                                    <option value="{{ $vehicleType['id'] }}" {{ (string) old('vehicle_type', $ride->vehicle_type) === (string) $vehicleType['id'] ? 'selected' : '' }}>
+                                                        {{ $vehicleType['label'] }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                         @error('vehicle_type')
@@ -1956,8 +1925,8 @@
                                             <option value="{{ $vehicle->id }}"
                                                 {{ (string) $selectedVehicleId === (string) $vehicle->id ? 'selected' : '' }}>
                                                 {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}
-                                                @if ($vehicle->vehicle_type)
-                                                    / {{ $vehicle->vehicle_type }}
+                                                @if ($vehicle->type_label)
+                                                    / {{ $vehicle->type_label }}
                                                 @endif
                                             </option>
                                         @endforeach

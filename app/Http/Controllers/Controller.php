@@ -190,8 +190,6 @@ class Controller extends BaseController
                 $this->selectedLanguage->id,
                 $this->defaultLang->id
             );
-
-            $postRidePage = $this->mapVehicleTypeFields($postRidePage, $postRidePage);
         }
 
         return $postRidePage;
@@ -207,52 +205,76 @@ class Controller extends BaseController
                 $this->selectedLanguage->id,
                 $this->defaultLang->id
             );
-
-            $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-            $findRidePage = $this->mapVehicleTypeFields($findRidePage, $postRidePage);
         }
 
         return $findRidePage;
     }
 
-    protected function mapVehicleTypeFields($targetPage, $sourcePage)
+    protected function getVehicleTypesByLanguage()
     {
-        if (!$targetPage || !$sourcePage) {
-            return $targetPage;
-        }
+        return $this->getVehicleTypesForLanguage($this->selectedLanguage->id, $this->defaultLang->id);
+    }
 
-        $vehicleTypeFields = [
-            'vehicle_type_convertible_text',
-            'vehicle_type_hatchback_text',
-            'vehicle_type_coupe_text',
-            'vehicle_type_minivan_text',
-            'vehicle_type_sedan_text',
-            'vehicle_type_station_wagon_text',
-            'vehicle_type_suv_text',
-            'vehicle_type_truck_text',
-            'vehicle_type_van_text',
-        ];
+    protected function getVehicleTypesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
+    {
+        $languageId = $languageId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
+        $fallbackLanguageId = $fallbackLanguageId ?: $this->defaultLang?->id ?: $languageId;
+        $vehicleTypeMap = collect($this->getVehicleTypeFeatureMap());
+        $featureIds = $vehicleTypeMap->pluck('id');
 
-        $vehicleTypeIds = array_filter(array_map(
-            fn ($field) => $sourcePage->{$field} ?? null,
-            $vehicleTypeFields
-        ));
-
-        $vehicleTypeDetails = FeaturesSettingDetail::whereIn('features_setting_id', $vehicleTypeIds)
-            ->where('language_id', $this->selectedLanguage->id)
+        $details = FeaturesSettingDetail::whereIn('features_setting_id', $featureIds)
+            ->whereIn('language_id', array_unique(array_filter([$languageId, $fallbackLanguageId])))
             ->get()
-            ->keyBy('features_setting_id');
+            ->groupBy('features_setting_id');
 
-        foreach ($vehicleTypeFields as $field) {
-            $valueField = str_replace('_text', '_value', $field);
-            $featureId = $sourcePage->{$field} ?? null;
+        return $vehicleTypeMap->map(function ($vehicleType) use ($details, $languageId, $fallbackLanguageId) {
+            $featureId = $vehicleType['id'];
+            $localized = $details->get($featureId, collect())
+                ->firstWhere('language_id', $languageId);
 
-            // $targetPage->{$valueField} = $featureId;
-            $targetPage->{$field} = $featureId
-                ? $vehicleTypeDetails->get($featureId)?->name
-                : null;
+            $fallback = $details->get($featureId, collect())
+                ->firstWhere('language_id', $fallbackLanguageId);
+
+            $detail = $localized ?: $fallback;
+
+            return [
+                'id' => $featureId,
+                'slug' => $vehicleType['slug'],
+                'label' => $detail?->name ?? $fallback?->name,
+            ];
+        })->filter(fn ($type) => !empty($type['id']) && !empty($type['label']))->values();
+    }
+
+    protected function attachVehicleTypeOptions($page, ?int $languageId = null, ?int $fallbackLanguageId = null)
+    {
+        if (!$page) {
+            return $page;
         }
 
-        return $targetPage;
+        $vehicleTypes = $this->getVehicleTypesForLanguage($languageId, $fallbackLanguageId);
+        $page->vehicle_types = $vehicleTypes->values();
+
+        foreach ($vehicleTypes as $vehicleType) {
+            $fieldBase = 'vehicle_type_' . $vehicleType['slug'];
+            $page->{$fieldBase . '_value'} = $vehicleType['id'];
+            $page->{$fieldBase . '_text'} = $vehicleType['label'];
+        }
+
+        return $page;
+    }
+
+    protected function getVehicleTypeFeatureMap(): array
+    {
+        return [
+            ['slug' => 'convertible', 'id' => 38],
+            ['slug' => 'hatchback', 'id' => 39],
+            ['slug' => 'coupe', 'id' => 40],
+            ['slug' => 'minivan', 'id' => 41],
+            ['slug' => 'sedan', 'id' => 42],
+            ['slug' => 'station_wagon', 'id' => 43],
+            ['slug' => 'suv', 'id' => 44],
+            ['slug' => 'truck', 'id' => 45],
+            ['slug' => 'van', 'id' => 46],
+        ];
     }
 }
