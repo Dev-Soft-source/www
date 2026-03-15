@@ -403,10 +403,16 @@ return
 				'max' => 'The phone number must be less than 20 characters.',
 				'unique' => 'The phone number has already been taken.',
 			],
-			'message' =>
-			[
-				'required' => 'The message is required.',
-			],
+		'message' =>
+		[
+			'required' => 'The message is required.',
+		],
+		'student_card' =>
+		[
+			'required' => 'The student card is required.',
+			'mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, pdf.',
+			'max' => 'The image must be less than 10MB.',
+		],
 		],
 		'attributes' =>
 		[

@@ -4633,11 +4633,11 @@
             };
         }
 
-        var priceErrorParagraph1 = @json(optional($postRidePage)->price_error_paragraph_1 ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
-        var priceErrorParagraph2Template = @json(optional($postRidePage)->price_error_paragraph_2 ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
-        var priceErrorParagraph3 = @json(optional($postRidePage)->price_error_paragraph_3 ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
-        var priceWarningParagraph1 = @json(optional($postRidePage)->price_warning_paragraph_1 ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec');
-        var priceWarningParagraph2 = @json(optional($postRidePage)->price_warning_paragraph_2 ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
+        var priceErrorParagraph1 = @json(optional($postRidePage)->carpool_regulation_limit_message ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
+        var priceErrorParagraph2Template = @json(optional($postRidePage)->max_price_per_seat_message ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
+        var priceErrorParagraph3 = @json(optional($postRidePage)->non_commercial_carpool_requirement_message ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
+        var priceWarningParagraph1 = @json(optional($postRidePage)->price_above_reimbursement_warning ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec');
+        var priceWarningParagraph2 = @json(optional($postRidePage)->price_reduction_suggestion_message ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
 
         function showPriceErrorModal(maxPricePerSeat) {
             const modal = document.getElementById('priceErrorModal');

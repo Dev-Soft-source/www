@@ -9,15 +9,18 @@ return new class extends Migration
     public function up()
     {
         Schema::table('post_ride_page_setting_detail', function (Blueprint $table) {
-            $table->text('price_above_reimbursement_warning')->nullable()->after('price_warning_keep_current_btn_label');
-            $table->text('price_reduction_suggestion_message')->nullable()->after('price_above_reimbursement_warning');
+            $table->string('alert_need_government_photo_label')->nullable()->after('phone_required_modal_phone_btn');
+            $table->string('alert_need_driver_license_label')->nullable()->after('alert_need_government_photo_label');
         });
     }
 
     public function down()
     {
         Schema::table('post_ride_page_setting_detail', function (Blueprint $table) {
-            $table->dropColumn(['price_above_reimbursement_warning', 'price_reduction_suggestion_message']);
+            $table->dropColumn([
+                'alert_need_government_photo_label',
+                'alert_need_driver_license_label',
+            ]);
         });
     }
 };

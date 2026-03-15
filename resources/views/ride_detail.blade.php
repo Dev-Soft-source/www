@@ -91,7 +91,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                             <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                                <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                                <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                     class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
                                     {{ $siteText['login_btn_text'] ?? 'Log in' }}
                                 </a>
@@ -234,7 +234,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                            <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                            <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                 class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
                                 {{ $siteText['login_btn_text'] }}
                             </a>
@@ -272,9 +272,7 @@
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
-                                    <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
-                                        id="phone-on-file-required-modal-title">
-                                        {{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                                    
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">
@@ -292,45 +290,6 @@
                                 class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
                                 {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="verified_email_phone" class="hidden relative z-50" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div
-                    class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeVerifyModal()">
-                    </div>
-                    <div
-                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button onclick="closeVerifyModal()"
-                            class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div class="mx-auto h-16 w-16">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                </svg>
-                                            </div> -->
-                            </div>
-                            <div class="w-full">
-                                <p class="text-center can-exp-p" id="verify-popup-text"></p>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <a href="#" onclick="closeVerifyModal()"
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
                         </div>
                     </div>
                 </div>
@@ -785,7 +744,7 @@
                             @endisset
                         </h3>
                         <div class="bg-white p-4 space-y-3">
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center gap-2">
                                 @if ($ride->smoke == (optional($postRidePage->smoking_option1)->features_setting_id ?? null))
                                     @isset(optional($postRidePage->smoking_option1)->icon)
                                         <img class="w-7 h-7"
@@ -837,73 +796,53 @@
                                         $ride->animal_friendly->features_setting_id ===
                                             (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}" @endif
                                         alt="">
-                                    <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }}
-                                        {{ $ride->animal_friendly->name }}</p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor"
-                                        class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
-                                        data-tippy-content="{{ optional($postRidePage)->animals_option1_tooltip ?? '' }}"
-                                        viewBox="0 0 16 16">
-                                        <path
-                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                    </svg>
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }}
+                                            {{ $ride->animal_friendly->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            @if (
+                                                $ride->animal_friendly->features_setting_id ===
+                                                    (optional($postRidePage->animals_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option1_tooltip ?? '' }}"
+                                        @elseif (
+                                            $ride->animal_friendly->features_setting_id ===
+                                                (optional($postRidePage->animals_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option2_tooltip ?? '' }}"
+                                        @elseif (
+                                            $ride->animal_friendly->features_setting_id ===
+                                                (optional($postRidePage->animals_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option3_tooltip ?? '' }}" @endif
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             @endisset
                             @isset($ride->luggage->features_setting_id)
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center gap-2">
                                     <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
                                         alt="">
-                                    <p class="font-semibold">{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}
-                                    </p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor"
-                                        class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
-                                        @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option1_tooltip ?? '' }}"
-                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option2_tooltip ?? '' }}"
-                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option3_tooltip ?? '' }}"
-                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option4_tooltip ?? '' }}"
-                                    @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option5_tooltip ?? '' }}" @endif
-                                        viewBox="0 0 16 16">
-                                        <path
-                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                    </svg>
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->luggage_label ?? '' }}
+                                            {{ $ride->luggage->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option2_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option3_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option4_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option5_tooltip ?? '' }}" @endif
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
                                 </div>
                             @endisset
-                            @if (!empty($ride->pink_ride))
-                                <div class="flex items-center space-x-2">
-                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->pink_ride->icon) }}"
-                                        alt="">
-                                    <p class="font-semibold">{{ rtrim($ride->pink_ride->name, 's') }}</p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor"
-                                        class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
-                                        data-tippy-content="{{ optional($postRidePage)->features_option11_tooltip ?? '' }}"
-                                        viewBox="0 0 16 16">
-                                        <path
-                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                    </svg>
-                                </div>
-                            @endif
-                            @if (!empty($postRidePage->features_option2->name))
-                                <div class="flex items-center space-x-2">
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
-                                        alt="">
-                                    <p class="font-semibold">{{ rtrim($postRidePage->features_option2->name, 's') }}</p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor"
-                                        class="bi bi-exclamation-circle-fill text-black cursor-help inline-block ml-1"
-                                        data-tippy-content="{{ optional($postRidePage)->features_option2_tooltip ?? '' }}"
-                                        viewBox="0 0 16 16">
-                                        <path
-                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                    </svg>
-                                </div>
-                            @endif
                             @php
                                 $features = !empty($ride->features) ? explode('=', $ride->features) : [];
 
-                                // Create a mapping of feature IDs to their option objects for efficient lookup
                                 $featureOptionsMap = [];
                                 $featureTooltipMap = [];
                                 $featureOptionKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
@@ -922,7 +861,6 @@
                                     }
                                 }
 
-                                // Also handle intval comparison for option8
                                 if (
                                     isset($postRidePage->features_option8) &&
                                     isset($postRidePage->features_option8->features_setting_id)
@@ -932,47 +870,38 @@
                                     $featureTooltipMap[intval($postRidePage->features_option8->features_setting_id)] =
                                         optional($postRidePage)->features_option8_tooltip ?? '';
                                 }
-
-                                // Excluded feature IDs
-                                $excludedFeatureIds = [
-                                    $postRidePage->features_option11->features_setting_id ?? null,
-                                    $postRidePage->features_option1->features_setting_id ?? null,
-                                    $postRidePage->features_option2->features_setting_id ?? null,
-                                ];
                             @endphp
                             @foreach ($features as $feature)
                                 @php
                                     $featureId = $feature;
                                     $featureIdInt = intval($feature);
-                                    $isExcluded =
-                                        in_array($featureId, $excludedFeatureIds, true) ||
-                                        in_array($featureIdInt, $excludedFeatureIds, true);
                                     $featureOption =
                                         $featureOptionsMap[$featureId] ?? ($featureOptionsMap[$featureIdInt] ?? null);
+                                    $featureName = $featureOption ? $featureOption->name : $feature;
+                                    $featureTooltip = $featureOption ? ($featureTooltipMap[$featureId] ?? ($featureTooltipMap[$featureIdInt] ?? '')) : '';
                                 @endphp
-                                @if ($isExcluded)
-                                    @continue
-                                @endif
-                                <div class="flex items-start space-x-2">
+                                <div class="flex items-center gap-2">
                                     @if ($featureOption && isset($featureOption->icon))
                                         <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $featureOption->icon) }}"
                                             alt="">
-                                        <p class="font-semibold flex items-center">
-                                            {{ $featureOption->name }}
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor"
-                                                class="bi bi-exclamation-circle-fill text-black cursor-help inline-block ml-1"
-                                                viewBox="0 0 20 20" fill="currentColor"
-                                                data-tippy-content="{{ $featureTooltipMap[$featureId] ?? ($featureTooltipMap[$featureIdInt] ?? '') }}">
-                                                <path
-                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-                                            </svg>
-                                        </p>
                                     @else
                                         <input id="wi-fi" type="checkbox" name="features[]" value="" checked
                                             disabled
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                     @endif
+                                    <p class="font-semibold flex items-center gap-1">
+                                        {{ $featureName }}
+                                        @if ($featureTooltip !== '')
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor"
+                                                class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                                data-tippy-content="{{ $featureTooltip }}"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                            </svg>
+                                        @endif
+                                    </p>
                                 </div>
                             @endforeach
                         </div>
@@ -1223,8 +1152,8 @@
                                             $ride->bookings->where('user_id', auth()->user()->id)->where('status', 1)->isNotEmpty())
                                         @php
                                             // Calculate the difference in days between today and the ride's date
-$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-// Add the leave review days to the ride's DateTime
+                                            $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+                                            // Add the leave review days to the ride's DateTime
                                             $reviewDateTime = clone $rideDateTime;
                                             $reviewDateTime->add(
                                                 new DateInterval('P' . $setting->leave_review_days . 'D'),
@@ -1309,8 +1238,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
-                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id, 'return_to' => url()->full()]) }}"
+                                                    class="button-exp-green-fill w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
                                                     @endisset
@@ -1318,7 +1247,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                             @endif
                                         @else
                                             <button type="button"
-                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36"
+                                                class="button-exp-green-fill w-36"
                                                 onclick="togglePopupModal1()">
                                                 @isset($rideDetailPage->driver_chat_button_label)
                                                     {{ $rideDetailPage->driver_chat_button_label }}
@@ -1330,36 +1259,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                             </div>
                         @endif
 
-                        {{-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl {{isset($ride->booking_type->name) && $ride->booking_type->name=='Firm cancellation'?'border-4 border-red-500':'' }}">
-                        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
-                            Cancellation policy
-                            @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
-                            <div class="sups inline-flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                </svg>
-                                <div
-                                  class="absolute tooltip payment_tooltiptext_position top-8 left-0 group-hover:flex hidden peer-hover:flex"
-                                >
-                                    <div
-                                        role="tooltip"
-                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                    >
-                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-
-                                            {{ $rideDetailPage->cancellation_policy_tooltip ?? '' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                        </h3>
-                        <div class=" p-4 w-full">
-                            <p class="text-left">
-                                {{ $ride->booking_type->name }}
-                            </p>
-                        </div>
-                    </div> --}}
                         <div
                             class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
@@ -1588,14 +1487,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                 </div>
             </div>
 
-            {{-- <div class="mt-4 mb-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-            <p class="text-gray-800">
-                @isset($rideDetailPage->driver_note_label)
-                    {{ $rideDetailPage->driver_note_label }}
-                @endisset
-                <span class="text-gray-500">{{ $ride->notes }}</span>
-            </p>
-        </div> --}}
         </div>
 
         <!-- Phone Verification Required Modal (same as search_ride) -->
@@ -1707,14 +1598,29 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                         </button>
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
-                                        id="photo-id-required-modal-title">
-                                        {{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <div class="text-3xl text-center font-FuturaMdCnBT text-black">
+                                        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" stroke="#ff0000">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round"></g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path d="M12 10V13" stroke="#db0000" stroke-width="2"
+                                                    stroke-linecap="round"></path>
+                                                <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2"
+                                                    stroke-linecap="round"></path>
+                                                <path
+                                                    d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z"
+                                                    stroke="#db0000" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </g>
+                                        </svg>
+                                    </div>
                                 </div>
-                                <div class="mt-2 w-full">
+                                <div class="mt-4 w-full">
                                     <p class="can-exp-p text-center">
-                                        {{ $siteText['photo_id_required_for_pink_extra_text'] ?? 'To book a Pink or Extra+ Ride, you must have a government-issued photo ID on file. Please add it in Dashboard → Edit Profile.' }}
+                                        {{ $postRidePage->alert_need_government_photo_label ?? 'To book a Pink or Extra+ Ride, you must have a government-issued photo ID on file. Please add it in Dashboard → Edit Profile.' }}
                                     </p>
                                 </div>
                             </div>
@@ -1733,6 +1639,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                 </div>
             </div>
         </div>
+        
 
         <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
             id="chat-modal">
@@ -1791,12 +1698,10 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                             <div class="py-3 text-center sm:text-left">
                                                 <div class="mt-2">
                                                     <div class="panel-body">
-                                                        {{-- <div style="font-weight:bold;color:#2563eb;margin-bottom:4px;">Ride Details</div> --}}
                                                         <chat-messages logged_in_user_id="{{ Auth::user()->id ?? null }}"
                                                             :messages="chats"
                                                             empty_chat_placeholder="{{ $rideDetailPage->chat_error_message }}"></chat-messages>
                                                     </div>
-
                                                 </div>
                                             </div>
 
@@ -1962,16 +1867,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
             document.getElementById('my-modal').style.display = 'none';
         }
 
-        function closeVerifyModal() {
-            document.getElementById('verified_email_phone').style.display = 'none';
-        }
-
-        function openVerifyModal(value) {
-            document.getElementById('verified_email_phone').style.display = 'block';
-            document.getElementById('verify-popup-text').innerText = value;
-
-        }
-
         function closePopupModal() {
             document.getElementById('my-chat-pop-modal').style.display = 'none';
         }
@@ -1987,7 +1882,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
         }
 
         function goToPhoneVerification() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showVerifiedPhoneForPinkExtraModal() {
@@ -2011,7 +1907,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
         }
 
         function goToPhoneNumberSettings() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showPhotoIdRequiredModal() {

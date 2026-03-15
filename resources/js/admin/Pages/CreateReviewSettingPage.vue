@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -722,6 +722,54 @@
                                             ></p>
                                         </div>
 
+                                        <!-- Passenger review page (passenger_review_*) -->
+                                        <div class="relative z-0 w-full group col-span-2 border-t pt-4 mt-2">
+                                            <p class="text-gray-600 font-medium mb-2">Passenger review page labels</p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_heading_${activeLanguageId}`">Passenger review heading</label>
+                                            <input type="text" :name="`passenger_review_heading_${activeLanguageId}`" :id="`passenger_review_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Review" :value="getCurrentValue('passenger_review_heading')" @input="handleInput($event.target.value, language, 'passenger_review_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_criteria_heading_${activeLanguageId}`">Review criteria heading</label>
+                                            <input type="text" :name="`passenger_review_criteria_heading_${activeLanguageId}`" :id="`passenger_review_criteria_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Review criteria" :value="getCurrentValue('passenger_review_criteria_heading')" @input="handleInput($event.target.value, language, 'passenger_review_criteria_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_condition_label_${activeLanguageId}`">Condition of vehicle</label>
+                                            <input type="text" :name="`passenger_review_condition_label_${activeLanguageId}`" :id="`passenger_review_condition_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Condition of the vehicle" :value="getCurrentValue('passenger_review_condition_label')" @input="handleInput($event.target.value, language, 'passenger_review_condition_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_conscious_label_${activeLanguageId}`">Conscious to passengers wellness</label>
+                                            <input type="text" :name="`passenger_review_conscious_label_${activeLanguageId}`" :id="`passenger_review_conscious_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_conscious_label')" @input="handleInput($event.target.value, language, 'passenger_review_conscious_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_comfort_label_${activeLanguageId}`">Comfort</label>
+                                            <input type="text" :name="`passenger_review_comfort_label_${activeLanguageId}`" :id="`passenger_review_comfort_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_comfort_label')" @input="handleInput($event.target.value, language, 'passenger_review_comfort_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_communication_label_${activeLanguageId}`">Communication</label>
+                                            <input type="text" :name="`passenger_review_communication_label_${activeLanguageId}`" :id="`passenger_review_communication_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_communication_label')" @input="handleInput($event.target.value, language, 'passenger_review_communication_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_attitude_label_${activeLanguageId}`">Overall attitude</label>
+                                            <input type="text" :name="`passenger_review_attitude_label_${activeLanguageId}`" :id="`passenger_review_attitude_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_attitude_label')" @input="handleInput($event.target.value, language, 'passenger_review_attitude_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_hygiene_label_${activeLanguageId}`">Personal hygiene</label>
+                                            <input type="text" :name="`passenger_review_hygiene_label_${activeLanguageId}`" :id="`passenger_review_hygiene_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_hygiene_label')" @input="handleInput($event.target.value, language, 'passenger_review_hygiene_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_respect_label_${activeLanguageId}`">Respect and courtesy</label>
+                                            <input type="text" :name="`passenger_review_respect_label_${activeLanguageId}`" :id="`passenger_review_respect_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_respect_label')" @input="handleInput($event.target.value, language, 'passenger_review_respect_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_safety_label_${activeLanguageId}`">Safety</label>
+                                            <input type="text" :name="`passenger_review_safety_label_${activeLanguageId}`" :id="`passenger_review_safety_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_safety_label')" @input="handleInput($event.target.value, language, 'passenger_review_safety_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_timeliness_label_${activeLanguageId}`">Timeliness</label>
+                                            <input type="text" :name="`passenger_review_timeliness_label_${activeLanguageId}`" :id="`passenger_review_timeliness_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('passenger_review_timeliness_label')" @input="handleInput($event.target.value, language, 'passenger_review_timeliness_label')" />
+                                        </div>
 
                                     </div>
                                 </div>
@@ -829,6 +877,17 @@ export default {
                             this.handleInput("", language, "reply_heading_label");
                             this.handleInput("", language, "review_label");
                             this.handleInput("", language, "see_all_review_label");
+                            this.handleInput("", language, "passenger_review_heading");
+                            this.handleInput("", language, "passenger_review_criteria_heading");
+                            this.handleInput("", language, "passenger_review_condition_label");
+                            this.handleInput("", language, "passenger_review_conscious_label");
+                            this.handleInput("", language, "passenger_review_comfort_label");
+                            this.handleInput("", language, "passenger_review_communication_label");
+                            this.handleInput("", language, "passenger_review_attitude_label");
+                            this.handleInput("", language, "passenger_review_hygiene_label");
+                            this.handleInput("", language, "passenger_review_respect_label");
+                            this.handleInput("", language, "passenger_review_safety_label");
+                            this.handleInput("", language, "passenger_review_timeliness_label");
                         });
                         this.fetchReviewSetting();
                     }
@@ -917,8 +976,17 @@ export default {
                                 setting?.language,
                                 "review_label"
                             );
-
-
+                            this.handleInput(setting?.passenger_review_heading, setting?.language, "passenger_review_heading");
+                            this.handleInput(setting?.passenger_review_criteria_heading, setting?.language, "passenger_review_criteria_heading");
+                            this.handleInput(setting?.passenger_review_condition_label, setting?.language, "passenger_review_condition_label");
+                            this.handleInput(setting?.passenger_review_conscious_label, setting?.language, "passenger_review_conscious_label");
+                            this.handleInput(setting?.passenger_review_comfort_label, setting?.language, "passenger_review_comfort_label");
+                            this.handleInput(setting?.passenger_review_communication_label, setting?.language, "passenger_review_communication_label");
+                            this.handleInput(setting?.passenger_review_attitude_label, setting?.language, "passenger_review_attitude_label");
+                            this.handleInput(setting?.passenger_review_hygiene_label, setting?.language, "passenger_review_hygiene_label");
+                            this.handleInput(setting?.passenger_review_respect_label, setting?.language, "passenger_review_respect_label");
+                            this.handleInput(setting?.passenger_review_safety_label, setting?.language, "passenger_review_safety_label");
+                            this.handleInput(setting?.passenger_review_timeliness_label, setting?.language, "passenger_review_timeliness_label");
                         });
                     }
                 });

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\DriverPageSetting;
+use App\Models\ErrorPageSetting;
 use App\Models\Language;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -13,21 +13,12 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths
+class ErrorPageSettingTemplateExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths
 {
     protected $format;
-
-    /** @var \Illuminate\Support\Collection|null */
     protected $languages;
-
-    /** @var \App\Models\DriverPageSetting|null */
     protected $existingData;
 
-    /**
-     * @param string $format - 'single_column', 'multi_column', or 'all_languages'
-     * @param \Illuminate\Support\Collection|array|null $languages
-     * @param \App\Models\DriverPageSetting|null $existingData - with driverPageSettingDetail loaded
-     */
     public function __construct($format = 'single_column', $languages = null, $existingData = null)
     {
         $this->format = $format;
@@ -38,22 +29,11 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
     public static function getTranslatableFieldsWithDefaults(): array
     {
         return [
-            'name' => 'Drivers',
-            'meta_keywords' => 'drivers, ride, carpool',
-            'meta_description' => 'Become a driver',
-            'main_heading' => 'Drivers',
-            'sub_heading' => 'Join as a driver',
-            'page_description' => 'Drive with us and earn.',
-            'driver_info_heading' => 'Driver info',
-            'joined_label' => 'Joined',
-            'age_label' => 'Age',
-            'mini_bio_heading' => 'Mini bio',
-            'passengers_driven_label' => 'Passengers driven',
-            'rides_taken_label' => 'Rides taken',
-            'km_shared_label' => 'KM shared',
-            'vehicle_info_heading' => 'Vehicle info',
-            'reviews_heading' => 'Reviews',
-            'see_all_reviews_btn' => 'See all reviews',
+            'error_404_heading' => "Ho-ho-hold on! This page doesn't exist.",
+            'error_404_paragraph_1' => "Kind of like this skinny Santa, cruising in a Tesla and eating a fat-free donut… in the middle of summer.",
+            'error_404_paragraph_2' => "The page you're looking for may have been moved, removed, renamed - or maybe it never existed in the first place.",
+            'error_404_back_home_btn' => 'Back to Homepage',
+            'error_404_contact_btn' => 'Contact us',
         ];
     }
 
@@ -83,8 +63,8 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
         $languages = $this->languages ?? Language::orderBy('id')->get();
         $fields = static::getTranslatableFieldsWithDefaults();
         $detailsByLang = [];
-        if ($this->existingData && $this->existingData->relationLoaded('driverPageSettingDetail')) {
-            foreach ($this->existingData->driverPageSettingDetail as $d) {
+        if ($this->existingData && $this->existingData->relationLoaded('errorPageSettingDetail')) {
+            foreach ($this->existingData->errorPageSettingDetail as $d) {
                 $detailsByLang[$d->language_id] = $d;
             }
         }
@@ -103,8 +83,7 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
 
     protected function multiColumnFormat(): Collection
     {
-        $fields = static::getTranslatableFieldsWithDefaults();
-        return new Collection([$fields]);
+        return new Collection([static::getTranslatableFieldsWithDefaults()]);
     }
 
     public function headings(): array
@@ -133,17 +112,17 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
     public function columnWidths(): array
     {
         if ($this->format === 'single_column') {
-            return ['A' => 25, 'B' => 80];
+            return ['A' => 28, 'B' => 80];
         }
         if ($this->format === 'all_languages') {
             $totalCols = ($this->languages ?? Language::orderBy('id')->get())->count() + 1;
             $widths = [];
             for ($colIndex = 1; $colIndex <= $totalCols; $colIndex++) {
                 $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
-                $widths[$col] = $colIndex === 1 ? 25 : 30;
+                $widths[$col] = $colIndex === 1 ? 28 : 40;
             }
             return $widths;
         }
-        return ['A' => 25, 'B' => 30];
+        return ['A' => 28, 'B' => 50];
     }
 }
