@@ -3393,7 +3393,7 @@
                                             </p>
                                         </div>
 
-                                        <!-- <div class="relative z-0 w-full group">
+                                        <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label
@@ -3479,7 +3479,7 @@
                                                     validationErros.get('pink_ride_tooltip_admin_disable_text.pink_ride_tooltip_admin_disable_text_${activeLanguageId}')
                                                 }}
                                             </p>
-                                        </div> -->
+                                        </div>
 
                                     </div>
                                 </div>

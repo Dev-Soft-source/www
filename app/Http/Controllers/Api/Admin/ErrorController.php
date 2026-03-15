@@ -14,18 +14,39 @@ class ErrorController extends Controller
 
     public function index()
     {
-        $languages = getAllLanguages();
-        foreach ($languages as $language) {
-            $validationFilePath = lang_path($language->abbreviation) . '/validation.php';
-            if (file_exists($validationFilePath)) {
-                $validation = File::getRequire($validationFilePath);
-                unset($validation['custom']);
-                unset($validation['attributes']);
-                $language->validation = $validation;
+        try {
+            $languages = getAllLanguages();
+            foreach ($languages as $language) {
+                if (empty($language->abbreviation)) {
+                    $language->validation = [];
+                    continue;
+                }
+                
+                $validationFilePath = lang_path($language->abbreviation) . '/validation.php';
+                if (file_exists($validationFilePath)) {
+                    try {
+                        $validation = File::getRequire($validationFilePath);
+                        if (is_array($validation)) {
+                            unset($validation['custom']);
+                            unset($validation['attributes']);
+                            $language->validation = $validation;
+                        } else {
+                            $language->validation = [];
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error reading validation file: ' . $validationFilePath . ' - ' . $e->getMessage());
+                        $language->validation = [];
+                    }
+                } else {
+                    $language->validation = [];
+                }
             }
-        }
 
-        return $this->successResponse($languages, 'Language has been added successfully.');
+            return $this->successResponse($languages, 'Language has been added successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Error in ErrorController@index: ' . $e->getMessage());
+            return response()->json($this->errorResponse('An error occurred while fetching language errors.'), 500);
+        }
     }
 
     public function update(Request $request)

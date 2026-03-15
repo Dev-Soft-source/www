@@ -58,6 +58,7 @@ class BookingPageSettingDetailResource extends JsonResource
             'booking_disclaimer_pink_ride' => $this->booking_disclaimer_pink_ride,
             'booking_disclaimer_extra_care_ride' => $this->booking_disclaimer_extra_care_ride,
             'booking_disclaimer_firm' => $this->booking_disclaimer_firm,
+            'booking_disclaimer_firm_tooltip' => $this->booking_disclaimer_firm_tooltip,
             'booking_term_agree_text' => $this->booking_term_agree_text,
             'booking_pink_ride_term_agree_text' => $this->booking_pink_ride_term_agree_text,
             'booking_extra_care_ride_term_agree_text' => $this->booking_extra_care_ride_term_agree_text,
