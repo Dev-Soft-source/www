@@ -27,6 +27,7 @@ class ResetPasswordPageSettingDetailResource extends JsonResource
             'password_placeholder' => $this->password_placeholder,
             'confirm_password_label' => $this->confirm_password_label,
             'confirm_password_error' => $this->confirm_password_error,
+            'password_do_not_match_error' => $this->password_do_not_match_error,
             'confirm_password_placeholder' => $this->confirm_password_placeholder,
             'button_label' => $this->button_label,
             'reset_password_page_setting' => new ResetPasswordPageSettingResource($this->whenLoaded('resetPasswordPageSetting')),

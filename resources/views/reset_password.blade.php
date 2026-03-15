@@ -49,11 +49,7 @@
                   </span>
                 </div>
                 @error('password')
-                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                      <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                    </div>
-                  </div>
+                  <div class="tooltip-error shadow-lg">{{ $message }}</div>
                 @enderror
               </div>
 
@@ -75,11 +71,7 @@
                   </span>
                 </div>
                 @error('password_confirmation')
-                  <div class="relative tooltip -bottom-4 group-hover:flex">
-                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                      <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                    </div>
-                  </div>
+                  <div class="tooltip-error shadow-lg">{{ $message }}</div>
                 @enderror
               </div>
 

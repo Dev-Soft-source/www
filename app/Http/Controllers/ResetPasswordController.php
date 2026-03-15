@@ -123,15 +123,15 @@ class ResetPasswordController extends Controller
                 'password' => 'required|confirmed|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/',
             ], [
                 'password.required' => 'The password is required',
-                'password.confirmed' => 'The password confirmation does not match',
+                'password.confirmed' => $resetPasswordPage->password_do_not_match_error ?? 'The password confirmation does not match',
                 'password.string' => 'The password must be a string',
                 'password.min' => 'The password must be at least 8 characters',
                 'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
             ],[
                 'password.required' => 'The password is required',
-                'password.confirmed' => 'The password confirmation does not match',
+                'password.confirmed' => $resetPasswordPage->password_do_not_match_error ?? 'The password confirmation does not match',
                 'password_confirmation.required' => 'The password confirmation is required',
-                'password_confirmation.confirmed' => 'The password confirmation does not match',
+                'password_confirmation.confirmed' => $resetPasswordPage->password_do_not_match_error ?? 'The password confirmation does not match',
                 'password_confirmation.string' => 'The password confirmation must be a string',
                 'password_confirmation.min' => 'The password confirmation must be at least 8 characters',
                 'password_confirmation.regex' => 'The password confirmation must contain at least one uppercase letter, one lowercase letter, one number, and one special character',

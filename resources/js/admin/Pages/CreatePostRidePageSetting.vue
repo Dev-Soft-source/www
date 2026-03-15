@@ -2816,6 +2816,34 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`agree_term_error_${activeLanguageId}`">Agree terms error</label>
+                                                </div>
+                                                <input type="text" :name="`agree_term_error_${activeLanguageId}`"
+                                                    :id="`agree_term_error_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'agree_term_error'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'agree_term_error'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `agree_term_error.agree_term_error_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `agree_term_error.agree_term_error_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`mobile_agree_terms_label_${activeLanguageId}`">Agree
                                                         terms label (App)</label>
                                                 </div>
@@ -3659,6 +3687,7 @@ export default {
                             // this.handleInput("", language, "pink_ride_disclaimers_description");
                             // this.handleInput("", language, "extra_care_ride_disclaimers_description");
                             this.handleInput("", language, "agree_terms_label");
+                            this.handleInput("", language, "agree_term_error");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4246,6 +4275,11 @@ export default {
                                 "agree_terms_label"
                             );
                             this.handleInput(
+                                setting?.agree_term_error,
+                                setting?.language,
+                                "agree_term_error"
+                            );
+                            this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,
                                 "mobile_agree_terms_label"
@@ -4806,6 +4840,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `agree_terms_label.agree_terms_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `agree_term_error.agree_term_error_${language.id}`
                 ) ||
                 validationErros.has(
                     `mobile_agree_terms_label.mobile_agree_terms_label_${language.id}`

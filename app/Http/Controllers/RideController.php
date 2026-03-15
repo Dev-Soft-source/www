@@ -2255,7 +2255,8 @@ class RideController extends Controller
             'mimes' => 'The :attribute must be a file of type: jpeg, png',
             'image.max' => 'Can not upload image size greater than 10MB',
             'uploaded' => 'The image is not uploaded yet',
-            'numeric' => 'This field must be a number'
+            'numeric' => 'This field must be a number',
+            'agree_terms.accepted' => $postRidePage->agree_term_error ?? 'You must agree to the terms to continue.',
         ];
 
         $skip_vehicle = $request->filled('skip_vehicle') ? $request->skip_vehicle : 0;
