@@ -82,7 +82,7 @@ class RideController extends Controller
             if (auth()->user()) {
                 // Check if user has suspanded
                 if (auth()->user()->suspand === '1') {
-                    return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
+                    return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
                 }
 
                 // Check if the search already exists
@@ -1931,8 +1931,8 @@ class RideController extends Controller
             }
         }
 
-        return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation]);
-        // return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->defaultRideDetail[0]->departure, 'destination' => $ride->defaultRideDetail[0]->destination, 'id' => $ride->id]);
+        return redirect()->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation]);
+        // return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $ride->defaultRideDetail[0]->departure, 'destination' => $ride->defaultRideDetail[0]->destination, 'id' => $ride->id]);
     }
 
     public function CopyRide($lang, $id)
@@ -1970,27 +1970,27 @@ class RideController extends Controller
             $overallRating = 5;
         }
 
-       
-                
+
+
         $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $postRidePage = $this->getPostRidePageWithSettingDetail();
-        
+
 
         $isNewForm = false;
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
-        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 
-        'postRidePage' => $postRidePage, 
-        'vehicleTypes' => $vehicleTypes, 
-        'vehiclePage' => $vehiclePage, 
-        'cancellationCount' => $cancellationCount, 
-        'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 
-        'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 
-        'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 
-        'overallRating' => $overallRating, 
+        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage,
+        'postRidePage' => $postRidePage,
+        'vehicleTypes' => $vehicleTypes,
+        'vehiclePage' => $vehiclePage,
+        'cancellationCount' => $cancellationCount,
+        'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride,
+        'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles,
+        'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting,
+        'overallRating' => $overallRating,
         'routeType' => 'copy']);
     }
 
@@ -2070,12 +2070,12 @@ class RideController extends Controller
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
 
-        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 
-        'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 
-        'pinkRideSetting' => $pinkRideSetting, 
-        'vehicleTypes' => $vehicleTypes, 
-        'vehiclePage' => $vehiclePage, 
-        'setting' => $setting, 'overallRating' => $overallRating, 
+        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage,
+        'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles,
+        'pinkRideSetting' => $pinkRideSetting,
+        'vehicleTypes' => $vehicleTypes,
+        'vehiclePage' => $vehiclePage,
+        'setting' => $setting, 'overallRating' => $overallRating,
         'routeType' => 'repost', 'noshows' => $noshows, 'totalNoOfRides' => $totalNoOfRides, 'noShowsCount' => $noShowsCount, 'cancellationCount' => $cancellationCount]);
     }
 
@@ -2181,26 +2181,8 @@ class RideController extends Controller
         $rides = Ride::where('added_by', $user_id)->get();
         $adminSetting = SiteSetting::first();
 
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'profile_photo_required_message', 'overlap_ride_message', 'ride_dead_time_text')->first();
-                $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
-                $defaultLang = Language::where('is_default', 1)->first();
-                $siteTextErrorMessage = SiteTextDetail::getByLanguageKeyedBySlug($selectedLanguage->id, $defaultLang ? $defaultLang->id : 1);
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $cityErrorMessage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('city_not_in_record')->first();
-                $siteTextErrorMessage = SiteTextDetail::getByLanguageKeyedBySlug($selectedLanguage->id, $selectedLanguage->id);
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_post_message', 'ride_schedule_message', 'overlap_ride_title', 'block_post_ride_message', 'not_allowed_post_ride_state_wise_message', 'overlap_ride_message', 'profile_photo_required_message', 'ride_dead_time_text')->first();
-            }
-        }
-        $siteTextErrorMessage = $siteTextErrorMessage ?? [];
+        $message = $this->successMessage;
+        $siteTextErrorMessage = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
         // Ensure stop_date and stop_time are arrays (form may send single value)
         if ($request->has('stop_date') && !is_array($request->stop_date)) {
@@ -2261,7 +2243,7 @@ class RideController extends Controller
         if ($request->has('features') && is_array($request->features)) {
             $pinkRideSetting = \App\Models\PinkRideSetting::first();
             $folkRideSetting = \App\Models\FolkRideSetting::first();
-            $postRidePage = \App\Models\PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+            $postRidePage = \App\Models\PostRidePageSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
 
             // Get feature IDs for Pink Ride and Extra Care Ride
             $pinkRideFeatureId = $postRidePage->features_option1->features_setting_id ?? null;
@@ -2377,13 +2359,7 @@ class RideController extends Controller
         $cityValidator = Validator::make([
             'from' => $from,
             'to' => $to,
-        ], [
-            'from' => 'required|exists:cities,name',
-            'to' => 'required|exists:cities,name',
-        ], [
-            'from.exists' => $cityErrorMessage->city_not_in_record,
-            'to.exists' => $cityErrorMessage->city_not_in_record,
-        ]);
+        ], [], []);
 
         $nowDate = date('Y-m-d');
         $getRideCount = RideDetail::whereRaw('LOWER(`departure`) LIKE ? ', ['%' . $request->from . '%'])->where('date', $nowDate)->where('default_ride', '1')->whereHas('ride', function ($q) use ($nowDate, $user_id) {
@@ -3158,7 +3134,7 @@ class RideController extends Controller
                 'at' => $request->time,
                 'seats' => $request->seats,
                 'price' => $request->price,
-                'redirect' => env('APP_URL') . '/' . $selectedLanguage->abbreviation . '/my-rides',
+                'redirect' => env('APP_URL') . '/' . $this->selectedLanguage->abbreviation . '/my-rides',
 
             ];
             if (in_array('1', $features) && in_array('2', $features)) {
@@ -3339,7 +3315,7 @@ class RideController extends Controller
             $redirectData['price_warning'] = session('price_warning');
         }
 
-        return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation])->with($redirectData)->withInput();
+        return redirect()->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation])->with($redirectData)->withInput();
     }
 
 
