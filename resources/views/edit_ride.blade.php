@@ -671,7 +671,7 @@
                                                 <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                                     <div class="">
                                                         <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                                            id="priceErrorHeading">Price Limit Exceeded</h3>
+                                                            id="priceErrorHeading">{{ optional($postRidePage)->price_error_heading ?? 'Price Limit Exceeded' }}</h3>
                                                     </div>
                                                     <div class="mt-2 w-full">
                                                         <p class="can-exp-p text-center mb-3" id="priceErrorParagraph1">
@@ -685,8 +685,7 @@
                                             <div
                                                 class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                                                 <button type="button" id="priceErrorAdjustBtn"
-                                                    onclick="adjustPriceFromError()" class="button-exp-fill">Adjust
-                                                    Price</button>
+                                                    onclick="adjustPriceFromError()" class="button-exp-fill">{{ optional($postRidePage)->price_error_adjust_btn_label ?? 'Adjust Price' }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -4531,15 +4530,17 @@
             };
         }
 
+        var priceErrorParagraph1 = @json(optional($postRidePage)->price_error_paragraph_1 ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
+        var priceErrorParagraph2Template = @json(optional($postRidePage)->price_error_paragraph_2 ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
+        var priceErrorParagraph3 = @json(optional($postRidePage)->price_error_paragraph_3 ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
+
         function showPriceErrorModal(maxPricePerSeat) {
             const modal = document.getElementById('priceErrorModal');
             if (modal) {
-                document.getElementById('priceErrorParagraph1').textContent =
-                    'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.';
+                document.getElementById('priceErrorParagraph1').textContent = priceErrorParagraph1;
                 document.getElementById('priceErrorParagraph2').textContent =
-                    'The maximum allowed for this trip is $' + maxPricePerSeat + ' per seat.';
-                document.getElementById('priceErrorParagraph3').textContent =
-                    'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
+                    (priceErrorParagraph2Template || '').replace(/:max_per_seat/g, maxPricePerSeat);
+                document.getElementById('priceErrorParagraph3').textContent = priceErrorParagraph3;
                 modal.classList.remove('hidden');
                 modal.style.display = 'block';
             }
