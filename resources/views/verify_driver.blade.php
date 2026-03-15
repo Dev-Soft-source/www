@@ -122,7 +122,7 @@
                         </div>
                         <div id="hide-buttons" class="hidden justify-center gap-2 mt-3">
                             <label for="edit-file"
-                                class="text-white bg-primary p-2 w-20 rounded cursor-pointer flex items-center justify-center gap-1">
+                                class="text-white bg-primary p-2 w-auto rounded cursor-pointer flex items-center justify-center gap-1">
                                 <div class="flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -139,7 +139,7 @@
                                 </div>
                             </label>
                             <button id="remove-photo" type="button"
-                                class="text-white bg-primary p-2 w-20 rounded flex items-center gap-1">
+                                class="text-white bg-primary p-2 w-auto rounded flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round"

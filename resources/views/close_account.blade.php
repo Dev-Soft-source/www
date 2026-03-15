@@ -85,7 +85,7 @@
                                 <li>
                                     <div>
                                         <input type="checkbox" value="Prefer not to say" name="reasons[]" id="reason_prefer_not_say"
-                                            {{ in_array('Prefer not to say', old('reasons', [])) || empty(old('reasons')) ? 'checked' : '' }}
+                                            {{ in_array('Prefer not to say', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
                                         <label for="reason_prefer_not_say"
                                             class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->not_say_checkbox_label ?? 'Prefer not to say' }}</label>
@@ -332,7 +332,22 @@
 @section('script')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
-        
+        $(function() {
+            var $preferNotSay = $('#reason_prefer_not_say');
+            var $otherReasons = $('input[name="reasons[]"]').not('#reason_prefer_not_say');
+
+            $preferNotSay.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $otherReasons.prop('checked', false);
+                }
+            });
+
+            $otherReasons.on('change', function() {
+                if ($(this).is(':checked')) {
+                    $preferNotSay.prop('checked', false);
+                }
+            });
+        });
 
         function closeModal() {
             const modal = document.getElementById('myModal');

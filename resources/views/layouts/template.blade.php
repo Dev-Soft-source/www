@@ -326,12 +326,12 @@
                 </div>
                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                     <a href="{{ route('logout', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                    class="button-exp-fill min-w-24 bg-greenXS hover:bg-greenXS text-white text-center flex items-center justify-center">
+                    class="button-exp-fill w-auto bg-greenXS hover:bg-greenXS text-white text-center flex items-center justify-center">
                         {{ $logoutPage->confirmation_yes_label ?? 'Yes' }}
                     </a>
 
                     <a href="javascript:void(0)" onclick="toggleModal('logout-modal')"
-                        class="button-exp-fill min-w-24">
+                        class="button-exp-fill w-auto">
                         {{ $logoutPage->confirmation_no_label ?? 'No, stay logged in' }}
                 </a>
                 </div>
