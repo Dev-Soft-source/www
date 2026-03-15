@@ -470,8 +470,8 @@
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:mt-0 sm:text-left">
                                 <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">Recommended
-                                        Contribution Limit</h3>
+                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">{{ optional($postRidePage)->price_warning_heading ??  'Recommended
+                                        Contribution Limit'}}</h3>
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1"></p>
@@ -481,10 +481,8 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                             <button type="button" id="priceWarningAdjustBtn"
-                                onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">Adjust
-                                Price</button>
-                            <button type="button" id="priceWarningContinue" class="button-exp-fill">Keep Current
-                                Price</button>
+                                onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">{{ optional($postRidePage)->price_warning_adjust_btn_label ?? 'Adjust Price' }}</button>
+                            <button type="button" id="priceWarningContinue" class="button-exp-fill">{{ optional($postRidePage)->price_warning_keep_current_btn_label ?? 'Keep Current Price' }}</button>
                         </div>
                     </div>
                 </div>
@@ -3273,6 +3271,9 @@
     var priceErrorParagraph2Template = @json(optional($postRidePage)->price_error_paragraph_2 ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
     var priceErrorParagraph3 = @json(optional($postRidePage)->price_error_paragraph_3 ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
 
+    var priceWarningParagraph1 = @json(optional($postRidePage)->price_warning_paragraph_1 ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.');
+    var priceWarningParagraph2 = @json(optional($postRidePage)->price_warning_paragraph_2 ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
+
     // Function to show error modal (Price Limit Exceeded)
     function showPriceErrorModal(maxPricePerSeat) {
         const modal = document.getElementById('priceErrorModal');
@@ -3301,12 +3302,11 @@
         const para2 = document.getElementById('priceWarningParagraph2');
 
         if (para1) {
-            para1.textContent =
-                'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+            para1.textContent = priceWarningParagraph1;
+                
         }
         if (para2) {
-            para2.textContent =
-                'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+            para2.textContent = priceWarningParagraph2;
         }
 
         // Show the modal - ensure it's visible
