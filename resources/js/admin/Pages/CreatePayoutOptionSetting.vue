@@ -416,6 +416,223 @@
                                                 "
                                             ></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div class="border-t pt-4 mt-2 border-gray-300">
+                                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Payout page content (web)</h4>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`web_interac_transfer_description_${activeLanguageId}`">Interac Transfer Description (web)</label>
+                                                </div>
+                                                <input type="text" :name="`web_interac_transfer_description_${activeLanguageId}`" :id="`web_interac_transfer_description_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('web_interac_transfer_description')" @input="handleInput($event.target.value, language, 'web_interac_transfer_description')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`processing_fee_text_${activeLanguageId}`">Processing Fee Text</label>
+                                                </div>
+                                                <input type="text" :name="`processing_fee_text_${activeLanguageId}`" :id="`processing_fee_text_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('processing_fee_text')" @input="handleInput($event.target.value, language, 'processing_fee_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`save_payout_method_btn_${activeLanguageId}`">Save Payout Method Button</label>
+                                                </div>
+                                                <input type="text" :name="`save_payout_method_btn_${activeLanguageId}`" :id="`save_payout_method_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('save_payout_method_btn')" @input="handleInput($event.target.value, language, 'save_payout_method_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_detail_heading_${activeLanguageId}`">Interac Detail Heading</label>
+                                                </div>
+                                                <input type="text" :name="`interac_detail_heading_${activeLanguageId}`" :id="`interac_detail_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_detail_heading')" @input="handleInput($event.target.value, language, 'interac_detail_heading')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_fee_heading_${activeLanguageId}`">PayPal Fee Heading</label>
+                                                </div>
+                                                <input type="text" :name="`paypal_fee_heading_${activeLanguageId}`" :id="`paypal_fee_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_fee_heading')" @input="handleInput($event.target.value, language, 'paypal_fee_heading')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_fee_proximaride_text_${activeLanguageId}`">PayPal Fee ProximaRide Text</label>
+                                                </div>
+                                                <input type="text" :name="`paypal_fee_proximaride_text_${activeLanguageId}`" :id="`paypal_fee_proximaride_text_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_fee_proximaride_text')" @input="handleInput($event.target.value, language, 'paypal_fee_proximaride_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`wallet_intro_line1_${activeLanguageId}`">Wallet Intro Line 1</label>
+                                                </div>
+                                                <textarea :name="`wallet_intro_line1_${activeLanguageId}`" :id="`wallet_intro_line1_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('wallet_intro_line1')" @input="handleInput($event.target.value, language, 'wallet_intro_line1')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`wallet_intro_line2_${activeLanguageId}`">Wallet Intro Line 2</label>
+                                                </div>
+                                                <textarea :name="`wallet_intro_line2_${activeLanguageId}`" :id="`wallet_intro_line2_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('wallet_intro_line2')" @input="handleInput($event.target.value, language, 'wallet_intro_line2')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_info_paragraph_${activeLanguageId}`">Interac Autodeposit Info Paragraph</label>
+                                                </div>
+                                                <textarea :name="`interac_autodeposit_info_paragraph_${activeLanguageId}`" :id="`interac_autodeposit_info_paragraph_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_autodeposit_info_paragraph')" @input="handleInput($event.target.value, language, 'interac_autodeposit_info_paragraph')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`bank_detail_info_paragraph_${activeLanguageId}`">Bank Detail Info Paragraph</label>
+                                                </div>
+                                                <textarea :name="`bank_detail_info_paragraph_${activeLanguageId}`" :id="`bank_detail_info_paragraph_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('bank_detail_info_paragraph')" @input="handleInput($event.target.value, language, 'bank_detail_info_paragraph')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`bank_funds_note_${activeLanguageId}`">Bank Funds Note</label>
+                                                </div>
+                                                <textarea :name="`bank_funds_note_${activeLanguageId}`" :id="`bank_funds_note_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('bank_funds_note')" @input="handleInput($event.target.value, language, 'bank_funds_note')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_detail_info_paragraph_${activeLanguageId}`">PayPal Detail Info Paragraph</label>
+                                                </div>
+                                                <textarea :name="`paypal_detail_info_paragraph_${activeLanguageId}`" :id="`paypal_detail_info_paragraph_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_detail_info_paragraph')" @input="handleInput($event.target.value, language, 'paypal_detail_info_paragraph')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_fee_receiving_text_${activeLanguageId}`">PayPal Fee Receiving Text</label>
+                                                </div>
+                                                <textarea :name="`paypal_fee_receiving_text_${activeLanguageId}`" :id="`paypal_fee_receiving_text_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_fee_receiving_text')" @input="handleInput($event.target.value, language, 'paypal_fee_receiving_text')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_fee_example_text_${activeLanguageId}`">PayPal Fee Example Text</label>
+                                                </div>
+                                                <textarea :name="`paypal_fee_example_text_${activeLanguageId}`" :id="`paypal_fee_example_text_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_fee_example_text')" @input="handleInput($event.target.value, language, 'paypal_fee_example_text')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`refund_footer_paragraph_${activeLanguageId}`">Refund Footer Paragraph</label>
+                                                </div>
+                                                <textarea :name="`refund_footer_paragraph_${activeLanguageId}`" :id="`refund_footer_paragraph_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('refund_footer_paragraph')" @input="handleInput($event.target.value, language, 'refund_footer_paragraph')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_label_${activeLanguageId}`">Interac Autodeposit Label</label>
+                                                </div>
+                                                <textarea :name="`interac_autodeposit_label_${activeLanguageId}`" :id="`interac_autodeposit_label_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_autodeposit_label')" @input="handleInput($event.target.value, language, 'interac_autodeposit_label')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_tooltip_${activeLanguageId}`">Interac Autodeposit Tooltip</label>
+                                                </div>
+                                                <textarea :name="`interac_autodeposit_tooltip_${activeLanguageId}`" :id="`interac_autodeposit_tooltip_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_autodeposit_tooltip')" @input="handleInput($event.target.value, language, 'interac_autodeposit_tooltip')"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_text_before_${activeLanguageId}`">Interac Autodeposit text (before)</label>
+                                                </div>
+                                                <input type="text" :name="`interac_autodeposit_text_before_${activeLanguageId}`" :id="`interac_autodeposit_text_before_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. I have enabled Interac" :value="getCurrentValue('interac_autodeposit_text_before')" @input="handleInput($event.target.value, language, 'interac_autodeposit_text_before')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_highlight_${activeLanguageId}`">Interac Autodeposit highlight word</label>
+                                                </div>
+                                                <input type="text" :name="`interac_autodeposit_highlight_${activeLanguageId}`" :id="`interac_autodeposit_highlight_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Autodeposit" :value="getCurrentValue('interac_autodeposit_highlight')" @input="handleInput($event.target.value, language, 'interac_autodeposit_highlight')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_autodeposit_text_after_${activeLanguageId}`">Interac Autodeposit text (after)</label>
+                                                </div>
+                                                <input type="text" :name="`interac_autodeposit_text_after_${activeLanguageId}`" :id="`interac_autodeposit_text_after_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. for this email address." :value="getCurrentValue('interac_autodeposit_text_after')" @input="handleInput($event.target.value, language, 'interac_autodeposit_text_after')" />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_email_label_${activeLanguageId}`">Interac Email Label</label>
+                                                </div>
+                                                <input type="text" :name="`interac_email_label_${activeLanguageId}`" :id="`interac_email_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_email_label')" @input="handleInput($event.target.value, language, 'interac_email_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_email_confirm_label_${activeLanguageId}`">Interac Email Confirm Label</label>
+                                                </div>
+                                                <input type="text" :name="`interac_email_confirm_label_${activeLanguageId}`" :id="`interac_email_confirm_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_email_confirm_label')" @input="handleInput($event.target.value, language, 'interac_email_confirm_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_email_placeholder_${activeLanguageId}`">Interac Email Placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`interac_email_placeholder_${activeLanguageId}`" :id="`interac_email_placeholder_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_email_placeholder')" @input="handleInput($event.target.value, language, 'interac_email_placeholder')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`interac_email_confirm_placeholder_${activeLanguageId}`">Interac Email Confirm Placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`interac_email_confirm_placeholder_${activeLanguageId}`" :id="`interac_email_confirm_placeholder_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('interac_email_confirm_placeholder')" @input="handleInput($event.target.value, language, 'interac_email_confirm_placeholder')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_email_confirm_label_${activeLanguageId}`">PayPal Email Confirm Label</label>
+                                                </div>
+                                                <input type="text" :name="`paypal_email_confirm_label_${activeLanguageId}`" :id="`paypal_email_confirm_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_email_confirm_label')" @input="handleInput($event.target.value, language, 'paypal_email_confirm_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`paypal_email_confirm_placeholder_${activeLanguageId}`">PayPal Email Confirm Placeholder</label>
+                                                </div>
+                                                <input type="text" :name="`paypal_email_confirm_placeholder_${activeLanguageId}`" :id="`paypal_email_confirm_placeholder_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('paypal_email_confirm_placeholder')" @input="handleInput($event.target.value, language, 'paypal_email_confirm_placeholder')" />
+                                            </div>
+                                        </div>
+
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -2273,6 +2490,32 @@ export default {
                             this.handleInput("", language, "paypal_detail_heading");
                             this.handleInput("", language, "web_bank_transfer_description");
                             this.handleInput("", language, "web_paypal_transfer_description");
+                            this.handleInput("", language, "web_interac_transfer_description");
+                            this.handleInput("", language, "wallet_intro_line1");
+                            this.handleInput("", language, "wallet_intro_line2");
+                            this.handleInput("", language, "interac_detail_heading");
+                            this.handleInput("", language, "interac_autodeposit_info_paragraph");
+                            this.handleInput("", language, "processing_fee_text");
+                            this.handleInput("", language, "save_payout_method_btn");
+                            this.handleInput("", language, "bank_detail_info_paragraph");
+                            this.handleInput("", language, "bank_funds_note");
+                            this.handleInput("", language, "paypal_detail_info_paragraph");
+                            this.handleInput("", language, "paypal_fee_heading");
+                            this.handleInput("", language, "paypal_fee_proximaride_text");
+                            this.handleInput("", language, "paypal_fee_receiving_text");
+                            this.handleInput("", language, "paypal_fee_example_text");
+                            this.handleInput("", language, "refund_footer_paragraph");
+                            this.handleInput("", language, "interac_autodeposit_label");
+                            this.handleInput("", language, "interac_autodeposit_tooltip");
+                            this.handleInput("", language, "interac_autodeposit_text_before");
+                            this.handleInput("", language, "interac_autodeposit_highlight");
+                            this.handleInput("", language, "interac_autodeposit_text_after");
+                            this.handleInput("", language, "interac_email_label");
+                            this.handleInput("", language, "interac_email_confirm_label");
+                            this.handleInput("", language, "interac_email_placeholder");
+                            this.handleInput("", language, "interac_email_confirm_placeholder");
+                            this.handleInput("", language, "paypal_email_confirm_label");
+                            this.handleInput("", language, "paypal_email_confirm_placeholder");
                             this.handleInput("", language, "web_payout_method_label");
                             this.handleInput("", language, "country_code_placeholder");
                             this.handleInput("", language, "web_payout_method_placeholder");
@@ -2360,6 +2603,32 @@ export default {
                                 setting?.language,
                                 "web_paypal_transfer_description"
                             );
+                            this.handleInput(setting?.web_interac_transfer_description, setting?.language, "web_interac_transfer_description");
+                            this.handleInput(setting?.wallet_intro_line1, setting?.language, "wallet_intro_line1");
+                            this.handleInput(setting?.wallet_intro_line2, setting?.language, "wallet_intro_line2");
+                            this.handleInput(setting?.interac_detail_heading, setting?.language, "interac_detail_heading");
+                            this.handleInput(setting?.interac_autodeposit_info_paragraph, setting?.language, "interac_autodeposit_info_paragraph");
+                            this.handleInput(setting?.processing_fee_text, setting?.language, "processing_fee_text");
+                            this.handleInput(setting?.save_payout_method_btn, setting?.language, "save_payout_method_btn");
+                            this.handleInput(setting?.bank_detail_info_paragraph, setting?.language, "bank_detail_info_paragraph");
+                            this.handleInput(setting?.bank_funds_note, setting?.language, "bank_funds_note");
+                            this.handleInput(setting?.paypal_detail_info_paragraph, setting?.language, "paypal_detail_info_paragraph");
+                            this.handleInput(setting?.paypal_fee_heading, setting?.language, "paypal_fee_heading");
+                            this.handleInput(setting?.paypal_fee_proximaride_text, setting?.language, "paypal_fee_proximaride_text");
+                            this.handleInput(setting?.paypal_fee_receiving_text, setting?.language, "paypal_fee_receiving_text");
+                            this.handleInput(setting?.paypal_fee_example_text, setting?.language, "paypal_fee_example_text");
+                            this.handleInput(setting?.refund_footer_paragraph, setting?.language, "refund_footer_paragraph");
+                            this.handleInput(setting?.interac_autodeposit_label, setting?.language, "interac_autodeposit_label");
+                            this.handleInput(setting?.interac_autodeposit_tooltip, setting?.language, "interac_autodeposit_tooltip");
+                            this.handleInput(setting?.interac_autodeposit_text_before, setting?.language, "interac_autodeposit_text_before");
+                            this.handleInput(setting?.interac_autodeposit_highlight, setting?.language, "interac_autodeposit_highlight");
+                            this.handleInput(setting?.interac_autodeposit_text_after, setting?.language, "interac_autodeposit_text_after");
+                            this.handleInput(setting?.interac_email_label, setting?.language, "interac_email_label");
+                            this.handleInput(setting?.interac_email_confirm_label, setting?.language, "interac_email_confirm_label");
+                            this.handleInput(setting?.interac_email_placeholder, setting?.language, "interac_email_placeholder");
+                            this.handleInput(setting?.interac_email_confirm_placeholder, setting?.language, "interac_email_confirm_placeholder");
+                            this.handleInput(setting?.paypal_email_confirm_label, setting?.language, "paypal_email_confirm_label");
+                            this.handleInput(setting?.paypal_email_confirm_placeholder, setting?.language, "paypal_email_confirm_placeholder");
 
                             this.handleInput(
                                 setting?.country_code_placeholder,

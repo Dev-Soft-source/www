@@ -56,10 +56,10 @@
         
         <div class="mt-4 mb-6">
             <p class="text-base md:text-lg mb-3">
-                Your <strong>Ride Contributions</strong> will be available in <strong>"My Wallet"</strong> 48 hours after the ride is completed.
+                {!! $payoutOptionPage->wallet_intro_line1 ?? 'Your <strong>Ride Contributions</strong> will be available in <strong>"My Wallet"</strong> 48 hours after the ride is completed.' !!}
             </p>
             <p class="text-base md:text-lg">
-                You can then request a payout to your default method below.
+                {{ $payoutOptionPage->wallet_intro_line2 ?? "You can then request a payout to your default method below." }}
             </p>
         </div>
 
@@ -80,7 +80,7 @@
                             <input type="radio" id="interac" name="payout_method" value="interac"
                                 {{ old('payout_method', 'interac') == 'interac' ? 'checked' : '' }} class="hidden peer">
                             <label for="interac" id="interac_label" class="text-2xl font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block border-gray-100 border leading-normal text-white bg-blue-600 cursor-pointer">
-                                Interac e-Transfer
+                                {{ $payoutOptionPage->web_interac_transfer_description ?? "Interac e-Transfer" }}
                             </label>
                         </li>
                         <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
@@ -111,28 +111,28 @@
             <div id="interac_transfer_fields" style="display: {{ old('payout_method', 'interac') == 'interac' ? 'block' : 'none' }};" class="pt-5">
             @endif
                 <div class="">
-                    <h2>Interac e-Transfer Details:</h2>
+                    <h2>{{ $payoutOptionPage->interac_detail_heading ?? "Interac e-Transfer Details:" }}</h2>
                 </div>
 
                 <!-- Info text at top of tab -->
                 <div class="mt-4 mb-4">
                     <p class="text-base md:text-lg text-gray-700">
-                        Please ensure the email above matches the one registered for Autodeposit at your bank. This ensures your funds are deposited instantly without needing a security question.
+                        {{ $payoutOptionPage->interac_autodeposit_info_paragraph ?? "Please ensure the email above matches the one registered for Autodeposit at your bank. This ensures your funds are deposited instantly without needing a security question." }}
                     </p>
                 </div>
 
                 <p class="text-base md:text-lg font-medium text-red-500">{{ $payoutOptionPage->mobile_indicate_required_field_label ?? "(*) Indicates required fields"}} </p>
                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="interac_email">Email Address<span class="text-red-500">*</span></label>
-                        <input type="email" id="interac_email" name="interac_email" value="{{ old('interac_email', $userBankDetail->interac_email ?? '') }}" {{ optional($userBankDetail)->interac_email ? 'readonly' : '' }} placeholder=" e.g. name@email.com " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="interac_email">{{ $payoutOptionPage->interac_email_label ?? "Email Address" }}<span class="text-red-500">*</span></label>
+                        <input type="email" id="interac_email" name="interac_email" value="{{ old('interac_email', $userBankDetail->interac_email ?? '') }}" {{ optional($userBankDetail)->interac_email ? 'readonly' : '' }} placeholder="{{ $payoutOptionPage->interac_email_placeholder ?? "e.g. name@email.com" }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('interac_email')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div> 
                         @enderror
                     </div>
                     <div>
-                        <label for="interac_email_confirm">Confirm Email Address<span class="text-red-500">*</span></label>
-                        <input type="email" id="interac_email_confirm" name="interac_email_confirm" value="{{ old('interac_email_confirm', '') }}" placeholder=" Re-enter your email address " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="interac_email_confirm">{{ $payoutOptionPage->interac_email_confirm_label ?? "Confirm Email Address" }}<span class="text-red-500">*</span></label>
+                        <input type="email" id="interac_email_confirm" name="interac_email_confirm" value="{{ old('interac_email_confirm', '') }}" placeholder="{{ $payoutOptionPage->interac_email_confirm_placeholder ?? "Re-enter your email address" }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('interac_email_confirm')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
@@ -141,22 +141,26 @@
                         <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
                             <input id="interac_autodeposit" name="interac_autodeposit" type="checkbox" value="1" class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                             <label for="interac_autodeposit" class="block text-gray-900">
-                                I have enabled Interac 
-                                <span class="inline-flex items-center relative sups">
-                                    Autodeposit
-                                    <span data-tippy-content="Autodeposit is a bank setting that lets you receive funds instantly without a security question. You can enable it in your bank's mobile app under 'Interac e-Transfer settings'.">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-500 cursor-help hover:text-blue-700 ml-1 autodeposit-info-icon">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                        </svg>
+                                @if(!empty($payoutOptionPage->interac_autodeposit_label))
+                                    {!! $payoutOptionPage->interac_autodeposit_label !!}
+                                @else
+                                    <span>{{ $payoutOptionPage->interac_autodeposit_text_before ?? "I have enabled Interac" }}</span>
+                                    <span class="inline-flex items-center relative sups">
+                                        <span>{{ $payoutOptionPage->interac_autodeposit_highlight ?? "Autodeposit" }}</span>
+                                        <span data-tippy-content="{{ $payoutOptionPage->interac_autodeposit_tooltip ?? "Autodeposit is a bank setting that lets you receive funds instantly without a security question. You can enable it in your bank's mobile app under 'Interac e-Transfer settings'." }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-blue-500 cursor-help hover:text-blue-700 ml-1 autodeposit-info-icon">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                            </svg>
+                                        </span>
                                     </span>
-                                </span>
-                                for this email address.
+                                    <span>{{ $payoutOptionPage->interac_autodeposit_text_after ?? "for this email address." }}</span>
+                                @endif
                             </label>
                         </div>
                     </div>
                     <div class="md:col-span-2">
                         <p class="text-base md:text-lg italic text-gray-600 mb-4">
-                            Processing Fee: $2.00 CAD per withdrawal.
+                            {{ $payoutOptionPage->processing_fee_text ?? "Processing Fee: $2.00 CAD per withdrawal." }}
                         </p>
                     </div>
                     <div class="md:col-span-2">
@@ -167,7 +171,7 @@
                     </div>
                     <div class="md:col-span-2 mt-4" id="interac_button_container">
                         <button type="submit" id="save_interac_btn" class="button-exp-fill opacity-50 cursor-not-allowed" disabled>
-                            Save Payout Method
+                            {{ $payoutOptionPage->save_payout_method_btn ?? "Save Payout Method" }}
                         </button>
                     </div>
                 </div>
@@ -185,7 +189,7 @@
                 <!-- Info text at top of tab -->
                 <div class="mt-4 mb-4">
                     <p class="text-base md:text-lg text-gray-700">
-                        Enter your bank details to receive funds via Direct Deposit (EFT)
+                        {{ $payoutOptionPage->bank_detail_info_paragraph ?? "Enter your bank details to receive funds via Direct Deposit (EFT)" }}
                     </p>
                 </div>
 
@@ -193,32 +197,32 @@
                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
 
                     <div>
-                        <label for="account_holder_name">Account Holder Name<span class="text-red-500">*</span></label>
-                        <input type="text" id="account_holder_name" name="account_holder_name" placeholder="As it appears on your bank statement" value="{{ old('account_holder_name', $userBankDetail->bank_title ?? '') }}" {{ optional($userBankDetail)->bank_title ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="account_holder_name">{{ $payoutOptionPage->bank_title_label ?? "Account Holder Name" }}<span class="text-red-500">*</span></label>
+                        <input type="text" id="account_holder_name" name="account_holder_name" placeholder="{{ $payoutOptionPage->bank_title_placeholder ?? "As it appears on your bank statement" }}" value="{{ old('account_holder_name', $userBankDetail->bank_title ?? '') }}" {{ optional($userBankDetail)->bank_title ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('account_holder_name')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="transit_number">Transit Number (5 digits)<span class="text-red-500">*</span></label>
-                        <input type="text" id="transit_number" name="branch_number" placeholder="The branch code" value="{{ old('branch_number', $userBankDetail->branch_number ?? '') }}" {{ optional($userBankDetail)->branch_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="transit_number">{{ $payoutOptionPage->branch_number_label ?? "Transit Number (5 digits)" }}<span class="text-red-500">*</span></label>
+                        <input type="text" id="transit_number" name="branch_number" placeholder="{{ $payoutOptionPage->branch_number_placeholder ?? "The branch code" }}" value="{{ old('branch_number', $userBankDetail->branch_number ?? '') }}" {{ optional($userBankDetail)->branch_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('branch_number')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="institution_number">Institution Number (3 digits)<span class="text-red-500">*</span></label>
-                        <input type="text" id="institution_number" name="institution_number" placeholder="The bank code (e.g., 004 for TD, 001 for BMO)" value="{{ old('institution_number', $userBankDetail->institution_number ?? '') }}" {{ optional($userBankDetail)->institution_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="institution_number">{{ $payoutOptionPage->institution_number_label ?? "Institution Number (3 digits)" }}<span class="text-red-500">*</span></label>
+                        <input type="text" id="institution_number" name="institution_number" placeholder="{{ $payoutOptionPage->institution_number_placeholder ?? "The bank code (e.g., 004 for TD, 001 for BMO)" }}" value="{{ old('institution_number', $userBankDetail->institution_number ?? '') }}" {{ optional($userBankDetail)->institution_number ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('institution_number')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="account_number">Account Number<span class="text-red-500">*</span></label>
-                        <input type="text" id="account_number" name="account_holder_number" placeholder="The unique account string (7–12 digits)" value="{{ old('account_holder_number', $userBankDetail->acc_no ?? '') }}" {{ optional($userBankDetail)->acc_no ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="account_number">{{ $payoutOptionPage->account_number_label ?? "Account Number" }}<span class="text-red-500">*</span></label>
+                        <input type="text" id="account_number" name="account_holder_number" placeholder="{{ $payoutOptionPage->account_number_placeholder ?? "The unique account string (7–12 digits)" }}" value="{{ old('account_holder_number', $userBankDetail->acc_no ?? '') }}" {{ optional($userBankDetail)->acc_no ? 'readonly' : '' }} class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('account_holder_number')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
@@ -226,13 +230,13 @@
 
                     <div class="md:col-span-2">
                         <p class="text-base md:text-lg italic text-gray-600 mb-4">
-                            Processing Fee: $2.0 CAD per withdrawal.
+                            {{ $payoutOptionPage->processing_fee_text ?? "Processing Fee: $2.00 CAD per withdrawal." }}
                         </p>
                     </div>
 
                     <div class="md:col-span-2">
                         <p class="text-base md:text-lg text-gray-700 mb-4">
-                            Note: Funds typically arrive in 1–3 business days.
+                            {{ $payoutOptionPage->bank_funds_note ?? "Note: Funds typically arrive in 1–3 business days." }}
                         </p>
                     </div>
 
@@ -245,7 +249,7 @@
 
                     <div class="md:col-span-2 mt-4" id="bank_button_container">
                         <button type="submit" id="save_bank_btn" class="button-exp-fill opacity-50 cursor-not-allowed" disabled>
-                            Save Payout Method
+                            {{ $payoutOptionPage->save_payout_method_btn ?? "Save Payout Method" }}
                         </button>
                     </div>
                 </div>
@@ -263,7 +267,7 @@
                 <!-- Info text at top of tab -->
                 <div class="mt-4 mb-4">
                     <p class="text-base md:text-lg text-gray-700">
-                        Enter the email address associated with your PayPal account.
+                        {{ $payoutOptionPage->paypal_detail_info_paragraph ?? "Enter the email address associated with your PayPal account." }}
                     </p>
                 </div>
 
@@ -271,27 +275,27 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="paypal_email">PayPal Email Address<span class="text-red-500">*</span></label>
-                        <input type="email" id="paypal_email" name="paypal_email" value="{{ old('paypal_email', $userBankDetail->paypal_email ?? '') }}"  placeholder=" e.g. name@email.com " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="paypal_email">{{ $payoutOptionPage->paypal_email_label ?? "PayPal Email Address" }}<span class="text-red-500">*</span></label>
+                        <input type="email" id="paypal_email" name="paypal_email" value="{{ old('paypal_email', $userBankDetail->paypal_email ?? '') }}" placeholder="{{ $payoutOptionPage->paypal_email_placeholder ?? "e.g. name@email.com" }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('paypal_email')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div>
-                        <label for="paypal_email_confirm">Confirm PayPal Email<span class="text-red-500">*</span></label>
-                        <input type="email" id="paypal_email_confirm" name="paypal_email_confirm" value="{{ old('paypal_email_confirm', '') }}" placeholder=" Re-enter your PayPal email " class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                        <label for="paypal_email_confirm">{{ $payoutOptionPage->paypal_email_confirm_label ?? "Confirm PayPal Email" }}<span class="text-red-500">*</span></label>
+                        <input type="email" id="paypal_email_confirm" name="paypal_email_confirm" value="{{ old('paypal_email_confirm', '') }}" placeholder="{{ $payoutOptionPage->paypal_email_confirm_placeholder ?? "Re-enter your PayPal email" }}" class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                         @error('paypal_email_confirm')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="md:col-span-2">
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Important Fee Information:</h3>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">{{ $payoutOptionPage->paypal_fee_heading ?? "Important Fee Information:" }}</h3>
                             <div class="space-y-2 text-base text-gray-700">
-                                <p><strong>ProximaRide Fee:</strong> $2.00</p>
-                                <p><strong>PayPal Receiving Fee:</strong> PayPal typically charges a fee (approx. 2.9% + $0.30) to receive funds.</p>
+                                <p>{!! $payoutOptionPage->paypal_fee_proximaride_text ?? "<strong>ProximaRide Fee:</strong> $2.00" !!}</p>
+                                <p>{!! $payoutOptionPage->paypal_fee_receiving_text ?? "<strong>PayPal Receiving Fee:</strong> PayPal typically charges a fee (approx. 2.9% + $0.30) to receive funds." !!}</p>
                                 <p class="mt-3 italic text-gray-600">
-                                    <strong>Example:</strong> If you withdraw $100, ProximaRide sends $98.00. After PayPal fees, you will see approximately $94.85 in your wallet.
+                                    {!! $payoutOptionPage->paypal_fee_example_text ?? "<strong>Example:</strong> If you withdraw $100, ProximaRide sends $98.00. After PayPal fees, you will see approximately $94.85 in your wallet." !!}
                                 </p>
                             </div>
                         </div>
@@ -304,7 +308,7 @@
                     </div>
                     <div class="md:col-span-2 mt-4" id="paypal_button_container">
                         <button type="submit" id="save_paypal_btn" class="button-exp-fill opacity-50 cursor-not-allowed" disabled>
-                            Save Payout Method
+                            {{ $payoutOptionPage->save_payout_method_btn ?? "Save Payout Method" }}
                         </button>
                     </div>
                 </div>
@@ -322,7 +326,7 @@
             
             <div class="mt-6 pt-4 border-t border-gray-200">
                 <p class="text-sm md:text-base text-gray-600 text-center">
-                    <strong>Expecting a refund?</strong> Refunds for passengers are credited to your wallet or original payment method. Please ensure your payout details are accurate to avoid delays with manual withdrawals.
+                    {!! $payoutOptionPage->refund_footer_paragraph ?? '<strong>Expecting a refund?</strong> Refunds for passengers are credited to your wallet or original payment method. Please ensure your payout details are accurate to avoid delays with manual withdrawals.' !!}
                 </p>
             </div>
         </form>
