@@ -362,7 +362,7 @@
     @if($cards->count() == 0)
     <div class="flex justify-center items-center p-4">
         <a href="{{ route('my_cards', ['lang' => $selectedLanguage->abbreviation, 'redirectUrl' => url()->full()]) }}"
-            class="button-exp-fill">{{ $paymentSettingDetail->add_new_card_button_text ?? 'Add Payment Method' }}</a>
+            class="button-exp-sky-fill">{{ $paymentSettingDetail->add_new_card_button_text ?? 'Add Payment Method' }}</a>
     </div>
     @endif
 </div>

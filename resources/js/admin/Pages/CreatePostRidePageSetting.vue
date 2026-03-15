@@ -3095,6 +3095,14 @@
                                             <input type="text" :name="`phone_required_modal_phone_btn_${activeLanguageId}`" :id="`phone_required_modal_phone_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. My Phone Number" :value="getCurrentValue('phone_required_modal_phone_btn')" @input="handleInput($event.target.value, language, 'phone_required_modal_phone_btn')" /></div>
                                         </div>
                                         <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`alert_need_government_photo_label_${activeLanguageId}`">Alert need government photo label</label></div>
+                                            <input type="text" :name="`alert_need_government_photo_label_${activeLanguageId}`" :id="`alert_need_government_photo_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Government Photo ID required" :value="getCurrentValue('alert_need_government_photo_label')" @input="handleInput($event.target.value, language, 'alert_need_government_photo_label')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`alert_need_driver_license_label_${activeLanguageId}`">Alert need driver license label</label></div>
+                                            <input type="text" :name="`alert_need_driver_license_label_${activeLanguageId}`" :id="`alert_need_driver_license_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Driver's license required" :value="getCurrentValue('alert_need_driver_license_label')" @input="handleInput($event.target.value, language, 'alert_need_driver_license_label')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label :for="`mobile_agree_terms_label_${activeLanguageId}`">Agree
@@ -3960,6 +3968,8 @@ export default {
                             this.handleInput("", language, "phone_required_modal_body_after");
                             this.handleInput("", language, "phone_required_modal_close_btn");
                             this.handleInput("", language, "phone_required_modal_phone_btn");
+                            this.handleInput("", language, "alert_need_government_photo_label");
+                            this.handleInput("", language, "alert_need_driver_license_label");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4593,6 +4603,8 @@ export default {
                             this.handleInput(setting?.phone_required_modal_body_after, setting?.language, "phone_required_modal_body_after");
                             this.handleInput(setting?.phone_required_modal_close_btn, setting?.language, "phone_required_modal_close_btn");
                             this.handleInput(setting?.phone_required_modal_phone_btn, setting?.language, "phone_required_modal_phone_btn");
+                            this.handleInput(setting?.alert_need_government_photo_label, setting?.language, "alert_need_government_photo_label");
+                            this.handleInput(setting?.alert_need_driver_license_label, setting?.language, "alert_need_driver_license_label");
                             this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,

@@ -11,17 +11,37 @@
                         </svg>
                     </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <h3 class="font-FuturaMdCnBT text-gray-700 mb-4" id="driver-license-modal-title">Action Required</h3>
-                        <p class="text-gray-800 text-base text-left">To post a ride, you must have your driver's license on file. Upload it in Dashboard → Edit Profile.</p>
+                        <div class="sm:flex sm:items-start justify-center">
+                            <div class="text-3xl text-center font-FuturaMdCnBT text-black">
+                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" stroke="#ff0000">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                        stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path d="M12 10V13" stroke="#db0000" stroke-width="2"
+                                            stroke-linecap="round"></path>
+                                        <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2"
+                                            stroke-linecap="round"></path>
+                                        <path
+                                            d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z"
+                                            stroke="#db0000" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-gray-800 text-base text-center">{{ $postRidePage->alert_need_driver_license_label ?? "To post a ride, you must have your driver's license on file. Upload it in Dashboard → Edit Profile." }}</p>
                         <div class="mt-6 flex flex-wrap gap-2 justify-center">
-                            <button type="button" onclick="closeDriverLicenseModal()" class="button-exp-fill font-FuturaMdCnBT">{{ $successMessage->cancel_button ?? 'Close' }}</button>
-                            <a href="{{ route('driver.verify', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="button-exp-fill bg-primary hover:bg-primary font-FuturaMdCnBT no-underline">Edit Profile</a>
+                            <button type="button" onclick="closeDriverLicenseModal()" class="button-exp-fill">{{ $siteText['close_btn_text'] ?? 'Close' }}</button>
+                            <a href="{{ route('driver.verify', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}" class="button-exp-sky-fill">{{ $siteText['edit_profile_btn_text'] ?? 'Edit Profile' }}</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     {{-- Modal: Phone number must be verified to post a ride --}}
     <div class="relative z-50 hidden" id="phone_required_modal" aria-labelledby="phone-required-modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closePhoneRequiredModal()"></div>
