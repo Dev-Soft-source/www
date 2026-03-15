@@ -9,16 +9,16 @@ return new class extends Migration
     public function up()
     {
         Schema::table('post_ride_page_setting_detail', function (Blueprint $table) {
-            $table->text('price_error_paragraph_1')->nullable()->after('agree_term_error');
-            $table->text('price_error_paragraph_2')->nullable()->after('price_error_paragraph_1');
-            $table->text('price_error_paragraph_3')->nullable()->after('price_error_paragraph_2');
+            $table->text('carpool_regulation_limit_message')->nullable()->after('agree_term_error');
+            $table->text('max_price_per_seat_message')->nullable()->after('carpool_regulation_limit_message');
+            $table->text('non_commercial_carpool_requirement_message')->nullable()->after('max_price_per_seat_message');
         });
     }
 
     public function down()
     {
         Schema::table('post_ride_page_setting_detail', function (Blueprint $table) {
-            $table->dropColumn(['price_error_paragraph_1', 'price_error_paragraph_2', 'price_error_paragraph_3']);
+            $table->dropColumn(['carpool_regulation_limit_message', 'max_price_per_seat_message', 'non_commercial_carpool_requirement_message']);
         });
     }
 };

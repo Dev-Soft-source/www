@@ -2842,84 +2842,84 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_error_paragraph_1_${activeLanguageId}`">Price error modal paragraph 1</label>
+                                                    <label :for="`carpool_regulation_limit_message_${activeLanguageId}`">Carpool Regulation Limit Message</label>
                                                 </div>
-                                                <textarea :name="`price_error_paragraph_1_${activeLanguageId}`"
-                                                    :id="`price_error_paragraph_1_${activeLanguageId}`"
+                                                <textarea :name="`carpool_regulation_limit_message_${activeLanguageId}`"
+                                                    :id="`carpool_regulation_limit_message_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" " :value="getCurrentValue(
-                                                        'price_error_paragraph_1'
+                                                        'carpool_regulation_limit_message'
                                                     )
                                                         " @input="
                                                             handleInput(
                                                                 $event.target.value,
                                                                 language,
-                                                                'price_error_paragraph_1'
+                                                                'carpool_regulation_limit_message'
                                                             )
                                                             " rows="3"></textarea>
                                             </div>
                                             <p class="mt-2 text-sm text-red-400" v-if="
                                                 validationErros.has(
-                                                    `price_error_paragraph_1.price_error_paragraph_1_${activeLanguageId}`
+                                                    `carpool_regulation_limit_message.carpool_regulation_limit_message_${activeLanguageId}`
                                                 )
                                             " v-text="validationErros.get(
-                                                `price_error_paragraph_1.price_error_paragraph_1_${activeLanguageId}`
+                                                `carpool_regulation_limit_message.carpool_regulation_limit_message_${activeLanguageId}`
                                             )
                                                 "></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_error_paragraph_2_${activeLanguageId}`">Price error modal paragraph 2 (use :max_per_seat for the amount)</label>
+                                                    <label :for="`max_price_per_seat_message_${activeLanguageId}`">Maximum Price Per Seat Message (use :max_per_seat for the amount)</label>
                                                 </div>
-                                                <textarea :name="`price_error_paragraph_2_${activeLanguageId}`"
-                                                    :id="`price_error_paragraph_2_${activeLanguageId}`"
+                                                <textarea :name="`max_price_per_seat_message_${activeLanguageId}`"
+                                                    :id="`max_price_per_seat_message_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" " :value="getCurrentValue(
-                                                        'price_error_paragraph_2'
+                                                        'max_price_per_seat_message'
                                                     )
                                                         " @input="
                                                             handleInput(
                                                                 $event.target.value,
                                                                 language,
-                                                                'price_error_paragraph_2'
+                                                                'max_price_per_seat_message'
                                                             )
                                                             " rows="2"></textarea>
                                             </div>
                                             <p class="mt-2 text-sm text-red-400" v-if="
                                                 validationErros.has(
-                                                    `price_error_paragraph_2.price_error_paragraph_2_${activeLanguageId}`
+                                                    `max_price_per_seat_message.max_price_per_seat_message_${activeLanguageId}`
                                                 )
                                             " v-text="validationErros.get(
-                                                `price_error_paragraph_2.price_error_paragraph_2_${activeLanguageId}`
+                                                `max_price_per_seat_message.max_price_per_seat_message_${activeLanguageId}`
                                             )
                                                 "></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_error_paragraph_3_${activeLanguageId}`">Price error modal paragraph 3</label>
+                                                    <label :for="`non_commercial_carpool_requirement_message_${activeLanguageId}`">Non-Commercial Carpool Requirement Notice</label>
                                                 </div>
-                                                <textarea :name="`price_error_paragraph_3_${activeLanguageId}`"
-                                                    :id="`price_error_paragraph_3_${activeLanguageId}`"
+                                                <textarea :name="`non_commercial_carpool_requirement_message_${activeLanguageId}`"
+                                                    :id="`non_commercial_carpool_requirement_message_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" " :value="getCurrentValue(
-                                                        'price_error_paragraph_3'
+                                                        'non_commercial_carpool_requirement_message'
                                                     )
                                                         " @input="
                                                             handleInput(
                                                                 $event.target.value,
                                                                 language,
-                                                                'price_error_paragraph_3'
+                                                                'non_commercial_carpool_requirement_message'
                                                             )
                                                             " rows="3"></textarea>
                                             </div>
                                             <p class="mt-2 text-sm text-red-400" v-if="
                                                 validationErros.has(
-                                                    `price_error_paragraph_3.price_error_paragraph_3_${activeLanguageId}`
+                                                    `non_commercial_carpool_requirement_message.non_commercial_carpool_requirement_message_${activeLanguageId}`
                                                 )
                                             " v-text="validationErros.get(
-                                                `price_error_paragraph_3.price_error_paragraph_3_${activeLanguageId}`
+                                                `non_commercial_carpool_requirement_message.non_commercial_carpool_requirement_message_${activeLanguageId}`
                                             )
                                                 "></p>
                                         </div>
@@ -3022,17 +3022,17 @@
                                         <div class="relative z-0 w-full group md:col-span-2">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_warning_paragraph_1_${activeLanguageId}`">Price warning paragraph 1</label>
+                                                    <label :for="`price_above_reimbursement_warning_${activeLanguageId}`">Price Above Reimbursement Rate Warning</label>
                                                 </div>
-                                                <textarea :name="`price_warning_paragraph_1_${activeLanguageId}`" :id="`price_warning_paragraph_1_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_warning_paragraph_1')" @input="handleInput($event.target.value, language, 'price_warning_paragraph_1')"></textarea>
+                                                <textarea :name="`price_above_reimbursement_warning_${activeLanguageId}`" :id="`price_above_reimbursement_warning_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_above_reimbursement_warning')" @input="handleInput($event.target.value, language, 'price_above_reimbursement_warning')"></textarea>
                                             </div>
                                         </div>
                                         <div class="relative z-0 w-full group md:col-span-2">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_warning_paragraph_2_${activeLanguageId}`">Price warning paragraph 2</label>
+                                                    <label :for="`price_reduction_suggestion_message_${activeLanguageId}`">Price Reduction Suggestion Message</label>
                                                 </div>
-                                                <textarea :name="`price_warning_paragraph_2_${activeLanguageId}`" :id="`price_warning_paragraph_2_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_warning_paragraph_2')" @input="handleInput($event.target.value, language, 'price_warning_paragraph_2')"></textarea>
+                                                <textarea :name="`price_reduction_suggestion_message_${activeLanguageId}`" :id="`price_reduction_suggestion_message_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_reduction_suggestion_message')" @input="handleInput($event.target.value, language, 'price_reduction_suggestion_message')"></textarea>
                                             </div>
                                         </div>
                                         <div class="relative z-0 w-full group">
@@ -3946,9 +3946,9 @@ export default {
                             // this.handleInput("", language, "extra_care_ride_disclaimers_description");
                             this.handleInput("", language, "agree_terms_label");
                             this.handleInput("", language, "agree_term_error");
-                            this.handleInput("", language, "price_error_paragraph_1");
-                            this.handleInput("", language, "price_error_paragraph_2");
-                            this.handleInput("", language, "price_error_paragraph_3");
+                            this.handleInput("", language, "carpool_regulation_limit_message");
+                            this.handleInput("", language, "max_price_per_seat_message");
+                            this.handleInput("", language, "non_commercial_carpool_requirement_message");
                             this.handleInput("", language, "price_error_heading");
                             this.handleInput("", language, "price_error_adjust_btn_label");
                             this.handleInput("", language, "delete_stop_modal_no_btn");
@@ -3956,8 +3956,8 @@ export default {
                             this.handleInput("", language, "price_warning_heading");
                             this.handleInput("", language, "price_warning_adjust_btn_label");
                             this.handleInput("", language, "price_warning_keep_current_btn_label");
-                            this.handleInput("", language, "price_warning_paragraph_1");
-                            this.handleInput("", language, "price_warning_paragraph_2");
+                            this.handleInput("", language, "price_above_reimbursement_warning");
+                            this.handleInput("", language, "price_reduction_suggestion_message");
                             this.handleInput("", language, "seats_warning_modal_heading");
                             this.handleInput("", language, "seats_warning_modal_paragraph");
                             this.handleInput("", language, "seats_warning_modal_got_it_btn");
@@ -4562,19 +4562,19 @@ export default {
                                 "agree_term_error"
                             );
                             this.handleInput(
-                                setting?.price_error_paragraph_1,
+                                setting?.carpool_regulation_limit_message,
                                 setting?.language,
-                                "price_error_paragraph_1"
+                                "carpool_regulation_limit_message"
                             );
                             this.handleInput(
-                                setting?.price_error_paragraph_2,
+                                setting?.max_price_per_seat_message,
                                 setting?.language,
-                                "price_error_paragraph_2"
+                                "max_price_per_seat_message"
                             );
                             this.handleInput(
-                                setting?.price_error_paragraph_3,
+                                setting?.non_commercial_carpool_requirement_message,
                                 setting?.language,
-                                "price_error_paragraph_3"
+                                "non_commercial_carpool_requirement_message"
                             );
                             this.handleInput(
                                 setting?.price_error_heading,
@@ -4591,8 +4591,8 @@ export default {
                             this.handleInput(setting?.price_warning_heading, setting?.language, "price_warning_heading");
                             this.handleInput(setting?.price_warning_adjust_btn_label, setting?.language, "price_warning_adjust_btn_label");
                             this.handleInput(setting?.price_warning_keep_current_btn_label, setting?.language, "price_warning_keep_current_btn_label");
-                            this.handleInput(setting?.price_warning_paragraph_1, setting?.language, "price_warning_paragraph_1");
-                            this.handleInput(setting?.price_warning_paragraph_2, setting?.language, "price_warning_paragraph_2");
+                            this.handleInput(setting?.price_above_reimbursement_warning, setting?.language, "price_above_reimbursement_warning");
+                            this.handleInput(setting?.price_reduction_suggestion_message, setting?.language, "price_reduction_suggestion_message");
                             this.handleInput(setting?.seats_warning_modal_heading, setting?.language, "seats_warning_modal_heading");
                             this.handleInput(setting?.seats_warning_modal_paragraph, setting?.language, "seats_warning_modal_paragraph");
                             this.handleInput(setting?.seats_warning_modal_got_it_btn, setting?.language, "seats_warning_modal_got_it_btn");
@@ -5171,13 +5171,13 @@ export default {
                     `agree_term_error.agree_term_error_${language.id}`
                 ) ||
                 validationErros.has(
-                    `price_error_paragraph_1.price_error_paragraph_1_${language.id}`
+                    `carpool_regulation_limit_message.carpool_regulation_limit_message_${language.id}`
                 ) ||
                 validationErros.has(
-                    `price_error_paragraph_2.price_error_paragraph_2_${language.id}`
+                    `max_price_per_seat_message.max_price_per_seat_message_${language.id}`
                 ) ||
                 validationErros.has(
-                    `price_error_paragraph_3.price_error_paragraph_3_${language.id}`
+                    `non_commercial_carpool_requirement_message.non_commercial_carpool_requirement_message_${language.id}`
                 ) ||
                 validationErros.has(
                     `price_error_heading.price_error_heading_${language.id}`
