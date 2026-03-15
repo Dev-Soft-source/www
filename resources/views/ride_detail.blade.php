@@ -223,7 +223,7 @@
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">
                                         @isset($rideDetailPage->chat_error_message)
-                                            {{ $rideDetailPage->chat_error_message }} {{ $ride->driver?->first_name }}
+                                            {{ $rideDetailPage->chat_error_message }}
                                         @endisset
                                     </p>
                                 </div>
@@ -547,16 +547,26 @@
                                                         </p>
                                                         <ul class="list-disc list-inside space-y-3 ml-6 text-gray-900 text-base md:text-lg">
                                                             @foreach ($stops as $stop)
-                                                                <li class="flex flex-row items-center items-baseline">
+                                                                <li class="flex flex-row items-center items-baseline flex-wrap gap-x-2">
                                                                     <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                         {{ $stop['name'] }}.
                                                                     </div>
+                                                                    @if (!empty($stop['date']) || !empty($stop['time']))
+                                                                        <p class="text-sm mt-1 md:mt-0">
+                                                                            @if (!empty($stop['date']))
+                                                                                {{ $rideDetailPage->stop_date_label ?? 'Date' }}: {{ \Carbon\Carbon::parse($stop['date'])->format('F d, Y') }}
+                                                                            @endif
+                                                                            @if (!empty($stop['time']))
+                                                                                {{ $rideDetailPage->at_label ?? 'At' }} {{ \Carbon\Carbon::parse($stop['time'])->format('g:i A') }}
+                                                                            @endif
+                                                                        </p>
+                                                                    @endif
                                                                     @if (!empty($stop['pickup']))
                                                                         <p class="text-sm mt-1 md:mt-0 ml-2">
                                                                             {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
                                                                             {{ $stop['pickup'] }}
                                                                         </p>
-                                                                    @endif 
+                                                                    @endif
                                                                 </li>
                                                             @endforeach
                                                         </ul>

@@ -724,7 +724,7 @@
                                                 }
                                             }
                                         @endphp
-                                        <input type="text" id="dateInput" name="date" value="{{ $dateValue }}"
+                                        <input type="text" id="dateInput" name="date" value="2026-03-16"
                                             class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
                                             placeholder="">
                                     </div>
@@ -756,6 +756,16 @@
                                             $timeValue = old('time');
                                             if (
                                                 $timeValue === null &&
+                                                ($routeType ?? '') !== '' &&
+                                                in_array($routeType ?? '', ['repost', 'copy']) &&
+                                                isset($ride) &&
+                                                $ride &&
+                                                !empty($ride->time)
+                                            ) {
+                                                $timeValue = \Carbon\Carbon::parse($ride->time)->format('H:i');
+                                            }
+                                            if (
+                                                ($timeValue === null || $timeValue === '') &&
                                                 ($routeType ?? '') !== '' &&
                                                 in_array($routeType ?? '', ['repost', 'copy']) &&
                                                 isset($ride) &&
@@ -869,6 +879,15 @@
                                     $stopPickupDropoffForDisplayPost[] = $seg->dropoff ?? '';
                                 }
                             }
+                            // Build stop dates for display (repost/copy or old input)
+                            $stopDatesForDisplayPost = [];
+                            if (null !== old('stop_date') && is_array(old('stop_date'))) {
+                                $stopDatesForDisplayPost = old('stop_date');
+                            } elseif (!empty($chainSegmentsPost)) {
+                                foreach ($chainSegmentsPost as $seg) {
+                                    $stopDatesForDisplayPost[] = $seg->date ? \Carbon\Carbon::parse($seg->date)->format('F d, Y') : '';
+                                }
+                            }
                             // Normalize lengths
                             $realStopsPost = array_values(
                                 array_filter($stopsForDisplayPost, function ($s) {
@@ -881,6 +900,9 @@
                                     count($stopsForDisplayPost),
                                     '',
                                 );
+                            }
+                            if (count($stopDatesForDisplayPost) !== count($stopsForDisplayPost)) {
+                                $stopDatesForDisplayPost = array_pad($stopDatesForDisplayPost, count($stopsForDisplayPost), '');
                             }
                             $hasStopsPost = count($realStopsPost) > 0;
                         @endphp
@@ -917,11 +939,11 @@
                                         @if ($hasStopsPost)
                                             @foreach ($stopsForDisplayPost as $idx => $stopValue)
                                                 @php $renderIndex = $idx + 1; @endphp
-                                                <div class="flex items-center gap-3 stop-row"
+                                                <div class="flex items-center gap-3 stop-row flex-nowrap"
                                                     data-stop-index="{{ $renderIndex }}">
-                                                    <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">
+                                                    <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0 flex-nowrap">
                                                         {{-- 1) Stop city --}}
-                                                        <div class="relative flex-1 min-w-0">
+                                                        <div class="relative flex-1 min-w-0 shrink">
                                                             <div
                                                                 class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                                                 <img src="{{ asset('assets/search-bar-from.png') }}"
@@ -941,14 +963,45 @@
                                                             </div>
                                                         </div>
                                                         {{-- 2) Pick up / drop off (text) --}}
-                                                        <div class="flex-1 min-w-0">
+                                                        <div class="relative flex-1 min-w-0 shrink">
                                                             <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
                                                                 id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1"
                                                                 placeholder="pick up / drop off"
                                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
+                                                            <div class="absolute hidden mt-1 z-10 left-0 top-full"
+                                                                id="stopPickupDropoffError_{{ $renderIndex }}">
+                                                                <div
+                                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        {{-- 3) Time --}}
-                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48">
+                                                        {{-- 3) Date --}}
+                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">
+                                                            <div class="relative">
+                                                                <div
+                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                                                    </svg>
+                                                                </div>
+                                                                <input type="text" name="stop_date[]"
+                                                                    id="stop_date_{{ $renderIndex }}"
+                                                                    value="{{ old('stop_date.' . $idx, $stopDatesForDisplayPost[$idx] ?? '') }}"
+                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                                    placeholder="">
+                                                                <div class="absolute hidden mt-1 z-10 left-0 top-full"
+                                                                    id="stopDateError_{{ $renderIndex }}">
+                                                                    <div
+                                                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {{-- 4) Time --}}
+                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">
                                                             <div class="relative">
                                                                 <div
                                                                     class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
@@ -961,9 +1014,14 @@
                                                                 </div>
                                                                 <input type="text" name="stop_time[]"
                                                                     id="stop_time_{{ $renderIndex }}"
-                                                                    value="{{ old('stop_time.' . $idx) }}"
                                                                     class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
                                                                     placeholder="">
+                                                                <div class="absolute hidden mt-1 z-10 left-0 top-full"
+                                                                    id="stopTimeError_{{ $renderIndex }}">
+                                                                    <div
+                                                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1244,7 +1302,7 @@
                                                 ? $ride->defaultRideDetail[0]->price
                                                 : '';
                                     @endphp
-                                    <input type="number" step="any" name="price" id="priceData0" placeholder=""
+                                    <input type="number" step="any" name="price" autocomplete="off" id="priceData0"  placeholder=""
                                         value="{{ old('price', $defaultPrice) }}"
                                         class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
                                 </div>
@@ -1278,7 +1336,15 @@
                                     <input type="number" step="any" id="priceData0DynamicInput" placeholder=""
                                         value="{{ old('price', '') }}"
                                         class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
-                                </div>                                
+                                </div>
+                                <div id="full-route-tooltip-container-dynamic"
+                                    class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
+                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                        The full-route price can't be higher than the total of all route
+                                        sections.<br>
+                                        You can lower the full-route price or adjust section prices.
+                                    </div>
+                                </div>
                             </div>
                             <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
                             <div class="relative mt-2 mb-4">
@@ -3001,23 +3067,25 @@
         </label>
     </div>
     <div id="agree_terms_client_error" class="hidden absolute mt-1 z-10">
-        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-            {{ $postRidePage->agree_term_error ?? 'Please check this box to continue.' }}
-        </div>
+        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">Please
+            check this box to continue.</div>
     </div>
     @error('agree_terms')
         <div class="absolute mt-1 z-10">
-            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                {{ $message }}</div>
+            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"> {{ $postRidePage->agree_term_error ?? 'Please accept our Terms and Conditions' }}</div>
         </div>
     @enderror
     <div class="hidden lg:flex justify-center items-center mt-8">
         <button
             class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
             type="submit">
-            @isset($postRidePage->submit_button_label)
-                {{ $postRidePage->submit_button_label }}
-            @endisset
+            @if (($routeType ?? '') === 'repost')
+            {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
+            @else
+                @isset($postRidePage->submit_button_label)
+                    {{ $postRidePage->submit_button_label }}
+                @endisset
+            @endif
         </button>
     </div>
 </div>
@@ -3026,9 +3094,13 @@
 <button
     class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
     type="submit">
-    @isset($postRidePage->submit_button_label)
-        {{ $postRidePage->submit_button_label }}
-    @endisset
+    @if (($routeType ?? '') === 'repost')
+        {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
+    @else
+        @isset($postRidePage->submit_button_label)
+            {{ $postRidePage->submit_button_label }}
+        @endisset
+    @endif
 </button>
 </div>
 </form>
@@ -3579,6 +3651,23 @@
             if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
                 schedulePriceValidationOnInput();
             }
+            if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
+                var id = e.target.id || '';
+                var idx = id.replace('stop_date_', '').replace('stop_time_', '');
+                if (idx && id !== idx) {
+                    var errId = (e.target.name === 'stop_date[]') ? 'stopDateError_' + idx : 'stopTimeError_' + idx;
+                    var errEl = document.getElementById(errId);
+                    if (errEl) errEl.classList.add('hidden');
+                }
+            }
+            if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
+                var id = e.target.id || '';
+                var idx = id.indexOf('stop_pickup_dropoff_') === 0 ? id.replace('stop_pickup_dropoff_', '') : '';
+                if (idx) {
+                    var errEl = document.getElementById('stopPickupDropoffError_' + idx);
+                    if (errEl) errEl.classList.add('hidden');
+                }
+            }
         });
         form.addEventListener('change', function(e) {
             if (e.target && e.target.name === 'price_spot_display[]') {
@@ -3588,6 +3677,23 @@
             }
             if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
                 runPriceValidationOnInput();
+            }
+            if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
+                var id = e.target.id || '';
+                var idx = id.replace('stop_date_', '').replace('stop_time_', '');
+                if (idx && id !== idx) {
+                    var errId = (e.target.name === 'stop_date[]') ? 'stopDateError_' + idx : 'stopTimeError_' + idx;
+                    var errEl = document.getElementById(errId);
+                    if (errEl) errEl.classList.add('hidden');
+                }
+            }
+            if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
+                var id = e.target.id || '';
+                var idx = id.indexOf('stop_pickup_dropoff_') === 0 ? id.replace('stop_pickup_dropoff_', '') : '';
+                if (idx) {
+                    var errEl = document.getElementById('stopPickupDropoffError_' + idx);
+                    if (errEl) errEl.classList.add('hidden');
+                }
             }
         });
 
@@ -3636,8 +3742,73 @@
                     if (!firstErrorElement) firstErrorElement = firstInvalidStop;
                 }
 
+                // 3b. Validate stop date, time, and pickup/dropoff when stop city is filled
+                var stopRows = stopsContainer ? stopsContainer.querySelectorAll('.stop-row') : [];
+                stopRows.forEach(function(row) {
+                    var dataIndex = row.getAttribute('data-stop-index');
+                    var dateErr = dataIndex ? document.getElementById('stopDateError_' + dataIndex) : null;
+                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
+                    var pickupDropoffErr = dataIndex ? document.getElementById('stopPickupDropoffError_' + dataIndex) : null;
+                    if (dateErr) dateErr.classList.add('hidden');
+                    if (timeErr) timeErr.classList.add('hidden');
+                    if (pickupDropoffErr) pickupDropoffErr.classList.add('hidden');
+                });
+                stopRows.forEach(function(row) {
+                    var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
+                    var dateInp = row.querySelector('input[name="stop_date[]"]');
+                    var timeInp = row.querySelector('input[name="stop_time[]"]');
+                    var pickupDropoffInp = row.querySelector('textarea[name="stop_pickup_dropoff[]"]');
+                    var cityVal = cityInp ? (cityInp.value || '').trim() : '';
+                    if (!cityVal) return;
+                    var dataIndex = row.getAttribute('data-stop-index');
+                    var dateErr = dataIndex ? document.getElementById('stopDateError_' + dataIndex) : null;
+                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
+                    var pickupDropoffErr = dataIndex ? document.getElementById('stopPickupDropoffError_' + dataIndex) : null;
+                    var dateVal = dateInp ? (dateInp.value || '').trim() : '';
+                    var timeVal = timeInp ? (timeInp.value || '').trim() : '';
+                    var pickupDropoffVal = pickupDropoffInp ? (pickupDropoffInp.value || '').trim() : '';
+                    if (!pickupDropoffVal) {
+                        hasAnyValidationError = true;
+                        if (pickupDropoffErr) {
+                            var pd = pickupDropoffErr.querySelector('.tooltip-error');
+                            if (pd) pd.textContent = 'Please enter pick up / drop off details.';
+                            pickupDropoffErr.classList.remove('hidden');
+                        }
+                        if (!firstErrorElement && pickupDropoffInp) firstErrorElement = pickupDropoffInp;
+                    }
+                    if (!dateVal) {
+                        hasAnyValidationError = true;
+                        if (dateErr) {
+                            var dt = dateErr.querySelector('.tooltip-error');
+                            if (dt) dt.textContent = 'Please enter the stop date.';
+                            dateErr.classList.remove('hidden');
+                        }
+                        if (!firstErrorElement && dateInp) firstErrorElement = dateInp;
+                    }
+                    if (!timeVal) {
+                        hasAnyValidationError = true;
+                        if (timeErr) {
+                            var tt = timeErr.querySelector('.tooltip-error');
+                            if (tt) tt.textContent = 'Please enter the stop time.';
+                            timeErr.classList.remove('hidden');
+                        }
+                        if (!firstErrorElement && timeInp) firstErrorElement = timeInp;
+                    }
+                });
+
                 // 4. Check HTML5 validation (date, time, seats, required fields, etc.) so we show all errors
-                var firstHtml5Invalid = this.querySelector(':invalid');
+                // Use the first *visible* invalid element so we don't scroll to hidden sections (e.g. recurring_trips when Recurring is unchecked)
+                var firstHtml5Invalid = null;
+                var recurringDetails = document.getElementById('recurringtripDetails');
+                var invalidEls = this.querySelectorAll('input:invalid, select:invalid, textarea:invalid');
+                for (var i = 0; i < invalidEls.length; i++) {
+                    var el = invalidEls[i];
+                    if (el.offsetParent === null) continue;
+                    if (recurringDetails && recurringDetails.contains(el) && recurringDetails.style.display === 'none') continue;
+                    firstHtml5Invalid = el;
+                    break;
+                }
+                if (!firstHtml5Invalid) firstHtml5Invalid = this.querySelector(':invalid');
                 if (firstHtml5Invalid) hasAnyValidationError = true;
                 if (firstHtml5Invalid && !firstErrorElement) firstErrorElement = firstHtml5Invalid;
 
@@ -3646,13 +3817,21 @@
                     e.preventDefault();
                     var scrollTarget = firstErrorElement || document.getElementById('from_spot_0');
                     if (scrollTarget) {
-                        scrollTarget.scrollIntoView({
+                        // When error is in a stop row, scroll to the row so the whole line and tooltips are visible
+                        var stopRow = scrollTarget.closest ? scrollTarget.closest('.stop-row') : null;
+                        var elementToScroll = (stopRow && scrollTarget.name && (
+                            scrollTarget.name === 'stop_spot_display[]' ||
+                            scrollTarget.name === 'stop_pickup_dropoff[]' ||
+                            scrollTarget.name === 'stop_date[]' ||
+                            scrollTarget.name === 'stop_time[]'
+                        )) ? stopRow : scrollTarget;
+                        elementToScroll.scrollIntoView({
                             behavior: 'smooth',
-                            block: scrollTarget === document.getElementById(
+                            block: elementToScroll === document.getElementById(
                                 'post-ride-price-section') ? 'start' : 'center'
                         });
-                        if (firstHtml5Invalid && scrollTarget === firstHtml5Invalid) scrollTarget
-                        .focus();
+                        if (firstHtml5Invalid && scrollTarget === firstHtml5Invalid) scrollTarget.focus();
+                        else if (scrollTarget.focus) scrollTarget.focus();
                     }
                     return;
                 }
@@ -4447,7 +4626,7 @@
     flatpickr(dateInput, {
         dateFormat: 'F d, Y',
         minDate: 'today', // Restrict to future dates only
-        defaultDate: (oldDate && oldDate !== '') ? oldDate : 'today', // Set default date to today
+        // defaultDate: (oldDate && oldDate !== '') ? oldDate : 'today', // Set default date to today
         disableMobile: true,
         onChange: function(selectedDates, dateStr, instance) {
             // Update minTime based on whether the selected date is today or a future date
@@ -4479,8 +4658,13 @@
         }, 10);
     }
 
-    // Initialize the date picker for main time input
-    // AM/PM display: e.g. 9:30 am, 2:30 pm (12-hour so AM/PM toggle is visible)
+    // Main time input: display 24-hour format (e.g. 14:30), no AM/PM
+    function formatTimeDisplay24(date) {
+        const h = date.getHours();
+        const m = date.getMinutes();
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+    // Stop time inputs: 12-hour with am/pm (e.g. 9:30 am, 2:30 pm)
     function formatTimeDisplay(date) {
         const hours = date.getHours();
         const minutes = date.getMinutes();
@@ -4489,8 +4673,8 @@
             const h = hours === 0 ? 12 : hours;
             return h + ':' + mins + ' am';
         } else {
-            const h = hours === 12 ? 12 : hours - 12;
-            return h + ':' + mins + ' pm';
+            const h = hours === 12 ? 12 : hours;
+            return h + ':' + mins;
         }
     }
     const timePicker = flatpickr(timeInput, {
@@ -4498,8 +4682,8 @@
         noCalendar: true,
         dateFormat: 'H:i', // 24-hour format for backend (stored value)
         altInput: true,
-        altFormat: 'H:i', // Initial display, overridden by onChange
-        time_24hr: false, // Enable AM/PM controls in picker
+        altFormat: 'H:i', // Display 24-hour in the time area
+        time_24hr: false, // Show 24-hour in picker to match display
         disableMobile: true,
         minTime: getCurrentProjectTime(), // Set min time to current time
         defaultDate: oldTime || '',
@@ -4528,6 +4712,22 @@
     }, 0);
 
     // Shared initializer for stop time inputs (same behavior/style as main time input: first click opens, second click closes)
+    function initStopDatePicker(el) {
+        if (!el) return;
+        try {
+            if (el._flatpickr) {
+                el._flatpickr.destroy();
+            }
+        } catch (e) {
+            // ignore
+        }
+        flatpickr(el, {
+            dateFormat: 'F d, Y',
+            minDate: 'today',
+            disableMobile: true,
+        });
+    }
+
     function initStopTimePicker(el) {
         if (!el) return;
         try {
@@ -4538,6 +4738,8 @@
             // ignore
         }
         const existingVal = el.value || '';
+        // Need a valid default time so the picker (and AM/PM) works; empty default can break AM/PM
+        const defaultTime = existingVal && String(existingVal).trim() ? existingVal : getCurrentProjectTime();
         const picker = flatpickr(el, {
             enableTime: true,
             noCalendar: true,
@@ -4546,20 +4748,8 @@
             altFormat: 'H:i',
             time_24hr: false,
             disableMobile: true,
-            minTime: getCurrentProjectTime(),
-            defaultDate: existingVal || '',
             minuteIncrement: 1,
-            clickOpens: false, // We handle open/close so second click on time area closes
-            onChange: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length && instance.altInput) {
-                    instance.altInput.value = formatTimeDisplay(selectedDates[0]);
-                }
-            },
-            onClose: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length && instance.altInput) {
-                    instance.altInput.value = formatTimeDisplay(selectedDates[0]);
-                }
-            },
+            clickOpens: false,
         });
         // If there is already a selected date, ensure display is formatted
         setTimeout(function() {
@@ -4612,6 +4802,10 @@
     // Initialize all existing stop time inputs on page load
     document.querySelectorAll('input[name="stop_time[]"]').forEach(function(el) {
         initStopTimePicker(el);
+    });
+    // Initialize all existing stop date inputs on page load
+    document.querySelectorAll('input[name="stop_date[]"]').forEach(function(el) {
+        initStopDatePicker(el);
     });
 
     // Time area: first click opens dropdown, second click (same area) closes it. Use wrapper so clock icon zone counts too.
@@ -4980,10 +5174,10 @@
             if (!isNaN(idx)) nextIndex = Math.max(nextIndex, idx + 1);
         });
         var row = document.createElement('div');
-        row.className = 'flex items-center gap-3 stop-row';
+        row.className = 'flex items-center gap-3 stop-row flex-nowrap';
         row.setAttribute('data-stop-index', nextIndex);
-        row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0">' +
-            '<div class="relative flex-1 min-w-0">' +
+        row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0 flex-nowrap">' +
+            '<div class="relative flex-1 min-w-0 shrink">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
             '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' +
             nextIndex +
@@ -4991,12 +5185,29 @@
             '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex +
             '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
             '</div>' +
-            '<div class="flex-1 min-w-0">' +
+            '<div class="relative flex-1 min-w-0 shrink">' +
             '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' +
             nextIndex +
             '" rows="1" placeholder="pick up / drop off" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopPickupDropoffError_' + nextIndex + '">' +
+            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
             '</div>' +
-            '<div class="w-32 sm:w-40 md:w-44 lg:w-48">' +
+            '</div>' +
+            '<div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">' +
+            '<div class="relative">' +
+            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />' +
+            '</svg>' +
+            '</div>' +
+            '<input type="text" name="stop_date[]" id="stop_date_' + nextIndex +
+            '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopDateError_' + nextIndex + '">' +
+            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">' +
             '<div class="relative">' +
             '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
@@ -5005,6 +5216,9 @@
             '</div>' +
             '<input type="text" name="stop_time[]" id="stop_time_' + nextIndex +
             '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopTimeError_' + nextIndex + '">' +
+            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
+            '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -5015,6 +5229,10 @@
         var newStopInput = document.getElementById('stop_spot_' + nextIndex);
         if (newStopInput && typeof attachStopAutocompletePostRide === 'function') {
             attachStopAutocompletePostRide(newStopInput);
+        }
+        var newStopDateInput = document.getElementById('stop_date_' + nextIndex);
+        if (newStopDateInput && typeof initStopDatePicker === 'function') {
+            initStopDatePicker(newStopDateInput);
         }
         // Initialize time picker for the new stop time input (same behavior as main time input)
         var newStopTimeInput = document.getElementById('stop_time_' + nextIndex);
@@ -5090,12 +5308,20 @@
         var fullRouteInput = container.querySelector('input[name="price"]') || container.querySelector(
             '.full-route-price-input');
         var totalInput = container.querySelector('#segment-total-price-input-dynamic');
+        var tooltip = container.querySelector('#full-route-tooltip-container-dynamic');
         if (!fullRouteInput || !totalInput) return;
         if (container.style.display === 'none' || !container.offsetParent) return;
         var fullVal = parseFloat(fullRouteInput.value);
         var totalVal = parseFloat(totalInput.value);
         if (isNaN(fullVal)) fullVal = 0;
         if (isNaN(totalVal)) totalVal = 0;
+        if (tooltip) {
+            if (fullVal > totalVal) {
+                tooltip.classList.remove('hidden');
+            } else {
+                tooltip.classList.add('hidden');
+            }
+        }
     }
 
     function syncSegmentPricesUIPostRide() {
