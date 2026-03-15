@@ -1964,31 +1964,11 @@ class RideController extends Controller
             $overallRating = 5;
         }
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+       
+                
+        $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
-
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
         
 
         $isNewForm = false;
@@ -2003,7 +1983,9 @@ class RideController extends Controller
         'cancellationCount' => $cancellationCount, 
         'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 
         'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 
-        'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'copy']);
+        'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 
+        'overallRating' => $overallRating, 
+        'routeType' => 'copy']);
     }
 
     public function RepostRide($lang, $id)
