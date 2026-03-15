@@ -27,7 +27,7 @@
                                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                     <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
-                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border"
+                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border1"
                                             onclick="event.stopPropagation()">
                                             <button onclick="closeModal('error-modal', event)"
                                                 class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
@@ -49,7 +49,7 @@
                                             <div
                                                 class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center verify-email-container">
                                                 <a onclick="closeModal('error-modal', event)"
-                                                    class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
+                                                    class="cursor-pointer inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
                                             </div>
                                         </div>
                                     </div>
@@ -148,13 +148,7 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                                  class="mx-auto h-16 w-16">
-                                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                      stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                  </svg>
-                                              </div> -->
+
                             </div>
                             <div class="mt-2 w-full">
                                 <p class="text-center can-exp-p">This email isn't verified yet.</p>

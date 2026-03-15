@@ -27,7 +27,7 @@
                                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                                     <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
-                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border"
+                                        <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl modal-border1"
                                             onclick="event.stopPropagation()">
                                             <a onclick="closeModal('error-modal')"
                                                 class="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 z-50">
@@ -62,7 +62,7 @@
                                                 @endif
 
                                                 <a onclick="closeModal('error-modal')"
-                                                    class="inline-flex justify-center w-auto rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
+                                                    class="cursor-pointer inline-flex justify-center w-auto rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                                             </div>
                                         </div>
                                     </div>

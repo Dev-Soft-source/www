@@ -84,89 +84,89 @@
                             <ul class="space-y-4 ml-2">
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="Prefer not to say" name="reasons[]"
+                                        <input type="checkbox" value="Prefer not to say" name="reasons[]" id="reason_prefer_not_say"
                                             {{ in_array('Prefer not to say', old('reasons', [])) || empty(old('reasons')) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->not_say_checkbox_label ?? 'Prefer not to say' }}</label>
+                                        <label for="reason_prefer_not_say"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->not_say_checkbox_label ?? 'Prefer not to say' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
                                         <input type="checkbox" value="I do not like the phone/email customer service"
-                                            name="reasons[]"
+                                            name="reasons[]" id="reason_customer_service"
                                             {{ in_array('I do not like the phone/email customer service', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->customer_service_checkbox_label ?? 'I do not like the phone/email customer service' }}</label>
+                                        <label for="reason_customer_service"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->customer_service_checkbox_label ?? 'I do not like the phone/email customer service' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
                                         <input type="checkbox" value="Technical issues with the website/app"
-                                            name="reasons[]"
+                                            name="reasons[]" id="reason_technical_issue"
                                             {{ in_array('Technical issues with the website/app', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->technical_issue_checkbox_label ?? 'Technical issues with the website/app' }}</label>
+                                        <label for="reason_technical_issue"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->technical_issue_checkbox_label ?? 'Technical issues with the website/app' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
                                         <input type="checkbox" value="Difficulties making/receving payments"
-                                            name="reasons[]"
+                                            name="reasons[]" id="reason_payment_difficulties"
                                             {{ in_array('Difficulties making/receving payments', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->difficulties_making_receiving_payments_label ?? 'Difficulties making/receving payments' }}</label>
+                                        <label for="reason_payment_difficulties"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->difficulties_making_receiving_payments_label ?? 'Difficulties making/receving payments' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="I don’t use ridesharing anymore" name="reasons[]"
-                                            {{ in_array('I don’t use ridesharing anymore', old('reasons', [])) ? 'checked' : '' }}
+                                        <input type="checkbox" value="I don't use ridesharing anymore" name="reasons[]" id="reason_dont_use"
+                                            {{ in_array("I don't use ridesharing anymore", old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->dont_use_checkbox_label ?? 'I don’t use ridesharing anymore' }}</label>
+                                        <label for="reason_dont_use"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->dont_use_checkbox_label ?? "I don't use ridesharing anymore" }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="I have another account that I’ll be using"
-                                            name="reasons[]"
-                                            {{ in_array('I have another account that I’ll be using', old('reasons', [])) ? 'checked' : '' }}
+                                        <input type="checkbox" value="I have another account that I'll be using"
+                                            name="reasons[]" id="reason_another_account"
+                                            {{ in_array("I have another account that I'll be using", old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->another_account_checkbox_label ?? 'I have another account that I’ll be using' }}</label>
+                                        <label for="reason_another_account"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->another_account_checkbox_label ?? "I have another account that I'll be using" }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
                                         <input type="checkbox" value="I did not get bookings on the rides I posted"
-                                            name="reasons[]"
+                                            name="reasons[]" id="reason_no_bookings"
                                             {{ in_array('I did not get bookings on the rides I posted', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->did_not_get_booking_checkbox_label ?? 'I did not get bookings on the rides I posted' }}</label>
+                                        <label for="reason_no_bookings"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->did_not_get_booking_checkbox_label ?? 'I did not get bookings on the rides I posted' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
                                         <input type="checkbox" value="I did not find rides to my destination"
-                                            name="reasons[]"
+                                            name="reasons[]" id="reason_no_rides"
                                             {{ in_array('I did not find rides to my destination', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->did_not_find_ride_checkbox_label ?? 'I did not find rides to my destination' }}</label>
+                                        <label for="reason_no_rides"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->did_not_find_ride_checkbox_label ?? 'I did not find rides to my destination' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="Other" name="reasons[]"
+                                        <input type="checkbox" value="Other" name="reasons[]" id="reason_other"
                                             {{ in_array('Other', old('reasons', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->other_checkbox_label ?? 'Other' }}</label>
+                                        <label for="reason_other"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->other_checkbox_label ?? 'Other' }}</label>
                                     </div>
                                 </li>
                                 @error('reasons')
@@ -186,29 +186,29 @@
                             <ul class="space-y-4">
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="No" name="recommend"
+                                        <input type="radio" value="No" name="recommend" id="recommend_no"
                                             {{ old('recommend') === 'No' ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->no_checkbox_label ?? 'No' }}</label>
+                                        <label for="recommend_no"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->no_checkbox_label ?? 'No' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="Yes" name="recommend"
+                                        <input type="radio" value="Yes" name="recommend" id="recommend_yes"
                                             {{ old('recommend') === 'Yes' ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->yes_checkbox_label ?? 'Yes' }}</label>
+                                        <label for="recommend_yes"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->yes_checkbox_label ?? 'Yes' }}</label>
                                     </div>
                                 </li>
                                 <li>
                                     <div>
-                                        <input type="checkbox" value="Prefer not to say" name="recommend"
+                                        <input type="radio" value="Prefer not to say" name="recommend" id="recommend_prefer_not_say"
                                             {{ old('recommend') === 'Prefer not to say' || empty(old('recommend')) ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none">
-                                        <label for=""
-                                            class="ml-2 text-gray-900">{{ $closeAccountPage->prefer_not_checkbox_label ?? 'Prefer not to say' }}</label>
+                                        <label for="recommend_prefer_not_say"
+                                            class="ml-2 text-gray-900 cursor-pointer">{{ $closeAccountPage->prefer_not_checkbox_label ?? 'Prefer not to say' }}</label>
                                     </div>
                                 </li>
                             </ul>
@@ -291,7 +291,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div
-                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
                     <button type="button" onclick="closeCloseAccountConfirmationModal()"
                         class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,6 +301,9 @@
                     </button>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="text-center w-full">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#db0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                            </div>
                             <h3 id="close-account-modal-title" class="font-FuturaMdCnBT text-gray-700 mb-4">
                                 {{ $closeAccountPage->close_account_button_text ?? 'Close my account' }}
                             </h3>

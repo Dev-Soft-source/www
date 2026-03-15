@@ -99,7 +99,7 @@ class LoginController extends Controller
             if ($user->closed === '1') {
                 $closeModalErrorMessage = $message->account_closed_message
                     ?? $loginPage->close_modal_error_message
-                    ?? 'It looks like this account has been closed. We\'d love to have you back! You can sign up for a new account using this email address anytime.';
+                    ?? "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.";
 
                 return back()->with(['error' => $closeModalErrorMessage])->withInput();
             }
