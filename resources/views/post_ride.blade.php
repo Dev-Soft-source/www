@@ -912,11 +912,7 @@
                                 class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4 w-full"
                                 aria-expanded="{{ $hasStopsPost ? 'true' : 'false' }}"
                                 aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
-                                <h3 class="text-2xl">
-                                    @isset($postRidePage->add_more_from_to){{ $postRidePage->add_more_from_to }}
-                                    @else
-                                    Stops Along the Way (Optional) @endisset
-                                </h3>
+                                <h3 class="text-2xl">@if(isset($postRidePage->stop_along_the_way_label)){{ $postRidePage->stop_along_the_way_label }}@elseif(isset($postRidePage->add_more_from_to)){{ $postRidePage->add_more_from_to }}@else Stops Along the Way (Optional) @endif</h3>
                                 <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -933,8 +929,7 @@
                                         <span id="stops-origin-label"
                                             class="text-gray-900 text-primary lg:text-lg"></span>
                                     </div>
-                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way: <span
-                                            class="text-red-500">*</span></h4>
+                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">{{ $postRidePage->stop_along_the_way_label ?? 'Stops Along the Way' }}: <span class="text-red-500">*</span></h4>
                                     <div class="space-y-3 mb-4" id="stops-rows-container">
                                         @if ($hasStopsPost)
                                             @foreach ($stopsForDisplayPost as $idx => $stopValue)
@@ -954,7 +949,7 @@
                                                                 id="stop_spot_{{ $renderIndex }}"
                                                                 value="{{ $stopValue }}" autocomplete="off"
                                                                 class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                                placeholder="">
+                                                                placeholder="{{ $postRidePage->stop_placeholder ?? '' }}">
                                                             <div class="absolute hidden mt-1 z-10 left-0 top-full"
                                                                 id="stopInputError_{{ $renderIndex }}">
                                                                 <div
@@ -966,7 +961,7 @@
                                                         <div class="relative flex-1 min-w-0 shrink">
                                                             <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
                                                                 id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1"
-                                                                placeholder="pick up / drop off"
+                                                                placeholder="{{ $postRidePage->pickup_off_placeholder ?? 'pick up / drop off' }}"
                                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
                                                             <div class="absolute hidden mt-1 z-10 left-0 top-full"
                                                                 id="stopPickupDropoffError_{{ $renderIndex }}">
@@ -1040,8 +1035,7 @@
                                             @endforeach
                                         @endif
                                     </div>
-                                    <button type="button" onclick="addStopRowPostRide();"
-                                        class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add Stop</button>
+                                    <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">{{ $postRidePage->add_stop_btn_label ?? '+ Add Stop' }}</button>
                                     <div class="flex items-center gap-2 mb-3">
                                         <h4 class="text-gray-900 text-xl font-medium">
                                             {{ $postRidePage->to_label ?? 'To' }}: </h4>
@@ -1661,59 +1655,61 @@
                             <div id="skipVehicle">
                                 <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
                                     <div class="md:col-span-2">
-                                        <label for="make" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->make_label)
-                                                {{ $postRidePage->make_label }}
+                                        <label for="make"
+                                            class="text-gray-900 mb-2">
+                                            @isset($vehiclePage->make_label)
+                                                {{ $vehiclePage->make_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" name="make" id=""
-                                                @if ($errors->count() > 0) value="{{ old('make', $ride->make) }}"
+                                                @if ($errors->count() > 0)
+                                                    value="{{ old('make', $ride->make) }}"
                                                 @else
-                                                    value="{{ $ride->make }}" @endif
+                                                    value="{{ $ride->make }}"
+                                                @endif
                                                 @isset($postRidePage->make_placeholder)
                                                     placeholder="{{ $postRidePage->make_placeholder }}"
                                                 @endisset
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('make')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->model_label)
-                                                {{ $postRidePage->model_label }}
+                                        <label for="modal"
+                                            class="text-gray-900 mb-2">
+                                            @isset($vehiclePage->model_label)
+                                                {{ $vehiclePage->model_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" name="model" id=""
-                                                @if ($errors->count() > 0) value="{{ old('model', $ride->model) }}"
+                                                @if ($errors->count() > 0)
+                                                    value="{{ old('model', $ride->model) }}"
                                                 @else
-                                                    value="{{ $ride->model }}" @endif
-                                                @isset($postRidePage->model_placeholder)
-                                                    placeholder="{{ $postRidePage->model_placeholder }}"
+                                                    value="{{ $ride->model }}"
+                                                @endif
+                                                @isset($vehiclePage->model_placeholder)
+                                                    placeholder="{{ $vehiclePage->model_placeholder }}"
                                                 @endisset
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('model')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="type" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->type_label)
-                                                {{ $postRidePage->type_label }}
+                                            @isset($vehiclePage->vehicle_type_label)
+                                                {{ $vehiclePage->vehicle_type_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
@@ -1721,176 +1717,163 @@
                                             <select id="type" name="vehicle_type"
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
 
-                                                <option
-                                                    {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }}
-                                                    value="">
-                                                    @isset($postRidePage->vehicle_type_placeholder)
-                                                        {{ $postRidePage->vehicle_type_placeholder }}
+                                                <option {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }} value="">
+                                                    @isset($vehiclePage->vehicle_type_placeholder)
+                                                        {{ $vehiclePage->vehicle_type_placeholder }}
                                                     @endisset
                                                 </option>
 
-                                                <option
-                                                    value="{{ $postRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
+                                                <option value="{{ $postRidePage->vehicle_type_convertible_value ?? 'Convertable' }}"
                                                     {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_convertible_value ?? 'Convertable') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_convertible_text ?? 'Convertable' }}
+                                                    {{ $postRidePage->vehicle_type_convertible_text ?? "Convertable"}}
                                                 </option>
                                                 <option value="{{ $postRidePage->vehicle_type_coupe_value ?? 'Coupe' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_coupe_value ?? 'Coupe') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_coupe_text ?? 'Coupe' }}
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_coupe_value ??'Coupe') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_coupe_text ?? "Coupe"}}
                                                 </option>
-                                                <option
-                                                    value="{{ $postRidePage->vehicle_type_hatchback_value ?? 'Hatchback' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_hatchback_value ?? 'Hatchback') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_hatchback_text ?? 'Hatchback' }}
+                                                <option value="{{ $postRidePage->vehicle_type_hatchback_value ??'Hatchback' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_hatchback_value ??'Hatchback') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_hatchback_text ?? "Hatchback"}}
                                                 </option>
-                                                <option
-                                                    value="{{ $postRidePage->vehicle_type_minivan_value ?? 'Minivan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_minivan_value ?? 'Minivan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_minivan_text ?? 'Minivan' }}
+                                                <option value="{{ $postRidePage->vehicle_type_minivan_value ??'Minivan' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_minivan_value ??'Minivan') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_minivan_text ?? "Minivan"}}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_sedan_value ?? 'Sedan' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_sedan_value ?? 'Sedan') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_sedan_text ?? 'Sedan' }}
+                                                <option value="{{ $postRidePage->vehicle_type_sedan_value ??'Sedan' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_sedan_value ??'Sedan') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_sedan_text ?? "Sedan"}}
                                                 </option>
                                                 <option value="{{ $postRidePage->vehicle_type_station_wagon_value }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_station_wagon_value ?? 'Station wagon') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_station_wagon_text ?? 'Station wagon' }}
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_station_wagon_value ??'Station wagon') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_station_wagon_text ?? "Station wagon"}}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_suv_value ?? 'SUV' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_suv_value ?? 'SUV') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_suv_text ?? 'SUV' }}
+                                                <option value="{{ $postRidePage->vehicle_type_suv_value ??'SUV' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_suv_value ??'SUV') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_suv_text ?? "SUV"}}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_truck_value ?? 'Truck' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_truck_value ?? 'Truck') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_truck_text ?? 'Truck' }}
+                                                <option value="{{ $postRidePage->vehicle_type_truck_value ??'Truck' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_truck_value ??'Truck') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_truck_text ?? "Truck"}}
                                                 </option>
-                                                <option value="{{ $postRidePage->vehicle_type_van_value ?? 'Van' }}"
-                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_van_value ?? 'Van') ? 'selected' : '' }}>
-                                                    {{ $postRidePage->vehicle_type_van_text ?? 'Van' }}
+                                                <option value="{{ $postRidePage->vehicle_type_van_value ??'Van' }}"
+                                                    {{ old('vehicle_type', $ride->vehicle_type) === ($postRidePage->vehicle_type_van_value ??'Van') ? 'selected' : '' }}>
+                                                    {{ $postRidePage->vehicle_type_van_text ?? "Van"}}
                                                 </option>
                                             </select>
                                         </div>
                                         @error('vehicle_type')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="">
                                         <label for="type" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->year_label)
-                                                {{ $postRidePage->year_label }}
+                                            @isset($vehiclePage->year_label)
+                                                {{ $vehiclePage->year_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" name="year" id="" placeholder=""
-                                                @if ($errors->count() > 0) value="{{ old('year', $ride->year) }}"
+                                                @if ($errors->count() > 0)
+                                                    value="{{ old('year', $ride->year) }}"
                                                 @else
-                                                    value="{{ $ride->year }}" @endif
+                                                    value="{{ $ride->year }}"
+                                                @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('year')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="">
-                                        <label for="color" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->color_label)
-                                                {{ $postRidePage->color_label }}
+                                        <label for="color"
+                                            class="text-gray-900 mb-2">
+                                            @isset($vehiclePage->color_label)
+                                                {{ $vehiclePage->color_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" name="color" id="" placeholder=""
-                                                @if ($errors->count() > 0) value="{{ old('color', $ride->color) }}"
+                                                @if ($errors->count() > 0)
+                                                    value="{{ old('color', $ride->color) }}"
                                                 @else
-                                                    value="{{ $ride->color }}" @endif
+                                                    value="{{ $ride->color }}"
+                                                @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('color')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-2">
                                         <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->liscense_label)
-                                                {{ $postRidePage->liscense_label }}
+                                            @isset($vehiclePage->license_plate_number_label)
+                                                {{ $vehiclePage->license_plate_number_label }}
                                             @endisset
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" name="license_no" id="" placeholder=""
-                                                @if ($errors->count() > 0) value="{{ old('license_no', $ride->license_no) }}"
+                                                @if ($errors->count() > 0)
+                                                    value="{{ old('license_no', $ride->license_no) }}"
                                                 @else
-                                                    value="{{ $ride->license_no }}" @endif
+                                                    value="{{ $ride->license_no }}"
+                                                @endif
                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                         </div>
                                         @error('license_no')
-                                            <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
-                                            </div>
+                                          <div class="absolute mt-1 z-10">
+                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
+                                          </div>
                                         @enderror
                                     </div>
                                     <div class="md:col-span-4">
                                         <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($postRidePage->car_type_label)
-                                                {{ $postRidePage->car_type_label }}
-                                            @endisset
+                                            {{ $vehiclePage->fuel_label }}
                                             <span class="text-red-500">*</span>
                                         </label>
                                         <div class=" flex items-center">
-                                            @isset($postRidePage->electric_car_label)
+                                            @isset($vehiclePage->electric_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio"
-                                                        value="{{ $postRidePage->electric_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->electric_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->electric_checkbox_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->electric_checkbox_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->electric_car_label }}
+                                                        {{ $vehiclePage->electric_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
-                                            @isset($postRidePage->hybrid_car_label)
+                                            @isset($vehiclePage->hybrid_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio"
-                                                        value="{{ $postRidePage->hybrid_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->hybrid_car_label ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{  $vehiclePage->hybrid_checkbox_label }}"
+                                                    {{ old('car_type', $ride->car_type) == $vehiclePage->hybrid_checkbox_label ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->hybrid_car_label }}
+                                                        {{ $vehiclePage->hybrid_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
-                                            @isset($postRidePage->gas_car_label)
+                                            @isset($vehiclePage->gas_checkbox_label)
                                                 <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio"
-                                                        value="{{ $postRidePage->gas_car_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $postRidePage->gas_car_label || empty(old('car_type')) ? 'checked' : '' }}
+                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->gas_checkbox_label }}"
+                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->gas_checkbox_label || ( empty(old('car_type'))) ? 'checked' : '' }}
                                                         class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                                     <label for="" class="block text-gray-900">
-                                                        {{ $postRidePage->gas_car_label }}
+                                                        {{ $vehiclePage->gas_checkbox_label }}
                                                     </label>
                                                 </div>
                                             @endisset
                                         </div>
                                         @error('car_type')
                                             <div class="absolute mt-1 z-10">
-                                                <div
-                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                    {{ $message }}</div>
+                                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
                                             </div>
                                         @enderror
                                     </div>
