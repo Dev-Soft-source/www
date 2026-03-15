@@ -6,25 +6,25 @@
     <div class="bg-white border rounded py-4 border-gray-200 w-full md:w-[70%] mx-auto shadow">
         <div class=" px-4">
         <div class="pb-2 flex flex-col md:flex-row items-center justify-between">
-            <h1 class="mb-0">Driver info</h1>
+            <h1 class="mb-0">{{ optional($driverPage)->driver_info_heading ?? 'Driver info' }}</h1>
         </div>
         <div class="flex pb-2 justify-between">
             <div class="flex items-start">
                 <img class="w-16 h-16 rounded-full object-cover mr-3 mt-2" src="{{ $ride->driver?->profile_image }}" alt="">
                 <div>
                     <h3 class="mb-0 text-2xl xl:text-3xl">{{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}</h3>
-                    <p class="mb-0">Joined: {{ $ride->driver?->created_at->format('F d, Y') }}</p>
+                    <p class="mb-0">{{ optional($driverPage)->joined_label ?? 'Joined' }}: {{ $ride->driver?->created_at->format('F d, Y') }}</p>
                     @php
                         // Calculate the age based on the driver's date of birth
                         $dob = \Carbon\Carbon::parse($ride->driver?->dob);
                         $age = $dob->diffInYears(\Carbon\Carbon::now());
                     @endphp
-                    <p class="mb-0">Age: {{ $age }}, {{ ucfirst($ride->driver?->gender) }}</p>
+                    <p class="mb-0">{{ optional($driverPage)->age_label ?? 'Age' }}: {{ $age }}, {{ ucfirst($ride->driver?->gender) }}</p>
                 </div>
             </div>
         </div>
         <div class="pb-2">
-            <h3 class="mb-0 text-2xl xl:text-3xl">Mini bio</h3>
+            <h3 class="mb-0 text-2xl xl:text-3xl">{{ optional($driverPage)->mini_bio_heading ?? 'Mini bio' }}</h3>
             <p>{{ $ride->driver?->about }}</p>
         </div>
         </div>
@@ -49,7 +49,7 @@
                         ->sum()
                     }}
                 </p>
-                <h4 class="text-black">Passengers driven</h4>
+                <h4 class="text-black">{{ optional($driverPage)->passengers_driven_label ?? 'Passengers driven' }}</h4>
             </div>
             <div class="bg-gray-500 w-0.5 h-20"></div>
             <div class="flex flex-col justify-center items-center w-48 my-4">
@@ -67,7 +67,7 @@
                             ->count()
                     }}
                 </p>
-                <h4 class="text-black">Rides taken</h4>
+                <h4 class="text-black">{{ optional($driverPage)->rides_taken_label ?? 'Rides taken' }}</h4>
             </div>
             <div class="bg-gray-500 w-0.5 h-20"></div>
             <div class="flex flex-col justify-center items-center w-48 my-4">
@@ -86,12 +86,12 @@
                         ->get()
                         ->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))), 0) }}
                 </p>
-                <h4 class="text-black">KM shared</h4>
+                <h4 class="text-black">{{ optional($driverPage)->km_shared_label ?? 'KM shared' }}</h4>
             </div>
           </div>
         </div>
         <div class="pb-2 px-4">
-            <h3 class="mb-0 text-2xl xl:text-3xl">Vehicle info</h3>
+            <h3 class="mb-0 text-2xl xl:text-3xl">{{ optional($driverPage)->vehicle_info_heading ?? 'Vehicle info' }}</h3>
             <div class="flex items-center gap-6">
                 <div class="w-32 h-28 bg-gray-50 border">
                     <img class="w-full h-full object-contain" src="{{ $ride->car_image }}" alt="">
@@ -110,7 +110,7 @@
             </div>
         </div>
         <div class="pb-2 px-4">
-            <h3 class="mb-0 text-2xl xl:text-3xl">{{ $ratings->count() }} Reviews</h3>
+            <h3 class="mb-0 text-2xl xl:text-3xl">{{ $ratings->count() }} {{ optional($driverPage)->reviews_heading ?? 'Reviews' }}</h3>
             <div class="space-y-4 mt-4">
                 @php $displayLimit = 2; @endphp
                 @foreach ($ratings as $index => $rating)
@@ -183,7 +183,7 @@
                 @if (count($ratings) > 2)
                     <div class="flex justify-end">
                         <button type="button" id="viewAllButton" class="button-exp-fill">
-                            See all reviews
+                            {{ optional($driverPage)->see_all_reviews_btn ?? 'See all reviews' }}
                         </button>
                     </div>
                 @endif

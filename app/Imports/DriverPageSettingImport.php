@@ -103,7 +103,7 @@ class DriverPageSettingImport implements ToCollection, WithHeadingRow, WithValid
         $value = $row['translation_value'] ?? $row['value'] ?? null;
         if (empty($fieldName) || $value === null || $value === '') return;
 
-        $allowed = ['name','meta_keywords','meta_description','main_heading','sub_heading','page_description'];
+        $allowed = ['name','meta_keywords','meta_description','main_heading','sub_heading','page_description','driver_info_heading','joined_label','age_label','mini_bio_heading','passengers_driven_label','rides_taken_label','km_shared_label','vehicle_info_heading','reviews_heading','see_all_reviews_btn'];
         if (!in_array($fieldName, $allowed)) return;
 
         $detail = DriverPageSettingDetail::where('driver_page_setting_id', $setting->id)
@@ -133,6 +133,16 @@ class DriverPageSettingImport implements ToCollection, WithHeadingRow, WithValid
             'main_heading' => $row['main_heading'] ?? null,
             'sub_heading' => $row['sub_heading'] ?? null,
             'page_description' => $row['page_description'] ?? null,
+            'driver_info_heading' => $row['driver_info_heading'] ?? null,
+            'joined_label' => $row['joined_label'] ?? null,
+            'age_label' => $row['age_label'] ?? null,
+            'mini_bio_heading' => $row['mini_bio_heading'] ?? null,
+            'passengers_driven_label' => $row['passengers_driven_label'] ?? null,
+            'rides_taken_label' => $row['rides_taken_label'] ?? null,
+            'km_shared_label' => $row['km_shared_label'] ?? null,
+            'vehicle_info_heading' => $row['vehicle_info_heading'] ?? null,
+            'reviews_heading' => $row['reviews_heading'] ?? null,
+            'see_all_reviews_btn' => $row['see_all_reviews_btn'] ?? null,
         ];
 
         DriverPageSettingDetail::updateOrCreate(

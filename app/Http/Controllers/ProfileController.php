@@ -7,6 +7,7 @@ use App\Models\Admin;
 use App\Models\ChatsPageSettingDetail;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\DriverPageSettingDetail;
 use App\Models\EditProfilePageSettingDetail;
 use App\Models\Language;
 use App\Models\MyReviewSettingDetail;
@@ -173,10 +174,19 @@ class ProfileController extends Controller
         })
         ->orderBy('id', 'desc')
         ->get();
-        return view('driver_info',[
+
+        $defaultLang = Language::where('is_default', 1)->first();
+        $driverPage = $selectedLanguage && $defaultLang
+            ? DriverPageSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang->id)
+            : null;
+
+        return view('driver_info', [
             'ride' => $ride,
             'ratings' => $ratings,
-        'notifications' => $notifications]);
+            'notifications' => $notifications,
+            'selectedLanguage' => $selectedLanguage,
+            'driverPage' => $driverPage,
+        ]);
     }
     
     public function edit($lang = null){

@@ -39,6 +39,16 @@ class DriverPageSettingService
             'main_heading' => $this->data($request, $language, 'main_heading'),
             'sub_heading' => $this->data($request, $language, 'sub_heading'),
             'page_description' => $this->data($request, $language, 'page_description'),
+            'driver_info_heading' => $this->data($request, $language, 'driver_info_heading'),
+            'joined_label' => $this->data($request, $language, 'joined_label'),
+            'age_label' => $this->data($request, $language, 'age_label'),
+            'mini_bio_heading' => $this->data($request, $language, 'mini_bio_heading'),
+            'passengers_driven_label' => $this->data($request, $language, 'passengers_driven_label'),
+            'rides_taken_label' => $this->data($request, $language, 'rides_taken_label'),
+            'km_shared_label' => $this->data($request, $language, 'km_shared_label'),
+            'vehicle_info_heading' => $this->data($request, $language, 'vehicle_info_heading'),
+            'reviews_heading' => $this->data($request, $language, 'reviews_heading'),
+            'see_all_reviews_btn' => $this->data($request, $language, 'see_all_reviews_btn'),
         ];
     }
 
