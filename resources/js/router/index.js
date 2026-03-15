@@ -46,6 +46,7 @@ import CreateFindRideSetting from '../admin/Mobile_Screens/CreateFindRideSetting
 import CreateHomePageSetting from '../admin/Pages/CreateHomePageSetting.vue'
 import CreateStudentPageSetting from '../admin/Pages/CreateStudentPageSetting.vue'
 import CreateDriverPageSetting from '../admin/Pages/CreateDriverPageSetting.vue'
+import CreateErrorPageSetting from '../admin/Pages/CreateErrorPageSetting.vue'
 import CreatePassengerPageSetting from '../admin/Pages/CreatePassengerPageSetting.vue'
 import CreateFindRidePageSetting from '../admin/Pages/CreateFindRidePageSetting.vue'
 import CreateRideDetailPageSetting from '../admin/Pages/CreateRideDetailPageSetting.vue'
@@ -577,6 +578,14 @@ const routes = [
         component: CreateDriverPageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Drivers page setting', 'routeName': 'admin.driver-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/error-page-settings',
+        name: 'admin.error-page-setting.index',
+        component: CreateErrorPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Error page setting (404)', 'routeName': 'admin.error-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

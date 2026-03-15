@@ -1,3 +1,6 @@
+@php
+    $errorPage = $errorPage ?? null;
+@endphp
 <!doctype html>
 <html>
 
@@ -97,29 +100,29 @@
             <!-- Text Content -->
             <div class="mb-8 font-FuturaMdCnBT">
                 <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                    Ho-ho-hold on! This page doesn't exist.
+                    {{ optional($errorPage)->error_404_heading ?? "Ho-ho-hold on! This page doesn't exist." }}
                 </h1>
                 <p class="text-gray-300 text-lg md:text-2xl">
-                    Kind of like this skinny Santa, cruising in a Tesla and eating a fat-free donut… in the middle of summer.
+                    {{ optional($errorPage)->error_404_paragraph_1 ?? "Kind of like this skinny Santa, cruising in a Tesla and eating a fat-free donut… in the middle of summer." }}
                     <br class="hidden md:block">
                     <br class="hidden md:block">
-                    The page you’re looking for may have been moved, removed, renamed - or maybe it never existed in the first place.
+                    {{ optional($errorPage)->error_404_paragraph_2 ?? "The page you’re looking for may have been moved, removed, renamed - or maybe it never existed in the first place." }}
                 </p>
             </div>
             
             <!-- Buttons -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a 
-                    aria-label="{{ __('Canadian Exporters') }}"
+                    aria-label="{{ optional($errorPage)->error_404_back_home_btn ?? 'Back to Homepage' }}"
                     href="/"
                     class="button-exp-fill px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 w-full sm:w-auto">
-                    Back to Homepage
+                    {{ optional($errorPage)->error_404_back_home_btn ?? 'Back to Homepage' }}
                 </a>
                 <a 
-                    aria-label="{{ __('Canadian Exporters') }}"
+                    aria-label="{{ optional($errorPage)->error_404_contact_btn ?? 'Contact us' }}"
                     href="/"
                     class="button-exp-fill px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-300 w-full sm:w-auto">
-                    Contact us
+                    {{ optional($errorPage)->error_404_contact_btn ?? 'Contact us' }}
                 </a>
             </div>
         </div>

@@ -385,11 +385,11 @@ class RideController extends Controller
 
         $origin = $defaultDetail && $defaultDetail->departure
             ? $defaultDetail->departure
-            : ($allDetails->first() ? $allDetails->first()->departure : '');
+            : ($allDetails->first() ? $allDetails->first()->departure : ($ride->departure ?? ''));
 
         $destination = $defaultDetail && $defaultDetail->destination
             ? $defaultDetail->destination
-            : ($allDetails->last() ? $allDetails->last()->destination : '');
+            : ($allDetails->last() ? $allDetails->last()->destination : ($ride->destination ?? ''));
 
         $segmentPickup = $defaultDetail && $defaultDetail->pickup
             ? $defaultDetail->pickup
@@ -425,8 +425,13 @@ class RideController extends Controller
 
         // Full route endpoints: always the driver's origin (A) and destination (E), regardless of passenger search (e.g. B to D)
         if ($orderedPoints->isNotEmpty()) {
-            $origin = $orderedPoints->first();
-            $destination = $orderedPoints->last();
+            // Fallback to main ride when segment-derived destination/departure is empty (e.g. same-city row with null destination)
+            if ($destination === null || $destination === '') {
+                $destination = $ride->destination ?? $origin ?? '';
+            }
+            if ($origin === null || $origin === '') {
+                $origin = $ride->departure ?? $destination ?? '';
+            }
             $originSegment = $allDetails->first(function ($d) use ($origin) {
                 return (string) $d->departure === (string) $origin;
             });
