@@ -245,24 +245,6 @@ class Controller extends BaseController
         })->filter(fn ($type) => !empty($type['id']) && !empty($type['label']))->values();
     }
 
-    protected function attachVehicleTypeOptions($page, ?int $languageId = null, ?int $fallbackLanguageId = null)
-    {
-        if (!$page) {
-            return $page;
-        }
-
-        $vehicleTypes = $this->getVehicleTypesForLanguage($languageId, $fallbackLanguageId);
-        $page->vehicle_types = $vehicleTypes->values();
-
-        foreach ($vehicleTypes as $vehicleType) {
-            $fieldBase = 'vehicle_type_' . $vehicleType['slug'];
-            $page->{$fieldBase . '_value'} = $vehicleType['id'];
-            $page->{$fieldBase . '_text'} = $vehicleType['label'];
-        }
-
-        return $page;
-    }
-
     protected function getVehicleTypeFeatureMap(): array
     {
         return [

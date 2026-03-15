@@ -105,7 +105,7 @@
                     <p class="text-gray-900">
                         {{ $ride->license_no }}
                     </p>
-                    <p>{{ $ride->car_type_label ?: $ride->car_type }}</p>
+                    <p>{{ $ride->vehicle_type_label ?: $ride->car_type }}</p>
                 </div>
             </div>
         </div>

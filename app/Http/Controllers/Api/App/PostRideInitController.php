@@ -116,8 +116,6 @@ class PostRideInitController extends Controller
         }
 
         if ($postRidePage) {
-            // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $langId, $selectedLanguage?->id);
-
             // Add error labels
             $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
             if ($postRideError) {

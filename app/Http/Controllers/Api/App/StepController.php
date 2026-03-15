@@ -314,13 +314,11 @@ class StepController extends Controller
             // Retrieve the Step3PageSettingDetail associated with the selected language
             $step3Page = Step3PageSettingDetail::where('language_id', $request->lang_id)->first();
             $step4Page = Step4PageSettingDetail::where('language_id', $request->lang_id)->first();
-            // $step3Page = $this->attachVehicleTypeOptions($step3Page, $request->lang_id, $request->lang_id);
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $step3Page = Step3PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $step4Page = Step4PageSettingDetail::where('language_id', $request->lang_id)->first();
-                // $step3Page = $this->attachVehicleTypeOptions($step3Page, $selectedLanguage->id, $selectedLanguage->id);
             }
         }
 

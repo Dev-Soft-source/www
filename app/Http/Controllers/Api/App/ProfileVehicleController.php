@@ -32,13 +32,11 @@ class ProfileVehicleController extends Controller
         $vehicleSettingPage = null;
         if ($request->lang_id && $request->lang_id != 0) {
             $vehicleSettingPage = MyVehicleSettingDetail::where('language_id', $request->lang_id)->first();
-            // $vehicleSettingPage = $this->attachVehicleTypeOptions($vehicleSettingPage, $request->lang_id, $request->lang_id);
             $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('delete_vehicle_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $vehicleSettingPage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // $vehicleSettingPage = $this->attachVehicleTypeOptions($vehicleSettingPage, $selectedLanguage->id, $selectedLanguage->id);
                 $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message')->first();
             }
         }

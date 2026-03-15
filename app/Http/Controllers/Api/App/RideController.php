@@ -4037,7 +4037,6 @@ class RideController extends Controller
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the PostRidePageSettingDetail associated with the selected language
             $postRidePage = PostRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $request->lang_id, $request->lang_id);
             $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
             $postRidePage->from_error = $postRideError->from_error ?? null ;
             $postRidePage->to_error = $postRideError->to_error ?? null ;
@@ -4074,7 +4073,6 @@ class RideController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // $postRidePage = $this->attachVehicleTypeOptions($postRidePage, $selectedLanguage->id, $selectedLanguage->id);
                 $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
                 $postRidePage->from_error = $postRideError->from_error ?? null ;
                 $postRidePage->to_error = $postRideError->to_error ?? null ;
@@ -4146,13 +4144,11 @@ class RideController extends Controller
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the FindRidePageSettingDetail associated with the selected language
             $findRidePage = FindRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            // $findRidePage = $this->attachVehicleTypeOptions($findRidePage, $request->lang_id, $request->lang_id);
             $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('female_user_message', 'star5_passenger_message', 'star4_passenger_message', 'star3_passenger_message', 'passenger_with_review_message', 'search_result_clear_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // $findRidePage = $this->attachVehicleTypeOptions($findRidePage, $selectedLanguage->id, $selectedLanguage->id);
                 $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('female_user_message', 'star5_passenger_message', 'star4_passenger_message', 'star3_passenger_message', 'passenger_with_review_message', 'search_result_clear_message')->first();
             }
         }

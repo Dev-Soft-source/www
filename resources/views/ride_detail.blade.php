@@ -1032,9 +1032,9 @@
                                     @if ($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->exists())
                                         <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
                                     @endif
-                                    <!-- @if ($ride->vehicle_type)
-    <p class="text-md">{{ $ride->vehicle_type }} </p>
-    @endif -->
+                                    @if ($ride->vehicle_type_label)
+                                        <p class="text-md">{{ $ride->vehicle_type_label }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
