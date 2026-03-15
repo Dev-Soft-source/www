@@ -169,7 +169,8 @@ class ReviewController extends Controller
 
             return view('review_passenger',['booking' => $booking, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         }
-        return view('errors/404');
+        $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
+        return view('errors/404', ['errorPage' => $errorPage]);
     }
 
     public function StoreReviewPassenger($id, Request $request){
@@ -438,7 +439,8 @@ class ReviewController extends Controller
 
             return view('review_driver',['booking' => $booking, 'ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         }
-        return view('errors/404');
+        $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
+        return view('errors/404', ['errorPage' => $errorPage]);
     }
 
     public function StoreReviewDriver($id, Request $request){

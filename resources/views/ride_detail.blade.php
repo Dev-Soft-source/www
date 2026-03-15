@@ -272,9 +272,7 @@
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
-                                    <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
-                                        id="phone-on-file-required-modal-title">
-                                        {{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                                    
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">
@@ -1677,14 +1675,29 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                         </button>
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-center font-FuturaMdCnBT text-gray-800 mb-4"
-                                        id="photo-id-required-modal-title">
-                                        {{ $siteText['action_required_label'] ?? 'Action Required' }}</h3>
+                                <div class="sm:flex sm:items-start justify-center">
+                                    <div class="text-3xl text-center font-FuturaMdCnBT text-black">
+                                        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" stroke="#ff0000">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                stroke-linejoin="round"></g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path d="M12 10V13" stroke="#db0000" stroke-width="2"
+                                                    stroke-linecap="round"></path>
+                                                <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2"
+                                                    stroke-linecap="round"></path>
+                                                <path
+                                                    d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z"
+                                                    stroke="#db0000" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round"></path>
+                                            </g>
+                                        </svg>
+                                    </div>
                                 </div>
-                                <div class="mt-2 w-full">
+                                <div class="mt-4 w-full">
                                     <p class="can-exp-p text-center">
-                                        {{ $siteText['photo_id_required_for_pink_extra_text'] ?? 'To book a Pink or Extra+ Ride, you must have a government-issued photo ID on file. Please add it in Dashboard → Edit Profile.' }}
+                                        {{ $postRidePage->alert_need_government_photo_label ?? 'To book a Pink or Extra+ Ride, you must have a government-issued photo ID on file. Please add it in Dashboard → Edit Profile.' }}
                                     </p>
                                 </div>
                             </div>
@@ -1703,6 +1716,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                 </div>
             </div>
         </div>
+        
 
         <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
             id="chat-modal">

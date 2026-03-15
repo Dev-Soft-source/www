@@ -223,15 +223,7 @@ class ProfileController extends Controller
 
         $filename = "";
         
-        if (isset($request->government_issued_id) && $request->hasFile('government_issued_id')) {
-            $file = $request->file('government_issued_id');
-            $filename = $file->getClientOriginalName();
-            $destination_path = public_path('users_government_ids');
-            $file->move($destination_path,$filename);
-        } elseif ($request->has('existing_image')) {
-            $filename = $request->input('existing_image');
-        }
-
+        // Validate first before moving the file
         $validator = Validator::make($request->all(),[
             'first_name' => 'required|string|max:25',
             'last_name' => 'required|string|max:25',
@@ -257,6 +249,31 @@ class ProfileController extends Controller
                     ->withInput()
                     ->with('uploaded_image', $filename ?? null);
             }
+        }
+
+        // Only move the file after validation passes
+        if (isset($request->government_issued_id) && $request->hasFile('government_issued_id')) {
+            try {
+                $file = $request->file('government_issued_id');
+                $filename = $file->getClientOriginalName();
+                $destination_path = public_path('users_government_ids');
+                
+                // Ensure the directory exists
+                if (!file_exists($destination_path)) {
+                    mkdir($destination_path, 0755, true);
+                }
+                
+                // Move the file
+                $file->move($destination_path, $filename);
+            } catch (\Exception $e) {
+                // If file move fails, return with error
+                return back()
+                    ->withErrors(['government_issued_id' => 'The Government Issued ID failed to upload. Please try again.'])
+                    ->withInput()
+                    ->with('uploaded_image', null);
+            }
+        } elseif ($request->has('existing_image')) {
+            $filename = $request->input('existing_image');
         }
         $isAdmin=Auth::guard('admin')->user();
           User::whereId($id)->update([

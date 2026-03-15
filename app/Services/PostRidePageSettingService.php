@@ -87,12 +87,12 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['agree_terms_label.agree_terms_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['agree_term_error.agree_term_error_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['agree_term_error.agree_term_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['price_error_paragraph_1.price_error_paragraph_1_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['price_error_paragraph_1.price_error_paragraph_1_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['price_error_paragraph_2.price_error_paragraph_2_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['price_error_paragraph_2.price_error_paragraph_2_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['price_error_paragraph_3.price_error_paragraph_3_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['price_error_paragraph_3.price_error_paragraph_3_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['carpool_regulation_limit_message.carpool_regulation_limit_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['carpool_regulation_limit_message.carpool_regulation_limit_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['max_price_per_seat_message.max_price_per_seat_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['max_price_per_seat_message.max_price_per_seat_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['non_commercial_carpool_requirement_message.non_commercial_carpool_requirement_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['non_commercial_carpool_requirement_message.non_commercial_carpool_requirement_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['price_error_heading.price_error_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['price_error_heading.price_error_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['price_error_adjust_btn_label.price_error_adjust_btn_label_' . $language->id => ['required', 'string']]);
@@ -211,9 +211,9 @@ class PostRidePageSettingService
             'disclaimers_description' => $this->data($request, $language, 'disclaimers_description'),
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
             'agree_term_error' => $this->data($request, $language, 'agree_term_error'),
-            'price_error_paragraph_1' => $this->data($request, $language, 'price_error_paragraph_1'),
-            'price_error_paragraph_2' => $this->data($request, $language, 'price_error_paragraph_2'),
-            'price_error_paragraph_3' => $this->data($request, $language, 'price_error_paragraph_3'),
+            'carpool_regulation_limit_message' => $this->data($request, $language, 'carpool_regulation_limit_message'),
+            'max_price_per_seat_message' => $this->data($request, $language, 'max_price_per_seat_message'),
+            'non_commercial_carpool_requirement_message' => $this->data($request, $language, 'non_commercial_carpool_requirement_message'),
             'price_error_heading' => $this->data($request, $language, 'price_error_heading'),
             'price_error_adjust_btn_label' => $this->data($request, $language, 'price_error_adjust_btn_label'),
             'delete_stop_modal_no_btn' => $this->data($request, $language, 'delete_stop_modal_no_btn'),
@@ -221,8 +221,8 @@ class PostRidePageSettingService
             'price_warning_heading' => $this->data($request, $language, 'price_warning_heading'),
             'price_warning_adjust_btn_label' => $this->data($request, $language, 'price_warning_adjust_btn_label'),
             'price_warning_keep_current_btn_label' => $this->data($request, $language, 'price_warning_keep_current_btn_label'),
-            'price_warning_paragraph_1' => $this->data($request, $language, 'price_warning_paragraph_1'),
-            'price_warning_paragraph_2' => $this->data($request, $language, 'price_warning_paragraph_2'),
+            'price_above_reimbursement_warning' => $this->data($request, $language, 'price_above_reimbursement_warning'),
+            'price_reduction_suggestion_message' => $this->data($request, $language, 'price_reduction_suggestion_message'),
             'seats_warning_modal_heading' => $this->data($request, $language, 'seats_warning_modal_heading'),
             'seats_warning_modal_paragraph' => $this->data($request, $language, 'seats_warning_modal_paragraph'),
             'seats_warning_modal_got_it_btn' => $this->data($request, $language, 'seats_warning_modal_got_it_btn'),
@@ -233,6 +233,8 @@ class PostRidePageSettingService
             'phone_required_modal_body_after' => $this->data($request, $language, 'phone_required_modal_body_after'),
             'phone_required_modal_close_btn' => $this->data($request, $language, 'phone_required_modal_close_btn'),
             'phone_required_modal_phone_btn' => $this->data($request, $language, 'phone_required_modal_phone_btn'),
+            'alert_need_government_photo_label' => $this->data($request, $language, 'alert_need_government_photo_label'),
+            'alert_need_driver_license_label' => $this->data($request, $language, 'alert_need_driver_license_label'),
             'submit_button_label' => $this->data($request, $language, 'submit_button_label'),
             'main_heading_update' => $this->data($request, $language, 'main_heading_update'),
             'mobile_agree_terms_label' => $this->data($request, $language, 'mobile_agree_terms_label'),
