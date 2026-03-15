@@ -91,7 +91,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                             <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                                <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                                <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                     class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
                                     {{ $siteText['login_btn_text'] ?? 'Log in' }}
                                 </a>
@@ -234,7 +234,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                            <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                            <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                 class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
                                 {{ $siteText['login_btn_text'] }}
                             </a>
@@ -1270,7 +1270,7 @@
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id, 'return_to' => url()->full()]) }}"
                                                     class="button-exp-green-fill w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
