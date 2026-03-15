@@ -213,7 +213,7 @@
                                         </div>
                                     @else
                                         <div class="flex items-center justify-end space-x-1">
-                                            <span class="bg-green-600 text-white px-4 py-1.5 rounded-md">
+                                            <span class="bg-green-200 text-gray text-xs px-2 py-2 rounded-md">
                                                 {{ $phoneSetting->primary_number_label ?? 'Primary Number' }}
                                             </span>
                                             <a href="{{ route('phone.destroy', $phone_number->id) }}"

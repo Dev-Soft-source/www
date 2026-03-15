@@ -398,12 +398,14 @@ body {
         button.bg-red-700,
         button.bg-greenXS,
         button.bg-sky-700,
+        button.bg-green-700,
         button.bg-primary,
         button.bg-blue-600,
         a.bg-red-500,
         a.bg-red-700,
         a.bg-greenXS,
         a.bg-sky-700,
+        a.bg-green-700,
         a.bg-primary,
         a.bg-blue-600,
         button[class*="bg-red"],
@@ -420,6 +422,7 @@ body {
         .bg-red-700.font-FuturaMdCnBT,
         .bg-greenXS.font-FuturaMdCnBT,
         .bg-sky-700.font-FuturaMdCnBT,
+        .bg-green-700.font-FuturaMdCnBT,
         .bg-primary.font-FuturaMdCnBT,
         .bg-blue-600.font-FuturaMdCnBT {
             font-size: 22px !important;
