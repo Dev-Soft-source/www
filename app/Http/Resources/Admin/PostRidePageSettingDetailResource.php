@@ -180,6 +180,7 @@ class PostRidePageSettingDetailResource extends JsonResource
             // 'pink_ride_disclaimers_description' => $this->pink_ride_disclaimers_description,
             // 'extra_care_ride_disclaimers_description' => $this->extra_care_ride_disclaimers_description,
             'agree_terms_label' => $this->agree_terms_label,
+            'agree_term_error' => $this->agree_term_error,
             'submit_button_label' => $this->submit_button_label,
             'main_heading_update' => $this->main_heading_update,
             'cancellation_policy_label1_tooltip' => $this->cancellation_policy_label1_tooltip,

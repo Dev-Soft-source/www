@@ -823,7 +823,7 @@
                                 @error('firm_agree_terms')
                                 <div id="firm_agree_terms-laravel-error" class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        <p class="text-white leading-none text-sm lg:text-base">{{ $bookingPage->booking_disclaimer_firm_tooltip }}</p>
                                     </div>
                                 </div>
                                 @enderror

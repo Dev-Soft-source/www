@@ -894,26 +894,24 @@
                                                 >
                                             </div>
                                             <editor
-                                                :tinymce-script-src="tinymceScriptSrc"
-                                                :id="`email_verified_message_${activeLanguageId}`"
-                                                v-model="form.email_verified_message[`email_verified_message_${activeLanguageId}`]"
-                                                :init="editorConfig"
-                                                placeholder=" "
-                                                :name="`email_verified_message_${activeLanguageId}`"
-                                                :value="
-                                                    getCurrentValue(
-                                                        'email_verified_message'
-                                                    )
-                                                "
-                                                @input="
-                                                    handleInput(
-                                                        $event.target.value,
+                                                @selectionChange="
+                                                    handleSelectionChange(
                                                         language,
                                                         'email_verified_message'
                                                     )
                                                 "
-                                                
-                                            ></editor>
+                                                :ref="`email_verified_message_${language.id}`"
+                                                :id="`email_verified_message_${language.id}`"
+                                                :initial-value="
+                                                    form[
+                                                        `email_verified_message`
+                                                    ][
+                                                        `email_verified_message_${language?.id}`
+                                                    ]
+                                                "
+                                                :tinymce-script-src="tinymceScriptSrc"
+                                                :init="editorConfig"
+                                            />
                                         </div>
                                         <p
                                             class="mt-2 text-sm text-red-400"
@@ -5271,15 +5269,12 @@ export default {
             editorConfig: {
                 height: 250,
                 menubar: false,
-                plugins: [
-                    "advlist autolink lists link image charmap print preview anchor image code table",
-                    "searchreplace visualblocks code fullscreen",
-                    "insertdatetime media table paste code help wordcount",
-                ],
+                plugins:
+                  "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen code",
                 toolbar:
-                    "undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | table | image | code | help",
+                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code | fullscreen",
+                base_url: "/plugins/tinymce",
+                suffix: ".min",
             },
             tinymceScriptSrc: "/plugins/tinymce/tinymce.min.js",
         };

@@ -52,6 +52,7 @@ class ResetPasswordPageSettingTemplateExport implements FromCollection, WithHead
             'password_placeholder' => 'Enter new password',
             'confirm_password_label' => 'Confirm Password',
             'confirm_password_error' => 'Passwords do not match',
+            'password_do_not_match_error' => 'The password confirmation does not match',
             'confirm_password_placeholder' => 'Confirm new password',
             'button_label' => 'Reset Password',
         ];

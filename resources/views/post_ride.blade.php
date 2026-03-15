@@ -3066,7 +3066,10 @@
             <span class="text-red-500">*</span>
         </label>
     </div>
-    
+    <div id="agree_terms_client_error" class="hidden absolute mt-1 z-10">
+        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">Please
+            check this box to continue.</div>
+    </div>
     @error('agree_terms')
         <div class="absolute mt-1 z-10">
             <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"> {{ $postRidePage->agree_term_error ?? 'Please accept our Terms and Conditions' }}</div>

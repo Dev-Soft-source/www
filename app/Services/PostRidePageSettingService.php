@@ -85,6 +85,8 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['disclaimers_description.disclaimers_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['agree_terms_label.agree_terms_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['agree_terms_label.agree_terms_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['agree_term_error.agree_term_error_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['agree_term_error.agree_term_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['submit_button_label.submit_button_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['submit_button_label.submit_button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['recurring_type_label.recurring_type_label_' . $language->id => ['required', 'string']]);
@@ -198,6 +200,7 @@ class PostRidePageSettingService
             'app_disclaimers_description4' => $this->data($request, $language, 'app_disclaimers_description4'),
             'disclaimers_description' => $this->data($request, $language, 'disclaimers_description'),
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
+            'agree_term_error' => $this->data($request, $language, 'agree_term_error'),
             'submit_button_label' => $this->data($request, $language, 'submit_button_label'),
             'main_heading_update' => $this->data($request, $language, 'main_heading_update'),
             'mobile_agree_terms_label' => $this->data($request, $language, 'mobile_agree_terms_label'),

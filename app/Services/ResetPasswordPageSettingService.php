@@ -29,6 +29,8 @@ class ResetPasswordPageSettingService
                 $errorMessages = array_merge($errorMessages, ['confirm_password_label.confirm_password_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['confirm_password_error.confirm_password_error_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['confirm_password_error.confirm_password_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['password_do_not_match_error.password_do_not_match_error_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['password_do_not_match_error.password_do_not_match_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['button_label.button_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['button_label.button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
@@ -51,6 +53,7 @@ class ResetPasswordPageSettingService
             'password_placeholder' => $this->data($request, $language, 'password_placeholder'),
             'confirm_password_label' => $this->data($request, $language, 'confirm_password_label'),
             'confirm_password_error' => $this->data($request, $language, 'confirm_password_error'),
+            'password_do_not_match_error' => $this->data($request, $language, 'password_do_not_match_error'),
             'confirm_password_placeholder' => $this->data($request, $language, 'confirm_password_placeholder'),
             'button_label' => $this->data($request, $language, 'button_label'),
         ];

@@ -316,7 +316,52 @@
                                                 "
                                             ></p>
                                         </div>
-
+ 
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`booking_disclaimer_firm_tooltip_${activeLanguageId}`"
+                                                        >Booking disclaimer firm tooltip</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`booking_disclaimer_firm_tooltip_${activeLanguageId}`"
+                                                    :id="`booking_disclaimer_firm_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'booking_disclaimer_firm_tooltip'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'booking_disclaimer_firm_tooltip'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+ 
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
@@ -2409,6 +2454,7 @@ export default {
                             this.handleInput("", language, "booking_disclaimer_pink_ride");
                             this.handleInput("", language, "booking_disclaimer_extra_care_ride");
                             this.handleInput("", language, "booking_disclaimer_firm");
+                            this.handleInput("", language, "booking_disclaimer_firm_tooltip");
                             this.handleInput("", language, "booking_term_agree_text");
                             this.handleInput("", language, "booking_pink_ride_term_agree_text");
                             this.handleInput("", language, "booking_extra_care_ride_term_agree_text");
@@ -2653,6 +2699,11 @@ export default {
                                 setting?.language,
                                 "booking_disclaimer_firm"
                             );
+                            this.handleInput(
+                                setting?.booking_disclaimer_firm_tooltip,
+                                setting?.language,
+                                "booking_disclaimer_firm_tooltip"
+                            );
 
                             this.handleInput(
                                 setting?.firm_cancellation_label_price_section,
@@ -2769,6 +2820,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `booking_disclaimer_firm.booking_disclaimer_firm_${language.id}`
+                ) ||
+                validationErros.has(
+                    `booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_${language.id}`
                 ) ||
                 validationErros.has(
                     `booking_term_agree_text.booking_term_agree_text_${language.id}`

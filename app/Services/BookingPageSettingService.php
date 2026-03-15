@@ -90,6 +90,8 @@ class BookingPageSettingService
                 $errorMessages = array_merge($errorMessages, ['booking_disclaimer_extra_care_ride.booking_disclaimer_extra_care_ride_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_disclaimer_firm.booking_disclaimer_firm_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['booking_disclaimer_firm.booking_disclaimer_firm_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_term_agree_text.booking_term_agree_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['booking_term_agree_text.booking_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_pink_ride_term_agree_text.booking_pink_ride_term_agree_text_' . $language->id => ['required', 'string']]);
@@ -158,6 +160,7 @@ class BookingPageSettingService
             'booking_disclaimer_pink_ride' => $this->data($request, $language, 'booking_disclaimer_pink_ride'),
             'booking_disclaimer_extra_care_ride' => $this->data($request, $language, 'booking_disclaimer_extra_care_ride'),
             'booking_disclaimer_firm' => $this->data($request, $language, 'booking_disclaimer_firm'),
+            'booking_disclaimer_firm_tooltip' => $this->data($request, $language, 'booking_disclaimer_firm_tooltip'),
             'booking_term_agree_text' => $this->data($request, $language, 'booking_term_agree_text'),
             'booking_pink_ride_term_agree_text' => $this->data($request, $language, 'booking_pink_ride_term_agree_text'),
             'booking_extra_care_ride_term_agree_text' => $this->data($request, $language, 'booking_extra_care_ride_term_agree_text'),

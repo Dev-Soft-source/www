@@ -277,6 +277,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`password_do_not_match_error_${activeLanguageId}`"
+                                                        >Password do not match error</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`password_do_not_match_error_${activeLanguageId}`"
+                                                    :id="`password_do_not_match_error_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'password_do_not_match_error'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'password_do_not_match_error'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `password_do_not_match_error.password_do_not_match_error_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `password_do_not_match_error.password_do_not_match_error_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`main_label_${activeLanguageId}`"
                                                         >Main label</label
                                                     >
@@ -721,6 +765,7 @@ export default {
                             this.handleInput("", language, "password_placeholder");
                             this.handleInput("", language, "confirm_password_label");
                             this.handleInput("", language, "confirm_password_error");
+                            this.handleInput("", language, "password_do_not_match_error");
                             this.handleInput("", language, "confirm_password_placeholder");
                             this.handleInput("", language, "button_label");
                         });
@@ -785,6 +830,11 @@ export default {
                                 setting?.confirm_password_error,
                                 setting?.language,
                                 "confirm_password_error"
+                            );
+                            this.handleInput(
+                                setting?.password_do_not_match_error,
+                                setting?.language,
+                                "password_do_not_match_error"
                             );
                             this.handleInput(
                                 setting?.confirm_password_placeholder,
@@ -860,6 +910,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `confirm_password_error.confirm_password_error_${language.id}`
+                ) ||
+                validationErros.has(
+                    `password_do_not_match_error.password_do_not_match_error_${language.id}`
                 ) ||
                 validationErros.has(
                     `confirm_password_placeholder.confirm_password_placeholder_${language.id}`

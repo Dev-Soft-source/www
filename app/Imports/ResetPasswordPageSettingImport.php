@@ -136,6 +136,7 @@ class ResetPasswordPageSettingImport implements ToCollection, WithHeadingRow, Wi
             'password_error' => 'required|string',
             'confirm_password_label' => 'required|string',
             'confirm_password_error' => 'required|string',
+            'password_do_not_match_error' => 'required|string',
             'button_label' => 'required|string',
         ];
     }
