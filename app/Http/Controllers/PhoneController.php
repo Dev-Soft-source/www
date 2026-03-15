@@ -108,6 +108,11 @@ class PhoneController extends Controller
     }
     public function index($lang = null)
     {
+        $redirectTo = request()->query('redirect_to');
+
+        if (is_string($redirectTo) && str_starts_with($redirectTo, url('/'))) {
+            session(['return_url_after_action' => $redirectTo]);
+        }
         
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -278,6 +283,13 @@ class PhoneController extends Controller
             return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
         }
 
+        $returnUrl = session('return_url_after_action');
+
+        if ($returnUrl) {
+            session()->forget('return_url_after_action');
+            return redirect($returnUrl)->with('success', $message->phone_add_message);
+        }
+
         return redirect()->route('phone', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->phone_add_message);
     }
 
@@ -321,7 +333,7 @@ class PhoneController extends Controller
             'first_name' => $user->first_name,
         ];
         if (isset($user->email_notification) && $user->email_notification == 1) {
-            Mail::to($user->email)->send(new PhoneNumberDeleted($emailData));
+            Mail::to($user->email)->queue(new PhoneNumberDeleted($emailData));
         }
 
         $notification = Notification::create([
@@ -657,7 +669,7 @@ class PhoneController extends Controller
             // If return URL exists, redirect there
             if ($returnUrl) {
                 session()->forget('return_url_after_action');
-                return redirect($returnUrl)->with('message', $message->phone_verified_message ?? 'Phone number verified successfully');
+                return redirect($returnUrl)->with('success', $message->phone_verified_message ?? 'Phone number verified successfully');
             }
             
             // Legacy support for page parameter

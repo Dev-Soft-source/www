@@ -1898,7 +1898,8 @@
         }
 
         function goToPhoneVerification() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showVerifiedPhoneForPinkExtraModal() {
@@ -1922,7 +1923,8 @@
         }
 
         function goToPhoneNumberSettings() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showPhotoIdRequiredModal() {
