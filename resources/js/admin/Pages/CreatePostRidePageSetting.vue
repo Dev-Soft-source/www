@@ -2984,6 +2984,94 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`delete_stop_modal_no_btn_${activeLanguageId}`">Delete stop modal No button</label>
+                                                </div>
+                                                <input type="text" :name="`delete_stop_modal_no_btn_${activeLanguageId}`" :id="`delete_stop_modal_no_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. No" :value="getCurrentValue('delete_stop_modal_no_btn')" @input="handleInput($event.target.value, language, 'delete_stop_modal_no_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`delete_stop_modal_yes_btn_${activeLanguageId}`">Delete stop modal Yes button</label>
+                                                </div>
+                                                <input type="text" :name="`delete_stop_modal_yes_btn_${activeLanguageId}`" :id="`delete_stop_modal_yes_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Yes" :value="getCurrentValue('delete_stop_modal_yes_btn')" @input="handleInput($event.target.value, language, 'delete_stop_modal_yes_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_warning_heading_${activeLanguageId}`">Price warning modal heading</label>
+                                                </div>
+                                                <input type="text" :name="`price_warning_heading_${activeLanguageId}`" :id="`price_warning_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Recommended Contribution Limit" :value="getCurrentValue('price_warning_heading')" @input="handleInput($event.target.value, language, 'price_warning_heading')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_warning_adjust_btn_label_${activeLanguageId}`">Price warning Adjust button</label>
+                                                </div>
+                                                <input type="text" :name="`price_warning_adjust_btn_label_${activeLanguageId}`" :id="`price_warning_adjust_btn_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Adjust Price" :value="getCurrentValue('price_warning_adjust_btn_label')" @input="handleInput($event.target.value, language, 'price_warning_adjust_btn_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_warning_keep_current_btn_label_${activeLanguageId}`">Price warning Keep Current Price button</label>
+                                                </div>
+                                                <input type="text" :name="`price_warning_keep_current_btn_label_${activeLanguageId}`" :id="`price_warning_keep_current_btn_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Keep Current Price" :value="getCurrentValue('price_warning_keep_current_btn_label')" @input="handleInput($event.target.value, language, 'price_warning_keep_current_btn_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_warning_paragraph_1_${activeLanguageId}`">Price warning paragraph 1</label>
+                                                </div>
+                                                <textarea :name="`price_warning_paragraph_1_${activeLanguageId}`" :id="`price_warning_paragraph_1_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_warning_paragraph_1')" @input="handleInput($event.target.value, language, 'price_warning_paragraph_1')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_warning_paragraph_2_${activeLanguageId}`">Price warning paragraph 2</label>
+                                                </div>
+                                                <textarea :name="`price_warning_paragraph_2_${activeLanguageId}`" :id="`price_warning_paragraph_2_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_warning_paragraph_2')" @input="handleInput($event.target.value, language, 'price_warning_paragraph_2')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`seats_warning_modal_heading_${activeLanguageId}`">Seats warning modal heading (5+ seats)</label>
+                                                </div>
+                                                <input type="text" :name="`seats_warning_modal_heading_${activeLanguageId}`" :id="`seats_warning_modal_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Heads up for 5+ seats" :value="getCurrentValue('seats_warning_modal_heading')" @input="handleInput($event.target.value, language, 'seats_warning_modal_heading')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`seats_warning_modal_paragraph_${activeLanguageId}`">Seats warning modal paragraph</label>
+                                                </div>
+                                                <textarea :name="`seats_warning_modal_paragraph_${activeLanguageId}`" :id="`seats_warning_modal_paragraph_${activeLanguageId}`" rows="3" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('seats_warning_modal_paragraph')" @input="handleInput($event.target.value, language, 'seats_warning_modal_paragraph')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`seats_warning_modal_got_it_btn_${activeLanguageId}`">Seats warning Got it button</label>
+                                                </div>
+                                                <input type="text" :name="`seats_warning_modal_got_it_btn_${activeLanguageId}`" :id="`seats_warning_modal_got_it_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Got it" :value="getCurrentValue('seats_warning_modal_got_it_btn')" @input="handleInput($event.target.value, language, 'seats_warning_modal_got_it_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`seats_warning_modal_learn_more_btn_${activeLanguageId}`">Seats warning Learn more button</label>
+                                                </div>
+                                                <input type="text" :name="`seats_warning_modal_learn_more_btn_${activeLanguageId}`" :id="`seats_warning_modal_learn_more_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Learn more about limits" :value="getCurrentValue('seats_warning_modal_learn_more_btn')" @input="handleInput($event.target.value, language, 'seats_warning_modal_learn_more_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`mobile_agree_terms_label_${activeLanguageId}`">Agree
                                                         terms label (App)</label>
                                                 </div>
@@ -3833,6 +3921,17 @@ export default {
                             this.handleInput("", language, "price_error_paragraph_3");
                             this.handleInput("", language, "price_error_heading");
                             this.handleInput("", language, "price_error_adjust_btn_label");
+                            this.handleInput("", language, "delete_stop_modal_no_btn");
+                            this.handleInput("", language, "delete_stop_modal_yes_btn");
+                            this.handleInput("", language, "price_warning_heading");
+                            this.handleInput("", language, "price_warning_adjust_btn_label");
+                            this.handleInput("", language, "price_warning_keep_current_btn_label");
+                            this.handleInput("", language, "price_warning_paragraph_1");
+                            this.handleInput("", language, "price_warning_paragraph_2");
+                            this.handleInput("", language, "seats_warning_modal_heading");
+                            this.handleInput("", language, "seats_warning_modal_paragraph");
+                            this.handleInput("", language, "seats_warning_modal_got_it_btn");
+                            this.handleInput("", language, "seats_warning_modal_learn_more_btn");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4449,6 +4548,17 @@ export default {
                                 setting?.language,
                                 "price_error_adjust_btn_label"
                             );
+                            this.handleInput(setting?.delete_stop_modal_no_btn, setting?.language, "delete_stop_modal_no_btn");
+                            this.handleInput(setting?.delete_stop_modal_yes_btn, setting?.language, "delete_stop_modal_yes_btn");
+                            this.handleInput(setting?.price_warning_heading, setting?.language, "price_warning_heading");
+                            this.handleInput(setting?.price_warning_adjust_btn_label, setting?.language, "price_warning_adjust_btn_label");
+                            this.handleInput(setting?.price_warning_keep_current_btn_label, setting?.language, "price_warning_keep_current_btn_label");
+                            this.handleInput(setting?.price_warning_paragraph_1, setting?.language, "price_warning_paragraph_1");
+                            this.handleInput(setting?.price_warning_paragraph_2, setting?.language, "price_warning_paragraph_2");
+                            this.handleInput(setting?.seats_warning_modal_heading, setting?.language, "seats_warning_modal_heading");
+                            this.handleInput(setting?.seats_warning_modal_paragraph, setting?.language, "seats_warning_modal_paragraph");
+                            this.handleInput(setting?.seats_warning_modal_got_it_btn, setting?.language, "seats_warning_modal_got_it_btn");
+                            this.handleInput(setting?.seats_warning_modal_learn_more_btn, setting?.language, "seats_warning_modal_learn_more_btn");
                             this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,

@@ -227,7 +227,7 @@
         @endif
         <div class="flex justify-between items-center">
             <h1>
-                Edit Ride
+                {{ optional($postRidePage)->main_heading_update ?? 'Edit Ride' }}
             </h1>
         </div>
         <form method="POST"
@@ -506,10 +506,10 @@
                                     style="{{ $hasStops ? 'height: auto;' : 'height: 0;' }}">
                                     <div class="add-more-spots-panel-inner bg-white p-4">
                                         <div class="flex items-center gap-2 mb-3">
-                                            <h4 class="text-gray-900 text-xl font-medium ">From: </h4>
+                                            <h4 class="text-gray-900 text-xl font-medium ">{{ optional($postRidePage)->from_label ?? 'From' }}: </h4>
                                             <p class="text-gray-900 text-primary lg:text-lg ">{{ $originText }}</p>
                                         </div>
-                                        <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">Stops Along the Way:<span
+                                        <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">{{ optional($postRidePage)->stop_along_the_way_label ?? 'Stops Along the Way' }}:<span
                                                 class="text-red-500">*</span></h4>
                                         <div class="space-y-3 mb-4" id="stops-rows-container">
                                             @if ($hasStops)
@@ -541,7 +541,7 @@
                                                         {{-- 2) Pick up / drop off (text) --}}
                                                         <div class="flex-1 min-w-0">
                                                             <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
-                                                                id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
+                                                                id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="{{ optional($postRidePage)->pickup_off_placeholder ?? 'pick up / drop off' }}"
                                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
                                                         </div>
                                                         {{-- 3) Date --}}
@@ -599,10 +599,9 @@
                                             @endif
                                         </div>
                                         <button type="button" onclick="addStopRow();"
-                                            class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ Add
-                                            Stop</button>
+                                            class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">{{ optional($postRidePage)->add_stop_btn_label ?? '+ Add Stop' }}</button>
                                         <div class="flex items-center gap-2 mb-3">
-                                            <h4 class="text-gray-900 text-xl font-medium ">To: </h4>
+                                            <h4 class="text-gray-900 text-xl font-medium ">{{ optional($postRidePage)->to_label ?? 'To' }}: </h4>
                                             <p class="text-gray-900 text-primary lg:text-lg ">{{ $destinationText }}</p>
                                         </div>
                                         <div id="stops-segments-hidden" class="hidden"></div>
@@ -633,16 +632,16 @@
                                                 <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                                     <div class="mt-2 w-full">
                                                         <p id="delete-stop-modal-title"
-                                                            class="can-exp-p text-center text-xl">Delete Stop?</p>
+                                                            class="can-exp-p text-center text-xl">{{ optional($postRidePage)->delete_stop_text ?? 'Delete Stop?' }}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div
                                                 class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                                                 <button type="button" id="delete-stop-no"
-                                                    class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">No</button>
+                                                    class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">{{ optional($postRidePage)->delete_stop_modal_no_btn ?? 'No' }}</button>
                                                 <button type="button" id="delete-stop-yes"
-                                                    class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">Yes</button>
+                                                    class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">{{ optional($postRidePage)->delete_stop_modal_yes_btn ?? 'Yes' }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -715,7 +714,7 @@
                                                     <div class="">
                                                         <h3
                                                             class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">
-                                                            Recommended Contribution Limit</h3>
+                                                            {{ optional($postRidePage)->price_warning_heading ?? 'Recommended Contribution Limit' }}</h3>
                                                     </div>
                                                     <div class="mt-2 w-full">
                                                         <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1">
@@ -728,9 +727,9 @@
                                                 class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                                                 <button type="button" id="priceWarningAdjustBtn"
                                                     onclick="adjustPriceFromWarning(); return false;"
-                                                    class="button-exp-fill">Adjust Price</button>
+                                                    class="button-exp-fill">{{ optional($postRidePage)->price_warning_adjust_btn_label ?? 'Adjust Price' }}</button>
                                                 <button type="button" id="priceWarningContinue"
-                                                    class="button-exp-fill">Keep Current Price</button>
+                                                    class="button-exp-fill">{{ optional($postRidePage)->price_warning_keep_current_btn_label ?? 'Keep Current Price' }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -753,22 +752,22 @@
                                     <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
                                         <div class="w-full md:w-[45%] mb-4">
                                             <label for="recurring_type" class="block mb-2 text-gray-900">
-                                                Recurring type
+                                                {{ optional($postRidePage)->recurring_type_label ?? 'Recurring type' }}
                                             </label>
                                             <div class="relative mt-2">
                                                 <select id="type" name="recurring_type"
                                                     class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                                     <option value=""
                                                         {{ old('recurring_type') === '' ? 'selected' : '' }}>
-                                                        Select
+                                                        {{ optional($postRidePage)->recurring_type_select_placeholder ?? 'Select' }}
                                                     </option>
                                                     <option value="Daily"
                                                         {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
-                                                        Daily
+                                                        {{ optional($postRidePage)->recurring_type_daily_label ?? 'Daily' }}
                                                     </option>
                                                     <option value="Weekly"
                                                         {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
-                                                        Weekly
+                                                        {{ optional($postRidePage)->recurring_type_weekly_label ?? 'Weekly' }}
                                                     </option>
                                                 </select>
                                             </div>
@@ -789,7 +788,7 @@
                                         </div>
                                         <div class="w-full md:w-[45%] mb-4">
                                             <label for="recurring_trips" class="block mb-2 text-gray-900">
-                                                Recurring trips
+                                                {{ optional($postRidePage)->recurring_trips_label ?? 'Recurring trips' }}
                                             </label>
                                             <div class="relative mt-2">
                                                 <input type="number" min="1" name="recurring_trips"
@@ -4269,6 +4268,7 @@
 
 
         var deleteStopTargetRow = null;
+        var stopPickupDropoffPlaceholder = @json(optional($postRidePage)->pickup_off_placeholder ?? 'pick up / drop off');
 
         function addStopRow() {
             var container = document.getElementById('stops-rows-container');
@@ -4294,7 +4294,7 @@
                 '<div class="flex-1 min-w-0">' +
                 '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' +
                 nextIndex +
-                '" rows="1" placeholder="pick up / drop off" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
+                '" rows="1" placeholder="' + (stopPickupDropoffPlaceholder || 'pick up / drop off') + '" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
                 '</div>' +
                 '<div class="w-32 sm:w-40 md:w-44 lg:w-48">' +
                 '<div class="relative">' +
@@ -4636,6 +4636,8 @@
         var priceErrorParagraph1 = @json(optional($postRidePage)->price_error_paragraph_1 ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
         var priceErrorParagraph2Template = @json(optional($postRidePage)->price_error_paragraph_2 ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
         var priceErrorParagraph3 = @json(optional($postRidePage)->price_error_paragraph_3 ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
+        var priceWarningParagraph1 = @json(optional($postRidePage)->price_warning_paragraph_1 ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec');
+        var priceWarningParagraph2 = @json(optional($postRidePage)->price_warning_paragraph_2 ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
 
         function showPriceErrorModal(maxPricePerSeat) {
             const modal = document.getElementById('priceErrorModal');
@@ -4654,10 +4656,8 @@
             if (!modal) return;
             var para1 = document.getElementById('priceWarningParagraph1');
             var para2 = document.getElementById('priceWarningParagraph2');
-            if (para1) para1.textContent =
-                'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
-            if (para2) para2.textContent =
-                'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
+            if (para1) para1.textContent = priceWarningParagraph1 || 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec';
+            if (para2) para2.textContent = priceWarningParagraph2 || 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.';
             modal.classList.remove('hidden');
             modal.style.setProperty('display', 'block', 'important');
             var continueBtn = document.getElementById('priceWarningContinue');
