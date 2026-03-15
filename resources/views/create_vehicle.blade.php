@@ -44,11 +44,11 @@
                     @endisset
                     <span class="text-red-500">*</span></label>
                     <select id="type" name="type" class="block mt-1 border w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                        <option value="" {{ old('type') === '' ? 'selected' : '' }}>
+                        <option value="">
                             {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                         </option>
                         @foreach (($vehicleTypes ?? collect()) as $vehicleType)
-                            <option value="{{ $vehicleType['id'] }}" {{ old('type', '') === $vehicleType['id'] ? 'selected' : '' }}>
+                            <option value="{{ $vehicleType['id'] }}" {{ (int) old('type') === $vehicleType['id'] ? 'selected' : '' }}>
                                 {{ $vehicleType['label'] }}
                             </option>
                         @endforeach
