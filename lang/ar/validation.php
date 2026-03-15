@@ -357,6 +357,11 @@ return [
         'message' => [
             'required' => 'الرسالة مطلوبة.',
         ],
+        'student_card' => [
+            'required' => 'بطاقة الطالب مطلوبة.',
+            'mimes' => 'يجب أن تكون الصورة ملفاً من نوع: jpeg, png, jpg, gif, pdf.',
+            'max' => 'يجب أن تكون الصورة أقل من 10 ميجابايت.',
+        ],
     ],
     'custom' => [
         'payment_method' => [

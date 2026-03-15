@@ -10,7 +10,7 @@
     color: #fff;
     border-radius: 8px;
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -53,7 +53,8 @@
     line-height: 1.4;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     display: inline-block;
-    animation: fadeIn 0.25s ease-in-out;
+    transform-origin: top center;
+    animation: tooltipErrorIn 0.28s ease-out forwards;
     /* min-width: max-content; */
 }
 
@@ -85,14 +86,14 @@
 
 
 
-@keyframes fadeIn {
+@keyframes tooltipErrorIn {
     from {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: translateY(-8px) scale(0.96);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }

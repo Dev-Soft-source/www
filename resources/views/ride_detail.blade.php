@@ -91,7 +91,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                             <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                                <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                                <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                     class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400">
                                     {{ $siteText['login_btn_text'] ?? 'Log in' }}
                                 </a>
@@ -234,7 +234,7 @@
                             class="inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                     </div> --}}
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-2">
-                            <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
+                            <a href="{{ route('login', ['lang' => app()->getLocale(), 'redirect_to' => url()->full()]) }}"
                                 class="inline-flex w-full justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-24">
                                 {{ $siteText['login_btn_text'] }}
                             </a>
@@ -292,45 +292,6 @@
                                 class="inline-flex justify-center rounded bg-gray-300 px-6 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:text-gray-800 hover:shadow-lg shadow-sm hover:bg-gray-400">
                                 {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="verified_email_phone" class="hidden relative z-50" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div
-                    class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeVerifyModal()">
-                    </div>
-                    <div
-                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button onclick="closeVerifyModal()"
-                            class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div class="mx-auto h-16 w-16">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                </svg>
-                                            </div> -->
-                            </div>
-                            <div class="w-full">
-                                <p class="text-center can-exp-p" id="verify-popup-text"></p>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <a href="#" onclick="closeVerifyModal()"
-                                class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a>
                         </div>
                     </div>
                 </div>
@@ -1193,8 +1154,8 @@
                                             $ride->bookings->where('user_id', auth()->user()->id)->where('status', 1)->isNotEmpty())
                                         @php
                                             // Calculate the difference in days between today and the ride's date
-$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-// Add the leave review days to the ride's DateTime
+                                            $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+                                            // Add the leave review days to the ride's DateTime
                                             $reviewDateTime = clone $rideDateTime;
                                             $reviewDateTime->add(
                                                 new DateInterval('P' . $setting->leave_review_days . 'D'),
@@ -1279,8 +1240,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
-                                                    class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id, 'return_to' => url()->full()]) }}"
+                                                    class="button-exp-green-fill w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
                                                     @endisset
@@ -1288,7 +1249,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                             @endif
                                         @else
                                             <button type="button"
-                                                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36"
+                                                class="button-exp-green-fill w-36"
                                                 onclick="togglePopupModal1()">
                                                 @isset($rideDetailPage->driver_chat_button_label)
                                                     {{ $rideDetailPage->driver_chat_button_label }}
@@ -1300,36 +1261,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                             </div>
                         @endif
 
-                        {{-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl {{isset($ride->booking_type->name) && $ride->booking_type->name=='Firm cancellation'?'border-4 border-red-500':'' }}">
-                        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
-                            Cancellation policy
-                            @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
-                            <div class="sups inline-flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black peer" viewBox="0 0 16 16">
-                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                </svg>
-                                <div
-                                  class="absolute tooltip payment_tooltiptext_position top-8 left-0 group-hover:flex hidden peer-hover:flex"
-                                >
-                                    <div
-                                        role="tooltip"
-                                        class="absolute after:left-[6.8rem] md:after:left-[6.8rem] payment_tooltiptext -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded tooltip_width sm:w-[25rem] md:w-[30rem] lg:w-72 xl:w-[23rem] 2xl:w-[25rem] px-4"
-                                    >
-                                        <p class="text-white font-semibold text-start text-sm lg:text-base">
-
-                                            {{ $rideDetailPage->cancellation_policy_tooltip ?? '' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                        </h3>
-                        <div class=" p-4 w-full">
-                            <p class="text-left">
-                                {{ $ride->booking_type->name }}
-                            </p>
-                        </div>
-                    </div> --}}
                         <div
                             class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
@@ -1558,14 +1489,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                 </div>
             </div>
 
-            {{-- <div class="mt-4 mb-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-            <p class="text-gray-800">
-                @isset($rideDetailPage->driver_note_label)
-                    {{ $rideDetailPage->driver_note_label }}
-                @endisset
-                <span class="text-gray-500">{{ $ride->notes }}</span>
-            </p>
-        </div> --}}
         </div>
 
         <!-- Phone Verification Required Modal (same as search_ride) -->
@@ -1761,12 +1684,10 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                             <div class="py-3 text-center sm:text-left">
                                                 <div class="mt-2">
                                                     <div class="panel-body">
-                                                        {{-- <div style="font-weight:bold;color:#2563eb;margin-bottom:4px;">Ride Details</div> --}}
                                                         <chat-messages logged_in_user_id="{{ Auth::user()->id ?? null }}"
                                                             :messages="chats"
                                                             empty_chat_placeholder="{{ $rideDetailPage->chat_error_message }}"></chat-messages>
                                                     </div>
-
                                                 </div>
                                             </div>
 
@@ -1932,16 +1853,6 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
             document.getElementById('my-modal').style.display = 'none';
         }
 
-        function closeVerifyModal() {
-            document.getElementById('verified_email_phone').style.display = 'none';
-        }
-
-        function openVerifyModal(value) {
-            document.getElementById('verified_email_phone').style.display = 'block';
-            document.getElementById('verify-popup-text').innerText = value;
-
-        }
-
         function closePopupModal() {
             document.getElementById('my-chat-pop-modal').style.display = 'none';
         }
@@ -1957,7 +1868,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
         }
 
         function goToPhoneVerification() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showVerifiedPhoneForPinkExtraModal() {
@@ -1981,7 +1893,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
         }
 
         function goToPhoneNumberSettings() {
-            window.location.href = '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}';
+            window.location.href =
+                '{{ route('phone', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en', 'redirect_to' => url()->full()]) }}';
         }
 
         function showPhotoIdRequiredModal() {

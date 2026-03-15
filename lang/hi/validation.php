@@ -357,6 +357,11 @@ return [
         'message' => [
             'required' => 'संदेश आवश्यक है।',
         ],
+        'student_card' => [
+            'required' => 'छात्र कार्ड आवश्यक है।',
+            'mimes' => 'छवि jpeg, png, jpg, gif, pdf प्रकार की फ़ाइल होनी चाहिए।',
+            'max' => 'छवि 10MB से कम होनी चाहिए।',
+        ],
 
         'payment_method' => [
             'required' => 'भुगतान विधि आवश्यक है।',

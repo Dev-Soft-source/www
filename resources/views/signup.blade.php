@@ -343,7 +343,7 @@
                     </p>
                 </div>
                 <div class="flex items-center justify-center space-x-1.5 md:space-x-4 my-4">
-                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'facebook']) }}"
+                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'facebook', 'intent' => 'signup']) }}"
                         class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100"
                             height="100" viewBox="0,0,256,256">
@@ -359,7 +359,7 @@
                             </g>
                         </svg>
                     </a>
-                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin-openid']) }}"
+                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin-openid', 'intent' => 'signup']) }}"
                         class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100"
                             height="100" viewBox="0 0 48 48">
@@ -368,7 +368,7 @@
                             </path>
                         </svg>
                     </a>
-                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'google']) }}"
+                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'google', 'intent' => 'signup']) }}"
                         class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100"
                             height="100" viewBox="0 0 48 48">
@@ -387,7 +387,7 @@
                         </svg>
                     </a>
                     <a id="apple-login-btn"
-                        href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'apple']) }}"
+                        href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'apple', 'intent' => 'signup']) }}"
                         class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center"
                         style="display: none;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100"

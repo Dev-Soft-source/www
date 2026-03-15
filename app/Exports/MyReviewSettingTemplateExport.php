@@ -39,8 +39,22 @@ class MyReviewSettingTemplateExport implements FromCollection, WithHeadings, Wit
     {
         $fields = [
             'review_left_label', 'review_received_label', 'main_heading', 'replied_label', 'response_label', 'reply_label', 'no_more_data_label', 'no_left_message', 'no_received_message', 'reply_heading_label', 'reply_placeholder', 'see_all_review_label', 'reply_submit_button_label', 'review_label',
+            'passenger_review_heading', 'passenger_review_criteria_heading', 'passenger_review_condition_label', 'passenger_review_conscious_label', 'passenger_review_comfort_label', 'passenger_review_communication_label', 'passenger_review_attitude_label', 'passenger_review_hygiene_label', 'passenger_review_respect_label', 'passenger_review_safety_label', 'passenger_review_timeliness_label',
         ];
-        return array_fill_keys($fields, '');
+        $defaults = [
+            'passenger_review_heading' => 'Review',
+            'passenger_review_criteria_heading' => 'Review criteria',
+            'passenger_review_condition_label' => 'Condition of the vehicle',
+            'passenger_review_conscious_label' => 'Conscious to passengers wellness',
+            'passenger_review_comfort_label' => 'Comfort',
+            'passenger_review_communication_label' => 'Communication',
+            'passenger_review_attitude_label' => 'Overall attitude',
+            'passenger_review_hygiene_label' => 'Personal hygiene',
+            'passenger_review_respect_label' => 'Respect and courtesy',
+            'passenger_review_safety_label' => 'Safety',
+            'passenger_review_timeliness_label' => 'Timeliness',
+        ];
+        return array_merge(array_fill_keys($fields, ''), $defaults);
     }
 
     public function collection(): Collection

@@ -39,9 +39,12 @@ class LoginController extends Controller
         return view('login_with_app',['languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }
 
-    public function create($lang = null){
+    public function create(Request $request, $lang = null){
+        $redirectTo = $request->query('redirect_to');
 
-        if (!session()->has('url.intended')) {
+        if (is_string($redirectTo) && str_starts_with($redirectTo, url('/'))) {
+            session()->put('url.intended', $redirectTo);
+        } elseif (!session()->has('url.intended')) {
             session()->put('url.intended', url()->previous());
         }
         

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -361,6 +361,98 @@
                                     </div>
                                 </div>
                                 <!-- about section end -->
+
+                                <!-- driver info page section start -->
+                                <div
+                                    class="border rounded w-full mt-4"
+                                    :class="
+                                        collapseStates[2] ? 'bg-gray-50' : ''
+                                    "
+                                >
+                                    <div
+                                        class="flex justify-between bg-primary text-white p-4 cursor-pointer"
+                                        @click.prevent="
+                                            collapseStates[2] =
+                                                !collapseStates[2]
+                                        "
+                                    >
+                                        <h3 class="text-white">
+                                            Driver info page (labels)
+                                        </h3>
+                                        <svg
+                                            class="w-5 h-5 fill-current text-gray-500"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path d="M6 9l4 4 4-4"></path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="p-4 bg-gray-100 border-t grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-y-4 md:gap-6"
+                                        v-if="collapseStates[2]"
+                                    >
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`driver_info_heading_${activeLanguageId}`">Driver info heading</label>
+                                            </div>
+                                            <input type="text" :name="`driver_info_heading_${activeLanguageId}`" :id="`driver_info_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Driver info" :value="getCurrentValue('driver_info_heading')" @input="handleInput($event.target.value, language, 'driver_info_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`joined_label_${activeLanguageId}`">Joined label</label>
+                                            </div>
+                                            <input type="text" :name="`joined_label_${activeLanguageId}`" :id="`joined_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Joined" :value="getCurrentValue('joined_label')" @input="handleInput($event.target.value, language, 'joined_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`age_label_${activeLanguageId}`">Age label</label>
+                                            </div>
+                                            <input type="text" :name="`age_label_${activeLanguageId}`" :id="`age_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Age" :value="getCurrentValue('age_label')" @input="handleInput($event.target.value, language, 'age_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`mini_bio_heading_${activeLanguageId}`">Mini bio heading</label>
+                                            </div>
+                                            <input type="text" :name="`mini_bio_heading_${activeLanguageId}`" :id="`mini_bio_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Mini bio" :value="getCurrentValue('mini_bio_heading')" @input="handleInput($event.target.value, language, 'mini_bio_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`passengers_driven_label_${activeLanguageId}`">Passengers driven label</label>
+                                            </div>
+                                            <input type="text" :name="`passengers_driven_label_${activeLanguageId}`" :id="`passengers_driven_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Passengers driven" :value="getCurrentValue('passengers_driven_label')" @input="handleInput($event.target.value, language, 'passengers_driven_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`rides_taken_label_${activeLanguageId}`">Rides taken label</label>
+                                            </div>
+                                            <input type="text" :name="`rides_taken_label_${activeLanguageId}`" :id="`rides_taken_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Rides taken" :value="getCurrentValue('rides_taken_label')" @input="handleInput($event.target.value, language, 'rides_taken_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`km_shared_label_${activeLanguageId}`">KM shared label</label>
+                                            </div>
+                                            <input type="text" :name="`km_shared_label_${activeLanguageId}`" :id="`km_shared_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. KM shared" :value="getCurrentValue('km_shared_label')" @input="handleInput($event.target.value, language, 'km_shared_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`vehicle_info_heading_${activeLanguageId}`">Vehicle info heading</label>
+                                            </div>
+                                            <input type="text" :name="`vehicle_info_heading_${activeLanguageId}`" :id="`vehicle_info_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Vehicle info" :value="getCurrentValue('vehicle_info_heading')" @input="handleInput($event.target.value, language, 'vehicle_info_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`reviews_heading_${activeLanguageId}`">Reviews heading</label>
+                                            </div>
+                                            <input type="text" :name="`reviews_heading_${activeLanguageId}`" :id="`reviews_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Reviews" :value="getCurrentValue('reviews_heading')" @input="handleInput($event.target.value, language, 'reviews_heading')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
+                                                <label :for="`see_all_reviews_btn_${activeLanguageId}`">See all reviews button</label>
+                                            </div>
+                                            <input type="text" :name="`see_all_reviews_btn_${activeLanguageId}`" :id="`see_all_reviews_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. See all reviews" :value="getCurrentValue('see_all_reviews_btn')" @input="handleInput($event.target.value, language, 'see_all_reviews_btn')" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- driver info page section end -->
                             </div>
                         </template>
                         <button type="submit" class="button-exp-fill mt-5">
@@ -457,6 +549,16 @@ export default {
                                 language,
                                 "page_description"
                             );
+                            this.handleInput("", language, "driver_info_heading");
+                            this.handleInput("", language, "joined_label");
+                            this.handleInput("", language, "age_label");
+                            this.handleInput("", language, "mini_bio_heading");
+                            this.handleInput("", language, "passengers_driven_label");
+                            this.handleInput("", language, "rides_taken_label");
+                            this.handleInput("", language, "km_shared_label");
+                            this.handleInput("", language, "vehicle_info_heading");
+                            this.handleInput("", language, "reviews_heading");
+                            this.handleInput("", language, "see_all_reviews_btn");
                         });
                         this.fetchDriverPageSetting();
                     }
@@ -500,6 +602,16 @@ export default {
                                 setting?.language,
                                 "page_description",
                             );
+                            this.handleInput(setting?.driver_info_heading, setting?.language, "driver_info_heading");
+                            this.handleInput(setting?.joined_label, setting?.language, "joined_label");
+                            this.handleInput(setting?.age_label, setting?.language, "age_label");
+                            this.handleInput(setting?.mini_bio_heading, setting?.language, "mini_bio_heading");
+                            this.handleInput(setting?.passengers_driven_label, setting?.language, "passengers_driven_label");
+                            this.handleInput(setting?.rides_taken_label, setting?.language, "rides_taken_label");
+                            this.handleInput(setting?.km_shared_label, setting?.language, "km_shared_label");
+                            this.handleInput(setting?.vehicle_info_heading, setting?.language, "vehicle_info_heading");
+                            this.handleInput(setting?.reviews_heading, setting?.language, "reviews_heading");
+                            this.handleInput(setting?.see_all_reviews_btn, setting?.language, "see_all_reviews_btn");
                         });
                     }
                 });

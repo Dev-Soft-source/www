@@ -23,13 +23,18 @@ use Carbon\Carbon;
 
 class ChatsController extends Controller
 {
-    public function index($lang = null, $departure, $destination, $id, $passenger)
+    public function index(Request $request, $lang = null, $departure, $destination, $id, $passenger)
     {
 
         $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $ride = Ride::whereId($id)->first();
         $passenger = User::whereId($passenger)->first();
+        $closeUrl = $request->query('return_to');
+
+        if (!is_string($closeUrl) || !str_starts_with($closeUrl, url('/'))) {
+            $closeUrl = route('notifications', ['lang' => app()->getLocale()]);
+        }
         
         // Validate that ride and passenger exist
         if (!$ride || !$passenger) {
@@ -38,7 +43,7 @@ class ChatsController extends Controller
         }
 // dd($chatsPage);
         return view('chat', [
-            'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
+            'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage, 'closeUrl' => $closeUrl]);
     }
 
     public function chatDetail($lang = null, $id, $passenger)
