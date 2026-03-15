@@ -963,14 +963,19 @@
                                                 </p>
                                             </div>
                                         @endif
+                                        @if (isset($remainingForSegment))
+                                            <p class="text-gray-700 text-sm mt-1 mb-2">{{ $remainingForSegment }} {{ $remainingForSegment === 1 ? 'seat' : 'seats' }} available for this segment.</p>
+                                        @endif
                                         <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
                                             @foreach ($ride->seatDetail as $detail)
                                                 @php
+                                                    $availableForSegment = $availableSeatIdsForSegment ?? $ride->seatDetail->pluck('id')->all();
                                                     $isBooked = $detail->status === 'booked';
                                                     $isHeldByOthers =
                                                         $detail->status === 'hold' &&
                                                         $detail->user_id != optional(auth()->user())->id;
-                                                    $isUnavailable = $isBooked || $isHeldByOthers;
+                                                    $isUnavailableForSegment = !in_array($detail->id, $availableForSegment);
+                                                    $isUnavailable = $isBooked || $isHeldByOthers || $isUnavailableForSegment;
                                                     $isSelectedByMe =
                                                         !$isUnavailable &&
                                                         ($detail->user_id == optional(auth()->user())->id ||

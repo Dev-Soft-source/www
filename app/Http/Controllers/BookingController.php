@@ -256,6 +256,8 @@ class BookingController extends Controller
 
             $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
 
+            // Segment-based seat availability will be computed after we have $orderedPoints and $from/$to (below).
+            // We keep a simple guard here; the real check is done after building the route.
             $seatsBooked = $bookings->sum('seats');
             if ($seatsBooked >= $ride->seats) {
                 return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
@@ -356,12 +358,74 @@ class BookingController extends Controller
             $fromLabel = $from;
             $toLabel = $to;
 
+            // Segment-based seat availability: remaining seats and which physical seats are available for this segment (from -> to)
+            $remainingForSegment = (int) $ride->seats;
+            $availableSeatIdsForSegment = $ride->seatDetail->pluck('id')->all();
+            $bookingsById = $bookings->keyBy('id');
+            $authId = auth()->id();
+
+            if ($from !== null && $from !== '' && $to !== null && $to !== ''
+                && $fromIndex !== false && $toIndex !== false && $fromIndex <= $toIndex) {
+                // Helper: does a booking's journey overlap the segment [fromIndex, toIndex]?
+                $bookingOverlapsSegment = function ($booking) use ($orderedPoints, $fromIndex, $toIndex) {
+                    $bDep = $booking->departure;
+                    $bDest = $booking->destination;
+                    $bDepIndex = ($bDep !== null && $bDep !== '') ? $orderedPoints->search(function ($p) use ($bDep) {
+                        return (string) $p === (string) $bDep;
+                    }) : 0;
+                    $bDestIndex = ($bDest !== null && $bDest !== '') ? $orderedPoints->search(function ($p) use ($bDest) {
+                        return (string) $p === (string) $bDest;
+                    }) : ($orderedPoints->count() - 1);
+                    if ($bDepIndex === false) {
+                        $bDepIndex = 0;
+                    }
+                    if ($bDestIndex === false) {
+                        $bDestIndex = $orderedPoints->count() - 1;
+                    }
+                    return $bDepIndex <= $toIndex && $bDestIndex >= $fromIndex;
+                };
+
+                $seatsUsedOnSegment = $bookings->filter($bookingOverlapsSegment)->sum('seats');
+                $remainingForSegment = (int) $ride->seats - (int) $seatsUsedOnSegment;
+                if ($remainingForSegment <= 0) {
+                    return redirect()->route('search_ride', [
+                        'notificationPage' => $notificationPage,
+                        'successMessage' => $successMessage,
+                        'lang' => $this->selectedLanguage->abbreviation,
+                        'from' => $ride->rideDetail[0]->departure,
+                        'to' => $ride->rideDetail[0]->destination,
+                        'date' => Carbon::parse($ride->date)->format('F d, Y'),
+                    ])->with(['failure' => $errorMsg->seat_unavailable_message]);
+                }
+
+                $availableSeatIdsForSegment = [];
+                foreach ($ride->seatDetail as $seat) {
+                    if ($seat->status === 'pending') {
+                        $availableSeatIdsForSegment[] = $seat->id;
+                        continue;
+                    }
+                    if ($seat->status === 'hold') {
+                        if ($seat->user_id == $authId) {
+                            $availableSeatIdsForSegment[] = $seat->id;
+                        }
+                        continue;
+                    }
+                    if ($seat->status === 'booked' && $seat->booking_id) {
+                        $booking = $bookingsById->get($seat->booking_id);
+                        if (!$booking || !$bookingOverlapsSegment($booking)) {
+                            $availableSeatIdsForSegment[] = $seat->id;
+                        }
+                    }
+                }
+            }
+
             return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage,
             'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
             'paymentSettingDetail' => $paymentSettingDetail,
             'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false,
             'selectedLanguage' => $selectedLanguage,
-            'origin' => $origin, 'destination' => $destination, 'stops' => $stops, 'segmentPickup' => $segmentPickup, 'segmentDropoff' => $segmentDropoff, 'displayDepartureDateTime' => $displayDepartureDateTime, 'fromLabel' => $fromLabel, 'toLabel' => $toLabel]);
+            'origin' => $origin, 'destination' => $destination, 'stops' => $stops, 'segmentPickup' => $segmentPickup, 'segmentDropoff' => $segmentDropoff, 'displayDepartureDateTime' => $displayDepartureDateTime, 'fromLabel' => $fromLabel, 'toLabel' => $toLabel,
+            'remainingForSegment' => $remainingForSegment, 'availableSeatIdsForSegment' => $availableSeatIdsForSegment]);
         } else {
             return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
         }
