@@ -1986,34 +1986,16 @@ class RideController extends Controller
             }
         }
 
-        $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-            // Ratings where type is 1 and ride_id belongs to the user
-            $query->where('type', '1')
-                ->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                });
-        })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                    ->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+        
 
         $isNewForm = false;
+        $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
-        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 'cancellationCount' => $cancellationCount, 'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'copy']);
+        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 
+        'postRidePage' => $postRidePage, 
+        'vehiclePage' => $vehiclePage, 
+        'cancellationCount' => $cancellationCount, 'noShowsCount' => $noShowsCount, 'isNewForm' => $isNewForm, 'ride' => $ride, 'noshows' => $noshows, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'copy']);
     }
 
     public function RepostRide($lang, $id)
@@ -2068,53 +2050,8 @@ class RideController extends Controller
             $overallRating = 5;
         }
 
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $postRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $postRideSubDetailPage = PostRidePageSettingSubDetail::where('language_id', $selectedLanguage->id)->first();
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-            }
-        }
-
-        $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-            // Ratings where type is 1 and ride_id belongs to the user
-            $query->where('type', '1')
-                ->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                });
-        })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                    ->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+        $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         $isNewForm = false;
 
@@ -2133,7 +2070,14 @@ class RideController extends Controller
         $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
         $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
-        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 'pinkRideSetting' => $pinkRideSetting, 'setting' => $setting, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'routeType' => 'repost', 'noshows' => $noshows, 'totalNoOfRides' => $totalNoOfRides, 'noShowsCount' => $noShowsCount, 'cancellationCount' => $cancellationCount]);
+        $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 
+        'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 
+        'pinkRideSetting' => $pinkRideSetting, 
+        'vehiclePage' => $vehiclePage, 
+        'setting' => $setting, 'overallRating' => $overallRating, 
+        'routeType' => 'repost', 'noshows' => $noshows, 'totalNoOfRides' => $totalNoOfRides, 'noShowsCount' => $noShowsCount, 'cancellationCount' => $cancellationCount]);
     }
 
     public function PostRide($lang = null)
@@ -3394,7 +3338,6 @@ class RideController extends Controller
             $redirectData['price_warning'] = session('price_warning');
         }
 
-        // return redirect()->route('post_ride', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $message->ride_post_message, 'id' => $initialRide->id]);
         return redirect()->route('my_rides', ['lang' => $selectedLanguage->abbreviation])->with($redirectData)->withInput();
     }
 
