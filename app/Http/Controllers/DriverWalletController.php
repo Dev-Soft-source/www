@@ -145,7 +145,6 @@ class DriverWalletController extends Controller
         })->with('rewardPointSetting')->where('language_id', $selectedLanguage->id)->get();
 
         $driverTotalRewardPoint = RewardPoint::where('type', 'driver')->where('user_id', $user_id)->where('status', 'pending')->sum('point');
-
         return view('driver_wallet_rewards',['reviewSetting' => $reviewSetting,'rewardPointSettings' => $rewardPointSettings,'driverTotalRewardPoint' => $driverTotalRewardPoint,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage, 'walletSettingPage' => $walletSettingPage,'ProfileSetting' => $ProfileSetting,'ProfilePage' => $ProfilePage]);
     }
 
