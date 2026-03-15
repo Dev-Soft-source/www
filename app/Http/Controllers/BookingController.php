@@ -1005,6 +1005,7 @@ class BookingController extends Controller
 
         if ($ride->booking_type == "37") {
             $rules['firm_agree_terms'] = 'accepted|required';
+            $rules['firm_cancellation_understand'] = 'accepted|required';
         }
 
         if (in_array('1', $featuresArray)) {
@@ -2356,6 +2357,7 @@ class BookingController extends Controller
 
         if ($ride->booking_type == "37") {
             $rules['firm_agree_terms'] = 'accepted|required';
+            $rules['firm_cancellation_understand'] = 'accepted|required';
         }
 
         $featuresArray = explode('=', $ride->features);
@@ -3983,10 +3985,26 @@ class BookingController extends Controller
             }
         }
 
-        $request->validate([
+        $rules = [
             'seats' => 'required|integer|min:1',
             'driver_message' => 'required',
-        ]);
+            'agree_terms' => 'accepted|required',
+        ];
+
+        if ($ride->booking_type == "37") {
+            $rules['firm_agree_terms'] = 'accepted|required';
+            $rules['firm_cancellation_understand'] = 'accepted|required';
+        }
+
+        $featuresArray = explode('=', $ride->features);
+        if (in_array('1', $featuresArray)) {
+            $rules['pink_ride_agree_terms'] = 'accepted|required';
+        }
+        if (in_array('2', $featuresArray)) {
+            $rules['extra_care_ride_agree_terms'] = 'accepted|required';
+        }
+
+        $request->validate($rules);
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
         $errorMsg = $this->successMessage;
@@ -3998,24 +4016,6 @@ class BookingController extends Controller
         }
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
-
-        $rules = [
-            'agree_terms' => 'accepted|required',
-        ];
-
-        if ($ride->booking_type == "37") {
-            $rules['firm_agree_terms'] = 'accepted|required';
-        }
-
-        $featuresArray = explode('=', $ride->features);
-        if (in_array('1', $featuresArray)) {
-            $rules['pink_ride_agree_terms'] = 'accepted|required';
-        }
-        if (in_array('2', $featuresArray)) {
-            $rules['extra_care_ride_agree_terms'] = 'accepted|required';
-        }
-
-        $validated = $request->validate($rules);
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -4093,6 +4093,7 @@ class BookingController extends Controller
 
             if ($ride->booking_type == "37") {
                 $rules['firm_agree_terms'] = 'accepted|required';
+                $rules['firm_cancellation_understand'] = 'accepted|required';
             }
 
             $featuresArray = explode('=', $ride->features);
@@ -5783,6 +5784,7 @@ class BookingController extends Controller
 
             if ($ride->booking_type == "37") {
                 $rules['firm_agree_terms'] = 'accepted|required';
+                $rules['firm_cancellation_understand'] = 'accepted|required';
             }
 
             $featuresArray = explode('=', $ride->features);

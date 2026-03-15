@@ -1019,14 +1019,11 @@
                                             @endforeach
                                         </div>
                                         @error('seats')
-                                            <div class="tooltip-error shadow-lg">{{ $bookingPage->seats_available_tooltip ?? $message }}</div>
+                                            <div id="seats-laravel-error" class="tooltip-error shadow-lg mt-1">{{ $bookingPage->seats_available_tooltip ?? $message }}</div>
                                         @enderror
 
-                                        <div id ="seats-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded ">
-                                                <p class="text-white leading-none text-sm lg:text-base"></p>
-                                            </div>
+                                        <div id="seats-error" class="hidden">
+                                            <div class="tooltip-error shadow-lg mt-1"><p class="text-sm lg:text-base"></p></div>
                                         </div>
                                         <!-- Hidden input to store count -->
                                         <input type="hidden" id="seat-count" name="seats" value="">
@@ -1260,7 +1257,7 @@
                                             class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                             placeholder="{{ $bookingPage->message_driver_placeholder ?? '' }}">{{ old('driver_message') }}</textarea>
                                         @error('driver_message')
-                                            <div role="tooltip" class="tooltip-error shadow-lg">{{ $bookingPage->chat_with_driver_tooltip ?? $message }}</div>
+                                            <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->chat_with_driver_tooltip ?? $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
@@ -1291,99 +1288,86 @@
                                             </p>
                                         </li>
                                     </ul>
-                                    <div class="flex items-start my-4">
-                                        <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                            <input id="" type="checkbox" name="agree_terms" value="1"
-                                                {{ old('agree_terms') == '1' ? 'checked' : '' }}
-                                                onchange="getFirmAgreeTerms();"
-                                                class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
-                                            <span class="ml-2">
-                                                @isset($bookingPage->booking_term_agree_text)
-                                                    {!! $bookingPage->booking_term_agree_text !!}
-                                                @endisset
-                                                <span class="text-red-500">*</span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    @error('agree_terms')
-                                        <div class="tooltip-error shadow-lg">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
-                                    @enderror
-
-                                    <div id ="agree_terms-error" class="relative tooltip -bottom-4 group-hover:flex">
-                                        <div role="tooltip"
-                                            class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base"></p>
-                                        </div>
-                                    </div>
-
-                                    @if ($ride->booking_type == '37')
-                                        @php
-                                            if ($setting) {
-                                                $settingFirmDiscount = $setting->frim_discount;
-                                            }
-
-                                            $firmText = str_replace(
-                                                ':discount',
-                                                $settingFirmDiscount,
-                                                $bookingPage->booking_disclaimer_firm,
-                                            );
-                                        @endphp
+                                    <div class="relative">
                                         <div class="flex items-start my-4">
                                             <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                <input id="" type="checkbox" name="firm_agree_terms"
-                                                    value="1" {{ old('firm_agree_terms') == '1' ? 'checked' : '' }}
+                                                <input id="" type="checkbox" name="agree_terms" value="1"
+                                                    {{ old('agree_terms') == '1' ? 'checked' : '' }}
                                                     onchange="getFirmAgreeTerms();"
                                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                                 <span class="ml-2">
-                                                    @isset($bookingPage->booking_disclaimer_firm)
-                                                        {!! $bookingPage->booking_disclaimer_firm !!}
+                                                    @isset($bookingPage->booking_term_agree_text)
+                                                        {!! $bookingPage->booking_term_agree_text !!}
                                                     @endisset
                                                     <span class="text-red-500">*</span>
                                                 </span>
                                             </label>
                                         </div>
-                                        @error('firm_agree_terms')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">{{ $bookingPage->booking_disclaimer_firm_tooltip }}</p>
-                                                </div>
-                                            </div>
-                                        @enderror
+                                    
+                                    @error('agree_terms')
+                                        <div id="agree_terms-laravel-error" class="tooltip-error shadow-lg mt-1" data-keep-on-interaction="1">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
+                                    @enderror
 
-                                        <div id ="firm_agree_terms-error"
-                                            class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base"></p>
-                                            </div>
+                                        <div id="agree_terms-error" class="hidden">
+                                            <div class="tooltip-error shadow-lg mt-1"><p class="text-sm lg:text-base"></p></div>
                                         </div>
+                                    </div>
 
-                                        {{-- Second checkbox for Firm Cancellation Policy --}}
-                                        <div class="flex items-start my-4">
-                                            <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                <input id="firm_cancellation_understand" type="checkbox"
-                                                    name="firm_cancellation_understand" value="1"
-                                                    {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
-                                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                                <span class="ml-2">
-                                                    @isset($bookingPage->firm_cancellation_understand_text)
-                                                        {!! $bookingPage->firm_cancellation_understand_text !!}
-                                                    @endisset
-                                                    <span class="text-red-500">*</span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                        @error('firm_cancellation_understand')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">
-                                                        {{ $message }}</p>
-                                                </div>
+                                    <div class="relative">
+                                        @if ($ride->booking_type == '37')
+                                            @php
+                                                if ($setting) {
+                                                    $settingFirmDiscount = $setting->frim_discount;
+                                                }
+
+                                                $firmText = str_replace(
+                                                    ':discount',
+                                                    $settingFirmDiscount,
+                                                    $bookingPage->booking_disclaimer_firm,
+                                                );
+                                            @endphp
+                                            <div class="flex items-start my-4">
+                                                <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                                    <input id="" type="checkbox" name="firm_agree_terms"
+                                                        value="1" {{ old('firm_agree_terms') == '1' ? 'checked' : '' }}
+                                                        onchange="getFirmAgreeTerms();"
+                                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
+                                                    <span class="ml-2">
+                                                        @isset($bookingPage->booking_disclaimer_firm)
+                                                            {!! $bookingPage->booking_disclaimer_firm !!}
+                                                        @endisset
+                                                        <span class="text-red-500">*</span>
+                                                    </span>
+                                                </label>
                                             </div>
-                                        @enderror
-                                    @endif
+                                            @error('firm_agree_terms')
+                                                <div id="firm_agree_terms-laravel-error" class="tooltip-error shadow-lg mt-1" data-keep-on-interaction="1">{{ $bookingPage->booking_disclaimer_firm_tooltip ?? $message }}</div>
+                                            @enderror
+
+                                                <div id="firm_agree_terms-error" class="hidden">
+                                                    <div class="tooltip-error shadow-lg mt-1"><p class="text-sm lg:text-base"></p></div>
+                                                </div>
+
+                                                {{-- Second checkbox for Firm Cancellation Policy --}}
+                                                <div class="flex items-start my-4">
+                                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                                        <input id="firm_cancellation_understand" type="checkbox"
+                                                            name="firm_cancellation_understand" value="1"
+                                                            {{ old('firm_cancellation_understand') == '1' ? 'checked' : '' }}
+                                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
+                                                        <span class="ml-2">
+                                                            @isset($bookingPage->firm_cancellation_understand_text)
+                                                                {!! $bookingPage->firm_cancellation_understand_text !!}
+                                                            @endisset
+                                                            <span class="text-red-500">*</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            @error('firm_cancellation_understand')
+                                                <div id="firm_cancellation_understand-laravel-error" class="tooltip-error shadow-lg mt-1" data-keep-on-interaction="1">{{ $message }}</div>
+                                            @enderror
+                                        @endif
+                                    </div>
 
                                     @if (in_array($postRidePage->features_option1->name, $features))
                                         <div class="flex items-start my-4">
@@ -1402,24 +1386,11 @@
                                             </label>
                                         </div>
                                         @error('pink_ride_agree_terms')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">
-                                                        @isset($bookingPage->pink_ride_tooltip)
-                                                            {{ $bookingPage->pink_ride_tooltip }}
-                                                        @endisset
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <div id="pink_ride_agree_terms-laravel-error" class="tooltip-error shadow-lg mt-1" data-keep-on-interaction="1">{{ $bookingPage->pink_ride_tooltip ?? $message }}</div>
                                         @enderror
 
-                                        <div id ="pink_ride_agree_terms-error"
-                                            class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base"></p>
-                                            </div>
+                                        <div id="pink_ride_agree_terms-error" class="hidden">
+                                            <div class="tooltip-error shadow-lg mt-1"><p class="text-sm lg:text-base"></p></div>
                                         </div>
                                     @endif
 
@@ -1440,27 +1411,13 @@
                                             </label>
                                         </div>
                                         @error('extra_care_ride_agree_terms')
-                                            <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                <div role="tooltip"
-                                                    class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                    <p class="text-white leading-none text-sm lg:text-base">
-                                                        @isset($bookingPage->extra_care_ride_tooltip)
-                                                            {{ $bookingPage->extra_care_ride_tooltip }}
-                                                        @endisset
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <div id="extra_care_ride_agree_terms-laravel-error" class="tooltip-error shadow-lg mt-1" data-keep-on-interaction="1">{{ $bookingPage->extra_care_ride_tooltip ?? $message }}</div>
                                         @enderror
 
-                                        <div id ="extra_care_ride_agree_terms-error"
-                                            class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="hidden relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base"></p>
-                                            </div>
+                                        <div id="extra_care_ride_agree_terms-error" class="hidden">
+                                            <div class="tooltip-error shadow-lg mt-1"><p class="text-sm lg:text-base"></p></div>
                                         </div>
                                     @endif
-
 
                                     @if (
                                         (optional($ride->payment_method)->features_setting_id ?? null) ===
@@ -1716,79 +1673,6 @@
 
             // Seat selection logic
             var lastSelectedIndex = -1; // To track the last selected index
-
-            // $('input[name="seats_id[]"]').change(function () {
-            //     var clickedIndex = $("input[name='seats_id[]']").index(this);
-            //     var seat = $(this).val();
-
-            //     // If the seat is checked
-            //     if ($(this).is(':checked')) {
-            //         // If this is the first selection or only one seat selected
-            //         // if ( $("input[name='seats_id[]']:checked").length === 0) {
-            //         //     // Keep only the current clicked seat selected
-            //         //     $("input[name='seats_id[]']").each(function (index) {
-            //         //         var seatValue = $(this).val();
-            //         //         if (index <= clickedIndex) {
-            //         //             // Select this seat (checked)
-            //         //             $(this).prop('checked', true);
-            //         //             // Change the image source for selected seats
-            //         //             $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-            //         //             $(".seat-number.seat-number-" + seatValue).addClass('text-green-300');
-            //         //         }
-            //         //     });
-            //         // } else {
-            //             // Select all seats to the left of or including this one
-            //             $("input[name='seats_id[]']").each(function (index) {
-            //                 var seatValue = $(this).val();
-            //                 if (index <= clickedIndex) {
-            //                     // Select this seat (checked)
-            //                     $(this).prop('checked', true);
-            //                     // Change the image source for selected seats
-            //                     $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-            //                     $(".seat-number.seat-number-" + seatValue).addClass('text-green-300');
-            //                 } else {
-            //                     // Unselect this seat (unchecked)
-            //                     $(this).prop('checked', false);
-            //                     // Revert the image source for unselected seats
-            //                     $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset('assets/seat.png') }}');
-            //                     $(".seat-number.seat-number-" + seatValue).removeClass('text-green-300');
-            //                 }
-            //             });
-            //         // }
-            //     } else {
-            //         // If unselected, unselect all seats to the right of or at the clicked index
-            //         $("input[name='seats_id[]']").each(function (index) {
-            //             var seatValue = $(this).val();
-            //             if (index <= clickedIndex) {
-            //                 // Keep this seat selected (checked)
-            //                 $(this).prop('checked', true);
-            //                 // Change the image source for selected seats
-            //                 $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-            //                 $(".seat-number.seat-number-" + seatValue).addClass('text-green-300');
-            //             } else {
-            //                 // Unselect this seat (unchecked)
-            //                 $(this).prop('checked', false);
-            //                 // Revert the image source for unselected seats
-            //                 $(".seat-image.seat-unselect-" + seatValue).attr('src', '{{ asset('assets/seat.png') }}');
-            //                 $(".seat-number.seat-number-" + seatValue).removeClass('text-green-300');
-            //             }
-            //         });
-            //     }
-
-            //     // Special case: allow unselection of the first seat when it is the only selected one
-            //     var selectedSeats = $("input[name='seats_id[]']:checked").length;
-
-            //     // Fix: Do not unselect all when only the first seat is selected
-            //     if (clickedIndex === 0) {
-            //         // First seat can be unselected if clicked again
-            //         $(this).prop('checked', true); // Ensure it stays checked when clicked
-            //         $(".seat-image.seat-unselect-" + seat).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-            //         $(".seat-number.seat-number-" + seat).addClass('text-green-300');
-            //     }
-
-            //     // Update the total amount after selections are done
-            //     updateTotalAmount();
-            // });
         });
 
         // Get the current date
@@ -2126,6 +2010,28 @@
                 $("#number-of-seat-" + id).prop('checked', true);
             });
 
+            // Hide seats validation error when at least one seat is selected; show when none
+            // Use next-sibling selector so we find the Laravel error div even if id is missing
+            var seatsErrorEl = document.getElementById('seats-laravel-error') ||
+                document.querySelector('#seat-selection-container + .tooltip-error');
+            var seatsErrorContainer = document.getElementById('seats-error');
+            if (newSelectionIds.length > 0) {
+                if (seatsErrorEl) {
+                    seatsErrorEl.classList.add('hidden');
+                    seatsErrorEl.style.display = 'none';
+                }
+                if (seatsErrorContainer) {
+                    seatsErrorContainer.classList.add('hidden');
+                    seatsErrorContainer.style.display = 'none';
+                }
+            } else {
+                if (seatsErrorEl) {
+                    seatsErrorEl.classList.remove('hidden');
+                    seatsErrorEl.style.display = '';
+                }
+                if (seatsErrorContainer) seatsErrorContainer.classList.add('hidden');
+            }
+
             $(".seat-image").attr('src', '{{ asset('assets/seat.png') }}');
             $(".seat-number").removeClass('text-green-300');
             newSelectionIds.forEach(function(id) {
@@ -2247,6 +2153,20 @@
 
         function getFirmAgreeTerms() {
             updateTotalAmount();
+            // Hide only the error for the checkbox that is checked (so only that one disappears, not all)
+            function hideErrorIfChecked(checkboxName, errorContainerId, laravelErrorId) {
+                var cb = document.querySelector('[name="' + checkboxName + '"]');
+                if (!cb || !cb.checked) return;
+                var el = document.getElementById(errorContainerId);
+                if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+                el = document.getElementById(laravelErrorId);
+                if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+            }
+            hideErrorIfChecked('agree_terms', 'agree_terms-error', 'agree_terms-laravel-error');
+            hideErrorIfChecked('firm_agree_terms', 'firm_agree_terms-error', 'firm_agree_terms-laravel-error');
+            hideErrorIfChecked('firm_cancellation_understand', 'firm_cancellation_understand-error', 'firm_cancellation_understand-laravel-error');
+            hideErrorIfChecked('pink_ride_agree_terms', 'pink_ride_agree_terms-error', 'pink_ride_agree_terms-laravel-error');
+            hideErrorIfChecked('extra_care_ride_agree_terms', 'extra_care_ride_agree_terms-error', 'extra_care_ride_agree_terms-laravel-error');
         }
 
         
