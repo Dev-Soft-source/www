@@ -8,6 +8,7 @@ use App\Mail\PassengerReceivedReviewMail;
 use App\Mail\ReviewLeftMail;
 use App\Models\Booking;
 use App\Models\Language;
+use App\Models\MyReviewSettingDetail;
 use App\Models\Notification;
 use App\Models\Rating;
 use App\Models\ReferralDetail;
@@ -84,7 +85,25 @@ class ReviewController extends Controller
             $query->withTrashed(); // Include soft-deleted users
         }])->first();
 
-        return view('passenger_review',['rating' => $rating,]);
+        if (!$rating) {
+            abort(404, 'Review not found');
+        }
+
+        $languages = Language::all();
+        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
+            session(['selectedLanguage' => $lang]);
+        }
+        $selectedLanguage = session('selectedLanguage');
+        $selectedLanguage = $selectedLanguage ? Language::where('abbreviation', $selectedLanguage)->first() : Language::where('is_default', 1)->first();
+        $defaultLang = Language::where('is_default', 1)->first();
+        $myReviewPage = ($selectedLanguage && $defaultLang)
+            ? MyReviewSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang->id)
+            : null;
+
+        return view('passenger_review', [
+            'rating' => $rating,
+            'myReviewPage' => $myReviewPage,
+        ]);
     }
 
     public function reviewLeftIndex($lang, $id){

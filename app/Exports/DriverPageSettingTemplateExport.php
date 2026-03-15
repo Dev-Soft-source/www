@@ -44,6 +44,16 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
             'main_heading' => 'Drivers',
             'sub_heading' => 'Join as a driver',
             'page_description' => 'Drive with us and earn.',
+            'driver_info_heading' => 'Driver info',
+            'joined_label' => 'Joined',
+            'age_label' => 'Age',
+            'mini_bio_heading' => 'Mini bio',
+            'passengers_driven_label' => 'Passengers driven',
+            'rides_taken_label' => 'Rides taken',
+            'km_shared_label' => 'KM shared',
+            'vehicle_info_heading' => 'Vehicle info',
+            'reviews_heading' => 'Reviews',
+            'see_all_reviews_btn' => 'See all reviews',
         ];
     }
 

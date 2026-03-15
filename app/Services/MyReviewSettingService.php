@@ -54,6 +54,17 @@ class MyReviewSettingService
             'see_all_review_label' => $this->data($request, $language, 'see_all_review_label'),
             'reply_submit_button_label' => $this->data($request, $language, 'reply_submit_button_label'),
             'review_label' => $this->data($request, $language, 'review_label'),
+            'passenger_review_heading' => $this->data($request, $language, 'passenger_review_heading'),
+            'passenger_review_criteria_heading' => $this->data($request, $language, 'passenger_review_criteria_heading'),
+            'passenger_review_condition_label' => $this->data($request, $language, 'passenger_review_condition_label'),
+            'passenger_review_conscious_label' => $this->data($request, $language, 'passenger_review_conscious_label'),
+            'passenger_review_comfort_label' => $this->data($request, $language, 'passenger_review_comfort_label'),
+            'passenger_review_communication_label' => $this->data($request, $language, 'passenger_review_communication_label'),
+            'passenger_review_attitude_label' => $this->data($request, $language, 'passenger_review_attitude_label'),
+            'passenger_review_hygiene_label' => $this->data($request, $language, 'passenger_review_hygiene_label'),
+            'passenger_review_respect_label' => $this->data($request, $language, 'passenger_review_respect_label'),
+            'passenger_review_safety_label' => $this->data($request, $language, 'passenger_review_safety_label'),
+            'passenger_review_timeliness_label' => $this->data($request, $language, 'passenger_review_timeliness_label'),
         ];
     }
 
