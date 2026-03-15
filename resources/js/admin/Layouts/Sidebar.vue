@@ -278,6 +278,25 @@
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Extra-Care settings</span>
                     </router-link>
                 </li>
+
+                <li>
+                    <router-link :to="{ name: 'admin.notification-message-setting.index' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.notification-message-setting.index' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-white">
+                                <path fill-rule="evenodd"
+                                    d="M9 2.25a.75.75 0 01.75.75v1.506a49.38 49.38 0 015.343.371.75.75 0 11-.186 1.489c-.66-.083-1.323-.151-1.99-.206a18.67 18.67 0 01-2.969 6.323c.317.384.65.753.998 1.107a.75.75 0 11-1.07 1.052A18.902 18.902 0 019 13.687a18.823 18.823 0 01-5.656 4.482.75.75 0 11-.688-1.333 17.323 17.323 0 005.396-4.353A18.72 18.72 0 015.89 8.598a.75.75 0 011.388-.568A17.21 17.21 0 009 11.224a17.17 17.17 0 002.391-5.165 48.038 48.038 0 00-8.298.307.75.75 0 01-.186-1.489 49.159 49.159 0 015.343-.371V3A.75.75 0 019 2.25zM15.75 9a.75.75 0 01.68.433l5.25 11.25a.75.75 0 01-1.36.634l-1.198-2.567h-6.744l-1.198 2.567a.75.75 0 01-1.36-.634l5.25-11.25A.75.75 0 0115.75 9zm-2.672 8.25h5.344l-2.672-5.726-2.672 5.726z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Notification messages</span>
+                    </router-link>
+                </li>
+
                 <li>
                     <router-link :to="{ name: 'admin.pink-ride-settings.index', params: { id: 1 } }"
                         class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
@@ -357,28 +376,14 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                 class="w-6 h-6 text-white">
                                 <path fill-rule="evenodd"
-                                    d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM8.25 8.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zm4.875 0a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5zM4.5 13.125a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM8.25 15.375a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zm4.875 0a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5z"
+                                    d="M9 2.25a.75.75 0 01.75.75v1.506a49.38 49.38 0 015.343.371.75.75 0 11-.186 1.489c-.66-.083-1.323-.151-1.99-.206a18.67 18.67 0 01-2.969 6.323c.317.384.65.753.998 1.107a.75.75 0 11-1.07 1.052A18.902 18.902 0 019 13.687a18.823 18.823 0 01-5.656 4.482.75.75 0 11-.688-1.333 17.323 17.323 0 005.396-4.353A18.72 18.72 0 015.89 8.598a.75.75 0 011.388-.568A17.21 17.21 0 009 11.224a17.17 17.17 0 002.391-5.165 48.038 48.038 0 00-8.298.307.75.75 0 01-.186-1.489 49.159 49.159 0 015.343-.371V3A.75.75 0 019 2.25zM15.75 9a.75.75 0 01.68.433l5.25 11.25a.75.75 0 01-1.36.634l-1.198-2.567h-6.744l-1.198 2.567a.75.75 0 01-1.36-.634l5.25-11.25A.75.75 0 0115.75 9zm-2.672 8.25h5.344l-2.672-5.726-2.672 5.726z"
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Setting site text</span>
                     </router-link>
                 </li>
-                <li>
-                    <router-link :to="{ name: 'admin.notification-message-setting.index' }"
-                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
-                        :class="$route.name == 'admin.notification-message-setting.index' ?
-                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
-                            ''">
-                        <div class="sidebar-links-icon flex justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="w-6 h-6 text-white">
-                                <path d="M4 5.25A2.25 2.25 0 016.25 3h11.5A2.25 2.25 0 0120 5.25v13.5A2.25 2.25 0 0117.75 21H6.25A2.25 2.25 0 014 18.75V5.25zm3 1.5a.75.75 0 000 1.5h10a.75.75 0 000-1.5H7zm0 4a.75.75 0 000 1.5h10a.75.75 0 000-1.5H7zm0 4a.75.75 0 000 1.5h6a.75.75 0 000-1.5H7z" />
-                            </svg>
-                        </div>
-                        <span class="links_name pointer-events-auto opacity-0 text-white ">Notification messages</span>
-                    </router-link>
-                </li>
+                
                 
                 <li>
                     <router-link :to="{ name: 'admin.success-messages-setting.index' }"
@@ -741,6 +746,24 @@
                             </svg>
                         </div>
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Contact proximaRide page settings </span>
+                    </router-link>
+                </li>
+
+                <li>
+                    <router-link :to="{ name: 'admin.cost-sharing-page-setting.index' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.cost-sharing-page-setting.index' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-white">
+                                <path fill-rule="evenodd"
+                                    d="M9 2.25a.75.75 0 01.75.75v1.506a49.38 49.38 0 015.343.371.75.75 0 11-.186 1.489c-.66-.083-1.323-.151-1.99-.206a18.67 18.67 0 01-2.969 6.323c.317.384.65.753.998 1.107a.75.75 0 11-1.07 1.052A18.902 18.902 0 019 13.687a18.823 18.823 0 01-5.656 4.482.75.75 0 11-.688-1.333 17.323 17.323 0 005.396-4.353A18.72 18.72 0 015.89 8.598a.75.75 0 011.388-.568A17.21 17.21 0 009 11.224a17.17 17.17 0 002.391-5.165 48.038 48.038 0 00-8.298.307.75.75 0 01-.186-1.489 49.159 49.159 0 015.343-.371V3A.75.75 0 019 2.25zM15.75 9a.75.75 0 01.68.433l5.25 11.25a.75.75 0 01-1.36.634l-1.198-2.567h-6.744l-1.198 2.567a.75.75 0 01-1.36-.634l5.25-11.25A.75.75 0 0115.75 9zm-2.672 8.25h5.344l-2.672-5.726-2.672 5.726z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Cost sharing page</span>
                     </router-link>
                 </li>
                 
@@ -1223,23 +1246,7 @@
                         <span class="links_name pointer-events-auto opacity-0 text-white ">Privacy policy page</span>
                     </router-link>
                 </li>
-                <li>
-                    <router-link :to="{ name: 'admin.cost-sharing-page-setting.index' }"
-                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
-                        :class="$route.name == 'admin.cost-sharing-page-setting.index' ?
-                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
-                            ''">
-                        <div class="sidebar-links-icon flex justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                class="w-6 h-6 text-white">
-                                <path fill-rule="evenodd"
-                                    d="M9 2.25a.75.75 0 01.75.75v1.506a49.38 49.38 0 015.343.371.75.75 0 11-.186 1.489c-.66-.083-1.323-.151-1.99-.206a18.67 18.67 0 01-2.969 6.323c.317.384.65.753.998 1.107a.75.75 0 11-1.07 1.052A18.902 18.902 0 019 13.687a18.823 18.823 0 01-5.656 4.482.75.75 0 11-.688-1.333 17.323 17.323 0 005.396-4.353A18.72 18.72 0 015.89 8.598a.75.75 0 011.388-.568A17.21 17.21 0 009 11.224a17.17 17.17 0 002.391-5.165 48.038 48.038 0 00-8.298.307.75.75 0 01-.186-1.489 49.159 49.159 0 015.343-.371V3A.75.75 0 019 2.25zM15.75 9a.75.75 0 01.68.433l5.25 11.25a.75.75 0 01-1.36.634l-1.198-2.567h-6.744l-1.198 2.567a.75.75 0 01-1.36-.634l5.25-11.25A.75.75 0 0115.75 9zm-2.672 8.25h5.344l-2.672-5.726-2.672 5.726z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <span class="links_name pointer-events-auto opacity-0 text-white ">Cost sharing page</span>
-                    </router-link>
-                </li>
+                
                 <li>
                     <router-link :to="{ name: 'admin.profile-photo-guidelines-page-setting.index' }"
                         class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
