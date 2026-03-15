@@ -75,6 +75,8 @@ import CreateChatsPageSetting from '../admin/Pages/CreateChatsPageSetting.vue'
 import CreateSelectLocationPageSetting from '../admin/Pages/CreateSelectLocationPageSetting.vue'
 import CreateCoffeeWallPageSetting from '../admin/Pages/CreateCoffeeWallPageSetting.vue'
 import CreateTripsPageSetting from '../admin/Pages/CreateTripsPageSetting.vue'
+import CreateThankyouPageSetting from '../admin/Pages/CreateThankyouPageSetting.vue'
+import CreateNotificationsPageSetting from '../admin/Pages/CreateNotificationsPageSetting.vue'
 import CreateFeaturesSetting from '../admin/Pages/CreateFeaturesSetting.vue'
 import CreatePreferencesSetting from '../admin/Pages/CreatePreferencesSetting.vue'
 import CreatePaymentMethodsSetting from '../admin/Pages/CreatePaymentMethodsSetting.vue'
@@ -990,6 +992,22 @@ const routes = [
         component: CreateReferralPageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Referral page setting', 'routeName': 'admin.referral-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/thankyou-page-settings',
+        name: 'admin.thankyou-page-setting.index',
+        component: CreateThankyouPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Thank You page settings', 'routeName': 'admin.thankyou-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/notifications-page-settings',
+        name: 'admin.notifications-page-setting.index',
+        component: CreateNotificationsPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Notifications page settings', 'routeName': 'admin.notifications-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

@@ -212,6 +212,16 @@ body {
         font-size: 22px;
     }
 
+    .button-exp-green-fill {
+        @apply bg-green-700 hover:bg-green-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-green-700 hover:border-green-600 hover:text-white text-center focus:bg-green-800 focus:text-white active:text-white active:bg-green-800;
+        font-size: 22px;
+    }
+
+    .button-exp-sky-fill {
+        @apply bg-sky-700 hover:bg-sky-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-sky-700 hover:border-sky-600 hover:text-white text-center focus:bg-sky-800 focus:text-white active:text-white active:bg-sky-800;
+        font-size: 22px;
+    }
+
     .button-exp-no-fill {
         @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
         font-size: 22px;
@@ -226,24 +236,29 @@ body {
     button.bg-red-500,
     button.bg-red-700,
     button.bg-greenXS,
+    button.bg-sky-700,
     button.bg-primary,
     button.bg-blue-600,
     a.bg-red-500,
     a.bg-red-700,
     a.bg-greenXS,
+    a.bg-sky-700,
     a.bg-primary,
     a.bg-blue-600,
     button[class*="bg-red"],
     button[class*="bg-green"],
+    button[class*="bg-sky"],
     button[class*="bg-blue"],
     button[class*="bg-primary"],
     a[class*="bg-red"],
     a[class*="bg-green"],
+    a[class*="bg-sky"],
     a[class*="bg-blue"],
     a[class*="bg-primary"],
     .bg-red-500.font-FuturaMdCnBT,
     .bg-red-700.font-FuturaMdCnBT,
     .bg-greenXS.font-FuturaMdCnBT,
+    .bg-sky-700.font-FuturaMdCnBT,
     .bg-primary.font-FuturaMdCnBT,
     .bg-blue-600.font-FuturaMdCnBT {
         font-size: 22px !important;
@@ -358,6 +373,16 @@ body {
             font-size: 22px;
         }
 
+        .button-exp-green-fill {
+            @apply bg-green-700 hover:bg-green-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-green-700 hover:border-green-600 hover:text-white text-center focus:bg-green-800 focus:text-white active:text-white active:bg-green-800;
+            font-size: 22px;
+        }
+
+        .button-exp-sky-fill {
+            @apply bg-sky-700 hover:bg-sky-600 text-white rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-sky-700 hover:border-sky-600 hover:text-white text-center focus:bg-sky-800 focus:text-white active:text-white active:bg-sky-800;
+            font-size: 22px;
+        }
+
         .button-exp-no-fill {
             @apply text-primary rounded font-FuturaMdCnBT px-5 py-2 hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-500 focus:text-blue-500 active:bg-blue-100 active:border-blue-100 active:text-blue-500;
             font-size: 22px;
@@ -372,24 +397,29 @@ body {
         button.bg-red-500,
         button.bg-red-700,
         button.bg-greenXS,
+        button.bg-sky-700,
         button.bg-primary,
         button.bg-blue-600,
         a.bg-red-500,
         a.bg-red-700,
         a.bg-greenXS,
+        a.bg-sky-700,
         a.bg-primary,
         a.bg-blue-600,
         button[class*="bg-red"],
         button[class*="bg-green"],
+        button[class*="bg-sky"],
         button[class*="bg-blue"],
         button[class*="bg-primary"],
         a[class*="bg-red"],
         a[class*="bg-green"],
+        a[class*="bg-sky"],
         a[class*="bg-blue"],
         a[class*="bg-primary"],
         .bg-red-500.font-FuturaMdCnBT,
         .bg-red-700.font-FuturaMdCnBT,
         .bg-greenXS.font-FuturaMdCnBT,
+        .bg-sky-700.font-FuturaMdCnBT,
         .bg-primary.font-FuturaMdCnBT,
         .bg-blue-600.font-FuturaMdCnBT {
             font-size: 22px !important;
@@ -479,6 +509,14 @@ body {
 
         .button-exp-red-fill {
             @apply bg-red-700 hover:bg-red-600 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-red-700 hover:border-red-600 hover:text-white text-center focus:bg-red-800 focus:text-white active:text-white active:bg-red-800;
+        }
+
+        .button-exp-green-fill {
+            @apply bg-green-700 hover:bg-green-600 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-green-700 hover:border-green-600 hover:text-white text-center focus:bg-green-800 focus:text-white active:text-white active:bg-green-800;
+        }
+
+        .button-exp-sky-fill {
+            @apply bg-sky-700 hover:bg-sky-600 text-white text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-sky-700 hover:border-sky-600 hover:text-white text-center focus:bg-sky-800 focus:text-white active:text-white active:bg-sky-800;
         }
 
         .button-exp-no-fill {
