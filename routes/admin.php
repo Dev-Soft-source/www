@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\Admin\{
     CountryController,
     DisputePolicyPageSettingController,
     DriverPageSettingController,
+    ErrorPageSettingController,
     FeaturesSettingController,
     FindRidePageSettingController,
     FolkRideSettingController,
@@ -150,6 +151,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-driver-page-setting', [DriverPageSettingController::class, 'show']);
     Route::post('/upload-driver-page-setting-excel', [DriverPageSettingController::class, 'uploadExcel']);
     Route::get('/download-driver-page-setting-template', [DriverPageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-error-page-setting', [ErrorPageSettingController::class, 'update']);
+    Route::get('/get-error-page-setting', [ErrorPageSettingController::class, 'show']);
+    Route::post('/upload-error-page-setting-excel', [ErrorPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-error-page-setting-template', [ErrorPageSettingController::class, 'downloadTemplate']);
     Route::post('/update-passenger-page-setting', [PassengerPageSettingController::class, 'update']);
     Route::get('/get-passenger-page-setting', [PassengerPageSettingController::class, 'show']);
     Route::post('/upload-passenger-page-setting-excel', [PassengerPageSettingController::class, 'uploadExcel']);

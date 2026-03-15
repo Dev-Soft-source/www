@@ -819,6 +819,20 @@
                     </router-link>
                 </li>
                 <li>
+                    <router-link :to="{ name: 'admin.error-page-setting.index' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.error-page-setting.index' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+                                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Error page (404) settings</span>
+                    </router-link>
+                </li>
+                <li>
                     <router-link :to="{ name: 'admin.edit-profile-page-setting.index' }"
                         class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
                         :class="$route.name == 'admin.edit-profile-page-setting.index' ?
@@ -2137,7 +2151,7 @@ export default {
             // Pages
             else if ([
                 'admin.home-page-setting.index', 'admin.student-page-setting.index', 'admin.terms-of-use-page-setting.index',
-                'admin.driver-page-setting.index', 'admin.passenger-page-setting.index', 'admin.find-ride-page-setting.index',
+                'admin.driver-page-setting.index', 'admin.error-page-setting.index', 'admin.passenger-page-setting.index', 'admin.find-ride-page-setting.index',
                 'admin.post-ride-page-setting.index', 'admin.login-page-setting.index', 'admin.signup-page-setting.index',
                 'admin.contact-us-page-setting.index', 'admin.features-setting.index', 'admin.preferences-setting.index',
                 'admin.forgot-password-setting.index', 'admin.payment-methods-setting.index', 'admin.luggage-options-setting.index',
