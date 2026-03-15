@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <header class="py-4 bg-white">
-            <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-full mx-auto px-4">
                 <div class="flex items-center justify-between">
                     <h1 class="can-edu-h1">
                         Create Videos

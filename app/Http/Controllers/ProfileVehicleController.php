@@ -55,7 +55,7 @@ class ProfileVehicleController extends Controller
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
+        // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
         $userVehicleCount = 0;
         if (auth()->user()) {
@@ -236,7 +236,7 @@ class ProfileVehicleController extends Controller
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
+        // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
 
         $vehicleTypes = $this->getVehicleTypesByLanguage();
 

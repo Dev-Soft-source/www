@@ -129,6 +129,7 @@ import Videos from  '../admin/Videos/Videos.vue'
 import SiteSettings from '../admin/Site_Settings/SiteSettings.vue'
 import CreateNews from '../admin/News/Create.vue'
 import CreateVideos from '../admin/Videos/Create.vue'
+import NotFound from '../admin/NotFound/NotFound.vue'
 const routes = [
     {
         path: '/admin/dashboard',
@@ -1272,6 +1273,14 @@ const routes = [
         component: SiteSettings,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Site settings', 'routeName': 'admin.site-settings.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/:pathMatch(.*)*',
+        name: 'admin.not-found',
+        component: NotFound,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': '404 - Page Not Found', 'routeName': 'admin.not-found', 'isCurrentRoute': 1}],
         },
     },
 ]

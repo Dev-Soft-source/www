@@ -1932,6 +1932,7 @@ class RideController extends Controller
 
     public function CopyRide($lang, $id)
     {
+        $user_id = auth()->user()->id;
         $ride = Ride::with(['defaultRideDetail', 'MoreRideDetail'])->where('id', $id)->first();
         $user_id = auth()->user()->id;
         $user = User::whereId($user_id)->first();
@@ -1990,6 +1991,7 @@ class RideController extends Controller
 
     public function RepostRide($lang, $id)
     {
+        $user_id = auth()->user()->id;
         $ride = Ride::with(['defaultRideDetail', 'MoreRideDetail'])->where('id', $id)->first();
         $user_id = auth()->user()->id;
         $user = User::whereId($user_id)->first();

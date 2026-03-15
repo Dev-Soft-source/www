@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="relative shadow-md sm:rounded-lg bg-white py-4">
-            <div class="px-4 sm:px-6 lg:px-8">
+            <div class="px-4">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
                         <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="no_shows">No shows</h3>

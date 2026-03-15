@@ -1,10 +1,8 @@
-<template>
+﻿<template>
     <AppLayout>
-        <section class="trips-section relative md:top-16">
-            <main class="flex-1 max-h-full p-3 bg-gray-200 pb-2">
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
-                        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="max-w-full mx-auto px-4">
                             <div class="flex items-center justify-between">
                                 <h3 class="can-exp-h2 text-primary">
                                     My trips page settings
@@ -20,7 +18,7 @@
                         @success="fetchTermsOfUsePageSetting"
                     />
 
-                    <form class="px-4 md:px-6 lg:px-8" @submit.prevent="updatePageSetting()">
+                    <form class="px-4" @submit.prevent="updatePageSetting()">
                         <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200">
                             <ul class="flex flex-wrap mb-2 overflow-x-auto gap-1">
                                 <li class="mr-2" v-for="language in languages" :key="language.id">
@@ -1667,10 +1665,7 @@
                             Submit
                         </button>
                     </form>
-                </div>
-            </main>
-        </section>
-    </AppLayout>
+                                </div>    </AppLayout>
 </template>
 <script>
 import Editor from "@tinymce/tinymce-vue";

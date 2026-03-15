@@ -278,7 +278,7 @@ class PhoneController extends Controller
             return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
         }
 
-        return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_add_message);
+        return redirect()->route('phone', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->phone_add_message);
     }
 
     public function setDefault($id)
@@ -303,7 +303,7 @@ class PhoneController extends Controller
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
-        return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', 'Phone number set as default successfully');
+        return redirect()->route('phone', ['lang' => $this->selectedLanguage->abbreviation])->with('message', 'Phone number set as default successfully');
     }
 
     public function destroy($id)
@@ -389,7 +389,7 @@ class PhoneController extends Controller
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_delete_message')->first();
             }
         }
-        return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_delete_message);
+        return redirect()->route('phone', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->phone_delete_message);
     }
 
     /**
@@ -502,7 +502,7 @@ class PhoneController extends Controller
 
             return view('phone_code_step', compact('user', 'phone_numbers', 'step4Page', 'notifications', 'languages', 'selectedLanguage'));
         }
-        return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
+        return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
     }
 
     public function verifyPhoneNumber(Request $request)
@@ -603,6 +603,11 @@ class PhoneController extends Controller
 
         if ($isValid && $phone_number) {
             $phone_number->update(['verified' => '1']);
+
+            // Update the step5 field in the users table for the authenticated user
+            if (auth()->check()) {
+                auth()->user()->update(['step5' => 1]);
+            }
 
             // Auto-mark as default if this is the first/only verified phone number
             $verifiedPhoneCount = PhoneNumber::where('user_id', auth()->user()->id)
