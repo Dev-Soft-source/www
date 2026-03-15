@@ -357,6 +357,11 @@ return [
         'message' => [
             'required' => 'Kinakailangan ang mensahe.',
         ],
+        'student_card' => [
+            'required' => 'Kinakailangan ang student card.',
+            'mimes' => 'Ang larawan ay dapat na isang file ng uri: jpeg, png, jpg, gif, pdf.',
+            'max' => 'Ang larawan ay dapat na mas mababa sa 10MB.',
+        ],
 
         'payment_method' => [
             'required' => 'Kinakailangan ang paraan ng pagbabayad.',

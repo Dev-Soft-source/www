@@ -42,20 +42,9 @@ class VerifyStudentController extends Controller
     }
 
     public function update($id, Request $request){
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('student_card_upload_message', 'image_size_error_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('student_card_upload_message', 'image_size_error_message')->first();
-            }
-        }
+        
+
+        $message = $this->successMessage;
         
         $customMessages = [
             'file' => 'Please select a valid file',
@@ -69,7 +58,7 @@ class VerifyStudentController extends Controller
             $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
 
             if (!in_array($extension, $allowedExtensions)) {
-                return redirect()->back()->withErrors(['student_card' => 'The file must be a PDF, JPEG, PNG, JPG, or GIF file.'])->withInput();
+                return redirect()->back()->withErrors(['student_card' => __('validation.custom.student_card.mimes')])->withInput();
             }
 
             // Check file magic bytes for more robust validation
@@ -96,18 +85,18 @@ class VerifyStudentController extends Controller
             if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])) {
                 // For image files, verify magic bytes
                 if (!in_array($mime, ['image/jpeg', 'image/png', 'image/gif'])) {
-                    return redirect()->back()->withErrors(['student_card' => 'The file is not a valid JPEG, PNG, or GIF image.'])->withInput();
+                    return redirect()->back()->withErrors(['student_card' => __('validation.custom.student_card.mimes')])->withInput();
                 }
             } elseif ($extension === 'pdf') {
                 // For PDF files, verify magic bytes
                 if ($mime !== 'application/pdf') {
-                    return redirect()->back()->withErrors(['student_card' => 'The file is not a valid PDF file.'])->withInput();
+                    return redirect()->back()->withErrors(['student_card' => __('validation.custom.student_card.mimes')])->withInput();
                 }
             }
 
             // Validate file size (10MB max = 10240 KB)
             if ($file->getSize() > 10240 * 1024) {
-                return redirect()->back()->withErrors(['student_card' => $message->image_size_error_message ?? 'File size cannot exceed 10MB.'])->withInput();
+                return redirect()->back()->withErrors(['student_card' => __('validation.custom.student_card.max')])->withInput();
             }
 
             $filename = $file->getClientOriginalName();
@@ -118,7 +107,7 @@ class VerifyStudentController extends Controller
         } else {
             // If no file and no existing image, and it's required
             if (!$request->has('existing_image')) {
-                return redirect()->back()->withErrors(['student_card' => 'Please select a valid file.'])->withInput();
+                return redirect()->back()->withErrors(['student_card' => __('validation.custom.student_card.required')])->withInput();
             }
         }
         
@@ -144,7 +133,7 @@ class VerifyStudentController extends Controller
             'first_name' => $user->first_name,
         ];
         if (isset($user->email_notification) && $user->email_notification == 1) {
-        Mail::to($user->email)->send(new StudentCardAddedMail($userEmailData));
+        Mail::to($user->email)->queue(new StudentCardAddedMail($userEmailData));
         }
         $country = Country::whereId($user->country)->first();
         $admin = Admin::first();
@@ -195,6 +184,6 @@ class VerifyStudentController extends Controller
             }
         }
 
-        return redirect()->route('student.verify', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->student_card_upload_message);
+        return redirect()->route('student.verify', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->student_card_upload_message);
     }
 }

@@ -357,6 +357,11 @@ return [
         'message' => [
             'required' => '消息为必填项。',
         ],
+        'student_card' => [
+            'required' => '学生卡为必填项。',
+            'mimes' => '图片必须是以下类型的文件：jpeg, png, jpg, gif, pdf。',
+            'max' => '图片必须小于10MB。',
+        ],
         'payment_method' => [
             'required' => '付款方式为必填项。',
         ],

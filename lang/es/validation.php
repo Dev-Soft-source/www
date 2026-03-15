@@ -381,6 +381,11 @@ return [
         'message' => [
             'required' => 'El mensaje es obligatorio.',
         ],
+        'student_card' => [
+            'required' => 'La tarjeta de estudiante es obligatoria.',
+            'mimes' => 'La imagen debe ser un archivo de tipo: jpeg, png, jpg, gif, pdf.',
+            'max' => 'La imagen debe ser menor a 10MB.',
+        ],
 
         'payment_method' => [
             'required' => 'El método de pago es obligatorio.',
