@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="relative py-4">
-            <div class="px-4 sm:px-6 lg:px-8">
+            <div class="px-4">
                 <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
                     <div class="mb-8">
                         <h1 class="text-9xl font-bold text-primary mb-4">404</h1>

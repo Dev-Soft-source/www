@@ -2,7 +2,7 @@
     <AppLayout>
         <div class="relative shadow-md sm:rounded-lg bg-white py-4">
             <header class="py-4">
-                <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-full mx-auto px-4">
                     <div class="flex items-center justify-between">
                         <h3 class="can-exp-h2 text-primary">
                             Registration reward settings
