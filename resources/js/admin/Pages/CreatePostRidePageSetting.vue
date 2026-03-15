@@ -2842,7 +2842,7 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`carpool_regulation_limit_message_${activeLanguageId}`">Price error modal paragraph 1</label>
+                                                    <label :for="`carpool_regulation_limit_message_${activeLanguageId}`">Carpool Regulation Limit Message</label>
                                                 </div>
                                                 <textarea :name="`carpool_regulation_limit_message_${activeLanguageId}`"
                                                     :id="`carpool_regulation_limit_message_${activeLanguageId}`"
@@ -2870,7 +2870,7 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`max_price_per_seat_message_${activeLanguageId}`">Price error modal paragraph 2 (use :max_per_seat for the amount)</label>
+                                                    <label :for="`max_price_per_seat_message_${activeLanguageId}`">Maximum Price Per Seat Message (use :max_per_seat for the amount)</label>
                                                 </div>
                                                 <textarea :name="`max_price_per_seat_message_${activeLanguageId}`"
                                                     :id="`max_price_per_seat_message_${activeLanguageId}`"
@@ -2898,7 +2898,7 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`non_commercial_carpool_requirement_message_${activeLanguageId}`">Price error modal paragraph 3</label>
+                                                    <label :for="`non_commercial_carpool_requirement_message_${activeLanguageId}`">Non-Commercial Carpool Requirement Notice</label>
                                                 </div>
                                                 <textarea :name="`non_commercial_carpool_requirement_message_${activeLanguageId}`"
                                                     :id="`non_commercial_carpool_requirement_message_${activeLanguageId}`"
@@ -3022,7 +3022,7 @@
                                         <div class="relative z-0 w-full group md:col-span-2">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_above_reimbursement_warning_${activeLanguageId}`">Price warning paragraph 1</label>
+                                                    <label :for="`price_above_reimbursement_warning_${activeLanguageId}`">Price Above Reimbursement Rate Warning</label>
                                                 </div>
                                                 <textarea :name="`price_above_reimbursement_warning_${activeLanguageId}`" :id="`price_above_reimbursement_warning_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_above_reimbursement_warning')" @input="handleInput($event.target.value, language, 'price_above_reimbursement_warning')"></textarea>
                                             </div>
@@ -3030,7 +3030,7 @@
                                         <div class="relative z-0 w-full group md:col-span-2">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`price_reduction_suggestion_message_${activeLanguageId}`">Price warning paragraph 2</label>
+                                                    <label :for="`price_reduction_suggestion_message_${activeLanguageId}`">Price Reduction Suggestion Message</label>
                                                 </div>
                                                 <textarea :name="`price_reduction_suggestion_message_${activeLanguageId}`" :id="`price_reduction_suggestion_message_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" " :value="getCurrentValue('price_reduction_suggestion_message')" @input="handleInput($event.target.value, language, 'price_reduction_suggestion_message')"></textarea>
                                             </div>
