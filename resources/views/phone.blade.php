@@ -199,13 +199,13 @@
                                     @if ($phone_number->default !== '1')
                                         <div class="flex items-center justify-end space-x-1">
                                             <a href="{{ route('phone.set_default', $phone_number->id) }}"
-                                                class="button-exp-green-fill py-1.5 w-36 px-2 text-center inline-block ">
+                                                class="button-exp-green-fill py-1.5 px-4 text-center inline-block ">
                                                 @isset($phoneSetting->set_as_default_label)
                                                     {{ $phoneSetting->set_as_default_label }}
                                                 @endisset
                                             </a>
                                             <a href="{{ route('phone.destroy', $phone_number->id) }}"
-                                                class="delete-button button-exp-red-fill py-1.5 w-24 px-2 text-center inline-block ">
+                                                class="delete-button button-exp-red-fill py-1.5 px-4 text-center inline-block ">
                                                 @isset($phoneSetting->delete_button_text)
                                                     {{ $phoneSetting->delete_button_text }}
                                                 @endisset
@@ -217,7 +217,7 @@
                                                 {{ $phoneSetting->primary_number_label ?? 'Primary Number' }}
                                             </span>
                                             <a href="{{ route('phone.destroy', $phone_number->id) }}"
-                                                class="delete-button button-exp-red-fill py-1.5 w-24 px-2 text-center inline-block">
+                                                class="delete-button button-exp-red-fill py-1.5 px-4 text-center inline-block">
                                                 @isset($phoneSetting->delete_button_text)
                                                     {{ $phoneSetting->delete_button_text }}
                                                 @endisset
@@ -227,13 +227,13 @@
                                 @else
                                     <div class="flex items-center justify-end space-x-1">
                                         <button type="button" onclick="sendVerificationCode({{ $phone_number->id }})"
-                                            class="button-exp-fill py-1.5 w-48 px-2 text-center inline-block ">
+                                            class="button-exp-fill py-1.5 px-4 text-center inline-block ">
                                             @isset($phoneSetting->web_send_verification_code_button_text)
                                                 {{ $phoneSetting->web_send_verification_code_button_text }}
                                             @endisset
                                         </button>
                                         <a href="{{ route('phone.destroy', $phone_number->id) }}"
-                                            class="delete-button button-exp-red-fill py-1.5 w-24 px-2 text-center inline-block ">
+                                            class="delete-button button-exp-red-fill py-1.5 px-4 text-center inline-block ">
                                             @isset($phoneSetting->delete_button_text)
                                                 {{ $phoneSetting->delete_button_text }}
                                             @endisset

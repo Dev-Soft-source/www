@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
@@ -316,9 +317,12 @@ class SignupController extends Controller
         ]);
     }
 
-    public function redirectToProvider($lang, $provider)
+    public function redirectToProvider($lang, $provider, Request $request)
     {
         session(['selectedLanguage' => $lang]);
+        session([
+            'social_auth_intent' => $request->query('intent') === 'login' ? 'login' : 'signup',
+        ]);
 
         return Socialite::driver($provider)
             ->redirect();
@@ -359,27 +363,49 @@ class SignupController extends Controller
                 return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
             }
 
-            $user = Socialite::driver($provider)->user();
+            $providerUser = Socialite::driver($provider)->user();
+            $authIntent = session()->pull('social_auth_intent', 'signup');
 
             Log::info("social login attempt", [
                 'provider' => $provider,
-                'email' => $user->email ?? 'not provided',
-                'has_token' => !empty($user->token ?? null)
+                'email' => $providerUser->email ?? 'not provided',
+                'has_token' => !empty($providerUser->token ?? null),
+                'intent' => $authIntent,
             ]);
 
             // Validate that required fields are present
-            if (empty($user->email)) {
+            if (empty($providerUser->email)) {
                 throw new \Exception("Email address is required from {$provider} provider");
             }
 
-            if (empty($user->name)) {
+            if (empty($providerUser->name)) {
                 throw new \Exception("Name is required from {$provider} provider");
             }
 
             // Check if the user is already registered
-            $existingUser = User::where('email', $user->email)->first();
+            $existingUser = User::where('email', $providerUser->email)->first();
 
             if ($existingUser) {
+                if ($existingUser->closed === '1') {
+                    if ($authIntent === 'login') {
+                        $closeModalErrorMessage = $this->successMessage->account_closed_message
+                            ?? "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.";
+
+                        Session::flash('error', $closeModalErrorMessage);
+
+                        return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
+                    }
+
+                    $existingUser->forceFill([
+                        'closed' => '0',
+                        'email_verified' => '1',
+                        'lang' => $existingUser->lang ?: $selectedLanguage->abbreviation,
+                        'provider' => $provider,
+                        'provider_id' => $providerUser->id,
+                        'profile_image' => $providerUser->avatar ?: $existingUser->getRawOriginal('profile_image'),
+                    ])->save();
+                }
+
                 if (!$existingUser->lang) {
                     $existingUser->forceFill([
                         'lang' => $selectedLanguage->abbreviation,
@@ -387,7 +413,7 @@ class SignupController extends Controller
                 }
 
                 // Log in the existing user
-                auth()->login($existingUser);
+                Auth::login($existingUser);
                 $userLang = $existingUser->fresh()->lang ?: $selectedLanguage->abbreviation;
                 session(['selectedLanguage' => $userLang]);
 
@@ -405,7 +431,7 @@ class SignupController extends Controller
             }
 
             // Split the full name into first and last names
-            $nameParts = explode(' ', $user->name, 2); // Split into two parts
+            $nameParts = explode(' ', $providerUser->name, 2); // Split into two parts
             $firstName = $nameParts[0];
             $lastName = isset($nameParts[1]) ? $nameParts[1] : ''; // Set to empty string if no last name
 
@@ -417,13 +443,13 @@ class SignupController extends Controller
             $newUser = User::create([
                 'first_name' => $firstName,
                 'last_name' => $lastName,
-                'email' => $user->email,
+                'email' => $providerUser->email,
                 'lang' => $selectedLanguage->abbreviation ?? $lang ?? config('app.locale', 'en'),
                 'email_verified' => '1',
                 'password' => '',
-                'profile_image' => $user->avatar,
+                'profile_image' => $providerUser->avatar,
                 'provider' => $provider,
-                'provider_id' => $user->id,
+                'provider_id' => $providerUser->id,
                 'country' => $country->id ?? 38,
                 'referral_uuid' => bin2hex(random_bytes(16))
             ]);
@@ -431,7 +457,7 @@ class SignupController extends Controller
             // Send admin notification about new social signup
             $adminData = [
                 'user_name' => $firstName . ' ' . $lastName,
-                'user_email' => $user->email,
+                'user_email' => $providerUser->email,
                 'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
                 'platform' => 'Web - ' . ucfirst($provider) . ' Login'
             ];
@@ -440,12 +466,12 @@ class SignupController extends Controller
             try {
                 Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
                 Log::info('Admin notification sent successfully for social signup', [
-                    'email' => $user->email,
+                    'email' => $providerUser->email,
                     'provider' => $provider
                 ]);
             } catch (\Throwable $e) {
                 Log::error('Failed to send admin notification for social signup', [
-                    'email' => $user->email,
+                    'email' => $providerUser->email,
                     'provider' => $provider,
                     'error' => $e->getMessage(),
                     'error_class' => get_class($e)
@@ -454,19 +480,19 @@ class SignupController extends Controller
                 try {
                     Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
                     Log::info('Admin notification sent via log mailer (fallback) for social signup', [
-                        'email' => $user->email,
+                        'email' => $providerUser->email,
                         'provider' => $provider
                     ]);
                 } catch (\Throwable $e2) {
                     Log::error('Failed to send admin notification via log mailer for social signup', [
-                        'email' => $user->email,
+                        'email' => $providerUser->email,
                         'provider' => $provider,
                         'error' => $e2->getMessage()
                     ]);
                 }
             }
 
-            auth()->login($newUser);
+            Auth::login($newUser);
             session(['selectedLanguage' => $newUser->lang]);
 
             return redirect()->route('step1to5', ['lang' => $newUser->lang]);
