@@ -74,6 +74,8 @@ use App\Http\Controllers\Api\Admin\{
     TermsAndConditionPageSettingController,
     TermsOfUsePageSettingController,
     TripsPageSettingController,
+    ThankyouPageSettingController,
+    NotificationsPageSettingController,
     VerifyBanksController,
     ProfilePageSettingController,
     VideoController,PasswordSettingController,MyWalletSettingController,MyVehicleSettingController,MyEmailSettingController,MyPhoneSettingController,
@@ -276,6 +278,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/download-select-location-page-setting-template', [SelectLocationPageSettingController::class, 'downloadTemplate']);
     Route::post('/update-trips-page-setting', [TripsPageSettingController::class, 'update']);
     Route::get('/get-trips-page-setting', [TripsPageSettingController::class, 'show']);
+    Route::post('/update-thankyou-page-setting', [ThankyouPageSettingController::class, 'update']);
+    Route::get('/get-thankyou-page-setting', [ThankyouPageSettingController::class, 'show']);
+    Route::post('/update-notifications-page-setting', [NotificationsPageSettingController::class, 'update']);
+    Route::get('/get-notifications-page-setting', [NotificationsPageSettingController::class, 'show']);
     Route::post('/upload-trips-page-setting-excel', [TripsPageSettingController::class, 'uploadExcel']);
     Route::get('/download-trips-page-setting-template', [TripsPageSettingController::class, 'downloadTemplate']);
     Route::apiResource('languages', LanguageController::class);
@@ -349,6 +355,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('coffee-wallet', [CoffeeWalletController::class, 'index']);
     Route::get('total-amount', [CoffeeWalletController::class, 'totalAmount']);
     Route::get('dashboard/statistics', [DashboardController::class, 'statistics']);
+    Route::get('search', [\App\Http\Controllers\Api\Admin\SearchController::class, 'search']);
     Route::apiResource('booking-credits', BookingCreditController::class);
     Route::apiResource('articles', ArticleController::class);
     Route::apiResource('videos', VideoController::class);

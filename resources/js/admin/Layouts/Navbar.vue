@@ -69,9 +69,40 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
-                <input type="text" v-model="searchQuery" @keyup.enter="handleSearch"
+                <input type="text" v-model="searchQuery" @input="handleSearchInput" @focus="showResults = true"
+                    @blur="handleBlur" @keydown.escape="closeResults"
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-lightpurple focus:border-lightpurple text-sm"
-                    placeholder="Search...">
+                    placeholder="Search page settings...">
+                
+                <!-- Search Results Dropdown -->
+                <div v-if="showResults && searchResults.length > 0 && searchQuery.length >= 2"
+                    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                    <div class="py-2">
+                        <div v-for="(result, index) in searchResults" :key="index"
+                            @mousedown.prevent="navigateToPage(result.route)"
+                            class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
+                            <div class="font-semibold text-gray-900 text-sm">{{ result.page_name }}</div>
+                            <div class="text-xs text-gray-500 mt-1 truncate">{{ result.preview }}</div>
+                            <div class="text-xs text-blue-600 mt-1">{{ result.route }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- No Results -->
+                <div v-if="showResults && searchResults.length === 0 && searchQuery.length >= 2 && !searching"
+                    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                        No results found
+                    </div>
+                </div>
+                
+                <!-- Loading -->
+                <div v-if="searching"
+                    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                        Searching...
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -132,6 +163,8 @@
 
 <script>
 import { mapState } from "vuex";
+import axios from "axios";
+
 export default {
     computed: {
         ...mapState({
@@ -141,7 +174,11 @@ export default {
     data() {
         return {
             breadcrumbs: [],
-            searchQuery: ''
+            searchQuery: '',
+            searchResults: [],
+            showResults: false,
+            searching: false,
+            searchTimeout: null
         }
     },
     created() {
@@ -155,13 +192,64 @@ export default {
         goToBack() {
             this.$router.go(-1)
         },
-        handleSearch() {
-            // Handle search functionality
-            if (this.searchQuery.trim()) {
-                // You can customize this to search specific routes or emit an event
-                console.log('Searching for:', this.searchQuery);
-                // Example: this.$router.push({ name: 'admin.search', query: { q: this.searchQuery } });
+        handleSearchInput() {
+            // Clear previous timeout
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
             }
+
+            // If query is too short, clear results
+            if (this.searchQuery.length < 2) {
+                this.searchResults = [];
+                this.showResults = false;
+                return;
+            }
+
+            // Show results dropdown
+            this.showResults = true;
+
+            // Debounce search
+            this.searchTimeout = setTimeout(() => {
+                this.performSearch();
+            }, 300);
+        },
+        async performSearch() {
+            if (this.searchQuery.length < 2) {
+                return;
+            }
+
+            this.searching = true;
+            try {
+                const response = await axios.get('/api/admin/search', {
+                    params: { q: this.searchQuery }
+                });
+
+                if (response.data.status === 'success') {
+                    this.searchResults = response.data.data || [];
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                this.searchResults = [];
+            } finally {
+                this.searching = false;
+            }
+        },
+        navigateToPage(route) {
+            this.showResults = false;
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.$router.push(route);
+        },
+        handleBlur() {
+            // Delay hiding results to allow click events
+            setTimeout(() => {
+                this.showResults = false;
+            }, 200);
+        },
+        closeResults() {
+            this.showResults = false;
+            this.searchQuery = '';
+            this.searchResults = [];
         }
     },
 };
