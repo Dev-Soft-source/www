@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -3067,6 +3067,33 @@
                                                 <input type="text" :name="`seats_warning_modal_learn_more_btn_${activeLanguageId}`" :id="`seats_warning_modal_learn_more_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Learn more about limits" :value="getCurrentValue('seats_warning_modal_learn_more_btn')" @input="handleInput($event.target.value, language, 'seats_warning_modal_learn_more_btn')" />
                                             </div>
                                         </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div><div class="flex justify-between"><label>Phone required modal (navbar)</label></div></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_heading_${activeLanguageId}`">Phone required modal heading</label></div>
+                                            <input type="text" :name="`phone_required_modal_heading_${activeLanguageId}`" :id="`phone_required_modal_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Action Required" :value="getCurrentValue('phone_required_modal_heading')" @input="handleInput($event.target.value, language, 'phone_required_modal_heading')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_body_before_${activeLanguageId}`">Phone required modal body (before link)</label></div>
+                                            <input type="text" :name="`phone_required_modal_body_before_${activeLanguageId}`" :id="`phone_required_modal_body_before_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. You must verify your phone number before posting any ride. Please do this in " :value="getCurrentValue('phone_required_modal_body_before')" @input="handleInput($event.target.value, language, 'phone_required_modal_body_before')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_link_text_${activeLanguageId}`">Phone required modal link text</label></div>
+                                            <input type="text" :name="`phone_required_modal_link_text_${activeLanguageId}`" :id="`phone_required_modal_link_text_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Dashboard → My Phone Number" :value="getCurrentValue('phone_required_modal_link_text')" @input="handleInput($event.target.value, language, 'phone_required_modal_link_text')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_body_after_${activeLanguageId}`">Phone required modal body (after link)</label></div>
+                                            <input type="text" :name="`phone_required_modal_body_after_${activeLanguageId}`" :id="`phone_required_modal_body_after_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. ." :value="getCurrentValue('phone_required_modal_body_after')" @input="handleInput($event.target.value, language, 'phone_required_modal_body_after')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_close_btn_${activeLanguageId}`">Phone required modal Close button</label></div>
+                                            <input type="text" :name="`phone_required_modal_close_btn_${activeLanguageId}`" :id="`phone_required_modal_close_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Close" :value="getCurrentValue('phone_required_modal_close_btn')" @input="handleInput($event.target.value, language, 'phone_required_modal_close_btn')" /></div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div><div class="flex justify-between"><label :for="`phone_required_modal_phone_btn_${activeLanguageId}`">Phone required modal My Phone Number button</label></div>
+                                            <input type="text" :name="`phone_required_modal_phone_btn_${activeLanguageId}`" :id="`phone_required_modal_phone_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. My Phone Number" :value="getCurrentValue('phone_required_modal_phone_btn')" @input="handleInput($event.target.value, language, 'phone_required_modal_phone_btn')" /></div>
+                                        </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -3927,6 +3954,12 @@ export default {
                             this.handleInput("", language, "seats_warning_modal_paragraph");
                             this.handleInput("", language, "seats_warning_modal_got_it_btn");
                             this.handleInput("", language, "seats_warning_modal_learn_more_btn");
+                            this.handleInput("", language, "phone_required_modal_heading");
+                            this.handleInput("", language, "phone_required_modal_body_before");
+                            this.handleInput("", language, "phone_required_modal_link_text");
+                            this.handleInput("", language, "phone_required_modal_body_after");
+                            this.handleInput("", language, "phone_required_modal_close_btn");
+                            this.handleInput("", language, "phone_required_modal_phone_btn");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4554,6 +4587,12 @@ export default {
                             this.handleInput(setting?.seats_warning_modal_paragraph, setting?.language, "seats_warning_modal_paragraph");
                             this.handleInput(setting?.seats_warning_modal_got_it_btn, setting?.language, "seats_warning_modal_got_it_btn");
                             this.handleInput(setting?.seats_warning_modal_learn_more_btn, setting?.language, "seats_warning_modal_learn_more_btn");
+                            this.handleInput(setting?.phone_required_modal_heading, setting?.language, "phone_required_modal_heading");
+                            this.handleInput(setting?.phone_required_modal_body_before, setting?.language, "phone_required_modal_body_before");
+                            this.handleInput(setting?.phone_required_modal_link_text, setting?.language, "phone_required_modal_link_text");
+                            this.handleInput(setting?.phone_required_modal_body_after, setting?.language, "phone_required_modal_body_after");
+                            this.handleInput(setting?.phone_required_modal_close_btn, setting?.language, "phone_required_modal_close_btn");
+                            this.handleInput(setting?.phone_required_modal_phone_btn, setting?.language, "phone_required_modal_phone_btn");
                             this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,
