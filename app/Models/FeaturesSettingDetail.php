@@ -18,7 +18,7 @@ class FeaturesSettingDetail extends Model
      * Appended attributes: default_name and default_icon from the row where language_id = 1
      * (same features_setting_id). Use for empty/null fallback.
      */
-    protected $appends = ['default_name', 'default_icon'];
+    protected $appends = ['default_name', 'default_icon', 'default_tooltip'];
 
     public function featuresSetting(): BelongsTo
     {
@@ -73,6 +73,16 @@ class FeaturesSettingDetail extends Model
     }
 
     /**
+     * Tooltip from the default language (language_id = 1). Use for null/empty fallback.
+     */
+    public function getDefaultTooltipAttribute(): ?string
+    {
+        $default = $this->getDefaultLanguageDetail();
+
+        return $default?->tooltip;
+    }
+
+    /**
      * Name with fallback to default (language_id = 1) when null or empty.
      */
     public function getDisplayNameAttribute(): ?string
@@ -90,5 +100,15 @@ class FeaturesSettingDetail extends Model
         $icon = $this->icon ?? $this->default_icon;
 
         return $icon !== '' && $icon !== null ? $icon : $this->default_icon;
+    }
+
+    /**
+     * Tooltip with fallback to default (language_id = 1) when null or empty.
+     */
+    public function getDisplayTooltipAttribute(): ?string
+    {
+        $tooltip = $this->tooltip ?? $this->default_tooltip;
+
+        return $tooltip !== '' && $tooltip !== null ? $tooltip : $this->default_tooltip;
     }
 }

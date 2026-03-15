@@ -550,80 +550,10 @@
                         @php
                             $features = !empty($ride->features) ? explode('=', $ride->features) : [];
                         @endphp
-                        @foreach ($features as $feature)
-                            <div class="flex items-start space-x-2">
-                                @if ($feature === $postRidePage->features_option11->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option11->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option1->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option2->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option9->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option8->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option8->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option10->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option10->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option3->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option3->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option12->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option12->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option4->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option5->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option6->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option7->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option13->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option13->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option14->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option14->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option15->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option15->icon) }}"
-                                        alt="">
-                                @elseif ($feature === $postRidePage->features_option16->name)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->features_option16->icon) }}"
-                                        alt="">
-                                @else
-                                    <input id="wi-fi" type="checkbox" name="features[]" value="" checked
-                                        disabled
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                @endif
-                                <p>{{ $feature }}</p>
-                            </div>
-                        @endforeach
+                        @include('partials.ride_feature_items', [
+                            'features' => $features,
+                            'postRidePage' => $postRidePage,
+                        ])
                     </div>
                 </div>
                 {{-- <div class="mt-4 mb-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">

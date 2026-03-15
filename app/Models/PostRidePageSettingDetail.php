@@ -25,6 +25,29 @@ class PostRidePageSettingDetail extends Model
         return $this->belongsTo(Language::class);
     }
 
+    public function getFeatureOptionsListAttribute(): array
+    {
+        $features = [];
 
-    
+        for ($i = 1; $i <= 20; $i++) {
+            $optionKey = 'features_option' . $i;
+
+            if (!isset($this->{$optionKey})) {
+                continue;
+            }
+
+            $option = $this->{$optionKey};
+
+            $features[] = [
+                'key' => $optionKey,
+                'id' => $option->features_setting_id ?? null,
+                'name' => $option->name ?? $option->label ?? null,
+                'label' => $option->label ?? $option->name ?? null,
+                'icon' => $option->icon ?? null,
+                'tooltip' => $option->tooltip ?? $this->{$optionKey . '_tooltip'} ?? null,
+            ];
+        }
+
+        return $features;
+    }
 }

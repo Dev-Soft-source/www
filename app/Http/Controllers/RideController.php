@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\Validator;
 
 class RideController extends Controller
 {
+    
     public function SearchRide(Request $request, $lang = null)
     {
 
@@ -2070,8 +2071,11 @@ class RideController extends Controller
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
 
-        return view('post_ride', ['postRideSubDetailPage' => $postRideSubDetailPage, 'postRidePage' => $postRidePage, 
-        'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 'vehicles' => $vehicles, 
+        return view('post_ride', [
+            'postRideSubDetailPage' => $postRideSubDetailPage, 
+            'postRidePage' => $postRidePage, 
+        'isNewForm' => $isNewForm, 'ride' => $ride, 'user' => $user, 
+        'vehicles' => $vehicles, 
         'pinkRideSetting' => $pinkRideSetting, 
         'vehicleTypes' => $vehicleTypes, 
         'vehiclePage' => $vehiclePage, 

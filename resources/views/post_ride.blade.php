@@ -2269,623 +2269,85 @@
             </div>
             <div class="bg-white p-4">
                 @php
-                    $hasDriverLicenseOnFile = !empty($user->driver_license_upload);
-                    $hasNoAddress = empty($user->address);
-                    $showPinkOrExtraAddressNotice =
-                        $hasDriverLicenseOnFile &&
-                        $hasNoAddress &&
-                        ($postRidePage->features_option1?->features_setting_id ||
-                            $postRidePage->features_option2?->features_setting_id);
+                    $selectedFeatures = old('features');
+
+                    if (!$selectedFeatures && !$isNewForm) {
+                        $selectedFeatures = explode('=', $ride->features ?? '');
+                    }
+
+                    $selectedFeatures = $selectedFeatures ?? [];
                 @endphp
                 <div class="space-y-2">
-                    @if ($postRidePage->features_option1?->features_setting_id)
-                        <div class="flex items-center {{ $showPinkOrExtraAddressNotice ? 'cursor-pointer' : '' }}"
-                            @if ($showPinkOrExtraAddressNotice) onclick="event.preventDefault(); showPinkExtraAddressRequiredModal();" role="button" tabindex="0" @endif>
-                            <input id="pink-ride" type="checkbox" name="features[]"
-                                @php $disabled = false; @endphp
-                                @if ($user->pink_ride == '0') @php $disabled = true; @endphp
-                                            @elseif ($user->pink_ride == '')
-                                                @if ($pinkRideSetting)
-                                                @if ($user->gender == 'female' && (empty($user->government_issued_id) || empty($user->address)))
-                                                @php $disabled = true; @endphp
-                                                 @elseif ($user->gender !== 'female')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->verfiy_phone === '1' && $user->phone_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->verify_email === '1' && $user->email_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($pinkRideSetting->driver_license === '1' && $user->driver !== '1')
-                                                        @php $disabled = true; @endphp @endif
-                                @endif
-                    @endif
-                    @if ($disabled) {{ 'disabled' }} @endif
-                    value="{{ $postRidePage->features_option1->features_setting_id }}"
-                    {{ $isNewForm
-                        ? (in_array($postRidePage->features_option1->features_setting_id, old('features', []))
-                            ? 'checked'
-                            : '')
-                        : (old('features')
-                            ? (in_array($postRidePage->features_option1->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (in_array($postRidePage->features_option1->features_setting_id, explode('=', $ride->features))
-                                ? 'checked'
-                                : '')) }}
-                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="pink-ride" class="ml-2 text-gray-900 flex space-x-1">
-                        <span
-                            class="text-pink-500 font-medium
-                                                @php $disabled = false; @endphp
-                                                @if ($user->pink_ride == '0') @php $disabled = true; @endphp
-                                                @elseif ($user->pink_ride == '')
-                                                    @if ($pinkRideSetting)
 
-                                                        @if ($user->gender == 'female' && (empty($user->government_issued_id) || empty($user->address)))
-                                                         @php $disabled = true; @endphp
-                                                        @elseif ($user->gender !== 'female')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->verfiy_phone === '1' && $user->phone_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->verify_email === '1' && $user->email_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($pinkRideSetting->driver_license === '1' && $user->driver !== '1')
-                                                            @php $disabled = true; @endphp @endif
-                                                    @endif
-                                                @endif
-                                                @if ($disabled) {{ 'line-through' }} @endif">
-                            {{ $postRidePage->features_option1->name }}
-                        </span>
+                    @foreach ($featureOptions as $featureOption)
+
                         @php
-                            $pinkRideTooltipText = '';
-                            if ($user->pink_ride == '0') {
-                                $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_disable_text ?? '';
-                            } elseif ($user->pink_ride == '1') {
-                                $pinkRideTooltipText = $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
-                            } elseif ($pinkRideSetting) {
-                                $pinkRideTooltipText =
-                                    ($postRidePage->pink_ride_tooltip_only_text ?? '') .
-                                    ' ' .
-                                    ($postRidePage->pink_ride_tooltip_female_text ?? '') .
-                                    ' ' .
-                                    ($postRidePage->pink_ride_tooltip_driver_text ?? '');
-                                if (
-                                    $pinkRideSetting->verfiy_phone === '1' ||
-                                    $pinkRideSetting->verify_email === '1' ||
-                                    $pinkRideSetting->driver_license === '1' ||
-                                    $pinkRideSetting->profile_complete === '1'
-                                ) {
-                                    $pinkRideTooltipText .= ' ' . ($postRidePage->pink_ride_tooltip_with_text ?? '');
-                                    if ($pinkRideSetting->profile_complete === '1') {
-                                        $pinkRideTooltipText .=
-                                            ' ' . ($postRidePage->pink_ride_tooltip_complete_profile_text ?? '');
-                                    }
-                                    if (
-                                        $pinkRideSetting->verfiy_phone === '1' ||
-                                        $pinkRideSetting->verify_email === '1' ||
-                                        $pinkRideSetting->driver_license === '1'
-                                    ) {
-                                        if ($pinkRideSetting->verfiy_phone === '1') {
-                                            $pinkRideTooltipText .=
-                                                ' ' . ($postRidePage->pink_ride_tooltip_phone_number_text ?? '');
-                                        }
-                                        if ($pinkRideSetting->verify_email === '1') {
-                                            $pinkRideTooltipText .=
-                                                ' ' . ($postRidePage->pink_ride_tooltip_email_text ?? '');
-                                        }
-                                        if ($pinkRideSetting->driver_license === '1') {
-                                            $pinkRideTooltipText .=
-                                                ' ' . ($postRidePage->pink_ride_tooltip_driver_license_text ?? '');
-                                        }
-                                        $pinkRideTooltipText .=
-                                            ' ' . ($postRidePage->pink_ride_tooltip_verified_text ?? '');
-                                    }
-                                }
-                                $pinkRideTooltipText .=
-                                    ' ' . ($postRidePage->pink_ride_tooltip_select_this_ride_text ?? '');
+                            $disabled = false;
+                            $tooltipText = null;
+
+                            if ($featureOption['slug'] === 'pink_rides') {
+                                $disabled = !$user->canUsePinkRide($pinkRideSetting);
+                                $tooltipText = $user->pinkRideTooltip($postRidePage, $pinkRideSetting);
+                            }
+
+                            if ($featureOption['slug'] === 'extra_care_rides') {
+                                $disabled = !$user->canUseExtraRide(
+                                    $setting,
+                                    $overallRating ?? null,
+                                    $totalRides ?? null,
+                                    $noShowsCount ?? null,
+                                    $cancellationCount ?? null,
+                                    $noshows ?? null,
+                                );
+
+                                $tooltipText = $user->extraRideTooltip(
+                                    $postRidePage,
+                                    $setting,
+                                    $overallRating ?? null,
+                                    $totalRides ?? null,
+                                    $noShowsCount ?? null,
+                                    $cancellationCount ?? null,
+                                    $noshows ?? null,
+                                );
                             }
                         @endphp
-                        <span class="inline-flex cursor-help"
-                            data-tippy-content="{{ $pinkRideTooltipText }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                viewBox="0 0 16 16">
-                                <path
-                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+
+                        <div class="flex items-start">
+
+                        <input
+                            id="{{ $featureOption['slug'] }}"
+                            type="checkbox"
+                            name="features[]"
+                            value="{{ $featureOption['id'] }}"
+                            @checked(in_array($featureOption['id'], $selectedFeatures))
+                            @disabled($disabled)
+                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        >
+
+                        <label for="{{ $featureOption['slug'] }}" class="ml-2 font-normal text-gray-900 flex space-x-1">
+
+                        <span @class([
+                            'text-pink-500 font-medium' => $featureOption['slug'] === 'pink_rides',
+                            'text-green-500 font-medium' => $featureOption['slug'] === 'extra_care_rides',
+                            'line-through' => $disabled,
+                        ])>
+                            {{ $featureOption['label'] }}
+                        </span>
+                        @if ($tooltipText)
+                        <span class="inline-flex cursor-help" data-tippy-content="{{ $tooltipText }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                             </svg>
                         </span>
-                    </label>
-                </div>
-                @endif
-                @if ($postRidePage->features_option2?->features_setting_id)
-                    @php
-                        // Calculate the age based on the driver's date of birth
-                        $dob = \Carbon\Carbon::parse($user->dob);
-                        $age = $dob->diffInYears(\Carbon\Carbon::now());
-                        $totalRidesCount = 0;
-                        $ride_limit = 0;
-                        if (isset($totalRides) && !empty($totalRides)) {
-                            $totalRidesCount = $totalRides;
-                        }
+                        @endif
+                        </label>
+                        </div>
 
-                        if (isset($setting->extra_rides_trip_limit) && !is_null($setting->extra_rides_trip_limit)) {
-                            $ride_limit = $setting->extra_rides_trip_limit;
-                        }
-                    @endphp
-                    <div class="flex items-center {{ $showPinkOrExtraAddressNotice ? 'cursor-pointer' : '' }}"
-                        @if ($showPinkOrExtraAddressNotice) onclick="event.preventDefault(); event.stopPropagation(); showPinkExtraAddressRequiredModal();" role="button" tabindex="0" @endif>
-                        <input id="Extra+" type="checkbox" name="features[]"
-                            @php $disabled = false; @endphp
-                            @if ($user->folks_ride == '0') @php $disabled = true; @endphp
-                                            @elseif ($user->folks_ride == '')
-                                                @if ($setting)
-                                                    @if ($setting->verfiy_phone === '1' && !$user->phoneNumbers->contains('verified', 1))
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($setting->verify_email === '1' && $user->email_verified !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($setting->driver_license === '1' && $user->driver !== '1')
-                                                        @php $disabled = true; @endphp
-                                                    @elseif (
-                                                        $overallRating < $setting->average_rating ||
-                                                            $age < $setting->driver_age ||
-                                                            $totalRidesCount < $ride_limit ||
-                                                            $noShowsCount > 0 ||
-                                                            $cancellationCount > 0)
-                                                        @php $disabled = true; @endphp
-                                                    @elseif ($noshows > 0)
-                                                        @php $disabled = true; @endphp
-                                                        
-                                                    @elseif (empty($user->government_issued_id) || empty($user->address))
-                                                        @php $disabled = true; @endphp @endif
-                            @endif
-                @endif
-                @if ($disabled) {{ 'disabled' }} @endif
-                value="{{ $postRidePage->features_option2->features_setting_id }}"
-                {{ $isNewForm
-                    ? (in_array($postRidePage->features_option2->features_setting_id, old('features', []))
-                        ? 'checked'
-                        : '')
-                    : (old('features')
-                        ? (in_array($postRidePage->features_option2->features_setting_id, old('features', []))
-                            ? 'checked'
-                            : '')
-                        : (in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features))
-                            ? 'checked'
-                            : '')) }}
-                class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                <label for="Extra+" class="ml-2 text-gray-900 flex space-x-1">
-                    <span
-                        class="text-green-500 font-medium
-                                                @php $disabled = false; @endphp
-                                                
-                                            @if ($user->folks_ride == '0') @php $disabled = true; @endphp
-                                                @elseif ($user->folks_ride == '')
-                                                    @if ($setting)
-                                                        @if ($setting->verfiy_phone === '1' && !$user->phoneNumbers->contains('verified', 1))
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($setting->verify_email === '1' && $user->email_verified !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($setting->driver_license === '1' && $user->driver !== '1')
-                                                            @php $disabled = true; @endphp
-                                                        @elseif (
-                                                            $overallRating < $setting->average_rating ||
-                                                                $age < $setting->driver_age ||
-                                                                $totalRidesCount < $ride_limit ||
-                                                                $noShowsCount > 0 ||
-                                                                $cancellationCount > 0)
-                                                            @php $disabled = true; @endphp
-                                                        @elseif ($noshows > 0)
-                                                            @php $disabled = true; @endphp
-                                                        @elseif (empty($user->government_issued_id) || empty($user->address))
-                                                        @php $disabled = true; @endphp @endif
-                                                    @endif
-                                                @endif
-                                                @if ($disabled) {{ 'line-through' }} @endif
-                                                    "
-                        @if ($disabled) onclick="event.preventDefault(); {{ $showPinkOrExtraAddressNotice ? 'showPinkExtraAddressRequiredModal' : 'extraCareRideModal' }}();" @endif>
-                        {{ $postRidePage->features_option2->name }}
-                    </span>
-                    @php
-                        $extraCareTooltipText = '';
-                        if ($user->folks_ride == '0') {
-                            $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_disable_text ?? '';
-                        } elseif ($user->folks_ride == '1') {
-                            $extraCareTooltipText = $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
-                        } else {
-                            $extraCareTooltipText =
-                                ($postRidePage->extra_care_tooltip_driver_review_text ?? '') .
-                                ' ' .
-                                (isset($setting) ? $setting->average_rating : '0') .
-                                ' ' .
-                                ($postRidePage->extra_care_tooltip_greater_age_text ?? '') .
-                                ' ' .
-                                (isset($setting) ? $setting->driver_age : '0') .
-                                ' ' .
-                                ($postRidePage->extra_care_tooltip_greater_text ?? '');
-                            if (
-                                $setting &&
-                                ($setting->verfiy_phone === '1' ||
-                                    $setting->verify_email === '1' ||
-                                    $setting->driver_license === '1' ||
-                                    $setting->profile_complete === '1')
-                            ) {
-                                if (isset($pinkRideSetting) && $pinkRideSetting->profile_complete === '1') {
-                                    $extraCareTooltipText .=
-                                        ' ' . ($postRidePage->extra_care_tooltip_complete_profile_text ?? '');
-                                }
-                                $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_and_his_text ?? '');
-                                if ($setting->verfiy_phone === '1') {
-                                    $extraCareTooltipText .=
-                                        ' ' . ($postRidePage->extra_care_tooltip_phone_number_text ?? '');
-                                }
-                                if ($setting->verify_email === '1') {
-                                    $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_email_text ?? '');
-                                }
-                                if ($setting->driver_license === '1') {
-                                    $extraCareTooltipText .=
-                                        ' ' . ($postRidePage->extra_care_tooltip_driver_license_text ?? '');
-                                }
-                                $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_verified_text ?? '');
-                            }
-                            $extraCareTooltipText .= ' ' . ($postRidePage->extra_care_tooltip_eligible_text ?? '');
-                        }
-                    @endphp
-                    <span class="inline-flex cursor-help"
-                        data-tippy-content="{{ $extraCareTooltipText }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" class="bi bi-info-circle-fill text-black"
-                            viewBox="0 0 16 16">
-                            <path
-                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                        </svg>
-                    </span>
-                </label>
-            </div>
-            @endif
-            @if ($postRidePage->features_option3?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="wi-fi" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option3->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option3->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option3->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="wi-fi" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span>
-                            {{ $postRidePage->features_option3->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option4?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="rating-passengers" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option4->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option4->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option4->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="rating-passengers" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span>
-                            {{ $postRidePage->features_option4->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option5?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="provide-babyseats" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option5->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option5->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option5->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="provide-babyseats" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option5->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option6?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="passenger-provide" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option6->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option6->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option6->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="passenger-provide" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option6->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option7?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="take-children" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option7->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option7->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option7->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="take-children" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option7->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option8?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="passenger-provide1" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option8->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option8->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option8->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="passenger-provide1" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option8->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option9?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="bike-rack" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option9->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option9->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option9->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="bike-rack" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option9->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option10?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="ski-rack" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option10->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option10->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option10->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="ski-rack" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option10->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option11?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="winter-tires" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option11->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option11->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option11->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="winter-tires" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option11->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option12?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="air-conditioning" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option12->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option12->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option12->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="air-conditioning" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option12->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option13?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="heating" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option13->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option13->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option13->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option13->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option14?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="heating" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option14->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option14->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option14->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option14->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option15?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="heating" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option15->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option15->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option15->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option15->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option16?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="heating" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option16->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option16->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option16->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option16->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
-            @if ($postRidePage->features_option18?->features_setting_id)
-                <div class="flex items-start">
-                    <input id="heating" type="checkbox" name="features[]"
-                        value="{{ $postRidePage->features_option18->features_setting_id }}"
-                        {{ $isNewForm
-                            ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
-                                ? 'checked'
-                                : '')
-                            : (old('features')
-                                ? (in_array($postRidePage->features_option18->features_setting_id, old('features', []))
-                                    ? 'checked'
-                                    : '')
-                                : (in_array($postRidePage->features_option18->features_setting_id, explode('=', $ride->features))
-                                    ? 'checked'
-                                    : '')) }}
-                        class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                    <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                        <span class="">
-                            {{ $postRidePage->features_option18->name }}
-                        </span>
-                    </label>
-                </div>
-            @endif
+                        @endforeach
+
+
+
         </div>
     </div>
 </div>
@@ -2946,54 +2408,37 @@
             @endisset
         </div>
         @php
-            $pinkRideChecked = false;
-            $extraCareRideChecked = false;
+            $pinkFeatureId = collect($featureOptions ?? [])->firstWhere('slug', 'pink_rides')['id'] ?? null;
+            $extraCareFeatureId = collect($featureOptions ?? [])->firstWhere('slug', 'extra_care_rides')['id'] ?? null;
+            $featuresArray = $isNewForm
+                ? old('features', [])
+                : (old('features') ?:
+                (isset($ride->features)
+                    ? explode('=', $ride->features)
+                    : []));
+            $pinkRideChecked = $pinkFeatureId && is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
+            $extraCareRideChecked = $extraCareFeatureId && is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
         @endphp
-        @if ($postRidePage->features_option1?->features_setting_id)
-            @php
-                $pinkFeatureId = $postRidePage->features_option1->features_setting_id;
-                $featuresArray = $isNewForm
-                    ? old('features', [])
-                    : (old('features') ?:
-                    (isset($ride->features)
-                        ? explode('=', $ride->features)
-                        : []));
-                $pinkRideChecked = is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
-            @endphp
-            <div id="pink-ride-disclaimer"
-                class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
-                <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                    <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
-                    5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
-                    male driver in my place and will not accept any male passengers over 12 years old, even if
-                    the booking is made by a female.
-                </p>
-            </div>
-        @endif
-        @if ($postRidePage->features_option2?->features_setting_id)
-            @php
-                $extraCareFeatureId = $postRidePage->features_option2->features_setting_id;
-                $featuresArray = $isNewForm
-                    ? old('features', [])
-                    : (old('features') ?:
-                    (isset($ride->features)
-                        ? explode('=', $ride->features)
-                        : []));
-                $extraCareRideChecked = is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
-
-            @endphp
-            <div id="Extra+-ride-disclaimer"
-                class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
-                <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                    <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                    <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
-                    I understand that this is an Extra+ Ride, exclusively for members with top-tier review
-                    ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
-                    this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
-                    ensuring a calm, respectful environment by preventing any passenger disputes.
-                </p>
-            </div>
-        @endif
+        <div id="pink-ride-disclaimer"
+            class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
+                5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
+                male driver in my place and will not accept any male passengers over 12 years old, even if
+                the booking is made by a female.
+            </p>
+        </div>
+        <div id="Extra+-ride-disclaimer"
+            class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
+                <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
+                I understand that this is an Extra+ Ride, exclusively for members with top-tier review
+                ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
+                this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
+                ensuring a calm, respectful environment by preventing any passenger disputes.
+            </p>
+        </div>
     </div>
 </div>
 
@@ -6008,7 +5453,7 @@
         }
 
         // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
-        const pinkRideCheckbox = document.getElementById('pink-ride');
+        const pinkRideCheckbox = document.getElementById('pink_rides');
         const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
         const extraCareDisclaimerNumber = document.getElementById('extra-care-disclaimer-number');
         if (pinkRideCheckbox && pinkRideDisclaimer) {
@@ -6022,10 +5467,12 @@
         }
 
         // Toggle Extra+ Ride disclaimer when Extra+ checkbox is checked/unchecked
-        const extraCareRideCheckbox = document.getElementById('Extra+');
+        const extraCareRideCheckbox = document.getElementById('extra_care_rides');
         const extraCareRideDisclaimer = document.getElementById('Extra+-ride-disclaimer');
         if (extraCareRideCheckbox && extraCareRideDisclaimer) {
             extraCareRideCheckbox.addEventListener('change', function() {
+                console.log('ddddd');
+                
                 extraCareRideDisclaimer.classList.toggle('hidden', !this.checked);
             });
         }

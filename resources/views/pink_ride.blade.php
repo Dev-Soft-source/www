@@ -1244,66 +1244,11 @@
                                                             <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
-                                                        @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option2_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option3_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option8_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option9_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option10_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option11_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option12_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option13_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option14_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option15_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option16_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option4_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option5_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option6_tooltip }}">
-                                                        @endif
-                                                        @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""
-                                                                data-tippy-content="{{ $postRidePage->features_option7_tooltip }}">
-                                                        @endif
+                                                        @include('partials.ride_feature_icons', [
+                                                            'rideFeatures' => $ride->features,
+                                                            'postRidePage' => $postRidePage,
+                                                            'iconClass' => 'w-8 h-8 cursor-help',
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>

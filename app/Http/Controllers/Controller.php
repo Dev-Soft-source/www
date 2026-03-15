@@ -14,6 +14,7 @@ use App\Models\Notification;
 use App\Models\Rating;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
+use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
 use App\Models\SiteTextDetail;
 use App\Models\VideoDetail;
@@ -70,12 +71,16 @@ class Controller extends BaseController
             }
 
             $languages = Language::all();
+            $featureOptions = $this->getFeatureOptionsByLanguage();
             $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
             View::share([
                 'selectedLanguage' => $this->selectedLanguage,
                 'languages' => $languages,
+                'featureOptions' => $featureOptions,
+                'featureOptionsById' => $featureOptions->keyBy('id'),
+                'featureOptionsByLabel' => $featureOptions->keyBy('label'),
                 'siteText' => $siteText,
                 'successMessage' => $this->successMessage,
                 // 'ratings' => $ratings,
@@ -148,29 +153,6 @@ class Controller extends BaseController
                     ->orderBy('id', 'desc')
                     ->get();
                 View::share('notifications', $notifications);
-
-                // // ratings
-                // $ratings = Rating::where(function ($query) use ($user_id) {
-                //     // Ratings where type is 2 and user_id belongs to the user
-                //     $query->where('type', '2')
-                //         ->whereHas('booking', function ($query) use ($user_id) {
-                //             $query->where('user_id', $user_id);
-                //         });
-                //     // OR Ratings where type is 1 and ride_id belongs to the user
-                //     $query->orWhere(function ($query) use ($user_id) {
-                //         $query->where('type', '1')
-                //             ->whereHas('ride', function ($query) use ($user_id) {
-                //                 $query->where('added_by', $user_id);
-                //             });
-                //     });
-                // })
-                //     ->with(['from' => function ($query) {
-                //         $query->withTrashed(); // Include soft-deleted users
-                //     }])
-                //     ->where('status', 1)
-                //     ->orderBy('id', 'desc')
-                //     ->get();
-                // View::share('ratings', $ratings);
             }
 
             return $next($request);
@@ -186,10 +168,12 @@ class Controller extends BaseController
         if ($postRidePage) {
             // Optimized: Batch load all option groups in a single query instead of 7 separate queries
             $postRidePage->mapMultipleOptionColumnsToDetails(
-                ['features', 'smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+                ['smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
                 $this->selectedLanguage->id,
                 $this->defaultLang->id
             );
+
+            $this->hydrateLegacyFeatureOptions($postRidePage);
         }
 
         return $postRidePage;
@@ -213,6 +197,11 @@ class Controller extends BaseController
     protected function getVehicleTypesByLanguage()
     {
         return $this->getVehicleTypesForLanguage($this->selectedLanguage->id, $this->defaultLang->id);
+    }
+
+    protected function getFeatureOptionsByLanguage()
+    {
+        return $this->getFeaturesForLanguage($this->selectedLanguage->id, $this->defaultLang->id);
     }
 
     protected function getVehicleTypesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
@@ -245,6 +234,39 @@ class Controller extends BaseController
         })->filter(fn ($type) => !empty($type['id']) && !empty($type['label']))->values();
     }
 
+    protected function getFeaturesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
+    {
+        $languageId = $languageId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
+        $fallbackLanguageId = $fallbackLanguageId ?: $this->defaultLang?->id ?: $languageId;
+        $featureIds = $this->getFeatureOptionIds();
+
+        $featureSlugs = FeaturesSetting::whereIn('id', $featureIds)
+            ->pluck('slug', 'id');
+
+        $details = FeaturesSettingDetail::whereIn('features_setting_id', $featureIds)
+            ->whereIn('language_id', array_unique(array_filter([$languageId, $fallbackLanguageId])))
+            ->get()
+            ->groupBy('features_setting_id');
+
+        return collect($featureIds)->map(function ($featureId) use ($details, $featureSlugs, $languageId, $fallbackLanguageId) {
+            $localized = $details->get($featureId, collect())
+                ->firstWhere('language_id', $languageId);
+
+            $fallback = $details->get($featureId, collect())
+                ->firstWhere('language_id', $fallbackLanguageId);
+
+            $detail = $localized ?: $fallback;
+
+            return [
+                'id' => $featureId,
+                'slug' => $featureSlugs->get($featureId),
+                'label' => $detail?->name ?? $fallback?->name,
+                'icon' => $detail?->icon ?? $fallback?->icon,
+                'tooltip' => $detail?->display_tooltip ?? $fallback?->display_tooltip,
+            ];
+        })->filter(fn ($feature) => !empty($feature['id']) && !empty($feature['label']))->values();
+    }
+
     protected function getVehicleTypeFeatureMap(): array
     {
         return [
@@ -258,5 +280,36 @@ class Controller extends BaseController
             ['slug' => 'truck', 'id' => 45],
             ['slug' => 'van', 'id' => 46],
         ];
+    }
+
+    protected function getFeatureOptionIds(): array
+    {
+        // id is refered to db
+        return array_merge(range(1, 20), [47]);
+    }
+
+    protected function hydrateLegacyFeatureOptions($postRidePage)
+    {
+        if (!$postRidePage) {
+            return $postRidePage;
+        }
+
+        $featureOptions = $this->getFeatureOptionsByLanguage();
+
+        foreach ($featureOptions as $featureOption) {
+            $legacyKey = 'features_option' . $featureOption['id'];
+
+            $postRidePage->{$legacyKey} = (object) [
+                'features_setting_id' => $featureOption['id'],
+                'name' => $featureOption['label'],
+                'label' => $featureOption['label'],
+                'icon' => $featureOption['icon'] ?? null,
+                'tooltip' => $featureOption['tooltip'] ?? null,
+            ];
+
+            $postRidePage->{$legacyKey . '_tooltip'} = $featureOption['tooltip'] ?? '';
+        }
+
+        return $postRidePage;
     }
 }

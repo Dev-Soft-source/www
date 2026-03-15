@@ -472,86 +472,10 @@
                                                                             src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
                                                                             alt="">
                                                                     @endif
-                                                                    @if (in_array($postRidePage->features_option1->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option2->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option3->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option3->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option8->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option8->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option9->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option9->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option10->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option10->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option11->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option11->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option12->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option12->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option13->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option13->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option14->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option14->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option15->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option15->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option16->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option16->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option4->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option5->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option6->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if (in_array($postRidePage->features_option7->features_setting_id, explode('=', $ride->features)))
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}"
-                                                                            alt="">
-                                                                    @endif
+                                                                    @include('partials.ride_feature_icons', [
+                                                                        'rideFeatures' => $ride->features,
+                                                                        'postRidePage' => $postRidePage,
+                                                                    ])
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 flex no-scrollbar overflow-x-auto items-center space-x-2 p-4">

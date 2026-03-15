@@ -200,6 +200,217 @@ class User extends Authenticatable
             ->exists();
     }
 
+    public function canUsePinkRide(?PinkRideSetting $pinkRideSetting = null): bool
+    {
+        if ((string) $this->pink_ride === '0') {
+            return false;
+        }
+
+        if ((string) $this->pink_ride === '1') {
+            return true;
+        }
+
+        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::first();
+
+        if (!$pinkRideSetting) {
+            return true;
+        }
+
+        if (strtolower((string) $this->gender) !== 'female') {
+            return false;
+        }
+
+        if (empty($this->government_issued_id) || empty($this->address)) {
+            return false;
+        }
+
+        if ($pinkRideSetting->verfiy_phone === '1' && !$this->hasPinkRideVerifiedPhone()) {
+            return false;
+        }
+
+        if ($pinkRideSetting->verify_email === '1' && (string) $this->email_verified !== '1') {
+            return false;
+        }
+
+        if ($pinkRideSetting->driver_license === '1' && (string) $this->driver !== '1') {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canUseExtraRide(
+        ?FolkRideSetting $folkRideSetting = null,
+        ?float $overallRating = null,
+        ?int $totalRides = null,
+        ?int $noShowsCount = null,
+        ?int $cancellationCount = null,
+        ?int $noshows = null
+    ): bool {
+        if ((string) $this->folks_ride === '0') {
+            return false;
+        }
+
+        if ((string) $this->folks_ride === '1') {
+            return true;
+        }
+
+        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::first();
+
+        if (!$folkRideSetting) {
+            return true;
+        }
+
+        $overallRating = $overallRating ?? $this->driverOverallRating();
+        $totalRides = $totalRides ?? $this->completedRideCount();
+        $noShowsCount = $noShowsCount ?? $this->recentDriverNoShowsCount();
+        $cancellationCount = $cancellationCount ?? $this->recentDriverCancellationCount();
+        $noshows = $noshows ?? $this->recentAnyDriverNoShowsCount();
+        $age = $this->age();
+
+        if ($folkRideSetting->verfiy_phone === '1' && !$this->hasVerifiedPhone()) {
+            return false;
+        }
+
+        if ($folkRideSetting->verify_email === '1' && (string) $this->email_verified !== '1') {
+            return false;
+        }
+
+        if ($folkRideSetting->driver_license === '1' && (string) $this->driver !== '1') {
+            return false;
+        }
+
+        if (empty($this->government_issued_id) || empty($this->address)) {
+            return false;
+        }
+
+        if ($overallRating < (float) ($folkRideSetting->average_rating ?? 0)) {
+            return false;
+        }
+
+        if ($age < (int) ($folkRideSetting->driver_age ?? 0)) {
+            return false;
+        }
+
+        if ($totalRides < (int) ($folkRideSetting->extra_rides_trip_limit ?? 0)) {
+            return false;
+        }
+
+        if ($noShowsCount > 0 || $cancellationCount > 0 || $noshows > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function pinkRideTooltip(?PostRidePageSettingDetail $postRidePage = null, ?PinkRideSetting $pinkRideSetting = null): string
+    {
+        $postRidePage = $postRidePage ?: $this->currentPostRidePage();
+
+        if ((string) $this->pink_ride === '0') {
+            return $postRidePage->pink_ride_tooltip_admin_disable_text ?? '';
+        }
+
+        if ((string) $this->pink_ride === '1') {
+            return $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
+        }
+
+        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::first();
+
+        if (!$pinkRideSetting) {
+            return '';
+        }
+
+        $parts = [
+            $postRidePage->pink_ride_tooltip_only_text ?? '',
+            $postRidePage->pink_ride_tooltip_female_text ?? '',
+            $postRidePage->pink_ride_tooltip_driver_text ?? '',
+        ];
+
+        if ($pinkRideSetting->profile_complete === '1') {
+            $parts[] = $postRidePage->pink_ride_tooltip_complete_profile_text ?? '';
+        }
+
+        if ($pinkRideSetting->verfiy_phone === '1' && !$this->hasPinkRideVerifiedPhone()) {
+            $parts[] = $postRidePage->pink_ride_tooltip_phone_number_text ?? '';
+        }
+
+        if ($pinkRideSetting->verify_email === '1' && (string) $this->email_verified !== '1') {
+            $parts[] = $postRidePage->pink_ride_tooltip_email_text ?? '';
+        }
+
+        if ($pinkRideSetting->driver_license === '1' && (string) $this->driver !== '1') {
+            $parts[] = $postRidePage->pink_ride_tooltip_driver_license_text ?? '';
+        }
+
+        $parts[] = $postRidePage->pink_ride_tooltip_verified_text ?? '';
+        $parts[] = $postRidePage->pink_ride_tooltip_select_this_ride_text ?? '';
+
+        return trim(implode(' ', array_filter($parts)));
+    }
+
+    public function extraRideTooltip(
+        ?PostRidePageSettingDetail $postRidePage = null,
+        ?FolkRideSetting $folkRideSetting = null,
+        ?float $overallRating = null,
+        ?int $totalRides = null,
+        ?int $noShowsCount = null,
+        ?int $cancellationCount = null,
+        ?int $noshows = null
+    ): string {
+        $postRidePage = $postRidePage ?: $this->currentPostRidePage();
+
+        if ((string) $this->folks_ride === '0') {
+            return $postRidePage->extra_care_tooltip_admin_disable_text ?? '';
+        }
+
+        if ((string) $this->folks_ride === '1') {
+            return $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
+        }
+
+        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::first();
+
+        if (!$folkRideSetting) {
+            return '';
+        }
+
+        $parts = [
+            $postRidePage->extra_care_tooltip_driver_review_text ?? '',
+            $folkRideSetting->average_rating ?? '0',
+            $postRidePage->extra_care_tooltip_greater_age_text ?? '',
+            $folkRideSetting->driver_age ?? '0',
+            $postRidePage->extra_care_tooltip_greater_text ?? '',
+        ];
+
+        if ($folkRideSetting->profile_complete === '1') {
+            $parts[] = $postRidePage->extra_care_tooltip_complete_profile_text ?? '';
+        }
+
+        if ($folkRideSetting->verfiy_phone === '1' && !$this->hasVerifiedPhone()) {
+            $parts[] = $postRidePage->extra_care_tooltip_phone_number_text ?? '';
+        }
+
+        if ($folkRideSetting->verify_email === '1' && (string) $this->email_verified !== '1') {
+            $parts[] = $postRidePage->extra_care_tooltip_email_text ?? '';
+        }
+
+        if ($folkRideSetting->driver_license === '1' && (string) $this->driver !== '1') {
+            $parts[] = $postRidePage->extra_care_tooltip_driver_license_text ?? '';
+        }
+
+        if (
+            $folkRideSetting->verfiy_phone === '1' ||
+            $folkRideSetting->verify_email === '1' ||
+            $folkRideSetting->driver_license === '1'
+        ) {
+            $parts[] = $postRidePage->extra_care_tooltip_verified_text ?? '';
+        }
+
+        $parts[] = $postRidePage->extra_care_tooltip_eligible_text ?? '';
+
+        return trim(implode(' ', array_filter($parts)));
+    }
+
     public function primaryPhone()
     {
         return $this->phoneNumbers()
@@ -225,5 +436,81 @@ class User extends Authenticatable
     public function isBlockedBooking()
     {
         return $this->block_booking;
+    }
+
+    protected function hasPinkRideVerifiedPhone(): bool
+    {
+        return $this->hasVerifiedPhone() || (string) ($this->phone_verified ?? '') === '1';
+    }
+
+    protected function age(): int
+    {
+        if (empty($this->dob)) {
+            return 0;
+        }
+
+        return \Carbon\Carbon::parse($this->dob)->diffInYears(now());
+    }
+
+    protected function driverOverallRating(): float
+    {
+        return (float) Rating::where('type', 1)
+            ->where('status', 1)
+            ->whereHas('ride', function ($query) {
+                $query->where('added_by', $this->id);
+            })
+            ->avg('average_rating');
+    }
+
+    protected function completedRideCount(): int
+    {
+        return Ride::where('added_by', $this->id)
+            ->where('status', '!=', 2)
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->whereDate('completed_date', '<', now()->toDateString())
+                        ->orWhere(function ($query) {
+                            $query->whereDate('completed_date', '=', now()->toDateString())
+                                ->whereTime('completed_time', '<', now()->toTimeString());
+                        });
+                });
+            })
+            ->count();
+    }
+
+    protected function recentDriverNoShowsCount(): int
+    {
+        return NoShowHistory::where('user_id', $this->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [now()->subMonths(3), now()])
+            ->count();
+    }
+
+    protected function recentDriverCancellationCount(): int
+    {
+        return CancellationHistory::where('user_id', $this->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [now()->subMonths(3), now()])
+            ->whereNotNull('booking_id')
+            ->count();
+    }
+
+    protected function recentAnyDriverNoShowsCount(): int
+    {
+        return NoShowHistory::where('user_id', $this->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [now()->subMonths(3), now()])
+            ->count();
+    }
+
+    protected function currentPostRidePage(): ?PostRidePageSettingDetail
+    {
+        $selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
+        $defaultLanguageId = Language::where('is_default', 1)->value('id') ?? 1;
+
+        return PostRidePageSettingDetail::getByLanguageWithFallback(
+            $selectedLanguage?->id ?? $defaultLanguageId,
+            $defaultLanguageId
+        );
     }
 }
