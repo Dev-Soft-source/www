@@ -3,17 +3,31 @@
 namespace App\View\Composers;
 
 use App\Models\Country;
+use App\Models\Language;
+use App\Models\PostRidePageSettingDetail;
 use Carbon\Carbon;
 use Illuminate\View\View;
 
 class BirthdayComposer
 {
     /**
-     * Share birthday data with the layout when it's the user's birthday.
+     * Share birthday data and postRidePage (for navbar modals) with the layout.
      */
     public function compose(View $view): void
     {
         $birthdayData = null;
+        $postRidePage = null;
+        $selectedLangAbbr = session('selectedLanguage');
+        $selectedLanguage = $selectedLangAbbr ? Language::where('abbreviation', $selectedLangAbbr)->first() : null;
+        if (!$selectedLanguage) {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        $defaultLang = Language::where('is_default', 1)->first();
+        if ($selectedLanguage && $defaultLang) {
+            $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang->id);
+        }
+        $view->with('postRidePage', $postRidePage);
+        $view->with('selectedLanguage', $selectedLanguage);
 
         if (auth()->check()) {
             $user = auth()->user();
@@ -43,3 +57,4 @@ class BirthdayComposer
         $view->with('birthdayData', $birthdayData);
     }
 }
+
