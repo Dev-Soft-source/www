@@ -3035,6 +3035,64 @@
             }
             const initialMinTime = isDefaultDateToday() ? getCurrentProjectTime() : '00:00';
 
+            function checkTimeOrderEditRide() {
+                function getDtEdit(dateEl, timeEl) {
+                    if (!dateEl || !timeEl) return null;
+                    try {
+                        var d = null, t = null;
+                        if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
+                            d = dateEl._flatpickr.selectedDates[0];
+                        } else if (dateEl.value && dateEl.value.trim()) {
+                            d = new Date(dateEl.value.trim());
+                            if (isNaN(d.getTime())) return null;
+                        } else return null;
+                        if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
+                            t = timeEl._flatpickr.selectedDates[0];
+                        } else if (timeEl.value && timeEl.value.trim()) {
+                            var timeStr = timeEl.value.trim();
+                            var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+                            var h = 0, m = 0;
+                            if (match) {
+                                h = parseInt(match[1], 10);
+                                m = parseInt(match[2], 10);
+                                if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
+                                if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
+                            } else return null;
+                            t = new Date(d);
+                            t.setHours(h, m, 0, 0);
+                        } else return null;
+                        if (!(d instanceof Date) || !(t instanceof Date)) return null;
+                        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
+                    } catch (err) { return null; }
+                }
+                var originDt = getDtEdit(dateInput, timeInput);
+                var container = document.getElementById('stops-rows-container');
+                if (!container) return;
+                var stopRows = container.querySelectorAll('.stop-row');
+                if (!originDt) return;
+                var prevDt = originDt;
+                stopRows.forEach(function(row) {
+                    var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
+                    var cityVal = cityInp ? (cityInp.value || '').trim() : '';
+                    if (!cityVal) return;
+                    var dataIndex = row.getAttribute('data-stop-index');
+                    var errEl = dataIndex ? document.getElementById('stopInputError_' + dataIndex) : null;
+                    var dateInp = row.querySelector('input[name="stop_date[]"]');
+                    var timeInp = row.querySelector('input[name="stop_time[]"]');
+                    var stopDt = getDtEdit(dateInp, timeInp);
+                    if (stopDt !== null && stopDt < prevDt) {
+                        if (errEl) {
+                            var te = errEl.querySelector('.tooltip-error');
+                            if (te) te.textContent = prevDt === originDt ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
+                            errEl.classList.remove('hidden');
+                        }
+                    } else {
+                        if (errEl) errEl.classList.add('hidden');
+                        if (stopDt !== null) prevDt = stopDt;
+                    }
+                });
+            }
+
             flatpickr(dateInput, {
                 dateFormat: 'F d, Y',
                 minDate: 'today',
@@ -3053,6 +3111,7 @@
                         date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
                         timeInput._flatpickr.setDate(date, true);
                     }
+                    if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
                 },
             });
 
@@ -3084,11 +3143,13 @@
                     if (selectedDates.length && timeInput._flatpickr.altInput) {
                         timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
                     }
+                    if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
                 },
                 onClose: function(selectedDates) {
                     if (selectedDates.length && timeInput._flatpickr.altInput) {
                         timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
                     }
+                    if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
                 }
             });
             if (timePicker.selectedDates.length && timePicker.altInput) {
@@ -3150,6 +3211,9 @@
                     dateFormat: 'F d, Y',
                     minDate: 'today',
                     disableMobile: true,
+                    onChange: function() {
+                        if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
+                    },
                 });
             }
 
@@ -3180,11 +3244,13 @@
                         if (selectedDates.length && instance.altInput) {
                             instance.altInput.value = formatTimeDisplay(selectedDates[0]);
                         }
+                        if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
                     },
                     onClose: function(selectedDates, dateStr, instance) {
                         if (selectedDates.length && instance.altInput) {
                             instance.altInput.value = formatTimeDisplay(selectedDates[0]);
                         }
+                        if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
                     },
                 });
                 setTimeout(function() {
@@ -3243,6 +3309,19 @@
                 initStopDatePickerForEdit(el);
             });
 
+            var editForm = document.getElementById('edit-ride-form');
+            if (editForm) {
+                editForm.addEventListener('input', function(e) {
+                    if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
+                        if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
+                    }
+                });
+                editForm.addEventListener('change', function(e) {
+                    if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
+                        if (typeof checkTimeOrderEditRide === 'function') checkTimeOrderEditRide();
+                    }
+                });
+            }
         }
 
         function seat_selected(th) {
@@ -3762,6 +3841,67 @@
                 }
                 if (fromInputError) fromInputError.classList.add('hidden');
                 if (toInputError) toInputError.classList.add('hidden');
+
+                // Time order: origin time <= first stop <= next stop <= ... Stop time cannot be before origin; each stop time cannot be before the previous.
+                var originDateEl = document.getElementById('dateInput');
+                var timeInputEl = document.getElementById('timeInput');
+                function getDateTimeFromInputsEdit(dateEl, timeEl) {
+                    if (!dateEl || !timeEl) return null;
+                    try {
+                        var d = null, t = null;
+                        if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
+                            d = dateEl._flatpickr.selectedDates[0];
+                        } else if (dateEl.value && dateEl.value.trim()) {
+                            d = new Date(dateEl.value.trim());
+                            if (isNaN(d.getTime())) return null;
+                        } else return null;
+                        if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
+                            t = timeEl._flatpickr.selectedDates[0];
+                        } else if (timeEl.value && timeEl.value.trim()) {
+                            var timeStr = timeEl.value.trim();
+                            var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+                            var h = 0, m = 0;
+                            if (match) {
+                                h = parseInt(match[1], 10);
+                                m = parseInt(match[2], 10);
+                                if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
+                                if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
+                            } else return null;
+                            t = new Date(d);
+                            t.setHours(h, m, 0, 0);
+                        } else return null;
+                        if (!(d instanceof Date) || !(t instanceof Date)) return null;
+                        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
+                    } catch (err) { return null; }
+                }
+                var originDtEdit = getDateTimeFromInputsEdit(originDateEl, timeInputEl);
+                if (originDtEdit && stopsContainer) {
+                    var stopRowsEdit = stopsContainer.querySelectorAll('.stop-row');
+                    var prevDtEdit = originDtEdit;
+                    for (var ri = 0; ri < stopRowsEdit.length; ri++) {
+                        var row = stopRowsEdit[ri];
+                        var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
+                        var cityVal = cityInp ? (cityInp.value || '').trim() : '';
+                        if (!cityVal) continue;
+                        var dateInp = row.querySelector('input[name="stop_date[]"]');
+                        var timeInp = row.querySelector('input[name="stop_time[]"]');
+                        var stopDtEdit = getDateTimeFromInputsEdit(dateInp, timeInp);
+                        if (stopDtEdit !== null && stopDtEdit < prevDtEdit) {
+                            e.preventDefault();
+                            var dataIndex = row.getAttribute('data-stop-index');
+                            var errEl = dataIndex ? document.getElementById('stopInputError_' + dataIndex) : null;
+                            if (errEl) {
+                                var te = errEl.querySelector('.tooltip-error');
+                                if (te) te.textContent = prevDtEdit === originDtEdit ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
+                                errEl.classList.remove('hidden');
+                            }
+                            if (timeInp) timeInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        } else if (stopDtEdit !== null) {
+                            prevDtEdit = stopDtEdit;
+                        }
+                    }
+                }
 
                 buildStopsSegmentsForSubmit();
                 // When segment prices are shown: full-route must be <= total; if not, scroll to price section and prevent submit

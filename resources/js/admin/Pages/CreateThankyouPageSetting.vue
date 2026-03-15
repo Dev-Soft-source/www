@@ -207,6 +207,174 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Welcome Message Page Section -->
+                                <div class="border rounded w-full mt-4" :class="collapseStates[1] ? 'bg-gray-50' : ''">
+                                    <div class="flex justify-between bg-primary text-white p-4 cursor-pointer"
+                                        @click.prevent="collapseStates[1] = !collapseStates[1]">
+                                        <h3 class="text-white">Welcome Message Page</h3>
+                                        <svg class="w-5 h-5 fill-current text-gray-500" viewBox="0 0 20 20">
+                                            <path d="M6 9l4 4 4-4"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="p-4 bg-gray-100 border-t grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                                        v-if="collapseStates[1]">
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_page_title_${activeLanguageId}`">Welcome Page Title</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_page_title_${activeLanguageId}`" :id="`welcome_page_title_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Welcome to ProximaRide"
+                                                    :value="getCurrentValue('welcome_page_title')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_page_title')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_greeting_${activeLanguageId}`">Welcome Greeting</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_greeting_${activeLanguageId}`" :id="`welcome_greeting_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Hi"
+                                                    :value="getCurrentValue('welcome_greeting')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_greeting')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_paragraph_1_${activeLanguageId}`">Welcome Paragraph 1</label>
+                                                </div>
+                                                <textarea :name="`welcome_paragraph_1_${activeLanguageId}`" :id="`welcome_paragraph_1_${activeLanguageId}`" rows="2"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_paragraph_1')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_paragraph_1')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_paragraph_2_${activeLanguageId}`">Welcome Paragraph 2</label>
+                                                </div>
+                                                <textarea :name="`welcome_paragraph_2_${activeLanguageId}`" :id="`welcome_paragraph_2_${activeLanguageId}`" rows="3"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_paragraph_2')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_paragraph_2')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_paragraph_3_${activeLanguageId}`">Welcome Paragraph 3</label>
+                                                </div>
+                                                <textarea :name="`welcome_paragraph_3_${activeLanguageId}`" :id="`welcome_paragraph_3_${activeLanguageId}`" rows="2"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_paragraph_3')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_paragraph_3')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_paragraph_4_${activeLanguageId}`">Welcome Paragraph 4</label>
+                                                </div>
+                                                <textarea :name="`welcome_paragraph_4_${activeLanguageId}`" :id="`welcome_paragraph_4_${activeLanguageId}`" rows="2"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_paragraph_4')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_paragraph_4')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_paragraph_5_${activeLanguageId}`">Welcome Paragraph 5</label>
+                                                </div>
+                                                <textarea :name="`welcome_paragraph_5_${activeLanguageId}`" :id="`welcome_paragraph_5_${activeLanguageId}`" rows="2"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_paragraph_5')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_paragraph_5')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_complete_profile_btn_${activeLanguageId}`">Complete Profile Button</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_complete_profile_btn_${activeLanguageId}`" :id="`welcome_complete_profile_btn_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Complete my profile"
+                                                    :value="getCurrentValue('welcome_complete_profile_btn')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_complete_profile_btn')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_closing_line1_${activeLanguageId}`">Welcome Closing Line 1</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_closing_line1_${activeLanguageId}`" :id="`welcome_closing_line1_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                                                    :value="getCurrentValue('welcome_closing_line1')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_closing_line1')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_closing_line2_${activeLanguageId}`">Welcome Closing Line 2</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_closing_line2_${activeLanguageId}`" :id="`welcome_closing_line2_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Erman, ProximaRide Founder"
+                                                    :value="getCurrentValue('welcome_closing_line2')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_closing_line2')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_closing_team_text_${activeLanguageId}`">Welcome Closing Team Text</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_closing_team_text_${activeLanguageId}`" :id="`welcome_closing_team_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. And the entire ProximaRide Team"
+                                                    :value="getCurrentValue('welcome_closing_team_text')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_closing_team_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_footer_help_contact_${activeLanguageId}`">Footer: Help & Contact</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_footer_help_contact_${activeLanguageId}`" :id="`welcome_footer_help_contact_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Help & Contact"
+                                                    :value="getCurrentValue('welcome_footer_help_contact')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_footer_help_contact')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_footer_terms_use_${activeLanguageId}`">Footer: Terms of Use</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_footer_terms_use_${activeLanguageId}`" :id="`welcome_footer_terms_use_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Terms of Use"
+                                                    :value="getCurrentValue('welcome_footer_terms_use')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_footer_terms_use')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`welcome_footer_coffee_on_wall_${activeLanguageId}`">Footer: Coffee on the Wall</label>
+                                                </div>
+                                                <input type="text" :name="`welcome_footer_coffee_on_wall_${activeLanguageId}`" :id="`welcome_footer_coffee_on_wall_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Coffee on the Wall"
+                                                    :value="getCurrentValue('welcome_footer_coffee_on_wall')"
+                                                    @input="handleInput($event.target.value, language, 'welcome_footer_coffee_on_wall')" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                         <button type="submit" class="button-exp-fill mt-5">Submit</button>
@@ -229,7 +397,7 @@ export default {
             languages: [],
             form: {},
             validationErros: new ErrorHandling(),
-            collapseStates: [true],
+            collapseStates: [true, false],
             loading: false,
         };
     },
@@ -282,6 +450,20 @@ export default {
                             this.handleInput("", language, "instant_booking_message");
                             this.handleInput("", language, "manual_booking_message");
                             this.handleInput("", language, "top_up_message");
+                            this.handleInput("", language, "welcome_page_title");
+                            this.handleInput("", language, "welcome_greeting");
+                            this.handleInput("", language, "welcome_paragraph_1");
+                            this.handleInput("", language, "welcome_paragraph_2");
+                            this.handleInput("", language, "welcome_paragraph_3");
+                            this.handleInput("", language, "welcome_paragraph_4");
+                            this.handleInput("", language, "welcome_paragraph_5");
+                            this.handleInput("", language, "welcome_complete_profile_btn");
+                            this.handleInput("", language, "welcome_closing_line1");
+                            this.handleInput("", language, "welcome_closing_line2");
+                            this.handleInput("", language, "welcome_closing_team_text");
+                            this.handleInput("", language, "welcome_footer_help_contact");
+                            this.handleInput("", language, "welcome_footer_terms_use");
+                            this.handleInput("", language, "welcome_footer_coffee_on_wall");
                         });
                         this.fetchThankyouPageSetting();
                     }
@@ -308,6 +490,20 @@ export default {
                             this.handleInput(setting?.instant_booking_message ?? "", lang, "instant_booking_message");
                             this.handleInput(setting?.manual_booking_message ?? "", lang, "manual_booking_message");
                             this.handleInput(setting?.top_up_message ?? "", lang, "top_up_message");
+                            this.handleInput(setting?.welcome_page_title ?? "", lang, "welcome_page_title");
+                            this.handleInput(setting?.welcome_greeting ?? "", lang, "welcome_greeting");
+                            this.handleInput(setting?.welcome_paragraph_1 ?? "", lang, "welcome_paragraph_1");
+                            this.handleInput(setting?.welcome_paragraph_2 ?? "", lang, "welcome_paragraph_2");
+                            this.handleInput(setting?.welcome_paragraph_3 ?? "", lang, "welcome_paragraph_3");
+                            this.handleInput(setting?.welcome_paragraph_4 ?? "", lang, "welcome_paragraph_4");
+                            this.handleInput(setting?.welcome_paragraph_5 ?? "", lang, "welcome_paragraph_5");
+                            this.handleInput(setting?.welcome_complete_profile_btn ?? "", lang, "welcome_complete_profile_btn");
+                            this.handleInput(setting?.welcome_closing_line1 ?? "", lang, "welcome_closing_line1");
+                            this.handleInput(setting?.welcome_closing_line2 ?? "", lang, "welcome_closing_line2");
+                            this.handleInput(setting?.welcome_closing_team_text ?? "", lang, "welcome_closing_team_text");
+                            this.handleInput(setting?.welcome_footer_help_contact ?? "", lang, "welcome_footer_help_contact");
+                            this.handleInput(setting?.welcome_footer_terms_use ?? "", lang, "welcome_footer_terms_use");
+                            this.handleInput(setting?.welcome_footer_coffee_on_wall ?? "", lang, "welcome_footer_coffee_on_wall");
                         });
                     }
                 });

@@ -3594,6 +3594,71 @@
             dynamicPriceInputEl.addEventListener('change', runPriceValidationOnInput);
         }
 
+        // Time-order check: show/hide stop time tooltips when origin or stop date/time changes (real-time).
+        function checkTimeOrderPostRide() {
+            function getDt(dateEl, timeEl) {
+                if (!dateEl || !timeEl) return null;
+                try {
+                    var d = null, t = null;
+                    if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
+                        d = dateEl._flatpickr.selectedDates[0];
+                    } else if (dateEl.value && dateEl.value.trim()) {
+                        d = new Date(dateEl.value.trim());
+                        if (isNaN(d.getTime())) return null;
+                    } else return null;
+                    if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
+                        t = timeEl._flatpickr.selectedDates[0];
+                    } else if (timeEl.value && timeEl.value.trim()) {
+                        var timeStr = timeEl.value.trim();
+                        var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+                        var h = 0, m = 0;
+                        if (match) {
+                            h = parseInt(match[1], 10);
+                            m = parseInt(match[2], 10);
+                            if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
+                            if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
+                        } else return null;
+                        t = new Date(d);
+                        t.setHours(h, m, 0, 0);
+                    } else return null;
+                    if (!(d instanceof Date) || !(t instanceof Date)) return null;
+                    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
+                } catch (err) { return null; }
+            }
+            var originDateEl = document.getElementById('dateInput');
+            var originTimeEl = document.getElementById('timeInput');
+            var originDt = getDt(originDateEl, originTimeEl);
+            var container = document.getElementById('stops-rows-container');
+            if (!container) return;
+            var stopRows = container.querySelectorAll('.stop-row');
+            stopRows.forEach(function(row) {
+                var dataIndex = row.getAttribute('data-stop-index');
+                var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
+                if (timeErr) timeErr.classList.add('hidden');
+            });
+            if (!originDt) return;
+            var prevDt = originDt;
+            stopRows.forEach(function(row) {
+                var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
+                var cityVal = cityInp ? (cityInp.value || '').trim() : '';
+                if (!cityVal) return;
+                var dateInp = row.querySelector('input[name="stop_date[]"]');
+                var timeInp = row.querySelector('input[name="stop_time[]"]');
+                var stopDt = getDt(dateInp, timeInp);
+                if (stopDt !== null && stopDt < prevDt) {
+                    var dataIndex = row.getAttribute('data-stop-index');
+                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
+                    if (timeErr) {
+                        var te = timeErr.querySelector('.tooltip-error');
+                        if (te) te.textContent = prevDt === originDt ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
+                        timeErr.classList.remove('hidden');
+                    }
+                } else if (stopDt !== null) {
+                    prevDt = stopDt;
+                }
+            });
+        }
+
         // When driver edits any segment (stop) price: update total, run full-total validation, and run per-segment validation (popup for individual route distance)
         form.addEventListener('input', function(e) {
             if (e.target && e.target.name === 'price_spot_display[]') {
@@ -3605,13 +3670,7 @@
                 schedulePriceValidationOnInput();
             }
             if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
-                var id = e.target.id || '';
-                var idx = id.replace('stop_date_', '').replace('stop_time_', '');
-                if (idx && id !== idx) {
-                    var errId = (e.target.name === 'stop_date[]') ? 'stopDateError_' + idx : 'stopTimeError_' + idx;
-                    var errEl = document.getElementById(errId);
-                    if (errEl) errEl.classList.add('hidden');
-                }
+                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
             }
             if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
                 var id = e.target.id || '';
@@ -3632,13 +3691,7 @@
                 runPriceValidationOnInput();
             }
             if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
-                var id = e.target.id || '';
-                var idx = id.replace('stop_date_', '').replace('stop_time_', '');
-                if (idx && id !== idx) {
-                    var errId = (e.target.name === 'stop_date[]') ? 'stopDateError_' + idx : 'stopTimeError_' + idx;
-                    var errEl = document.getElementById(errId);
-                    if (errEl) errEl.classList.add('hidden');
-                }
+                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
             }
             if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
                 var id = e.target.id || '';
@@ -3748,6 +3801,64 @@
                         if (!firstErrorElement && timeInp) firstErrorElement = timeInp;
                     }
                 });
+
+                // 3c. Time order: origin time <= first stop <= next stop <= ... (destination implied). Stop time cannot be before origin; each stop time cannot be before the previous.
+                var originDateEl = document.getElementById('dateInput');
+                var originTimeEl = document.getElementById('timeInput');
+                function getDateTimeFromInputs(dateEl, timeEl) {
+                    if (!dateEl || !timeEl) return null;
+                    try {
+                        var d = null, t = null;
+                        if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
+                            d = dateEl._flatpickr.selectedDates[0];
+                        } else if (dateEl.value && dateEl.value.trim()) {
+                            d = new Date(dateEl.value.trim());
+                            if (isNaN(d.getTime())) return null;
+                        } else return null;
+                        if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
+                            t = timeEl._flatpickr.selectedDates[0];
+                        } else if (timeEl.value && timeEl.value.trim()) {
+                            var timeStr = timeEl.value.trim();
+                            var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+                            var h = 0, m = 0;
+                            if (match) {
+                                h = parseInt(match[1], 10);
+                                m = parseInt(match[2], 10);
+                                if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
+                                if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
+                            } else return null;
+                                t = new Date(d);
+                                t.setHours(h, m, 0, 0);
+                        } else return null;
+                        if (!(d instanceof Date) || !(t instanceof Date)) return null;
+                        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
+                    } catch (e) { return null; }
+                }
+                var originDt = getDateTimeFromInputs(originDateEl, originTimeEl);
+                if (originDt) {
+                    var prevDt = originDt;
+                    stopRows.forEach(function(row) {
+                        var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
+                        var cityVal = cityInp ? (cityInp.value || '').trim() : '';
+                        if (!cityVal) return;
+                        var dateInp = row.querySelector('input[name="stop_date[]"]');
+                        var timeInp = row.querySelector('input[name="stop_time[]"]');
+                        var stopDt = getDateTimeFromInputs(dateInp, timeInp);
+                        if (stopDt !== null && stopDt < prevDt) {
+                            hasAnyValidationError = true;
+                            var dataIndex = row.getAttribute('data-stop-index');
+                            var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
+                            if (timeErr) {
+                                var te = timeErr.querySelector('.tooltip-error');
+                                if (te) te.textContent = prevDt === originDt ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
+                                timeErr.classList.remove('hidden');
+                            }
+                            if (!firstErrorElement && timeInp) firstErrorElement = timeInp;
+                        } else if (stopDt !== null) {
+                            prevDt = stopDt;
+                        }
+                    });
+                }
 
                 // 4. Check HTML5 validation (date, time, seats, required fields, etc.) so we show all errors
                 // Use the first *visible* invalid element so we don't scroll to hidden sections (e.g. recurring_trips when Recurring is unchecked)
@@ -4600,6 +4711,7 @@
                 date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
                 timeInput._flatpickr.setDate(date, true);
             }
+            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
         },
     });
     if (rideDate && rideDate !== "" && dateInput._flatpickr) {
@@ -4646,16 +4758,19 @@
             if (selectedDates.length && timeInput._flatpickr.altInput) {
                 timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
             }
+            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
         },
         onValueUpdate: function(selectedDates) {
             if (selectedDates.length && timeInput._flatpickr.altInput) {
                 timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
             }
+            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
         },
         onClose: function(selectedDates) {
             if (selectedDates.length && timeInput._flatpickr.altInput) {
                 timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
             }
+            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
         }
     });
     setTimeout(function() {
@@ -4678,6 +4793,9 @@
             dateFormat: 'F d, Y',
             minDate: 'today',
             disableMobile: true,
+            onChange: function() {
+                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
+            },
         });
     }
 
@@ -4703,6 +4821,9 @@
             disableMobile: true,
             minuteIncrement: 1,
             clickOpens: false,
+            onChange: function() {
+                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
+            },
         });
         // If there is already a selected date, ensure display is formatted
         setTimeout(function() {

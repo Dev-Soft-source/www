@@ -37,6 +37,20 @@ class ThankyouPageSettingService
             'instant_booking_message' => $this->data($request, $language, 'instant_booking_message'),
             'manual_booking_message' => $this->data($request, $language, 'manual_booking_message'),
             'top_up_message' => $this->data($request, $language, 'top_up_message'),
+            'welcome_page_title' => $this->data($request, $language, 'welcome_page_title'),
+            'welcome_greeting' => $this->data($request, $language, 'welcome_greeting'),
+            'welcome_paragraph_1' => $this->data($request, $language, 'welcome_paragraph_1'),
+            'welcome_paragraph_2' => $this->data($request, $language, 'welcome_paragraph_2'),
+            'welcome_paragraph_3' => $this->data($request, $language, 'welcome_paragraph_3'),
+            'welcome_paragraph_4' => $this->data($request, $language, 'welcome_paragraph_4'),
+            'welcome_paragraph_5' => $this->data($request, $language, 'welcome_paragraph_5'),
+            'welcome_complete_profile_btn' => $this->data($request, $language, 'welcome_complete_profile_btn'),
+            'welcome_closing_line1' => $this->data($request, $language, 'welcome_closing_line1'),
+            'welcome_closing_line2' => $this->data($request, $language, 'welcome_closing_line2'),
+            'welcome_closing_team_text' => $this->data($request, $language, 'welcome_closing_team_text'),
+            'welcome_footer_help_contact' => $this->data($request, $language, 'welcome_footer_help_contact'),
+            'welcome_footer_terms_use' => $this->data($request, $language, 'welcome_footer_terms_use'),
+            'welcome_footer_coffee_on_wall' => $this->data($request, $language, 'welcome_footer_coffee_on_wall'),
         ];
     }
 

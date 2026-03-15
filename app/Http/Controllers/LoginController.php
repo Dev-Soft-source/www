@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\LoginPageSettingDetail;
 use App\Models\Notification;
 use App\Models\SuccessMessagesSettingDetail;
+use App\Models\ThankyouPageSettingDetail;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\User;
 use App\Services\FCMService;
@@ -318,10 +319,15 @@ class LoginController extends Controller
             'first_name' => $user->first_name ?? '',
             'email' => $user->email ?? '',
         ];
-        $greeting_message = 'Hi';
+        $defaultLang = Language::where('is_default', 1)->first();
+        $thankyouPage = ThankyouPageSettingDetail::getByLanguageWithFallback(
+            $selectedLanguage->id ?? $defaultLang?->id,
+            $defaultLang->id ?? $selectedLanguage->id
+        );
+        $greeting_message = optional($thankyouPage)->welcome_greeting ?? 'Hi';
         $languages = Language::all();
 
-        return view('welcome_message', compact('data', 'greeting_message', 'selectedLanguage', 'languages'));
+        return view('welcome_message', compact('data', 'greeting_message', 'selectedLanguage', 'languages', 'thankyouPage'));
     }
 
     public function emailVerify($token, $email, Request $request){

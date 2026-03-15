@@ -836,7 +836,7 @@
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>​
             <div
-                class="inline-block animate__animated animate__fadeIn align-bottom bg-white rounded-md text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                class="inline-block animate__animated animate__fadeIn align-bottom bg-white rounded-md text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full modal-border">
                 <form method="POST" action="{{ route('secured_cash_code') }}">
                     @csrf
                     @method('PUT')
