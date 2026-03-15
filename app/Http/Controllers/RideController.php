@@ -461,9 +461,10 @@ class RideController extends Controller
                 : collect();
         }
 
-        // For each stop, find its specific pickup and dropoff from the segment list:
-        // - pickup: segment where this stop is the departure
-        // - dropoff: segment where this stop is the destination
+        // For each stop, find its specific pickup, dropoff, and date/time from the segment list:
+        // - pickup: segment where this stop is the departure (with pickup note)
+        // - dropoff: segment where this stop is the destination (with dropoff note)
+        // - date/time: segment where this stop is the departure (departure date/time at this stop)
         $stops = $stopNames->map(function ($name) use ($allDetails) {
             $pickupSegment = $allDetails->first(function ($d) use ($name) {
                 return (string) $d->departure === (string) $name && !empty($d->pickup);
@@ -471,11 +472,16 @@ class RideController extends Controller
             $dropoffSegment = $allDetails->first(function ($d) use ($name) {
                 return (string) $d->destination === (string) $name && !empty($d->dropoff);
             });
+            $departureSegment = $allDetails->first(function ($d) use ($name) {
+                return (string) $d->departure === (string) $name;
+            });
 
             return [
                 'name'    => $name,
                 'pickup'  => $pickupSegment ? $pickupSegment->pickup : null,
                 'dropoff' => $dropoffSegment ? $dropoffSegment->dropoff : null,
+                'date'    => $departureSegment && $departureSegment->date ? $departureSegment->date : null,
+                'time'    => $departureSegment && $departureSegment->time ? $departureSegment->time : null,
             ];
         });
 
@@ -768,6 +774,17 @@ class RideController extends Controller
         if (count($stopTimesForDisplay) !== count($stopsForDisplay)) {
             $stopTimesForDisplay = array_pad($stopTimesForDisplay, count($stopsForDisplay), '');
         }
+        $stopDatesForDisplay = [];
+        if (null !== old('stop_date') && is_array(old('stop_date'))) {
+            $stopDatesForDisplay = old('stop_date');
+        } elseif (!empty($chainSegments)) {
+            foreach ($chainSegments as $seg) {
+                $stopDatesForDisplay[] = $seg->date ? Carbon::parse($seg->date)->format('F d, Y') : '';
+            }
+        }
+        if (count($stopDatesForDisplay) !== count($stopsForDisplay)) {
+            $stopDatesForDisplay = array_pad($stopDatesForDisplay, count($stopsForDisplay), '');
+        }
         $segmentsForPrice = [];
         $realStops = array_values(array_filter($stopsForDisplay, function ($s) {
             return trim((string) $s) !== '';
@@ -834,6 +851,7 @@ class RideController extends Controller
             'chainSegments' => $chainSegments,
             'stopPickupDropoffForDisplay' => $stopPickupDropoffForDisplay,
             'stopTimesForDisplay' => $stopTimesForDisplay,
+            'stopDatesForDisplay' => $stopDatesForDisplay,
             'segmentsForPrice' => $segmentsForPrice,
             'realStops' => $realStops,
             'hasStops' => $hasStops,
@@ -895,6 +913,47 @@ class RideController extends Controller
 
         $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
         $formattedTime = Carbon::createFromFormat('H:i', $request->time)->format('H:i:s');
+
+        // Normalize stop_date[] to Y-m-d for consistent save to ride_details
+        if ($request->has('stop_date') && !is_array($request->stop_date)) {
+            $request->merge(['stop_date' => [$request->stop_date]]);
+        }
+        if ($request->has('stop_time') && !is_array($request->stop_time)) {
+            $request->merge(['stop_time' => [$request->stop_time]]);
+        }
+
+        if ($request->has('stop_date') && is_array($request->stop_date)) {
+            $normalizedStopDates = [];
+            foreach ($request->stop_date as $idx => $v) {
+                if ($v === null || trim((string) $v) === '') {
+                    $normalizedStopDates[$idx] = '';
+                    continue;
+                }
+                try {
+                    $normalizedStopDates[$idx] = Carbon::parse($v)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    $normalizedStopDates[$idx] = '';
+                }
+            }
+            $request->merge(['stop_date' => $normalizedStopDates]);
+        }
+
+        if ($request->has('stop_time') && is_array($request->stop_time)) {
+            $normalizedStopTimes = [];
+            foreach ($request->stop_time as $idx => $v) {
+                if ($v === null || trim((string) $v) === '') {
+                    $normalizedStopTimes[$idx] = '';
+                    continue;
+                }
+                try {
+                    $normalizedStopTimes[$idx] = Carbon::parse($v)->format('H:i:s');
+                } catch (\Throwable $e) {
+                    $normalizedStopTimes[$idx] = '';
+                }
+            }
+            $request->merge(['stop_time' => $normalizedStopTimes]);
+        }
+
         $rides = DB::table('rides')
             ->where('status', '!=', 2)
             ->where('id', '!=', $ride->id)
@@ -1545,16 +1604,20 @@ class RideController extends Controller
                 $rideDetail->total_duration = $duration;
                 $rideDetail->price = $request->price_spot[$key];
                 // Segment departure time: origin segment uses main time; later segments use stop_time[ key - 1 ]
-                $segmentTime = $request->time;
-                if ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && trim((string) $request->stop_time[$key - 1]) !== '') {
+                $segmentTime = ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && (string) $request->stop_time[$key - 1] !== '')
+                    ? $request->stop_time[$key - 1]
+                    : $formattedTime;
+                if (strlen($segmentTime) <= 5 && $segmentTime !== '') {
                     try {
-                        $segmentTime = Carbon::parse($request->stop_time[$key - 1])->format('H:i');
+                        $segmentTime = Carbon::createFromFormat('H:i', $segmentTime)->format('H:i:s');
                     } catch (\Throwable $e) {
-                        // keep main time if parse fails
                     }
                 }
                 $rideDetail->time = $segmentTime;
-                $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                $segmentDate = ($key > 0 && $request->has('stop_date') && is_array($request->stop_date) && isset($request->stop_date[$key - 1]) && (string) $request->stop_date[$key - 1] !== '')
+                    ? $request->stop_date[$key - 1]
+                    : Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                $rideDetail->date = $segmentDate;
 
                 if (isset($adminSetting)) {
 
@@ -1621,15 +1684,20 @@ class RideController extends Controller
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
                     $compositeDetail->price = $compositePrice;
-                    $compositeSegmentTime = $request->time;
-                    if ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && trim((string) $request->stop_time[$i - 1]) !== '') {
+                    $compositeSegmentTime = ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && (string) $request->stop_time[$i - 1] !== '')
+                        ? $request->stop_time[$i - 1]
+                        : $formattedTime;
+                    if (strlen($compositeSegmentTime) <= 5 && $compositeSegmentTime !== '') {
                         try {
-                            $compositeSegmentTime = Carbon::parse($request->stop_time[$i - 1])->format('H:i');
+                            $compositeSegmentTime = Carbon::createFromFormat('H:i', $compositeSegmentTime)->format('H:i:s');
                         } catch (\Throwable $e) {
                         }
                     }
                     $compositeDetail->time = $compositeSegmentTime;
-                    $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                    $compositeSegmentDate = ($i > 0 && $request->has('stop_date') && is_array($request->stop_date) && isset($request->stop_date[$i - 1]) && (string) $request->stop_date[$i - 1] !== '')
+                        ? $request->stop_date[$i - 1]
+                        : Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                    $compositeDetail->date = $compositeSegmentDate;
                     if (isset($adminSetting) && isset($ride->date) && isset($ride->time)) {
                         $cumulativeDurationToJ = 0;
                         for ($k = 0; $k < $j; $k++) {
@@ -2188,6 +2256,49 @@ class RideController extends Controller
             }
         }
         $siteTextErrorMessage = $siteTextErrorMessage ?? [];
+
+        // Ensure stop_date and stop_time are arrays (form may send single value)
+        if ($request->has('stop_date') && !is_array($request->stop_date)) {
+            $request->merge(['stop_date' => [$request->stop_date]]);
+        }
+        if ($request->has('stop_time') && !is_array($request->stop_time)) {
+            $request->merge(['stop_time' => [$request->stop_time]]);
+        }
+
+        // Normalize stop_date[] to Y-m-d; preserve keys so segment N (From = stop N-1) uses stop_date[N-1]
+        if ($request->has('stop_date') && is_array($request->stop_date)) {
+            $normalizedStopDates = [];
+            foreach ($request->stop_date as $idx => $v) {
+                if ($v === null || trim((string) $v) === '') {
+                    $normalizedStopDates[$idx] = '';
+                    continue;
+                }
+                try {
+                    $normalizedStopDates[$idx] = Carbon::parse($v)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    $normalizedStopDates[$idx] = '';
+                }
+            }
+            $request->merge(['stop_date' => $normalizedStopDates]);
+        }
+
+        // Normalize stop_time[] to H:i:s; preserve keys so segment N (From = stop N-1) uses stop_time[N-1]
+        if ($request->has('stop_time') && is_array($request->stop_time)) {
+            $normalizedStopTimes = [];
+            foreach ($request->stop_time as $idx => $v) {
+                if ($v === null || trim((string) $v) === '') {
+                    $normalizedStopTimes[$idx] = '';
+                    continue;
+                }
+                try {
+                    $normalizedStopTimes[$idx] = Carbon::parse($v)->format('H:i:s');
+                } catch (\Throwable $e) {
+                    $normalizedStopTimes[$idx] = '';
+                }
+            }
+            $request->merge(['stop_time' => $normalizedStopTimes]);
+        }
+
         if ($user->block_post_ride == '1') {
             return back()->with('message', $message->block_post_ride_message);
         }
@@ -2364,19 +2475,22 @@ class RideController extends Controller
                     ->with('uploaded_image', $filename ?? null);
             }
         }
+
+        $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
+        $formattedTime = strlen($request->time) <= 5
+            ? Carbon::createFromFormat('H:i', $request->time)->format('H:i:s')
+            : Carbon::parse($request->time)->format('H:i:s');
+
         // Check if any existing ride has the same date and time
         foreach ($rides as $existingRide) {
             if (
-                $existingRide->date == Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d') &&
-                $existingRide->time == $request->time . ':00'
+                $existingRide->date == $formattedDate &&
+                $existingRide->time == $formattedTime
             ) {
                 $oldInput = $request->all();
                 return back()->with('error', $message->ride_schedule_message)->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
             }
         }
-
-        $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
-        $formattedTime = Carbon::createFromFormat('H:i', $request->time)->format('H:i:s');
 
         //Second - Get distance and duration from Google Maps API
         $duration = 0;
@@ -2621,8 +2735,8 @@ class RideController extends Controller
 
             'total_distance' => "",
             'total_time' => "",
-            'date' => Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d'),
-            'time' => $request->time,
+            'date' => $formattedDate,
+            'time' => $formattedTime,
 
             'recurring' => $recurring,
             'recurring_type' => $recurring_type,
@@ -2688,8 +2802,8 @@ class RideController extends Controller
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
         $rideDetail->price = $request->price;
-        $rideDetail->time = $request->time;
-        $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+        $rideDetail->time = $formattedTime;
+        $rideDetail->date = $formattedDate;
 
         if (isset($adminSetting)) {
 
@@ -2841,15 +2955,21 @@ class RideController extends Controller
                 $rideDetail->total_distance = $distance;
                 $rideDetail->total_duration = $duration;
                 $rideDetail->price = $request->price_spot[$key];
-                $segmentTime = $request->time;
-                if ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && trim((string) $request->stop_time[$key - 1]) !== '') {
+                // Date/time when this segment's "From" (from_spot[$key]) is the departure: key 0 = main, key>0 = stop_date[key-1] / stop_time[key-1]
+                $segmentDate = ($key > 0 && $request->has('stop_date') && is_array($request->stop_date) && isset($request->stop_date[$key - 1]) && (string) $request->stop_date[$key - 1] !== '')
+                    ? $request->stop_date[$key - 1]
+                    : $formattedDate;
+                $segmentTime = ($key > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$key - 1]) && (string) $request->stop_time[$key - 1] !== '')
+                    ? $request->stop_time[$key - 1]
+                    : $formattedTime;
+                if (strlen($segmentTime) <= 5 && $segmentTime !== '') {
                     try {
-                        $segmentTime = Carbon::parse($request->stop_time[$key - 1])->format('H:i');
+                        $segmentTime = Carbon::createFromFormat('H:i', $segmentTime)->format('H:i:s');
                     } catch (\Throwable $e) {
                     }
                 }
+                $rideDetail->date = $segmentDate;
                 $rideDetail->time = $segmentTime;
-                $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
 
                 if (isset($adminSetting)) {
 
@@ -2917,15 +3037,20 @@ class RideController extends Controller
                     $compositeDetail->total_distance = $compositeDistance;
                     $compositeDetail->total_duration = $compositeDuration;
                     $compositeDetail->price = $compositePrice;
-                    $compositeSegmentTime = $request->time;
-                    if ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && trim((string) $request->stop_time[$i - 1]) !== '') {
+                    $compositeSegmentTime = ($i > 0 && $request->has('stop_time') && is_array($request->stop_time) && isset($request->stop_time[$i - 1]) && (string) $request->stop_time[$i - 1] !== '')
+                        ? $request->stop_time[$i - 1]
+                        : $formattedTime;
+                    if (strlen($compositeSegmentTime) <= 5 && $compositeSegmentTime !== '') {
                         try {
-                            $compositeSegmentTime = Carbon::parse($request->stop_time[$i - 1])->format('H:i');
+                            $compositeSegmentTime = Carbon::createFromFormat('H:i', $compositeSegmentTime)->format('H:i:s');
                         } catch (\Throwable $e) {
                         }
                     }
                     $compositeDetail->time = $compositeSegmentTime;
-                    $compositeDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
+                    $compositeSegmentDate = ($i > 0 && $request->has('stop_date') && is_array($request->stop_date) && isset($request->stop_date[$i - 1]) && (string) $request->stop_date[$i - 1] !== '')
+                        ? $request->stop_date[$i - 1]
+                        : Carbon::parse($request->date)->format('Y-m-d');
+                    $compositeDetail->date = $compositeSegmentDate;
                     if (isset($adminSetting) && isset($initialRide->date) && isset($initialRide->time)) {
                         $cumulativeDurationToJ = 0;
                         for ($k = 0; $k < $j; $k++) {

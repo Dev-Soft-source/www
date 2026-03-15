@@ -544,7 +544,26 @@
                                                                 id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1" placeholder="pick up / drop off"
                                                                 class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplay[$idx] ?? '') }}</textarea>
                                                         </div>
-                                                        {{-- 3) Time --}}
+                                                        {{-- 3) Date --}}
+                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48">
+                                                            <div class="relative">
+                                                                <div
+                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                                                    </svg>
+                                                                </div>
+                                                                <input type="text" name="stop_date[]"
+                                                                    id="stop_date_{{ $renderIndex }}"
+                                                                    value="{{ old('stop_date.' . $idx, $stopDatesForDisplay[$idx] ?? '') }}"
+                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                                    placeholder="">
+                                                            </div>
+                                                        </div>
+                                                        {{-- 4) Time --}}
                                                         <div class="w-32 sm:w-40 md:w-44 lg:w-48">
                                                             <div class="relative">
                                                                 <div
@@ -3155,6 +3174,23 @@
                 });
             }
 
+            // Per-stop date inputs (F d, Y, minDate today)
+            function initStopDatePickerForEdit(el) {
+                if (!el || typeof flatpickr === 'undefined') return;
+                try {
+                    if (el._flatpickr) {
+                        el._flatpickr.destroy();
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                flatpickr(el, {
+                    dateFormat: 'F d, Y',
+                    minDate: 'today',
+                    disableMobile: true,
+                });
+            }
+
             // Shared initializer for per-stop time inputs (same behavior as main time: first click opens, second click closes)
             function initStopTimePickerForEdit(el) {
                 if (!el || typeof flatpickr === 'undefined') return;
@@ -3239,6 +3275,10 @@
             // Initialize any existing stop time inputs on page load
             document.querySelectorAll('input[name="stop_time[]"]').forEach(function(el) {
                 initStopTimePickerForEdit(el);
+            });
+            // Initialize any existing stop date inputs on page load
+            document.querySelectorAll('input[name="stop_date[]"]').forEach(function(el) {
+                initStopDatePickerForEdit(el);
             });
 
         }
@@ -4158,6 +4198,17 @@
                 '<div class="relative">' +
                 '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />' +
+                '</svg>' +
+                '</div>' +
+                '<input type="text" name="stop_date[]" id="stop_date_' + nextIndex +
+                '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
+                '</div>' +
+                '</div>' +
+                '<div class="w-32 sm:w-40 md:w-44 lg:w-48">' +
+                '<div class="relative">' +
+                '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
                 '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />' +
                 '</svg>' +
                 '</div>' +
@@ -4170,6 +4221,10 @@
                 '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
                 '</button>';
             container.appendChild(row);
+            var newStopDateInput = document.getElementById('stop_date_' + nextIndex);
+            if (newStopDateInput && typeof initStopDatePickerForEdit === 'function') {
+                initStopDatePickerForEdit(newStopDateInput);
+            }
             var newStopInput = document.getElementById('stop_spot_' + nextIndex);
             if (newStopInput && typeof attachStopAutocompleteEditRide === 'function') attachStopAutocompleteEditRide(
                 newStopInput);
