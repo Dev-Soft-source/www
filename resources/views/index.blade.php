@@ -2031,8 +2031,9 @@
     @endif
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
-        var errorCityRequrired = "{{ $siteText['required_field_error_text'] }}" ?? "This is required";
-        var errorCityMissing = "{{ $homePage->slider_required_error }}" ?? "Please select a valid city from the dropdown";
+        var errorFromCityRequrired = @json(__('validation.custom.from.required')) ?? "The origin is required";
+        var errorToCityRequrired = @json(__('validation.custom.to.required')) ?? "The destination is required";
+        var errorCityMissing = @json(__('validation.custom.city_not_in_record.message')) ?? "Please select a valid city from the dropdown";
 
         // Google Places Autocomplete initialization - Define function before loading Google Maps API
         let fromAutocomplete, toAutocomplete, geocoder;
@@ -2085,7 +2086,7 @@
                     // Set the formatted address in the input
                     document.getElementById('fromInput').value = formattedAddress;
                     // Hide error message if it was showing
-                    const fromError = document.getElementById('fromError');
+                    const fromError = document.getElementById('fromInputError');
                     if (fromError) fromError.classList.add('hidden');
                     // Reset flags after a short delay to allow input event to process
                     setTimeout(() => {
@@ -2110,7 +2111,7 @@
                     // Set the formatted address in the input
                     document.getElementById('toInput').value = formattedAddress;
                     // Hide error message if it was showing
-                    const toError = document.getElementById('toError');
+                    const toError = document.getElementById('toInputError');
                     if (toError) toError.classList.add('hidden');
                     // Reset flags after a short delay to allow input event to process
                     setTimeout(() => {
@@ -2211,11 +2212,11 @@
                         selectedFromPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
-                        if (currentValue !== '' && toInputError) {
+                        if (fromInputError) {
                             const tooltipError = fromInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
                                 tooltipError.textContent = currentValue === '' ?
-                                    errorCityRequrired :
+                                    errorFromCityRequrired :
                                     errorCityMissing;
                             }
                             fromInputError.classList.remove('hidden');
@@ -2257,11 +2258,11 @@
                         selectedToPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
-                        if (currentValue !== '' && toInputError) {
+                        if (toInputError) {
                             const tooltipError = toInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
                                 tooltipError.textContent = currentValue === '' ?
-                                    errorCityRequrired :
+                                    errorToCityRequrired :
                                     errorCityMissing;
                             }
                             toInputError.classList.remove('hidden');
@@ -2598,7 +2599,7 @@
                 if (fromInputError) {
                     const tooltipError = fromInputError.querySelector('.tooltip-error');
                     if (tooltipError) {
-                        tooltipError.textContent = fromValue === '' ? errorCityRequrired :
+                        tooltipError.textContent = fromValue === '' ? errorFromCityRequrired :
                             errorCityMissing; // Show required error if empty, otherwise show invalid error
                     }
                     fromInputError.classList.remove('hidden');
@@ -2611,7 +2612,7 @@
                 if (toInputError) {
                     const tooltipError = toInputError.querySelector('.tooltip-error');
                     if (tooltipError) {
-                        tooltipError.textContent = toValue === '' ? errorCityRequrired :
+                        tooltipError.textContent = toValue === '' ? errorToCityRequrired :
                             errorCityMissing; // Show required error if empty, otherwise show invalid error
                     }
                     toInputError.classList.remove('hidden');
