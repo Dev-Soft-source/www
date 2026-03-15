@@ -395,22 +395,18 @@
                             <div class="text-center sm:mt-0 sm:text-left">
                                 <div class="">
                                     <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                        id="seats-modal-title">Heads up for 5+ seats</h3>
+                                        id="seats-modal-title">{{ optional($postRidePage)->seats_warning_modal_heading ?? 'Heads up for 5+ seats' }}</h3>
                                 </div>
                                 <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">Please note that for large vehicles, your total trip
-                                        collection must stay within non-commercial limits. To keep this a standard carpool,
-                                        we suggest a lower price per seat. By law, total contributions cannot exceed the
-                                        standard reimbursement limit ($0.72/km).</p>
+                                    <p class="can-exp-p text-center">{{ optional($postRidePage)->seats_warning_modal_paragraph ?? 'Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).' }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="px-4 pb-6 pt-4 flex items-center space-x-2  justify-center">
-                            <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">Got
-                                it</button>
+                            <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">{{ optional($postRidePage)->seats_warning_modal_got_it_btn ?? 'Got it' }}</button>
                             <button type="button"
                                 onclick="window.location.href='{{ route('cost_sharing_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
-                                class="button-exp-no-fill inline-block text-center">Learn more about limits</button>
+                                class="button-exp-no-fill inline-block text-center">{{ optional($postRidePage)->seats_warning_modal_learn_more_btn ?? 'Learn more about limits' }}</button>
                         </div>
                     </div>
                 </div>
