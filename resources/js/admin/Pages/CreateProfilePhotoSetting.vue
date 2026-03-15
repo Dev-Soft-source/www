@@ -119,7 +119,7 @@
                                             ></p>
                                         </div>
 
-                                        <div class="relative z-0 w-full group">
+                                        <div v-if="isDataLoaded" class="relative z-0 w-full group col-span-2">
                                             <div>
                                                 <div
                                                     class="flex justify-between"
@@ -129,24 +129,24 @@
                                                         >Main heading </label
                                                     >
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`sub_heading_text_${activeLanguageId}`"
-                                                    :id="`sub_heading_text_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'sub_heading_text'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
+                                                <editor
+                                                    @selectionChange="
+                                                        handleSelectionChange(
                                                             language,
                                                             'sub_heading_text'
                                                         )
                                                     "
+                                                    :ref="`sub_heading_text_${language.id}`"
+                                                    :id="`sub_heading_text_${language.id}`"
+                                                    :initial-value="
+                                                        form[
+                                                            `sub_heading_text`
+                                                        ][
+                                                            `sub_heading_text_${language?.id}`
+                                                        ]
+                                                    "
+                                                    :tinymce-script-src="tinymceScriptSrc"
+                                                    :init="editorConfig"
                                                 />
                                             </div>
                                             <p
@@ -610,6 +610,7 @@ import ExcelBulkImport from "../components/ExcelBulkImport.vue";
 export default {
     data() {
         return {
+            isDataLoaded: false,
             activeLanguageId: null,
             languages: [],
             form: {},
@@ -619,16 +620,14 @@ export default {
             editorConfig: {
                 height: 250,
                 menubar: false,
-                plugins: [
-                    "advlist autolink lists link image charmap print preview anchor image code table",
-                    "searchreplace visualblocks code fullscreen",
-                    "insertdatetime media table paste code help wordcount",
-                ],
+                plugins:
+                  "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen code",
                 toolbar:
-                    "undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | table | image | code | link | help",
+                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code | fullscreen",
+                base_url: "/plugins/tinymce",
+                suffix: ".min",
             },
+            tinymceScriptSrc: "/plugins/tinymce/tinymce.min.js",
         };
     },
     components: {
@@ -757,6 +756,7 @@ export default {
                             );
 
                         });
+                        this.isDataLoaded = true;
                     }
                 });
         },
@@ -829,3 +829,29 @@ export default {
     },
 };
 </script>
+<style>
+/* Ensure TinyMCE fullscreen appears above admin layout (navbar, sidebar, etc.) */
+.tox-fullscreen,
+body .tox-fullscreen {
+    z-index: 2147483647 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+.mce-fullscreen,
+body .mce-fullscreen {
+    z-index: 2147483647 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+</style>
