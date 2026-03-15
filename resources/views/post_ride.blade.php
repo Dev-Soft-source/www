@@ -409,7 +409,7 @@
                             <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">Got
                                 it</button>
                             <button type="button"
-                                onclick="window.location.href='{{ route('cost_sharing_compliance_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
+                                onclick="window.location.href='{{ route('cost_sharing_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
                                 class="button-exp-no-fill inline-block text-center">Learn more about limits</button>
                         </div>
                     </div>
