@@ -2844,6 +2844,146 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_1_${activeLanguageId}`">Price error modal paragraph 1</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_1_${activeLanguageId}`"
+                                                    :id="`price_error_paragraph_1_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'price_error_paragraph_1'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'price_error_paragraph_1'
+                                                            )
+                                                            " rows="3"></textarea>
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `price_error_paragraph_1.price_error_paragraph_1_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `price_error_paragraph_1.price_error_paragraph_1_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_2_${activeLanguageId}`">Price error modal paragraph 2 (use :max_per_seat for the amount)</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_2_${activeLanguageId}`"
+                                                    :id="`price_error_paragraph_2_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'price_error_paragraph_2'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'price_error_paragraph_2'
+                                                            )
+                                                            " rows="2"></textarea>
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `price_error_paragraph_2.price_error_paragraph_2_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `price_error_paragraph_2.price_error_paragraph_2_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_3_${activeLanguageId}`">Price error modal paragraph 3</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_3_${activeLanguageId}`"
+                                                    :id="`price_error_paragraph_3_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'price_error_paragraph_3'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'price_error_paragraph_3'
+                                                            )
+                                                            " rows="3"></textarea>
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `price_error_paragraph_3.price_error_paragraph_3_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `price_error_paragraph_3.price_error_paragraph_3_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_heading_${activeLanguageId}`">Price error modal heading</label>
+                                                </div>
+                                                <input type="text" :name="`price_error_heading_${activeLanguageId}`"
+                                                    :id="`price_error_heading_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'price_error_heading'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'price_error_heading'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `price_error_heading.price_error_heading_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `price_error_heading.price_error_heading_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_adjust_btn_label_${activeLanguageId}`">Price error modal Adjust button label</label>
+                                                </div>
+                                                <input type="text" :name="`price_error_adjust_btn_label_${activeLanguageId}`"
+                                                    :id="`price_error_adjust_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'price_error_adjust_btn_label'
+                                                    )
+                                                        " @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'price_error_adjust_btn_label'
+                                                            )
+                                                            " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `price_error_adjust_btn_label.price_error_adjust_btn_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                `price_error_adjust_btn_label.price_error_adjust_btn_label_${activeLanguageId}`
+                                            )
+                                                "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`mobile_agree_terms_label_${activeLanguageId}`">Agree
                                                         terms label (App)</label>
                                                 </div>
@@ -3688,6 +3828,11 @@ export default {
                             // this.handleInput("", language, "extra_care_ride_disclaimers_description");
                             this.handleInput("", language, "agree_terms_label");
                             this.handleInput("", language, "agree_term_error");
+                            this.handleInput("", language, "price_error_paragraph_1");
+                            this.handleInput("", language, "price_error_paragraph_2");
+                            this.handleInput("", language, "price_error_paragraph_3");
+                            this.handleInput("", language, "price_error_heading");
+                            this.handleInput("", language, "price_error_adjust_btn_label");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4280,6 +4425,31 @@ export default {
                                 "agree_term_error"
                             );
                             this.handleInput(
+                                setting?.price_error_paragraph_1,
+                                setting?.language,
+                                "price_error_paragraph_1"
+                            );
+                            this.handleInput(
+                                setting?.price_error_paragraph_2,
+                                setting?.language,
+                                "price_error_paragraph_2"
+                            );
+                            this.handleInput(
+                                setting?.price_error_paragraph_3,
+                                setting?.language,
+                                "price_error_paragraph_3"
+                            );
+                            this.handleInput(
+                                setting?.price_error_heading,
+                                setting?.language,
+                                "price_error_heading"
+                            );
+                            this.handleInput(
+                                setting?.price_error_adjust_btn_label,
+                                setting?.language,
+                                "price_error_adjust_btn_label"
+                            );
+                            this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,
                                 "mobile_agree_terms_label"
@@ -4843,6 +5013,21 @@ export default {
                 ) ||
                 validationErros.has(
                     `agree_term_error.agree_term_error_${language.id}`
+                ) ||
+                validationErros.has(
+                    `price_error_paragraph_1.price_error_paragraph_1_${language.id}`
+                ) ||
+                validationErros.has(
+                    `price_error_paragraph_2.price_error_paragraph_2_${language.id}`
+                ) ||
+                validationErros.has(
+                    `price_error_paragraph_3.price_error_paragraph_3_${language.id}`
+                ) ||
+                validationErros.has(
+                    `price_error_heading.price_error_heading_${language.id}`
+                ) ||
+                validationErros.has(
+                    `price_error_adjust_btn_label.price_error_adjust_btn_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `mobile_agree_terms_label.mobile_agree_terms_label_${language.id}`
