@@ -464,6 +464,92 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 inlineCardElement.mount('#card-element');
             };
+
+            var bookingForm = document.getElementById('submitForm');
+            if (bookingForm) {
+                bookingForm.addEventListener('submit', async function(event) {
+                    var selectedCardOption = document.querySelector('input[name="card_id"]:checked');
+                    if (!selectedCardOption || selectedCardOption.value !== 'credit_card') {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    window.buyBalanceEnsureCardElement();
+
+                    var existingStripeToken = bookingForm.querySelector('input[name="stripeToken"]');
+                    if (existingStripeToken) {
+                        existingStripeToken.remove();
+                    }
+
+                    var existingCardElementMarker = bookingForm.querySelector('input[name="card_element"]');
+                    if (existingCardElementMarker) {
+                        existingCardElementMarker.remove();
+                    }
+
+                    var nameOnCardInput = document.getElementById('name_on_card');
+                    var cardWrapper = document.getElementById('card-element')?.parentElement;
+                    var submitButton = document.getElementById('submitButton');
+
+                    if (!nameOnCardInput || nameOnCardInput.value.trim() === '') {
+                        var nameErrorTooltip = nameOnCardInput?.parentElement?.querySelector('.tooltip-error');
+                        if (!nameErrorTooltip && nameOnCardInput?.parentElement) {
+                            nameErrorTooltip = document.createElement('div');
+                            nameErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
+                            nameOnCardInput.parentElement.appendChild(nameErrorTooltip);
+                        }
+                        if (nameErrorTooltip) {
+                            nameErrorTooltip.classList.remove('hidden');
+                            nameErrorTooltip.textContent = 'Cardholder name is required.';
+                        }
+                        return;
+                    }
+
+                    if (submitButton) {
+                        submitButton.setAttribute('disabled', 'true');
+                    }
+
+                    try {
+                        const result = await stripe.createToken(inlineCardElement, {
+                            name: nameOnCardInput.value.trim()
+                        });
+
+                        if (result.error) {
+                            var cardErrorTooltip = cardWrapper?.querySelector('.tooltip-error');
+                            if (!cardErrorTooltip && cardWrapper) {
+                                cardErrorTooltip = document.createElement('div');
+                                cardErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
+                                cardWrapper.appendChild(cardErrorTooltip);
+                            }
+                            if (cardErrorTooltip) {
+                                cardErrorTooltip.classList.remove('hidden');
+                                cardErrorTooltip.textContent = result.error.message;
+                            }
+                            if (submitButton) {
+                                submitButton.removeAttribute('disabled');
+                            }
+                            return;
+                        }
+
+                        var tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'stripeToken';
+                        tokenInput.value = result.token.id;
+                        bookingForm.appendChild(tokenInput);
+
+                        var cardElementInput = document.createElement('input');
+                        cardElementInput.type = 'hidden';
+                        cardElementInput.name = 'card_element';
+                        cardElementInput.value = 'card_provided';
+                        bookingForm.appendChild(cardElementInput);
+
+                        bookingForm.submit();
+                    } catch (error) {
+                        if (submitButton) {
+                            submitButton.removeAttribute('disabled');
+                        }
+                    }
+                });
+            }
         }
 </script>
 

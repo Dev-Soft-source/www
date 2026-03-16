@@ -52,6 +52,7 @@ use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
 use Stripe\Refund;
 use Stripe\Stripe;
+use Stripe\Customer;
 use Twilio\Rest\Client;
 use App\Events\MessageSentEvent;
 use App\Mail\PassengerListMail;
@@ -768,29 +769,13 @@ class BookingController extends Controller
             return redirect()->route('login', ['lang' => $lang])->with('error', __('Please log in to cancel your booking.'));
         }
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'features_option1', 'features_option2', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'features_option1', 'features_option2', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-        }
+        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $successMessage = $this->successMessage;
+        // Retrieve the HomePageSettingDetail associated with the selected language
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
         $user_id = $user->id;
         $setting = SiteSetting::first();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration);
@@ -798,9 +783,6 @@ class BookingController extends Controller
         $cancellationCount = Booking::where('user_id', $user_id)
             ->where('booked_on', '>=', $monthsAgo)
             ->count();
-        // if ($cancellationCount >= $setting->booking_cancel_limit) {
-        // return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-        // }
 
 
         $booking = Booking::where('id', $id)->first();
@@ -832,29 +814,11 @@ class BookingController extends Controller
 
 
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('cancel_booking', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage, 'sureMessage' => $sureMessage]);
+        
+        return view('cancel_booking', ['notificationPage' => $notificationPage, 
+        'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 
+        'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage, 
+        'sureMessage' => $sureMessage]);
     }
 
     public function bookingRequest($id, Request $request)
@@ -981,7 +945,7 @@ class BookingController extends Controller
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
         // This limit does NOT apply to "Online" or "Secured-Cash" payment methods
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
@@ -2371,7 +2335,7 @@ class BookingController extends Controller
         $request->validate($rules);
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
@@ -2467,6 +2431,8 @@ class BookingController extends Controller
                         'payment_method' => 'required',
                         'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
                         'booking_credit' => 'required|max:25',
+                        'name_on_card' => 'required_if:card_id,credit_card',
+                        'stripeToken' => 'required_if:card_id,credit_card',
                     ]);
 
                     if ($request->payment_method == 'paypal') {
@@ -2528,16 +2494,54 @@ class BookingController extends Controller
                             if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                                 $stripId = $request->gPayApplePayId;
                             } else {
-
-                                // Retrieve the selected card from the database
-                                $card = Card::where('id', $request->card_id)
-                                    ->where('user_id', $user->id)
-                                    ->firstOrFail();
-
                                 // Set your Stripe API key.
                                 Stripe::setApiKey(env('STRIPE_SECRET'));
-                                // Attach the payment method to the customer
-                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
                                 $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
                                 if ($payable_amount > '0') {
@@ -2763,6 +2767,8 @@ class BookingController extends Controller
                     'payment_method' => 'required',
                     'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
                     'booking_credit' => 'required|max:25',
+                    'name_on_card' => 'required_if:card_id,credit_card',
+                    'stripeToken' => 'required_if:card_id,credit_card',
                 ]);
 
                 if ($ride->payment_method == "33") {
@@ -2835,15 +2841,54 @@ class BookingController extends Controller
                             if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                                 $stripId = $request->gPayApplePayId;
                             } else {
-                                // Retrieve the selected card from the database
-                                $card = Card::where('id', $request->card_id)
-                                    ->where('user_id', $user->id)
-                                    ->firstOrFail();
-
                                 // Set your Stripe API key.
                                 Stripe::setApiKey(env('STRIPE_SECRET'));
-                                // Attach the payment method to the customer
-                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
                                 $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
                                 if ($payable_amount > '0') {
@@ -4089,6 +4134,8 @@ class BookingController extends Controller
                 // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
                 'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
+                'name_on_card' => 'required_if:card_id,credit_card',
+                'stripeToken' => 'required_if:card_id,credit_card',
             ];
 
             if ($ride->booking_type == "37") {
@@ -4250,17 +4297,55 @@ class BookingController extends Controller
                         if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                             $stripId = $request->gPayApplePayId;
                         } else {
-
                             Stripe::setApiKey(env('STRIPE_SECRET'));
-                            // Retrieve the selected card from the database
-                            $card = Card::where('id', $request->card_id)
-                                ->where('user_id', $user->id)
-                                ->firstOrFail();
 
+                            if (!$user->stripe_customer_id) {
+                                $customer = Customer::create([
+                                    'email' => $user->email,
+                                    'name' => $user->first_name,
+                                ]);
+                                User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                $user = User::whereId($user->id)->first();
+                            }
 
-                            // Attach the payment method to the customer
-                            $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-                            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            if ($request->card_id === 'credit_card') {
+                                $stripeToken = $request->stripeToken;
+                                if (!$stripeToken) {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->withErrors(['card_element' => 'Card details are required.']);
+                                }
+
+                                if (str_starts_with($stripeToken, 'tok_')) {
+                                    $paymentMethod = PaymentMethod::create([
+                                        'type' => 'card',
+                                        'card' => [
+                                            'token' => $stripeToken,
+                                        ],
+                                    ]);
+                                } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                    $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                } else {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                }
+
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            } else {
+                                $card = Card::where('id', $request->card_id)
+                                    ->where('user_id', $user->id)
+                                    ->first();
+
+                                if (!$card) {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                }
+
+                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            }
 
 
                             $stripePay = 0;
@@ -5798,7 +5883,7 @@ class BookingController extends Controller
             $validated = $request->validate($rules);
 
             // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+            $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             if ($postRidePage) {
                 // Check if user is a student (student == 1 for verified, student == 2 for pending)
                 $isStudent = ($user->student == '1' || $user->student == '2');
