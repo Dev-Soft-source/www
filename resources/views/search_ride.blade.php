@@ -1887,7 +1887,7 @@
 
         function SearchRoute(SearchfromValue, SearchtoValue) {
             const hideFullRides = document.getElementById('hide-full-rides')?.checked ? '1' : '';
-            // Construct the URL with query parameters
+            /// Construct the URL with query parameters
             let searchUrl =
                 `{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}?from=${SearchfromValue}&to=${SearchtoValue}&date=&driver_age=&driver_rating=&driver_phone=&driver_name=&keyword=&passenger_rating=&payment_method=&vehicle_type=&features=&luggage=&smoking=&pets=&hide_full_rides=${hideFullRides}`;
 
