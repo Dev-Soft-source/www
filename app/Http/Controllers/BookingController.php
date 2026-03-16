@@ -768,29 +768,13 @@ class BookingController extends Controller
             return redirect()->route('login', ['lang' => $lang])->with('error', __('Please log in to cancel your booking.'));
         }
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'features_option1', 'features_option2', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'features_option1', 'features_option2', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-        }
+        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $successMessage = $this->successMessage;
+        // Retrieve the HomePageSettingDetail associated with the selected language
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
         $user_id = $user->id;
         $setting = SiteSetting::first();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration);
@@ -798,9 +782,6 @@ class BookingController extends Controller
         $cancellationCount = Booking::where('user_id', $user_id)
             ->where('booked_on', '>=', $monthsAgo)
             ->count();
-        // if ($cancellationCount >= $setting->booking_cancel_limit) {
-        // return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-        // }
 
 
         $booking = Booking::where('id', $id)->first();
@@ -832,29 +813,11 @@ class BookingController extends Controller
 
 
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('cancel_booking', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage, 'sureMessage' => $sureMessage]);
+        
+        return view('cancel_booking', ['notificationPage' => $notificationPage, 
+        'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 
+        'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage, 
+        'sureMessage' => $sureMessage]);
     }
 
     public function bookingRequest($id, Request $request)

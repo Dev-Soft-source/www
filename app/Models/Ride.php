@@ -244,6 +244,28 @@ class Ride extends Model
         return $detail?->name;
     }
 
+    public function isPinkRide(): bool
+    {
+        return !empty($this->pink_ride);
+    }
+
+    public function isExtraCareRide(): bool
+    {
+        return !empty($this->extra_care_ride);
+    }
+
+    public function pricePerSeat(): float
+    {
+        return (float) ($this->rideDetail->first()?->price ?? 0);
+    }
+
+    public function isShortDistanceRide(): bool
+    {
+        $pricePerSeat = $this->pricePerSeat();
+
+        return $pricePerSeat > 0 && $pricePerSeat <= 15;
+    }
+
     protected static function booted()
     {
         parent::booted();
