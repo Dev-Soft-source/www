@@ -512,40 +512,22 @@
                                                     ? explode(';', $_GET['features'])
                                                     : [];
 
-                                                $featureOptions = [
-                                                    3 => 'wi-fi',
-                                                    4 => 'rating-passengers',
-                                                    5 => 'provide-babyseats',
-                                                    6 => 'passenger-provide',
-                                                    7 => 'take-children',
-                                                    8 => 'passenger-provide1',
-                                                    9 => 'bike-rack',
-                                                    10 => 'ski-rack',
-                                                    11 => 'winter-tires',
-                                                    12 => 'air-conditioning',
-                                                ];
+                                                
                                             @endphp
-                                            @foreach ($featureOptions as $optionNum => $inputId)
+                                            @foreach ($featureOptions as $featureOption)
                                                 @php
-                                                    $optionProperty = 'ride_features_option' . $optionNum;
-                                                    $option = $findRidePage->$optionProperty ?? null;
-                                                    $hasFeatureId = $option && isset($option->features_setting_id);
-                                                    $isChecked =
-                                                        $hasFeatureId &&
-                                                        in_array($option->features_setting_id, $features_check);
+                                                    $isChecked = in_array($featureOption['id'], $features_check);
                                                 @endphp
-                                                @if ($hasFeatureId)
-                                                    <div class="flex items-start justify-between p-3">
-                                                        <label for="{{ $inputId }}"
-                                                            class="font-normal text-gray-900 flex space-x-1">
-                                                            <span class="text-base md:text-lg">{{ $option->name }}</span>
-                                                        </label>
-                                                        <input id="{{ $inputId }}" type="checkbox"
-                                                            value="{{ $option->features_setting_id }}"
-                                                            {{ $isChecked ? 'checked' : '' }}
-                                                            class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                    </div>
-                                                @endif
+                                                <div class="flex items-start justify-between p-3">
+                                                    <label for="{{ $featureOption['slug'] }}"
+                                                        class="font-normal text-gray-900 flex space-x-1">
+                                                        <span class="text-base md:text-lg">{{ $featureOption['label'] }}</span>
+                                                    </label>
+                                                    <input id="{{ $featureOption['slug'] }}" type="checkbox"
+                                                        value="{{ $featureOption['id'] }}"
+                                                        {{ $isChecked ? 'checked' : '' }}
+                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                </div>
                                             @endforeach
                                         </div>
                                     </div>
@@ -1292,9 +1274,11 @@
                                                                 alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
+                                                        {{-- @php
+                                                            dd($ride->features);
+                                                        @endphp --}}
                                                         @include('partials.ride_feature_icons', [
                                                             'rideFeatures' => $ride->features,
-                                                            'postRidePage' => $postRidePage,
                                                             'iconClass' => 'w-8 h-8 cursor-help',
                                                         ])
                                                     </div>

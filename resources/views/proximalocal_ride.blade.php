@@ -497,141 +497,18 @@
                                     $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
                                 @endphp
 
-                                @isset($findRidePage->ride_features_option3->features_setting_id)
+                                @foreach ($featureOptions as $featureOption)
                                 <div class="flex items-start justify-between p-3">
-                                    <label for="wi-fi" class="font-normal text-gray-900 flex space-x-1">
+                                    <label for="{{ $featureOption['slug'] }}" class="font-normal text-gray-900 flex space-x-1">
                                         <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option3->name }}
+                                            {{ $featureOption['label'] }}
                                         </span>
                                     </label>
-                                    <input id="wi-fi" type="checkbox" value="{{ $findRidePage->ride_features_option3->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option3->features_setting_id, $features_check) ? 'checked' : '' }}
+                                    <input id="{{ $featureOption['slug'] }}" type="checkbox" value="{{ $featureOption['id'] }}"
+                                        {{ in_array($featureOption['id'], $features_check) ? 'checked' : '' }}
                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                 </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option4->features_setting_id)
-                                @isset($postRidePage->features_option4)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="rating-passengers" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option4->name }}
-                                        </span>
-                                    </label>
-                                    <input id="rating-passengers" type="checkbox"
-                                        value="{{ $postRidePage->features_option4->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option4->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @endisset
-                                @isset($findRidePage->ride_features_option5->features_setting_id)
-                                @isset($postRidePage->features_option5)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="provide-babyseats" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option5->name }}
-                                        </span>
-                                    </label>
-                                    <input id="provide-babyseats" type="checkbox"
-                                        value="{{ $postRidePage->features_option5->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option5->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @endisset
-                                @isset($findRidePage->ride_features_option6->features_setting_id)
-                                @isset($postRidePage->features_option6)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="passenger-provide" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option6->name }}
-                                        </span>
-                                    </label>
-                                    <input id="passenger-provide" type="checkbox"
-                                        value="{{ $postRidePage->features_option6->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option6->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @endisset
-                                @isset($findRidePage->ride_features_option7->features_setting_id)
-                                @isset($postRidePage->features_option7)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="take-children" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option7->name }}
-                                        </span>
-                                    </label>
-                                    <input id="take-children" type="checkbox" value="{{ $postRidePage->features_option7->features_setting_id }}"
-                                        {{ in_array($postRidePage->features_option7->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @endisset
-                                @isset($findRidePage->ride_features_option8->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="passenger-provide1" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option8->name }}
-                                        </span>
-                                    </label>
-                                    <input id="passenger-provide1" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option8->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option8->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option9->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                     <label for="bike-rack" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option9->name }}
-                                        </span>
-                                    </label>
-                                    <input id="bike-rack" type="checkbox" value="{{ $findRidePage->ride_features_option9->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option9->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option10->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="ski-rack" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option10->name }}
-                                        </span>
-                                    </label>
-                                    <input id="ski-rack" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option10->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option10->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option11->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="winter-tires" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option11->name }}
-                                        </span>
-                                    </label>
-                                    <input id="winter-tires" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option11->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option11->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
-                                @isset($findRidePage->ride_features_option12->features_setting_id)
-                                <div class="flex items-start justify-between p-3">
-                                    <label for="air-conditioning" class="font-normal text-gray-900 flex space-x-1">
-                                        <span class="text-lg">
-                                            {{ $findRidePage->ride_features_option12->name }}
-                                        </span>
-                                    </label>
-                                    <input id="air-conditioning" type="checkbox"
-                                        value="{{ $findRidePage->ride_features_option12->features_setting_id }}"
-                                        {{ in_array($findRidePage->ride_features_option12->features_setting_id, $features_check) ? 'checked' : '' }}
-                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                </div>
-                                @endisset
+                                @endforeach
                             </div>
                         </div>
                         <div class="space-y-4 mb-4">

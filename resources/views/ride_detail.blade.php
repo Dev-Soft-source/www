@@ -884,7 +884,6 @@
                             @endphp
                             @include('partials.ride_feature_items', [
                                 'features' => $features,
-                                'postRidePage' => $postRidePage,
                             ])
                         </div>
                     </div>

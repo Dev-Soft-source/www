@@ -705,7 +705,7 @@
                                 @php
                                     $features = !empty($ride->features) ? explode('=', $ride->features) : [];
                                 @endphp
-                                @include('partials.ride_feature_items', ['features' => $features, 'postRidePage' => $postRidePage, 'iconClass' => 'w-7 h-7'])
+                                @include('partials.ride_feature_items', ['features' => $features, 'iconClass' => 'w-7 h-7'])
                             </div>
                         </div>
                     </div>

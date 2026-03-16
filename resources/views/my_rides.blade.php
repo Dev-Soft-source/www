@@ -472,9 +472,9 @@
                                                                             src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
                                                                             alt="">
                                                                     @endif
+                                                                    
                                                                     @include('partials.ride_feature_icons', [
                                                                         'rideFeatures' => $ride->features,
-                                                                        'postRidePage' => $postRidePage,
                                                                     ])
                                                                 </div>
                                                                 <div
