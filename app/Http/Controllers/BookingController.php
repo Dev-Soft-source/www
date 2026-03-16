@@ -944,7 +944,7 @@ class BookingController extends Controller
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
         // This limit does NOT apply to "Online" or "Secured-Cash" payment methods
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
@@ -2334,7 +2334,7 @@ class BookingController extends Controller
         $request->validate($rules);
 
         // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
             // Check if user is a student (student == 1 for verified, student == 2 for pending)
             $isStudent = ($user->student == '1' || $user->student == '2');
@@ -5761,7 +5761,7 @@ class BookingController extends Controller
             $validated = $request->validate($rules);
 
             // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('payment_methods_option1', 'payment_methods_option2')->first();
+            $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             if ($postRidePage) {
                 // Check if user is a student (student == 1 for verified, student == 2 for pending)
                 $isStudent = ($user->student == '1' || $user->student == '2');
