@@ -52,6 +52,7 @@ use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
 use Stripe\Refund;
 use Stripe\Stripe;
+use Stripe\Customer;
 use Twilio\Rest\Client;
 use App\Events\MessageSentEvent;
 use App\Mail\PassengerListMail;
@@ -2430,6 +2431,8 @@ class BookingController extends Controller
                         'payment_method' => 'required',
                         'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
                         'booking_credit' => 'required|max:25',
+                        'name_on_card' => 'required_if:card_id,credit_card',
+                        'stripeToken' => 'required_if:card_id,credit_card',
                     ]);
 
                     if ($request->payment_method == 'paypal') {
@@ -2491,16 +2494,54 @@ class BookingController extends Controller
                             if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                                 $stripId = $request->gPayApplePayId;
                             } else {
-
-                                // Retrieve the selected card from the database
-                                $card = Card::where('id', $request->card_id)
-                                    ->where('user_id', $user->id)
-                                    ->firstOrFail();
-
                                 // Set your Stripe API key.
                                 Stripe::setApiKey(env('STRIPE_SECRET'));
-                                // Attach the payment method to the customer
-                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
                                 $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
                                 if ($payable_amount > '0') {
@@ -2726,6 +2767,8 @@ class BookingController extends Controller
                     'payment_method' => 'required',
                     'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
                     'booking_credit' => 'required|max:25',
+                    'name_on_card' => 'required_if:card_id,credit_card',
+                    'stripeToken' => 'required_if:card_id,credit_card',
                 ]);
 
                 if ($ride->payment_method == "33") {
@@ -2798,15 +2841,54 @@ class BookingController extends Controller
                             if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                                 $stripId = $request->gPayApplePayId;
                             } else {
-                                // Retrieve the selected card from the database
-                                $card = Card::where('id', $request->card_id)
-                                    ->where('user_id', $user->id)
-                                    ->firstOrFail();
-
                                 // Set your Stripe API key.
                                 Stripe::setApiKey(env('STRIPE_SECRET'));
-                                // Attach the payment method to the customer
-                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
                                 $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
                                 if ($payable_amount > '0') {
@@ -4052,6 +4134,8 @@ class BookingController extends Controller
                 // On booking page we always expect a card_id (paypal / credit_card / google_pay / apple_pay / saved card)
                 'card_id' => 'required',
                 'booking_credit' => 'required|max:25',
+                'name_on_card' => 'required_if:card_id,credit_card',
+                'stripeToken' => 'required_if:card_id,credit_card',
             ];
 
             if ($ride->booking_type == "37") {
@@ -4213,17 +4297,55 @@ class BookingController extends Controller
                         if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                             $stripId = $request->gPayApplePayId;
                         } else {
-
                             Stripe::setApiKey(env('STRIPE_SECRET'));
-                            // Retrieve the selected card from the database
-                            $card = Card::where('id', $request->card_id)
-                                ->where('user_id', $user->id)
-                                ->firstOrFail();
 
+                            if (!$user->stripe_customer_id) {
+                                $customer = Customer::create([
+                                    'email' => $user->email,
+                                    'name' => $user->first_name,
+                                ]);
+                                User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                $user = User::whereId($user->id)->first();
+                            }
 
-                            // Attach the payment method to the customer
-                            $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-                            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            if ($request->card_id === 'credit_card') {
+                                $stripeToken = $request->stripeToken;
+                                if (!$stripeToken) {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->withErrors(['card_element' => 'Card details are required.']);
+                                }
+
+                                if (str_starts_with($stripeToken, 'tok_')) {
+                                    $paymentMethod = PaymentMethod::create([
+                                        'type' => 'card',
+                                        'card' => [
+                                            'token' => $stripeToken,
+                                        ],
+                                    ]);
+                                } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                    $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                } else {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                }
+
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            } else {
+                                $card = Card::where('id', $request->card_id)
+                                    ->where('user_id', $user->id)
+                                    ->first();
+
+                                if (!$card) {
+                                    return redirect()->back()
+                                        ->withInput()
+                                        ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                }
+
+                                $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                            }
 
 
                             $stripePay = 0;

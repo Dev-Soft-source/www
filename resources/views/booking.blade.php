@@ -1671,21 +1671,23 @@
             $('.totalSumIn').val(totalSumIn);
             $('.totalSumInput').val(actualTotalSum);
 
-            if ($("#check_payment_method").val() == "cash") {
-                var chargeAmount = totalAmountIn + taxAmount;
-                paymentRequest.update({
-                    total: {
-                        label: 'Total',
-                        amount: Math.round(chargeAmount * 100)
-                    },
-                });
-            } else {
-                paymentRequest.update({
-                    total: {
-                        label: 'Total',
-                        amount: Math.round(totalSumIn * 100)
-                    },
-                });
+            if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
+                if ($("#check_payment_method").val() == "cash") {
+                    var chargeAmount = totalAmountIn + taxAmount;
+                    paymentRequest.update({
+                        total: {
+                            label: 'Total',
+                            amount: Math.round(chargeAmount * 100)
+                        },
+                    });
+                } else {
+                    paymentRequest.update({
+                        total: {
+                            label: 'Total',
+                            amount: Math.round(totalSumIn * 100)
+                        },
+                    });
+                }
             }
 
 
