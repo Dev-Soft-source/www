@@ -120,10 +120,9 @@
                                     <textarea id="message" rows="5" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                         placeholder="{{ $tripsPage->cancel_booking_trip_placeholder ?? 'Please provide as many details as you want as to why you want to cancel this booking &#10;Your driver will receive a copy of this message' }}">{{ old('message') }}</textarea>
-                                    <div id="messageError"
-                                        class="tooltip-error shadow-lg {{ $errors->has('message') ? '' : 'hidden' }}">
-                                        {{ $errors->first('message') }}
-                                    </div>
+                                    @error('message')
+                                        <div class="tooltip-error shadow-lg mt-1">{{ $message }}</div>
+                                    @enderror
 
                                 </div>
                             </div>
@@ -214,59 +213,7 @@
         const requiredMessage = '{{ $tripsPage->cancel_all_feilds_are_required ?? 'All fields are required' }}';
         let cancelBookingConfirmed = false;
 
-        function showMessageError(message) {
-            if (messageErrorEl) {
-                messageErrorEl.textContent = message;
-                messageErrorEl.classList.remove('hidden');
-            }
-
-            if (messageField) {
-                messageField.classList.add('border-red-500');
-                messageField.focus();
-            }
-        }
-
-        function clearMessageError() {
-            if (messageErrorEl) {
-                messageErrorEl.classList.add('hidden');
-                messageErrorEl.textContent = '';
-            }
-
-            if (messageField) {
-                messageField.classList.remove('border-red-500');
-            }
-        }
-
-        if (messageErrorEl && messageErrorEl.textContent.trim()) {
-            showMessageError(messageErrorEl.textContent.trim());
-        }
-
-        // cancelRideForm.addEventListener('submit', function(event) {
-        //     if (cancelBookingConfirmed) {
-        //         return;
-        //     }
-
-        //     event.preventDefault();
-
-        //     // 1. Validate message first — show error before any popup
-        //     var messageVal = (messageField && messageField.value) ? messageField.value.trim() : '';
-        //     clearMessageError();
-
-        //     if (!messageVal) {
-        //         showMessageError(requiredMessage);
-        //         return;
-        //     }
-
-        //     document.getElementById('cancelConfirmModal').classList.remove('hidden');
-        // });
-
-        if (messageField) {
-            messageField.addEventListener('input', function() {
-                if (this.value.trim()) {
-                    clearMessageError();
-                }
-            });
-        }
+        
 
         function closeModalcancel() {
             const modal = document.getElementById('myModal');
@@ -285,19 +232,4 @@
             cancelRideForm.submit();
         }
     </script>
-    <style>
-        .swal2-confirm {
-            background-color: #f87171 !important;
-            /* Red background for "Yes, cancel it!" and "Close" */
-            border-color: #f87171 !important;
-            /* Red border */
-        }
-
-        .swal2-cancel {
-            background-color: #106BC7 !important;
-            /* Blue background for "No, take me back" */
-            border-color: #106BC7 !important;
-            /* Blue border */
-        }
-    </style>
 @endsection
