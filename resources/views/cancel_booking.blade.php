@@ -16,13 +16,7 @@
                             </svg>
                         </button>
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                </svg>
-                            </div> -->
-                            </div>
+                            <div class="sm:flex sm:items-start justify-center"></div>
                             <div class="text-center">
 
                                 <div class="w-full">
@@ -84,7 +78,6 @@
                 id="formCancelRide">
                 @csrf
                 @method('PUT')
-                <!-- <h1>{{ $tripsPage->cancel_booking_main_heading ?? 'Cancel my booking' }}</h1> -->
                 <div class="space-y-4">
                     <div class="bg-white rounded-lg hidden shadow-3xl">
                         <div class="bg-white p-4">
@@ -127,14 +120,15 @@
                                     <textarea id="message" rows="5" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                         placeholder="{{ $tripsPage->cancel_booking_trip_placeholder ?? 'Please provide as many details as you want as to why you want to cancel this booking &#10;Your driver will receive a copy of this message' }}">{{ old('message') }}</textarea>
-                                    @error('message')
-                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                    @enderror
+                                    <div id="messageError"
+                                        class="tooltip-error shadow-lg {{ $errors->has('message') ? '' : 'hidden' }}">
+                                        {{ $errors->first('message') }}
+                                    </div>
 
                                 </div>
                             </div>
                             <div class="flex justify-center items-center mt-4">
-                                <button class="button-exp-fill" type="submit" id="cancelRideBtn">
+                                <button class="button-exp-fill" type="submit">
                                     {{ $tripsPage->booking_cancel_btn_label ?? 'Cancel ride' }}
                                 </button>
                             </div>
@@ -196,60 +190,22 @@
                 }
             }
 
-            // Function to update the total amount
             function updateTotalAmount() {
-                var seatPrice = parseFloat({{ $booking->price }});
-                var selectedSeats = $('#type').val();
+                var selectedSeats = parseFloat($('#type').val()) || 0;
                 var totalAmount = bookingPrice * selectedSeats;
-                var totalBookingCredit = "{{ $booking->booking_credit }}";
-                var bookedSeats = "{{ $booking->seats }}";
-                var totalPaid = Number(bookedSeats) * Number(seatPrice) + Number(totalBookingCredit);
-                var totalSeatsAmount = seatPrice * selectedSeats;
-
-                // Calculate the sum of totalAmount and totalSeatsAmount
-                var totalSum = totalAmount + totalSeatsAmount;
-
-                // Format the sums to two decimal places
                 var formattedTotalAmount = totalAmount.toFixed(2);
-                var formattedTotalPayableAmount = Math.abs(totalAmount - totalBookingCredit);
-                var formattedTotalPayableOnlineAmount = Math.abs(totalSum - totalPaid)
-                var formattedTotalSeatsAmount = totalSeatsAmount.toFixed(2);
-                var formattedTotalSum = totalSum.toFixed(2);
 
-                // Update the content of the <p> tags
-                $('#selectedSeats').text(selectedSeats);
                 $('.totalAmount').text('$' + formattedTotalAmount);
-                $('.totalPayableAmount').text('$' + formattedTotalPayableAmount.toFixed(2));
-                $('.totalPayableOnlineAmount').text('$' + formattedTotalPayableOnlineAmount.toFixed(2));
                 $('#totalAmountInput').val(totalAmount);
-                $('.totalSeatsAmount').text('$' + formattedTotalSeatsAmount);
-                $('.totalSum').text('$' + formattedTotalSum);
-
-                if (selectedSeats >= bookedSeats) {
-                    $('.payable').removeClass('hidden');
-                    $('.payable').addClass('flex');
-                    $('.refund').addClass('hidden');
-                    $('.refund').removeClass('flex');
-                } else {
-                    $('.payable').addClass('hidden');
-                    $('.payable').removeClass('flex');
-                    $('.refund').removeClass('hidden');
-                    $('.refund').addClass('flex');
-                }
             }
 
-            // Attach an event listener to the select element
             $('#type').on('change', function() {
-                // Call the function to update the total amount
                 updateTotalAmount();
             });
 
-            // Trigger the change event on page load
             $('#type').trigger('change');
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         const cancelRideForm = document.getElementById('formCancelRide');
