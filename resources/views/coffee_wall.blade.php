@@ -394,7 +394,7 @@
                                             </label>
                                         </div>
                                         @error('terms_privacy')
-                                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                            <div class="tooltip-error shadow-lg">{{ $coffeeWallPage->agree_terms_error ?? $message }}</div>
                                         @enderror
                                     </div>
                                 </div>

@@ -122,23 +122,15 @@
                                     </select>
                                 </div>
                                 <div class="mt-6">
-                                    <label for="meeting"
+                                    <label for="message"
                                         class="text-gray-900 font-medium text-lg lg:text-xl mb-2">{{ $tripsPage->cancel_message_title ?? 'Message to your driver' }}</label>
-                                    <textarea id="meeting" rows="5" name="message"
+                                    <textarea id="message" rows="5" name="message"
                                         class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                         placeholder="{{ $tripsPage->cancel_booking_trip_placeholder ?? 'Please provide as many details as you want as to why you want to cancel this booking &#10;Your driver will receive a copy of this message' }}">{{ old('message') }}</textarea>
                                     @error('message')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
-                                    <div id="messageError"
-                                        class="hidden mt-1 text-sm text-white bg-[#f87171] w-fit p-2 rounded-md"
-                                        role="alert"></div>
+
                                 </div>
                             </div>
                             <div class="flex justify-center items-center mt-4">
@@ -260,45 +252,62 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const cancelRideBtn = document.getElementById('cancelRideBtn');
+        const cancelRideForm = document.getElementById('formCancelRide');
         const messageField = document.querySelector('textarea[name="message"]');
         const messageErrorEl = document.getElementById('messageError');
         const requiredMessage = '{{ $tripsPage->cancel_all_feilds_are_required ?? 'All fields are required' }}';
+        let cancelBookingConfirmed = false;
 
-        cancelRideBtn.addEventListener('click', function(event) {
-            event.preventDefault();
+        function showMessageError(message) {
+            if (messageErrorEl) {
+                messageErrorEl.textContent = message;
+                messageErrorEl.classList.remove('hidden');
+            }
 
-            // 1. Validate message first — show error before any popup
-            var messageVal = (messageField && messageField.value) ? messageField.value.trim() : '';
+            if (messageField) {
+                messageField.classList.add('border-red-500');
+                messageField.focus();
+            }
+        }
+
+        function clearMessageError() {
             if (messageErrorEl) {
                 messageErrorEl.classList.add('hidden');
                 messageErrorEl.textContent = '';
             }
-            if (messageField) messageField.classList.remove('border-red-500');
 
-            if (!messageVal) {
-                if (messageErrorEl) {
-                    messageErrorEl.textContent = requiredMessage;
-                    messageErrorEl.classList.remove('hidden');
-                }
-                if (messageField) {
-                    messageField.classList.add('border-red-500');
-                    messageField.focus();
-                }
-                return;
+            if (messageField) {
+                messageField.classList.remove('border-red-500');
             }
+        }
 
-            // 2. Only after validation passes, show confirmation modal
-            document.getElementById('cancelConfirmModal').classList.remove('hidden');
-        });
+        if (messageErrorEl && messageErrorEl.textContent.trim()) {
+            showMessageError(messageErrorEl.textContent.trim());
+        }
 
-        // Clear message error when user types
-        if (messageField && messageErrorEl) {
+        // cancelRideForm.addEventListener('submit', function(event) {
+        //     if (cancelBookingConfirmed) {
+        //         return;
+        //     }
+
+        //     event.preventDefault();
+
+        //     // 1. Validate message first — show error before any popup
+        //     var messageVal = (messageField && messageField.value) ? messageField.value.trim() : '';
+        //     clearMessageError();
+
+        //     if (!messageVal) {
+        //         showMessageError(requiredMessage);
+        //         return;
+        //     }
+
+        //     document.getElementById('cancelConfirmModal').classList.remove('hidden');
+        // });
+
+        if (messageField) {
             messageField.addEventListener('input', function() {
                 if (this.value.trim()) {
-                    messageErrorEl.classList.add('hidden');
-                    messageErrorEl.textContent = '';
-                    this.classList.remove('border-red-500');
+                    clearMessageError();
                 }
             });
         }
@@ -315,7 +324,9 @@
         }
 
         function confirmCancelBooking() {
-            document.getElementById('formCancelRide').submit();
+            cancelBookingConfirmed = true;
+            closeCancelConfirmModal();
+            cancelRideForm.submit();
         }
     </script>
     <style>

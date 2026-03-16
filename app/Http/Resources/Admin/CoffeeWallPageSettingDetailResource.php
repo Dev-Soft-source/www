@@ -25,6 +25,7 @@ class CoffeeWallPageSettingDetailResource extends JsonResource
             'required_field_label' => $this->required_field_label,
             'main_text' => $this->main_text,
             'agree_terms_label' => $this->agree_terms_label,
+            'agree_terms_error' => $this->agree_terms_error,
             'custom_amount_label' => $this->custom_amount_label,
             'pay_button_label' => $this->pay_button_label,
             'notify_coffee_used_label' => $this->notify_coffee_used_label,

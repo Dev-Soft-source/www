@@ -45,6 +45,7 @@ class CoffeeWallPageSettingTemplateExport implements FromCollection, WithHeading
             'required_field_label' => 'Required field',
             'main_text' => 'Support us with a coffee.',
             'agree_terms_label' => 'I agree to the terms',
+            'agree_terms_error' => 'You must agree to the terms',
             'custom_amount_label' => 'Custom amount',
             'pay_button_label' => 'Pay',
             'notify_coffee_used_label' => 'Notify me when my Coffee is used',
