@@ -997,11 +997,21 @@
                                                         );
                                                         $departureDateLabel = $departureDateTime['dateLabel'];
                                                         $departureTimeLabel = $departureDateTime['timeLabel'];
+                                                        $allSegments = $ride->rideDetail()->orderBy('id')->get();
+                                                        $firstSegment = $allSegments->first();
+                                                        $isFromAStop = $allSegments->count() > 1 && $firstSegment && $rideDetail->id !== $firstSegment->id;
                                                     @endphp
                                                     <p class="flex items-center space-x-2 font-semibold">
                                                         {{ $departureDateLabel }}
                                                         {{ $rideDetailPage->at_label }}
                                                         {{ $departureTimeLabel ?? 'N/A' }}
+                                                        @if ($isFromAStop)
+                                                            <span class="inline-block cursor-help ml-2" data-tippy-content="Departure time is approximate. This ride starts in {{ $firstSegment->departure ?? 'another city' }} and may be delayed by prior legs. Please wait 15–20 minutes before reporting a no-show.">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black" viewBox="0 0 16 16">
+                                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                                                </svg>
+                                                            </span>
+                                                        @endif
                                                     </p>
 
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
@@ -1368,7 +1378,7 @@
                     @endif
                 </div>
                 @endforeach
-                {{ $rides->appends(request()->except('page'))->links() }}
+                {{ $rides->appends(request()->except('page'))->links('vendor.pagination.circles') }}
             @elseif ($rides && $rides->count() == 0 && $request->from && $request->to)
                 <div class="text-center">
                     <h1 class="font-FuturaMdCnBT">

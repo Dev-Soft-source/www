@@ -1730,7 +1730,7 @@
                                 </div>
                             @endforeach
                         @endif
-                        {{ $paginatedRides->appends(request()->except('page'))->links() }}
+                        {{ $paginatedRides->appends(request()->except('page'))->links('vendor.pagination.circles') }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
                             <h3 class="text-primary">{{ $findRidePage->no_rides_found_extra_ride_label ?? 'Sorry, we couldn\'t find any Folk Rides matching your search.' }}</h3>

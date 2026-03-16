@@ -1314,16 +1314,25 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                             </h3>
                             <div class=" p-4 w-full">
                                 <p class="text-left">
-                                    @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Standard cancellation')
+                                    @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Standard Cancellation')
                                         <a href="{{ route('cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'standard']) }}"
                                             class="font-bold text-black no-underline hover:no-underline" target="_blank">
                                             {{ $ride->booking_type->name }}
                                         </a>
-                                    @elseif(isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
-                                        <a href="{{ route('firm_cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'firm']) }}"
-                                            class="font-bold text-black no-underline hover:no-underline" target="_blank">
-                                            {{ $ride->booking_type->name }}
-                                        </a>
+                                    
+                                    @elseif(isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm Cancellation')
+                                        <span class="inline-flex items-center gap-1">
+                                            <a href="{{ route('firm_cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'firm']) }}"
+                                                class="font-bold text-black no-underline hover:no-underline" target="_blank">
+                                                {{ $ride->booking_type->name }}
+                                            </a>
+                                            <span class="inline-block cursor-help" data-tippy-content="{{ $rideDetailPage->cancellation_policy_tooltip ?? 'Under this policy, the booking price is automatically reduced by 10% to reflect the mutual commitment between driver and passenger. Please note that bookings made under this policy are non-refundable.' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                    class="bi bi-exclamation-circle-fill text-black" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                                </svg>
+                                            </span>
+                                        </span>
                                     @else
                                         {{ $ride->booking_type->name ?? '' }}
                                     @endif

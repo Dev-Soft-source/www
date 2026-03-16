@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -403,38 +403,6 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
-                                                    <label :for="`pink_ride_page_faq_heading_${activeLanguageId}`">
-                                                      pink ride FAQ heading label
-                                                    </label>
-                                                </div>
-                                                <input type="text" :name="`pink_ride_page_faq_heading_${activeLanguageId}`"
-                                                    :id="`pink_ride_page_faq_heading_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'pink_ride_page_faq_heading'
-                                                    )
-                                                        " @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'pink_ride_page_faq_heading'
-                                                        )
-                                                        " />
-                                            </div>
-                                            
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
-                                                )
-                                                    "></p>
-                                        </div>
-
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
                                                     <label :for="`extra_care_ride_faqs_heading_${activeLanguageId}`">
                                                       extra+ ride FAQ heading label
                                                     </label>
@@ -614,6 +582,8 @@
                                                 )
                                                     "></p>
                                         </div>
+
+                                        
                                         <div class="relative z-0 w-full group">
                                             <div class="flex items-center justify-between">
                                                 <div class="w-full">
@@ -967,6 +937,44 @@
                                                     />
                                                 </div>
                                             </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group col-span-2">
+                                            <div v-if="settingsLoaded && form['pink_ride_page_faq_heading']">
+                                                <div class="flex justify-between">
+                                                <label :for="`pink_ride_page_faq_heading_${activeLanguageId}`">
+                                                    pink ride FAQ heading label
+                                                </label>
+                                                </div>
+
+                                                <editor
+                                                    v-if="form['pink_ride_page_faq_heading'][`pink_ride_page_faq_heading_${activeLanguageId}`] !== undefined"
+                                                    @selectionChange="
+                                                        handleSelectionChange(language, 'pink_ride_page_faq_heading')
+                                                    "
+                                                    :ref="`pink_ride_page_faq_heading_${activeLanguageId}`"
+                                                    :id="`pink_ride_page_faq_heading_${activeLanguageId}`"
+                                                    :initial-value="
+                                                        form['pink_ride_page_faq_heading'][`pink_ride_page_faq_heading_${activeLanguageId}`] || ''
+                                                    "
+                                                    :tinymce-script-src="tinymceScriptSrc"
+                                                    :init="editorConfig"
+                                                />
+                                            </div>
+
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                validationErros.has(
+                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
+                                                )
+                                                "
+                                                v-text="
+                                                validationErros.get(
+                                                    `pink_ride_page_faq_heading.pink_ride_page_faq_heading_${activeLanguageId}`
+                                                )
+                                                "
+                                            ></p>
                                         </div>
                                     </div>
                                 </div>
@@ -3283,6 +3291,10 @@ import axios from "axios";
 import ErrorHandling from "../../ErrorHandling.js";
 import ExcelBulkImport from "../components/ExcelBulkImport.vue";
 export default {
+    components: {
+        editor: Editor,
+        ExcelBulkImport,
+    },
     data() {
         return {
             activeLanguageId: null,
@@ -3294,16 +3306,24 @@ export default {
             editorConfig: {
                 height: 250,
                 menubar: false,
-                plugins: [
-                    "advlist autolink lists link image charmap print preview anchor image code table",
-                    "searchreplace visualblocks code fullscreen",
-                    "insertdatetime media table paste code help wordcount",
-                ],
+                plugins:
+                  "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount fullscreen code",
                 toolbar:
-                    "undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | table | image | code | help",
+                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code | fullscreen",
+                base_url: "/plugins/tinymce",
+                suffix: ".min",
+                // Prefer the same Futura family used across the site
+                content_style:
+                  "body { font-family: 'FuturaMdCnBT','Futura','Futura Md BT',sans-serif; }",
+                font_family_formats:
+                  "Futura='FuturaMdCnBT','Futura','Futura Md BT',sans-serif;" +
+                  "Arial=arial,helvetica,sans-serif;" +
+                  "Courier New='courier new',courier,monospace;" +
+                  "Georgia=georgia,palatino,'Book Antiqua',serif;" +
+                  "Times New Roman='Times New Roman',times,serif;",
             },
+            tinymceScriptSrc: "/plugins/tinymce/tinymce.min.js",
+            settingsLoaded: false,
         };
     },
     components: {
@@ -4077,6 +4097,7 @@ export default {
                             this.handleInput(setting?.hide_ride_popup_heading, setting?.language, "hide_ride_popup_heading");
                         });
                     }
+                    this.settingsLoaded = true;
                 });
         },
         updatePageSetting() {

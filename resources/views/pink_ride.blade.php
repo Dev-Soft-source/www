@@ -834,6 +834,7 @@
                             </div>
                         @endforeach
                     @elseif ($paginatedRides && $paginatedRides->count() > 0)
+                        {{-- 1. Pink rides (ProximaRide) are always displayed first --}}
                         @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() > 0)
                             <div class="flex flex-col items-center justify-center border-b border-gray-400">
                                 <h3 class="text-primary">{{ $findRidePage->search_results_pink_ride_label ?? 'Search results for ProximaRide' }}</h3>
@@ -1251,6 +1252,7 @@
                                 </div>
                             @endforeach
                         @endif
+                        {{-- 2. After pink rides, other rides (non-ProximaRide) are displayed --}}
                         @if($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
                             <div class="border-b border-gray-400 flex flex-col items-center justify-center pt-6">
                                 @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
@@ -1690,7 +1692,7 @@
                                 </div>
                             @endforeach
                         @endif
-                        {{ $paginatedRides->appends(request()->except('page'))->links() }}
+                        {{ $paginatedRides->appends(request()->except('page'))->links('vendor.pagination.circles') }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
                             <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
@@ -1783,12 +1785,14 @@
         @if (empty($request->from) && empty($request->to) && empty($request->date))
             <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
                 <div class="pink-ride-faq">
-                    <div class="pink-ride-faq__header">
-                        <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                            @isset($findRidePage->pink_ride_page_faq_heading)
-                                {{ $findRidePage->pink_ride_page_faq_heading }}
-                            @endisset
-                        </h3>
+                    <div class="pink-ride-faq__header text-center justify-center">
+                        <div class="w-full flex justify-center">
+                            <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
+                                @isset($findRidePage->pink_ride_page_faq_heading)
+                                    {!! $findRidePage->pink_ride_page_faq_heading !!}
+                                @endisset
+                            </h3>
+                        </div>
                     </div>
                     <div class="pink-ride-faq__body">
                         @foreach ($pinkRideFaqs as $pinkRideFaq)

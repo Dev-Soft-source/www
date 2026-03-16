@@ -8,11 +8,13 @@ use App\Models\PostRidePageSettingDetail;
 use App\Models\Ride;
 use App\Models\TripsPageSettingDetail;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 class PostRideAgainController extends Controller
 {
     public function CurrentRides($lang = null){
-        $rides = Ride::where('added_by', auth()->user()->id)
+        $baseQuery = Ride::where('added_by', auth()->user()->id)
             ->where('status', '!=', 2)
             ->where(function ($query) {
                 $query->where(function ($query) {
@@ -23,8 +25,35 @@ class PostRideAgainController extends Controller
                         });
                 });
             })
-            ->orderBy('id', 'desc')
-            ->paginate(6);
+            ->orderBy('id', 'desc');
+
+        $allRides = $baseQuery->get();
+
+        // De-duplicate rides that were copied with identical details except date/time
+        $uniqueRides = $allRides->unique(function ($ride) {
+            $attributes = Arr::except($ride->getAttributes(), [
+                'id',
+                'date',
+                'time',
+                'random_id',
+                'completed_date',
+                'completed_time',
+                'created_at',
+                'updated_at',
+            ]);
+
+            return md5(json_encode($attributes));
+        })->values();
+
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $rides = new LengthAwarePaginator(
+            $uniqueRides->forPage($currentPage, $perPage),
+            $uniqueRides->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
         
         $languages = Language::all();
         // Store the selected language in the session
@@ -74,7 +103,7 @@ class PostRideAgainController extends Controller
     }
 
     public function PastRides($lang = null){
-        $rides = Ride::where('added_by',auth()->user()->id)
+        $baseQuery = Ride::where('added_by',auth()->user()->id)
             ->where('status', '!=', 2)
             ->where(function ($query) {
                 $query->where(function ($query) {
@@ -85,8 +114,35 @@ class PostRideAgainController extends Controller
                         });
                 });
             })
-            ->orderBy('id', 'desc')
-            ->paginate(6);
+            ->orderBy('id', 'desc');
+
+        $allRides = $baseQuery->get();
+
+        // De-duplicate rides that were copied with identical details except date/time
+        $uniqueRides = $allRides->unique(function ($ride) {
+            $attributes = Arr::except($ride->getAttributes(), [
+                'id',
+                'date',
+                'time',
+                'random_id',
+                'completed_date',
+                'completed_time',
+                'created_at',
+                'updated_at',
+            ]);
+
+            return md5(json_encode($attributes));
+        })->values();
+
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $rides = new LengthAwarePaginator(
+            $uniqueRides->forPage($currentPage, $perPage),
+            $uniqueRides->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
         $languages = Language::all();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -137,10 +193,37 @@ class PostRideAgainController extends Controller
     }
 
     public function CancelledRides($lang = null){
-        $rides = Ride::where('added_by',auth()->user()->id)
+        $baseQuery = Ride::where('added_by',auth()->user()->id)
             ->where('status', 2)
-            ->orderBy('id', 'desc')
-            ->paginate(6);
+            ->orderBy('id', 'desc');
+
+        $allRides = $baseQuery->get();
+
+        // De-duplicate rides that were copied with identical details except date/time
+        $uniqueRides = $allRides->unique(function ($ride) {
+            $attributes = Arr::except($ride->getAttributes(), [
+                'id',
+                'date',
+                'time',
+                'random_id',
+                'completed_date',
+                'completed_time',
+                'created_at',
+                'updated_at',
+            ]);
+
+            return md5(json_encode($attributes));
+        })->values();
+
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $rides = new LengthAwarePaginator(
+            $uniqueRides->forPage($currentPage, $perPage),
+            $uniqueRides->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
 
 
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);

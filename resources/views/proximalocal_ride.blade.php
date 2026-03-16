@@ -1717,7 +1717,7 @@
                                 </div>
                             @endforeach
                         @endif
-                        {{ $paginatedRides->appends(request()->except('page'))->links() }}
+                        {{ $paginatedRides->appends(request()->except('page'))->links('vendor.pagination.circles') }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
                             <h3 class="text-primary">Sorry, we couldn't find any ProximaLocal Rides matching your search.</h3>

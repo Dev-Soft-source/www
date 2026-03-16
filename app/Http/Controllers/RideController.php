@@ -257,12 +257,13 @@ class RideController extends Controller
                 $rides = $rides->whereIn('animal_friendly', $pets);
             }
             if ($request->hide_full_rides) {
+                // Exclude fully-booked rides: only show rides where seats > booked seats (exclude cancelled 3, 4)
                 $rides = $rides->whereRaw('rides.seats > (
                     SELECT COALESCE(SUM(bookings.seats), 0)
                     FROM bookings
                     INNER JOIN users ON bookings.user_id = users.id AND users.deleted_at IS NULL
                     WHERE bookings.ride_id = rides.id
-                    AND bookings.status NOT IN (0, 1)
+                    AND bookings.status NOT IN (3, 4)
                 )');
             }
 
