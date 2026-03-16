@@ -25,6 +25,8 @@ class CoffeeWallSettingService
                 $errorMessages = array_merge($errorMessages, ['main_text.main_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['agree_terms_label.agree_terms_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['agree_terms_label.agree_terms_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['agree_terms_error.agree_terms_error_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['agree_terms_error.agree_terms_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['custom_amount_label.custom_amount_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['custom_amount_label.custom_amount_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pay_button_label.pay_button_label_' . $language->id => ['required', 'string']]);
@@ -112,6 +114,7 @@ class CoffeeWallSettingService
             'required_field_label' => $this->data($request, $language, 'required_field_label'),
             'main_text' => $this->data($request, $language, 'main_text'),
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
+            'agree_terms_error' => $this->data($request, $language, 'agree_terms_error'),
             'custom_amount_label' => $this->data($request, $language, 'custom_amount_label'),
             'pay_button_label' => $this->data($request, $language, 'pay_button_label'),
             'notify_coffee_used_label' => $this->data($request, $language, 'notify_coffee_used_label'),

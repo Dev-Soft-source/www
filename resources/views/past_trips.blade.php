@@ -59,9 +59,9 @@
                                                     @if ($reviewed)
                                                         <div>
                                                             <a href="{{ route('review_passenger.index', ['lang' => $selectedLanguage->abbreviation, 'id' => $rating->id]) }}" class="button-exp-fill me-1">
-                                                                @isset($rideDetailPage->card_sectcard_section_reviewion_age)
+                                                                @isset($rideDetailPage->card_section_review)
                                                                 {{ $rideDetailPage->card_section_review }}
-                                                            @endisset
+                                                                @endisset
                                                             </a>
                                                         </div>
                                                     @elseif ($reviewButtonVisible)

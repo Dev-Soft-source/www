@@ -356,33 +356,27 @@
                 </h1>
 
                 @php
-                    // Pink Ride and Extra+ Ride flags are set by RideController (features_option1, features_option2)
-                    $isPinkRide = !empty($ride->pink_ride);
-                    $isExtraCareRide = !empty($ride->extra_care_ride);
-                    // Short-Distance Ride: price per seat is on RideDetail, not Ride; no booking fee when < $15
-                    $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
-                    $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
-                    // Phone numbers on file
-                    $hasAnyPhoneNumber =
-                        auth()->check() && \App\Models\PhoneNumber::where('user_id', auth()->id())->exists();
-                    $hasVerifiedPhone =
-                        auth()->check() &&
-                        \App\Models\PhoneNumber::where('user_id', auth()->id())
-                            ->where('verified', '1')
-                            ->exists();
-                    // Phone verification required before booking (same logic as search_ride)
-                    $needsPhoneVerification = auth()->check() && $hasAnyPhoneNumber && !$hasVerifiedPhone;
-                    // For REGULAR rides, require at least one phone number on file (verified or unverified)
-                    $needsPhoneOnFileForRegularRide =
-                        auth()->check() && !$hasAnyPhoneNumber && !$isPinkRide && !$isExtraCareRide;
-                    // Pink or Extra+ Ride: verified phone required
-                    $needsVerifiedPhoneForPinkExtra =
-                        auth()->check() && ($isPinkRide || $isExtraCareRide) && !$hasVerifiedPhone;
-                    // Government-issued photo ID required to book Pink or Extra+ Ride
                     $user = auth()->user();
-                    $hasGovernmentId = $user && !empty($user->government_issued_id ?? null);
+                    $isAuthenticated = (bool) $user;
+
+                    $isPinkRide = $ride->isPinkRide();
+                    $isExtraCareRide = $ride->isExtraCareRide();
+                    $requiresStrictVerification = $isPinkRide || $isExtraCareRide;
+
+                    $isShortDistanceRide = $ride->isShortDistanceRide();
+
+                    $hasAnyPhoneNumber = $user?->hasPhone() ?? false;
+                    $hasVerifiedPhone = $user?->hasVerifiedPhone() ?? false;
+
+                    $needsPhoneVerification = $isAuthenticated && $hasAnyPhoneNumber && !$hasVerifiedPhone;
+                    $needsPhoneOnFileForRegularRide =
+                        $isAuthenticated && !$hasAnyPhoneNumber && !$requiresStrictVerification;
+                    $needsVerifiedPhoneForPinkExtra =
+                        $isAuthenticated && $requiresStrictVerification && !$hasVerifiedPhone;
+
+                    $hasGovernmentId = !empty($user?->government_issued_id);
                     $showPhotoIdRequiredForBooking =
-                        auth()->check() && ($isPinkRide || $isExtraCareRide) && !$hasGovernmentId;
+                        $isAuthenticated && $requiresStrictVerification && !$hasGovernmentId;
                 @endphp
                 @if ($isShortDistanceRide)
                     <div class="col-span-3 w-full">
@@ -879,12 +873,12 @@
                                     </div>
                                 </div>
                             @endisset
+                            
                             @php
                                 $features = !empty($ride->features) ? explode('=', $ride->features) : [];
                             @endphp
                             @include('partials.ride_feature_items', [
                                 'features' => $features,
-                                'postRidePage' => $postRidePage,
                             ])
                         </div>
                     </div>

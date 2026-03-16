@@ -1286,6 +1286,48 @@
                                                 "
                                             ></p>
                                         </div>
+                                        <div class="relative z-0 w-full group col-span-2 md:col-span-1">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`agree_terms_error_${activeLanguageId}`"
+                                                        >Agree terms error</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`agree_terms_error_${activeLanguageId}`"
+                                                    :id="`agree_terms_error_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'agree_terms_error'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'agree_terms_error'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `agree_terms_error.agree_terms_error_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `agree_terms_error.agree_terms_error_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- main section end -->
@@ -1481,6 +1523,11 @@ export default {
                                 language,
                                 "agree_terms_label"
                             );
+                            this.handleInput(
+                                "",
+                                language,
+                                "agree_terms_error"
+                            );
                         });
                         this.fetchTermsOfUsePageSetting();
                     }
@@ -1633,6 +1680,11 @@ export default {
                                 setting?.language,
                                 "agree_terms_label"
                             );
+                            this.handleInput(
+                                setting?.agree_terms_error,
+                                setting?.language,
+                                "agree_terms_error"
+                            );
                         });
                     }
                 });
@@ -1744,6 +1796,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `main_text.main_text_${language.id}`
+                ) ||
+                validationErros.has(
+                    `agree_terms_error.agree_terms_error_${language.id}`
                 ) ||
                 validationErros.has(
                     `agree_terms_label.agree_terms_label_${language.id}`

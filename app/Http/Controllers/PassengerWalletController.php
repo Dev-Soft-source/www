@@ -26,6 +26,7 @@ use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
 use Stripe\Stripe;
+use Stripe\Customer;
 
 class PassengerWalletController extends Controller
 {
@@ -333,6 +334,7 @@ class PassengerWalletController extends Controller
             'dr_amount' => ['required', 'numeric', 'gt:0'],
             'name_on_card' => 'required_if:card_id,credit_card',
             'card_element' => 'required_if:card_id,credit_card',
+            'stripeToken' => 'required_if:card_id,credit_card',
         ]);
 
         $message = $this->successMessage;
@@ -444,7 +446,7 @@ class PassengerWalletController extends Controller
             return redirect()->route('paypal.cancel');
 
         } elseif ($request->card_id == 'google_pay' || $request->card_id == 'apple_pay' || $request->card_id == 'credit_card') {
-            // Use the user's primary card of the corresponding type (Stripe-based methods)
+            // Use the inline Stripe token for a newly entered card, otherwise use the user's primary saved method
             $typeMap = [
                 'google_pay'  => 'google_pay',
                 'apple_pay'   => 'apple_pay',
@@ -454,6 +456,48 @@ class PassengerWalletController extends Controller
             $mappedType = $typeMap[$request->card_id] ?? null;
             if (!$mappedType) {
                 return $genericErrorResponse();
+            }
+
+            if ($request->card_id === 'credit_card') {
+                if (!$user->stripe_customer_id) {
+                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    $customer = Customer::create([
+                        'email' => $user->email,
+                        'name' => $user->first_name,
+                    ]);
+                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                    $user = User::whereId($user->id)->first();
+                }
+
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+                $stripeToken = $request->stripeToken;
+
+                if (str_starts_with($stripeToken, 'tok_')) {
+                    $paymentMethod = PaymentMethod::create([
+                        'type' => 'card',
+                        'card' => [
+                            'token' => $stripeToken,
+                        ],
+                    ]);
+                } elseif (str_starts_with($stripeToken, 'pm_')) {
+                    $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                } else {
+                    return redirect()->back()->with(['error' => $message->general_error_message ?? 'Payment method not found. Please try again.']);
+                }
+
+                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
+                $paymentIntentOrResponse = $chargeWithStripePaymentMethod($paymentMethod->id);
+                if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
+                    return $paymentIntentOrResponse;
+                }
+
+                /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
+                if ($paymentIntentOrResponse->status !== 'succeeded') {
+                    return $genericErrorResponse();
+                }
+
+                return $handleSuccessfulTopUp('stripe', $paymentIntentOrResponse->id);
             }
 
             $card = Card::where('user_id', $user->id)
