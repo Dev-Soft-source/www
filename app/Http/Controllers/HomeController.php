@@ -284,12 +284,14 @@ class HomeController extends Controller
         }
         $selectedLanguage = session('selectedLanguage');
         $selectedLanguage = $selectedLanguage ? Language::where('abbreviation', $selectedLanguage)->first() : null;
+        $coffeeWallPage = CoffeeWallPageSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $this->defaultLang->id) ?? null;
         if (!$selectedLanguage) {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
         return view('coffee_wall_story', [
             'selectedLanguage' => $selectedLanguage,
             'languages' => $languages,
+            'coffeeWallPage' => $coffeeWallPage,
         ]);
     }
 
