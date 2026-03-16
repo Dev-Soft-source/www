@@ -172,6 +172,9 @@
                                 @error('reasons')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
+                                <div id="reasons_error_client" class="hidden mt-2">
+                                    <div class="tooltip-error shadow-lg"><span class="reasons-error-text"></span></div>
+                                </div>
                             </ul>
                         </div>
 
@@ -228,12 +231,7 @@
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                             <div id="close_account_reason_error_client" class="hidden mt-2">
-                                <div class="relative tooltip -bottom-4 flex">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="error-text text-white leading-none text-sm lg:text-base"></p>
-                                    </div>
-                                </div>
+                                <div class="tooltip-error shadow-lg"><span class="error-text"></span></div>
                             </div>
                         </div>
 
@@ -251,12 +249,7 @@
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                             <div id="improve_message_error_client" class="hidden mt-2">
-                                <div class="relative tooltip -bottom-4 flex">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="error-text text-white leading-none text-sm lg:text-base"></p>
-                                    </div>
-                                </div>
+                                <div class="tooltip-error shadow-lg"><span class="error-text"></span></div>
                             </div>
                         </div>
 
@@ -272,6 +265,9 @@
                             @error('confirm_close_account')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
+                            <div id="confirm_close_account_error_client" class="hidden mt-2">
+                                <div class="tooltip-error shadow-lg"><span class="confirm-error-text"></span></div>
+                            </div>
                         </div>
 
                         <div class="md:col-span-2 flex justify-center">
@@ -332,6 +328,13 @@
 @section('script')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        var closeAccountValidationMessages = {
+            reasons: '{{ addslashes($closeAccountPage->reasons_required_error ?? "The reasons are required") }}',
+            close_account_reason: '{{ addslashes($closeAccountPage->why_closing_account_label ?? "Reason for closing account") }}',
+            improve_message: '{{ addslashes($closeAccountPage->improve_label ?? "How we can improve") }}',
+            confirm_close_account: '{{ addslashes($closeAccountPage->check_box_validation_message ?? "Just one last step! Please check this box to confirm.") }}'
+        };
+
         $(function() {
             var $preferNotSay = $('#reason_prefer_not_say');
             var $otherReasons = $('input[name="reasons[]"]').not('#reason_prefer_not_say');
@@ -347,6 +350,12 @@
                     $preferNotSay.prop('checked', false);
                 }
             });
+
+            // Hide client tooltips when user corrects the field
+            $('input[name="reasons[]"]').on('change', function() { $('#reasons_error_client').addClass('hidden'); });
+            $('#close_account_reason').on('input', function() { $('#close_account_reason_error_client').addClass('hidden'); });
+            $('#improve_message').on('input', function() { $('#improve_message_error_client').addClass('hidden'); });
+            $('#close_account_checkbox').on('change', function() { $('#confirm_close_account_error_client').addClass('hidden'); });
         });
 
         function closeModal() {
@@ -356,7 +365,53 @@
             }
         }
 
+        /** Returns true if all required fields are valid; otherwise shows tooltips and returns false. */
+        function validateCloseAccountForm() {
+            var isValid = true;
+            // Hide all client tooltips first
+            $('#reasons_error_client').addClass('hidden');
+            $('#close_account_reason_error_client').addClass('hidden');
+            $('#improve_message_error_client').addClass('hidden');
+            $('#confirm_close_account_error_client').addClass('hidden');
+
+            var reasonsChecked = $('input[name="reasons[]"]:checked').length;
+            if (reasonsChecked === 0) {
+                $('#reasons_error_client').find('.reasons-error-text').text(closeAccountValidationMessages.reasons);
+                $('#reasons_error_client').removeClass('hidden');
+                isValid = false;
+            }
+
+            var closeReason = $.trim($('#close_account_reason').val());
+            if (closeReason === '') {
+                $('#close_account_reason_error_client').removeClass('hidden').find('.error-text').text(closeAccountValidationMessages.close_account_reason);
+                isValid = false;
+            }
+
+            var improveMsg = $.trim($('#improve_message').val());
+            if (improveMsg === '') {
+                $('#improve_message_error_client').removeClass('hidden').find('.error-text').text(closeAccountValidationMessages.improve_message);
+                isValid = false;
+            }
+
+            if (!$('#close_account_checkbox').is(':checked')) {
+                $('#confirm_close_account_error_client').find('.confirm-error-text').text(closeAccountValidationMessages.confirm_close_account);
+                $('#confirm_close_account_error_client').removeClass('hidden');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                var firstError = $('#reasons_error_client:not(.hidden), #close_account_reason_error_client:not(.hidden), #improve_message_error_client:not(.hidden), #confirm_close_account_error_client:not(.hidden)').first();
+                if (firstError.length) {
+                    firstError[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            return isValid;
+        }
+
         function openCloseAccountConfirmationModal() {
+            if (!validateCloseAccountForm()) {
+                return;
+            }
             const modal = document.getElementById('closeAccountConfirmationModal');
             if (modal) {
                 modal.classList.remove('hidden');
