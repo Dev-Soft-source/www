@@ -61,7 +61,7 @@ use App\Http\Controllers\TestEmailController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\VerifyDriverController;
 use App\Http\Controllers\VerifyStudentController;
-use App\Http\Controllers\PxRideWebController;
+use App\Http\Controllers\RideSearchController;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 use Twilio\Rest\Client;
@@ -85,22 +85,22 @@ Route::get('/run-queue', function () {
 });
 
 
- Route::get('/.well-known/assetlinks.json', function () {
-     $payload = [
-         [
-             "relation" => ["delegate_permission/common.handle_all_urls"],
-             "target" => [
-                 "namespace" => "android_app",
-                 "package_name" => "com.devop360.proximaride",
-                 "sha256_cert_fingerprints" => [
-                     "5EAEF3972B908B855AB851965F46B1F80376FA95CB0C22AFFD956DDEC3CCE9C8"
-                 ]
-             ]
-         ]
-     ];
+Route::get('/.well-known/assetlinks.json', function () {
+    $payload = [
+        [
+            "relation" => ["delegate_permission/common.handle_all_urls"],
+            "target" => [
+                "namespace" => "android_app",
+                "package_name" => "com.devop360.proximaride",
+                "sha256_cert_fingerprints" => [
+                    "5EAEF3972B908B855AB851965F46B1F80376FA95CB0C22AFFD956DDEC3CCE9C8"
+                ]
+            ]
+        ]
+    ];
 
-     return response()->json($payload)->header('Access-Control-Allow-Origin', '*');
- });
+    return response()->json($payload)->header('Access-Control-Allow-Origin', '*');
+});
 
 Route::get('/accept/{bookingId}', [StripeWebhookController::class, 'acceptRedirect']);
 Route::get('/reject/{bookingId}', [StripeWebhookController::class, 'rejectRedirect']);
@@ -155,14 +155,13 @@ Route::get('/create-conservation/{id}', function ($id) {
             } else {
 
                 $participant = $twilio->conversations->v1->conversations($conversationSid)
-                ->participants
-                ->create([
-                    'messagingBindingAddress'      => $to,
-                    'messagingBindingProxyAddress' => $from,
-                ]);
+                    ->participants
+                    ->create([
+                        'messagingBindingAddress'      => $to,
+                        'messagingBindingProxyAddress' => $from,
+                    ]);
                 $participantId = $participant->sid;
             }
-
         } catch (\Twilio\Exceptions\RestException $e) {
             throw $e;
         }
@@ -299,10 +298,23 @@ Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('pa
 // Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
 // Route::get('{lang?}/extra-plus-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
 // Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
+
 Route::get('{lang?}/ride/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
-Route::get('{lang?}/my-ride/{id}', [MyRideController::class, 'MyRideDetail'])->middleware('auth')->name('my_ride_detail');
 Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
+
+Route::get('{lang?}/my-rides', [MyRideController::class, 'CurrentRides'])->name('my_rides')->middleware('auth');
+Route::get('{lang?}/past-rides', [MyRideController::class, 'PastRides'])->name('past_rides')->middleware('auth');
+Route::get('{lang?}/cancelled-rides', [MyRideController::class, 'CancelledRides'])->name('cancelled_rides')->middleware('auth');
+Route::get('{lang?}/my-ride/{id}', [MyRideController::class, 'MyRideDetail'])->middleware('auth')->name('my_ride_detail');
 Route::get('{lang?}/my-passengers/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyPassengers'])->name('my_passengers');
+Route::get('{lang?}/cancel-ride/{id}', [MyRideController::class, 'cancel'])->name('ride.cancel')->middleware('auth');
+Route::get('{lang?}/cancel-passenger/{id}', [MyRideController::class, 'cancelPassenger'])->name('passenger.cancel')->middleware('auth');
+Route::put('secured-cash-code', [MyRideController::class, 'enterCode'])->name('secured_cash_code');
+Route::post('/cancel-ride/{id}', [MyRideController::class, 'cancelRide'])->name('cancel.ride');
+Route::put('update-remove-passenger/{id}', [MyRideController::class, 'updateRemovePassenger'])->middleware('auth')->name('update_remove_passenger');
+Route::put('update-cancel-ride/{id}', [MyRideController::class, 'updateCancelRide'])->middleware('auth')->name('update_cancel_ride');
+
+
 Route::get('{lang?}/review/{id}', [ReviewController::class, 'reviewIndex'])->name('review.index');
 Route::get('{lang?}/review/passenger/{id}', [ReviewController::class, 'passengerReviewIndex'])->name('review_passenger.index');
 Route::get('{lang?}/review-left/{id}', [ReviewController::class, 'reviewLeftIndex'])->name('review_left.index');
@@ -335,11 +347,7 @@ Route::get('{lang?}/driver-wallet-pending', [DriverWalletController::class, 'pen
 Route::get('{lang?}/driver-wallet-available', [DriverWalletController::class, 'available'])->name('driver_wallet_available')->middleware('auth');
 Route::get('{lang?}/driver-wallet-paid-out', [DriverWalletController::class, 'paid'])->name('driver_wallet_paid')->middleware('auth');
 Route::get('{lang?}/ride-fair-details/{id}', [DriverWalletController::class, 'detail'])->name('ride_fair_details')->middleware('auth');
-Route::get('{lang?}/my-rides', [MyRideController::class, 'CurrentRides'])->name('my_rides')->middleware('auth');
-Route::get('{lang?}/past-rides', [MyRideController::class, 'PastRides'])->name('past_rides')->middleware('auth');
-Route::get('{lang?}/cancelled-rides', [MyRideController::class, 'CancelledRides'])->name('cancelled_rides')->middleware('auth');
-Route::get('{lang?}/cancel-ride/{id}', [MyRideController::class, 'cancel'])->name('ride.cancel')->middleware('auth');
-Route::get('{lang?}/cancel-passenger/{id}', [MyRideController::class, 'cancelPassenger'])->name('passenger.cancel')->middleware('auth');
+
 Route::get('{lang?}/my-trips', [MyTripController::class, 'CurrentTrips'])->name('my_trips')->middleware('auth');
 Route::get('{lang?}/past-trips', [MyTripController::class, 'PastTrips'])->name('past_trips')->middleware('auth');
 Route::get('{lang?}/cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('cancelled_trips')->middleware('auth');
@@ -420,7 +428,7 @@ Route::post('no-show-passenger', [BookingController::class, 'noShowPassenger'])-
 Route::post('revert-no-show-passenger', [BookingController::class, 'revertNoShowPassenger'])->name('revert_no_show_passenger');
 Route::post('store-top-up-balance', [PassengerWalletController::class, 'storeTopUpBalance'])->name('store_top_up_balance')->middleware('auth');
 Route::get('send-payout-request', [DriverWalletController::class, 'sendPayoutRequest'])->name('send_payout_request')->middleware('auth');
-Route::put('secured-cash-code', [MyRideController::class, 'enterCode'])->name('secured_cash_code');
+
 Route::get('/access-portal/{email}', [AccessPortalController::class, 'index']);
 Route::post('/chat-messages', [ChatsController::class, 'sendMessage']);
 Route::post('contact-us/store', [ContactUsController::class, 'store'])->name('contact_us.store');
@@ -443,7 +451,7 @@ Route::post('get-states-by-country', [CountryStateCityController::class, 'getSta
 
 Route::post('add-new-spots', [RideController::class, 'addNewSpots'])->name('post_ride.add_new_spot')->middleware('auth');
 Route::post('delete-spots', [RideController::class, 'deleteSpots'])->name('post_ride.delete_spot')->middleware('auth');
-Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
+
 
 Route::post('create-payment-intent', [BookingController::class, 'createPaymentIntent'])->middleware('auth')->name('createPaymentIntent');
 Route::post('/create-subscription', [HomeController::class, 'createSubscription']);
@@ -463,13 +471,14 @@ Route::get('success-transaction-booking-request/{id}/{type}/{seats}/{seats_amoun
 Route::get('success-transaction-update-booking-request/{id}/{type}/{seats}/{seats_amount}/{booking_credit}/{online_payment}/{cash_payment}/{total}/{seats_id}/{coffee_wall}/{transactionTaxSum}/{ride}/{tax_amount}/{tax_percentage}/{tax_type}/{deduct_tax}', [BookingController::class, 'updateSuccessTransactionBookingRequest'])->name('paypal.success.update-booking_request');
 Route::get('success-transaction-top-up/{dr_amount}', [PassengerWalletController::class, 'successTransaction'])->name('paypal.success.top-up');
 Route::get('cancel-transaction', [BookingController::class, 'cancelTransaction'])->name('paypal.cancel');
-Route::put('update-instant-booking/{id}', [BookingController::class, 'updateInstantBooking'])->middleware('auth')->name('update_instant_booking');
+
 Route::post('booking-request/{id}', [BookingController::class, 'bookingRequest'])->middleware('auth')->name('booking_request');
+Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
+
+Route::put('update-instant-booking/{id}', [BookingController::class, 'updateInstantBooking'])->middleware('auth')->name('update_instant_booking');
 Route::put('update-booking-request/{id}', [BookingController::class, 'updateBookingRequest'])->middleware('auth')->name('update_booking_request');
 Route::put('update-cancel-booking/{id}', [BookingController::class, 'updateCancelBooking'])->middleware('auth')->name('update_cancel_booking');
-Route::post('/cancel-ride/{id}', [MyRideController::class, 'cancelRide'])->name('cancel.ride');
-Route::put('update-remove-passenger/{id}', [MyRideController::class, 'updateRemovePassenger'])->middleware('auth')->name('update_remove_passenger');
-Route::put('update-cancel-ride/{id}', [MyRideController::class, 'updateCancelRide'])->middleware('auth')->name('update_cancel_ride');
+
 Route::post('step3-5/store/{id}', [Step3to5Controller::class, 'store'])->middleware('auth')->name('step3to5.store');
 Route::post('step4-5/store/{id}', [Step4to5Controller::class, 'store'])->middleware('auth')->name('step4to5.store');
 Route::post('{lang?}/login', [LoginController::class, 'store'])->middleware('guest');
@@ -511,10 +520,10 @@ Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
     ->where('any', '.*');
 // new logic for px post ride
 Route::post('{lang?}/post-ride/segment-distance-estimates', [RideController::class, 'segmentDistanceEstimates'])->name('post_ride.segment_distance_estimates')->middleware('auth');
-Route::get('{lang?}/search-rides', [PxRideWebController::class, 'search'])->name('search_ride');
-Route::get('{lang?}/search-extra-care-rides', [PxRideWebController::class, 'folk_ride_search'])->name('folk_ride');
-Route::get('{lang?}/search-pink-rides', [PxRideWebController::class, 'pink_ride_search'])->name('pink_ride');
-Route::get('{lang?}/search-proximalocal-ride', [PxRideWebController::class, 'proximalocal_ride_search'])->name('proximalocal_ride');
+Route::get('{lang?}/search-rides', [RideSearchController::class, 'search'])->name('search_ride');
+Route::get('{lang?}/search-extra-care-rides', [RideSearchController::class, 'folk_ride_search'])->name('folk_ride');
+Route::get('{lang?}/search-pink-rides', [RideSearchController::class, 'pink_ride_search'])->name('pink_ride');
+Route::get('{lang?}/search-proximalocal-ride', [RideSearchController::class, 'proximalocal_ride_search'])->name('proximalocal_ride');
 
 
 
@@ -529,7 +538,7 @@ Route::get('/sitemap.xml', function () {
     $routes = Route::getRoutes();
     $urls = [];
 
-    $getRides = Ride::with('defaultRideDetail')->where('status','0')->get();
+    $getRides = Ride::with('defaultRideDetail')->where('status', '0')->get();
 
 
     foreach ($routes as $route) {
@@ -553,4 +562,3 @@ Route::get('/sitemap.xml', function () {
         'lastmod' => Carbon::now()->toAtomString()
     ])->header('Content-Type', 'application/xml');
 });
-

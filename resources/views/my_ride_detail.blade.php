@@ -686,19 +686,7 @@
                             </div>
                         </div>
                     </div>
-                    {{-- <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                    <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">Booking type</h3>
-                    <div class="flex items-center space-x-2 p-4 w-full">
-                        <div class="flex items-center justify-between w-full">
-                            <label for="booking-method" class="font-normal text-gray-900 flex space-x-1">
-                                <span class="text-lg">
-                                    {{ $ride->booking_method }}
-                                </span>
-                            </label>
-                            <input id="booking-method" checked type="checkbox" value="" class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                        </div>
-                    </div>
-                </div> --}}
+
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                             {{ $rideDetailPage->cancellation_policy_label ?? 'Cancellation policy' }}</h3>
@@ -709,8 +697,6 @@
                                         {{ $ride->booking_type }}
                                     </span>
                                 </label>
-                                <input id="booking-method" checked type="checkbox" value=""
-                                    class="w-4 h-4 ml-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                             </div>
                         </div>
                     </div>

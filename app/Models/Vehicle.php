@@ -45,7 +45,7 @@ class Vehicle extends Model
     public static function normalizeVehicleTypeId($value): ?int
     {
         if ($value === null || $value === '') {
-            return null;
+            return 0;
         }
 
         if (is_numeric($value)) {

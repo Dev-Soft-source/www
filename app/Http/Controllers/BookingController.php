@@ -130,36 +130,23 @@ class BookingController extends Controller
         return $bookingCredit;
     }
 
+    /**
+     * Booking page
+     */
     public function create($lang = null, $id, $rideDetailId)
     {
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button', 'login_before_booking_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button', 'login_before_booking_message')->first();
-            }
-        }
+
+        $successMessage = $this->successMessage;
 
         if (auth()->user()) {
+            
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
+
             // Check if user has suspanded
-            if ($user->suspand === '1') {
+            if ($user->isSuspended()) {
                 return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
             }
-
-            // $rideDetailId = isset($request->rideDetailId) ? $request->rideDetailId : 0;
 
             $ride = Ride::where('id', $id)->with('seatDetail');
             if ($rideDetailId != 0) {
@@ -189,6 +176,7 @@ class BookingController extends Controller
             }
 
             $bookingPage = null;
+            $selectedLanguage = $this->selectedLanguage;
             if ($selectedLanguage) {
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -234,32 +222,12 @@ class BookingController extends Controller
 
             $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
 
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-
-            $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
 
             // Segment-based seat availability will be computed after we have $orderedPoints and $from/$to (below).
             // We keep a simple guard here; the real check is done after building the route.
             $seatsBooked = $bookings->sum('seats');
             if ($seatsBooked >= $ride->seats) {
-                return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+                return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $successMessage->seat_unavailable_message]);
             }
 
             $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
@@ -394,7 +362,7 @@ class BookingController extends Controller
                         'from' => $ride->rideDetail[0]->departure,
                         'to' => $ride->rideDetail[0]->destination,
                         'date' => Carbon::parse($ride->date)->format('F d, Y'),
-                    ])->with(['failure' => $errorMsg->seat_unavailable_message]);
+                    ])->with(['failure' => $successMessage->seat_unavailable_message]);
                 }
 
                 $availableSeatIdsForSegment = [];
@@ -418,7 +386,8 @@ class BookingController extends Controller
                 }
             }
 
-            return view('booking', ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage,
+            return view('booking', 
+            ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage,
             'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
             'paymentSettingDetail' => $paymentSettingDetail,
             'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false,
@@ -819,27 +788,18 @@ class BookingController extends Controller
         'sureMessage' => $sureMessage]);
     }
 
+    /**
+     * Make a request to book
+     */
     public function bookingRequest($id, Request $request)
     {
-        $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'booking_request_success_message', 'add_your_phone')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'booking_request_success_message', 'add_your_phone')->first();
-            }
-        }
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
+        
         $ride = Ride::where('id', $request->id)->first();
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $user = User::where('id', auth()->user()->id)->first();
+        
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {
             // Store return URL to redirect back after add phone
@@ -1653,2289 +1613,9 @@ class BookingController extends Controller
         return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
     }
 
-    public function sendVerificationCodeBooking($id)
-    {
-        $phoneNumber = PhoneNumber::find($id);
-
-        $existingRecord = DB::table('phone_verifications')
-            ->where('phone_number_id', $phoneNumber->id)
-            ->first();
-
-        if ($existingRecord) {
-            $existingRecord = DB::table('phone_verifications')
-                ->where('phone_number_id', $phoneNumber->id)
-                ->delete();
-        }
-
-        $verificationCode = rand(1000, 9999);
-
-        // Save verification code and its expiration time (30 minutes) to the database
-        DB::table('phone_verifications')->insert([
-            'phone_number_id' => $phoneNumber->id,
-            'verification_code' => $verificationCode,
-            'expires_at' => Carbon::now()->addMinutes(30),
-        ]);
-
-        // Send the verification code via Twilio
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $from = env('TWILIO_PHONE_NUMBER');
-
-        $twilio = new Client($sid, $token);
-        $to = $phoneNumber->phone;
-        $message = "ProximaRide: Your verification code is: $verificationCode. This code will expire in 30 minutes.";
-
-        try {
-            if (env('APP_ENV') != 'local') {
-                $res = $twilio->messages->create(
-                    $to,
-                    [
-                        'from' => $from,
-                        'body' => $message,
-                    ]
-                );
-            }
-        } catch (\Exception  $e) {
-            $this->logTwilioSmsFailure($to, $message, $e);
-
-            // return redirect()->back()->with(['error' => 'Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate']);
-        }
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-        // return redirect()->route('phone_code', ['lang' => $this->selectedLanguage->abbreviation]);
-        return redirect()->back()->with([
-            'lang' => $this->selectedLanguage->abbreviation,
-            'phone_code' => 'Language changed successfully!' // or any success message
-        ]);
-    }
-
-    public function successTransactionBookingRequest($id, $type, $seats, $seats_amount, $booking_credit, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
-    {
-
-        $taxAmt = $tax_amount;
-        $paypal = new PayPalClient;
-        $paypal->setApiCredentials(config('paypal'));
-        $token = $paypal->getAccessToken();
-        $paypal->setAccessToken($token);
-
-        $result = $paypal->capturePaymentOrder($request->get('token'));
-
-        if ($result['status'] == 'COMPLETED') {
-            $ride = Ride::where('id', $id)->first();
-            $user = User::where('id', auth()->user()->id)->first();
-
-            // Student booking fee waiver: Validate and apply waiver with card expiration check
-            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
-
-            // Calculate expiry time based on ride date and time
-            $currentTime = now();
-            $Time = now();
-            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
-            $difference = $rideDateTime->diffInHours($currentTime);
-
-            if ($difference > 48) {
-                $expiryTime = $Time->addHours(12);
-            } elseif ($difference >= 24 && $difference <= 48) {
-                $expiryTime = $Time->addHours(6);
-            } elseif ($difference >= 6 && $difference < 24) {
-                $expiryTime = $Time->addHours(2);
-            } else {
-                $expiryTime = $Time->addMinutes(30);
-            }
-
-            $selectedLanguage = session('selectedLanguage');
-            $messages = null;
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            }
-
-            //Booking Method
-            $secured_cash = null;
-            $secured_cash_code = null;
-
-
-            // Payment successful, handle booking logic here
-            $booking = Booking::create([
-                'user_id' => $user->id,
-                'ride_id' => $id,
-                'seats' => $seats,
-                'type' => $type,
-                'booked_on' => $currentTime,
-                'booking_credit' => $booking_credit,
-                'fare' => $seats_amount,
-                'secured_cash' => $secured_cash,
-                'tax_amount' => $taxAmt,
-                'secured_cash_code' => $secured_cash_code,
-                'expires_at' => $expiryTime,
-                'departure' => $ride->rideDetail[0]->departure,
-                'destination' => $ride->rideDetail[0]->destination,
-                'price' => $ride->rideDetail[0]->price,
-                'ride_detail_id' => $ride->rideDetail[0]->id
-            ]);
-
-
-
-            $seats_id_array = explode(',', $seats_id);
-            $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();
-            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                foreach ($getSeatDetails as $key => $getSeatDetail) {
-                    $getSeatDetail->status = 'booked';
-                    $getSeatDetail->booking_id = $booking->id;
-                    $getSeatDetail->user_id = $booking->user_id;
-                    $getSeatDetail->save();
-                }
-            }
-
-            $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
-
-            $onlinePayment = $online_payment;
-            if (isset($coffee_wall) && $coffee_wall == "1") {
-                $onlinePayment = $online_payment + $booking_credit;
-            }
-
-            if ($request->cash_payment > 0) {
-                $onlinePayment = $onlinePayment;
-            } else {
-                $onlinePayment = $onlinePayment - $taxAmt;
-            }
-
-            $transaction = Transaction::create([
-                'booking_id' => $booking->id,
-                'type' => '1',
-                'booking_fee' => $booking_credit,
-                'price' => $onlinePayment,
-                'paypal_id' => $captureId,
-                'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false,
-                'tax_amount' => $taxAmt,
-                'tax_percentage' => $tax_percentage,
-                'tax_type' => $tax_type,
-                'deduct_type' => $deduct_tax,
-            ]);
-
-            if (isset($coffee_wall) && $coffee_wall == "1") {
-                $coffeeWallet = CoffeeWallet::create([
-                    'booking_id' => $booking->id,
-                    'ride_id' => $ride->id,
-                    'user_id' => $booking->user_id,
-                    'cr_amount' => $booking_credit,
-                ]);
-            }
-
-            Notification::create([
-                'ride_id' => $id,
-                'posted_by' => $user->id,
-                'message' =>  $seats . ' seats needed',
-                'status' => 'request',
-                'notification_type' => 'upcoming',
-                'ride_detail_id' => $booking->ride_detail_id,
-                'departure' => $booking->departure,
-                'destination' => $booking->destination
-            ]);
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-
-                $price = $seats_amount / $seats;
-                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
-                // Send booking request email
-                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-            }
-
-
-
-
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-                $data = ['first_name' => $user->first_name];
-                Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
-
-
-                // $data = ['first_name' => $user->first_name, 'seats' => $booking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $booking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
-                $data = [
-                    'first_name' => $user->first_name,
-                    'full_name' => $user->first_name . ' ' . $user->last_name,
-                    'amount' => $total,
-                    'transaction_id' => $card->random_id ?? 'N/A',
-                    'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
-                    'payment_method' => 'paypal',
-                    'paypal_email' => $user->paypal_email ?? 'N/A',
-                    'seats' => $booking->seats,
-                    'seats_amount' => $seats_amount,
-                    'booking_credit' => $booking->booking_credit,
-                    'online_payment' => $online_payment,
-                    'cash_payment' => $cash_payment,
-                    'total' => $total
-                ];
-                Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
-            }
-
-            $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
-
-            if (!$phoneNumber) {
-                $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
-            }
-
-            if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
-                // Send the secured cash code via Twilio
-                $sid = env('TWILIO_ACCOUNT_SID');
-                $token = env('TWILIO_AUTH_TOKEN');
-                $from = env('TWILIO_PHONE_NUMBER');
-
-                $twilio = new Client($sid, $token);
-                $to = $phoneNumber->phone;
-
-                $title = "";
-                $currentHour = date('H');
-                if ($currentHour >= 0 && $currentHour < 12) {
-                    $title = "Good morning " . $ride->driver->first_name . ",";
-                } elseif ($currentHour >= 12 && $currentHour < 17) {
-                    $title = "Good afternoon " . $ride->driver->first_name . ",";
-                } else {
-                    $title = "Good evening " . $ride->driver->first_name . ",";
-                }
-
-                $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-
-                $depatureDate = date('F d, Y H:i', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-                $message = $title . "\n" . "From ProximaRide: You have a new booking request from (" . $user->first_name . ")\n"
-                    . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . "\n" . $user->first_name . ": " . $user->phone . "\nNumber of seats: " . $booking->seats . "\nClick here for accept(" . url("/accept/" . $booking->id) . ")\nClick here for reject(" . url("/reject/" . $booking->id) . ")";
-
-                try {
-                    $res = $twilio->messages->create(
-                        $to,
-                        [
-                            'from' => $from,
-                            'body' => $message,
-                        ]
-                    );
-                } catch (\Exception  $e) {
-                    $this->logTwilioSmsFailure($to, $message, $e);
-
-                    // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-                }
-            }
-
-            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
-        }
-
-        return redirect()
-            ->route('home')
-            ->with('message', 'Transaction failed.');
-    }
-
-    public function updateSuccessTransactionBookingRequest($id, $type, $seats, $seats_amount, $booking_credit, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
-    {
-
-        $taxAmt = $tax_amount;
-        $paypal = new PayPalClient;
-        $paypal->setApiCredentials(config('paypal'));
-        $token = $paypal->getAccessToken();
-        $paypal->setAccessToken($token);
-
-        $result = $paypal->capturePaymentOrder($request->get('token'));
-
-        if ($result['status'] == 'COMPLETED') {
-            $booking = Booking::where('id', $id)->first();
-            $ride = Ride::where('id', $booking->ride_id)->first();
-            $user = User::where('id', auth()->user()->id)->first();
-
-            // Student booking fee waiver: Validate and apply waiver with card expiration check
-            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
-
-            // Calculate expiry time based on ride date and time
-            $currentTime = now();
-            $Time = now();
-            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
-            $difference = $rideDateTime->diffInHours($currentTime);
-
-            if ($difference > 48) {
-                $expiryTime = $Time->addHours(12);
-            } elseif ($difference >= 24 && $difference <= 48) {
-                $expiryTime = $Time->addHours(6);
-            } elseif ($difference >= 6 && $difference < 24) {
-                $expiryTime = $Time->addHours(2);
-            } else {
-                $expiryTime = $Time->addMinutes(30);
-            }
-
-            $selectedLanguage = session('selectedLanguage');
-            $messages = null;
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            }
-
-            //Booking Method
-            $secured_cash = null;
-            $secured_cash_code = null;
-
-            $transactions = Transaction::where('booking_id', $booking->id)->get();
-
-            $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
-
-            if ($booking->status === '0') {
-                // Payment successful, handle booking logic here
-                $newBooking = Booking::create([
-                    'user_id' => $user->id,
-                    'ride_id' => $ride->id,
-                    'seats' => $seats,
-                    'type' => $type,
-                    'booked_on' => $currentTime,
-                    'booking_credit' => $booking_credit,
-                    'fare' => $seats_amount,
-                    'secured_cash' => $secured_cash,
-                    'tax_amount' => $taxAmt,
-                    'secured_cash_code' => $secured_cash_code,
-                    'expires_at' => $expiryTime,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
-                ]);
-
-                $seats_id_array = explode(',', $seats_id);
-                $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();
-                if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                    foreach ($getSeatDetails as $key => $getSeatDetail) {
-                        $getSeatDetail->status = 'booked';
-                        $getSeatDetail->booking_id = $newBooking->id;
-                        $getSeatDetail->user_id = $newBooking->user_id;
-                        $getSeatDetail->save();
-                    }
-                }
-
-                foreach ($transactions as $transaction) {
-                    $transaction->update([
-                        'booking_id' => $newBooking->id,
-                    ]);
-                }
-
-                $booking->delete();
-
-                $getBookingFeeSum = Transaction::where('booking_id', $newBooking->id)->sum('booking_fee');
-                $currentBookingFee = $booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
-
-                $transactionTotalPrice = Transaction::where('booking_id', $newBooking->id)->where('parent_id', '0')->sum('price');
-                $transactionBookingPrice = Transaction::where('booking_id', $newBooking->id)->where('parent_id', '0')->sum('booking_fee');
-
-                $transactionPrice = $transactionTotalPrice;
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
-                }
-
-                if ($ride->payment_method == "33") {
-
-                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
-                } else {
-
-                    $payable_amount = $request->online_payment - $transactionPrice;
-                }
-
-
-                $onlinePayment = $payable_amount;
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $onlinePayment = $payable_amount + $currentBookingFee;
-                }
-
-                $transactionTaxAmt = $taxAmt - $transactionTaxSum;
-
-                $currentTransactionAmt = $onlinePayment - $transactionTaxAmt;
-
-                $transaction = Transaction::create([
-                    'booking_id' => $newBooking->id,
-                    'type' => '1',
-                    'booking_fee' => $currentBookingFee,
-                    'price' => $currentTransactionAmt,
-                    'paypal_id' => $captureId,
-                    'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false,
-                    'tax_amount' => $transactionTaxAmt,
-                    'tax_percentage' => $tax_percentage,
-                    'tax_type' => $tax_type,
-                    'deduct_type' => $deduct_tax,
-                ]);
-
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $coffeeWallet = CoffeeWallet::create([
-                        'booking_id' => $newBooking->id,
-                        'ride_id' => $ride->id,
-                        'user_id' => $newBooking->user_id,
-                        'cr_amount' => $currentBookingFee,
-                    ]);
-                }
-
-                Notification::create([
-                    'ride_id' => $ride->id,
-                    'posted_by' => $user->id,
-                    'message' => getNotificationMessageText(
-                        'booking_request_from_name',
-                        $ride->driver,
-                        ['first_name' => $user->first_name],
-                        'Booking request from {first_name}'
-                    ),
-                    'status' => 'request',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $newBooking->ride_detail_id,
-                    'departure' => $newBooking->departure,
-                    'destination' => $newBooking->destination
-                ]);
-                if (isset($user->email_notification) && $user->email_notification == 1) {
-
-                    $price = $seats_amount / $seats;
-                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
-                    // Send booking request email
-                    Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                }
-
-
-                if (isset($user->email_notification) && $user->email_notification == 1) {
-                    $data = ['first_name' => $user->first_name];
-                    Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
-
-
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
-                        ->where('default', '1')
-                        ->first();
-
-                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
-
-
-                    $data = ['first_name' => $user->first_name, 'seats' => $newBooking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $newBooking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
-                    Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
-                }
-            } elseif ($booking->status === '1') {
-                $booking_credit = $booking_credit - $booking->booking_credit;
-                $seats = $seats - $booking->seats;
-                $seats_amount = $seats_amount - $booking->fare;
-                $newBooking = Booking::create([
-                    'user_id' => $user->id,
-                    'ride_id' => $ride->id,
-                    'seats' => $seats,
-                    'type' => $type,
-                    'booked_on' => $currentTime,
-                    'booking_credit' => $booking_credit,
-                    'fare' => $seats_amount,
-                    'secured_cash' => $secured_cash,
-                    'secured_cash_code' => $secured_cash_code,
-                    'expires_at' => $expiryTime,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
-                ]);
-
-                $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
-                $transactionBookingPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('booking_fee');
-
-                $transactionPrice = $transactionTotalPrice;
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
-                }
-
-                $payable_amount = $online_payment - $transactionPrice;
-
-                $onlinePayment = $payable_amount;
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $onlinePayment = $payable_amount + $booking_credit;
-                }
-
-                $transaction = Transaction::create([
-                    'booking_id' => $newBooking->id,
-                    'type' => '1',
-                    'booking_fee' => $booking_credit,
-                    'price' => $onlinePayment,
-                    'paypal_id' => $captureId,
-                    'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false
-                ]);
-
-                if (isset($coffee_wall) && $coffee_wall == "1") {
-                    $coffeeWallet = CoffeeWallet::create([
-                        'booking_id' => $newBooking->id,
-                        'ride_id' => $ride->id,
-                        'user_id' => $newBooking->user_id,
-                        'cr_amount' => $booking_credit,
-                    ]);
-                }
-
-                Notification::create([
-                    'ride_id' => $ride->id,
-                    'posted_by' => $user->id,
-                    'message' => getNotificationMessageText(
-                        'booking_request_from_name',
-                        $ride->driver,
-                        ['first_name' => $user->first_name],
-                        'Booking request from {first_name}'
-                    ),
-                    'status' => 'request',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $newBooking->ride_detail_id,
-                    'departure' => $newBooking->departure,
-                    'destination' => $newBooking->destination
-                ]);
-                if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-
-                    $price = $newBooking->fare / $newBooking->seats;
-                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
-                    // Send booking request email
-                    Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                }
-
-
-                if (isset($user->email_notification) && $user->email_notification == 1) {
-                    $data = ['first_name' => $user->first_name];
-                    Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
-
-
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
-                        ->where('default', '1')
-                        ->first();
-
-                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
-
-
-                    $data = ['first_name' => $user->first_name, 'seats' => $newBooking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $newBooking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
-                    Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
-                }
-            }
-
-            $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
-
-            if (!$phoneNumber) {
-                $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
-            }
-
-            if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
-                // Send the secured cash code via Twilio
-                $sid = env('TWILIO_ACCOUNT_SID');
-                $token = env('TWILIO_AUTH_TOKEN');
-                $from = env('TWILIO_PHONE_NUMBER');
-
-                $twilio = new Client($sid, $token);
-                $to = $phoneNumber->phone;
-
-                $title = "";
-                $currentHour = date('H');
-                if ($currentHour >= 0 && $currentHour < 12) {
-                    $title = "Good morning " . $ride->driver->first_name . ",";
-                } elseif ($currentHour >= 12 && $currentHour < 17) {
-                    $title = "Good afternoon " . $ride->driver->first_name . ",";
-                } else {
-                    $title = "Good evening " . $ride->driver->first_name . ",";
-                }
-
-                $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-
-                $depatureDate = date('F d, Y H:i', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-                $message = $title . "\n"
-                    . "From ProximaRide: You have a new booking request from (" . $user->first_name . ")\n"
-                    . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . "\n" . $user->first_name . ": " . $user->phone . "\nNumber of seats: " . $booking->seats . "\nClick here for accept(" . url("/accept/" . $booking->id) . ")\nClick here for reject(" . url("/reject/" . $booking->id) . ")";
-
-                try {
-                    $res = $twilio->messages->create(
-                        $to,
-                        [
-                            'from' => $from,
-                            'body' => $message,
-                        ]
-                    );
-                } catch (\Exception  $e) {
-                    $this->logTwilioSmsFailure($to, $message, $e);
-
-                    // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-                }
-            }
-
-            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
-        }
-
-        return redirect()
-            ->route('home')
-            ->with('message', 'Transaction failed.');
-    }
-
-    public function updateBookingRequest($id, Request $request)
-    {
-        $selectedLanguage = session('selectedLanguage');
-        $findRidePage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message', 'booking_not_update_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verified_number_message', 'block_booking_message', 'add_your_phone', 'verified_number_message', 'booking_not_update_message')->first();
-            }
-        }
-        $booking = Booking::where('id', $id)->first();
-        $rideDetailId = $booking->ride_detail_id;
-        $ride = Ride::where('id', $booking->ride_id)->with(['rideDetail' => function ($q) use ($rideDetailId) {
-            $q->where('id', $rideDetailId);
-        }])->first();
-
-        $type = FeaturesSetting::whereId($ride->payment_method)->first();
-        $user = User::where('id', auth()->user()->id)->first();
-        $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
-        if (is_null($phoneNumber) && $type->slug == 'secured') {
-            // Store return URL to redirect back after phone verification
-            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
-            session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone "]);
-        }
-        $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
-        if (!$phoneVerification && $type->slug == 'secured') {
-            // Store return URL to redirect back after phone verification
-            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
-            session(['return_url_after_action' => $returnUrl]);
-            return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
-        }
-
-        $rules = [
-            'agree_terms' => 'accepted|required'
-        ];
-
-        if ($ride->booking_type == "37") {
-            $rules['firm_agree_terms'] = 'accepted|required';
-            $rules['firm_cancellation_understand'] = 'accepted|required';
-        }
-
-        $featuresArray = explode('=', $ride->features);
-        if (in_array('1', $featuresArray)) {
-            $rules['pink_ride_agree_terms'] = 'accepted|required';
-        }
-        if (in_array('2', $featuresArray)) {
-            $rules['extra_care_ride_agree_terms'] = 'accepted|required';
-        }
-
-        $request->validate($rules);
-
-        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        if ($postRidePage) {
-            // Check if user is a student (student == 1 for verified, student == 2 for pending)
-            $isStudent = ($user->student == '1' || $user->student == '2');
-
-            // Check if payment method is Cash (payment_methods_option1 is Cash)
-            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-
-            // Apply limit only for students on Cash rides
-            if ($isStudent && $isCashPayment) {
-                if ($request->seats > 2) {
-                    return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
-                }
-            }
-        }
-
-        // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
-        if ($pricePerSeat < 15) {
-            $request->merge(['booking_credit' => '0']);
-        }
-
-        // Student booking fee waiver: Validate and apply waiver with card expiration check
-        $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
-        $request->merge(['booking_credit' => $adjustedBookingCredit]);
-
-        $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
-
-        // Calculate expiry time based on ride date and time
-        $currentTime = now();
-        $Time = now();
-        $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
-        $difference = $rideDateTime->diffInHours($currentTime);
-
-        if ($difference > 48) {
-            $expiryTime = $Time->addHours(12);
-        } elseif ($difference >= 24 && $difference <= 48) {
-            $expiryTime = $Time->addHours(6);
-        } elseif ($difference >= 6 && $difference < 24) {
-            $expiryTime = $Time->addHours(2);
-        } else {
-            $expiryTime = $Time->addMinutes(30);
-        }
-
-
-
-        if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
-        }
-
-        $bookings = Booking::where('ride_id', $booking->ride_id)
-            ->where('status', '!=', '3')
-            ->where('status', '!=', '4')
-            ->whereNotIn('id', [$id])
-            ->get();
-        $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        $seatsBooked = $bookings->sum('seats') + $request->seats;
-        if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
-
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
-        }
-
-        //Booking Method
-        $secured_cash = null;
-        $secured_cash_code = null;
-
-        $transactions = Transaction::where('booking_id', $booking->id)->get();
-
-        $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
-        $transactionBookingPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('booking_fee');
-
-        $transactionTaxSum = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('tax_amount');
-
-        $transactionPrice = $transactionTotalPrice + $transactionTaxSum;;
-        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-            $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
-        }
-
-        $total = $request->booking_credit + $request->seats_amount;
-        $cash_payment = $total - $request->online_payment;
-
-        if ($booking->status === '0') {
-            if ($request->seats > $booking->seats) {
-
-                if ($ride->payment_method == "33") {
-                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
-                } else {
-
-                    $payable_amount = $request->online_payment - $transactionPrice;
-                }
-                if ($payable_amount > '0') {
-                    $request->validate([
-                        'payment_method' => 'required',
-                        'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
-                        'booking_credit' => 'required|max:25',
-                        'name_on_card' => 'required_if:card_id,credit_card',
-                        'stripeToken' => 'required_if:card_id,credit_card',
-                    ]);
-
-                    if ($request->payment_method == 'paypal') {
-                        $paypal = new PayPalClient;
-                        $paypal->setApiCredentials(config('paypal'));
-                        $token = $paypal->getAccessToken();
-                        $paypal->setAccessToken($token);
-
-                        if ($request->online_payment > '0') {
-                            $paypalAmt = $payable_amount;
-                            $order = $paypal->createOrder([
-                                "intent" => "CAPTURE",
-                                "purchase_units" => [
-                                    [
-                                        "amount" => [
-                                            "currency_code" => "USD",
-                                            "value" => number_format((float)$paypalAmt, 2, '.', '')
-                                        ]
-                                    ]
-                                ],
-                                "application_context" => [
-                                    "cancel_url" => route('paypal.cancel'),
-                                    "return_url" => route('paypal.success.update-booking_request', [
-                                        'id' => $booking->id,
-                                        'type' => $booking->type,
-                                        'seats' => $request->seats,
-                                        'seats_amount' => $request->seats_amount,
-                                        'booking_credit' => $request->booking_credit,
-                                        'online_payment' => $request->online_payment,
-                                        'cash_payment' => $cash_payment,
-                                        'total' => $total,
-                                        'seats_id' => implode(',', $request->seats_id),
-                                        'coffee_wall' => isset($request->coffee_wall) ? $request->coffee_wall : '0',
-                                        'transactionTaxSum' => $transactionTaxSum,
-                                        'ride' => $ride,
-                                        'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
-                                        'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                                        'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                                        'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL
-                                    ]),
-                                ]
-                            ]);
-                        }
-
-                        if (isset($order['id'])) {
-                            foreach ($order['links'] as $link) {
-                                if ($link['rel'] == 'approve') {
-                                    return redirect()->away($link['href']);
-                                }
-                            }
-                        }
-
-                        return redirect()->route('paypal.cancel');
-                    } elseif ($request->payment_method == 'credit_card') {
-
-                        $stripId = null;
-                        try {
-
-                            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
-                                $stripId = $request->gPayApplePayId;
-                            } else {
-                                // Set your Stripe API key.
-                                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                if (!$user->stripe_customer_id) {
-                                    $customer = Customer::create([
-                                        'email' => $user->email,
-                                        'name' => $user->first_name,
-                                    ]);
-                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
-                                    $user = User::whereId($user->id)->first();
-                                }
-
-                                if ($request->card_id === 'credit_card') {
-                                    $stripeToken = $request->stripeToken;
-                                    if (!$stripeToken) {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->withErrors(['card_element' => 'Card details are required.']);
-                                    }
-
-                                    if (str_starts_with($stripeToken, 'tok_')) {
-                                        $paymentMethod = PaymentMethod::create([
-                                            'type' => 'card',
-                                            'card' => [
-                                                'token' => $stripeToken,
-                                            ],
-                                        ]);
-                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
-                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
-                                    } else {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
-                                    }
-                                } else {
-                                    $card = Card::where('id', $request->card_id)
-                                        ->where('user_id', $user->id)
-                                        ->first();
-
-                                    if (!$card) {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
-                                    }
-
-                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-                                }
-
-                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
-
-                                if ($payable_amount > '0') {
-                                    // Create a payment intent
-
-                                    $stripePay = $payable_amount;
-
-                                    $paymentIntent = PaymentIntent::create([
-                                        'amount' => round(($stripePay * 100), 0),
-                                        'currency' => 'cad',
-                                        'customer' => $user->stripe_customer_id,
-                                        'payment_method' => $paymentMethod->id,
-                                        'off_session' => true,
-                                        'confirm' => true,
-                                    ]);
-
-                                    $stripId = $paymentIntent->id;
-                                }
-                            }
-
-
-
-                            // Payment successful, handle booking logic here
-                            $newBooking = Booking::create([
-                                'user_id' => auth()->user()->id,
-                                'ride_id' => $ride->id,
-                                'seats' => $request->seats,
-                                'type' => $request->type,
-                                'booked_on' => $currentTime,
-                                'booking_credit' => $request->booking_credit,
-                                'fare' => $request->seats_amount,
-                                'secured_cash' => $secured_cash,
-                                'tax_amount' => $taxAmt,
-                                'secured_cash_code' => $secured_cash_code,
-                                'expires_at' => $expiryTime,
-                                'departure' => $ride->rideDetail[0]->departure,
-                                'destination' => $ride->rideDetail[0]->destination,
-                                'price' => $ride->rideDetail[0]->price,
-                                'ride_detail_id' => $ride->rideDetail[0]->id
-                            ]);
-
-                            $ids = $request->seats_id;
-                            $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
-                            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                                foreach ($getSeatDetails as $key => $getSeatDetail) {
-                                    $getSeatDetail->status = 'booked';
-                                    $getSeatDetail->booking_id = $newBooking->id;
-                                    $getSeatDetail->user_id = $newBooking->user_id;
-                                    $getSeatDetail->save();
-                                }
-                            }
-
-                            foreach ($transactions as $transaction) {
-                                $transaction->update([
-                                    'booking_id' => $newBooking->id,
-                                ]);
-                            }
-
-                            $booking->delete();
-
-                            $getBookingFeeSum = Transaction::where('booking_id', $newBooking->id)->sum('booking_fee');
-                            $currentBookingFee = $request->booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
-
-                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                                $payable_amount = $payable_amount + $currentBookingFee;
-                            }
-
-                            $transactionTaxAmt = $taxAmt - $transactionTaxSum;
-
-                            $currentTransactionAmt = $payable_amount - $transactionTaxAmt;
-
-                            $transaction = Transaction::create([
-                                'booking_id' => $newBooking->id,
-                                'type' => '1',
-                                'booking_fee' => $currentBookingFee,
-                                'price' => $currentTransactionAmt,
-                                'stripe_id' => $stripId,
-                                'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
-                                'tax_amount' => $transactionTaxAmt,
-                                'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                                'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                                'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
-                            ]);
-
-                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                                $coffeeWallet = CoffeeWallet::create([
-                                    'booking_id' => $newBooking->id,
-                                    'ride_id' => $ride->id,
-                                    'user_id' => $newBooking->user_id,
-                                    'cr_amount' => $currentBookingFee,
-                                ]);
-                            }
-
-                            Notification::create([
-                                'ride_id' => $ride->id,
-                                'posted_by' => auth()->user()->id,
-                                'message' => getNotificationMessageText(
-                                    'booking_request_from_name',
-                                    $ride->driver,
-                                    ['first_name' => auth()->user()->first_name],
-                                    'Booking request from {first_name}'
-                                ),
-                                'status' => 'request',
-                                'notification_type' => 'upcoming',
-                                'ride_detail_id' => $newBooking->ride_detail_id,
-                                'departure' => $newBooking->departure,
-                                'destination' => $newBooking->destination
-                            ]);
-                            if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-
-                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $newBooking->booking_credit, 'total_price' => $newBooking->fare, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
-                                // Send booking request email
-                                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                            }
-
-
-                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
-                        } catch (\Stripe\Exception\ApiErrorException $e) {
-                            // Handle error
-                            return redirect()->back()->with(['error' => $e->getMessage()]);
-                        }
-                    }
-                } else {
-                    $booking->update([
-                        'user_id' => $user->id,
-                        'ride_id' => $ride->id,
-                        'seats' => $request->seats,
-                        'type' => $request->type,
-                        'booked_on' => $currentTime,
-                        'booking_credit' => $request->booking_credit,
-                        'fare' => $request->seats_amount,
-                        'secured_cash' => $secured_cash,
-                        'tax_amount' => $taxAmt,
-                        'secured_cash_code' => $secured_cash_code,
-                        'expires_at' => $expiryTime,
-                    ]);
-
-                    $ids = $request->seats_id;
-                    $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
-                    if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                        foreach ($getSeatDetails as $key => $getSeatDetail) {
-                            $getSeatDetail->status = 'booked';
-                            $getSeatDetail->booking_id = $booking->id;
-                            $getSeatDetail->user_id = $booking->user_id;
-                            $getSeatDetail->save();
-                        }
-                    }
-
-                    if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                        $getBookingFeeSum = Transaction::where('booking_id', $booking->id)->sum('booking_fee');
-                        $currentBookingFee = $request->booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
-
-                        $transactionTaxAmt = $taxAmt - $transactionTaxSum;
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $booking->id,
-                            'type' => '1',
-                            'price' => $currentBookingFee,
-                            'booking_fee' => $currentBookingFee,
-                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
-                            'tax_amount' => $transactionTaxAmt,
-                            'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                            'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                            'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
-                        ]);
-
-                        $coffeeWallet = CoffeeWallet::create([
-                            'booking_id' => $booking->id,
-                            'ride_id' => $ride->id,
-                            'user_id' => $booking->user_id,
-                            'cr_amount' => $currentBookingFee + $transactionTaxAmt,
-                        ]);
-                    }
-
-                    $notification = Notification::create([
-                        'ride_id' => $ride->id,
-                        'posted_by' => $user->id,
-                        'message' => getNotificationMessageText(
-                            'booking_request_from_name',
-                            $ride->driver,
-                            ['first_name' => $user->first_name],
-                            'Booking request from {first_name}'
-                        ),
-                        'status' => 'request',
-                        'notification_type' => 'upcoming',
-                        'ride_detail_id' => $booking->ride_detail_id,
-                        'departure' => $booking->departure,
-                        'destination' => $booking->destination
-                    ]);
-
-                    // Assuming $user and $fcmToken are defined
-                    $fcmService = new FCMService();
-                    $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
-                    $body = $notification->message;
-
-                    $fcmToken = $ride->driver->mobile_fcm_token;
-                    if ($fcmToken) {
-                        $fcmService->sendNotification($fcmToken, $body);
-                    }
-
-                    foreach ($fcm_tokens as $fcm_token) {
-                        try {
-                            $fcmService->sendNotification($fcm_token->token, $body);
-                        } catch (\Exception $e) {
-                            Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                        }
-                    }
-                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-
-                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $request->seats, 'booking_price' => $request->booking_credit, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
-                        // Send booking request email
-                        Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                    }
-
-                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
-                }
-            } else {
-                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
-            }
-        } elseif ($booking->status === '1') {
-            if ($request->seats > $booking->seats) {
-                $request->validate([
-                    'payment_method' => 'required',
-                    'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
-                    'booking_credit' => 'required|max:25',
-                    'name_on_card' => 'required_if:card_id,credit_card',
-                    'stripeToken' => 'required_if:card_id,credit_card',
-                ]);
-
-                if ($ride->payment_method == "33") {
-
-                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
-                } else {
-
-                    $payable_amount = $request->online_payment - $transactionPrice;
-                }
-
-                if ($payable_amount > '0') {
-                    if ($request->payment_method == 'paypal') {
-                        $paypal = new PayPalClient;
-                        $paypal->setApiCredentials(config('paypal'));
-                        $token = $paypal->getAccessToken();
-                        $paypal->setAccessToken($token);
-
-                        if ($request->online_payment > '0') {
-                            $paypalPay = $payable_amount;
-                            $order = $paypal->createOrder([
-                                "intent" => "CAPTURE",
-                                "purchase_units" => [
-                                    [
-                                        "amount" => [
-                                            "currency_code" => "USD",
-                                            "value" => number_format((float)$paypalPay, 2, '.', '')
-                                        ]
-                                    ]
-                                ],
-                                "application_context" => [
-                                    "cancel_url" => route('paypal.cancel'),
-                                    "return_url" => route('paypal.success.update-booking_request', [
-                                        'id' => $booking->id,
-                                        'type' => $request->type,
-                                        'seats' => $request->seats,
-                                        'seats_amount' => $request->seats_amount,
-                                        'booking_credit' => $request->booking_credit,
-                                        'online_payment' => $request->online_payment,
-                                        'cash_payment' => $cash_payment,
-                                        'total' => $total,
-                                        'seats_id' => implode(',', $request->seats_id),
-                                        'coffee_wall' => isset($request->coffee_wall) ? $request->coffee_wall : '0',
-                                        'transactionTaxSum' => $transactionTaxSum,
-                                        'ride' => $ride,
-                                        'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
-                                        'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                                        'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                                        'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL
-                                    ]),
-                                ]
-                            ]);
-                        }
-
-                        if (isset($order['id'])) {
-                            foreach ($order['links'] as $link) {
-                                if ($link['rel'] == 'approve') {
-                                    return redirect()->away($link['href']);
-                                }
-                            }
-                        }
-
-                        return redirect()->route('paypal.cancel');
-                    } elseif ($request->payment_method == 'credit_card') {
-
-                        try {
-
-                            $stripId = null;
-
-
-                            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
-                                $stripId = $request->gPayApplePayId;
-                            } else {
-                                // Set your Stripe API key.
-                                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                if (!$user->stripe_customer_id) {
-                                    $customer = Customer::create([
-                                        'email' => $user->email,
-                                        'name' => $user->first_name,
-                                    ]);
-                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
-                                    $user = User::whereId($user->id)->first();
-                                }
-
-                                if ($request->card_id === 'credit_card') {
-                                    $stripeToken = $request->stripeToken;
-                                    if (!$stripeToken) {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->withErrors(['card_element' => 'Card details are required.']);
-                                    }
-
-                                    if (str_starts_with($stripeToken, 'tok_')) {
-                                        $paymentMethod = PaymentMethod::create([
-                                            'type' => 'card',
-                                            'card' => [
-                                                'token' => $stripeToken,
-                                            ],
-                                        ]);
-                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
-                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
-                                    } else {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
-                                    }
-                                } else {
-                                    $card = Card::where('id', $request->card_id)
-                                        ->where('user_id', $user->id)
-                                        ->first();
-
-                                    if (!$card) {
-                                        return redirect()->back()
-                                            ->withInput()
-                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
-                                    }
-
-                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-                                }
-
-                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
-
-                                if ($payable_amount > '0') {
-
-                                    $stripePay = $payable_amount;
-                                    // Create a payment intent
-                                    $paymentIntent = PaymentIntent::create([
-                                        'amount' => round(($stripePay * 100), 0),
-                                        'currency' => 'cad',
-                                        'customer' => $user->stripe_customer_id,
-                                        'payment_method' => $paymentMethod->id,
-                                        'off_session' => true,
-                                        'confirm' => true,
-                                    ]);
-
-                                    $stripId = $paymentIntent->id;
-                                }
-                            }
-
-
-
-
-                            // Payment successful, handle booking logic here
-                            $booking_credit = $request->booking_credit - $booking->booking_credit;
-                            $seats = $request->seats - $booking->seats;
-                            $fare = $request->seats_amount - $booking->fare;
-
-                            $booking = Booking::create([
-                                'user_id' => auth()->user()->id,
-                                'ride_id' => $ride->id,
-                                'seats' => $seats,
-                                'booked_on' => $currentTime,
-                                'booking_credit' => $booking_credit,
-                                'fare' => $fare,
-                                'secured_cash' => $secured_cash,
-                                'tax_amount' => $taxAmt,
-                                'secured_cash_code' => $secured_cash_code,
-                                'expires_at' => $expiryTime,
-                                'departure' => $ride->rideDetail[0]->departure,
-                                'destination' => $ride->rideDetail[0]->destination,
-                                'price' => $ride->rideDetail[0]->price,
-                                'ride_detail_id' => $ride->rideDetail[0]->id
-                            ]);
-
-                            $ids = $request->seats_id;
-                            $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
-                            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                                foreach ($getSeatDetails as $key => $getSeatDetail) {
-                                    $getSeatDetail->status = 'booked';
-                                    $getSeatDetail->booking_id = $booking->id;
-                                    $getSeatDetail->user_id = $booking->user_id;
-                                    $getSeatDetail->save();
-                                }
-                            }
-
-                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                                $payable_amount = $payable_amount + $booking_credit;
-                            }
-
-                            $transactionTaxAmt = $taxAmt - $transactionTaxSum;
-
-                            $currentTransactionAmt = $payable_amount - $transactionTaxAmt;
-
-                            $transaction = Transaction::create([
-                                'booking_id' => $booking->id,
-                                'type' => '1',
-                                'booking_fee' => $booking_credit,
-                                'price' => $currentTransactionAmt,
-                                'stripe_id' => $stripId,
-                                'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
-                                'tax_amount' => $transactionTaxAmt,
-                                'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                                'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                                'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
-                            ]);
-
-                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                                $coffeeWallet = CoffeeWallet::create([
-                                    'booking_id' => $booking->id,
-                                    'ride_id' => $ride->id,
-                                    'user_id' => $booking->user_id,
-                                    'cr_amount' => $booking_credit,
-                                ]);
-                            }
-
-                            Notification::create([
-                                'ride_id' => $ride->id,
-                                'posted_by' => auth()->user()->id,
-                                'message' => getNotificationMessageText(
-                                    'booking_request_from_name',
-                                    $ride->driver,
-                                    ['first_name' => $user->first_name],
-                                    'Booking request from {first_name}'
-                                ),
-                                'status' => 'request',
-                                'notification_type' => 'upcoming',
-                                'ride_detail_id' => $booking->ride_detail_id,
-                                'departure' => $booking->departure,
-                                'destination' => $booking->destination
-                            ]);
-                            if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-
-                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'),];
-                                // Send booking request email
-                                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                            }
-
-                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
-                        } catch (\Stripe\Exception\ApiErrorException $e) {
-                            // Handle error
-                            return redirect()->back()->with(['error' => $e->getMessage()]);
-                        }
-                    }
-                } else {
-                    $booking_credit = $request->booking_credit - $booking->booking_credit;
-                    $seats = $request->seats - $booking->seats;
-                    $fare = $request->seats_amount - $booking->fare;
-
-                    $booking = Booking::create([
-                        'user_id' => $user->id,
-                        'ride_id' => $ride->id,
-                        'seats' => $seats,
-                        'booked_on' => $currentTime,
-                        'booking_credit' => $booking_credit,
-                        'fare' => $fare,
-                        'secured_cash' => $secured_cash,
-                        'tax_amount' => $taxAmt,
-                        'secured_cash_code' => $secured_cash_code,
-                        'expires_at' => $expiryTime,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
-                    ]);
-
-                    $transactionTaxAmt = $taxAmt - $transactionTaxSum;
-
-                    if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $booking->id,
-                            'type' => '1',
-                            'price' => $booking_credit,
-                            'booking_fee' => $booking_credit,
-                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
-                            'tax_amount' => $transactionTaxAmt,
-                            'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
-                            'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                            'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
-                        ]);
-
-                        $coffeeWallet = CoffeeWallet::create([
-                            'booking_id' => $booking->id,
-                            'ride_id' => $ride->id,
-                            'user_id' => $booking->user_id,
-                            'cr_amount' => $booking_credit + $transactionTaxAmt,
-                        ]);
-                    }
-
-                    $notification = Notification::create([
-                        'ride_id' => $ride->id,
-                        'posted_by' => $user->id,
-                        'message' => getNotificationMessageText(
-                            'booking_request_from_name',
-                            $ride->driver,
-                            ['first_name' => $user->first_name],
-                            'Booking request from {first_name}'
-                        ),
-                        'status' => 'request',
-                        'notification_type' => 'upcoming',
-                        'ride_detail_id' => $booking->ride_detail_id,
-                        'departure' => $booking->departure,
-                        'destination' => $booking->destination
-                    ]);
-
-                    // Assuming $user and $fcmToken are defined
-                    $fcmToken = $ride->driver->mobile_fcm_token;
-                    $body = $notification->message;
-
-                    $fcmService = new FCMService();
-                    $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
-                    $body = $notification->message;
-
-                    $fcmToken = $ride->driver->mobile_fcm_token;
-                    if ($fcmToken) {
-                        $fcmService->sendNotification($fcmToken, $body);
-                    }
-
-                    foreach ($fcm_tokens as $fcm_token) {
-                        try {
-                            $fcmService->sendNotification($fcm_token->token, $body);
-                        } catch (\Exception $e) {
-                            Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                        }
-                    }
-                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-
-                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
-                        // Send booking request email
-                        Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
-                    }
-
-                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
-                }
-            } else {
-                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update ']);
-            }
-        }
-
-        return redirect()->route('ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
-    }
-
-    public function AcceptBookingRequest($lang = null, $id, $email)
-    {
-        if (!auth()->user()) {
-            $user = User::where('email', $email)->first();
-            $user = auth()->login($user);
-        }
-        $booking = Booking::with(['ride'])->whereId($id)->first();
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        if ($booking && $booking->status === '0') {
-            $existingRecord = Booking::with(['ride'])->where('user_id', $booking->user_id)
-                ->where('status', '1')
-                ->where('ride_id', $booking->ride_id)
-                ->where('id', '!=', $booking->id)
-                ->first();
-
-            if ($existingRecord) {
-                // Existing record found, update it
-                $existingRecord->update([
-                    'seats' => DB::raw('seats + ' . $booking->seats), // Adding the seats value
-                    'booking_credit' => DB::raw('booking_credit + ' . $booking->booking_credit), // Adding the booking_credit value
-                    'fare' => DB::raw('fare + ' . $booking->fare), // Adding the booking_credit value
-                ]);
-                $existingRecord->refresh();
-
-                $transactions = Transaction::where('booking_id', $booking->id)->get();
-                foreach ($transactions as $transaction) {
-                    $transaction->update([
-                        'booking_id' => $existingRecord->id,
-                    ]);
-                }
-
-                $coffeeWallets = CoffeeWallet::where('booking_id', $booking->id)->get();
-                foreach ($coffeeWallets as $coffeeWallet) {
-                    $coffeeWallet->update([
-                        'booking_id' => $existingRecord->id,
-                    ]);
-                }
-
-                $booking->delete();
-
-                $notification = Notification::create([
-                    'type' => 2,
-                    'ride_id' => $existingRecord->ride_id,
-                    'posted_to' => $existingRecord->id,
-                    'posted_by' => $existingRecord->ride->added_by,
-                    'message' => getNotificationMessageText(
-                        'booking_request_approved_by',
-                        $existingRecord->passenger,
-                        ['first_name' => $existingRecord->ride->driver->first_name],
-                        'Booking request approved by {first_name}'
-                    ),
-                    'status' => 'completed',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $existingRecord->ride_detail_id,
-                    'departure' => $existingRecord->departure,
-                    'destination' => $existingRecord->destination
-                ]);
-
-                $user = User::whereId($existingRecord->user_id)->first();
-                // Assuming $user and $fcmToken are defined
-                $fcmToken = $user->mobile_fcm_token;
-                $body = $notification->message;
-
-                $fcmService = new FCMService();
-                $fcm_tokens = FCMToken::where('user_id', $existingRecord->user_id)->get();
-                $body = $notification->message;
-
-                $fcmToken = $existingRecord->passenger->mobile_fcm_token;
-                if ($fcmToken) {
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                foreach ($fcm_tokens as $fcm_token) {
-                    try {
-                        $fcmService->sendNotification($fcm_token->token, $body);
-                    } catch (\Exception $e) {
-                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                    }
-                }
-
-
-                $bookingPrice = $existingRecord->price * $existingRecord->seats;
-                if (isset($existingRecord->passenger->email_notification) && $existingRecord->passenger->email_notification == 1) {
-                    $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)
-                        // ->where('verified', '1')
-                        ->where('default', '1')
-                        ->first();
-                    $phoneToUse = $phoneNumber ? $phoneNumber->phone : $existingRecord->passenger->phone;
-
-                    $data = ['driver_first_name' => $booking->ride->driver->first_name, 'first_name' => $existingRecord->passenger->first_name, 'last_name' => $existingRecord->passenger->last_name, 'email' => $existingRecord->passenger->email, 'phone' => $phoneToUse, 'from' => $existingRecord?->departure, 'to' => $existingRecord?->destination, 'date' => Carbon::parse($existingRecord?->ride?->date)->format('F d, Y'), 'time' => $existingRecord?->ride?->time, 'seats' => $existingRecord?->seats, 'total_price' => $bookingPrice];
-                    // Send booking request email
-                    Mail::to($existingRecord->passenger->email)->queue(new AcceptBookingRequestMail($data));
-                }
-
-                $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)->where('verified', '1')->where('default', '1')->first();
-
-                if (!$phoneNumber) {
-                    $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)->where('verified', '1')->first();
-                }
-
-                if ($phoneNumber && env('APP_ENV') != 'local' && isset($existingRecord->driver->sms_notification) && $existingRecord->driver->sms_notification == 1) {
-                    // Send the secured cash code via Twilio
-                    $sid = env('TWILIO_ACCOUNT_SID');
-                    $token = env('TWILIO_AUTH_TOKEN');
-                    $from = env('TWILIO_PHONE_NUMBER');
-
-                    $twilio = new Client($sid, $token);
-                    $to = $phoneNumber->phone;
-
-
-                    $title = "";
-                    $currentHour = date('H');
-                    if ($currentHour >= 0 && $currentHour < 12) {
-                        $title = "Good morning " . $existingRecord->passenger->first_name . ",";
-                    } elseif ($currentHour >= 12 && $currentHour < 17) {
-                        $title = "Good afternoon " . $existingRecord->passenger->first_name . ",";
-                    } else {
-                        $title = "Good evening " . $existingRecord->passenger->first_name . ",";
-                    }
-
-                    // $depatureDate = date('d F, Y H:i:s', strtotime('' . $existingRecord->ride->date . ' ' . $existingRecord->ride->time . ''));
-                    $departureTime = date('H:i:s', strtotime($existingRecord->ride->time));
-                    $depatureDate = date('d F, Y', strtotime($existingRecord->ride->date));
-                    $seatWords = numberToWords($booking->seats);
-
-                    // $message = "" . $title . "\nThe driver has approved your booking request\nTrip detail\nOrigin: " . $existingRecord->departure . "\nDestination: " . $existingRecord->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $existingRecord->ride->driver->first_name . "\nDriver phone number: " . $existingRecord->ride->driver->phone . "\nVehicle info: " . $existingRecord->ride->make ?? '' . "," . $existingRecord->ride->year ?? '' . "," . $existingRecord->ride->modal ?? '' . "\nVehicle type: " . $existingRecord->ride->car_type . "";
-
-                    $message = $title . "\n" . "From ProximaRide: You have approved " . $existingRecord->passenger->first_name . ". Phone: " . $existingRecord->passenger->phone . "\nRide from " . $existingRecord->departure . " to " . $existingRecord->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
-                    try {
-                        $res = $twilio->messages->create(
-                            $to,
-                            [
-                                'from' => $from,
-                                'body' => $message,
-                            ]
-                        );
-                    } catch (\Exception  $e) {
-                        $this->logTwilioSmsFailure($to, $message, $e);
-
-                        // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-                    }
-
-
-                    if ($existingRecord->ride->payment_method == "35") {
-                        $secured_cash = '1';
-                        $secured_cash_code = rand(1000, 9999);
-
-                        $existingRecord->secured_cash = $secured_cash;
-                        $existingRecord->secured_cash_code = $secured_cash_code;
-                        $existingRecord->save();
-                        $to = $phoneNumber->phone;
-
-
-                        $title = "";
-                        $currentHour = date('H');
-                        if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $existingRecord->passenger->first_name . ",";
-                        } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $existingRecord->passenger->first_name . ",";
-                        } else {
-                            $title = "Good evening " . $existingRecord->passenger->first_name . ",";
-                        }
-
-                        // $depatureDate = date('d F, Y H:i:s', strtotime('' . $existingRecord->ride->date . ' ' . $existingRecord->ride->time . ''));
-                        $departureTime = date('H:i:s', strtotime($existingRecord->ride->time));
-                        $depatureDate = date('d F, Y', strtotime($existingRecord->ride->date));
-                        $seatWords = numberToWords($booking->seats);
-
-                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $existingRecord->departure . "\nDestination: " . $existingRecord->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $existingRecord->ride->driver->first_name . "\nDriver p    hone number: " . $existingRecord->ride->driver->phone . "\nVehicle info: " . $existingRecord->ride->make ?? '' . "," . $existingRecord->ride->year ?? '' . "," . $existingRecord->ride->modal ?? '' . "\nVehicle type: " . $existingRecord->ride->car_type . "";
-                        $message = $title . "\n" . "From ProximaRide: You have approved " . $booking->passenger->first_name . ". Phone: " . $booking->passenger->phone . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                        } catch (\Exception  $e) {
-                            $this->logTwilioSmsFailure($to, $message, $e);
-                        }
-                    }
-                }
-
-                Notification::create([
-                    'ride_id' => $existingRecord->ride_id,
-                    'posted_by' => $existingRecord->user_id,
-                    'message' => getNotificationMessageText(
-                        'booking_approved_you_have_approved',
-                        auth()->user(),
-                        [
-                            'first_name' => $existingRecord->passenger->first_name,
-                            'seats' => numberToWords($existingRecord->seats),
-                        ],
-                        "You have approved {first_name}\nSeats booked: {seats}"
-                    ),
-                    'status' => 'completed',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $existingRecord->ride_detail_id,
-                    'departure' => $existingRecord->departure,
-                    'destination' => $existingRecord->destination
-                ]);
-
-                $user = auth()->user();
-                // Assuming $user and $fcmToken are defined
-                $fcmToken = $user->mobile_fcm_token;
-                $body = $notification->message;
-
-                $fcmService = new FCMService();
-                $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-                $body = $notification->message;
-
-                $fcmToken = $user->mobile_fcm_token;
-                if ($fcmToken) {
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                foreach ($fcm_tokens as $fcm_token) {
-                    try {
-                        $fcmService->sendNotification($fcm_token->token, $body);
-                    } catch (\Exception $e) {
-                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                    }
-                }
-
-                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id])
-                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
-            } else {
-
-                $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
-                    ->where('verified', '1')
-                    ->where('default', '1')
-                    ->first();
-
-                if (!$driverPhoneNumber) {
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
-                        ->where('verified', '1')
-                        ->first();
-                }
-
-                if ($driverPhoneNumber && env('APP_ENV') != 'local' && isset($booking->ride->driver->sms_notification) && $booking->ride->driver->sms_notification == 1) {
-                    $sid = env('TWILIO_ACCOUNT_SID');
-                    $token = env('TWILIO_AUTH_TOKEN');
-                    $from = env('TWILIO_PHONE_NUMBER');
-
-                    $twilio = new Client($sid, $token);
-                    $to = $driverPhoneNumber->phone;
-
-                    $title = "";
-                    $currentHour = date('H');
-                    if ($currentHour >= 0 && $currentHour < 12) {
-                        $title = "Good morning " . $booking->ride->driver->first_name . ",";
-                    } elseif ($currentHour >= 12 && $currentHour < 17) {
-                        $title = "Good afternoon " . $booking->ride->driver->first_name . ",";
-                    } else {
-                        $title = "Good evening " . $booking->ride->driver->first_name . ",";
-                    }
-
-                    $departureTime = date('H:i:s', strtotime($booking->ride->time));
-                    $depatureDate = date('d F, Y', strtotime($booking->ride->date));
-                    $seatWords = numberToWords($booking->seats);
-                    $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
-                        // ->where('verified', '1')
-                        ->where('default', '1')
-                        ->first();
-
-                    $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone :  $booking->passenger->phone;
-
-                    $message = $title . "\n" . "From ProximaRide: You have approved " . $booking->passenger->first_name . ". Phone: " . $passengerPhoneToUse . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
-
-                    try {
-                        $res = $twilio->messages->create(
-                            $to,
-                            [
-                                'from' => $from,
-                                'body' => $message,
-                            ]
-                        );
-                    } catch (\Exception $e) {
-                        $this->logTwilioSmsFailure($to, $message, $e, 'driver');
-                    }
-                }
-
-                if ($booking->ride->payment_method == "35") {
-                    $secured_cash = '1';
-                    $secured_cash_code = rand(1000, 9999);
-
-                    $booking->secured_cash = $secured_cash;
-                    $booking->secured_cash_code = $secured_cash_code;
-                    $booking->save();
-
-                    $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
-                    $securedCashNotification = Notification::create([
-                        'type' => 2, // Assuming 3 is for secured-cash notifications
-                        'ride_id' => $booking->ride_id,
-                        'posted_to' => $booking->id,
-                        'posted_by' => $booking->ride->added_by,
-                        'receiver_id' => $booking->user_id,
-                        'message' => getNotificationMessageText(
-                            'secured_cash_payment_code',
-                            $booking->passenger,
-                            ['code' => $secured_cash_code],
-                            'Your Secured-cash payment code is: {code}'
-                        ),
-                        'status' => 'completed',
-                        'notification_type' => 'secured_cash',
-                        'ride_detail_id' => $booking->ride_detail_id,
-                        'departure' => $booking->departure,
-                        'destination' => $booking->destination
-                    ]);
-
-                    // Send push notification for secured cash code
-                    $fcmService = new FCMService();
-                    $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-                    $body = $securedCashNotification->message;
-
-                    $fcmToken = $booking->passenger->mobile_fcm_token;
-                    if ($fcmToken) {
-                        $fcmService->sendNotification($fcmToken, $body);
-                    }
-
-                    foreach ($fcm_tokens as $fcm_token) {
-                        try {
-                            $fcmService->sendNotification($fcm_token->token, $body);
-                        } catch (\Exception $e) {
-                            Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-                        }
-                    }
-
-                    $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
-                    if (!$phoneNumber) {
-                        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-                    }
-
-                    if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-                        $sid = env('TWILIO_ACCOUNT_SID');
-                        $token = env('TWILIO_AUTH_TOKEN');
-                        $from = env('TWILIO_PHONE_NUMBER');
-
-                        $twilio = new Client($sid, $token);
-                        $to = $phoneNumber->phone;
-                        $title = "";
-                        $currentHour = date('H');
-                        if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $booking->passenger->first_name . ",";
-                        } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $booking->passenger->first_name . ",";
-                        } else {
-                            $title = "Good evening " . $booking->passenger->first_name . ",";
-                        }
-
-                        // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
-                        $departureTime = date('H:i:s', strtotime($booking->ride->time));
-                        $departureDate = date('d F, Y', strtotime($booking->ride->date));
-                        $driverPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $booking->ride->driver->phone);
-
-                        $seatWords = numberToWords($booking->seats);
-
-                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $booking->ride->rideDetail[0]->departure . "\nDestination: " . $booking->ride->rideDetail[0]->destination . "\nDeparture date: " . $departureDate . "\Driver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
-                        $message = $title . "\n" . "From ProximaRide: Your secured-cash payment code is: " . $secured_cash_code . "\n" .
-                            "Give this code to your driver ONLY at the time of the ride when you meet with them.\n" .
-                            "Driver name is " . $booking->ride->driver->first_name . ", phone " . $driverPhone . "\n" .
-                            "Ride from " . $booking->ride->rideDetail[0]->departure . " to " . $booking->ride->rideDetail[0]->destination .
-                            " on " . $departureDate . " at " . $departureTime . "\n" .
-                            "Number of seats: " . ucfirst($seatWords);
-
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                        } catch (\Exception  $e) {
-                            $this->logTwilioSmsFailure($to, $message, $e);
-                        }
-                    }
-
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
-                        ->where('default', '1')
-                        ->first();
-                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
-
-                    $emailData = [
-                        'first_name' => $booking->passenger->first_name,
-                        'secured_cash_code' => $secured_cash_code,
-                        'driver_first_name' => $booking->ride->driver->first_name,
-                        'driver_last_name' => $booking->ride->driver->last_name,
-                        'driver_phone' => $driverPhoneToUse,
-                        'driver_email' => $booking->ride->driver->email,
-                        'departure' => $booking->departure,
-                        'destination' => $booking->destination,
-                        'date' => Carbon::parse($booking->ride->date)->format('F d, Y'),
-                        'time' => $booking->ride->time,
-                        'seats' => $booking->seats,
-                        'booking_price' => $booking->price * $booking->seats
-                    ];
-
-                    Mail::to($booking->passenger->email)->queue(new SecuredCashPaymentCodeMail($emailData));
-                }
-
-                $booking->update([
-                    'status' => '1',
-                    'expires_at' => null,
-                ]);
-
-                $notification = Notification::create([
-                    'type' => 2,
-                    'ride_id' => $booking->ride_id,
-                    'posted_to' => $booking->id,
-                    'posted_by' => $booking->ride->added_by,
-                    'message' => getNotificationMessageText(
-                        'booking_request_approved_by',
-                        $booking->passenger,
-                        ['first_name' => $booking->ride->driver->first_name],
-                        'Booking request approved by {first_name}'
-                    ),
-                    'status' => 'completed',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $booking->ride_detail_id,
-                    'departure' => $booking->departure,
-                    'destination' => $booking->destination
-                ]);
-
-
-
-                $user = User::whereId($booking->user_id)->first();
-                // Assuming $user and $fcmToken are defined
-                $fcmService = new FCMService();
-                $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-                $body = $notification->message;
-
-                $fcmToken = $booking->passenger->mobile_fcm_token;
-                if ($fcmToken) {
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                foreach ($fcm_tokens as $fcm_token) {
-                    try {
-                        $fcmService->sendNotification($fcm_token->token, $body);
-                    } catch (\Exception $e) {
-                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                    }
-                }
-
-
-                $bookingPrice = $booking->price * $booking->seats;
-                $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
-                    // ->where('verified', '1')
-                    ->where('default', '1')
-                    ->first();
-                $phoneToUse = $phoneNumber ? $phoneNumber->phone : $booking->passenger->phone;
-                // if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-
-                $data = ['driver_first_name' => $booking->ride->driver->first_name, 'driver_last_name' => $user->last_name, 'first_name' => $booking->passenger->first_name, 'last_name' => $booking->passenger->last_name, 'email' => $booking->passenger->email, 'phone' => $phoneToUse, 'from' => $booking?->departure, 'to' => $booking?->destination, 'date' => Carbon::parse($booking?->ride?->date)->format('F d, Y'), 'time' => $booking?->ride?->time, 'seats' => $booking?->seats, 'total_price' => $bookingPrice];
-                // Send booking request email
-                if (isset($booking->ride->driver->email_notification) && $booking->ride->driver->email_notification == 1) {
-                    Mail::to($booking->ride->driver->email)->queue(new AcceptBookingRequestMail($data));
-                }
-
-                $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
-                    // ->where('verified', '1')
-                    ->where('default', '1')
-                    ->first();
-
-                $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
-
-                if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-                    $data = [
-                        'first_name' => $booking->passenger->first_name,
-                        'last_name' => $booking->passenger->last_name,
-                        'driver_first_name' => $booking->ride->driver->first_name,
-                        'driver_last_name' => $booking->ride->driver->last_name,
-                        'driver_email' => $booking->ride->driver->email,
-                        'driver_phone' => $driverPhoneToUse,
-                        'from' => $booking?->departure,
-                        'to' => $booking?->destination,
-                        'date' => Carbon::parse($booking?->ride?->date)->format('F d, Y'),
-                        'time' => $booking?->ride?->time,
-                        'seats' => $booking?->seats,
-                        'total_price' => $bookingPrice
-                    ];
-                    Mail::to($booking->passenger->email)->queue(new RideApprovalEmail($data));
-                }
-
-
-                $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
-
-                if (!$phoneNumber) {
-                    $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-                }
-
-                if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-                    // Send the secured cash code via Twilio
-                    $sid = env('TWILIO_ACCOUNT_SID');
-                    $token = env('TWILIO_AUTH_TOKEN');
-                    $from = env('TWILIO_PHONE_NUMBER');
-
-                    $twilio = new Client($sid, $token);
-                    $to = $phoneNumber->phone;
-
-                    $title = "";
-                    $currentHour = date('H');
-                    if ($currentHour >= 0 && $currentHour < 12) {
-                        $title = "Good morning " . $booking->passenger->first_name . ",";
-                    } elseif ($currentHour >= 12 && $currentHour < 17) {
-                        $title = "Good afternoon " . $booking->passenger->first_name . ",";
-                    } else {
-                        $title = "Good evening " . $booking->passenger->first_name . ",";
-                    }
-
-                    // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
-                    $departureTime = date('H:i:s', strtotime($booking->ride->time));
-                    $depatureDate = date('d F, Y', strtotime($booking->ride->date));
-                    $seatWords = numberToWords($booking->seats);
-                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
-                        // ->where('verified', '1')
-                        ->where('default', '1')
-                        ->first();
-
-                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
-
-                    // $message = "" . $title . "\nThe driver has approved your booking request\nTrip detail\nOrigin: " . $booking->ride->departure . "\nDestination: " . $booking->ride->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
-                    $message = $title . "\n" . "From ProximaRide: Your booking request has been approved by " . $booking->ride->driver->first_name .
-                        ". Phone " . $driverPhoneToUse .
-                        "\nRide from " . $booking->departure .
-                        " to " . $booking->destination .
-                        " on " . $depatureDate .
-                        " at " . $departureTime .
-                        "\nNumber of seats: " . $seatWords;
-
-
-                    try {
-                        $res = $twilio->messages->create(
-                            $to,
-                            [
-                                'from' => $from,
-                                'body' => $message,
-                            ]
-                        );
-                    } catch (\Exception  $e) {
-                        $this->logTwilioSmsFailure($to, $message, $e);
-
-                        // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-                    }
-                }
-
-                Notification::create([
-                    'ride_id' => $booking->ride_id,
-                    'posted_by' => $booking->user_id,
-                    'message' => getNotificationMessageText(
-                        'booking_approved_you_have_approved',
-                        auth()->user(),
-                        [
-                            'first_name' => $booking->passenger->first_name,
-                            'seats' => numberToWords($booking->seats),
-                        ],
-                        "You have approved {first_name}\nSeats booked: {seats}"
-                    ),
-                    'status' => 'completed',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $booking->ride_detail_id,
-                    'departure' => $booking->departure,
-                    'destination' => $booking->destination
-                ]);
-
-                $user = auth()->user();
-                // Assuming $user and $fcmToken are defined
-                $fcmService = new FCMService();
-                $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-                $body = $notification->message;
-
-                $fcmToken = $user->mobile_fcm_token;
-                if ($fcmToken) {
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                foreach ($fcm_tokens as $fcm_token) {
-                    try {
-                        $fcmService->sendNotification($fcm_token->token, $body);
-                    } catch (\Exception $e) {
-                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                    }
-                }
-                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
-                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
-            }
-        } else {
-            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
-            return redirect()->route('my_rides', ['lang' => $lang])
-                ->with('error', __('Request expired'));
-        }
-    }
-
-    public function RejectBookingRequest($lang = null, $id, $email)
-    {
-        if (!auth()->user()) {
-            $user = User::where('email', $email)->first();
-            $user = auth()->login($user);
-        }
-        $booking = Booking::with(['passenger', 'ride'])->whereId($id)->first();
-        if ($booking && $booking->status === '0') {
-            $booking->update([
-                'status' => '3',
-                'expires_at' => null,
-            ]);
-
-            // Release seats linked to this booking
-            $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
-            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                foreach ($getSeatDetails as $key => $getSeatDetail) {
-                    $getSeatDetail->status = 'pending';
-                    $getSeatDetail->booking_id = NULL;
-                    $getSeatDetail->user_id = NULL;
-                    $getSeatDetail->save();
-                }
-            }
-
-            // Also release any orphaned hold seats (held by this passenger for this ride but never linked to booking_id)
-            $orphanedHoldSeats = SeatDetail::where('ride_id', $booking->ride_id)
-                ->where('user_id', $booking->user_id)
-                ->where('status', 'hold')
-                ->get();
-            if ($orphanedHoldSeats->isNotEmpty()) {
-                foreach ($orphanedHoldSeats as $seat) {
-                    $seat->status = 'pending';
-                    $seat->booking_id = NULL;
-                    $seat->user_id = NULL;
-                    $seat->save();
-                }
-            }
-
-            $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
-            foreach ($transactions as $transaction) {
-                if ($transaction) {
-                    $transactionAmt = 0.0;
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $transactionAmt = (float)$transaction->price - (float)$transaction->booking_fee;
-                    } else {
-                        $transactionAmt = (float)$transaction->price;
-                    }
-
-                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice)) {
-                        $transactionAmt = $transactionAmt - $getRefundEntryPrice;
-                    }
-
-                    if ($transactionAmt > 0) {
-                        $refundId = "";
-                        if ($transaction->pay_by_account == 0) {
-                            if ($transaction->paypal_id) {
-                                $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                                $paypal = new PayPalClient;
-                                $paypal->setApiCredentials(config('paypal'));
-                                $token = $paypal->getAccessToken();
-                                $paypal->setAccessToken($token);
-                                $response = $paypal->refundCapturedPayment(
-                                    $transaction->paypal_id,
-                                    'Invoice-' . $uniqueId,
-                                    $transactionAmt,
-                                    'Refund issued.'
-                                );
-                                $refundId = isset($response['id']) ? $response['id'] : "";
-                            } elseif ($transaction->stripe_id) {
-                                // Set your Stripe API key
-                                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                try {
-                                    // Create a refund using the payment intent ID
-                                    $refund = Refund::create([
-                                        'payment_intent' => $transaction->stripe_id,
-                                        'amount' => $transactionAmt * 100, // Refund amount in cents
-                                    ]);
-                                    $refundId = $refund->id;
-                                } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    // Handle error
-                                    return redirect()->back()->with(['error' => $e->getMessage()]);
-                                }
-                            }
-                        } else {
-                            $topUpBalance = TopUpBalance::create([
-                                'booking_id' => $transaction->booking_id,
-                                'user_id' => $booking->user_id,
-                                'dr_amount' => $transactionAmt,
-                                'added_date' => date('Y-m-d'),
-                            ]);
-                        }
-
-                        if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                            $bookingAmt = $transaction->booking_fee;
-
-                            $getRefundBookingPrice = CoffeeWallet::where('booking_id', $booking->id)->where('ride_id', $booking->ride_id)->where('user_id', $booking->user_id)->sum('dr_amount');
-                            if (isset($getRefundBookingPrice) && !is_null($getRefundBookingPrice)) {
-                                $bookingAmt = $transaction->booking_fee - $getRefundBookingPrice;
-                            }
-
-                            if ($bookingAmt > 0) {
-                                $coffeeWallet = CoffeeWallet::create([
-                                    'booking_id' => $booking->id,
-                                    'ride_id' => $booking->ride_id,
-                                    'user_id' => $booking->user_id,
-                                    'dr_amount' => $bookingAmt,
-                                ]);
-                            }
-                        }
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $transactionAmt,
-                            'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                            'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                        ]);
-                    }
-                }
-            }
-        } else {
-            $selectedLanguage = session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : Language::where('is_default', 1)->first();
-            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
-            return redirect()->route('my_rides', ['lang' => $lang])
-                ->with('error', __('Request expired'));
-        }
-
-        $notification = Notification::create([
-            'type' => 2,
-            'ride_id' => $booking->ride_id,
-            'posted_to' => $booking->id,
-            'posted_by' => $booking->ride->added_by,
-            'message' => getNotificationMessageText(
-                'booking_request_declined',
-                $booking->passenger,
-                [],
-                'Booking request declined'
-            ),
-            'status' => 'reject',
-            'notification_type' => 'upcoming',
-            'ride_detail_id' => $booking->ride_detail_id,
-            'departure' => $booking->departure,
-            'destination' => $booking->destination
-        ]);
-
-        $user = User::whereId($booking->user_id)->first();
-        // Assuming $user and $fcmToken are defined
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-        $body = $notification->message;
-
-        $fcmToken = $booking->passenger->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
-
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-            }
-        }
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-        if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-
-            $data = ['first_name' => $booking->passenger->first_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
-
-            // Send booking request email
-            Mail::to($booking->passenger->email)->queue(new RejectBookingRequestMail($data));
-        }
-
-
-        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
-
-        if (!$phoneNumber) {
-            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-        }
-
-        if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-            // Send the secured cash code via Twilio
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
-            $from = env('TWILIO_PHONE_NUMBER');
-
-            $twilio = new Client($sid, $token);
-            $to = $phoneNumber->phone;
-
-            $title = "";
-            $currentHour = date('H');
-            if ($currentHour >= 0 && $currentHour < 12) {
-                $title = "Good morning " . $booking->passenger->first_name . ",";
-            } elseif ($currentHour >= 12 && $currentHour < 17) {
-                $title = "Good afternoon " . $booking->passenger->first_name . ",";
-            } else {
-                $title = "Good evening " . $booking->passenger->first_name . ",";
-            }
-
-            // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
-            $departureTime = date('H:i:s', strtotime($booking->ride->time));
-            $depatureDate = date('d F, Y', strtotime($booking->ride->date));
-
-            // $message = "" . $title . "\nWe are sorry the driver did not approve your booking request\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\n";
-            $message = $title . "\n" . "From ProximaRide: We are sorry to inform you that your booking request has been declined by the driver.\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nAll payments that you have made will be refunded to you immediately";
-
-            try {
-                $res = $twilio->messages->create(
-                    $to,
-                    [
-                        'from' => $from,
-                        'body' => $message,
-                    ]
-                );
-            } catch (\Exception  $e) {
-                $this->logTwilioSmsFailure($to, $message, $e);
-
-                // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-            }
-        }
-
-        return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
-            ->with('decline_success_message', 'You have declined the booking request. The seats are now available for other passengers to book.');
-    }
-
+    /**
+     * Make a book (instant booking)
+     */
     public function instantBooking($id, Request $request)
     {
         $ride = Ride::where('id', $request->id)->first();
@@ -5414,6 +3094,2280 @@ class BookingController extends Controller
             return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->book_seat_message]);
         }
     }
+
+    public function updateBookingRequest($id, Request $request)
+    {
+
+        $messages = $this->successMessage;
+
+        $booking = Booking::where('id', $id)->first();
+        $rideDetailId = $booking->ride_detail_id;
+        $ride = Ride::where('id', $booking->ride_id)->with(['rideDetail' => function ($q) use ($rideDetailId) {
+            $q->where('id', $rideDetailId);
+        }])->first();
+
+        $type = FeaturesSetting::whereId($ride->payment_method)->first();
+        $user = User::where('id', auth()->user()->id)->first();
+        $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
+        if (is_null($phoneNumber) && $type->slug == 'secured') {
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->add_your_phone ?? "add phone "]);
+        }
+        $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
+        if (!$phoneVerification && $type->slug == 'secured') {
+            // Store return URL to redirect back after phone verification
+            $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+            session(['return_url_after_action' => $returnUrl]);
+            return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation])->with(['failure' => $messages->verified_number_message ?? "verify number", 'phone' => $phoneNumber]);
+        }
+
+        $rules = [
+            'agree_terms' => 'accepted|required'
+        ];
+
+        if ($ride->booking_type == "37") {
+            $rules['firm_agree_terms'] = 'accepted|required';
+            $rules['firm_cancellation_understand'] = 'accepted|required';
+        }
+
+        $featuresArray = explode('=', $ride->features);
+        if (in_array('1', $featuresArray)) {
+            $rules['pink_ride_agree_terms'] = 'accepted|required';
+        }
+        if (in_array('2', $featuresArray)) {
+            $rules['extra_care_ride_agree_terms'] = 'accepted|required';
+        }
+
+        $request->validate($rules);
+
+        // Student booking limit for Cash rides: Limit students to 1-2 seats per ride if payment method is Cash
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        if ($postRidePage) {
+            // Check if user is a student (student == 1 for verified, student == 2 for pending)
+            $isStudent = ($user->student == '1' || $user->student == '2');
+
+            // Check if payment method is Cash (payment_methods_option1 is Cash)
+            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
+
+            // Apply limit only for students on Cash rides
+            if ($isStudent && $isCashPayment) {
+                if ($request->seats > 2) {
+                    return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
+                }
+            }
+        }
+
+        // ProximaLocal: no booking fee on rides under $15 per seat
+        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        if ($pricePerSeat < 15) {
+            $request->merge(['booking_credit' => '0']);
+        }
+
+        // Student booking fee waiver: Validate and apply waiver with card expiration check
+        $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+        $request->merge(['booking_credit' => $adjustedBookingCredit]);
+
+        $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
+
+        // Calculate expiry time based on ride date and time
+        $currentTime = now();
+        $Time = now();
+        $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+        $difference = $rideDateTime->diffInHours($currentTime);
+
+        if ($difference > 48) {
+            $expiryTime = $Time->addHours(12);
+        } elseif ($difference >= 24 && $difference <= 48) {
+            $expiryTime = $Time->addHours(6);
+        } elseif ($difference >= 6 && $difference < 24) {
+            $expiryTime = $Time->addHours(2);
+        } else {
+            $expiryTime = $Time->addMinutes(30);
+        }
+
+
+
+        if ($user->block_booking == '1') {
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+        }
+
+        $bookings = Booking::where('ride_id', $booking->ride_id)
+            ->where('status', '!=', '3')
+            ->where('status', '!=', '4')
+            ->whereNotIn('id', [$id])
+            ->get();
+        $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
+        $seatsBooked = $bookings->sum('seats') + $request->seats;
+        if ($seatsBooked > $ride->seats) {
+            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $booking->departure,'to' => $booking->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
+
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+        }
+
+        //Booking Method
+        $secured_cash = null;
+        $secured_cash_code = null;
+
+        $transactions = Transaction::where('booking_id', $booking->id)->get();
+
+        $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
+        $transactionBookingPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('booking_fee');
+
+        $transactionTaxSum = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('tax_amount');
+
+        $transactionPrice = $transactionTotalPrice + $transactionTaxSum;;
+        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+            $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
+        }
+
+        $total = $request->booking_credit + $request->seats_amount;
+        $cash_payment = $total - $request->online_payment;
+
+        if ($booking->status === '0') {
+            if ($request->seats > $booking->seats) {
+
+                if ($ride->payment_method == "33") {
+                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
+                } else {
+
+                    $payable_amount = $request->online_payment - $transactionPrice;
+                }
+                if ($payable_amount > '0') {
+                    $request->validate([
+                        'payment_method' => 'required',
+                        'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                        'booking_credit' => 'required|max:25',
+                        'name_on_card' => 'required_if:card_id,credit_card',
+                        'stripeToken' => 'required_if:card_id,credit_card',
+                    ]);
+
+                    if ($request->payment_method == 'paypal') {
+                        $paypal = new PayPalClient;
+                        $paypal->setApiCredentials(config('paypal'));
+                        $token = $paypal->getAccessToken();
+                        $paypal->setAccessToken($token);
+
+                        if ($request->online_payment > '0') {
+                            $paypalAmt = $payable_amount;
+                            $order = $paypal->createOrder([
+                                "intent" => "CAPTURE",
+                                "purchase_units" => [
+                                    [
+                                        "amount" => [
+                                            "currency_code" => "USD",
+                                            "value" => number_format((float)$paypalAmt, 2, '.', '')
+                                        ]
+                                    ]
+                                ],
+                                "application_context" => [
+                                    "cancel_url" => route('paypal.cancel'),
+                                    "return_url" => route('paypal.success.update-booking_request', [
+                                        'id' => $booking->id,
+                                        'type' => $booking->type,
+                                        'seats' => $request->seats,
+                                        'seats_amount' => $request->seats_amount,
+                                        'booking_credit' => $request->booking_credit,
+                                        'online_payment' => $request->online_payment,
+                                        'cash_payment' => $cash_payment,
+                                        'total' => $total,
+                                        'seats_id' => implode(',', $request->seats_id),
+                                        'coffee_wall' => isset($request->coffee_wall) ? $request->coffee_wall : '0',
+                                        'transactionTaxSum' => $transactionTaxSum,
+                                        'ride' => $ride,
+                                        'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
+                                        'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                                        'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                                        'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL
+                                    ]),
+                                ]
+                            ]);
+                        }
+
+                        if (isset($order['id'])) {
+                            foreach ($order['links'] as $link) {
+                                if ($link['rel'] == 'approve') {
+                                    return redirect()->away($link['href']);
+                                }
+                            }
+                        }
+
+                        return redirect()->route('paypal.cancel');
+                    } elseif ($request->payment_method == 'credit_card') {
+
+                        $stripId = null;
+                        try {
+
+                            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
+                                $stripId = $request->gPayApplePayId;
+                            } else {
+                                // Set your Stripe API key.
+                                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
+                                if ($payable_amount > '0') {
+                                    // Create a payment intent
+
+                                    $stripePay = $payable_amount;
+
+                                    $paymentIntent = PaymentIntent::create([
+                                        'amount' => round(($stripePay * 100), 0),
+                                        'currency' => 'cad',
+                                        'customer' => $user->stripe_customer_id,
+                                        'payment_method' => $paymentMethod->id,
+                                        'off_session' => true,
+                                        'confirm' => true,
+                                    ]);
+
+                                    $stripId = $paymentIntent->id;
+                                }
+                            }
+
+
+
+                            // Payment successful, handle booking logic here
+                            $newBooking = Booking::create([
+                                'user_id' => auth()->user()->id,
+                                'ride_id' => $ride->id,
+                                'seats' => $request->seats,
+                                'type' => $request->type,
+                                'booked_on' => $currentTime,
+                                'booking_credit' => $request->booking_credit,
+                                'fare' => $request->seats_amount,
+                                'secured_cash' => $secured_cash,
+                                'tax_amount' => $taxAmt,
+                                'secured_cash_code' => $secured_cash_code,
+                                'expires_at' => $expiryTime,
+                                'departure' => $ride->rideDetail[0]->departure,
+                                'destination' => $ride->rideDetail[0]->destination,
+                                'price' => $ride->rideDetail[0]->price,
+                                'ride_detail_id' => $ride->rideDetail[0]->id
+                            ]);
+
+                            $ids = $request->seats_id;
+                            $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
+                            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                                foreach ($getSeatDetails as $key => $getSeatDetail) {
+                                    $getSeatDetail->status = 'booked';
+                                    $getSeatDetail->booking_id = $newBooking->id;
+                                    $getSeatDetail->user_id = $newBooking->user_id;
+                                    $getSeatDetail->save();
+                                }
+                            }
+
+                            foreach ($transactions as $transaction) {
+                                $transaction->update([
+                                    'booking_id' => $newBooking->id,
+                                ]);
+                            }
+
+                            $booking->delete();
+
+                            $getBookingFeeSum = Transaction::where('booking_id', $newBooking->id)->sum('booking_fee');
+                            $currentBookingFee = $request->booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
+
+                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                                $payable_amount = $payable_amount + $currentBookingFee;
+                            }
+
+                            $transactionTaxAmt = $taxAmt - $transactionTaxSum;
+
+                            $currentTransactionAmt = $payable_amount - $transactionTaxAmt;
+
+                            $transaction = Transaction::create([
+                                'booking_id' => $newBooking->id,
+                                'type' => '1',
+                                'booking_fee' => $currentBookingFee,
+                                'price' => $currentTransactionAmt,
+                                'stripe_id' => $stripId,
+                                'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                                'tax_amount' => $transactionTaxAmt,
+                                'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                                'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                                'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                            ]);
+
+                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                                $coffeeWallet = CoffeeWallet::create([
+                                    'booking_id' => $newBooking->id,
+                                    'ride_id' => $ride->id,
+                                    'user_id' => $newBooking->user_id,
+                                    'cr_amount' => $currentBookingFee,
+                                ]);
+                            }
+
+                            Notification::create([
+                                'ride_id' => $ride->id,
+                                'posted_by' => auth()->user()->id,
+                                'message' => getNotificationMessageText(
+                                    'booking_request_from_name',
+                                    $ride->driver,
+                                    ['first_name' => auth()->user()->first_name],
+                                    'Booking request from {first_name}'
+                                ),
+                                'status' => 'request',
+                                'notification_type' => 'upcoming',
+                                'ride_detail_id' => $newBooking->ride_detail_id,
+                                'departure' => $newBooking->departure,
+                                'destination' => $newBooking->destination
+                            ]);
+                            if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $newBooking->booking_credit, 'total_price' => $newBooking->fare, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                                // Send booking request email
+                                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                            }
+
+
+                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
+                        } catch (\Stripe\Exception\ApiErrorException $e) {
+                            // Handle error
+                            return redirect()->back()->with(['error' => $e->getMessage()]);
+                        }
+                    }
+                } else {
+                    $booking->update([
+                        'user_id' => $user->id,
+                        'ride_id' => $ride->id,
+                        'seats' => $request->seats,
+                        'type' => $request->type,
+                        'booked_on' => $currentTime,
+                        'booking_credit' => $request->booking_credit,
+                        'fare' => $request->seats_amount,
+                        'secured_cash' => $secured_cash,
+                        'tax_amount' => $taxAmt,
+                        'secured_cash_code' => $secured_cash_code,
+                        'expires_at' => $expiryTime,
+                    ]);
+
+                    $ids = $request->seats_id;
+                    $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
+                    if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                        foreach ($getSeatDetails as $key => $getSeatDetail) {
+                            $getSeatDetail->status = 'booked';
+                            $getSeatDetail->booking_id = $booking->id;
+                            $getSeatDetail->user_id = $booking->user_id;
+                            $getSeatDetail->save();
+                        }
+                    }
+
+                    if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                        $getBookingFeeSum = Transaction::where('booking_id', $booking->id)->sum('booking_fee');
+                        $currentBookingFee = $request->booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
+
+                        $transactionTaxAmt = $taxAmt - $transactionTaxSum;
+
+                        $newTransaction = Transaction::create([
+                            'booking_id' => $booking->id,
+                            'type' => '1',
+                            'price' => $currentBookingFee,
+                            'booking_fee' => $currentBookingFee,
+                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                            'tax_amount' => $transactionTaxAmt,
+                            'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                            'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                            'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                        ]);
+
+                        $coffeeWallet = CoffeeWallet::create([
+                            'booking_id' => $booking->id,
+                            'ride_id' => $ride->id,
+                            'user_id' => $booking->user_id,
+                            'cr_amount' => $currentBookingFee + $transactionTaxAmt,
+                        ]);
+                    }
+
+                    $notification = Notification::create([
+                        'ride_id' => $ride->id,
+                        'posted_by' => $user->id,
+                        'message' => getNotificationMessageText(
+                            'booking_request_from_name',
+                            $ride->driver,
+                            ['first_name' => $user->first_name],
+                            'Booking request from {first_name}'
+                        ),
+                        'status' => 'request',
+                        'notification_type' => 'upcoming',
+                        'ride_detail_id' => $booking->ride_detail_id,
+                        'departure' => $booking->departure,
+                        'destination' => $booking->destination
+                    ]);
+
+                    // Assuming $user and $fcmToken are defined
+                    $fcmService = new FCMService();
+                    $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
+                    $body = $notification->message;
+
+                    $fcmToken = $ride->driver->mobile_fcm_token;
+                    if ($fcmToken) {
+                        $fcmService->sendNotification($fcmToken, $body);
+                    }
+
+                    foreach ($fcm_tokens as $fcm_token) {
+                        try {
+                            $fcmService->sendNotification($fcm_token->token, $body);
+                        } catch (\Exception $e) {
+                            Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                        }
+                    }
+                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $request->seats, 'booking_price' => $request->booking_credit, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                        // Send booking request email
+                        Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                    }
+
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+                }
+            } else {
+                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update your booking in this ride']);
+            }
+        } elseif ($booking->status === '1') {
+            if ($request->seats > $booking->seats) {
+                $request->validate([
+                    'payment_method' => 'required',
+                    'card_id' => $request->payment_method == 'credit_card' && !isset($request->gPayApplePayId) && $request->gPayApplePayId == "" ? 'required' : 'nullable',
+                    'booking_credit' => 'required|max:25',
+                    'name_on_card' => 'required_if:card_id,credit_card',
+                    'stripeToken' => 'required_if:card_id,credit_card',
+                ]);
+
+                if ($ride->payment_method == "33") {
+
+                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
+                } else {
+
+                    $payable_amount = $request->online_payment - $transactionPrice;
+                }
+
+                if ($payable_amount > '0') {
+                    if ($request->payment_method == 'paypal') {
+                        $paypal = new PayPalClient;
+                        $paypal->setApiCredentials(config('paypal'));
+                        $token = $paypal->getAccessToken();
+                        $paypal->setAccessToken($token);
+
+                        if ($request->online_payment > '0') {
+                            $paypalPay = $payable_amount;
+                            $order = $paypal->createOrder([
+                                "intent" => "CAPTURE",
+                                "purchase_units" => [
+                                    [
+                                        "amount" => [
+                                            "currency_code" => "USD",
+                                            "value" => number_format((float)$paypalPay, 2, '.', '')
+                                        ]
+                                    ]
+                                ],
+                                "application_context" => [
+                                    "cancel_url" => route('paypal.cancel'),
+                                    "return_url" => route('paypal.success.update-booking_request', [
+                                        'id' => $booking->id,
+                                        'type' => $request->type,
+                                        'seats' => $request->seats,
+                                        'seats_amount' => $request->seats_amount,
+                                        'booking_credit' => $request->booking_credit,
+                                        'online_payment' => $request->online_payment,
+                                        'cash_payment' => $cash_payment,
+                                        'total' => $total,
+                                        'seats_id' => implode(',', $request->seats_id),
+                                        'coffee_wall' => isset($request->coffee_wall) ? $request->coffee_wall : '0',
+                                        'transactionTaxSum' => $transactionTaxSum,
+                                        'ride' => $ride,
+                                        'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
+                                        'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                                        'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                                        'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL
+                                    ]),
+                                ]
+                            ]);
+                        }
+
+                        if (isset($order['id'])) {
+                            foreach ($order['links'] as $link) {
+                                if ($link['rel'] == 'approve') {
+                                    return redirect()->away($link['href']);
+                                }
+                            }
+                        }
+
+                        return redirect()->route('paypal.cancel');
+                    } elseif ($request->payment_method == 'credit_card') {
+
+                        try {
+
+                            $stripId = null;
+
+
+                            if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
+                                $stripId = $request->gPayApplePayId;
+                            } else {
+                                // Set your Stripe API key.
+                                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                if (!$user->stripe_customer_id) {
+                                    $customer = Customer::create([
+                                        'email' => $user->email,
+                                        'name' => $user->first_name,
+                                    ]);
+                                    User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                                    $user = User::whereId($user->id)->first();
+                                }
+
+                                if ($request->card_id === 'credit_card') {
+                                    $stripeToken = $request->stripeToken;
+                                    if (!$stripeToken) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->withErrors(['card_element' => 'Card details are required.']);
+                                    }
+
+                                    if (str_starts_with($stripeToken, 'tok_')) {
+                                        $paymentMethod = PaymentMethod::create([
+                                            'type' => 'card',
+                                            'card' => [
+                                                'token' => $stripeToken,
+                                            ],
+                                        ]);
+                                    } elseif (str_starts_with($stripeToken, 'pm_')) {
+                                        $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                                    } else {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+                                } else {
+                                    $card = Card::where('id', $request->card_id)
+                                        ->where('user_id', $user->id)
+                                        ->first();
+
+                                    if (!$card) {
+                                        return redirect()->back()
+                                            ->withInput()
+                                            ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                                    }
+
+                                    $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
+                                }
+
+                                $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
+                                if ($payable_amount > '0') {
+
+                                    $stripePay = $payable_amount;
+                                    // Create a payment intent
+                                    $paymentIntent = PaymentIntent::create([
+                                        'amount' => round(($stripePay * 100), 0),
+                                        'currency' => 'cad',
+                                        'customer' => $user->stripe_customer_id,
+                                        'payment_method' => $paymentMethod->id,
+                                        'off_session' => true,
+                                        'confirm' => true,
+                                    ]);
+
+                                    $stripId = $paymentIntent->id;
+                                }
+                            }
+
+
+
+
+                            // Payment successful, handle booking logic here
+                            $booking_credit = $request->booking_credit - $booking->booking_credit;
+                            $seats = $request->seats - $booking->seats;
+                            $fare = $request->seats_amount - $booking->fare;
+
+                            $booking = Booking::create([
+                                'user_id' => auth()->user()->id,
+                                'ride_id' => $ride->id,
+                                'seats' => $seats,
+                                'booked_on' => $currentTime,
+                                'booking_credit' => $booking_credit,
+                                'fare' => $fare,
+                                'secured_cash' => $secured_cash,
+                                'tax_amount' => $taxAmt,
+                                'secured_cash_code' => $secured_cash_code,
+                                'expires_at' => $expiryTime,
+                                'departure' => $ride->rideDetail[0]->departure,
+                                'destination' => $ride->rideDetail[0]->destination,
+                                'price' => $ride->rideDetail[0]->price,
+                                'ride_detail_id' => $ride->rideDetail[0]->id
+                            ]);
+
+                            $ids = $request->seats_id;
+                            $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
+                            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                                foreach ($getSeatDetails as $key => $getSeatDetail) {
+                                    $getSeatDetail->status = 'booked';
+                                    $getSeatDetail->booking_id = $booking->id;
+                                    $getSeatDetail->user_id = $booking->user_id;
+                                    $getSeatDetail->save();
+                                }
+                            }
+
+                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                                $payable_amount = $payable_amount + $booking_credit;
+                            }
+
+                            $transactionTaxAmt = $taxAmt - $transactionTaxSum;
+
+                            $currentTransactionAmt = $payable_amount - $transactionTaxAmt;
+
+                            $transaction = Transaction::create([
+                                'booking_id' => $booking->id,
+                                'type' => '1',
+                                'booking_fee' => $booking_credit,
+                                'price' => $currentTransactionAmt,
+                                'stripe_id' => $stripId,
+                                'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                                'tax_amount' => $transactionTaxAmt,
+                                'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                                'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                                'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                            ]);
+
+                            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                                $coffeeWallet = CoffeeWallet::create([
+                                    'booking_id' => $booking->id,
+                                    'ride_id' => $ride->id,
+                                    'user_id' => $booking->user_id,
+                                    'cr_amount' => $booking_credit,
+                                ]);
+                            }
+
+                            Notification::create([
+                                'ride_id' => $ride->id,
+                                'posted_by' => auth()->user()->id,
+                                'message' => getNotificationMessageText(
+                                    'booking_request_from_name',
+                                    $ride->driver,
+                                    ['first_name' => $user->first_name],
+                                    'Booking request from {first_name}'
+                                ),
+                                'status' => 'request',
+                                'notification_type' => 'upcoming',
+                                'ride_detail_id' => $booking->ride_detail_id,
+                                'departure' => $booking->departure,
+                                'destination' => $booking->destination
+                            ]);
+                            if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+                                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'),];
+                                // Send booking request email
+                                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                            }
+
+                            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'Your new request has been successfully sent to the driver']);
+                        } catch (\Stripe\Exception\ApiErrorException $e) {
+                            // Handle error
+                            return redirect()->back()->with(['error' => $e->getMessage()]);
+                        }
+                    }
+                } else {
+                    $booking_credit = $request->booking_credit - $booking->booking_credit;
+                    $seats = $request->seats - $booking->seats;
+                    $fare = $request->seats_amount - $booking->fare;
+
+                    $booking = Booking::create([
+                        'user_id' => $user->id,
+                        'ride_id' => $ride->id,
+                        'seats' => $seats,
+                        'booked_on' => $currentTime,
+                        'booking_credit' => $booking_credit,
+                        'fare' => $fare,
+                        'secured_cash' => $secured_cash,
+                        'tax_amount' => $taxAmt,
+                        'secured_cash_code' => $secured_cash_code,
+                        'expires_at' => $expiryTime,
+                        'departure' => $ride->rideDetail[0]->departure,
+                        'destination' => $ride->rideDetail[0]->destination,
+                        'price' => $ride->rideDetail[0]->price,
+                        'ride_detail_id' => $ride->rideDetail[0]->id
+                    ]);
+
+                    $transactionTaxAmt = $taxAmt - $transactionTaxSum;
+
+                    if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                        $newTransaction = Transaction::create([
+                            'booking_id' => $booking->id,
+                            'type' => '1',
+                            'price' => $booking_credit,
+                            'booking_fee' => $booking_credit,
+                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                            'tax_amount' => $transactionTaxAmt,
+                            'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
+                            'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
+                            'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                        ]);
+
+                        $coffeeWallet = CoffeeWallet::create([
+                            'booking_id' => $booking->id,
+                            'ride_id' => $ride->id,
+                            'user_id' => $booking->user_id,
+                            'cr_amount' => $booking_credit + $transactionTaxAmt,
+                        ]);
+                    }
+
+                    $notification = Notification::create([
+                        'ride_id' => $ride->id,
+                        'posted_by' => $user->id,
+                        'message' => getNotificationMessageText(
+                            'booking_request_from_name',
+                            $ride->driver,
+                            ['first_name' => $user->first_name],
+                            'Booking request from {first_name}'
+                        ),
+                        'status' => 'request',
+                        'notification_type' => 'upcoming',
+                        'ride_detail_id' => $booking->ride_detail_id,
+                        'departure' => $booking->departure,
+                        'destination' => $booking->destination
+                    ]);
+
+                    // Assuming $user and $fcmToken are defined
+                    $fcmToken = $ride->driver->mobile_fcm_token;
+                    $body = $notification->message;
+
+                    $fcmService = new FCMService();
+                    $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
+                    $body = $notification->message;
+
+                    $fcmToken = $ride->driver->mobile_fcm_token;
+                    if ($fcmToken) {
+                        $fcmService->sendNotification($fcmToken, $body);
+                    }
+
+                    foreach ($fcm_tokens as $fcm_token) {
+                        try {
+                            $fcmService->sendNotification($fcm_token->token, $body);
+                        } catch (\Exception $e) {
+                            Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                        }
+                    }
+                    if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+                        $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $booking->booking_credit, 'total_price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'expires_at' => Carbon::parse($booking->expires_at)->format('H:i'), 'time' => $ride->time];
+                        // Send booking request email
+                        Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                    }
+
+                    return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => 'You have successfully booked seat in this ride']);
+                }
+            } else {
+                return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_not_update_message ?? 'You did not update ']);
+            }
+        }
+
+        return redirect()->route('ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
+    }
+
+
+    public function sendVerificationCodeBooking($id)
+    {
+        $phoneNumber = PhoneNumber::find($id);
+
+        $existingRecord = DB::table('phone_verifications')
+            ->where('phone_number_id', $phoneNumber->id)
+            ->first();
+
+        if ($existingRecord) {
+            $existingRecord = DB::table('phone_verifications')
+                ->where('phone_number_id', $phoneNumber->id)
+                ->delete();
+        }
+
+        $verificationCode = rand(1000, 9999);
+
+        // Save verification code and its expiration time (30 minutes) to the database
+        DB::table('phone_verifications')->insert([
+            'phone_number_id' => $phoneNumber->id,
+            'verification_code' => $verificationCode,
+            'expires_at' => Carbon::now()->addMinutes(30),
+        ]);
+
+        // Send the verification code via Twilio
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+
+        $twilio = new Client($sid, $token);
+        $to = $phoneNumber->phone;
+        $message = "ProximaRide: Your verification code is: $verificationCode. This code will expire in 30 minutes.";
+
+        try {
+            if (env('APP_ENV') != 'local') {
+                $res = $twilio->messages->create(
+                    $to,
+                    [
+                        'from' => $from,
+                        'body' => $message,
+                    ]
+                );
+            }
+        } catch (\Exception  $e) {
+            $this->logTwilioSmsFailure($to, $message, $e);
+
+            // return redirect()->back()->with(['error' => 'Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate']);
+        }
+
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        // return redirect()->route('phone_code', ['lang' => $this->selectedLanguage->abbreviation]);
+        return redirect()->back()->with([
+            'lang' => $this->selectedLanguage->abbreviation,
+            'phone_code' => 'Language changed successfully!' // or any success message
+        ]);
+    }
+
+    public function successTransactionBookingRequest($id, $type, $seats, $seats_amount, $booking_credit, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
+    {
+
+        $taxAmt = $tax_amount;
+        $paypal = new PayPalClient;
+        $paypal->setApiCredentials(config('paypal'));
+        $token = $paypal->getAccessToken();
+        $paypal->setAccessToken($token);
+
+        $result = $paypal->capturePaymentOrder($request->get('token'));
+
+        if ($result['status'] == 'COMPLETED') {
+            $ride = Ride::where('id', $id)->first();
+            $user = User::where('id', auth()->user()->id)->first();
+
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
+
+            // Calculate expiry time based on ride date and time
+            $currentTime = now();
+            $Time = now();
+            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+            $difference = $rideDateTime->diffInHours($currentTime);
+
+            if ($difference > 48) {
+                $expiryTime = $Time->addHours(12);
+            } elseif ($difference >= 24 && $difference <= 48) {
+                $expiryTime = $Time->addHours(6);
+            } elseif ($difference >= 6 && $difference < 24) {
+                $expiryTime = $Time->addHours(2);
+            } else {
+                $expiryTime = $Time->addMinutes(30);
+            }
+
+            $selectedLanguage = session('selectedLanguage');
+            $messages = null;
+            if ($selectedLanguage) {
+                // Find the language by abbreviation
+                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+                if ($selectedLanguage) {
+                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
+                }
+            } else {
+                $selectedLanguage = Language::where('is_default', 1)->first();
+                if ($selectedLanguage) {
+                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
+                }
+            }
+
+            //Booking Method
+            $secured_cash = null;
+            $secured_cash_code = null;
+
+
+            // Payment successful, handle booking logic here
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'ride_id' => $id,
+                'seats' => $seats,
+                'type' => $type,
+                'booked_on' => $currentTime,
+                'booking_credit' => $booking_credit,
+                'fare' => $seats_amount,
+                'secured_cash' => $secured_cash,
+                'tax_amount' => $taxAmt,
+                'secured_cash_code' => $secured_cash_code,
+                'expires_at' => $expiryTime,
+                'departure' => $ride->rideDetail[0]->departure,
+                'destination' => $ride->rideDetail[0]->destination,
+                'price' => $ride->rideDetail[0]->price,
+                'ride_detail_id' => $ride->rideDetail[0]->id
+            ]);
+
+
+
+            $seats_id_array = explode(',', $seats_id);
+            $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();
+            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                foreach ($getSeatDetails as $key => $getSeatDetail) {
+                    $getSeatDetail->status = 'booked';
+                    $getSeatDetail->booking_id = $booking->id;
+                    $getSeatDetail->user_id = $booking->user_id;
+                    $getSeatDetail->save();
+                }
+            }
+
+            $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+
+            $onlinePayment = $online_payment;
+            if (isset($coffee_wall) && $coffee_wall == "1") {
+                $onlinePayment = $online_payment + $booking_credit;
+            }
+
+            if ($request->cash_payment > 0) {
+                $onlinePayment = $onlinePayment;
+            } else {
+                $onlinePayment = $onlinePayment - $taxAmt;
+            }
+
+            $transaction = Transaction::create([
+                'booking_id' => $booking->id,
+                'type' => '1',
+                'booking_fee' => $booking_credit,
+                'price' => $onlinePayment,
+                'paypal_id' => $captureId,
+                'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false,
+                'tax_amount' => $taxAmt,
+                'tax_percentage' => $tax_percentage,
+                'tax_type' => $tax_type,
+                'deduct_type' => $deduct_tax,
+            ]);
+
+            if (isset($coffee_wall) && $coffee_wall == "1") {
+                $coffeeWallet = CoffeeWallet::create([
+                    'booking_id' => $booking->id,
+                    'ride_id' => $ride->id,
+                    'user_id' => $booking->user_id,
+                    'cr_amount' => $booking_credit,
+                ]);
+            }
+
+            Notification::create([
+                'ride_id' => $id,
+                'posted_by' => $user->id,
+                'message' =>  $seats . ' seats needed',
+                'status' => 'request',
+                'notification_type' => 'upcoming',
+                'ride_detail_id' => $booking->ride_detail_id,
+                'departure' => $booking->departure,
+                'destination' => $booking->destination
+            ]);
+            if (isset($user->email_notification) && $user->email_notification == 1) {
+
+                $price = $seats_amount / $seats;
+                $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                // Send booking request email
+                Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+            }
+
+
+
+
+            if (isset($user->email_notification) && $user->email_notification == 1) {
+                $data = ['first_name' => $user->first_name];
+                Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
+
+
+                // $data = ['first_name' => $user->first_name, 'seats' => $booking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $booking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
+                $data = [
+                    'first_name' => $user->first_name,
+                    'full_name' => $user->first_name . ' ' . $user->last_name,
+                    'amount' => $total,
+                    'transaction_id' => $card->random_id ?? 'N/A',
+                    'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
+                    'payment_method' => 'paypal',
+                    'paypal_email' => $user->paypal_email ?? 'N/A',
+                    'seats' => $booking->seats,
+                    'seats_amount' => $seats_amount,
+                    'booking_credit' => $booking->booking_credit,
+                    'online_payment' => $online_payment,
+                    'cash_payment' => $cash_payment,
+                    'total' => $total
+                ];
+                Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
+            }
+
+            $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
+
+            if (!$phoneNumber) {
+                $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
+            }
+
+            if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
+                // Send the secured cash code via Twilio
+                $sid = env('TWILIO_ACCOUNT_SID');
+                $token = env('TWILIO_AUTH_TOKEN');
+                $from = env('TWILIO_PHONE_NUMBER');
+
+                $twilio = new Client($sid, $token);
+                $to = $phoneNumber->phone;
+
+                $title = "";
+                $currentHour = date('H');
+                if ($currentHour >= 0 && $currentHour < 12) {
+                    $title = "Good morning " . $ride->driver->first_name . ",";
+                } elseif ($currentHour >= 12 && $currentHour < 17) {
+                    $title = "Good afternoon " . $ride->driver->first_name . ",";
+                } else {
+                    $title = "Good evening " . $ride->driver->first_name . ",";
+                }
+
+                $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
+
+                $depatureDate = date('F d, Y H:i', strtotime('' . $ride->date . ' ' . $ride->time . ''));
+                $message = $title . "\n" . "From ProximaRide: You have a new booking request from (" . $user->first_name . ")\n"
+                    . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . "\n" . $user->first_name . ": " . $user->phone . "\nNumber of seats: " . $booking->seats . "\nClick here for accept(" . url("/accept/" . $booking->id) . ")\nClick here for reject(" . url("/reject/" . $booking->id) . ")";
+
+                try {
+                    $res = $twilio->messages->create(
+                        $to,
+                        [
+                            'from' => $from,
+                            'body' => $message,
+                        ]
+                    );
+                } catch (\Exception  $e) {
+                    $this->logTwilioSmsFailure($to, $message, $e);
+
+                    // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                }
+            }
+
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+        }
+
+        return redirect()
+            ->route('home')
+            ->with('message', 'Transaction failed.');
+    }
+
+    public function updateSuccessTransactionBookingRequest($id, $type, $seats, $seats_amount, $booking_credit, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
+    {
+
+        $taxAmt = $tax_amount;
+        $paypal = new PayPalClient;
+        $paypal->setApiCredentials(config('paypal'));
+        $token = $paypal->getAccessToken();
+        $paypal->setAccessToken($token);
+
+        $result = $paypal->capturePaymentOrder($request->get('token'));
+
+        if ($result['status'] == 'COMPLETED') {
+            $booking = Booking::where('id', $id)->first();
+            $ride = Ride::where('id', $booking->ride_id)->first();
+            $user = User::where('id', auth()->user()->id)->first();
+
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
+
+            // Calculate expiry time based on ride date and time
+            $currentTime = now();
+            $Time = now();
+            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+            $difference = $rideDateTime->diffInHours($currentTime);
+
+            if ($difference > 48) {
+                $expiryTime = $Time->addHours(12);
+            } elseif ($difference >= 24 && $difference <= 48) {
+                $expiryTime = $Time->addHours(6);
+            } elseif ($difference >= 6 && $difference < 24) {
+                $expiryTime = $Time->addHours(2);
+            } else {
+                $expiryTime = $Time->addMinutes(30);
+            }
+
+            $selectedLanguage = session('selectedLanguage');
+            $messages = null;
+            if ($selectedLanguage) {
+                // Find the language by abbreviation
+                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+                if ($selectedLanguage) {
+                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
+                }
+            } else {
+                $selectedLanguage = Language::where('is_default', 1)->first();
+                if ($selectedLanguage) {
+                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
+                }
+            }
+
+            //Booking Method
+            $secured_cash = null;
+            $secured_cash_code = null;
+
+            $transactions = Transaction::where('booking_id', $booking->id)->get();
+
+            $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+
+            if ($booking->status === '0') {
+                // Payment successful, handle booking logic here
+                $newBooking = Booking::create([
+                    'user_id' => $user->id,
+                    'ride_id' => $ride->id,
+                    'seats' => $seats,
+                    'type' => $type,
+                    'booked_on' => $currentTime,
+                    'booking_credit' => $booking_credit,
+                    'fare' => $seats_amount,
+                    'secured_cash' => $secured_cash,
+                    'tax_amount' => $taxAmt,
+                    'secured_cash_code' => $secured_cash_code,
+                    'expires_at' => $expiryTime,
+                    'departure' => $ride->rideDetail[0]->departure,
+                    'destination' => $ride->rideDetail[0]->destination,
+                    'price' => $ride->rideDetail[0]->price,
+                    'ride_detail_id' => $ride->rideDetail[0]->id
+                ]);
+
+                $seats_id_array = explode(',', $seats_id);
+                $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();
+                if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                    foreach ($getSeatDetails as $key => $getSeatDetail) {
+                        $getSeatDetail->status = 'booked';
+                        $getSeatDetail->booking_id = $newBooking->id;
+                        $getSeatDetail->user_id = $newBooking->user_id;
+                        $getSeatDetail->save();
+                    }
+                }
+
+                foreach ($transactions as $transaction) {
+                    $transaction->update([
+                        'booking_id' => $newBooking->id,
+                    ]);
+                }
+
+                $booking->delete();
+
+                $getBookingFeeSum = Transaction::where('booking_id', $newBooking->id)->sum('booking_fee');
+                $currentBookingFee = $booking_credit - (isset($getBookingFeeSum) && !is_null($getBookingFeeSum) ? $getBookingFeeSum : 0);
+
+                $transactionTotalPrice = Transaction::where('booking_id', $newBooking->id)->where('parent_id', '0')->sum('price');
+                $transactionBookingPrice = Transaction::where('booking_id', $newBooking->id)->where('parent_id', '0')->sum('booking_fee');
+
+                $transactionPrice = $transactionTotalPrice;
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
+                }
+
+                if ($ride->payment_method == "33") {
+
+                    $payable_amount = ($request->online_payment + $taxAmt) - $transactionPrice;
+                } else {
+
+                    $payable_amount = $request->online_payment - $transactionPrice;
+                }
+
+
+                $onlinePayment = $payable_amount;
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $onlinePayment = $payable_amount + $currentBookingFee;
+                }
+
+                $transactionTaxAmt = $taxAmt - $transactionTaxSum;
+
+                $currentTransactionAmt = $onlinePayment - $transactionTaxAmt;
+
+                $transaction = Transaction::create([
+                    'booking_id' => $newBooking->id,
+                    'type' => '1',
+                    'booking_fee' => $currentBookingFee,
+                    'price' => $currentTransactionAmt,
+                    'paypal_id' => $captureId,
+                    'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false,
+                    'tax_amount' => $transactionTaxAmt,
+                    'tax_percentage' => $tax_percentage,
+                    'tax_type' => $tax_type,
+                    'deduct_type' => $deduct_tax,
+                ]);
+
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $coffeeWallet = CoffeeWallet::create([
+                        'booking_id' => $newBooking->id,
+                        'ride_id' => $ride->id,
+                        'user_id' => $newBooking->user_id,
+                        'cr_amount' => $currentBookingFee,
+                    ]);
+                }
+
+                Notification::create([
+                    'ride_id' => $ride->id,
+                    'posted_by' => $user->id,
+                    'message' => getNotificationMessageText(
+                        'booking_request_from_name',
+                        $ride->driver,
+                        ['first_name' => $user->first_name],
+                        'Booking request from {first_name}'
+                    ),
+                    'status' => 'request',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $newBooking->ride_detail_id,
+                    'departure' => $newBooking->departure,
+                    'destination' => $newBooking->destination
+                ]);
+                if (isset($user->email_notification) && $user->email_notification == 1) {
+
+                    $price = $seats_amount / $seats;
+                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                    // Send booking request email
+                    Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                }
+
+
+                if (isset($user->email_notification) && $user->email_notification == 1) {
+                    $data = ['first_name' => $user->first_name];
+                    Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
+
+
+                    $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
+                        ->where('default', '1')
+                        ->first();
+
+                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
+
+
+                    $data = ['first_name' => $user->first_name, 'seats' => $newBooking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $newBooking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
+                    Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
+                }
+            } elseif ($booking->status === '1') {
+                $booking_credit = $booking_credit - $booking->booking_credit;
+                $seats = $seats - $booking->seats;
+                $seats_amount = $seats_amount - $booking->fare;
+                $newBooking = Booking::create([
+                    'user_id' => $user->id,
+                    'ride_id' => $ride->id,
+                    'seats' => $seats,
+                    'type' => $type,
+                    'booked_on' => $currentTime,
+                    'booking_credit' => $booking_credit,
+                    'fare' => $seats_amount,
+                    'secured_cash' => $secured_cash,
+                    'secured_cash_code' => $secured_cash_code,
+                    'expires_at' => $expiryTime,
+                    'departure' => $ride->rideDetail[0]->departure,
+                    'destination' => $ride->rideDetail[0]->destination,
+                    'price' => $ride->rideDetail[0]->price,
+                    'ride_detail_id' => $ride->rideDetail[0]->id
+                ]);
+
+                $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
+                $transactionBookingPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('booking_fee');
+
+                $transactionPrice = $transactionTotalPrice;
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $transactionPrice = $transactionTotalPrice - $transactionBookingPrice;
+                }
+
+                $payable_amount = $online_payment - $transactionPrice;
+
+                $onlinePayment = $payable_amount;
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $onlinePayment = $payable_amount + $booking_credit;
+                }
+
+                $transaction = Transaction::create([
+                    'booking_id' => $newBooking->id,
+                    'type' => '1',
+                    'booking_fee' => $booking_credit,
+                    'price' => $onlinePayment,
+                    'paypal_id' => $captureId,
+                    'coffee_from_wall' => isset($coffee_wall) && $coffee_wall == "1" ? true : false
+                ]);
+
+                if (isset($coffee_wall) && $coffee_wall == "1") {
+                    $coffeeWallet = CoffeeWallet::create([
+                        'booking_id' => $newBooking->id,
+                        'ride_id' => $ride->id,
+                        'user_id' => $newBooking->user_id,
+                        'cr_amount' => $booking_credit,
+                    ]);
+                }
+
+                Notification::create([
+                    'ride_id' => $ride->id,
+                    'posted_by' => $user->id,
+                    'message' => getNotificationMessageText(
+                        'booking_request_from_name',
+                        $ride->driver,
+                        ['first_name' => $user->first_name],
+                        'Booking request from {first_name}'
+                    ),
+                    'status' => 'request',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $newBooking->ride_detail_id,
+                    'departure' => $newBooking->departure,
+                    'destination' => $newBooking->destination
+                ]);
+                if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+                    $price = $newBooking->fare / $newBooking->seats;
+                    $data = ['first_name' => $ride->driver->first_name, 'id' => $newBooking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $newBooking->seats, 'booking_price' => $price, 'total_price' => $seats_amount, 'from' => $newBooking->departure, 'to' => $newBooking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
+                    // Send booking request email
+                    Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
+                }
+
+
+                if (isset($user->email_notification) && $user->email_notification == 1) {
+                    $data = ['first_name' => $user->first_name];
+                    Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
+
+
+                    $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
+                        ->where('default', '1')
+                        ->first();
+
+                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
+
+
+                    $data = ['first_name' => $user->first_name, 'seats' => $newBooking->seats, 'seats_amount' => $seats_amount, 'booking_credit' => $newBooking->booking_credit, 'online_payment' => $online_payment, 'cash_payment' => $cash_payment, 'total' => $total];
+                    Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
+                }
+            }
+
+            $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
+
+            if (!$phoneNumber) {
+                $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
+            }
+
+            if ($phoneNumber && env('APP_ENV') != 'local' && isset($ride->driver->sms_notification) && $ride->driver->sms_notification == 1) {
+                // Send the secured cash code via Twilio
+                $sid = env('TWILIO_ACCOUNT_SID');
+                $token = env('TWILIO_AUTH_TOKEN');
+                $from = env('TWILIO_PHONE_NUMBER');
+
+                $twilio = new Client($sid, $token);
+                $to = $phoneNumber->phone;
+
+                $title = "";
+                $currentHour = date('H');
+                if ($currentHour >= 0 && $currentHour < 12) {
+                    $title = "Good morning " . $ride->driver->first_name . ",";
+                } elseif ($currentHour >= 12 && $currentHour < 17) {
+                    $title = "Good afternoon " . $ride->driver->first_name . ",";
+                } else {
+                    $title = "Good evening " . $ride->driver->first_name . ",";
+                }
+
+                $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
+
+                $depatureDate = date('F d, Y H:i', strtotime('' . $ride->date . ' ' . $ride->time . ''));
+                $message = $title . "\n"
+                    . "From ProximaRide: You have a new booking request from (" . $user->first_name . ")\n"
+                    . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . "\n" . $user->first_name . ": " . $user->phone . "\nNumber of seats: " . $booking->seats . "\nClick here for accept(" . url("/accept/" . $booking->id) . ")\nClick here for reject(" . url("/reject/" . $booking->id) . ")";
+
+                try {
+                    $res = $twilio->messages->create(
+                        $to,
+                        [
+                            'from' => $from,
+                            'body' => $message,
+                        ]
+                    );
+                } catch (\Exception  $e) {
+                    $this->logTwilioSmsFailure($to, $message, $e);
+
+                    // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                }
+            }
+
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->booking_request_success_message ?? 'Your request has been successfully sent to the driver']);
+        }
+
+        return redirect()
+            ->route('home')
+            ->with('message', 'Transaction failed.');
+    }
+
+    
+    public function AcceptBookingRequest($lang = null, $id, $email)
+    {
+        if (!auth()->user()) {
+            $user = User::where('email', $email)->first();
+            $user = auth()->login($user);
+        }
+        $booking = Booking::with(['ride'])->whereId($id)->first();
+
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+
+        if ($booking && $booking->status === '0') {
+            $existingRecord = Booking::with(['ride'])->where('user_id', $booking->user_id)
+                ->where('status', '1')
+                ->where('ride_id', $booking->ride_id)
+                ->where('id', '!=', $booking->id)
+                ->first();
+
+            if ($existingRecord) {
+                // Existing record found, update it
+                $existingRecord->update([
+                    'seats' => DB::raw('seats + ' . $booking->seats), // Adding the seats value
+                    'booking_credit' => DB::raw('booking_credit + ' . $booking->booking_credit), // Adding the booking_credit value
+                    'fare' => DB::raw('fare + ' . $booking->fare), // Adding the booking_credit value
+                ]);
+                $existingRecord->refresh();
+
+                $transactions = Transaction::where('booking_id', $booking->id)->get();
+                foreach ($transactions as $transaction) {
+                    $transaction->update([
+                        'booking_id' => $existingRecord->id,
+                    ]);
+                }
+
+                $coffeeWallets = CoffeeWallet::where('booking_id', $booking->id)->get();
+                foreach ($coffeeWallets as $coffeeWallet) {
+                    $coffeeWallet->update([
+                        'booking_id' => $existingRecord->id,
+                    ]);
+                }
+
+                $booking->delete();
+
+                $notification = Notification::create([
+                    'type' => 2,
+                    'ride_id' => $existingRecord->ride_id,
+                    'posted_to' => $existingRecord->id,
+                    'posted_by' => $existingRecord->ride->added_by,
+                    'message' => getNotificationMessageText(
+                        'booking_request_approved_by',
+                        $existingRecord->passenger,
+                        ['first_name' => $existingRecord->ride->driver->first_name],
+                        'Booking request approved by {first_name}'
+                    ),
+                    'status' => 'completed',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $existingRecord->ride_detail_id,
+                    'departure' => $existingRecord->departure,
+                    'destination' => $existingRecord->destination
+                ]);
+
+                $user = User::whereId($existingRecord->user_id)->first();
+                // Assuming $user and $fcmToken are defined
+                $fcmToken = $user->mobile_fcm_token;
+                $body = $notification->message;
+
+                $fcmService = new FCMService();
+                $fcm_tokens = FCMToken::where('user_id', $existingRecord->user_id)->get();
+                $body = $notification->message;
+
+                $fcmToken = $existingRecord->passenger->mobile_fcm_token;
+                if ($fcmToken) {
+                    $fcmService->sendNotification($fcmToken, $body);
+                }
+
+                foreach ($fcm_tokens as $fcm_token) {
+                    try {
+                        $fcmService->sendNotification($fcm_token->token, $body);
+                    } catch (\Exception $e) {
+                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                    }
+                }
+
+
+                $bookingPrice = $existingRecord->price * $existingRecord->seats;
+                if (isset($existingRecord->passenger->email_notification) && $existingRecord->passenger->email_notification == 1) {
+                    $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)
+                        // ->where('verified', '1')
+                        ->where('default', '1')
+                        ->first();
+                    $phoneToUse = $phoneNumber ? $phoneNumber->phone : $existingRecord->passenger->phone;
+
+                    $data = ['driver_first_name' => $booking->ride->driver->first_name, 'first_name' => $existingRecord->passenger->first_name, 'last_name' => $existingRecord->passenger->last_name, 'email' => $existingRecord->passenger->email, 'phone' => $phoneToUse, 'from' => $existingRecord?->departure, 'to' => $existingRecord?->destination, 'date' => Carbon::parse($existingRecord?->ride?->date)->format('F d, Y'), 'time' => $existingRecord?->ride?->time, 'seats' => $existingRecord?->seats, 'total_price' => $bookingPrice];
+                    // Send booking request email
+                    Mail::to($existingRecord->passenger->email)->queue(new AcceptBookingRequestMail($data));
+                }
+
+                $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)->where('verified', '1')->where('default', '1')->first();
+
+                if (!$phoneNumber) {
+                    $phoneNumber = PhoneNumber::where('user_id', $existingRecord->user_id)->where('verified', '1')->first();
+                }
+
+                if ($phoneNumber && env('APP_ENV') != 'local' && isset($existingRecord->driver->sms_notification) && $existingRecord->driver->sms_notification == 1) {
+                    // Send the secured cash code via Twilio
+                    $sid = env('TWILIO_ACCOUNT_SID');
+                    $token = env('TWILIO_AUTH_TOKEN');
+                    $from = env('TWILIO_PHONE_NUMBER');
+
+                    $twilio = new Client($sid, $token);
+                    $to = $phoneNumber->phone;
+
+
+                    $title = "";
+                    $currentHour = date('H');
+                    if ($currentHour >= 0 && $currentHour < 12) {
+                        $title = "Good morning " . $existingRecord->passenger->first_name . ",";
+                    } elseif ($currentHour >= 12 && $currentHour < 17) {
+                        $title = "Good afternoon " . $existingRecord->passenger->first_name . ",";
+                    } else {
+                        $title = "Good evening " . $existingRecord->passenger->first_name . ",";
+                    }
+
+                    // $depatureDate = date('d F, Y H:i:s', strtotime('' . $existingRecord->ride->date . ' ' . $existingRecord->ride->time . ''));
+                    $departureTime = date('H:i:s', strtotime($existingRecord->ride->time));
+                    $depatureDate = date('d F, Y', strtotime($existingRecord->ride->date));
+                    $seatWords = numberToWords($booking->seats);
+
+                    // $message = "" . $title . "\nThe driver has approved your booking request\nTrip detail\nOrigin: " . $existingRecord->departure . "\nDestination: " . $existingRecord->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $existingRecord->ride->driver->first_name . "\nDriver phone number: " . $existingRecord->ride->driver->phone . "\nVehicle info: " . $existingRecord->ride->make ?? '' . "," . $existingRecord->ride->year ?? '' . "," . $existingRecord->ride->modal ?? '' . "\nVehicle type: " . $existingRecord->ride->car_type . "";
+
+                    $message = $title . "\n" . "From ProximaRide: You have approved " . $existingRecord->passenger->first_name . ". Phone: " . $existingRecord->passenger->phone . "\nRide from " . $existingRecord->departure . " to " . $existingRecord->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception  $e) {
+                        $this->logTwilioSmsFailure($to, $message, $e);
+
+                        // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                    }
+
+
+                    if ($existingRecord->ride->payment_method == "35") {
+                        $secured_cash = '1';
+                        $secured_cash_code = rand(1000, 9999);
+
+                        $existingRecord->secured_cash = $secured_cash;
+                        $existingRecord->secured_cash_code = $secured_cash_code;
+                        $existingRecord->save();
+                        $to = $phoneNumber->phone;
+
+
+                        $title = "";
+                        $currentHour = date('H');
+                        if ($currentHour >= 0 && $currentHour < 12) {
+                            $title = "Good morning " . $existingRecord->passenger->first_name . ",";
+                        } elseif ($currentHour >= 12 && $currentHour < 17) {
+                            $title = "Good afternoon " . $existingRecord->passenger->first_name . ",";
+                        } else {
+                            $title = "Good evening " . $existingRecord->passenger->first_name . ",";
+                        }
+
+                        // $depatureDate = date('d F, Y H:i:s', strtotime('' . $existingRecord->ride->date . ' ' . $existingRecord->ride->time . ''));
+                        $departureTime = date('H:i:s', strtotime($existingRecord->ride->time));
+                        $depatureDate = date('d F, Y', strtotime($existingRecord->ride->date));
+                        $seatWords = numberToWords($booking->seats);
+
+                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $existingRecord->departure . "\nDestination: " . $existingRecord->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $existingRecord->ride->driver->first_name . "\nDriver p    hone number: " . $existingRecord->ride->driver->phone . "\nVehicle info: " . $existingRecord->ride->make ?? '' . "," . $existingRecord->ride->year ?? '' . "," . $existingRecord->ride->modal ?? '' . "\nVehicle type: " . $existingRecord->ride->car_type . "";
+                        $message = $title . "\n" . "From ProximaRide: You have approved " . $booking->passenger->first_name . ". Phone: " . $booking->passenger->phone . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
+                        try {
+                            $res = $twilio->messages->create(
+                                $to,
+                                [
+                                    'from' => $from,
+                                    'body' => $message,
+                                ]
+                            );
+                        } catch (\Exception  $e) {
+                            $this->logTwilioSmsFailure($to, $message, $e);
+                        }
+                    }
+                }
+
+                Notification::create([
+                    'ride_id' => $existingRecord->ride_id,
+                    'posted_by' => $existingRecord->user_id,
+                    'message' => getNotificationMessageText(
+                        'booking_approved_you_have_approved',
+                        auth()->user(),
+                        [
+                            'first_name' => $existingRecord->passenger->first_name,
+                            'seats' => numberToWords($existingRecord->seats),
+                        ],
+                        "You have approved {first_name}\nSeats booked: {seats}"
+                    ),
+                    'status' => 'completed',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $existingRecord->ride_detail_id,
+                    'departure' => $existingRecord->departure,
+                    'destination' => $existingRecord->destination
+                ]);
+
+                $user = auth()->user();
+                // Assuming $user and $fcmToken are defined
+                $fcmToken = $user->mobile_fcm_token;
+                $body = $notification->message;
+
+                $fcmService = new FCMService();
+                $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+                $body = $notification->message;
+
+                $fcmToken = $user->mobile_fcm_token;
+                if ($fcmToken) {
+                    $fcmService->sendNotification($fcmToken, $body);
+                }
+
+                foreach ($fcm_tokens as $fcm_token) {
+                    try {
+                        $fcmService->sendNotification($fcm_token->token, $body);
+                    } catch (\Exception $e) {
+                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                    }
+                }
+
+                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $existingRecord->departure, 'destination' => $existingRecord->destination, 'id' => $existingRecord->ride->id])
+                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
+            } else {
+
+                $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
+                    ->where('verified', '1')
+                    ->where('default', '1')
+                    ->first();
+
+                if (!$driverPhoneNumber) {
+                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
+                        ->where('verified', '1')
+                        ->first();
+                }
+
+                if ($driverPhoneNumber && env('APP_ENV') != 'local' && isset($booking->ride->driver->sms_notification) && $booking->ride->driver->sms_notification == 1) {
+                    $sid = env('TWILIO_ACCOUNT_SID');
+                    $token = env('TWILIO_AUTH_TOKEN');
+                    $from = env('TWILIO_PHONE_NUMBER');
+
+                    $twilio = new Client($sid, $token);
+                    $to = $driverPhoneNumber->phone;
+
+                    $title = "";
+                    $currentHour = date('H');
+                    if ($currentHour >= 0 && $currentHour < 12) {
+                        $title = "Good morning " . $booking->ride->driver->first_name . ",";
+                    } elseif ($currentHour >= 12 && $currentHour < 17) {
+                        $title = "Good afternoon " . $booking->ride->driver->first_name . ",";
+                    } else {
+                        $title = "Good evening " . $booking->ride->driver->first_name . ",";
+                    }
+
+                    $departureTime = date('H:i:s', strtotime($booking->ride->time));
+                    $depatureDate = date('d F, Y', strtotime($booking->ride->date));
+                    $seatWords = numberToWords($booking->seats);
+                    $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
+                        // ->where('verified', '1')
+                        ->where('default', '1')
+                        ->first();
+
+                    $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone :  $booking->passenger->phone;
+
+                    $message = $title . "\n" . "From ProximaRide: You have approved " . $booking->passenger->first_name . ". Phone: " . $passengerPhoneToUse . "\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nNumber of seats: " . $seatWords;
+
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception $e) {
+                        $this->logTwilioSmsFailure($to, $message, $e, 'driver');
+                    }
+                }
+
+                if ($booking->ride->payment_method == "35") {
+                    $secured_cash = '1';
+                    $secured_cash_code = rand(1000, 9999);
+
+                    $booking->secured_cash = $secured_cash;
+                    $booking->secured_cash_code = $secured_cash_code;
+                    $booking->save();
+
+                    $notificationMessage = "Your Secured-cash payment code is: " . $secured_cash_code;
+                    $securedCashNotification = Notification::create([
+                        'type' => 2, // Assuming 3 is for secured-cash notifications
+                        'ride_id' => $booking->ride_id,
+                        'posted_to' => $booking->id,
+                        'posted_by' => $booking->ride->added_by,
+                        'receiver_id' => $booking->user_id,
+                        'message' => getNotificationMessageText(
+                            'secured_cash_payment_code',
+                            $booking->passenger,
+                            ['code' => $secured_cash_code],
+                            'Your Secured-cash payment code is: {code}'
+                        ),
+                        'status' => 'completed',
+                        'notification_type' => 'secured_cash',
+                        'ride_detail_id' => $booking->ride_detail_id,
+                        'departure' => $booking->departure,
+                        'destination' => $booking->destination
+                    ]);
+
+                    // Send push notification for secured cash code
+                    $fcmService = new FCMService();
+                    $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
+                    $body = $securedCashNotification->message;
+
+                    $fcmToken = $booking->passenger->mobile_fcm_token;
+                    if ($fcmToken) {
+                        $fcmService->sendNotification($fcmToken, $body);
+                    }
+
+                    foreach ($fcm_tokens as $fcm_token) {
+                        try {
+                            $fcmService->sendNotification($fcm_token->token, $body);
+                        } catch (\Exception $e) {
+                            Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+                        }
+                    }
+
+                    $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
+                    if (!$phoneNumber) {
+                        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
+                    }
+
+                    if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
+                        $sid = env('TWILIO_ACCOUNT_SID');
+                        $token = env('TWILIO_AUTH_TOKEN');
+                        $from = env('TWILIO_PHONE_NUMBER');
+
+                        $twilio = new Client($sid, $token);
+                        $to = $phoneNumber->phone;
+                        $title = "";
+                        $currentHour = date('H');
+                        if ($currentHour >= 0 && $currentHour < 12) {
+                            $title = "Good morning " . $booking->passenger->first_name . ",";
+                        } elseif ($currentHour >= 12 && $currentHour < 17) {
+                            $title = "Good afternoon " . $booking->passenger->first_name . ",";
+                        } else {
+                            $title = "Good evening " . $booking->passenger->first_name . ",";
+                        }
+
+                        // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
+                        $departureTime = date('H:i:s', strtotime($booking->ride->time));
+                        $departureDate = date('d F, Y', strtotime($booking->ride->date));
+                        $driverPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $booking->ride->driver->phone);
+
+                        $seatWords = numberToWords($booking->seats);
+
+                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $booking->ride->rideDetail[0]->departure . "\nDestination: " . $booking->ride->rideDetail[0]->destination . "\nDeparture date: " . $departureDate . "\Driver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
+                        $message = $title . "\n" . "From ProximaRide: Your secured-cash payment code is: " . $secured_cash_code . "\n" .
+                            "Give this code to your driver ONLY at the time of the ride when you meet with them.\n" .
+                            "Driver name is " . $booking->ride->driver->first_name . ", phone " . $driverPhone . "\n" .
+                            "Ride from " . $booking->ride->rideDetail[0]->departure . " to " . $booking->ride->rideDetail[0]->destination .
+                            " on " . $departureDate . " at " . $departureTime . "\n" .
+                            "Number of seats: " . ucfirst($seatWords);
+
+                        try {
+                            $res = $twilio->messages->create(
+                                $to,
+                                [
+                                    'from' => $from,
+                                    'body' => $message,
+                                ]
+                            );
+                        } catch (\Exception  $e) {
+                            $this->logTwilioSmsFailure($to, $message, $e);
+                        }
+                    }
+
+                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
+                        ->where('default', '1')
+                        ->first();
+                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
+
+                    $emailData = [
+                        'first_name' => $booking->passenger->first_name,
+                        'secured_cash_code' => $secured_cash_code,
+                        'driver_first_name' => $booking->ride->driver->first_name,
+                        'driver_last_name' => $booking->ride->driver->last_name,
+                        'driver_phone' => $driverPhoneToUse,
+                        'driver_email' => $booking->ride->driver->email,
+                        'departure' => $booking->departure,
+                        'destination' => $booking->destination,
+                        'date' => Carbon::parse($booking->ride->date)->format('F d, Y'),
+                        'time' => $booking->ride->time,
+                        'seats' => $booking->seats,
+                        'booking_price' => $booking->price * $booking->seats
+                    ];
+
+                    Mail::to($booking->passenger->email)->queue(new SecuredCashPaymentCodeMail($emailData));
+                }
+
+                $booking->update([
+                    'status' => '1',
+                    'expires_at' => null,
+                ]);
+
+                $notification = Notification::create([
+                    'type' => 2,
+                    'ride_id' => $booking->ride_id,
+                    'posted_to' => $booking->id,
+                    'posted_by' => $booking->ride->added_by,
+                    'message' => getNotificationMessageText(
+                        'booking_request_approved_by',
+                        $booking->passenger,
+                        ['first_name' => $booking->ride->driver->first_name],
+                        'Booking request approved by {first_name}'
+                    ),
+                    'status' => 'completed',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $booking->ride_detail_id,
+                    'departure' => $booking->departure,
+                    'destination' => $booking->destination
+                ]);
+
+
+
+                $user = User::whereId($booking->user_id)->first();
+                // Assuming $user and $fcmToken are defined
+                $fcmService = new FCMService();
+                $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
+                $body = $notification->message;
+
+                $fcmToken = $booking->passenger->mobile_fcm_token;
+                if ($fcmToken) {
+                    $fcmService->sendNotification($fcmToken, $body);
+                }
+
+                foreach ($fcm_tokens as $fcm_token) {
+                    try {
+                        $fcmService->sendNotification($fcm_token->token, $body);
+                    } catch (\Exception $e) {
+                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                    }
+                }
+
+
+                $bookingPrice = $booking->price * $booking->seats;
+                $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
+                    // ->where('verified', '1')
+                    ->where('default', '1')
+                    ->first();
+                $phoneToUse = $phoneNumber ? $phoneNumber->phone : $booking->passenger->phone;
+                // if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
+
+                $data = ['driver_first_name' => $booking->ride->driver->first_name, 'driver_last_name' => $user->last_name, 'first_name' => $booking->passenger->first_name, 'last_name' => $booking->passenger->last_name, 'email' => $booking->passenger->email, 'phone' => $phoneToUse, 'from' => $booking?->departure, 'to' => $booking?->destination, 'date' => Carbon::parse($booking?->ride?->date)->format('F d, Y'), 'time' => $booking?->ride?->time, 'seats' => $booking?->seats, 'total_price' => $bookingPrice];
+                // Send booking request email
+                if (isset($booking->ride->driver->email_notification) && $booking->ride->driver->email_notification == 1) {
+                    Mail::to($booking->ride->driver->email)->queue(new AcceptBookingRequestMail($data));
+                }
+
+                $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
+                    // ->where('verified', '1')
+                    ->where('default', '1')
+                    ->first();
+
+                $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
+
+                if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
+                    $data = [
+                        'first_name' => $booking->passenger->first_name,
+                        'last_name' => $booking->passenger->last_name,
+                        'driver_first_name' => $booking->ride->driver->first_name,
+                        'driver_last_name' => $booking->ride->driver->last_name,
+                        'driver_email' => $booking->ride->driver->email,
+                        'driver_phone' => $driverPhoneToUse,
+                        'from' => $booking?->departure,
+                        'to' => $booking?->destination,
+                        'date' => Carbon::parse($booking?->ride?->date)->format('F d, Y'),
+                        'time' => $booking?->ride?->time,
+                        'seats' => $booking?->seats,
+                        'total_price' => $bookingPrice
+                    ];
+                    Mail::to($booking->passenger->email)->queue(new RideApprovalEmail($data));
+                }
+
+
+                $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
+
+                if (!$phoneNumber) {
+                    $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
+                }
+
+                if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
+                    // Send the secured cash code via Twilio
+                    $sid = env('TWILIO_ACCOUNT_SID');
+                    $token = env('TWILIO_AUTH_TOKEN');
+                    $from = env('TWILIO_PHONE_NUMBER');
+
+                    $twilio = new Client($sid, $token);
+                    $to = $phoneNumber->phone;
+
+                    $title = "";
+                    $currentHour = date('H');
+                    if ($currentHour >= 0 && $currentHour < 12) {
+                        $title = "Good morning " . $booking->passenger->first_name . ",";
+                    } elseif ($currentHour >= 12 && $currentHour < 17) {
+                        $title = "Good afternoon " . $booking->passenger->first_name . ",";
+                    } else {
+                        $title = "Good evening " . $booking->passenger->first_name . ",";
+                    }
+
+                    // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
+                    $departureTime = date('H:i:s', strtotime($booking->ride->time));
+                    $depatureDate = date('d F, Y', strtotime($booking->ride->date));
+                    $seatWords = numberToWords($booking->seats);
+                    $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
+                        // ->where('verified', '1')
+                        ->where('default', '1')
+                        ->first();
+
+                    $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
+
+                    // $message = "" . $title . "\nThe driver has approved your booking request\nTrip detail\nOrigin: " . $booking->ride->departure . "\nDestination: " . $booking->ride->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
+                    $message = $title . "\n" . "From ProximaRide: Your booking request has been approved by " . $booking->ride->driver->first_name .
+                        ". Phone " . $driverPhoneToUse .
+                        "\nRide from " . $booking->departure .
+                        " to " . $booking->destination .
+                        " on " . $depatureDate .
+                        " at " . $departureTime .
+                        "\nNumber of seats: " . $seatWords;
+
+
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception  $e) {
+                        $this->logTwilioSmsFailure($to, $message, $e);
+
+                        // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+                    }
+                }
+
+                Notification::create([
+                    'ride_id' => $booking->ride_id,
+                    'posted_by' => $booking->user_id,
+                    'message' => getNotificationMessageText(
+                        'booking_approved_you_have_approved',
+                        auth()->user(),
+                        [
+                            'first_name' => $booking->passenger->first_name,
+                            'seats' => numberToWords($booking->seats),
+                        ],
+                        "You have approved {first_name}\nSeats booked: {seats}"
+                    ),
+                    'status' => 'completed',
+                    'notification_type' => 'upcoming',
+                    'ride_detail_id' => $booking->ride_detail_id,
+                    'departure' => $booking->departure,
+                    'destination' => $booking->destination
+                ]);
+
+                $user = auth()->user();
+                // Assuming $user and $fcmToken are defined
+                $fcmService = new FCMService();
+                $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+                $body = $notification->message;
+
+                $fcmToken = $user->mobile_fcm_token;
+                if ($fcmToken) {
+                    $fcmService->sendNotification($fcmToken, $body);
+                }
+
+                foreach ($fcm_tokens as $fcm_token) {
+                    try {
+                        $fcmService->sendNotification($fcm_token->token, $body);
+                    } catch (\Exception $e) {
+                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+                    }
+                }
+                return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+                    ->with('approve_success_message', "You've successfully approved the booking request. You can view the passenger's details by visiting the ride page. Please remember to follow all road safety rules and adhere to ProximaRide's community guidelines. Wishing you a smooth and safe ride!");
+            }
+        } else {
+            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
+            return redirect()->route('my_rides', ['lang' => $lang])
+                ->with('error', __('Request expired'));
+        }
+    }
+
+    public function RejectBookingRequest($lang = null, $id, $email)
+    {
+        if (!auth()->user()) {
+            $user = User::where('email', $email)->first();
+            $user = auth()->login($user);
+        }
+        $booking = Booking::with(['passenger', 'ride'])->whereId($id)->first();
+        if ($booking && $booking->status === '0') {
+            $booking->update([
+                'status' => '3',
+                'expires_at' => null,
+            ]);
+
+            // Release seats linked to this booking
+            $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
+            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
+                foreach ($getSeatDetails as $key => $getSeatDetail) {
+                    $getSeatDetail->status = 'pending';
+                    $getSeatDetail->booking_id = NULL;
+                    $getSeatDetail->user_id = NULL;
+                    $getSeatDetail->save();
+                }
+            }
+
+            // Also release any orphaned hold seats (held by this passenger for this ride but never linked to booking_id)
+            $orphanedHoldSeats = SeatDetail::where('ride_id', $booking->ride_id)
+                ->where('user_id', $booking->user_id)
+                ->where('status', 'hold')
+                ->get();
+            if ($orphanedHoldSeats->isNotEmpty()) {
+                foreach ($orphanedHoldSeats as $seat) {
+                    $seat->status = 'pending';
+                    $seat->booking_id = NULL;
+                    $seat->user_id = NULL;
+                    $seat->save();
+                }
+            }
+
+            $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
+            foreach ($transactions as $transaction) {
+                if ($transaction) {
+                    $transactionAmt = 0.0;
+                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
+                        $transactionAmt = (float)$transaction->price - (float)$transaction->booking_fee;
+                    } else {
+                        $transactionAmt = (float)$transaction->price;
+                    }
+
+                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
+                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice)) {
+                        $transactionAmt = $transactionAmt - $getRefundEntryPrice;
+                    }
+
+                    if ($transactionAmt > 0) {
+                        $refundId = "";
+                        if ($transaction->pay_by_account == 0) {
+                            if ($transaction->paypal_id) {
+                                $uniqueId = strtotime(date('Y-m-d H:i:s'));
+                                $paypal = new PayPalClient;
+                                $paypal->setApiCredentials(config('paypal'));
+                                $token = $paypal->getAccessToken();
+                                $paypal->setAccessToken($token);
+                                $response = $paypal->refundCapturedPayment(
+                                    $transaction->paypal_id,
+                                    'Invoice-' . $uniqueId,
+                                    $transactionAmt,
+                                    'Refund issued.'
+                                );
+                                $refundId = isset($response['id']) ? $response['id'] : "";
+                            } elseif ($transaction->stripe_id) {
+                                // Set your Stripe API key
+                                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                try {
+                                    // Create a refund using the payment intent ID
+                                    $refund = Refund::create([
+                                        'payment_intent' => $transaction->stripe_id,
+                                        'amount' => $transactionAmt * 100, // Refund amount in cents
+                                    ]);
+                                    $refundId = $refund->id;
+                                } catch (\Stripe\Exception\ApiErrorException $e) {
+                                    // Handle error
+                                    return redirect()->back()->with(['error' => $e->getMessage()]);
+                                }
+                            }
+                        } else {
+                            $topUpBalance = TopUpBalance::create([
+                                'booking_id' => $transaction->booking_id,
+                                'user_id' => $booking->user_id,
+                                'dr_amount' => $transactionAmt,
+                                'added_date' => date('Y-m-d'),
+                            ]);
+                        }
+
+                        if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
+                            $bookingAmt = $transaction->booking_fee;
+
+                            $getRefundBookingPrice = CoffeeWallet::where('booking_id', $booking->id)->where('ride_id', $booking->ride_id)->where('user_id', $booking->user_id)->sum('dr_amount');
+                            if (isset($getRefundBookingPrice) && !is_null($getRefundBookingPrice)) {
+                                $bookingAmt = $transaction->booking_fee - $getRefundBookingPrice;
+                            }
+
+                            if ($bookingAmt > 0) {
+                                $coffeeWallet = CoffeeWallet::create([
+                                    'booking_id' => $booking->id,
+                                    'ride_id' => $booking->ride_id,
+                                    'user_id' => $booking->user_id,
+                                    'dr_amount' => $bookingAmt,
+                                ]);
+                            }
+                        }
+
+                        $newTransaction = Transaction::create([
+                            'booking_id' => $transaction->booking_id,
+                            'ride_id' => $booking->ride_id,
+                            'parent_id' => $transaction->id,
+                            'type' => '3',
+                            'price' => $transactionAmt,
+                            'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
+                            'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
+                        ]);
+                    }
+                }
+            }
+        } else {
+            $selectedLanguage = session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : Language::where('is_default', 1)->first();
+            $lang = $selectedLanguage ? $selectedLanguage->abbreviation : config('app.locale');
+            return redirect()->route('my_rides', ['lang' => $lang])
+                ->with('error', __('Request expired'));
+        }
+
+        $notification = Notification::create([
+            'type' => 2,
+            'ride_id' => $booking->ride_id,
+            'posted_to' => $booking->id,
+            'posted_by' => $booking->ride->added_by,
+            'message' => getNotificationMessageText(
+                'booking_request_declined',
+                $booking->passenger,
+                [],
+                'Booking request declined'
+            ),
+            'status' => 'reject',
+            'notification_type' => 'upcoming',
+            'ride_detail_id' => $booking->ride_detail_id,
+            'departure' => $booking->departure,
+            'destination' => $booking->destination
+        ]);
+
+        $user = User::whereId($booking->user_id)->first();
+        // Assuming $user and $fcmToken are defined
+        $fcmService = new FCMService();
+        $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
+        $body = $notification->message;
+
+        $fcmToken = $booking->passenger->mobile_fcm_token;
+        if ($fcmToken) {
+            $fcmService->sendNotification($fcmToken, $body);
+        }
+
+        foreach ($fcm_tokens as $fcm_token) {
+            try {
+                $fcmService->sendNotification($fcm_token->token, $body);
+            } catch (\Exception $e) {
+                Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
+            }
+        }
+
+        $selectedLanguage = session('selectedLanguage');
+        if ($selectedLanguage) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+        }
+        if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
+
+            $data = ['first_name' => $booking->passenger->first_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
+
+            // Send booking request email
+            Mail::to($booking->passenger->email)->queue(new RejectBookingRequestMail($data));
+        }
+
+
+        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
+
+        if (!$phoneNumber) {
+            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
+        }
+
+        if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
+            // Send the secured cash code via Twilio
+            $sid = env('TWILIO_ACCOUNT_SID');
+            $token = env('TWILIO_AUTH_TOKEN');
+            $from = env('TWILIO_PHONE_NUMBER');
+
+            $twilio = new Client($sid, $token);
+            $to = $phoneNumber->phone;
+
+            $title = "";
+            $currentHour = date('H');
+            if ($currentHour >= 0 && $currentHour < 12) {
+                $title = "Good morning " . $booking->passenger->first_name . ",";
+            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                $title = "Good afternoon " . $booking->passenger->first_name . ",";
+            } else {
+                $title = "Good evening " . $booking->passenger->first_name . ",";
+            }
+
+            // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
+            $departureTime = date('H:i:s', strtotime($booking->ride->time));
+            $depatureDate = date('d F, Y', strtotime($booking->ride->date));
+
+            // $message = "" . $title . "\nWe are sorry the driver did not approve your booking request\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\n";
+            $message = $title . "\n" . "From ProximaRide: We are sorry to inform you that your booking request has been declined by the driver.\nRide from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nAll payments that you have made will be refunded to you immediately";
+
+            try {
+                $res = $twilio->messages->create(
+                    $to,
+                    [
+                        'from' => $from,
+                        'body' => $message,
+                    ]
+                );
+            } catch (\Exception  $e) {
+                $this->logTwilioSmsFailure($to, $message, $e);
+
+                // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
+            }
+        }
+
+        return redirect()->route('my_ride_detail', ['lang' => $this->selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])
+            ->with('decline_success_message', 'You have declined the booking request. The seats are now available for other passengers to book.');
+    }
+
+    
 
     public function successTransaction($id, $type, $seats, $seats_amount, $booking_credit, $fare, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
     {

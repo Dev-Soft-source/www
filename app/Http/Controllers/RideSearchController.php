@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
-class PxRideWebController extends Controller
+class RideSearchController extends Controller
 {
     /**
      * Cached success messages for validation
@@ -381,33 +381,6 @@ class PxRideWebController extends Controller
             ->orderByDesc('id')
             ->get();
     }
-
-    protected function getPostRideOptionGroups($selectedLangId, $defaultLangId)
-    {
-        return PxOptionGroup::query()
-            ->with(['options' => function ($query) use ($selectedLangId, $defaultLangId) {
-                $query->where('is_active', true)
-                    ->orderBy('sort_order')
-                    ->with(['translations' => function ($translationQuery) use ($selectedLangId, $defaultLangId) {
-                        $translationQuery->whereIn('language_id', array_filter([$selectedLangId, $defaultLangId]));
-                    }]);
-            }])
-            ->orderBy('sort_order')
-            ->get()
-            ->map(function ($group) use ($selectedLangId, $defaultLangId) {
-                $group->options = $group->options->map(function ($option) use ($selectedLangId, $defaultLangId) {
-                    $selected = $option->translations->firstWhere('language_id', $selectedLangId);
-                    $fallback = $option->translations->firstWhere('language_id', $defaultLangId);
-                    $option->display_label = optional($selected)->label ?: optional($fallback)->label ?: $option->code;
-                    $option->display_description = optional($selected)->description ?: optional($fallback)->description;
-                    return $option;
-                });
-
-                return $group;
-            });
-    }
-
-
 
     protected function getPxSearchFilters(Request $request): array
     {

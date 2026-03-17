@@ -1056,8 +1056,8 @@
                                     <select name="vehicle_type" class="w-full rounded border-gray-300">
                                         <option value="">{{ $vehiclePage->vehicle_type_placeholder }}</option>
                                         @foreach ($vehicleTypes ?? collect() as $vehicleType)
-                                            <option value="{{ $vehicleType['id'] }}" @selected(old('vehicle_type') === $vehicleType['id'])>
-                                                {{ $vehicleType['label'] }} @selected(old('vehicle_type') === $vehicleType['id'])
+                                            <option value="{{ $vehicleType['id'] }}" @selected(old('vehicle_type') == $vehicleType['id'])>
+                                                {{ $vehicleType['label'] }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -1131,11 +1131,11 @@
                                         class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
                                         <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                                             @if ($ride->car_image)
-                                                <img id="profile-image"
+                                                <img id="vehicle-image"
                                                     class="w-40 h-40 object-contain mb-4 cursor-pointer"
                                                     src="{{ $ride->car_image }}">
                                             @else
-                                                <img id="profile-image"
+                                                <img id="vehicle-image"
                                                     class="w-12 h-12 object-contain mb-4 cursor-pointer"
                                                     src="{{ asset('assets/image-placeholder.png') }}">
                                             @endif
@@ -1146,8 +1146,8 @@
                                                 {{ $vehiclePage->images_option_placeholder ?? 'JPEG, JPG, PNG, GIF - 10MB max.' }}
                                             </p>
                                         </div>
-                                        <input id="dropzone-file" name="vehicle_image" type="file"
-                                            onchange="previewImage(this)" class="hidden" />
+                                        <input id="dropzone-file" name="vehicle_image" type="file" accept="image/*"
+                                            class="hidden" />
                                     </label>
                                     @error('vehicle_image')
                                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -3178,9 +3178,11 @@
 
             // Client-side image preview for "add new vehicle" upload.
             const vehicleImageInput = document.getElementById('dropzone-file');
-            const vehicleImagePreview = document.getElementById('px-vehicle-image-preview');
+            const vehicleImagePreview = document.getElementById('vehicle-image');
             if (vehicleImageInput && vehicleImagePreview) {
                 vehicleImageInput.addEventListener('change', function(event) {
+                    console.log('sssss');
+                    
                     const file = event.target.files && event.target.files[0];
                     if (!file) {
                         return;

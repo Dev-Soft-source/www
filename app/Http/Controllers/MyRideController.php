@@ -61,7 +61,7 @@ class MyRideController extends Controller
         
         // If user hasn't posted rides, redirect to "As a Passenger" (my_trips)
         if (!$hasPostedRides) {
-            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation ?? 'en']);
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation]);
         }
         
         // Continue with driver rides if user has posted rides
@@ -98,7 +98,6 @@ class MyRideController extends Controller
             'reviewSetting' => $reviewSetting, 
             'ProfilePage' => $ProfilePage, 
             'ProfileSetting' => $ProfileSetting, 
-            'postRidePage' => $postRidePage, 
             'rideDetailPage' => $rideDetailPage, 
             'searchOptionGroups' => $searchOptionGroups, 
             'tripsPage' => $tripsPage
