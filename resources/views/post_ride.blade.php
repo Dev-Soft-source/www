@@ -51,7 +51,7 @@
         if ($prefillRide) {
 
             $rideDetail = $prefillRide->detail;
-            
+    
             // Populate origin data
             if (!old('origin.label') && $rideDetail) {
                 $oldOriginLabel = $rideDetail->departure;
@@ -79,10 +79,10 @@
                 $oldDepartureDate = old('date', '');
                 $oldDepartureTime = old('time', '');
             }else{
-                $oldDepartureDate = old('date', $rideDetail->date);
+                $oldDepartureDate = old('date', \Carbon\Carbon::parse($rideDetail->date)->format('F j, Y'));
                 $oldDepartureTime = old('time', $rideDetail->time);
             }
-            
+
             // Populate stops (excluding origin and destination - already filtered in controller)
             $oldStops = old('stops', $prefillRide->intermediate_stops);
 
@@ -98,7 +98,7 @@
 
             // Populate other fields
             $oldSeatsTotal = old('seats_total', $prefillRide->seats);
-            $oldPriceMinor = old('price_minor', $prefillRide->price_minor);
+            $oldPriceMinor = old('price_minor', $rideDetail->price);
             $oldVehicleId = old('vehicle_id', $prefillRide->vehicle_id);
             $oldNotes = old('notes', $prefillRide->notes);
             $oldStatus = old('status', $isCopyMode ? 'published' : $prefillRide->status);

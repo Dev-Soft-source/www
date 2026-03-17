@@ -921,6 +921,7 @@ class RideController extends Controller
         }
         $ride->intermediate_stops = $this->extractIntermediateStopsForForm($ride);
 
+
         $postRidePage = $this->getPostRidePageWithSettingDetail();
         $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 

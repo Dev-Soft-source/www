@@ -252,11 +252,11 @@ class RideSearchController extends Controller
                 }
             }
         }
-
         foreach ($rides as $ride) {
-            if (method_exists($this, 'translatePxRideOptions')) {
-                $this->translatePxRideOptions($ride, $selectedLangId, $defaultLangId);
-            }
+            
+            // if (method_exists($this, 'translatePxRideOptions')) {
+            //     $this->translatePxRideOptions($ride, $selectedLangId, $defaultLangId);
+            // }
 
             $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
             $orderedStops = $stopsSource
@@ -293,6 +293,7 @@ class RideSearchController extends Controller
                 $matchedFromIndex,
                 $matchedToIndex
             );
+            
             $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
                 ? $ride->resolveSegmentAvailableSeats(
                     (int) $ride->matched_from_stop_id,
@@ -491,7 +492,7 @@ class RideSearchController extends Controller
         $stops = $stopsSource
             ? $stopsSource->sortBy('stop_order')->values()->all()
             : [];
-
+// dd($ride->price_minor);
         if (count($stops) < 2) {
             return (int) ($ride->price_minor ?? 0);
         }

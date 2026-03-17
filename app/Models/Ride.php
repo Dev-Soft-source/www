@@ -378,7 +378,7 @@ class Ride extends Model
             $firstStop = $orderedStops->first();
             $lastStop = $orderedStops->last();
             $departureAt = $firstStop?->departure_at ?: trim(($ride->date ?? '') . ' ' . ($ride->time ?? ''));
-            $priceMinor = (int) round(((float) ($ride->pricePerSeat())) * 100);
+            $priceMinor = (int) round((float) ($ride->pricePerSeat()));
 
             $ride->setRelation('stops', $orderedStops);
             $ride->setRelation('route', (object) [
@@ -394,7 +394,7 @@ class Ride extends Model
             $ride->departure_at = $departureAt ?: null;
             $ride->price_minor = $priceMinor;
             $ride->price_per_seat_minor = $priceMinor;
-            $ride->currency = 'USD';
+            // $ride->currency = 'USD';
             $ride->seats_total = (int) ($ride->seats ?? 0);
             $ride->seats_available = $ride->pendingSeatDetail->count() ?: max(0, (int) ($ride->seats ?? 0));
             $ride->detail_route = 'ride_detail';

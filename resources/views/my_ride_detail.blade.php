@@ -423,7 +423,7 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
-                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ $ride->rideDetail[0]->price }}
+                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ number_format(floatval($ride->rideDetail[0]->price/100), 2) }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
