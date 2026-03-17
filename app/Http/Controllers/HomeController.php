@@ -44,7 +44,7 @@ class HomeController extends Controller
 {
     public function index($lang = null)
     {
-        $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->notCancelled()->where('suspand', '!=', 1)->take(4)->get();
+        $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->where('status', '!=', 2)->where('suspand', '!=', 1)->take(4)->get();
         
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
         
@@ -284,12 +284,14 @@ class HomeController extends Controller
         }
         $selectedLanguage = session('selectedLanguage');
         $selectedLanguage = $selectedLanguage ? Language::where('abbreviation', $selectedLanguage)->first() : null;
+        $coffeeWallPage = CoffeeWallPageSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $this->defaultLang->id) ?? null;
         if (!$selectedLanguage) {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
         return view('coffee_wall_story', [
             'selectedLanguage' => $selectedLanguage,
             'languages' => $languages,
+            'coffeeWallPage' => $coffeeWallPage,
         ]);
     }
 
