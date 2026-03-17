@@ -853,6 +853,7 @@ class RideController extends Controller
             'languages' => $languages,
             'selectedLanguage' => $selectedLanguage,
             'routeType' => 'edit',
+            'isNewForm' => false,
             'originText' => $originText,
             'destinationText' => $destinationText,
             'stopsForDisplay' => $stopsForDisplay,
@@ -2157,7 +2158,7 @@ class RideController extends Controller
 
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
-
+            
         return view('post_ride', [
             'totalRides' => $totalNoOfRides,
             'noShowsCount' => $noShowsCount,

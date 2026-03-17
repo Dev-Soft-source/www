@@ -83,6 +83,10 @@ return new class extends Migration
             $table->string('pets_allowed_option1')->nullable();
             $table->string('pets_allowed_option2')->nullable();
             $table->string('pets_allowed_option3')->nullable();
+            $table->string('departure_time_approximate1_tooltip')->nullable();
+            $table->string('departure_time_approximate2_tooltip')->nullable();
+            $table->string('depends_on_other_stops_tooltip')->nullable();
+            
             $table->timestamps();
         });
     }

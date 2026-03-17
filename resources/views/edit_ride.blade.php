@@ -1720,102 +1720,135 @@
                             </h3>
                         </div>
                         <div class="bg-white p-4">
+                            @php
+                                $luggageVal = old('luggage', $ride->luggage);
+                            @endphp
                             <div class="border rounded-md divide-y">
-                                @isset($postRidePage->luggage_option1)
+                                @if ($postRidePage->luggage_option1?->features_setting_id !== null)
+                                    @php $luggageFirstId = $postRidePage->luggage_option1->features_setting_id; @endphp
                                     <div class="flex items-center justify-start p-3">
-                                        <input type="radio" id="no-luggage" name="luggage" value="0"
-                                            {{ old('luggage', $ride->luggage) == 0 ? 'checked' : '' }}
+                                        <input type="radio" id="luggage-opt-1" name="luggage"
+                                            value="{{ $luggageFirstId }}"
+                                            {{ ($luggageVal && (string)$luggageVal === (string)$luggageFirstId) || !$luggageVal ? 'checked' : '' }}
                                             class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="no-luggage"
+                                        <label for="luggage-opt-1"
                                             class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
-                                            <img class="w-10 h-10" src="{{ asset('assets/noluggage.png') }}"
-                                                alt="">
-                                            <span>
-                                                {{ $postRidePage->luggage_option1->name }}
-                                            </span>
+                                            @isset($postRidePage->luggage_option1->icon)
+                                                <img class="w-10 h-10" src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10" src="{{ asset('assets/noluggage.png') }}" alt="">
+                                            @endisset
+                                            <span>{{ $postRidePage->luggage_option1->name ?? '' }}</span>
                                         </label>
+                                        @if (!empty($postRidePage->luggage_option1_tooltip))
+                                            <span class="inline-flex cursor-help ml-1" data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-gray-800" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option2)
+                                @endif
+                                @if ($postRidePage->luggage_option2?->features_setting_id !== null)
                                     <div class="flex items-center justify-start p-3">
-                                        <input type="radio" id="small" name="luggage"
+                                        <input type="radio" id="luggage-opt-2" name="luggage"
                                             value="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
+                                            {{ (string)$luggageVal === (string)$postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="small"
+                                        <label for="luggage-opt-2"
                                             class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
-                                            <img class="w-10 h-10" src="{{ asset('assets/luggage.png') }}" alt="">
-                                            <span>
-                                                {{ $postRidePage->luggage_option2->name }}
-                                            </span>
+                                            @isset($postRidePage->luggage_option2->icon)
+                                                <img class="w-10 h-10" src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10" src="{{ asset('assets/luggage.png') }}" alt="">
+                                            @endisset
+                                            <span>{{ $postRidePage->luggage_option2->name ?? '' }}</span>
                                         </label>
+                                        @if (!empty($postRidePage->luggage_option2_tooltip))
+                                            <span class="inline-flex cursor-help ml-1" data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-gray-800" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option3)
+                                @endif
+                                @if ($postRidePage->luggage_option3?->features_setting_id !== null)
                                     <div class="flex items-center justify-start p-3">
-                                        <input type="radio" id="medium" name="luggage"
+                                        <input type="radio" id="luggage-opt-3" name="luggage"
                                             value="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
+                                            {{ (string)$luggageVal === (string)$postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="medium"
+                                        <label for="luggage-opt-3"
                                             class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
-                                            <img class="w-10 h-10" src="{{ asset('assets/mediumluggage.png') }}"
-                                                alt="">
-                                            <span>
-                                                {{ $postRidePage->luggage_option3->name }}
-                                            </span>
+                                            @isset($postRidePage->luggage_option3->icon)
+                                                <img class="w-10 h-10" src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10" src="{{ asset('assets/mediumluggage.png') }}" alt="">
+                                            @endisset
+                                            <span>{{ $postRidePage->luggage_option3->name ?? '' }}</span>
                                         </label>
+                                        @if (!empty($postRidePage->luggage_option3_tooltip))
+                                            <span class="inline-flex cursor-help ml-1" data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-gray-800" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option4)
+                                @endif
+                                @if ($postRidePage->luggage_option4?->features_setting_id !== null)
                                     <div class="flex items-center justify-start p-3">
-                                        <input type="radio" id="large" name="luggage"
+                                        <input type="radio" id="luggage-opt-4" name="luggage"
                                             value="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
+                                            {{ (string)$luggageVal === (string)$postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="large"
+                                        <label for="luggage-opt-4"
                                             class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
-                                            <img class="w-10 h-10" src="{{ asset('assets/largeluggage.png') }}"
-                                                alt="">
-                                            <span>
-                                                {{ $postRidePage->luggage_option4->name }}
-                                            </span>
+                                            @isset($postRidePage->luggage_option4->icon)
+                                                <img class="w-10 h-10" src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10" src="{{ asset('assets/largeluggage.png') }}" alt="">
+                                            @endisset
+                                            <span>{{ $postRidePage->luggage_option4->name ?? '' }}</span>
                                         </label>
+                                        @if (!empty($postRidePage->luggage_option4_tooltip))
+                                            <span class="inline-flex cursor-help ml-1" data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-gray-800" viewBox="0 0 16 16">
+                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                     </div>
-                                @endisset
-                                @isset($postRidePage->luggage_option5)
+                                @endif
+                                @if ($postRidePage->luggage_option5?->features_setting_id !== null)
                                     <div class="flex items-center justify-start p-3">
-                                        <input type="radio" id="xl-multiple" name="luggage"
+                                        <input type="radio" id="luggage-opt-5" name="luggage"
                                             value="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
+                                            {{ (string)$luggageVal === (string)$postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 ml-2 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                        <label for="xl-multiple"
+                                        <label for="luggage-opt-5"
                                             class="font-normal text-gray-900 flex items-center space-x-1 ml-4">
-                                            <img class="w-10 h-10" src="{{ asset('assets/extralargeluggage.png') }}"
-                                                alt="">
+                                            @isset($postRidePage->luggage_option5->icon)
+                                                <img class="w-10 h-10" src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}" alt="">
+                                            @else
+                                                <img class="w-10 h-10" src="{{ asset('assets/extralargeluggage.png') }}" alt="">
+                                            @endisset
                                             <div>
-                                                <p class="leading-normal mt-2">
-                                                    {{ $postRidePage->luggage_option5->name }}
-                                                </p>
-                                                <div
-                                                    class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                    <small>{{ $postRidePage->luggage_option5_label }} <sup
-                                                            class="text-red-500">*</sup></small>
+                                                <p class="leading-normal mt-2">{{ $postRidePage->luggage_option5->name ?? '' }}</p>
+                                                <div class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
+                                                    <small>{{ $postRidePage->luggage_option5_label ?? '' }} <sup class="text-red-500">*</sup></small>
                                                     <span class="inline-flex cursor-help items-center"
                                                         data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                            height="16" fill="currentColor"
-                                                            class="bi bi-info-circle-fill text-gray-800"
-                                                            viewBox="0 0 16 16">
-                                                            <path
-                                                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-gray-800" viewBox="0 0 16 16">
+                                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                         </svg>
                                                     </span>
                                                 </div>
                                             </div>
                                         </label>
                                     </div>
-                                @endisset
+                                @endif
                             </div>
                             @error('luggage')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
