@@ -2059,7 +2059,96 @@
                                                 )
                                                     "></p>
                                         </div>
-                                        
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`departure_time_approximate1_tooltip_${activeLanguageId}`">Departure time tooltip (prefix text)</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`departure_time_approximate1_tooltip_${activeLanguageId}`"
+                                                    :id="`departure_time_approximate1_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'departure_time_approximate1_tooltip'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'departure_time_approximate1_tooltip'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `departure_time_approximate1_tooltip.departure_time_approximate1_tooltip_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `departure_time_approximate1_tooltip.departure_time_approximate1_tooltip_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`departure_time_approximate2_tooltip_${activeLanguageId}`">Departure time tooltip (suffix text)</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`departure_time_approximate2_tooltip_${activeLanguageId}`"
+                                                    :id="`departure_time_approximate2_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'departure_time_approximate2_tooltip'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'departure_time_approximate2_tooltip'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `departure_time_approximate2_tooltip.departure_time_approximate2_tooltip_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `departure_time_approximate2_tooltip.departure_time_approximate2_tooltip_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`depends_on_other_stops_tooltip_${activeLanguageId}`">Intermediate stop timing tooltip text</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`depends_on_other_stops_tooltip_${activeLanguageId}`"
+                                                    :id="`depends_on_other_stops_tooltip_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'depends_on_other_stops_tooltip'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'depends_on_other_stops_tooltip'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -3443,6 +3532,9 @@ export default {
                             this.handleInput("", language, "trips_card_section_seat_available");
                             this.handleInput("", language, "trips_card_section_review_driver");
                             this.handleInput("", language, "firm_cancellation_tooltip");
+                            this.handleInput("", language, "departure_time_approximate1_tooltip");
+                            this.handleInput("", language, "departure_time_approximate2_tooltip");
+                            this.handleInput("", language, "depends_on_other_stops_tooltip");
                             this.handleInput("", language, "filter_section_heading");
                             this.handleInput("", language, "filter1_driver_heading");
                             this.handleInput("", language, "driver_age_label");
@@ -3826,11 +3918,25 @@ export default {
                                 setting?.language,
                                 "trips_card_section_review_driver"
                             );
-
                             this.handleInput(
                                 setting?.firm_cancellation_tooltip,
                                 setting?.language,
                                 "firm_cancellation_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.departure_time_approximate1_tooltip,
+                                setting?.language,
+                                "departure_time_approximate1_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.departure_time_approximate2_tooltip,
+                                setting?.language,
+                                "departure_time_approximate2_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.depends_on_other_stops_tooltip,
+                                setting?.language,
+                                "depends_on_other_stops_tooltip"
                             );
                             this.handleInput(
                                 setting?.filter_section_heading,

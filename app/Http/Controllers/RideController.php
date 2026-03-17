@@ -301,7 +301,7 @@ class RideController extends Controller
             }
         }
 
-
+        Log::info($postRidePage);
         $recentSearches = RecentSearch::orderBy('updated_at', 'desc')->limit(2)->get();
 
 

@@ -289,13 +289,13 @@ class FindRidePageSettingService
             'search_section_extra_care_label' => $this->data($request, $language, 'search_section_extra_care_label'),
             'filter_search_btn_label' => $this->data($request, $language, 'filter_search_btn_label'),
             'filter_close_btn_label' => $this->data($request, $language, 'filter_close_btn_label'),
-            
             'hide_ride_popup_heading' => $this->data($request, $language, 'hide_ride_popup_heading'),
             'hide_ride_popup_text' => $this->data($request, $language, 'hide_ride_popup_text'),
             'hide_ride_popup_confirm_button' => $this->data($request, $language, 'hide_ride_popup_confirm_button'),
             'hide_ride_popup_take_me_back_button' => $this->data($request, $language, 'hide_ride_popup_take_me_back_button'),
-
-
+            'departure_time_approximate1_tooltip' => $this->data($request, $language, 'departure_time_approximate1_tooltip'),
+            'departure_time_approximate2_tooltip' => $this->data($request, $language, 'departure_time_approximate2_tooltip'),
+            'depends_on_other_stops_tooltip' => $this->data($request, $language, 'depends_on_other_stops_tooltip'),
         ];
     }
 

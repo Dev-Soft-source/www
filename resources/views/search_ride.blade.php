@@ -999,14 +999,26 @@
                                                         $departureTimeLabel = $departureDateTime['timeLabel'];
                                                         $allSegments = $ride->rideDetail()->orderBy('id')->get();
                                                         $firstSegment = $allSegments->first();
-                                                        $isFromAStop = $allSegments->count() > 1 && $firstSegment && $rideDetail->id !== $firstSegment->id;
+                                                        $lastSegment = $allSegments->last();
+                                                        // From is a stop if this segment's departure is not the ride's first departure
+                                                        $isFromAStop = $allSegments->count() > 1
+                                                            && $firstSegment
+                                                            && isset($rideDetail->departure)
+                                                            && isset($firstSegment->departure)
+                                                            && $rideDetail->departure !== $firstSegment->departure;
+                                                        // To is a stop if this segment's destination is not the ride's final destination
+                                                        $isToBStop = $allSegments->count() > 1
+                                                            && $lastSegment
+                                                            && isset($rideDetail->destination)
+                                                            && isset($lastSegment->destination)
+                                                            && $rideDetail->destination !== $lastSegment->destination;
                                                     @endphp
                                                     <p class="flex items-center space-x-2 font-semibold">
                                                         {{ $departureDateLabel }}
                                                         {{ $rideDetailPage->at_label }}
                                                         {{ $departureTimeLabel ?? 'N/A' }}
                                                         @if ($isFromAStop)
-                                                            <span class="inline-block cursor-help ml-2" data-tippy-content="Departure time is approximate. This ride starts in {{ $firstSegment->departure ?? 'another city' }} and may be delayed by prior legs. Please wait 15–20 minutes before reporting a no-show.">
+                                                            <span class="inline-block cursor-help ml-2" data-tippy-content="{{ $findRidePage->departure_time_approximate1_tooltip ?? 'Departure time is approximate. This ride starts in ' }}  {{ $firstSegment->departure ?? 'another city' }} {{$findRidePage->departure_time_approximate2_tooltip ?? 'and may be delayed by prior legs. Please wait 15–20 minutes before reporting a no-show.'}} ">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill text-black" viewBox="0 0 16 16">
                                                                     <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                                                                 </svg>
@@ -1113,16 +1125,31 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <p class="font-bold text-xl text-black">
-                                                                    @isset($findRidePage->card_section_from_label)
-                                                                        {{ $findRidePage->card_section_from_label }}
-                                                                    @endisset
-                                                                </p>
-                                                                <div class="flex gap-2">
+                                                                <div class="flex items-center gap-2">
+                                                                    <p class="font-bold text-xl text-black">
+                                                                        @isset($findRidePage->card_section_from_label)
+                                                                            {{ $findRidePage->card_section_from_label }}
+                                                                        @endisset
+                                                                    </p>
+                                                                    @if ($isFromAStop)
+                                                                        <span
+                                                                            class="inline-flex items-center cursor-help mt-1"
+                                                                            data-tippy-content="{{ $findRidePage->depends_on_other_stops_tooltip ?? 'This ride is part of a longer route. Departure and arrival times may vary depending on other stops.' }}">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                                class="w-6 h-6 text-black"
+                                                                                fill="currentColor">
+                                                                                <!-- Curved thick arrow pointing upward -->
+                                                                                <path d="M7 17a1.5 1.5 0 0 1-1.06-2.56l5.2-5.2a3 3 0 0 1 4.24 0l.82.82V7a1.5 1.5 0 0 1 3 0v5.5a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1 0-3h2.06l-.82-.82a.99.99 0 0 0-1.4 0l-5.2 5.2A1.5 1.5 0 0 1 7 17Z" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="flex gap-2 items-baseline">
                                                                     <h3
                                                                         class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $rideDetail->departure }}.
                                                                     </h3>
+                                                                    
                                                                     @php $segmentPickup = $rideDetail->pickup ?? $ride->pickup; @endphp
                                                                     @if (!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
@@ -1145,16 +1172,31 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <p class="font-bold text-xl text-black">
-                                                                    @isset($findRidePage->card_section_to_label)
-                                                                        {{ $findRidePage->card_section_to_label }}
-                                                                    @endisset
-                                                                </p>
-                                                                <div class="flex gap-2">
+                                                                <div class="flex items-center gap-2">
+                                                                    <p class="font-bold text-xl text-black">
+                                                                        @isset($findRidePage->card_section_to_label)
+                                                                            {{ $findRidePage->card_section_to_label }}
+                                                                        @endisset
+                                                                    </p>
+                                                                    @if ($isToBStop)
+                                                                        <span
+                                                                            class="inline-flex items-center cursor-help mt-1"
+                                                                            data-tippy-content="{{ $findRidePage->depends_on_other_stops_tooltip ?? 'This ride is part of a longer route. Departure and arrival times may vary depending on other stops.' }}">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                                class="w-6 h-6 text-black"
+                                                                                fill="currentColor">
+                                                                                <!-- Curved thick arrow pointing upward -->
+                                                                                <path d="M7 17a1.5 1.5 0 0 1-1.06-2.56l5.2-5.2a3 3 0 0 1 4.24 0l.82.82V7a1.5 1.5 0 0 1 3 0v5.5a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1 0-3h2.06l-.82-.82a.99.99 0 0 0-1.4 0l-5.2 5.2A1.5 1.5 0 0 1 7 17Z" />
+                                                                            </svg>
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="flex gap-2 items-baseline">
                                                                     <h3
                                                                         class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $rideDetail->destination }}.
                                                                     </h3>
+                                                                    
                                                                     @php $segmentDropoff = $rideDetail->dropoff ?? $ride->dropoff; @endphp
                                                                     @if (!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
@@ -1284,9 +1326,6 @@
                                                                 alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
-                                                        {{-- @php
-                                                            dd($ride->features);
-                                                        @endphp --}}
                                                         @include('partials.ride_feature_icons', [
                                                             'rideFeatures' => $ride->features,
                                                             'iconClass' => 'w-8 h-8 cursor-help',

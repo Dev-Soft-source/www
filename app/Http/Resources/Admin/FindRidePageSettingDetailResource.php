@@ -146,6 +146,9 @@ class FindRidePageSettingDetailResource extends JsonResource
             'pets_allowed_option2' => FeaturesSettingDetail::whereFeaturesSettingId($this->pets_allowed_option2)->whereLanguageId($this->language_id)->value('name'),
             'pets_allowed_option3' => FeaturesSettingDetail::whereFeaturesSettingId($this->pets_allowed_option3)->whereLanguageId($this->language_id)->value('name'),
             'card_section_cancelled' => $this->card_section_cancelled,
+            'departure_time_approximate1_tooltip' => $this->departure_time_approximate1_tooltip,
+            'departure_time_approximate2_tooltip' => $this->departure_time_approximate2_tooltip,
+            'depends_on_other_stops_tooltip' => $this->depends_on_other_stops_tooltip,
             'find_ride_page_setting' => new FindRidePageSettingResource($this->whenLoaded('findRidePageSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),
         ];
