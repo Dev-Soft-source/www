@@ -537,7 +537,7 @@ const routes = [
         name: 'admin.site-text-setting.index',
         component: SiteTextSetting,
         meta: {
-            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Setting site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Common site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

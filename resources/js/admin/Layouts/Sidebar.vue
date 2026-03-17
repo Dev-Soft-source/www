@@ -380,7 +380,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="links_name pointer-events-auto opacity-0 text-white ">Setting site text</span>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Common site text</span>
                     </router-link>
                 </li>
                 

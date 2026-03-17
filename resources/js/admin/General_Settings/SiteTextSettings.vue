@@ -7,7 +7,7 @@
                         <div class="max-w-full mx-auto px-4">
                             <div class="flex items-center justify-between flex-wrap gap-4">
                                 <h3 class="can-exp-h2 text-primary">
-                                    Setting site text
+                                    Common site text
                                 </h3>
                                 <div class="flex items-center gap-3 flex-wrap">
                                     <button
